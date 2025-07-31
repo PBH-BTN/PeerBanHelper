@@ -1,0 +1,5 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jul 31 17:25:29 UTC 2025
+https\://repo.maven.apache.org/maven2/.lastUpdated=1753982729325
+@default-ej-technologies-https\://maven.ej-technologies.com/repository/.lastUpdated=1753982729190
+https\://maven.ej-technologies.com/repository/.error=Could not transfer artifact io.github.git-commit-id\:git-commit-id-maven-plugin\:pom\:9.0.2 from/to ej-technologies (https\://maven.ej-technologies.com/repository)\: maven.ej-technologies.com

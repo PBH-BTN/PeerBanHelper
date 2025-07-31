@@ -1,0 +1,15 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jul 31 17:25:43 UTC 2025
+https\://maven.sergeybochkov.com/releases/.error=Could not transfer artifact org.slf4j\:slf4j-bom\:pom\:2.0.13 from/to reposilite-repository-releases (https\://maven.sergeybochkov.com/releases)\: maven.sergeybochkov.com\: Temporary failure in name resolution
+https\://lislei.github.io/maven-eclipse.github.io/maven/.error=Could not transfer artifact org.slf4j\:slf4j-bom\:pom\:2.0.13 from/to maven-eclipse-repo-fork (https\://lislei.github.io/maven-eclipse.github.io/maven)\: lislei.github.io\: Temporary failure in name resolution
+https\://s01.oss.sonatype.org/content/repositories/snapshots/.error=Could not transfer artifact org.slf4j\:slf4j-bom\:pom\:2.0.13 from/to maven-snapshots (https\://s01.oss.sonatype.org/content/repositories/snapshots/)\: s01.oss.sonatype.org\: Temporary failure in name resolution
+https\://jitpack.io/.error=Could not transfer artifact org.slf4j\:slf4j-bom\:pom\:2.0.13 from/to Jitpack (https\://jitpack.io)\: jitpack.io\: Temporary failure in name resolution
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.lastUpdated=1753982743307
+@default-maven-eclipse-repo-fork-https\://lislei.github.io/maven-eclipse.github.io/maven/.lastUpdated=1753982743335
+@default-Jitpack-https\://jitpack.io/.lastUpdated=1753982743331
+https\://maven.reposilite.com/snapshots/.error=Could not transfer artifact org.slf4j\:slf4j-bom\:pom\:2.0.13 from/to reposilite-repository (https\://maven.reposilite.com/snapshots)\: maven.reposilite.com\: Temporary failure in name resolution
+https\://repo.maven.apache.org/maven2/.lastUpdated=1753982743591
+@default-reposilite-repository-releases-https\://maven.sergeybochkov.com/releases/.lastUpdated=1753982743318
+@default-maven-snapshots-https\://s01.oss.sonatype.org/content/repositories/snapshots/.lastUpdated=1753982743339
+@default-reposilite-repository-https\://maven.reposilite.com/snapshots/.lastUpdated=1753982743342
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.error=

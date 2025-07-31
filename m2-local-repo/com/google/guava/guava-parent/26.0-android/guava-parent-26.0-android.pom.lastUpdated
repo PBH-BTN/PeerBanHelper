@@ -1,0 +1,15 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jul 31 17:26:04 UTC 2025
+https\://maven.sergeybochkov.com/releases/.error=Could not transfer artifact com.google.guava\:guava-parent\:pom\:26.0-android from/to reposilite-repository-releases (https\://maven.sergeybochkov.com/releases)\: maven.sergeybochkov.com
+https\://lislei.github.io/maven-eclipse.github.io/maven/.error=Could not transfer artifact com.google.guava\:guava-parent\:pom\:26.0-android from/to maven-eclipse-repo-fork (https\://lislei.github.io/maven-eclipse.github.io/maven)\: lislei.github.io
+https\://s01.oss.sonatype.org/content/repositories/snapshots/.error=Could not transfer artifact com.google.guava\:guava-parent\:pom\:26.0-android from/to maven-snapshots (https\://s01.oss.sonatype.org/content/repositories/snapshots/)\: s01.oss.sonatype.org
+https\://jitpack.io/.error=Could not transfer artifact com.google.guava\:guava-parent\:pom\:26.0-android from/to Jitpack (https\://jitpack.io)\: jitpack.io
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.lastUpdated=1753982763751
+@default-maven-eclipse-repo-fork-https\://lislei.github.io/maven-eclipse.github.io/maven/.lastUpdated=1753982763754
+@default-Jitpack-https\://jitpack.io/.lastUpdated=1753982763753
+https\://maven.reposilite.com/snapshots/.error=Could not transfer artifact com.google.guava\:guava-parent\:pom\:26.0-android from/to reposilite-repository (https\://maven.reposilite.com/snapshots)\: maven.reposilite.com
+https\://repo.maven.apache.org/maven2/.lastUpdated=1753982764002
+@default-reposilite-repository-releases-https\://maven.sergeybochkov.com/releases/.lastUpdated=1753982763752
+@default-maven-snapshots-https\://s01.oss.sonatype.org/content/repositories/snapshots/.lastUpdated=1753982763754
+@default-reposilite-repository-https\://maven.reposilite.com/snapshots/.lastUpdated=1753982763755
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.error=

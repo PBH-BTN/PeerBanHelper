@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-project</artifactId>
+    <version>11.0.25</version>
+  </parent>
+  <groupId>org.eclipse.jetty.websocket</groupId>
+  <artifactId>websocket-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Jetty :: Websocket :: Parent</name>
+  <modules>
+    <module>websocket-core-client</module>
+    <!-- WebSocket Core Implementation -->
+    <module>websocket-core-common</module>
+    <module>websocket-core-server</module>
+    <module>websocket-core-tests</module>
+    <module>websocket-jakarta-client</module>
+    <!-- Jakarta WebSocket Implementation -->
+    <module>websocket-jakarta-common</module>
+    <module>websocket-jakarta-server</module>
+    <module>websocket-jakarta-tests</module>
+    <!-- Jetty WebSocket Implementation -->
+    <module>websocket-jetty-api</module>
+    <module>websocket-jetty-client</module>
+    <module>websocket-jetty-common</module>
+    <module>websocket-jetty-server</module>
+    <module>websocket-jetty-tests</module>
+    <!-- Common Servlet WebSocket Implementation -->
+    <module>websocket-servlet</module>
+  </modules>
+  <properties>
+    <spotbugs.onlyAnalyze>org.eclipse.jetty.websocket.*</spotbugs.onlyAnalyze>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

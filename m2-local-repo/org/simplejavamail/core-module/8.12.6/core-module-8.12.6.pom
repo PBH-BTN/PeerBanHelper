@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.simplejavamail</groupId>
+        <artifactId>maven-master-project</artifactId>
+        <version>8.12.6</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>core-module</artifactId>
+    <packaging>jar</packaging>
+    <name>Simple Java Mail - Core module</name>
+    <description>Simple API, Complex Emails. Core module support</description>
+
+    <properties>
+        <automaticModuleName>org.simplejavamail.core</automaticModuleName>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.simplejavamail.*
+                        </Export-Package>
+                        <Import-Package>
+                            !org.jacoco.*,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+
+        <!-- core dependencies -->
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency><!-- email validation framework -->
+            <groupId>com.sanctionco.jmail</groupId>
+            <artifactId>jmail</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+
+        <dependency><!-- Annotation processor -->
+            <groupId>com.github.therapi</groupId>
+            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+            <version>0.15.0</version>
+            <scope>provided</scope><!-- makes library mandatory if we should support CLI (even optionally) -->
+        </dependency>
+    </dependencies>
+</project>

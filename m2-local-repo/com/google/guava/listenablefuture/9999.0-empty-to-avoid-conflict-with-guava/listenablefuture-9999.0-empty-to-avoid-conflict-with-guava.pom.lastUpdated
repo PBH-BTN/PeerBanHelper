@@ -1,0 +1,15 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jul 31 17:26:03 UTC 2025
+https\://maven.sergeybochkov.com/releases/.error=Could not transfer artifact com.google.guava\:listenablefuture\:pom\:9999.0-empty-to-avoid-conflict-with-guava from/to reposilite-repository-releases (https\://maven.sergeybochkov.com/releases)\: maven.sergeybochkov.com\: Temporary failure in name resolution
+https\://lislei.github.io/maven-eclipse.github.io/maven/.error=Could not transfer artifact com.google.guava\:listenablefuture\:pom\:9999.0-empty-to-avoid-conflict-with-guava from/to maven-eclipse-repo-fork (https\://lislei.github.io/maven-eclipse.github.io/maven)\: lislei.github.io\: Temporary failure in name resolution
+https\://s01.oss.sonatype.org/content/repositories/snapshots/.error=Could not transfer artifact com.google.guava\:listenablefuture\:pom\:9999.0-empty-to-avoid-conflict-with-guava from/to maven-snapshots (https\://s01.oss.sonatype.org/content/repositories/snapshots/)\: s01.oss.sonatype.org\: Temporary failure in name resolution
+https\://jitpack.io/.error=Could not transfer artifact com.google.guava\:listenablefuture\:pom\:9999.0-empty-to-avoid-conflict-with-guava from/to Jitpack (https\://jitpack.io)\: jitpack.io\: Temporary failure in name resolution
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.lastUpdated=1753982763466
+@default-maven-eclipse-repo-fork-https\://lislei.github.io/maven-eclipse.github.io/maven/.lastUpdated=1753982763488
+@default-Jitpack-https\://jitpack.io/.lastUpdated=1753982763484
+https\://maven.reposilite.com/snapshots/.error=Could not transfer artifact com.google.guava\:listenablefuture\:pom\:9999.0-empty-to-avoid-conflict-with-guava from/to reposilite-repository (https\://maven.reposilite.com/snapshots)\: maven.reposilite.com\: Temporary failure in name resolution
+https\://repo.maven.apache.org/maven2/.lastUpdated=1753982763750
+@default-reposilite-repository-releases-https\://maven.sergeybochkov.com/releases/.lastUpdated=1753982763474
+@default-maven-snapshots-https\://s01.oss.sonatype.org/content/repositories/snapshots/.lastUpdated=1753982763491
+@default-reposilite-repository-https\://maven.reposilite.com/snapshots/.lastUpdated=1753982763495
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.error=

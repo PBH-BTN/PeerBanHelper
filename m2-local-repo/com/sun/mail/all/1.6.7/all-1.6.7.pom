@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+
+    Copyright (c) 1997, 2021 Oracle and/or its affiliates. All rights reserved.
+
+    This program and the accompanying materials are made available under the
+    terms of the Eclipse Public License v. 2.0, which is available at
+    http://www.eclipse.org/legal/epl-2.0.
+
+    This Source Code may also be made available under the following Secondary
+    Licenses when the conditions for such availability set forth in the
+    Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+    version 2 with the GNU Classpath Exception, which is available at
+    https://www.gnu.org/software/classpath/license.html.
+
+    SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+			    http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+	<groupId>org.eclipse.ee4j</groupId>
+	<artifactId>project</artifactId>
+	<version>1.0.6</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.sun.mail</groupId>
+    <artifactId>all</artifactId>
+    <packaging>pom</packaging>
+    <version>1.6.7</version>
+    <name>Jakarta Mail API distribution</name>
+    <description>${project.name}</description>
+    <url>http://eclipse-ee4j.github.io/mail</url>
+
+    <scm>
+	<connection>scm:git:ssh://git@github.com/eclipse-ee4j/mail.git</connection>
+	<developerConnection>scm:git:ssh://git@github.com/eclipse-ee4j/mail.git</developerConnection>
+	<url>https://github.com/eclipse-ee4j/mail</url>
+    </scm>
+
+    <issueManagement>
+	<system>GitHub</system>
+	<url>https://github.com/eclipse-ee4j/mail/issues</url>
+    </issueManagement>
+
+    <licenses>
+	<license>
+	    <name>EPL 2.0</name>
+	    <url>http://www.eclipse.org/legal/epl-2.0</url>
+	    <distribution>repo</distribution>
+	</license>
+	<license>
+	    <name>GPL2 w/ CPE</name>
+	    <url>https://www.gnu.org/software/classpath/license.html</url>
+	    <distribution>repo</distribution>
+	</license>
+	<license>
+	    <name>EDL 1.0</name>
+	    <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
+	    <distribution>repo</distribution>
+	</license>
+    </licenses>
+
+    <organization>
+	<name>Oracle</name>
+	<url>http://www.oracle.com</url>
+    </organization>
+
+    <properties>
+	<mail.version>${project.version}</mail.version>
+	<mail.spec.version>1.6</mail.spec.version>
+	<activation.version>1.2.1</activation.version>
+	<!-- defaults that are overridden in mail module -->
+	<mail.extensionName>
+	    ${project.groupId}.${project.artifactId}
+	</mail.extensionName>
+	<mail.specificationTitle>
+	    ${project.groupId}.${project.artifactId}
+	</mail.specificationTitle>
+	<mail.implementationTitle>
+	    ${project.groupId}.${project.artifactId}
+	</mail.implementationTitle>
+	<mail.bundle.symbolicName>
+	    ${project.groupId}.${project.artifactId}
+	</mail.bundle.symbolicName>
+	<mail.packages.export>
+	    javax.mail.*; version=${mail.spec.version}
+	</mail.packages.export>
+	<mail.packages.import>
+	    javax.activation;version=!,
+	    javax.security.sasl;resolution:=optional,
+	    sun.security.util;resolution:=optional,
+	    *
+	</mail.packages.import>
+	<mail.packages.private>
+	    com.sun.mail.*
+	</mail.packages.private>
+	<mail.probeFile/>
+        <mail.recompile.skip>false</mail.recompile.skip>
+        <mail.javadoc.bottom><![CDATA[
+Comments to : <a href="mailto:mail-dev@eclipse.org">mail-dev@eclipse.org</a>.<br>
+Copyright &#169; 2019, 2021 Eclipse Foundation. All rights reserved.<br>
+Use is subject to <a href="{@docRoot}/doc-files/speclicense.html" target="_top">license terms</a>.]]>
+        </mail.javadoc.bottom>
+        <mail.javadoc.api.header><![CDATA[<br>Jakarta Mail API v${project.version}]]></mail.javadoc.api.header>
+        <mail.javadoc.impl.header><![CDATA[<br>Jakarta Mail v${project.version}]]></mail.javadoc.impl.header>
+        <mail.javadoc.title>
+            Jakarta Mail API documentation
+        </mail.javadoc.title>
+	<!-- for the osgiversion-maven-plugin -->
+	<hk2.plugin.version>2.0.0</hk2.plugin.version>
+	<javac.path>/opt/jdk1.7/bin/javac</javac.path>
+	<project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
+	<findbugs.threshold>
+	    High
+	</findbugs.threshold>
+	<findbugs.version>
+	    3.1.0
+	</findbugs.version>
+	<findbugs.skip>
+	    true
+	</findbugs.skip>
+	<findbugs.exclude/>
+        <copyright-plugin.version>2.4</copyright-plugin.version>
+    </properties>
+
+    <developers>
+	<developer>
+	    <id>shannon</id>
+	    <name>Bill Shannon</name>
+	    <email>bill.shannon@oracle.com</email>
+	    <organization>Oracle</organization>
+	    <roles>
+		<role>lead</role>
+	    </roles>
+	</developer>
+    </developers>
+
+    <!-- following to enable use of "mvn site:stage" -->
+    <distributionManagement>
+	<site>
+	    <id>oracle.com</id>
+	    <url>file:/tmp</url> <!-- not used -->
+	</site>
+    </distributionManagement>
+
+    <modules>
+	<module>mail</module>
+	<module>mailapi</module>
+	<module>mailapijar</module>
+	<module>smtp</module>
+	<module>imap</module>
+	<module>gimap</module>
+	<module>pop3</module>
+	<module>dsn</module>
+	<module>mailhandler</module>
+	<module>android</module>
+	<module>parent-distrib</module>
+    </modules>
+
+    <profiles>
+	<!--
+	    This profile contains modules that should only be built
+	    but not installed or deployed.
+	-->
+	<profile>
+	    <id>build-only</id>
+	    <modules>
+		<module>mbox</module>
+		<module>demo</module>
+		<module>client</module>
+		<module>servlet</module>
+		<module>webapp</module>
+		<module>taglib</module>
+		<module>logging</module>
+		<module>outlook</module>
+		<module>javadoc</module>
+		<module>publish</module>
+	    </modules>
+	    <activation>
+		<activeByDefault>true</activeByDefault>
+	    </activation>
+	</profile>
+
+	<!--
+	    This profile is used for deploying a Jakarta Mail final release.
+
+	    Activating this profile manually for deployment causes
+	    the above profile to be deactivated, which works around
+	    an apparent bug in maven that prevents me from manually
+	    deactivating a profile.  This profile purposely has none
+	    of the modules I don't want to be deployed.
+	-->
+	<profile>
+	    <id>deploy-release</id>
+	    <modules>
+		<module>parent-distrib</module>
+	    </modules>
+	</profile>
+
+	<!--
+	    A special profile for compiling with the real JDK 1.7
+	    compiler, to make sure there are no accidental dependencies
+	    on JDK 1.8 or newer APIs.  Set the property javac.path to the path
+	    to the JDK 1.7 compiler, e.g.,
+	    "mvn -P1.7 -Djavac.path=/opt/jdk1.7/bin/javac".
+	-->
+	<profile>
+	    <id>1.7</id>
+	    <activation>
+		<jdk>1.7</jdk>
+	    </activation>
+	    <build>
+		<plugins>
+		    <plugin>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<executions>
+			    <execution>
+				<id>default-compile</id>
+				<configuration>
+				    <fork>true</fork>
+				    <executable>${javac.path}</executable>
+				    <compilerVersion>1.7</compilerVersion>
+				    <source>1.7</source>
+				    <target>1.7</target>
+				</configuration>
+			    </execution>
+			</executions>
+		    </plugin>
+		    <!--
+			Only require JDK 1.7.
+		    -->
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-enforcer-plugin</artifactId>
+			<executions>
+			    <execution>
+				<id>enforce-version</id>
+				<goals>
+				    <goal>enforce</goal>
+				</goals>
+				<configuration>
+				    <rules>
+					<requireMavenVersion>
+					    <version>[3.0.3,)</version>
+					</requireMavenVersion>
+					<requireJavaVersion>
+					    <version>1.7</version>
+					</requireJavaVersion>
+				    </rules>
+				</configuration>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+    </profiles>
+
+    <build>
+	<defaultGoal>install</defaultGoal>
+	<plugins>
+	    <!--
+		Make sure we're using the correct version of maven and JDK.
+	    -->
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-enforcer-plugin</artifactId>
+		<executions>
+		    <execution>
+			<id>enforce-version</id>
+			<goals>
+			    <goal>enforce</goal>
+			</goals>
+			<configuration>
+			    <rules>
+				<requireMavenVersion>
+				    <version>[3.0.3,)</version>
+				</requireMavenVersion>
+				<requireJavaVersion>
+				    <version>[11,)</version>
+				</requireJavaVersion>
+			    </rules>
+			</configuration>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	    <!--
+		This plugin is reponsible for packaging artifacts
+		as OSGi bundles.  Please refer to
+		http://felix.apache.org/site/apache-felix-maven-bundle-plugin-bnd.html
+		for more information about how to use this plugin.
+	    -->
+	    <plugin>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>maven-bundle-plugin</artifactId>
+		<configuration>
+		    <instructions>
+			<Bundle-SymbolicName>
+			    ${mail.bundle.symbolicName}
+			</Bundle-SymbolicName>
+			<Export-Package>
+			    ${mail.packages.export}
+			</Export-Package>
+			<Import-Package>
+			    ${mail.packages.import}
+			</Import-Package>
+			<Private-Package>
+			    ${mail.packages.private}
+			</Private-Package>
+			<DynamicImport-Package>
+			    *
+			</DynamicImport-Package>
+		    </instructions>
+		    <niceManifest>true</niceManifest>
+		</configuration>
+		<!--
+		    Since we don't change the packaging type to bundle, we
+		    need to configure the plugin to execute the manifest goal
+		    during the process-classes phase of the build life cycle.
+		-->
+		<executions>
+		    <execution>
+			<id>osgi-manifest</id>
+			<phase>process-classes</phase>
+			<goals>
+			    <goal>manifest</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	    <!--
+		Since we don't want a qualifier like b05 or SNAPSHOT to
+		appear in the OSGi package version attribute, we use
+		the following plugin to populate a project property
+		with an OSGi version that is equivalent to the maven
+		version without the qualifier.
+	    -->
+	    <plugin>
+		<groupId>org.glassfish.hk2</groupId>
+		<artifactId>osgiversion-maven-plugin</artifactId>
+		<version>${hk2.plugin.version}</version>
+		<configuration>
+		    <dropVersionComponent>qualifier</dropVersionComponent>
+		    <versionPropertyName>mail.osgiversion</versionPropertyName>
+		</configuration>
+		<executions>
+		    <execution>
+			<id>compute-osgi-version</id>
+			<goals>
+			    <goal>compute-osgi-version</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	    <!--
+		Use the JDK 11+ compiler for Jakarta Mail itself,
+		but restrict it to 1.7 source and target.  The 1.8 compiler is
+		used *only* to pick up the definition of the Repeatable
+		annotation, needed by MailServiceDefinition(s) on places where it is needed
+                and the test classes.
+                The 11+ compiler is used *only* to compile module-info descriptors.
+	    -->
+	    <plugin>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<executions>
+		    <execution>
+			<id>default-compile</id>
+			<configuration>
+                            <skipMain>${mail.recompile.skip}</skipMain>
+                            <release>9</release>
+                            <showDeprecation>true</showDeprecation>
+                            <showWarnings>true</showWarnings>
+                            <!--
+                                Configure compiler plugin to print lint warnings.
+                                Need to exclude options warning because bootstrap
+                                classpath isn't set (on purpose).
+                                Need to exclude path warnings because Maven includes
+                                source directories that don't exist (e.g., generated-sources).
+                            -->
+			    <compilerArgs>
+				<arg>-Xlint</arg>
+				<arg>-Xlint:-options</arg>
+				<arg>-Xlint:-path</arg>
+				<!--
+				    Too many finalize warnings.
+				<arg>-Werror</arg>
+				-->
+			    </compilerArgs>
+			</configuration>
+		    </execution>
+                    <!--
+                        Exclude MailSessionDefinition and MailSessionDefinitions since
+                        the former requires JDK 1.8 and the latter depends on the former.
+                    -->
+                    <execution>
+                        <id>base-compile-7</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <skipMain>${mail.recompile.skip}</skipMain>
+                            <release>7</release>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                                <exclude>javax/mail/MailSessionDefinition.java</exclude>
+                                <exclude>javax/mail/MailSessionDefinitions.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+		    <execution>
+			<id>default-testCompile</id>
+			<configuration>
+			    <release>8</release>
+			</configuration>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	    <plugin>
+		<artifactId>maven-jar-plugin</artifactId>
+		<configuration>
+		    <finalName>${project.artifactId}</finalName>
+		    <archive>
+			<!--
+			    Configure the maven-jar-plugin to pick up
+			    META-INF/MANIFEST.MF that's generated by
+			    the maven-bundle-plugin.
+			-->
+			<manifestFile>
+			  ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+			</manifestFile>
+			<manifestEntries>
+			    <Extension-Name>
+				${mail.extensionName}
+			    </Extension-Name>
+			    <Specification-Title>
+				${mail.specificationTitle}
+			    </Specification-Title>
+			    <Specification-Version>
+				${mail.spec.version}
+			    </Specification-Version>
+			    <Specification-Vendor>
+				${project.organization.name}
+			    </Specification-Vendor>
+			    <Implementation-Title>
+				${mail.implementationTitle}
+			    </Implementation-Title>
+			    <Implementation-Version>
+				${project.version}
+			    </Implementation-Version>
+			    <Implementation-Vendor>
+				${project.organization.name}
+			    </Implementation-Vendor>
+			    <Implementation-Vendor-Id>
+				com.sun
+			    </Implementation-Vendor-Id>
+			    <Probe-Provider-XML-File-Names>
+				${mail.probeFile}
+			    </Probe-Provider-XML-File-Names>
+			</manifestEntries>
+		    </archive>
+		</configuration>
+	    </plugin>
+
+	    <!--
+		Tell the source plugin about the sources that may have
+		been downloaded by the maven-dependency-plugin.
+
+		Also, need this plugin to define target/classes as another
+		source directory so that the filtered Version.java
+		that's copied there will also be compiled when using
+		the latest version of the maven-compiler-plugin.
+	    -->
+
+	    <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>build-helper-maven-plugin</artifactId>
+		<executions>
+		    <execution>
+			<id>add-source</id>
+			<phase>generate-sources</phase>
+			<goals>
+			    <goal>add-source</goal>
+			</goals>
+			<configuration>
+			    <sources>
+				<source> <!-- for dependencies -->
+				    ${project.build.directory}/generated-sources/sources
+				</source>
+				<source> <!-- for Version.java -->
+				    ${project.build.directory}/generated-sources/version
+				</source>
+			    </sources>
+			</configuration>
+		    </execution>
+		    <execution>
+			<id>add-resource</id>
+			<phase>generate-resources</phase>
+			<goals>
+			    <goal>add-resource</goal>
+			</goals>
+			<configuration>
+			    <resources>
+				<resource>
+				    <directory>${main.basedir}</directory>
+				    <targetPath>META-INF</targetPath>
+				    <includes>
+					<include>LICENSE.md</include>
+					<include>NOTICE.md</include>
+				    </includes>
+				</resource>
+                                <resource>
+                                    <directory>${project.build.directory}/generated-sources/sources</directory>
+                                    <excludes>
+                                        <exclude>**/*.java</exclude>
+                                    </excludes>
+                                </resource>
+			    </resources>
+			</configuration>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	    <!--
+		Directory plugin to find parent root directory absolute path.
+		Sets ${main.basedir}, used above with build-helper-maven-plugin
+		to include LICENSE.md and NOTICE.md in jar files.
+	    -->
+	    <plugin>
+		<groupId>org.commonjava.maven.plugins</groupId>
+		<artifactId>directory-maven-plugin</artifactId>
+		<executions>
+		    <execution>
+			<id>directories</id>
+			<goals>
+			    <goal>highest-basedir</goal>
+			</goals>
+			<phase>initialize</phase>
+			<configuration>
+			    <property>main.basedir</property>
+			</configuration>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	    <!--
+		Configure the source plugin here so that it will know
+		about the sources that may have been downloaded by the
+		maven-dependency-plugin and configured by the
+		build-helper-maven-plugin.
+	    -->
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-source-plugin</artifactId>
+		<executions>
+		    <execution>
+			<id>attach-sources</id>
+			<goals>
+			    <goal>jar-no-fork</goal> 
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
+
+<!-- not used
+	    <plugin>
+		<artifactId>maven-release-plugin</artifactId>
+		<configuration>
+		    <arguments>-P deploy</arguments>
+		</configuration>
+	    </plugin>
+-->
+	</plugins>
+
+	<pluginManagement>
+	    <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-compiler-plugin</artifactId>
+		    <version>3.8.1</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-surefire-plugin</artifactId>
+		    <version>2.4.3</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-jar-plugin</artifactId>
+		    <version>3.2.0</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.codehaus.mojo</groupId>
+		    <artifactId>build-helper-maven-plugin</artifactId>
+		    <version>3.2.0</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-assembly-plugin</artifactId>
+		    <version>3.3.0</version>
+		</plugin>
+		<plugin>
+		    <!--
+			By default, disable the SpotBugs plugin for all modules.
+			It's enabled in the modules where we actually want to
+			run it.
+		    -->
+		    <groupId>com.github.spotbugs</groupId>
+		    <artifactId>spotbugs-maven-plugin</artifactId>
+		    <version>${findbugs.version}</version>
+		    <configuration>
+			<skip>${findbugs.skip}</skip>
+			<threshold>${findbugs.threshold}</threshold>
+			<findbugsXmlWithMessages>true</findbugsXmlWithMessages>
+			<excludeFilterFile>
+			    ${findbugs.exclude}
+			</excludeFilterFile>
+		    </configuration>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-enforcer-plugin</artifactId>
+		    <version>3.0.0-M3</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.felix</groupId>
+		    <artifactId>maven-bundle-plugin</artifactId>
+		    <version>5.1.1</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-source-plugin</artifactId>
+		    <version>3.2.1</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-javadoc-plugin</artifactId>
+		    <version>3.1.1</version>
+		    <configuration>
+                        <source>11</source>
+			<doclint>none</doclint>
+                        <detectJavaApiLink>false</detectJavaApiLink>
+                        <docfilessubdirs>true</docfilessubdirs>
+                        <javadocDirectory>src/main/java</javadocDirectory>
+                        <quiet>true</quiet>
+                        <header>${mail.javadoc.impl.header}</header>
+		    </configuration>
+		</plugin>
+                <plugin>
+                    <groupId>org.commonjava.maven.plugins</groupId>
+                    <artifactId>directory-maven-plugin</artifactId>
+                    <version>0.3.1</version>
+                </plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-war-plugin</artifactId>
+		    <version>3.3.1</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-project-info-reports-plugin</artifactId>
+		    <version>3.1.1</version>
+		</plugin>
+		<plugin>
+		    <groupId>org.glassfish.copyright</groupId>
+		    <artifactId>glassfish-copyright-maven-plugin</artifactId>
+		    <version>${copyright-plugin.version}</version>
+		    <configuration>
+			<scm>git</scm>
+			<scmOnly>true</scmOnly> 
+			<excludeFile>
+			    copyright-exclude
+			</excludeFile>
+		    </configuration>
+		</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.ant</groupId>
+                            <artifactId>ant</artifactId>
+                            <version>1.10.9</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+	</pluginManagement>
+    </build>
+
+    <dependencyManagement>
+	<dependencies>
+	    <dependency>
+		<groupId>com.sun.activation</groupId>
+		<artifactId>jakarta.activation</artifactId>
+		<version>${activation.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>com.sun.mail</groupId>
+		<artifactId>jakarta.mail</artifactId>
+		<version>${mail.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>com.sun.mail</groupId>
+		<artifactId>mailapi</artifactId>
+		<version>${mail.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>com.sun.mail</groupId>
+		<artifactId>dsn</artifactId>
+		<version>${mail.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>com.sun.mail</groupId>
+		<artifactId>imap</artifactId>
+		<version>${mail.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>com.sun.mail</groupId>
+		<artifactId>gimap</artifactId>
+		<version>${mail.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>com.sun.mail</groupId>
+		<artifactId>mbox</artifactId>
+		<version>${mail.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>com.sun.mail</groupId>
+		<artifactId>taglib</artifactId>
+		<version>${mail.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>jakarta.servlet</groupId>
+		<artifactId>jakarta.servlet-api</artifactId>
+		<version>4.0.4</version>
+	    </dependency>
+	    <dependency>
+		<groupId>jakarta.servlet.jsp</groupId>
+		<artifactId>jakarta.servlet.jsp-api</artifactId>
+		<version>2.3.6</version>
+	    </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.1</version>
+            </dependency>
+	</dependencies>
+    </dependencyManagement>
+
+    <!--
+	I'm leaving this here but commented out to remind myself
+	NOT to add this back in because it breaks the Android
+	version of Jakarta Mail.
+
+    <dependencies>
+	<dependency>
+	    <groupId>com.sun.activation</groupId>
+	    <artifactId>jakarta.activation</artifactId>
+	</dependency>
+    </dependencies>
+    -->
+
+    <reporting>
+	<plugins>
+	    <!--
+		Configure SpotBugs to run with "mvn site" and
+		generate html output that can be viewed directly.
+	    -->
+	    <plugin>
+		<groupId>com.github.spotbugs</groupId>
+		<artifactId>spotbugs-maven-plugin</artifactId>
+		<version>${findbugs.version}</version>
+		<configuration>
+		    <skip>${findbugs.skip}</skip>
+		    <threshold>${findbugs.threshold}</threshold>
+		    <excludeFilterFile>
+			${findbugs.exclude}
+		    </excludeFilterFile>
+		</configuration>
+	    </plugin>
+	</plugins>
+    </reporting>
+</project>

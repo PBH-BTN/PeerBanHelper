@@ -1,0 +1,230 @@
+<!--
+  ~ This file is part of YamlConfiguration.
+  ~ 
+  ~ Implementation of SnakeYAML to be easy to use with files.
+  ~ 
+  ~ Copyright (C) 2010-2014 The Bukkit Project (https://bukkit.org/)
+  ~ Copyright (C) 2014-2024 SpigotMC Pty. Ltd. (https://www.spigotmc.org/)
+  ~ Copyright (C) 2020-2025 BSPF Systems, LLC (https://bspfsystems.org/)
+  ~ 
+  ~ Many of the files in this project are sourced from the Bukkit API as
+  ~ part of The Bukkit Project (https://bukkit.org/), now maintained by
+  ~ SpigotMC Pty. Ltd. (https://www.spigotmc.org/). These files can be found
+  ~ at https://github.com/Bukkit/Bukkit/ and https://hub.spigotmc.org/stash/,
+  ~ respectively.
+  ~ 
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~ 
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~ 
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>org.bspfsystems</groupId>
+    <artifactId>yamlconfiguration</artifactId>
+    <version>3.0.3</version>
+    <packaging>jar</packaging>
+    
+    <name>YamlConfiguration</name>
+    <description>Implementation of SnakeYAML to be easy to use with files.</description>
+    <url>https://github.com/bspfsystems/YamlConfiguration/</url>
+    <organization>
+        <name>BSPF Systems, LLC</name>
+        <url>https://bspfsystems.org/</url>
+    </organization>
+    
+    <licenses>
+        <license>
+            <name>GNU General Public License, Version 3</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+        </license>
+    </licenses>
+    
+    <developers>
+        <developer>
+            <organization>The Bukkit Project</organization>
+            <organizationUrl>https://bukkit.org/</organizationUrl>
+        </developer>
+        <developer>
+            <name>md_5</name>
+            <email>blog@md-5.net</email>
+            <organization>SpigotMC Pty. Ltd.</organization>
+            <organizationUrl>https://www.spigotmc.org/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Matt Ciolkosz</name>
+            <email>mciolkosz@bspfsystems.org</email>
+            <organization>BSPF Systems, LLC</organization>
+            <organizationUrl>https://bspfsystems.org/</organizationUrl>
+        </developer>
+    </developers>
+    
+    <scm>
+        <connection>scm:git:https://github.com/bspfsystems/YamlConfiguration.git</connection>
+        <developerConnection>scm:git:https://github.com/bspfsystems/YamlConfiguration.git</developerConnection>
+        <url>https://github.com/bspfsystems/YamlConfiguration.git</url>
+    </scm>
+    
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/bspfsystems/YamlConfiguration/issues/</url>
+    </issueManagement>
+    
+    <!-- No longer needed with Sonatype's move to Central from the Legacy OSSRH - 2025-04-24 -->
+    <!-- Please see https://central.sonatype.org/faq/what-is-different-between-central-portal-and-legacy-ossrh/ for more information -->
+    <!--<distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus</id>
+            <url>https://central.sonatype.com/</url>
+        </repository>
+    </distributionManagement>-->
+    
+    <repositories>
+        <repository>
+            <id>maven-central</id>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+    </repositories>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>26.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.17</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.4</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <id>apache-maven-releases</id>
+            <url>https://repository.apache.org/content/repositories/releases/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>apache-maven-snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>central-sonatype-releases</id>
+            <url>https://central.sonatype.com/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>central-sonatype-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <sourcepath>src/main/java</sourcepath>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.7</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.4</version>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.7.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <autoPublish>true</autoPublish>
+                    <checksums>all</checksums>
+                    <waitUntil>published</waitUntil>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+</project>

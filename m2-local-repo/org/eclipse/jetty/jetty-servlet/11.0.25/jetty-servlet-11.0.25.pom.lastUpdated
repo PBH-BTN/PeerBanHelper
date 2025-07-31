@@ -1,0 +1,15 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jul 31 17:25:44 UTC 2025
+https\://maven.sergeybochkov.com/releases/.error=Could not transfer artifact org.eclipse.jetty\:jetty-servlet\:pom\:11.0.25 from/to reposilite-repository-releases (https\://maven.sergeybochkov.com/releases)\: maven.sergeybochkov.com
+https\://lislei.github.io/maven-eclipse.github.io/maven/.error=Could not transfer artifact org.eclipse.jetty\:jetty-servlet\:pom\:11.0.25 from/to maven-eclipse-repo-fork (https\://lislei.github.io/maven-eclipse.github.io/maven)\: lislei.github.io
+https\://s01.oss.sonatype.org/content/repositories/snapshots/.error=Could not transfer artifact org.eclipse.jetty\:jetty-servlet\:pom\:11.0.25 from/to maven-snapshots (https\://s01.oss.sonatype.org/content/repositories/snapshots/)\: s01.oss.sonatype.org
+https\://jitpack.io/.error=Could not transfer artifact org.eclipse.jetty\:jetty-servlet\:pom\:11.0.25 from/to Jitpack (https\://jitpack.io)\: jitpack.io
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.lastUpdated=1753982744405
+@default-maven-eclipse-repo-fork-https\://lislei.github.io/maven-eclipse.github.io/maven/.lastUpdated=1753982744407
+@default-Jitpack-https\://jitpack.io/.lastUpdated=1753982744406
+https\://maven.reposilite.com/snapshots/.error=Could not transfer artifact org.eclipse.jetty\:jetty-servlet\:pom\:11.0.25 from/to reposilite-repository (https\://maven.reposilite.com/snapshots)\: maven.reposilite.com
+https\://repo.maven.apache.org/maven2/.lastUpdated=1753982744770
+@default-reposilite-repository-releases-https\://maven.sergeybochkov.com/releases/.lastUpdated=1753982744406
+@default-maven-snapshots-https\://s01.oss.sonatype.org/content/repositories/snapshots/.lastUpdated=1753982744408
+@default-reposilite-repository-https\://maven.reposilite.com/snapshots/.lastUpdated=1753982744409
+file\:////home/runner/work/PeerBanHelper/PeerBanHelper/m2-local-repo/.error=

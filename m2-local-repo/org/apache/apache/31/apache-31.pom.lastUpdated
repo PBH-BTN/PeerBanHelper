@@ -1,0 +1,5 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jul 31 17:25:32 UTC 2025
+https\://repo.maven.apache.org/maven2/.lastUpdated=1753982732543
+@default-ej-technologies-https\://maven.ej-technologies.com/repository/.lastUpdated=1753982732314
+https\://maven.ej-technologies.com/repository/.error=Could not transfer artifact org.apache\:apache\:pom\:31 from/to ej-technologies (https\://maven.ej-technologies.com/repository)\: maven.ej-technologies.com

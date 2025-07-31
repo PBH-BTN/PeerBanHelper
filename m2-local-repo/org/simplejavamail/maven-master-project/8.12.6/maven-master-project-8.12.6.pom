@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.bbottema</groupId>
+        <artifactId>modular-project-parent</artifactId>
+        <version>1.0.33</version>
+    </parent>
+
+    <groupId>org.simplejavamail</groupId>
+    <artifactId>maven-master-project</artifactId>
+    <packaging>pom</packaging>
+    <version>8.12.6</version>
+    <inceptionYear>2009</inceptionYear>
+
+    <name>Simple Java Mail - Maven master project</name>
+    <description>Simple Java Mail - Maven master project</description>
+    <url>https://www.simplejavamail.org/</url>
+
+    <properties>
+        <automaticModuleName>org.simplejavamail.undefined</automaticModuleName> <!-- update in individual modules -->
+        <license.owner.name>Benny Bottema</license.owner.name>
+        <license.owner.email>benny@bennybottema.com</license.owner.email>
+        <lombok.version>1.18.36</lombok.version>
+    </properties>
+
+    <!-- to skip some steps: -DskipTests -Dspotbugs.skip=true -Dmaven.javadoc.skip=true -Denforcer.skip=true -Djacoco.skip=true -Dlicense.skip=true -->
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/bbottema/simple-java-mail/issues</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git://github.com/bbottema/simple-java-mail.git</connection>
+        <developerConnection>scm:git:git@github.com:bbottema/simple-java-mail.git</developerConnection>
+        <url>https://github.com/bbottema/simple-java-mail</url>
+    </scm>
+
+    <modules>
+        <module>modules/core-module</module>
+        <module>modules/core-test-module</module>
+        <module>modules/batch-module</module>
+        <module>modules/authenticated-socks-module</module>
+        <module>modules/outlook-module</module>
+        <module>modules/dkim-module</module>
+        <module>modules/smime-module</module>
+        <module>modules/simple-java-mail</module>
+        <module>modules/spring-module</module>
+        <module>modules/cli-module</module>
+        <module>modules/jacoco-aggregator-module</module>
+        <module>modules/karaf-module</module>
+    </modules>
+
+    <dependencies>
+        <!-- utility -->
+        <dependency><!-- gives us @NotNull annotations-->
+            <groupId>com.github.bbottema</groupId>
+            <artifactId>jetbrains-runtime-annotations</artifactId>
+            <version>1.0.2</version>
+            <scope>compile</scope><!-- SimpleJavaMail uses the annotation using java reflection -->
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.pivovarit</groupId>
+            <artifactId>throwing-function</artifactId>
+            <version>1.6.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- testing -->
+        <dependency>
+            <groupId>com.github.bbottema</groupId>
+            <artifactId>java-socks-proxy-server</artifactId>
+            <version>4.1.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- this solves the dependency clashes found with the enforcer plugin -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.mail</groupId>
+                <artifactId>jakarta.mail-api</artifactId>
+                <version>2.1.3</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.activation</groupId>
+                <artifactId>jakarta.activation-api</artifactId>
+                <version>2.1.3</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.16.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.angus</groupId>
+                <artifactId>angus-mail</artifactId>
+                <version>2.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>2.0.13</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin><!-- this plugin must come after jacoco instrument -->
+                <groupId>se.eris</groupId>
+                <artifactId>notnull-instrumenter-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <classes>**Assert</classes><!-- AssertJ generated -->
+                        <classes>**.ServerReply</classes><!-- somehow gets messed up -->
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <dependencyConvergence/>
+                                <requireReleaseDeps>
+                                    <onlyWhenRelease>true</onlyWhenRelease>
+                                </requireReleaseDeps>
+                                <requireUpperBoundDeps>
+                                    <excludes>
+                                        <!-- tests seem to work fine with the version Maven's dependency resolution defaults to -->
+                                        <exclude>org.objenesis:objenesis</exclude>
+                                        <exclude>commons-codec:commons-codec</exclude>
+                                    </excludes>
+                                </requireUpperBoundDeps>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>standard-javadoc</id>
+            <activation>
+                <file>
+                    <missing>src/main/javadoc</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <doclint>all,-missing</doclint>
+                            <show>public</show>
+                            <nohelp>true</nohelp>
+                            <detectOfflineLinks>false</detectOfflineLinks>
+                            <excludePackageNames>*.internal:*.internal.*:testutil:demo</excludePackageNames>
+                            <quiet>true</quiet>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>custom-javadoc</id>
+            <activation>
+                <file>
+                    <exists>src/main/javadoc</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>javadoc</classifier>
+                                    <classesDirectory>${project.basedir}/src/main/javadoc</classesDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>skip-unsupported-live-tests</id>
+            <activation>
+                <property>
+                    <name>excludeLiveServerTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <version>3.2.5</version>
+                            <configuration>
+                                <excludes>
+                                    <exclude>**/*LiveTest.java</exclude>
+                                </excludes>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+
+        <profile>
+            <id>oss-scan-fail</id>
+            <activation>
+                <property>
+                    <name>oss-scan-warn</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.ossindex.maven</groupId>
+                        <artifactId>ossindex-maven-plugin</artifactId>
+                        <configuration>
+                            <fail>false</fail>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-bom</artifactId>
+  <version>2.0.16</version>
+  <packaging>pom</packaging>
+
+  <url>http://www.slf4j.org</url>
+
+  <name>SLF4J BOM</name>
+  <description>SLF4J project BOM</description>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/qos-ch/slf4j</url>
+    <connection>scm:git:https://github.com/qos-ch/slf4j.git</connection>
+  </scm>
+
+
+  <!-- Inspired by Improving the Maven Bill of Materials (BOM) Pattern  -->
+  <!-- https://www.garretwilson.com/blog/2023/06/14/improve-maven-bom-pattern -->
+  <modules>
+    <module>parent</module>
+    <module>slf4j-api</module>
+    <module>slf4j-simple</module>
+    <module>slf4j-nop</module>
+    <module>slf4j-jdk14</module>
+    <module>slf4j-jdk-platform-logging</module>
+    <module>slf4j-log4j12</module>
+    <module>slf4j-reload4j</module>
+    <module>slf4j-ext</module>
+    <module>jcl-over-slf4j</module>
+    <module>log4j-over-slf4j</module>
+    <module>jul-to-slf4j</module>
+    <module>osgi-over-slf4j</module>
+    <module>integration</module>
+    <module>slf4j-migrator</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-nop</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk14</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk-platform-logging</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-reload4j</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-ext</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>log4j-over-slf4j</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jul-to-slf4j</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>osgi-over-slf4j</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+
+    </dependencies>
+  </dependencyManagement>
+
+  <distributionManagement>
+
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+
+  </distributionManagement>
+
+  <developers>
+    <developer>
+      <id>ceki</id>
+      <name>Ceki Gulcu</name>
+      <email>ceki@qos.ch</email>
+    </developer>
+  </developers>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.3</version>
+        <configuration>
+          <verbose>true</verbose>
+          <skippedModules>
+             slf4j-jdk-platform-logging,slf4j-migrator,osgi-over-slf4j
+          </skippedModules>
+          <detectLinks>true</detectLinks>
+          <doctitle>SLF4J project modules ${project.version}</doctitle>
+          <windowtitle>SLF4J javadoc</windowtitle>
+          <bottom><![CDATA[Copyright  &copy; 2005-{currentYear} QOS.CH Sarl. All rights reserved]]></bottom>
+          <linksource>true</linksource>
+          <additionalOptions>
+            <additionalOption>-Xdoclint:none</additionalOption>
+          </additionalOptions>
+          <groups>
+            <group>
+              <title>SLF4J API packages</title>
+              <packages>org.slf4j:org.slf4j.spi:org.slf4j.event:org.slf4j.helpers</packages>
+            </group>
+
+            <group>
+              <title>slf4j-simple package</title>
+              <packages>org.slf4j.simple</packages>
+            </group>
+
+            <group>
+              <title>slf4j-nop package</title>
+              <packages>org.slf4j.nop</packages>
+            </group>
+
+
+            <group>
+              <title>slf4j-jdk14 package</title>
+              <packages>org.slf4j.jul</packages>
+            </group>
+
+
+            <group>
+              <title>slf4j-reload4j package</title>
+              <packages>org.slf4j.reload4j</packages>
+            </group>
+
+
+            <group>
+              <title>SLF4J extensions</title>
+              <packages>
+                org.slf4j.cal10n:org.slf4j.profiler:org.slf4j.ext:org.slf4j.instrumentation:org.slf4j.agent
+              </packages>
+            </group>
+
+            <group>
+              <title>Jakarta Commons Logging packages</title>
+              <packages>org.apache.commons.*</packages>
+            </group>
+
+            <group>
+              <title>java.util.logging (JUL) to SLF4J bridge</title>
+              <packages>org.slf4j.bridge</packages>
+            </group>
+
+            <group>
+              <title>log4j-over-slf4j redirection</title>
+              <packages>org.apache.log4j:org.apache.log4j.*</packages>
+            </group>
+          </groups>
+
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+
+    <profile>
+      <id>sign-artifacts</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

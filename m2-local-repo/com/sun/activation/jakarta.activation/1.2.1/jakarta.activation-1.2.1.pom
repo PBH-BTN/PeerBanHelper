@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+
+    Copyright (c) 1997, 2018 Oracle and/or its affiliates. All rights reserved.
+
+    This program and the accompanying materials are made available under the
+    terms of the Eclipse Distribution License v. 1.0, which is available at
+    http://www.eclipse.org/org/documents/edl-v10.php.
+
+    SPDX-License-Identifier: BSD-3-Clause
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+			    http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+	<groupId>com.sun.activation</groupId>
+	<artifactId>all</artifactId>
+	<version>1.2.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.sun.activation</groupId>
+    <artifactId>jakarta.activation</artifactId>
+    <packaging>jar</packaging>
+    <name>JavaBeans Activation Framework</name>
+
+    <properties>
+	<activation.extensionName>
+	    jakarta.activation
+	</activation.extensionName>
+	<activation.moduleName>
+	    jakarta.activation
+	</activation.moduleName>
+	<activation.specificationTitle>
+	    JavaBeans(TM) Activation Framework Specification
+	</activation.specificationTitle>
+	<activation.implementationTitle>
+	    javax.activation
+	</activation.implementationTitle>
+	<activation.packages.export>
+	    javax.activation.*; version=${activation.spec.version},
+	    com.sun.activation.*; version=${activation.osgiversion}
+	</activation.packages.export>
+	<findbugs.skip>
+	    false
+	</findbugs.skip>
+	<findbugs.exclude>
+	    ${project.basedir}/exclude.xml
+	</findbugs.exclude>
+    </properties>
+
+    <build>
+	<resources>
+	    <resource>
+		<directory>src/main/resources</directory>
+		<filtering>true</filtering>
+	    </resource>
+	</resources>
+	<plugins>
+	    <!--
+		Configure compiler plugin to print lint warnings.
+	    -->
+	    <plugin>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<executions>
+		    <execution>
+			<id>default-compile</id>
+			<configuration>
+			    <source>1.5</source>
+			    <target>1.5</target>
+			    <fork>true</fork>
+			    <!--
+				ignore some of the errors that are
+				too hard to fix for now
+			    -->
+			    <!--
+			    <compilerArguments>
+				<Xlint:all/>
+				<Xlint:-rawtypes/>
+				<Xlint:-unchecked/>
+				<Xlint:-finally/>
+			    </compilerArguments>
+			    <showWarnings>true</showWarnings>
+			    -->
+			</configuration>
+		    </execution>
+		    <execution>
+			<id>default-testCompile</id>
+			<configuration>
+			    <source>1.5</source>
+			    <target>1.5</target>
+			</configuration>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	    <!--
+		Configure test plugin to find *TestSuite classes.
+	    -->
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-surefire-plugin</artifactId>
+		<configuration>
+		    <includes>
+			<include>**/*Test.java</include>
+			<include>**/*TestSuite.java</include>
+		    </includes>
+		</configuration>
+	    </plugin>
+
+	    <plugin>
+		<artifactId>maven-javadoc-plugin</artifactId>
+		<inherited>false</inherited>
+                <executions>
+		    <execution>
+			<phase>package</phase>
+			<goals>
+			    <goal>javadoc</goal>
+			</goals>
+			<configuration>
+			    <author>false</author>
+			    <description>
+				JavaBeans Activation Framework API documentation
+			    </description>
+			    <doctitle>
+				JavaBeans Activation Framework API documentation
+			    </doctitle>
+			    <windowtitle>
+				JavaBeans Activation Framework API documentation
+			    </windowtitle>
+			    <splitindex>true</splitindex>
+			    <use>true</use>
+			    <notimestamp>true</notimestamp>
+			    <serialwarn>true</serialwarn>
+			    <quiet>true</quiet>
+			    <bottom>
+<![CDATA[Copyright &#169; 1996-2017,
+    <a href="http://www.oracle.com">Oracle</a>
+    and/or its affiliates. All Rights Reserved.
+    Use is subject to
+    <a href="{@docRoot}/doc-files/speclicense.html" target="_top">license terms</a>.
+]]>
+			    </bottom>
+			    <groups>
+				<group>
+				    <title>JavaBeans Activation Framework API Packages</title>
+				    <packages>javax.*</packages>
+				</group>
+			    </groups>
+			    <subpackages>javax.activation</subpackages>
+			    <!--
+				Links to Java SE javadocs.
+
+				XXX - links need to include a trailing "/."
+				      because Maven strips off a trailing "/"
+				      before passing the option to the javadoc
+				      command, which then strips off the last
+				      name if it doesn't end with "/".
+			    -->
+			    <links>
+				<link>http://docs.oracle.com/javase/1.5.0/docs/api/.</link>
+			    </links>
+			</configuration>
+		    </execution>
+                </executions>
+	    </plugin>
+	</plugins>
+    </build>
+
+    <dependencies>
+	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>4.12</version>
+	    <scope>test</scope>
+	    <optional>true</optional>
+	</dependency>
+    </dependencies>
+</project>

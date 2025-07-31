@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+
+    Copyright (c) 1997, 2021 Oracle and/or its affiliates. All rights reserved.
+
+    This program and the accompanying materials are made available under the
+    terms of the Eclipse Public License v. 2.0, which is available at
+    http://www.eclipse.org/legal/epl-2.0.
+
+    This Source Code may also be made available under the following Secondary
+    Licenses when the conditions for such availability set forth in the
+    Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+    version 2 with the GNU Classpath Exception, which is available at
+    https://www.gnu.org/software/classpath/license.html.
+
+    SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+			    http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+	<groupId>com.sun.mail</groupId>
+	<artifactId>all</artifactId>
+	<version>1.6.7</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.sun.mail</groupId>
+    <artifactId>jakarta.mail</artifactId>
+    <packaging>jar</packaging>
+    <name>Jakarta Mail API</name>
+
+    <properties>
+	<mail.extensionName>
+	    jakarta.mail
+	</mail.extensionName>
+	<mail.moduleName>
+	    jakarta.mail
+	</mail.moduleName>
+	<mail.specificationTitle>
+	    Jakarta Mail API Design Specification
+	</mail.specificationTitle>
+	<mail.implementationTitle>
+	    javax.mail
+	</mail.implementationTitle>
+	<mail.packages.export>
+	    javax.mail.*; version=${mail.spec.version},
+	    com.sun.mail.imap; version=${mail.osgiversion},
+	    com.sun.mail.imap.protocol; version=${mail.osgiversion},
+	    com.sun.mail.iap; version=${mail.osgiversion},
+	    com.sun.mail.pop3; version=${mail.osgiversion},
+	    com.sun.mail.smtp; version=${mail.osgiversion},
+	    com.sun.mail.util; version=${mail.osgiversion},
+	    com.sun.mail.util.logging; version=${mail.osgiversion},
+	    com.sun.mail.handlers; version=${mail.osgiversion}
+	</mail.packages.export>
+	<mail.probeFile>
+	    META-INF/gfprobe-provider.xml
+	</mail.probeFile>
+	<findbugs.skip>
+	    false
+	</findbugs.skip>
+	<findbugs.exclude>
+	    ${project.basedir}/exclude.xml
+	</findbugs.exclude>
+    </properties>
+
+    <build>
+	<resources>
+	    <resource>
+		<directory>src/main/resources</directory>
+		<filtering>true</filtering>
+                <excludes>
+                    <exclude>javax/mail/Version.java</exclude>
+                </excludes>
+	    </resource>
+	</resources>
+	<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/generated-sources/version</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>javax/mail/Version.java</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+                Use 1.8 compiler to compile MailServiceDefinition & MailServiceDefinitions
+                which depend on the Repeatable annotation available from Java SE 8
+            -->
+	    <plugin>
+		<artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>base-compile-8</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>8</release>
+                            <includes>
+                                <include>javax/mail/MailSessionDefinition.java</include>
+                                <include>javax/mail/MailSessionDefinitions.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+	    </plugin>
+
+	    <!--
+		Configure test plugin to find *TestSuite classes.
+	    -->
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-surefire-plugin</artifactId>
+		<configuration>
+		    <includes>
+			<include>**/*Test.java</include>
+			<include>**/*TestSuite.java</include>
+		    </includes>
+		</configuration>
+	    </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <bottom>${mail.javadoc.bottom}</bottom>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+	<dependency>
+	    <groupId>com.sun.activation</groupId>
+	    <artifactId>jakarta.activation</artifactId>
+	</dependency>
+	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <scope>test</scope>
+	</dependency>
+    </dependencies>
+</project>

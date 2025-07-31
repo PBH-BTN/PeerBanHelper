@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.oshi</groupId>
+        <artifactId>oshi-parent</artifactId>
+        <version>5.8.6</version>
+    </parent>
+
+    <artifactId>oshi-core</artifactId>
+    <packaging>jar</packaging>
+
+    <name>oshi-core</name>
+
+    <scm>
+        <connection>scm:git:git@github.com:oshi/oshi.git</connection>
+        <developerConnection>scm:git:git@github.com:oshi/oshi.git</developerConnection>
+        <url>https://github.com/oshi/oshi.git</url>
+        <tag>oshi-parent-5.8.6</tag>
+    </scm>
+
+    <properties>
+        <!-- Users of the Spring Boot Starter Parent should include this property
+            in their POM -->
+        <jna.version>5.10.0</jna.version>
+        <main.basedir>${project.parent.basedir}</main.basedir>
+        <automatic.module.name>com.github.oshi</automatic.module.name>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Due to critical nature of OSHI jna usage, set to dependency management
+                to help influence usage -->
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

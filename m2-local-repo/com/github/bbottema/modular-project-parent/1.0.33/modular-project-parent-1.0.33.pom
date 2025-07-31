@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.bbottema</groupId>
+		<artifactId>standard-project-parent</artifactId>
+		<version>1.0.45</version>
+	</parent>
+
+	<artifactId>modular-project-parent</artifactId>
+	<packaging>pom</packaging>
+	<name>modular-project-parent</name>
+	<version>1.0.33</version>
+	<description>Benny's modular parent POM full of default sweetness and boilerplate code.</description>
+	<url>https://github.com/bbottema/modular-project-parent</url>
+	<inceptionYear>2019</inceptionYear>
+
+	<scm>
+		<connection>scm:git:git://github.com/bbottema/modular-project-parent.git</connection>
+		<developerConnection>scm:git:git@github.com:bbottema/modular-project-parent.git</developerConnection>
+		<url>https://github.com/bbottema/modular-project-parent</url>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/bbottema/modular-project-parent/issues</url>
+	</issueManagement>
+
+	<build>
+		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>aggregate-jar</id>
+                        <goals>
+                            <goal>aggregate-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!-- pretty ugly, but since Maven 3 there's no property directly pointing to the parent project root -->
+		<profile>
+			<id>load-spotbugs-exclude-xml-parent</id>
+			<activation><file><exists>../spotbugs-exclude.xml</exists></file></activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.spotbugs</groupId>
+						<artifactId>spotbugs-maven-plugin</artifactId>
+						<configuration><excludeFilterFile>../spotbugs-exclude.xml</excludeFilterFile></configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>load-spotbugs-exclude-xml-parent-parent</id>
+			<activation><file><exists>../../spotbugs-exclude.xml</exists></file></activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.spotbugs</groupId>
+						<artifactId>spotbugs-maven-plugin</artifactId>
+						<configuration><excludeFilterFile>../../spotbugs-exclude.xml</excludeFilterFile></configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>load-spotbugs-exclude-xml-parent-parent-parent</id>
+			<activation><file><exists>../../../spotbugs-exclude.xml</exists></file></activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.spotbugs</groupId>
+						<artifactId>spotbugs-maven-plugin</artifactId>
+						<configuration><excludeFilterFile>../../../spotbugs-exclude.xml</excludeFilterFile></configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

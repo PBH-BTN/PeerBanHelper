@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.bbottema</groupId>
+		<artifactId>standard-project-parent-nodeps</artifactId>
+		<version>1.0.1</version>
+	</parent>
+
+	<artifactId>jetbrains-runtime-annotations</artifactId>
+	<packaging>jar</packaging>
+	<name>jetbrains-runtime-nullability-annotations</name>
+	<version>1.0.2</version>
+	<description>The well-known Jetbrains nullability annotations, but with RUNTIME retention</description>
+	<url>https://github.com/bbottema/jetbrains-runtime-nullability-annotations</url>
+	<inceptionYear>2019</inceptionYear>
+
+	<properties>
+		<license.owner.name>Benny Bottema</license.owner.name>
+		<license.owner.email>benny@bennybottema.com</license.owner.email>
+	</properties>
+
+	<scm>
+		<connection>scm:git:git://github.com/bbottema/jetbrains-runtime-nullability-annotations.git</connection>
+		<developerConnection>scm:git:git@github.com:bbottema/jetbrains-runtime-nullability-annotations.git</developerConnection>
+		<url>https://github.com/bbottema/jetbrains-runtime-nullability-annotations</url>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/bbottema/jetbrains-runtime-nullability-annotations/issues</url>
+	</issueManagement>
+</project>
