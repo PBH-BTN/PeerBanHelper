@@ -90,10 +90,6 @@ public final class BtnNetwork implements Reloadable {
         }).start();
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     @Override
     public ReloadResult reloadModule() throws Exception {
         new Thread(this::reloadConfig).start();
