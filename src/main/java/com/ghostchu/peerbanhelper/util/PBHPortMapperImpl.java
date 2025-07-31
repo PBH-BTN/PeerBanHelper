@@ -122,7 +122,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                     }
                     mapper.unmapPort(mappedPort);
                     originalToRefreshedPortMap.remove(mappedPort);
-                } catch (InterruptedException ignored) {
+                } catch (Exception ignored) {
                 }
             }
             return null;
