@@ -66,7 +66,7 @@ public final class PushDeerPushProvider extends AbstractPushProvider {
         Map<String, Object> map = new HashMap<>();
         map.put("pushkey", config.getPushKey());
         map.put("text", title + "\n\n" + content);
-        map.put("type", "text");
+        map.put("type", "markdown");
         
         RequestBody requestBody = RequestBody.create(
                 JsonUtil.getGson().toJson(map),
