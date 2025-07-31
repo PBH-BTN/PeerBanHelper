@@ -186,8 +186,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                     if (!ignoreBanForDisconnect) return true;
                     return !b.getValue().isBanForDisconnect();
                 })
-                .filter(b -> search == null || b.getKey().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
-                        || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
+                .filter(b -> search == null || matchesSearchCriteria(b.getKey(), b.getValue(), search))
                 .map(entry -> new BanDTO(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
@@ -204,5 +203,71 @@ public final class PBHBanController extends AbstractFeatureModule {
             }
         });
         return banResponseList;
+    }
+
+    /**
+     * Enhanced search criteria matching that supports multiple address representations.
+     * This allows searching for IPv4/IPv6 addresses with or without ports, using standard notation.
+     */
+    private boolean matchesSearchCriteria(PeerAddress peerAddress, Object banMetadata, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return true;
+        }
+        
+        String searchLower = search.toLowerCase(Locale.ROOT);
+        
+        // Check if ban metadata matches (original functionality)
+        if (banMetadata.toString().toLowerCase(Locale.ROOT).contains(searchLower)) {
+            return true;
+        }
+        
+        // Check original toString representation (backward compatibility)
+        if (peerAddress.toString().toLowerCase(Locale.ROOT).contains(searchLower)) {
+            return true;
+        }
+        
+        // Extract IP and port for more flexible matching
+        String ip = peerAddress.getIp();
+        int port = peerAddress.getPort();
+        
+        // Check IP address only (without port)
+        if (ip.toLowerCase(Locale.ROOT).contains(searchLower)) {
+            return true;
+        }
+        
+        // Check port number only
+        if (port > 0 && String.valueOf(port).contains(searchLower)) {
+            return true;
+        }
+        
+        // For IPv6 addresses, also check with proper bracket notation
+        if (ip.contains(":")) { // Likely IPv6
+            // Standard IPv6 with port format: [IPv6]:port
+            String standardFormat = "[" + ip + "]:" + port;
+            if (standardFormat.toLowerCase(Locale.ROOT).contains(searchLower)) {
+                return true;
+            }
+            
+            // IPv6 address with brackets (without port)
+            String ipWithBrackets = "[" + ip + "]";
+            if (ipWithBrackets.toLowerCase(Locale.ROOT).contains(searchLower)) {
+                return true;
+            }
+            
+            // Check partial bracket searches (e.g., "[2408")
+            if (searchLower.startsWith("[") && ipWithBrackets.toLowerCase(Locale.ROOT).startsWith(searchLower)) {
+                return true;
+            }
+        }
+        
+        // For IPv4 addresses, also check with explicit port format
+        if (!ip.contains(":")) { // Likely IPv4
+            String ipWithPort = ip + ":" + port;
+            if (ipWithPort.toLowerCase(Locale.ROOT).contains(searchLower)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
