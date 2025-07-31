@@ -47,7 +47,7 @@ export async function getBanListPaginated(params: {
   pageSize?: number
   search?: string
   filters?: BanListFilters
-}): Promise<CommonResponseWithPage<BanList[]>> {
+}): Promise<CommonResponseWithPage<BanList>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 

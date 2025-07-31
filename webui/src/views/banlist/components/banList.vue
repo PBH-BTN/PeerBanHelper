@@ -84,6 +84,7 @@
 
 <script setup lang="ts">
 import AsyncMethod from '@/components/asyncMethod.vue'
+import { type BanList } from '@/api/model/banlist'
 import { getBanListPaginated, unbanIP, type BanListFilters } from '@/service/banList'
 import { useAutoUpdate, useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
@@ -110,21 +111,25 @@ const countryOptions = ref<{ label: string; value: string }[]>([])
 const cityOptions = ref<{ label: string; value: string }[]>([])
 
 const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
-  usePagination(getBanListPaginated, {
-    defaultParams: [
-      {
-        page: 1,
-        pageSize: 10,
-        search: '',
-        filters: {}
+  usePagination(
+    getBanListPaginated,
+    {
+      defaultParams: [
+        {
+          page: 1,
+          pageSize: 10,
+          search: '',
+          filters: {}
+        }
+      ],
+      pagination: {
+        currentKey: 'page',
+        pageSizeKey: 'pageSize',
+        totalKey: 'data.total'
       }
-    ],
-    pagination: {
-      currentKey: 'page',
-      pageSizeKey: 'pageSize',
-      totalKey: 'data.total'
-    }
-  })
+    },
+    [useAutoUpdatePlugin]
+  )
 
 const pollingHandler = autoUpdateStore.polling(() => {
   if (current.value === 1) refresh()
@@ -173,7 +178,7 @@ const updateFilterOptions = () => {
   const cities = new Set<string>()
 
   items.forEach((item) => {
-    if (item.banMetadata.peer.clientName) {
+    if (item.banMetadata?.peer?.clientName) {
       clientNames.add(item.banMetadata.peer.clientName)
     }
     if (item.ipGeoData?.country?.name) {
