@@ -85,6 +85,62 @@
           />
         </a-form-item>
       </a-col>
+
+      <!-- ISP Filter -->
+      <a-col :span="24" :md="12" :lg="8">
+        <a-form-item :label="t('page.banlist.banlist.filters.isp')">
+          <a-select
+            v-model="localFilters.isp"
+            :placeholder="t('page.banlist.banlist.filters.isp.placeholder')"
+            allow-clear
+            allow-search
+            :options="ispOptions"
+            @change="onFilterChange"
+          />
+        </a-form-item>
+      </a-col>
+
+      <!-- Network Type Filter -->
+      <a-col :span="24" :md="12" :lg="8">
+        <a-form-item :label="t('page.banlist.banlist.filters.netType')">
+          <a-select
+            v-model="localFilters.netType"
+            :placeholder="t('page.banlist.banlist.filters.netType.placeholder')"
+            allow-clear
+            allow-search
+            :options="netTypeOptions"
+            @change="onFilterChange"
+          />
+        </a-form-item>
+      </a-col>
+
+      <!-- Discovery Location Filter -->
+      <a-col :span="24" :md="12" :lg="8">
+        <a-form-item :label="t('page.banlist.banlist.filters.context')">
+          <a-select
+            v-model="localFilters.context"
+            :placeholder="t('page.banlist.banlist.filters.context.placeholder')"
+            allow-clear
+            allow-search
+            :options="contextOptions"
+            @change="onFilterChange"
+          />
+        </a-form-item>
+      </a-col>
+
+      <!-- Hit Rule Filter -->
+      <a-col :span="24" :md="12" :lg="8">
+        <a-form-item :label="t('page.banlist.banlist.filters.rule')">
+          <a-select
+            v-model="localFilters.rule"
+            :placeholder="t('page.banlist.banlist.filters.rule.placeholder')"
+            allow-clear
+            allow-search
+            :options="ruleOptions"
+            @change="onFilterChange"
+          />
+        </a-form-item>
+      </a-col>
     </a-row>
   </a-space>
 </template>
@@ -102,13 +158,21 @@ interface Props {
   clientNameOptions?: { label: string; value: string }[]
   countryOptions?: { label: string; value: string }[]
   cityOptions?: { label: string; value: string }[]
+  ispOptions?: { label: string; value: string }[]
+  netTypeOptions?: { label: string; value: string }[]
+  contextOptions?: { label: string; value: string }[]
+  ruleOptions?: { label: string; value: string }[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
   filters: () => ({}),
   clientNameOptions: () => [],
   countryOptions: () => [],
-  cityOptions: () => []
+  cityOptions: () => [],
+  ispOptions: () => [],
+  netTypeOptions: () => [],
+  contextOptions: () => [],
+  ruleOptions: () => []
 })
 
 const emits = defineEmits<{
@@ -121,7 +185,11 @@ const localFilters = reactive<BanListFilters>({
   peerId: props.filters.peerId || '',
   country: props.filters.country || '',
   city: props.filters.city || '',
-  asn: props.filters.asn || ''
+  asn: props.filters.asn || '',
+  isp: props.filters.isp || '',
+  netType: props.filters.netType || '',
+  context: props.filters.context || '',
+  rule: props.filters.rule || ''
 })
 
 const debouncedFilterChange = useDebounceFn(() => {
@@ -133,6 +201,10 @@ const debouncedFilterChange = useDebounceFn(() => {
   if (localFilters.country?.trim()) activeFilters.country = localFilters.country.trim()
   if (localFilters.city?.trim()) activeFilters.city = localFilters.city.trim()
   if (localFilters.asn?.trim()) activeFilters.asn = localFilters.asn.trim()
+  if (localFilters.isp?.trim()) activeFilters.isp = localFilters.isp.trim()
+  if (localFilters.netType?.trim()) activeFilters.netType = localFilters.netType.trim()
+  if (localFilters.context?.trim()) activeFilters.context = localFilters.context.trim()
+  if (localFilters.rule?.trim()) activeFilters.rule = localFilters.rule.trim()
 
   emits('filter-change', activeFilters)
 }, 300)
@@ -148,6 +220,10 @@ const resetFilters = () => {
   localFilters.country = ''
   localFilters.city = ''
   localFilters.asn = ''
+  localFilters.isp = ''
+  localFilters.netType = ''
+  localFilters.context = ''
+  localFilters.rule = ''
   onFilterChange()
 }
 
@@ -161,7 +237,11 @@ watch(
       peerId: newFilters.peerId || '',
       country: newFilters.country || '',
       city: newFilters.city || '',
-      asn: newFilters.asn || ''
+      asn: newFilters.asn || '',
+      isp: newFilters.isp || '',
+      netType: newFilters.netType || '',
+      context: newFilters.context || '',
+      rule: newFilters.rule || ''
     })
   },
   { deep: true }

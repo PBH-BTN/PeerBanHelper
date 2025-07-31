@@ -37,5 +37,13 @@ export default {
   'page.banlist.banlist.filters.city': '城市',
   'page.banlist.banlist.filters.city.placeholder': '选择城市...',
   'page.banlist.banlist.filters.asn': 'ASN',
-  'page.banlist.banlist.filters.asn.placeholder': '输入 ASN 编号或组织名...'
+  'page.banlist.banlist.filters.asn.placeholder': '输入 ASN 编号或组织名...',
+  'page.banlist.banlist.filters.isp': 'ISP',
+  'page.banlist.banlist.filters.isp.placeholder': '选择 ISP...',
+  'page.banlist.banlist.filters.netType': '网络类型',
+  'page.banlist.banlist.filters.netType.placeholder': '选择网络类型...',
+  'page.banlist.banlist.filters.context': '发现位置',
+  'page.banlist.banlist.filters.context.placeholder': '选择发现位置...',
+  'page.banlist.banlist.filters.rule': '命中规则',
+  'page.banlist.banlist.filters.rule.placeholder': '选择命中规则...'
 }

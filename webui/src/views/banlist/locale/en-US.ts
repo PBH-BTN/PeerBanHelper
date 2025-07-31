@@ -37,5 +37,13 @@ export default {
   'page.banlist.banlist.filters.city': 'City',
   'page.banlist.banlist.filters.city.placeholder': 'Select city...',
   'page.banlist.banlist.filters.asn': 'ASN',
-  'page.banlist.banlist.filters.asn.placeholder': 'Enter ASN number or organization...'
+  'page.banlist.banlist.filters.asn.placeholder': 'Enter ASN number or organization...',
+  'page.banlist.banlist.filters.isp': 'ISP',
+  'page.banlist.banlist.filters.isp.placeholder': 'Select ISP...',
+  'page.banlist.banlist.filters.netType': 'Network Type',
+  'page.banlist.banlist.filters.netType.placeholder': 'Select network type...',
+  'page.banlist.banlist.filters.context': 'Discovery Location',
+  'page.banlist.banlist.filters.context.placeholder': 'Select discovery location...',
+  'page.banlist.banlist.filters.rule': 'Hit Rule',
+  'page.banlist.banlist.filters.rule.placeholder': 'Select hit rule...'
 }

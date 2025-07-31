@@ -11,6 +11,10 @@ export interface BanListFilters {
   country?: string
   city?: string
   asn?: string
+  isp?: string
+  netType?: string
+  context?: string
+  rule?: string
 }
 
 export async function getBanList(
@@ -79,6 +83,18 @@ export async function getBanListPaginated(params: {
     }
     if (params.filters.asn?.trim()) {
       url.searchParams.set('filterAsn', encodeURIComponent(params.filters.asn.trim()))
+    }
+    if (params.filters.isp?.trim()) {
+      url.searchParams.set('filterIsp', encodeURIComponent(params.filters.isp.trim()))
+    }
+    if (params.filters.netType?.trim()) {
+      url.searchParams.set('filterNetType', encodeURIComponent(params.filters.netType.trim()))
+    }
+    if (params.filters.context?.trim()) {
+      url.searchParams.set('filterContext', encodeURIComponent(params.filters.context.trim()))
+    }
+    if (params.filters.rule?.trim()) {
+      url.searchParams.set('filterRule', encodeURIComponent(params.filters.rule.trim()))
     }
   }
 

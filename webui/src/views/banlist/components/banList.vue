@@ -48,6 +48,10 @@
           :client-name-options="clientNameOptions"
           :country-options="countryOptions"
           :city-options="cityOptions"
+          :isp-options="ispOptions"
+          :net-type-options="netTypeOptions"
+          :context-options="contextOptions"
+          :rule-options="ruleOptions"
           @filter-change="handleFilterChange"
         />
       </a-collapse-item>
@@ -109,6 +113,10 @@ const { t } = useI18n()
 const clientNameOptions = ref<{ label: string; value: string }[]>([])
 const countryOptions = ref<{ label: string; value: string }[]>([])
 const cityOptions = ref<{ label: string; value: string }[]>([])
+const ispOptions = ref<{ label: string; value: string }[]>([])
+const netTypeOptions = ref<{ label: string; value: string }[]>([])
+const contextOptions = ref<{ label: string; value: string }[]>([])
+const ruleOptions = ref<{ label: string; value: string }[]>([])
 
 const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
   usePagination(
@@ -176,6 +184,10 @@ const updateFilterOptions = () => {
   const clientNames = new Set<string>()
   const countries = new Set<string>()
   const cities = new Set<string>()
+  const isps = new Set<string>()
+  const netTypes = new Set<string>()
+  const contexts = new Set<string>()
+  const rules = new Set<string>()
 
   items.forEach((item) => {
     if (item.banMetadata?.peer?.clientName) {
@@ -187,11 +199,27 @@ const updateFilterOptions = () => {
     if (item.ipGeoData?.city?.name) {
       cities.add(item.ipGeoData.city.name)
     }
+    if (item.ipGeoData?.network?.isp) {
+      isps.add(item.ipGeoData.network.isp)
+    }
+    if (item.ipGeoData?.network?.netType) {
+      netTypes.add(item.ipGeoData.network.netType)
+    }
+    if (item.banMetadata?.context) {
+      contexts.add(item.banMetadata.context)
+    }
+    if (item.banMetadata?.rule) {
+      rules.add(item.banMetadata.rule)
+    }
   })
 
   clientNameOptions.value = Array.from(clientNames).map((name) => ({ label: name, value: name }))
   countryOptions.value = Array.from(countries).map((name) => ({ label: name, value: name }))
   cityOptions.value = Array.from(cities).map((name) => ({ label: name, value: name }))
+  ispOptions.value = Array.from(isps).map((name) => ({ label: name, value: name }))
+  netTypeOptions.value = Array.from(netTypes).map((name) => ({ label: name, value: name }))
+  contextOptions.value = Array.from(contexts).map((name) => ({ label: name, value: name }))
+  ruleOptions.value = Array.from(rules).map((name) => ({ label: name, value: name }))
 }
 
 watch(list, updateFilterOptions, { immediate: true })
