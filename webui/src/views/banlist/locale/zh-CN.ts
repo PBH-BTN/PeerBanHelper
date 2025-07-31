@@ -20,5 +20,22 @@ export default {
   'page.banlist.banlist.listItem.unbanall': '解封全部',
   'page.banlist.banlist.listItem.unbanUnexcepted': '没有 IP 地址被成功解除封禁',
   'page.banlist.banlist.listItem.unbanSuccess': '成功解封 {count} 个 IP 地址',
-  'page.banlist.banlist.listItem.threatAnalyse': '威胁分析'
+  'page.banlist.banlist.listItem.threatAnalyse': '威胁分析',
+  // Filter translations
+  'page.banlist.banlist.filters.title': '筛选器',
+  'page.banlist.banlist.filters.reset': '重置',
+  'page.banlist.banlist.filters.show': '显示筛选器',
+  'page.banlist.banlist.filters.hide': '隐藏筛选器',
+  'page.banlist.banlist.filters.reason': '封禁原因',
+  'page.banlist.banlist.filters.reason.placeholder': '输入封禁原因...',
+  'page.banlist.banlist.filters.clientName': '客户端名称',
+  'page.banlist.banlist.filters.clientName.placeholder': '选择客户端名称...',
+  'page.banlist.banlist.filters.peerId': 'PeerID',
+  'page.banlist.banlist.filters.peerId.placeholder': '输入 PeerID...',
+  'page.banlist.banlist.filters.country': '国家/地区',
+  'page.banlist.banlist.filters.country.placeholder': '选择国家/地区...',
+  'page.banlist.banlist.filters.city': '城市',
+  'page.banlist.banlist.filters.city.placeholder': '选择城市...',
+  'page.banlist.banlist.filters.asn': 'ASN',
+  'page.banlist.banlist.filters.asn.placeholder': '输入 ASN 编号或组织名...'
 }

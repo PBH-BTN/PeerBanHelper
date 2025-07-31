@@ -20,5 +20,22 @@ export default {
   'page.banlist.banlist.listItem.unbanall': 'Unban all',
   'page.banlist.banlist.listItem.unbanUnexcepted': 'No IP address(s) unbanned',
   'page.banlist.banlist.listItem.unbanSuccess': 'Unbanned {count} IP address',
-  'page.banlist.banlist.listItem.threatAnalyse': 'Threat Analyse'
+  'page.banlist.banlist.listItem.threatAnalyse': 'Threat Analyse',
+  // Filter translations
+  'page.banlist.banlist.filters.title': 'Filters',
+  'page.banlist.banlist.filters.reset': 'Reset',
+  'page.banlist.banlist.filters.show': 'Show Filters',
+  'page.banlist.banlist.filters.hide': 'Hide Filters',
+  'page.banlist.banlist.filters.reason': 'Ban Reason',
+  'page.banlist.banlist.filters.reason.placeholder': 'Enter ban reason...',
+  'page.banlist.banlist.filters.clientName': 'Client Name',
+  'page.banlist.banlist.filters.clientName.placeholder': 'Select client name...',
+  'page.banlist.banlist.filters.peerId': 'PeerID',
+  'page.banlist.banlist.filters.peerId.placeholder': 'Enter PeerID...',
+  'page.banlist.banlist.filters.country': 'Country/Region',
+  'page.banlist.banlist.filters.country.placeholder': 'Select country/region...',
+  'page.banlist.banlist.filters.city': 'City',
+  'page.banlist.banlist.filters.city.placeholder': 'Select city...',
+  'page.banlist.banlist.filters.asn': 'ASN',
+  'page.banlist.banlist.filters.asn.placeholder': 'Enter ASN number or organization...'
 }

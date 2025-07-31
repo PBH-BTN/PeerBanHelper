@@ -17,6 +17,16 @@
             {{ t('page.banlist.banlist.listItem.unbanall') }}
           </a-button>
         </AsyncMethod>
+        <a-button @click="toggleFilters">
+          <template #icon>
+            <icon-filter />
+          </template>
+          {{
+            showFilters
+              ? t('page.banlist.banlist.filters.hide')
+              : t('page.banlist.banlist.filters.show')
+          }}
+        </a-button>
         <a-input-search
           :style="{ width: '250px' }"
           :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
@@ -26,6 +36,23 @@
         />
       </a-space>
     </a-space>
+
+    <!-- Filters -->
+    <a-collapse v-model:active-key="filtersActiveKey" :bordered="false">
+      <a-collapse-item key="filters" :show-expand-icon="false">
+        <template #header>
+          <div></div>
+        </template>
+        <BanListFiltersComponent
+          :filters="currentFilters"
+          :client-name-options="clientNameOptions"
+          :country-options="countryOptions"
+          :city-options="cityOptions"
+          @filter-change="handleFilterChange"
+        />
+      </a-collapse-item>
+    </a-collapse>
+
     <!-- paginated list (no virtual scroll / infinite load) -->
     <a-list :data="list">
       <template #item="{ item }">
@@ -57,39 +84,47 @@
 
 <script setup lang="ts">
 import AsyncMethod from '@/components/asyncMethod.vue'
-import { getBanListPaginated, unbanIP } from '@/service/banList'
+import { getBanListPaginated, unbanIP, type BanListFilters } from '@/service/banList'
 import { useAutoUpdate, useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
+import { IconFilter } from '@arco-design/web-vue/es/icon'
 import { useDebounceFn } from '@vueuse/core'
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 import banListItem from './banListItem.vue'
+import BanListFiltersComponent from './banListFilters.vue'
+
 const endpointState = useEndpointStore()
 const autoUpdateStore = useAutoUpdate()
 const searchString = ref('')
+const currentFilters = reactive<BanListFilters>({})
+const showFilters = ref(false)
+const filtersActiveKey = ref<string[]>([])
 const { t } = useI18n()
 
+// Extract unique values for filter options
+const clientNameOptions = ref<{ label: string; value: string }[]>([])
+const countryOptions = ref<{ label: string; value: string }[]>([])
+const cityOptions = ref<{ label: string; value: string }[]>([])
+
 const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
-  usePagination(
-    getBanListPaginated,
-    {
-      defaultParams: [
-        {
-          page: 1,
-          pageSize: 10,
-          search: ''
-        }
-      ],
-      pagination: {
-        currentKey: 'page',
-        pageSizeKey: 'pageSize',
-        totalKey: 'data.total'
+  usePagination(getBanListPaginated, {
+    defaultParams: [
+      {
+        page: 1,
+        pageSize: 10,
+        search: '',
+        filters: {}
       }
-    },
-    [useAutoUpdatePlugin]
-  )
+    ],
+    pagination: {
+      currentKey: 'page',
+      pageSizeKey: 'pageSize',
+      totalKey: 'data.total'
+    }
+  })
 
 const pollingHandler = autoUpdateStore.polling(() => {
   if (current.value === 1) refresh()
@@ -126,18 +161,60 @@ watch(
   }
 )
 
-run({ page: 1, pageSize: 10, search: '' })
+run({ page: 1, pageSize: 10, search: '', filters: {} })
 
 const list = computed(() => data.value?.data.results ?? [])
+
+// Extract unique filter options from the current data
+const updateFilterOptions = () => {
+  const items = list.value || []
+  const clientNames = new Set<string>()
+  const countries = new Set<string>()
+  const cities = new Set<string>()
+
+  items.forEach((item) => {
+    if (item.banMetadata.peer.clientName) {
+      clientNames.add(item.banMetadata.peer.clientName)
+    }
+    if (item.ipGeoData?.country?.name) {
+      countries.add(item.ipGeoData.country.name)
+    }
+    if (item.ipGeoData?.city?.name) {
+      cities.add(item.ipGeoData.city.name)
+    }
+  })
+
+  clientNameOptions.value = Array.from(clientNames).map((name) => ({ label: name, value: name }))
+  countryOptions.value = Array.from(countries).map((name) => ({ label: name, value: name }))
+  cityOptions.value = Array.from(cities).map((name) => ({ label: name, value: name }))
+}
+
+watch(list, updateFilterOptions, { immediate: true })
+
 const debouncedSearch = useDebounceFn((v: string) => {
   searchString.value = v
   changeCurrent(1)
-  run({ page: 1, pageSize: pageSize.value, search: v })
+  run({ page: 1, pageSize: pageSize.value, search: v, filters: currentFilters })
 }, 300)
 
 const handleSearch = (v: string) => {
   if (searchString.value === v) return
   debouncedSearch(v)
+}
+
+const debouncedFilterChange = useDebounceFn((filters: BanListFilters) => {
+  Object.assign(currentFilters, filters)
+  changeCurrent(1)
+  run({ page: 1, pageSize: pageSize.value, search: searchString.value, filters })
+}, 300)
+
+const handleFilterChange = (filters: BanListFilters) => {
+  debouncedFilterChange(filters)
+}
+
+const toggleFilters = () => {
+  showFilters.value = !showFilters.value
+  filtersActiveKey.value = showFilters.value ? ['filters'] : []
 }
 </script>
 

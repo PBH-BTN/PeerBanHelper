@@ -20,5 +20,22 @@ export default {
   'page.banlist.banlist.listItem.unbanall': '解封全部',
   'page.banlist.banlist.listItem.unbanUnexcepted': '沒有 IP 位址被成功解除封禁',
   'page.banlist.banlist.listItem.unbanSuccess': '成功解封 {count} 個 IP 位址',
-  'page.banlist.banlist.listItem.threatAnalyse': '威脅分析'
+  'page.banlist.banlist.listItem.threatAnalyse': '威脅分析',
+  // Filter translations
+  'page.banlist.banlist.filters.title': '篩選器',
+  'page.banlist.banlist.filters.reset': '重置',
+  'page.banlist.banlist.filters.show': '顯示篩選器',
+  'page.banlist.banlist.filters.hide': '隱藏篩選器',
+  'page.banlist.banlist.filters.reason': '封禁原因',
+  'page.banlist.banlist.filters.reason.placeholder': '輸入封禁原因...',
+  'page.banlist.banlist.filters.clientName': '客戶端名稱',
+  'page.banlist.banlist.filters.clientName.placeholder': '選擇客戶端名稱...',
+  'page.banlist.banlist.filters.peerId': 'PeerID',
+  'page.banlist.banlist.filters.peerId.placeholder': '輸入 PeerID...',
+  'page.banlist.banlist.filters.country': '國家/地區',
+  'page.banlist.banlist.filters.country.placeholder': '選擇國家/地區...',
+  'page.banlist.banlist.filters.city': '城市',
+  'page.banlist.banlist.filters.city.placeholder': '選擇城市...',
+  'page.banlist.banlist.filters.asn': 'ASN',
+  'page.banlist.banlist.filters.asn.placeholder': '輸入 ASN 編號或組織名...'
 }

@@ -4,6 +4,15 @@ import { type CommonResponse, type CommonResponseWithPage } from '@/api/model/co
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 
+export interface BanListFilters {
+  reason?: string
+  clientName?: string
+  peerId?: string
+  country?: string
+  city?: string
+  asn?: string
+}
+
 export async function getBanList(
   limit: number,
   search?: string,
@@ -37,6 +46,7 @@ export async function getBanListPaginated(params: {
   page: number
   pageSize?: number
   search?: string
+  filters?: BanListFilters
 }): Promise<CommonResponseWithPage<BanList[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -48,6 +58,28 @@ export async function getBanListPaginated(params: {
   }
   if (params.search && params.search.trim() !== '') {
     url.searchParams.set('search', encodeURIComponent(params.search.trim()))
+  }
+
+  // Add filter parameters
+  if (params.filters) {
+    if (params.filters.reason?.trim()) {
+      url.searchParams.set('filterReason', encodeURIComponent(params.filters.reason.trim()))
+    }
+    if (params.filters.clientName?.trim()) {
+      url.searchParams.set('filterClientName', encodeURIComponent(params.filters.clientName.trim()))
+    }
+    if (params.filters.peerId?.trim()) {
+      url.searchParams.set('filterPeerId', encodeURIComponent(params.filters.peerId.trim()))
+    }
+    if (params.filters.country?.trim()) {
+      url.searchParams.set('filterCountry', encodeURIComponent(params.filters.country.trim()))
+    }
+    if (params.filters.city?.trim()) {
+      url.searchParams.set('filterCity', encodeURIComponent(params.filters.city.trim()))
+    }
+    if (params.filters.asn?.trim()) {
+      url.searchParams.set('filterAsn', encodeURIComponent(params.filters.asn.trim()))
+    }
   }
 
   return fetch(url, {
