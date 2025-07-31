@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
@@ -73,6 +74,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private StunManager bTStunManager;
     @Autowired
     private BackgroundTaskManager backgroundTaskManager;
+    @Autowired
+    private BtnNetwork btnNetwork;
 
     @Override
     public boolean isConfigurable() {
@@ -167,6 +170,11 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                     return;
                 }
             }
+        }
+        // WORKAROUND FIX: Btn status incorrect #961
+        if (moduleName.equalsIgnoreCase("btn") && btnNetwork.isEnabled()) {
+            context.json(new StdResp(true, null, true));
+            return;
         }
         context.json(new StdResp(true, null, false));
     }
