@@ -94,6 +94,8 @@ export default {
   'page.settings.tab.config.push.form.type.pushplus': 'Push+',
   'page.settings.tab.config.push.form.type.serverchan': 'Server醬',
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
+  'page.settings.tab.config.push.form.type.bark': 'Bark',
+  'page.settings.tab.config.push.form.type.gotify': 'Gotify',
 
   'page.settings.tab.config.push.form.stmp.host': '主機',
   'page.settings.tab.config.push.form.stmp.port': '埠號',
