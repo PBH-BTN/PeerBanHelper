@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.Main;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,12 @@ public class DownloaderDiscovery {
                 .callTimeout(8, TimeUnit.SECONDS)
                 .followRedirects(true)
                 .followSslRedirects(true)
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("User-Agent", "PeerBanHelper-DownloaderDiscovery/1.0 " + Main.getUserAgent());
+                    return chain.proceed(requestBuilder.build());
+                })
                 .build();
     }
 
