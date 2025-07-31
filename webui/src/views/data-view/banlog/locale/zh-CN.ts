@@ -12,5 +12,24 @@ export default {
   'page.banlog.banlogTable.column.torrentSize': '大小',
   'page.banlog.banlogTable.column.description': '描述',
   'page.banlog.radio.viewMode': '视图模式',
-  'page.banlog.radio.table': '表格'
+  'page.banlog.radio.table': '表格',
+  
+  // 筛选器
+  'page.banlog.filters.showFilters': '显示筛选器',
+  'page.banlog.filters.hideFilters': '隐藏筛选器',
+  'page.banlog.filters.reset': '重置',
+  'page.banlog.filters.reason': '封禁原因',
+  'page.banlog.filters.reasonPlaceholder': '输入封禁原因...',
+  'page.banlog.filters.clientName': '客户端名称',
+  'page.banlog.filters.clientNamePlaceholder': '选择客户端名称...',
+  'page.banlog.filters.peerId': 'Peer ID',
+  'page.banlog.filters.peerIdPlaceholder': '输入 Peer ID...',
+  'page.banlog.filters.torrentName': '种子名称',
+  'page.banlog.filters.torrentNamePlaceholder': '输入种子名称...',
+  'page.banlog.filters.module': '模块',
+  'page.banlog.filters.modulePlaceholder': '选择模块...',
+  'page.banlog.filters.rule': '命中规则',
+  'page.banlog.filters.rulePlaceholder': '选择规则...',
+  'page.banlog.filters.context': '发现位置',
+  'page.banlog.filters.contextPlaceholder': '选择发现位置...'
 }

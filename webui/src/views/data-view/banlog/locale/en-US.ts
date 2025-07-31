@@ -12,5 +12,24 @@ export default {
   'page.banlog.banlogTable.column.torrentSize': 'Size',
   'page.banlog.banlogTable.column.description': 'Description',
   'page.banlog.radio.viewMode': 'View Mode',
-  'page.banlog.radio.table': 'Table'
+  'page.banlog.radio.table': 'Table',
+  
+  // Filters
+  'page.banlog.filters.showFilters': 'Show Filters',
+  'page.banlog.filters.hideFilters': 'Hide Filters',
+  'page.banlog.filters.reset': 'Reset',
+  'page.banlog.filters.reason': 'Ban Reason',
+  'page.banlog.filters.reasonPlaceholder': 'Enter ban reason...',
+  'page.banlog.filters.clientName': 'Client Name',
+  'page.banlog.filters.clientNamePlaceholder': 'Select client name...',
+  'page.banlog.filters.peerId': 'Peer ID',
+  'page.banlog.filters.peerIdPlaceholder': 'Enter Peer ID...',
+  'page.banlog.filters.torrentName': 'Torrent Name',
+  'page.banlog.filters.torrentNamePlaceholder': 'Enter torrent name...',
+  'page.banlog.filters.module': 'Module',
+  'page.banlog.filters.modulePlaceholder': 'Select module...',
+  'page.banlog.filters.rule': 'Hit Rule',
+  'page.banlog.filters.rulePlaceholder': 'Select rule...',
+  'page.banlog.filters.context': 'Discovery Location',
+  'page.banlog.filters.contextPlaceholder': 'Select discovery location...'
 }

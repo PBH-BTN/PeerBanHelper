@@ -1,24 +1,27 @@
 <template>
-  <a-table
-    :stripe="true"
-    :columns="columns"
-    :data="list"
-    :loading="tableLoading"
-    :pagination="{
-      total,
-      current,
-      pageSize,
-      showPageSize: true,
-      baseSize: 4,
-      bufferSize: 1
-    }"
-    column-resizable
-    size="medium"
-    class="banlog-table"
-    @sorter-change="sorterChange"
-    @page-change="changeCurrent"
-    @page-size-change="changePageSize"
-  >
+  <div>
+    <banLogFilters v-model="filters" :ban-logs="allBanLogs" />
+    
+    <a-table
+      :stripe="true"
+      :columns="columns"
+      :data="list"
+      :loading="tableLoading"
+      :pagination="{
+        total,
+        current,
+        pageSize,
+        showPageSize: true,
+        baseSize: 4,
+        bufferSize: 1
+      }"
+      column-resizable
+      size="medium"
+      class="banlog-table"
+      @sorter-change="sorterChange"
+      @page-change="changeCurrent"
+      @page-size-change="changePageSize"
+    >
     <template #banAt="{ record }">
       <a-space fill direction="vertical">
         <a-typography-text><icon-stop /> {{ d(record.banAt, 'long') }}</a-typography-text>
@@ -83,11 +86,13 @@
         <p>{{ formatFileSize(record.torrentSize) }}</p>
       </a-tooltip>
     </template>
-  </a-table>
+    </a-table>
+  </div>
 </template>
 <script setup lang="ts">
 import queryIpLink from '@/components/queryIpLink.vue'
-import { getBanlogs } from '@/service/banLogs'
+import banLogFilters from './banLogFilters.vue'
+import { getBanlogs, type BanLogFilters } from '@/service/banLogs'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
@@ -95,12 +100,21 @@ import { formatIPAddressPort } from '@/utils/string'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
+
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
+const filters = ref<BanLogFilters>({})
+const allBanLogs = ref<any[]>([])
+
+// Custom wrapper function that includes filters
+const fetchBanLogs = (params: { page: number; pageSize?: number; sorter?: string }) => {
+  return getBanlogs({ ...params, filters: filters.value })
+}
+
 const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh, run } =
   usePagination(
-    getBanlogs,
+    fetchBanLogs,
     {
       defaultParams: [
         {
@@ -114,7 +128,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
         totalKey: 'data.total'
       },
       cacheKey: (params) =>
-        `${endpointState.endpoint}-banlogs-${params?.[0].page || 1}-${params?.[0].pageSize || 10}`,
+        `${endpointState.endpoint}-banlogs-${params?.[0].page || 1}-${params?.[0].pageSize || 10}-${JSON.stringify(filters.value)}`,
       onAfter: () => {
         forceLoading.value = false
       }
@@ -127,6 +141,22 @@ watch([pageSize, current], () => {
 })
 
 watch(() => endpointState.endpoint, refresh)
+
+// Watch data changes to update allBanLogs for filter options
+watch(data, (newData) => {
+  if (newData?.data?.results) {
+    allBanLogs.value = newData.data.results
+  }
+}, { immediate: true })
+
+// Watch filters and trigger refresh
+watch(filters, () => {
+  forceLoading.value = true
+  run({
+    page: 1, // Reset to first page when filters change
+    pageSize: pageSize.value
+  })
+}, { deep: true })
 
 const tableLoading = computed(() => {
   return forceLoading.value || loading.value || !list.value

@@ -12,5 +12,24 @@ export default {
   'page.banlog.banlogTable.column.torrentSize': '大小',
   'page.banlog.banlogTable.column.description': '描述',
   'page.banlog.radio.viewMode': '檢視模式',
-  'page.banlog.radio.table': '表格'
+  'page.banlog.radio.table': '表格',
+  
+  // 篩選器
+  'page.banlog.filters.showFilters': '顯示篩選器',
+  'page.banlog.filters.hideFilters': '隱藏篩選器',
+  'page.banlog.filters.reset': '重置',
+  'page.banlog.filters.reason': '封禁原因',
+  'page.banlog.filters.reasonPlaceholder': '輸入封禁原因...',
+  'page.banlog.filters.clientName': '客戶端名稱',
+  'page.banlog.filters.clientNamePlaceholder': '選擇客戶端名稱...',
+  'page.banlog.filters.peerId': 'Peer ID',
+  'page.banlog.filters.peerIdPlaceholder': '輸入 Peer ID...',
+  'page.banlog.filters.torrentName': '種子名稱',
+  'page.banlog.filters.torrentNamePlaceholder': '輸入種子名稱...',
+  'page.banlog.filters.module': '模組',
+  'page.banlog.filters.modulePlaceholder': '選擇模組...',
+  'page.banlog.filters.rule': '命中規則',
+  'page.banlog.filters.rulePlaceholder': '選擇規則...',
+  'page.banlog.filters.context': '發現位置',
+  'page.banlog.filters.contextPlaceholder': '選擇發現位置...'
 }
