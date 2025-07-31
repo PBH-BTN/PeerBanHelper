@@ -2,6 +2,7 @@ import { genIconComponent } from '@/components/iconFont'
 import BanList from '@/views/banlist/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
+import EnhancedSubscribeManagement from '@/views/rule-management/components/enhanced-subscribe/index.vue'
 import { IconCloud, IconCodeSquare, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
 import { computed, h } from 'vue'
 import {
@@ -87,6 +88,16 @@ export const routerOptions: RouteRecordRaw[] = [
           needLogin: true
         },
         component: SubscribeManagement
+      },
+      {
+        path: '/enhancedRuleSubscribe',
+        name: 'rule_management_enhanced_subscribe',
+        meta: {
+          label: 'page.rule_management.enhancedRuleSubscribe.title',
+          icon: () => h(IconCodeSquare),
+          needLogin: true
+        },
+        component: EnhancedSubscribeManagement
       },
       {
         path: '/script',
