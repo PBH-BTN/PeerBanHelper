@@ -6,100 +6,109 @@ import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 
 import java.util.Locale;
 
+/**
+ * Applies filters to ban list data in memory.
+ * Since ban list data comes from active memory rather than database queries,
+ * filtering is performed on the DTO objects after geo data enrichment.
+ */
 public class BanListFilterApplier {
     
+    /**
+     * Applies the given filters to a BanDTO object.
+     * 
+     * @param dto The ban DTO to check against filters
+     * @param filters The filters to apply
+     * @return true if the DTO passes all filters, false otherwise
+     */
     public static boolean applyFilters(BanDTO dto, BanListFilters filters) {
-        if (filters == null) return true;
+        if (filters == null || !filters.hasAnyFilter()) {
+            return true;
+        }
 
         BakedBanMetadata metadata = dto.getBanMetadata();
         
         // Filter by reason/description
-        if (filters.getReason() != null && !filters.getReason().trim().isEmpty()) {
-            String description = metadata.getDescription();
-            if (description == null || !description.toLowerCase(Locale.ROOT).contains(filters.getReason().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
+        if (!matchesStringFilter(metadata.getDescription(), filters.getReason())) {
+            return false;
         }
 
         // Filter by client name
-        if (filters.getClientName() != null && !filters.getClientName().trim().isEmpty()) {
-            PeerWrapper peer = metadata.getPeer();
-            String clientName = peer != null ? peer.getClientName() : null;
-            if (clientName == null || !clientName.toLowerCase(Locale.ROOT).contains(filters.getClientName().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
+        PeerWrapper peer = metadata.getPeer();
+        String clientName = peer != null ? peer.getClientName() : null;
+        if (!matchesStringFilter(clientName, filters.getClientName())) {
+            return false;
         }
 
         // Filter by peer ID
-        if (filters.getPeerId() != null && !filters.getPeerId().trim().isEmpty()) {
-            PeerWrapper peer = metadata.getPeer();
-            String peerId = peer != null ? peer.getId() : null;
-            if (peerId == null || !peerId.toLowerCase(Locale.ROOT).contains(filters.getPeerId().toLowerCase(Locale.ROOT))) {
+        String peerId = peer != null ? peer.getId() : null;
+        if (!matchesStringFilter(peerId, filters.getPeerId())) {
+            return false;
+        }
+
+        // Filter by geographic data
+        var geoData = dto.getIpGeoData();
+        if (geoData != null) {
+            if (!matchesStringFilter(geoData.getCountry(), filters.getCountry()) ||
+                !matchesStringFilter(geoData.getCity(), filters.getCity()) ||
+                !matchesStringFilter(geoData.getAsn(), filters.getAsn()) ||
+                !matchesStringFilter(geoData.getIsp(), filters.getIsp()) ||
+                !matchesStringFilter(geoData.getNet(), filters.getNetType())) {
+                return false;
+            }
+        } else {
+            // If geo data is null but geo filters are set, exclude this entry
+            if (hasGeoFilter(filters)) {
                 return false;
             }
         }
 
-        // Filter by country
-        if (filters.getCountry() != null && !filters.getCountry().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String country = geoData != null ? geoData.getCountry() : null;
-            if (country == null || !country.toLowerCase(Locale.ROOT).contains(filters.getCountry().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by city
-        if (filters.getCity() != null && !filters.getCity().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String city = geoData != null ? geoData.getCity() : null;
-            if (city == null || !city.toLowerCase(Locale.ROOT).contains(filters.getCity().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by ASN
-        if (filters.getAsn() != null && !filters.getAsn().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String asn = geoData != null ? geoData.getAsn() : null;
-            if (asn == null || !asn.toLowerCase(Locale.ROOT).contains(filters.getAsn().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by ISP
-        if (filters.getIsp() != null && !filters.getIsp().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String isp = geoData != null ? geoData.getIsp() : null;
-            if (isp == null || !isp.toLowerCase(Locale.ROOT).contains(filters.getIsp().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by network type
-        if (filters.getNetType() != null && !filters.getNetType().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String netType = geoData != null ? geoData.getNet() : null;
-            if (netType == null || !netType.toLowerCase(Locale.ROOT).contains(filters.getNetType().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by context
-        if (filters.getContext() != null && !filters.getContext().trim().isEmpty()) {
-            String context = metadata.getContext();
-            if (context == null || !context.toLowerCase(Locale.ROOT).contains(filters.getContext().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by rule
-        if (filters.getRule() != null && !filters.getRule().trim().isEmpty()) {
-            String rule = metadata.getRule();
-            if (rule == null || !rule.toLowerCase(Locale.ROOT).contains(filters.getRule().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
+        // Filter by context and rule
+        if (!matchesStringFilter(metadata.getContext(), filters.getContext()) ||
+            !matchesStringFilter(metadata.getRule(), filters.getRule())) {
+            return false;
         }
 
         return true;
+    }
+    
+    /**
+     * Checks if the actual value matches the filter value using case-insensitive contains.
+     * 
+     * @param actualValue The actual value from the data
+     * @param filterValue The filter value to match against
+     * @return true if filter passes (filter is empty or actual value contains filter value)
+     */
+    private static boolean matchesStringFilter(String actualValue, String filterValue) {
+        if (filterValue == null || filterValue.trim().isEmpty()) {
+            return true; // No filter applied
+        }
+        
+        if (actualValue == null) {
+            return false; // Cannot match against null value
+        }
+        
+        return actualValue.toLowerCase(Locale.ROOT).contains(filterValue.trim().toLowerCase(Locale.ROOT));
+    }
+    
+    /**
+     * Checks if any geographic filter is set.
+     * 
+     * @param filters The filters to check
+     * @return true if any geographic filter has a value
+     */
+    private static boolean hasGeoFilter(BanListFilters filters) {
+        return isValidFilter(filters.getCountry()) || isValidFilter(filters.getCity()) ||
+               isValidFilter(filters.getAsn()) || isValidFilter(filters.getIsp()) ||
+               isValidFilter(filters.getNetType());
+    }
+    
+    /**
+     * Checks if a filter value is valid (not null and not empty after trimming).
+     * 
+     * @param value The filter value to check
+     * @return true if the value is valid for filtering
+     */
+    private static boolean isValidFilter(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }
