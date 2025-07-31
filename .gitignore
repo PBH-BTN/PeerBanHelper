@@ -3,6 +3,7 @@
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+m2-local-repo/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
