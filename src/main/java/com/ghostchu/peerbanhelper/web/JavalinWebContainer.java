@@ -172,7 +172,8 @@ public final class JavalinWebContainer {
                         throw new NotLoggedInException();
                     }
                 })
-                .options("/*", ctx -> ctx.status(200));
+                .options("/*", ctx -> ctx.status(200))
+                .after(ctx -> ctx.header("Server", Main.getUserAgent()));
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
         this.pBHPortMapper = pBHPortMapper;
     }
