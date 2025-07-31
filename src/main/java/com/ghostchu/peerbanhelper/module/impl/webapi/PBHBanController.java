@@ -6,12 +6,15 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.ModuleDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.RuleDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanListFilters;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanListFilterApplier;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanLogFilters;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanLogFilterApplier;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -23,9 +26,6 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.j256.ormlite.stmt.QueryBuilder;
 import io.javalin.http.Context;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,39 +40,6 @@ import java.util.stream.Stream;
 @Component
 
 public final class PBHBanController extends AbstractFeatureModule {
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BanListFilters {
-        private String reason;
-        private String clientName;
-        private String peerId;
-        private String country;
-        private String city;
-        private String asn;
-        private String isp;
-        private String netType;
-        private String context;
-        private String rule;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BanLogFilters {
-        private String reason;
-        private String clientName;
-        private String peerId;
-        private String country;
-        private String city;
-        private String asn;
-        private String isp;
-        private String netType;
-        private String context;
-        private String rule;
-        private String torrentName;
-        private String module;
-    }
 
     @Autowired
     private Database db;
@@ -149,20 +116,14 @@ public final class PBHBanController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx);
         Orderable orderable = new Orderable(Map.of("banAt", false), ctx);
         
-        // Extract filter parameters for ban logs
+        // Extract filter parameters for ban logs - only database-supported filters
         BanLogFilters filters = new BanLogFilters(
                 ctx.queryParam("filterReason"),
                 ctx.queryParam("filterClientName"), 
                 ctx.queryParam("filterPeerId"),
-                ctx.queryParam("filterCountry"),
-                ctx.queryParam("filterCity"),
-                ctx.queryParam("filterAsn"),
-                ctx.queryParam("filterIsp"),
-                ctx.queryParam("filterNetType"),
-                ctx.queryParam("filterContext"),
-                ctx.queryParam("filterRule"),
                 ctx.queryParam("filterTorrentName"),
-                ctx.queryParam("filterModule")
+                ctx.queryParam("filterModule"),
+                ctx.queryParam("filterRule")
         );
 
         var queryBuilder = orderable
@@ -178,8 +139,8 @@ public final class PBHBanController extends AbstractFeatureModule {
                                 , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
                 );
 
-        // Apply filters to the query
-        queryBuilder = applyBanLogFilters(queryBuilder, filters);
+        // Apply filters to the query using the new filter applier
+        queryBuilder = BanLogFilterApplier.applyFilters(queryBuilder, filters);
 
         var queryResult = historyDao.queryByPaging(queryBuilder, pageable);
         var result = queryResult.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
@@ -272,7 +233,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                     }
                     return dto;
                 })
-                .filter(dto -> applyFilters(dto, filters))
+                .filter(dto -> BanListFilterApplier.applyFilters(dto, filters))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
             banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);
@@ -283,143 +244,4 @@ public final class PBHBanController extends AbstractFeatureModule {
         return banResponseList;
     }
 
-    private boolean applyFilters(BanDTO dto, BanListFilters filters) {
-        if (filters == null) return true;
-
-        BakedBanMetadata metadata = dto.getBanMetadata();
-        
-        // Filter by reason/description
-        if (filters.getReason() != null && !filters.getReason().trim().isEmpty()) {
-            String description = metadata.getDescription();
-            if (description == null || !description.toLowerCase(Locale.ROOT).contains(filters.getReason().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by client name
-        if (filters.getClientName() != null && !filters.getClientName().trim().isEmpty()) {
-            PeerWrapper peer = metadata.getPeer();
-            String clientName = peer != null ? peer.getClientName() : null;
-            if (clientName == null || !clientName.toLowerCase(Locale.ROOT).contains(filters.getClientName().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by peer ID
-        if (filters.getPeerId() != null && !filters.getPeerId().trim().isEmpty()) {
-            PeerWrapper peer = metadata.getPeer();
-            String peerId = peer != null ? peer.getId() : null;
-            if (peerId == null || !peerId.toLowerCase(Locale.ROOT).contains(filters.getPeerId().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by country
-        if (filters.getCountry() != null && !filters.getCountry().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String country = geoData != null ? geoData.getCountry() : null;
-            if (country == null || !country.toLowerCase(Locale.ROOT).contains(filters.getCountry().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by city
-        if (filters.getCity() != null && !filters.getCity().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String city = geoData != null ? geoData.getCity() : null;
-            if (city == null || !city.toLowerCase(Locale.ROOT).contains(filters.getCity().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by ASN
-        if (filters.getAsn() != null && !filters.getAsn().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String asn = geoData != null ? geoData.getAsn() : null;
-            if (asn == null || !asn.toLowerCase(Locale.ROOT).contains(filters.getAsn().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by ISP
-        if (filters.getIsp() != null && !filters.getIsp().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String isp = geoData != null ? geoData.getIsp() : null;
-            if (isp == null || !isp.toLowerCase(Locale.ROOT).contains(filters.getIsp().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by network type
-        if (filters.getNetType() != null && !filters.getNetType().trim().isEmpty()) {
-            var geoData = dto.getIpGeoData();
-            String netType = geoData != null ? geoData.getNet() : null;
-            if (netType == null || !netType.toLowerCase(Locale.ROOT).contains(filters.getNetType().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by context
-        if (filters.getContext() != null && !filters.getContext().trim().isEmpty()) {
-            String context = metadata.getContext();
-            if (context == null || !context.toLowerCase(Locale.ROOT).contains(filters.getContext().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        // Filter by rule
-        if (filters.getRule() != null && !filters.getRule().trim().isEmpty()) {
-            String rule = metadata.getRule();
-            if (rule == null || !rule.toLowerCase(Locale.ROOT).contains(filters.getRule().toLowerCase(Locale.ROOT))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private QueryBuilder<HistoryEntity, Long> applyBanLogFilters(QueryBuilder<HistoryEntity, Long> queryBuilder, BanLogFilters filters) throws SQLException {
-        if (filters == null) return queryBuilder;
-
-        // Filter by reason/description
-        if (filters.getReason() != null && !filters.getReason().trim().isEmpty()) {
-            queryBuilder.where().like("description", "%" + filters.getReason() + "%");
-        }
-
-        // Filter by client name
-        if (filters.getClientName() != null && !filters.getClientName().trim().isEmpty()) {
-            queryBuilder.where().like("peerClientName", "%" + filters.getClientName() + "%");
-        }
-
-        // Filter by peer ID
-        if (filters.getPeerId() != null && !filters.getPeerId().trim().isEmpty()) {
-            queryBuilder.where().like("peerId", "%" + filters.getPeerId() + "%");
-        }
-
-        // Note: Geographic filters (country, city, ASN, ISP, netType) would require additional
-        // GeoIP lookup during query or stored geo data in the history table.
-        // For now, these filters are not implemented in the database query.
-
-        // Filter by context
-        if (filters.getContext() != null && !filters.getContext().trim().isEmpty()) {
-            queryBuilder.where().like("context", "%" + filters.getContext() + "%");
-        }
-
-        // Filter by rule
-        if (filters.getRule() != null && !filters.getRule().trim().isEmpty()) {
-            queryBuilder.where().like("rule.rule", "%" + filters.getRule() + "%");
-        }
-
-        // Filter by torrent name
-        if (filters.getTorrentName() != null && !filters.getTorrentName().trim().isEmpty()) {
-            queryBuilder.where().like("torrent.name", "%" + filters.getTorrentName() + "%");
-        }
-
-        // Filter by module
-        if (filters.getModule() != null && !filters.getModule().trim().isEmpty()) {
-            queryBuilder.where().like("module.name", "%" + filters.getModule() + "%");
-        }
-
-        return queryBuilder;
-    }
 }
