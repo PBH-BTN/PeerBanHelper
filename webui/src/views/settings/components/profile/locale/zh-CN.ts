@@ -12,6 +12,7 @@ export default {
     '来自这些 IP 地址的 Peers 不会被 PBH 检查，绕过所有检查规则',
   'page.settings.tab.profile.module.title': '模块配置',
   'page.settings.tab.profile.module.enable': '启用',
+  'page.settings.tab.profile.module.btn.title': 'BTN 网络',
 
   'page.settings.tab.profile.formArray.emptyTips': '请填写非空字符串',
 

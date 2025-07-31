@@ -69,7 +69,7 @@
               >
                 <autoRangeBan v-model="form.module.auto_range_ban" />
               </a-collapse-item>
-              <a-collapse-item key="6" header="BTN">
+              <a-collapse-item key="6" :header="t('page.settings.tab.profile.module.btn.title')">
                 <btn v-model="form.module.btn" />
               </a-collapse-item>
               <a-collapse-item

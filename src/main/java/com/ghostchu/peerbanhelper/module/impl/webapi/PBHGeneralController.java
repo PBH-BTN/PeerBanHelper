@@ -4,7 +4,7 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
-import com.ghostchu.peerbanhelper.btn.BtnNetwork;
+
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
@@ -67,8 +67,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private PeerBanHelper peerBanHelper;
     @Autowired
     private DownloaderServer downloaderServer;
-    @Autowired(required = false)
-    private BtnNetwork btnNetwork;
 
     @Override
     public boolean isConfigurable() {
@@ -141,29 +139,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             throw new IllegalArgumentException("module argument cannot be null");
         }
         
-        // Special case for BTN: check if either rules module is enabled OR data submission abilities are active
-        if ("btn".equalsIgnoreCase(moduleName)) {
-            // Check if BTN rules module is enabled
-            for (FeatureModule module : moduleManager.getModules()) {
-                if ((module.getName().equalsIgnoreCase("BTN Network Online Rules") ||
-                     module.getConfigName().equalsIgnoreCase("btn")) && 
-                    module.isModuleEnabled()) {
-                    context.json(new StdResp(true, null, true));
-                    return;
-                }
-            }
-            
-            // Check if BTN network has any active abilities (data submission)
-            if (btnNetwork != null && !btnNetwork.getAbilities().isEmpty()) {
-                context.json(new StdResp(true, null, true));
-                return;
-            }
-            
-            context.json(new StdResp(true, null, false));
-            return;
-        }
-        
-        // Standard module checking for non-BTN modules
         for (FeatureModule module : moduleManager.getModules()) {
             if (module.getName().equalsIgnoreCase(moduleName)
                     || module.getConfigName().equalsIgnoreCase(moduleName)

@@ -405,13 +405,12 @@
       <a-descriptions-item :label="t('page.settings.tab.info.btn.module')">
         <a-skeleton-line v-if="btnLoading" :rows="1" />
         <div v-else>
-          <a-typography-text v-if="!btnEnable?.data">{{
-            t('page.settings.tab.info.btn.disable')
+          <a-typography-text>{{
+            t(`page.settings.tab.info.btn.${btnOverallStatus}`)
           }}</a-typography-text>
-          <a-typography-text v-else>{{ t('page.settings.tab.info.btn.enable') }}</a-typography-text>
         </div>
       </a-descriptions-item>
-      <a-descriptions-item v-if="btnEnable?.data" :label="t('page.settings.tab.info.btn.status')">
+      <a-descriptions-item v-if="btnHasAnyCapabilities" :label="t('page.settings.tab.info.btn.status')">>
         <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
         <a-space v-else>
           <a-tooltip :content="btnStatus?.data.configResult">
@@ -442,7 +441,7 @@
         </a-space>
       </a-descriptions-item>
       <a-descriptions-item
-        v-if="btnEnable?.data"
+        v-if="btnHasAnyCapabilities"
         :label="t('page.settings.tab.info.btn.status.configUrl')"
       >
         <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
@@ -450,20 +449,20 @@
           {{ btnStatus?.data.configUrl }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item v-if="btnEnable?.data" label="App ID">
+      <a-descriptions-item v-if="btnHasAnyCapabilities" label="App ID">
         <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
         <a-typography-text v-else code copyable>
           {{ btnStatus?.data.appId }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item v-if="btnEnable?.data" label="App Secret">
+      <a-descriptions-item v-if="btnHasAnyCapabilities" label="App Secret">
         <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
         <div v-else>
           {{ btnStatus?.data.appSecret }}
         </div>
       </a-descriptions-item>
       <a-descriptions-item
-        v-if="btnEnable?.data"
+        v-if="btnHasAnyCapabilities"
         :label="t('page.settings.tab.info.btn.abilities')"
       >
         <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
@@ -564,16 +563,39 @@ const webuiHash = computed(() => {
   }
 })
 
-const { data: btnEnable } = useRequest(CheckModuleEnable, {
+const { data: btnRulesEnable } = useRequest(CheckModuleEnable, {
   defaultParams: ['btn'],
   onSuccess: () => (btnLoading.value = false)
 })
 
 const { data: btnStatus, loading: statusLoading } = useRequest(GetBtnStatus, {
-  ready: computed(() => btnEnable.value?.data ?? false)
+  ready: computed(() => true), // Always try to fetch BTN status
+  onError: () => {} // Ignore errors, will show as no data available
 })
 
 const btnStatusLoading = computed(() => statusLoading || btnLoading.value)
+
+// Compute overall BTN status based on rules module and data submission abilities
+const btnOverallStatus = computed(() => {
+  const rulesEnabled = btnRulesEnable.value?.data ?? false
+  const hasDataSubmission = btnStatus.value?.success && btnStatus.value?.data && btnStatus.value.data.abilities && btnStatus.value.data.abilities.length > 0
+  
+  if (rulesEnabled && hasDataSubmission) {
+    return 'rules_and_submission'
+  } else if (rulesEnabled && !hasDataSubmission) {
+    return 'rules_only'
+  } else if (!rulesEnabled && hasDataSubmission) {
+    return 'submission_only'
+  } else {
+    return 'both_disabled'
+  }
+})
+
+const btnHasAnyCapabilities = computed(() => {
+  const rulesEnabled = btnRulesEnable.value?.data ?? false
+  const hasDataSubmission = btnStatus.value?.success && btnStatus.value?.data && btnStatus.value.data.abilities && btnStatus.value.data.abilities.length > 0
+  return rulesEnabled || hasDataSubmission
+})
 
 const btnAbilityList = ref<InstanceType<typeof btnAbilitiesModal>>()
 

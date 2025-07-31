@@ -12,6 +12,7 @@ export default {
     'Bypass list, all peers comes from those IPs will bypass all checks',
   'page.settings.tab.profile.module.title': 'Module Config',
   'page.settings.tab.profile.module.enable': 'Enable',
+  'page.settings.tab.profile.module.btn.title': 'BTN Network',
 
   'page.settings.tab.profile.formArray.emptyTips':
     'Please fill in all fields with non-whitespace content',
