@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi.filter;
 
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 
 import java.util.Locale;
@@ -77,10 +78,9 @@ public class BanListFilterApplier {
             return false;
         }
         
-        // Filter by rule
-        if (!matchesStringFilter(metadata.getRule(), filters.getRule())) {
-            return false;
-        }
+        // Filter by rule - this will be handled in the controller before BakedBanMetadata creation
+        // to access the original rule key instead of the translated text
+        // This filter is intentionally skipped here and handled upstream
 
         return true;
     }
@@ -124,5 +124,22 @@ public class BanListFilterApplier {
      */
     private static boolean isValidFilter(String value) {
         return value != null && !value.trim().isEmpty();
+    }
+    
+    /**
+     * Applies rule filter to original BanMetadata before baking.
+     * This allows access to the original rule key instead of translated text.
+     * 
+     * @param banMetadata The original ban metadata
+     * @param filters The filters to apply
+     * @return true if the ban metadata passes the rule filter
+     */
+    public static boolean applyRuleFilter(BanMetadata banMetadata, BanListFilters filters) {
+        if (filters == null || filters.getRule() == null || filters.getRule().trim().isEmpty()) {
+            return true;
+        }
+        
+        String ruleKey = banMetadata.getRule() != null ? banMetadata.getRule().getKey() : null;
+        return matchesStringFilter(ruleKey, filters.getRule());
     }
 }

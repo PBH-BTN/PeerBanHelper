@@ -262,6 +262,9 @@ const localFilters = reactive<BanListFilters>({...props.filters})
 // Track which filters are currently being shown for input
 const activeInputs = ref<Set<keyof BanListFilters>>(new Set())
 
+// Track if this is the initial load to avoid re-initializing active inputs inappropriately
+const isInitialLoad = ref(true)
+
 // Initialize active inputs based on existing filters
 const initializeActiveInputs = () => {
   activeInputs.value.clear()
@@ -275,6 +278,7 @@ const initializeActiveInputs = () => {
 // Initialize on mount
 onMounted(() => {
   initializeActiveInputs()
+  isInitialLoad.value = false
 })
 
 // Computed properties
@@ -435,8 +439,11 @@ watch(
       rule: newFilters.rule || ''
     })
 
-    // Update active inputs based on current filters
-    initializeActiveInputs()
+    // Only re-initialize active inputs on initial load or when explicitly requested
+    // This prevents deleted filters from reappearing when toggling visibility or adding new filters
+    if (isInitialLoad.value) {
+      initializeActiveInputs()
+    }
   },
   { deep: true, immediate: true }
 )

@@ -404,6 +404,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 })
                 .filter(b -> search == null || b.getKey().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
+                .filter(entry -> BanListFilterApplier.applyRuleFilter(entry.getValue(), filters)) // Apply rule filter before baking
                 .map(entry -> {
                     BanDTO dto = new BanDTO(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null);
                     PeerWrapper peerWrapper = dto.getBanMetadata().getPeer();
