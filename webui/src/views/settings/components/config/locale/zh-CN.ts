@@ -96,6 +96,7 @@ export default {
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
   'page.settings.tab.config.push.form.type.bark': 'Bark',
   'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
+  'page.settings.tab.config.push.form.type.gotify': 'Gotify',
 
   'page.settings.tab.config.push.form.stmp.host': '主机',
   'page.settings.tab.config.push.form.stmp.port': '端口号',
@@ -118,6 +119,9 @@ export default {
 
   'page.settings.tab.config.push.form.pushdeer.endpoint': '端点',
   'page.settings.tab.config.push.form.pushdeer.pushkey': '推送密钥',
+
+  'page.settings.tab.config.push.form.gotify.endpoint': '端点',
+  'page.settings.tab.config.push.form.gotify.priority': '优先级',
 
   'page.settings.tab.config.push.form.action.ok': '确定',
   'page.settings.tab.config.push.form.action.cancel': '取消',
