@@ -36,6 +36,8 @@ public final class MCPControllerRefactored extends AbstractFeatureModule {
     private MCPMonitoringTools monitoringTools;
     @Autowired
     private MCPWebAPITools webAPITools;
+    @Autowired
+    private MCPOperationsTools operationsTools;
 
     public MCPControllerRefactored(JavalinWebContainer javalinWebContainer, MCPToolsRegistry toolsRegistry) {
         super();
@@ -88,10 +90,11 @@ public final class MCPControllerRefactored extends AbstractFeatureModule {
         ruleTools.registerTools(toolsRegistry);
         monitoringTools.registerTools(toolsRegistry);
         webAPITools.registerTools(toolsRegistry);
+        operationsTools.registerTools(toolsRegistry);
 
         int newToolsAdded = toolsRegistry.getToolCount() - initialToolCount;
         log.info("Added {} new MCP tools from {} providers (total: {})", 
-                newToolsAdded, 4, toolsRegistry.getToolCount());
+                newToolsAdded, 5, toolsRegistry.getToolCount());
     }
 
     /**
@@ -232,7 +235,8 @@ public final class MCPControllerRefactored extends AbstractFeatureModule {
                         systemTools.getProviderName(),
                         ruleTools.getProviderName(),
                         monitoringTools.getProviderName(),
-                        webAPITools.getProviderName()
+                        webAPITools.getProviderName(),
+                        operationsTools.getProviderName()
                 ),
                 "features", List.of(
                         "Rule module management",
@@ -257,7 +261,8 @@ public final class MCPControllerRefactored extends AbstractFeatureModule {
                         systemTools.getProviderName(),
                         ruleTools.getProviderName(),
                         monitoringTools.getProviderName(),
-                        webAPITools.getProviderName()
+                        webAPITools.getProviderName(),
+                        operationsTools.getProviderName()
                 )
         )));
     }
