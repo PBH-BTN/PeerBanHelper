@@ -73,6 +73,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private StunManager bTStunManager;
     @Autowired
     private BackgroundTaskManager backgroundTaskManager;
+    @Autowired
+    private HTTPUtil hTTPUtil;
 
     @Override
     public boolean isConfigurable() {
@@ -253,7 +255,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         var userIp = IPAddressUtil.getIPAddress(userIp(context)).toCompressedString();
         Map<String, Object> network = new LinkedHashMap<>();
         var proxy = Main.getMainConfig().getInt("proxy.setting");
-        network.put("internet_access", true); // ?
+        network.put("internet_access", hTTPUtil.getNetworkReachability());
         network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
         network.put("reverse_proxy", WebUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
