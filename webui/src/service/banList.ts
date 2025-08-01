@@ -123,6 +123,7 @@ export interface FilterOptions {
   clientNames: string[]
   countries: string[]
   cities: string[]
+  asns: string[]
   isps: string[]
   netTypes: string[]
   torrents: Array<{ id: string; name: string }>

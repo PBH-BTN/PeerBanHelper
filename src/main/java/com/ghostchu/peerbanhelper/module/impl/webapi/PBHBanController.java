@@ -99,6 +99,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         options.put("clientNames", new HashSet<>());
         options.put("countries", new HashSet<>());
         options.put("cities", new HashSet<>());
+        options.put("asns", new HashSet<>());
         options.put("isps", new HashSet<>());
         options.put("netTypes", new HashSet<>());
         options.put("rules", new HashSet<>());

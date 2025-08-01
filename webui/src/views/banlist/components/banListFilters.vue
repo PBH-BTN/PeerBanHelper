@@ -129,15 +129,17 @@
           />
         </div>
 
-        <!-- ASN Input -->
+        <!-- ASN Select -->
         <div v-if="showFilterInput('asn')" class="filter-input-group">
           <span class="input-label">{{ t('page.banlist.banlist.filters.asn') }}</span>
-          <a-input
+          <a-select
             v-model="localFilters.asn"
             :placeholder="t('page.banlist.banlist.filters.asn.placeholder')"
             size="small"
             style="width: 200px"
             allow-clear
+            allow-search
+            :options="asnOptions"
             @change="onFilterChange"
           />
         </div>
@@ -232,6 +234,7 @@ const filterOptions = ref<FilterOptions>({
   clientNames: [],
   countries: [],
   cities: [],
+  asns: [],
   isps: [],
   netTypes: [],
   torrents: [],
@@ -322,6 +325,10 @@ const countryOptions = computed(() =>
 
 const cityOptions = computed(() => 
   filterOptions.value.cities.map(name => ({ label: name, value: name }))
+)
+
+const asnOptions = computed(() => 
+  filterOptions.value.asns.map(name => ({ label: name, value: name }))
 )
 
 const ispOptions = computed(() => 
