@@ -96,15 +96,17 @@
           />
         </div>
 
-        <!-- Torrent Name Input -->
+        <!-- Torrent Name Select -->
         <div v-if="showFilterInput('torrentName')" class="filter-input-group">
           <span class="input-label">{{ t('page.banlog.filters.torrentName') }}</span>
-          <a-input
+          <a-select
             v-model="localFilters.torrentName"
             :placeholder="t('page.banlog.filters.torrentNamePlaceholder')"
             size="small"
             style="width: 200px"
             allow-clear
+            allow-search
+            :options="torrentNameOptions"
           />
         </div>
 
@@ -155,18 +157,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { debounce } from 'lodash'
 import type { BanLogFilters } from '@/service/banLogs'
-import type { BanLog } from '@/api/model/banlogs'
+import { getBanLogFilterOptions, type BanLogFilterOptions } from '@/service/banLogs'
 
 const { t } = useI18n()
 
 // Props
 interface Props {
   modelValue: BanLogFilters
-  banLogs: BanLog[]
 }
 
 const props = defineProps<Props>()
@@ -176,11 +177,51 @@ const emit = defineEmits<{
   'update:modelValue': [value: BanLogFilters]
 }>()
 
+// Filter options from backend
+const filterOptions = ref<BanLogFilterOptions>({
+  clientNames: [],
+  torrentNames: [],
+  modules: [],
+  rules: [],
+  contexts: []
+})
+
+// Load filter options from backend
+const loadFilterOptions = async () => {
+  try {
+    const response = await getBanLogFilterOptions()
+    if (response.success) {
+      filterOptions.value = response.data
+    }
+  } catch (error) {
+    console.error('Failed to load ban log filter options:', error)
+  }
+}
+
+onMounted(() => {
+  loadFilterOptions()
+})
+
 // State
 const localFilters = ref<BanLogFilters>({ ...props.modelValue })
 
 // Track which filters are currently being shown for input
 const activeInputs = ref<Set<keyof BanLogFilters>>(new Set())
+
+// Initialize active inputs based on existing filters
+const initializeActiveInputs = () => {
+  activeInputs.value.clear()
+  Object.entries(localFilters.value).forEach(([key, value]) => {
+    if (value && value.trim()) {
+      activeInputs.value.add(key as keyof BanLogFilters)
+    }
+  })
+}
+
+// Initialize on mount
+onMounted(() => {
+  initializeActiveInputs()
+})
 
 // Computed
 const activeFilters = computed(() => {
@@ -216,28 +257,26 @@ const availableFilters = computed(() => {
   return filters.filter(f => !activeInputs.value.has(f.key as keyof BanLogFilters))
 })
 
-// Dynamic options for dropdowns
-const clientNameOptions = computed(() => {
-  const names = [...new Set(props.banLogs.map(ban => ban.peerClientName).filter(Boolean))]
-  return names.map(name => ({ label: name, value: name }))
-})
+// Dynamic options for dropdowns using backend data
+const clientNameOptions = computed(() => 
+  filterOptions.value.clientNames.map(name => ({ label: name, value: name }))
+)
 
-const moduleOptions = computed(() => {
-  const modules = [...new Set(props.banLogs.map(ban => ban.module).filter(Boolean))]
-  return modules.map(module => ({ label: module, value: module }))
-})
+const torrentNameOptions = computed(() => 
+  filterOptions.value.torrentNames.map(name => ({ label: name, value: name }))
+)
 
-const ruleOptions = computed(() => {
-  // Use description as rule for ban logs since rule property is not available
-  const rules = [...new Set(props.banLogs.map(ban => ban.description).filter(Boolean))]
-  return rules.map(rule => ({ label: rule, value: rule }))
-})
+const moduleOptions = computed(() => 
+  filterOptions.value.modules.map(name => ({ label: name, value: name }))
+)
 
-const contextOptions = computed(() => {
-  // Context is not directly available in BanLog, using description as fallback
-  const contexts = [...new Set(props.banLogs.map(ban => ban.description).filter(Boolean))]
-  return contexts.map(context => ({ label: context, value: context }))
-})
+const ruleOptions = computed(() => 
+  filterOptions.value.rules.map(name => ({ label: name, value: name }))
+)
+
+const contextOptions = computed(() => 
+  filterOptions.value.contexts.map(name => ({ label: name, value: name }))
+)
 
 // Methods
 const getFilterLabel = (key: keyof BanLogFilters): string => {
@@ -268,16 +307,22 @@ const addFilter = (key: string) => {
 }
 
 const removeFilter = (key: keyof BanLogFilters) => {
+  // Clear the filter value
   if (localFilters.value[key] !== undefined) {
     delete localFilters.value[key]
   }
+  // Remove from active inputs
   activeInputs.value.delete(key)
+  // Trigger change
   emitFilters()
 }
 
 const resetFilters = () => {
+  // Clear all filter values
   localFilters.value = {}
+  // Clear all active inputs
   activeInputs.value.clear()
+  // Trigger change
   emitFilters()
 }
 
@@ -292,9 +337,13 @@ const emitFilters = debounce(() => {
   emit('update:modelValue', cleanFilters)
 }, 300)
 
-// Watchers
+// Watchers - prevent infinite loops
+let internalUpdate = false
+
 watch(localFilters, () => {
-  emitFilters()
+  if (!internalUpdate) {
+    emitFilters()
+  }
 }, { deep: true })
 
 watch(() => props.modelValue, (newValue, oldValue) => {
@@ -304,15 +353,13 @@ watch(() => props.modelValue, (newValue, oldValue) => {
   const currentLocalStr = JSON.stringify(localFilters.value || {})
   
   if (newValueStr !== oldValueStr && newValueStr !== currentLocalStr) {
+    internalUpdate = true
     localFilters.value = { ...newValue }
     
     // Update active inputs based on current filters
-    activeInputs.value.clear()
-    Object.entries(newValue || {}).forEach(([key, value]) => {
-      if (value && value.trim()) {
-        activeInputs.value.add(key as keyof BanLogFilters)
-      }
-    })
+    initializeActiveInputs()
+    
+    setTimeout(() => { internalUpdate = false }, 350) // Slightly longer than debounce
   }
 }, { deep: true, immediate: true })
 </script>

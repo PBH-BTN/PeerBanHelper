@@ -62,9 +62,17 @@ public class BanListFilterApplier {
             }
         }
 
-        // Filter by context and rule
-        if (!matchesStringFilter(metadata.getContext(), filters.getContext()) ||
-            !matchesStringFilter(metadata.getRule(), filters.getRule())) {
+        // Filter by context (now maps to torrent name for discovery location)
+        String torrentName = null;
+        if (metadata.getTorrent() != null) {
+            torrentName = metadata.getTorrent().getName();
+        }
+        if (!matchesStringFilter(torrentName, filters.getContext())) {
+            return false;
+        }
+        
+        // Filter by rule
+        if (!matchesStringFilter(metadata.getRule(), filters.getRule())) {
             return false;
         }
 

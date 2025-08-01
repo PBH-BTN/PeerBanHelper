@@ -207,54 +207,72 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, watch, ref } from 'vue'
+import { reactive, computed, watch, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDebounceFn } from '@vueuse/core'
 import type { BanListFilters } from '@/service/banList'
+import { getBanListFilterOptions, type FilterOptions } from '@/service/banList'
 
 const { t } = useI18n()
 
 interface Props {
   filters?: BanListFilters
-  clientNameOptions?: { label: string; value: string }[]
-  countryOptions?: { label: string; value: string }[]
-  cityOptions?: { label: string; value: string }[]
-  ispOptions?: { label: string; value: string }[]
-  netTypeOptions?: { label: string; value: string }[]
-  contextOptions?: { label: string; value: string }[]
-  ruleOptions?: { label: string; value: string }[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  filters: () => ({}),
-  clientNameOptions: () => [],
-  countryOptions: () => [],
-  cityOptions: () => [],
-  ispOptions: () => [],
-  netTypeOptions: () => [],
-  contextOptions: () => [],
-  ruleOptions: () => []
+  filters: () => ({})
 })
 
 const emits = defineEmits<{
   (e: 'filter-change', filters: BanListFilters): void
 }>()
 
-const localFilters = reactive<BanListFilters>({
-  reason: props.filters.reason || '',
-  clientName: props.filters.clientName || '',
-  peerId: props.filters.peerId || '',
-  country: props.filters.country || '',
-  city: props.filters.city || '',
-  asn: props.filters.asn || '',
-  isp: props.filters.isp || '',
-  netType: props.filters.netType || '',
-  context: props.filters.context || '',
-  rule: props.filters.rule || ''
+// Filter options from backend
+const filterOptions = ref<FilterOptions>({
+  clientNames: [],
+  countries: [],
+  cities: [],
+  isps: [],
+  netTypes: [],
+  torrentNames: [],
+  rules: []
 })
+
+// Load filter options from backend
+const loadFilterOptions = async () => {
+  try {
+    const response = await getBanListFilterOptions()
+    if (response.success) {
+      filterOptions.value = response.data
+    }
+  } catch (error) {
+    console.error('Failed to load filter options:', error)
+  }
+}
+
+onMounted(() => {
+  loadFilterOptions()
+})
+
+const localFilters = reactive<BanListFilters>({...props.filters})
 
 // Track which filters are currently being shown for input
 const activeInputs = ref<Set<keyof BanListFilters>>(new Set())
+
+// Initialize active inputs based on existing filters
+const initializeActiveInputs = () => {
+  activeInputs.value.clear()
+  Object.entries(localFilters).forEach(([key, value]) => {
+    if (value && value.trim()) {
+      activeInputs.value.add(key as keyof BanListFilters)
+    }
+  })
+}
+
+// Initialize on mount
+onMounted(() => {
+  initializeActiveInputs()
+})
 
 // Computed properties
 const activeFilters = computed(() => {
@@ -293,6 +311,35 @@ const availableFilters = computed(() => {
   return filters.filter(f => !activeInputs.value.has(f.key as keyof BanListFilters))
 })
 
+// Computed options for dropdowns using backend data
+const clientNameOptions = computed(() => 
+  filterOptions.value.clientNames.map(name => ({ label: name, value: name }))
+)
+
+const countryOptions = computed(() => 
+  filterOptions.value.countries.map(name => ({ label: name, value: name }))
+)
+
+const cityOptions = computed(() => 
+  filterOptions.value.cities.map(name => ({ label: name, value: name }))
+)
+
+const ispOptions = computed(() => 
+  filterOptions.value.isps.map(name => ({ label: name, value: name }))
+)
+
+const netTypeOptions = computed(() => 
+  filterOptions.value.netTypes.map(name => ({ label: name, value: name }))
+)
+
+const contextOptions = computed(() => 
+  filterOptions.value.torrentNames.map(name => ({ label: name, value: name }))
+)
+
+const ruleOptions = computed(() => 
+  filterOptions.value.rules.map(name => ({ label: name, value: name }))
+)
+
 // Methods
 const getFilterLabel = (key: keyof BanListFilters): string => {
   const labels = {
@@ -319,17 +366,23 @@ const addFilter = (key: string) => {
 }
 
 const removeFilter = (key: keyof BanListFilters) => {
+  // Clear the filter value
   localFilters[key] = ''
+  // Remove from active inputs
   activeInputs.value.delete(key)
-  onFilterChange()
+  // Trigger change
+  debouncedFilterChange()
 }
 
 const resetFilters = () => {
+  // Clear all filter values
   Object.keys(localFilters).forEach(key => {
     localFilters[key as keyof BanListFilters] = ''
   })
+  // Clear all active inputs
   activeInputs.value.clear()
-  onFilterChange()
+  // Trigger change
+  debouncedFilterChange()
 }
 
 const debouncedFilterChange = useDebounceFn(() => {
@@ -353,10 +406,15 @@ const onFilterChange = () => {
   debouncedFilterChange()
 }
 
-// Watch for external filter changes
+// Watch for external filter changes - prevent infinite loops
+let internalUpdate = false
+
 watch(
   () => props.filters,
   (newFilters) => {
+    if (internalUpdate) return
+    
+    // Update local filters
     Object.assign(localFilters, {
       reason: newFilters.reason || '',
       clientName: newFilters.clientName || '',
@@ -371,14 +429,22 @@ watch(
     })
 
     // Update active inputs based on current filters
-    activeInputs.value.clear()
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value && value.trim()) {
-        activeInputs.value.add(key as keyof BanListFilters)
-      }
-    })
+    initializeActiveInputs()
   },
   { deep: true, immediate: true }
+)
+
+// Watch local filter changes to emit updates
+watch(
+  localFilters,
+  () => {
+    if (!internalUpdate) {
+      internalUpdate = true
+      debouncedFilterChange()
+      setTimeout(() => { internalUpdate = false }, 350) // Slightly longer than debounce
+    }
+  },
+  { deep: true }
 )
 </script>
 

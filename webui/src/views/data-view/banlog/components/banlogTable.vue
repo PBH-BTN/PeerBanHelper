@@ -1,6 +1,6 @@
 <template>
   <div>
-    <banLogFilters v-model="filters" :ban-logs="allBanLogs" />
+    <banLogFilters v-model="filters" />
     
     <a-table
       :stripe="true"
@@ -105,7 +105,6 @@ const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
 const filters = ref<BanLogFilters>({})
-const allBanLogs = ref<any[]>([])
 
 // Custom wrapper function that includes filters
 const fetchBanLogs = (params: { page: number; pageSize?: number; sorter?: string }) => {
@@ -141,14 +140,6 @@ watch([pageSize, current], () => {
 })
 
 watch(() => endpointState.endpoint, refresh)
-
-// Watch data changes to update allBanLogs for filter options
-watch(data, (newData) => {
-  if (newData?.data?.results && !forceLoading.value) {
-    // Only update if not currently loading to prevent cycles
-    allBanLogs.value = newData.data.results
-  }
-}, { immediate: true })
 
 // Watch filters and trigger refresh (prevent infinite loops with careful change detection)
 watch(filters, (newFilters, oldFilters) => {

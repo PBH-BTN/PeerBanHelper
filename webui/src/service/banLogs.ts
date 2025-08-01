@@ -1,5 +1,5 @@
 import type { BanLog } from '@/api/model/banlogs'
-import type { CommonResponseWithPage } from '@/api/model/common'
+import type { CommonResponseWithPage, CommonResponse } from '@/api/model/common'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -77,6 +77,24 @@ export async function getBanlogs(params: {
     }
   }
 
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
+  })
+}
+
+export interface BanLogFilterOptions {
+  clientNames: string[]
+  torrentNames: string[]
+  modules: string[]
+  rules: string[]
+  contexts: string[]
+}
+
+export async function getBanLogFilterOptions(): Promise<CommonResponse<BanLogFilterOptions>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+  const url = new URL(urlJoin(endpointStore.endpoint, 'api/bans/logs/filter-options'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()

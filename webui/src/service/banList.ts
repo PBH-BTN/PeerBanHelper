@@ -118,3 +118,25 @@ export async function unbanIP(ip: string): Promise<CommonResponse<UnbanResult>> 
     return res.json()
   })
 }
+
+export interface FilterOptions {
+  clientNames: string[]
+  countries: string[]
+  cities: string[]
+  isps: string[]
+  netTypes: string[]
+  torrentNames: string[]
+  rules: string[]
+}
+
+export async function getBanListFilterOptions(): Promise<CommonResponse<FilterOptions>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+  const url = new URL(urlJoin(endpointStore.endpoint, 'api/bans/filter-options'), location.href)
+  return fetch(url, {
+    headers: getCommonHeader()
+  }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
+  })
+}
