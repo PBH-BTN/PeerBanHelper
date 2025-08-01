@@ -7,7 +7,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
@@ -45,8 +47,7 @@ public final class GotifyPushProvider extends AbstractPushProvider {
     public ConfigurationSection saveYaml() {
         YamlConfiguration section = new YamlConfiguration();
         section.set("type", "gotify");
-        section.set("server_url", config.getServerUrl());
-        section.set("token", config.getToken());
+        section.set("endpoint", config.getEndpoint());
         section.set("priority", config.getPriority());
         return section;
     }
@@ -56,10 +57,9 @@ public final class GotifyPushProvider extends AbstractPushProvider {
     }
 
     public static GotifyPushProvider loadFromYaml(String name, ConfigurationSection section, HTTPUtil httpUtil) {
-        var serverUrl = section.getString("server_url", "");
-        var token = section.getString("token", "");
+        var backendUrl = section.getString("endpoint", "https://push.example.de/message?token=<apptoken>");
         var priority = section.getInt("priority", 5);
-        Config config = new Config(serverUrl, token, priority);
+        Config config = new Config(backendUrl, priority);
         return new GotifyPushProvider(name, config, httpUtil);
     }
 
@@ -68,25 +68,19 @@ public final class GotifyPushProvider extends AbstractPushProvider {
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
         map.put("message", stripMarkdown(content));
-        map.put("priority", config.getPriority());
-        
-        RequestBody requestBody = RequestBody.create(
-                JsonUtil.getGson().toJson(map),
-                MediaType.parse("application/json")
-        );
-        
-        String url = config.getServerUrl();
-        if (!url.endsWith("/")) {
-            url += "/";
-        }
-        url += "message?token=" + config.getToken();
-        
+
+        FormBody.Builder formBody = new FormBody.Builder();
+
+        var form = formBody.add("title", title)
+                .add("message", stripMarkdown(content))
+                .add("priority", String.valueOf(config.getPriority())).build();
+
         Request request = new Request.Builder()
-                .url(url)
-                .post(requestBody)
-                .header("Content-Type", "application/json")
+                .url(config.getEndpoint())
+                .post(form)
+                .header("Content-Type", "application/x-www-form-urlencoded")
                 .build();
-        
+
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("HTTP Failed while sending push messages to Gotify: " + response.body().string());
@@ -100,11 +94,10 @@ public final class GotifyPushProvider extends AbstractPushProvider {
     @AllArgsConstructor
     @Data
     public static class Config {
-        @SerializedName("server_url")
-        private String serverUrl;
-        @SerializedName("token")
-        private String token;
+        @SerializedName("endpoint")
+        private String endpoint;
         @SerializedName("priority")
         private int priority;
     }
+
 }

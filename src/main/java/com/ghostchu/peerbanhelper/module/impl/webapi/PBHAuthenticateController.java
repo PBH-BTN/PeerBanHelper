@@ -78,6 +78,12 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
             return;
         }
+        if (loginRequestBody.getToken() == null || loginRequestBody.getToken().isBlank()) {
+            ctx.status(HttpStatus.BAD_REQUEST);
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
+            // do not mark login failed, it's webui workaround
+            return;
+        }
         if (!webContainer.getToken().equals(loginRequestBody.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));

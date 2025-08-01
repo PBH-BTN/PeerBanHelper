@@ -60,8 +60,7 @@ export interface BarkConfig {
 }
 
 export interface GotifyConfig {
-  server_url: string
-  token: string
+  endpoint: string
   priority: number
 }
 

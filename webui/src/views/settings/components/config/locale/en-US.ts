@@ -118,9 +118,9 @@ export default {
   'page.settings.tab.config.push.form.pushplus.template': 'Template',
   'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
 
-  'page.settings.tab.config.push.form.gotify.server_url': 'Server URL',
-  'page.settings.tab.config.push.form.gotify.server_url.placeholder': 'https://gotify.example.com',
-  'page.settings.tab.config.push.form.gotify.token': 'Application Token',
+  'page.settings.tab.config.push.form.gotify.endpoint': 'Gotify Endpoint',
+  'page.settings.tab.config.push.form.gotify.endpoint.placeholder': 'https://gotify.example.com/message?token=your-app-token',
+  'page.settings.tab.config.push.form.gotify.endpoint.extra': 'Complete Gotify URL including the message endpoint and token',
   'page.settings.tab.config.push.form.gotify.priority': 'Priority',
   'page.settings.tab.config.push.form.gotify.priority.extra': 'Message priority level (1-10, default: 5)',
 

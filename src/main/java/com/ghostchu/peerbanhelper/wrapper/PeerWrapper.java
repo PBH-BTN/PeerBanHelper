@@ -22,7 +22,7 @@ public final class PeerWrapper {
 
     public PeerWrapper(Peer peer) {
         this.id = peer.getPeerId();
-        this.rawIp = peer.getRawIp();
+        this.rawIp = peer.getPeerAddress().getRawIp();
         this.address = new PeerAddressWrapper(peer.getPeerAddress());
         this.clientName = peer.getClientName();
         this.downloaded = peer.getDownloaded();
@@ -34,6 +34,6 @@ public final class PeerWrapper {
     }
 
     public PeerAddress toPeerAddress() {
-        return new PeerAddress(address.getIp(), address.getPort());
+        return new PeerAddress(address.getIp(), address.getPort(), rawIp);
     }
 }

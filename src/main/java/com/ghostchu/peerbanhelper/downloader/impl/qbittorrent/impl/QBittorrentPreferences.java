@@ -26,4 +26,7 @@ public final class QBittorrentPreferences {
 
     @SerializedName("alt_dl_limit")
     private Long altDlLimit;
+
+    @SerializedName("listen_port")
+    private Integer listenPort;
 }

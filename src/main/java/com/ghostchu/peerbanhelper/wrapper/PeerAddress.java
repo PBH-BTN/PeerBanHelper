@@ -17,19 +17,34 @@ import java.util.Objects;
 public final class PeerAddress implements Comparable<PeerAddress>, Serializable {
 
     private String ip;
+    private String rawIp;
+    private String noNatIP;
     private transient IPAddress address;
     /**
      * 端口可能为 0 （代表未设置）
      */
     private int port;
+    private int noNatPort;
 
-    public PeerAddress(String ip, int port) {
+
+    public PeerAddress(String ip, int port, String rawIp) {
         this.ip = ip;
+        this.rawIp = rawIp;
+        this.noNatIP = ip;
         this.port = port;
+        this.noNatPort = port;
+    }
+
+    public PeerAddress updateNat(String nattedIp, int nattedPort) {
+        this.ip = nattedIp;
+        this.rawIp = nattedIp;
+        this.port = nattedPort;
+        this.address = null; // clear cached address
+        return this;
     }
 
     public IPAddress getAddress() {
-        if (address == null) { // 可能由 Gson 反序列化时导致此值为空
+        if (address == null) {
             address = IPAddressUtil.getIPAddress(ip);
         }
         return address;
