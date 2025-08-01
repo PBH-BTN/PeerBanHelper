@@ -282,7 +282,14 @@ const resetFilters = () => {
 }
 
 const emitFilters = debounce(() => {
-  emit('update:modelValue', { ...localFilters.value })
+  const cleanFilters = { ...localFilters.value }
+  // Remove empty values
+  Object.keys(cleanFilters).forEach(key => {
+    if (!cleanFilters[key as keyof BanLogFilters] || !cleanFilters[key as keyof BanLogFilters]?.trim()) {
+      delete cleanFilters[key as keyof BanLogFilters]
+    }
+  })
+  emit('update:modelValue', cleanFilters)
 }, 300)
 
 // Watchers
@@ -290,16 +297,22 @@ watch(localFilters, () => {
   emitFilters()
 }, { deep: true })
 
-watch(() => props.modelValue, (newValue) => {
-  localFilters.value = { ...newValue }
+watch(() => props.modelValue, (newValue, oldValue) => {
+  // Only update if the value actually changed (prevent infinite loops)
+  const newValueStr = JSON.stringify(newValue || {})
+  const oldValueStr = JSON.stringify(oldValue || {})
   
-  // Update active inputs based on current filters
-  activeInputs.value.clear()
-  Object.entries(newValue).forEach(([key, value]) => {
-    if (value && value.trim()) {
-      activeInputs.value.add(key as keyof BanLogFilters)
-    }
-  })
+  if (newValueStr !== oldValueStr) {
+    localFilters.value = { ...newValue }
+    
+    // Update active inputs based on current filters
+    activeInputs.value.clear()
+    Object.entries(newValue).forEach(([key, value]) => {
+      if (value && value.trim()) {
+        activeInputs.value.add(key as keyof BanLogFilters)
+      }
+    })
+  }
 }, { deep: true, immediate: true })
 </script>
 

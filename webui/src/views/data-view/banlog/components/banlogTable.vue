@@ -149,13 +149,19 @@ watch(data, (newData) => {
   }
 }, { immediate: true })
 
-// Watch filters and trigger refresh
-watch(filters, () => {
-  forceLoading.value = true
-  run({
-    page: 1, // Reset to first page when filters change
-    pageSize: pageSize.value
-  })
+// Watch filters and trigger refresh (prevent infinite loops with careful change detection)
+watch(filters, (newFilters, oldFilters) => {
+  // Only trigger if filters actually changed and are not empty objects
+  const newFilterStr = JSON.stringify(newFilters || {})
+  const oldFilterStr = JSON.stringify(oldFilters || {})
+  
+  if (newFilterStr !== oldFilterStr) {
+    forceLoading.value = true
+    run({
+      page: 1, // Reset to first page when filters change
+      pageSize: pageSize.value
+    })
+  }
 }, { deep: true })
 
 const tableLoading = computed(() => {

@@ -38,24 +38,18 @@
     </a-space>
 
     <!-- Filters -->
-    <a-collapse v-model:active-key="filtersActiveKey" :bordered="false">
-      <a-collapse-item key="filters" :show-expand-icon="false">
-        <template #header>
-          <div></div>
-        </template>
-        <BanListFiltersComponent
-          :filters="currentFilters"
-          :client-name-options="clientNameOptions"
-          :country-options="countryOptions"
-          :city-options="cityOptions"
-          :isp-options="ispOptions"
-          :net-type-options="netTypeOptions"
-          :context-options="contextOptions"
-          :rule-options="ruleOptions"
-          @filter-change="handleFilterChange"
-        />
-      </a-collapse-item>
-    </a-collapse>
+    <BanListFiltersComponent
+      v-if="showFilters"
+      :filters="currentFilters"
+      :client-name-options="clientNameOptions"
+      :country-options="countryOptions"
+      :city-options="cityOptions"
+      :isp-options="ispOptions"
+      :net-type-options="netTypeOptions"
+      :context-options="contextOptions"
+      :rule-options="ruleOptions"
+      @filter-change="handleFilterChange"
+    />
 
     <!-- paginated list (no virtual scroll / infinite load) -->
     <a-list :data="list">
@@ -106,7 +100,6 @@ const autoUpdateStore = useAutoUpdate()
 const searchString = ref('')
 const currentFilters = reactive<BanListFilters>({})
 const showFilters = ref(false)
-const filtersActiveKey = ref<string[]>([])
 const { t } = useI18n()
 
 // Extract unique values for filter options
@@ -247,7 +240,6 @@ const handleFilterChange = (filters: BanListFilters) => {
 
 const toggleFilters = () => {
   showFilters.value = !showFilters.value
-  filtersActiveKey.value = showFilters.value ? ['filters'] : []
 }
 </script>
 
