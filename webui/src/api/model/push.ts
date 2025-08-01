@@ -4,7 +4,8 @@ export enum PushType {
   ServerChan = 'serverchan',
   Telegram = 'telegram',
   Bark = 'bark',
-  PushDeer = 'pushdeer'
+  PushDeer = 'pushdeer',
+  Gotify = 'gotify'
 }
 
 export enum SMTPEncryption {
@@ -64,6 +65,11 @@ export interface PushDeerConfig {
   pushkey: string
 }
 
+export interface GotifyConfig {
+  endpoint: string
+  priority: number
+}
+
 export type PushConfig = {
   name: string
 } & (
@@ -73,4 +79,5 @@ export type PushConfig = {
   | { type: PushType.Telegram; config: TelegramConfig }
   | { type: PushType.Bark; config: BarkConfig }
   | { type: PushType.PushDeer; config: PushDeerConfig }
+  | { type: PushType.Gotify; config: GotifyConfig }
 )
