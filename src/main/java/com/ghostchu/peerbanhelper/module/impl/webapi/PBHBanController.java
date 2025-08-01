@@ -28,6 +28,10 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
+
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -112,7 +116,7 @@ public final class PBHBanController extends AbstractFeatureModule {
             
             // Rules
             if (banMetadata.getRule() != null) {
-                options.get("rules").add(banMetadata.getRule());
+                options.get("rules").add(banMetadata.getRule().getKey());
             }
             
             // Torrent ID and name pairs (for discovery location)
@@ -125,19 +129,22 @@ public final class PBHBanController extends AbstractFeatureModule {
         
         // Also collect geo data from IP database for currently banned IPs
         downloaderServer.getBannedPeers().keySet().forEach(peerAddress -> {
-            var geoData = getServer().queryIPDB(peerAddress).geoData().orElse(null);
+            var geoData = getServer().queryIPDB(peerAddress).geoData().get();
             if (geoData != null) {
-                if (geoData.getCountry() != null) {
-                    options.get("countries").add(geoData.getCountry());
+                if (geoData.getCountry() != null && geoData.getCountry().getName() != null) {
+                    options.get("countries").add(geoData.getCountry().getName());
                 }
-                if (geoData.getCity() != null) {
-                    options.get("cities").add(geoData.getCity());
+                if (geoData.getCity() != null && geoData.getCity().getName() != null) {
+                    options.get("cities").add(geoData.getCity().getName());
                 }
-                if (geoData.getIsp() != null) {
-                    options.get("isps").add(geoData.getIsp());
+                if (geoData.getAs() != null && geoData.getAs().getOrganization() != null) {
+                    options.get("asns").add(geoData.getAs().getOrganization());
                 }
-                if (geoData.getNet() != null) {
-                    options.get("netTypes").add(geoData.getNet());
+                if (geoData.getNetwork() != null && geoData.getNetwork().getIsp() != null) {
+                    options.get("isps").add(geoData.getNetwork().getIsp());
+                }
+                if (geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
+                    options.get("netTypes").add(geoData.getNetwork().getNetType());
                 }
             }
         });
@@ -231,7 +238,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .ne("rule.rule", new SelectArg(""))
                 .query()
                 .stream()
-                .map(h -> h.getRule() != null ? h.getRule().getRule() : null)
+                .map(h -> h.getRule() != null ? h.getRule().getRule().getKey() : null)
                 .filter(Objects::nonNull)
                 .sorted()
                 .collect(Collectors.toList());

@@ -48,11 +48,17 @@ public class BanListFilterApplier {
         // Filter by geographic data
         var geoData = dto.getIpGeoData();
         if (geoData != null) {
-            if (!matchesStringFilter(geoData.getCountry(), filters.getCountry()) ||
-                !matchesStringFilter(geoData.getCity(), filters.getCity()) ||
-                !matchesStringFilter(geoData.getAsn(), filters.getAsn()) ||
-                !matchesStringFilter(geoData.getIsp(), filters.getIsp()) ||
-                !matchesStringFilter(geoData.getNet(), filters.getNetType())) {
+            String country = geoData.getCountry() != null ? geoData.getCountry().getName() : null;
+            String city = geoData.getCity() != null ? geoData.getCity().getName() : null;
+            String asn = geoData.getAs() != null ? geoData.getAs().getOrganization() : null;
+            String isp = geoData.getNetwork() != null ? geoData.getNetwork().getIsp() : null;
+            String netType = geoData.getNetwork() != null ? geoData.getNetwork().getNetType() : null;
+            
+            if (!matchesStringFilter(country, filters.getCountry()) ||
+                !matchesStringFilter(city, filters.getCity()) ||
+                !matchesStringFilter(asn, filters.getAsn()) ||
+                !matchesStringFilter(isp, filters.getIsp()) ||
+                !matchesStringFilter(netType, filters.getNetType())) {
                 return false;
             }
         } else {
