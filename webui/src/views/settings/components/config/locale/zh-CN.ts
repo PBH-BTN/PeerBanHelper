@@ -117,8 +117,10 @@ export default {
   'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
 
   'page.settings.tab.config.push.form.gotify.endpoint': 'Gotify 端点',
-  'page.settings.tab.config.push.form.gotify.endpoint.placeholder': 'https://gotify.example.com/message?token=your-app-token',
-  'page.settings.tab.config.push.form.gotify.endpoint.extra': '完整的 Gotify URL，包括消息端点和令牌',
+  'page.settings.tab.config.push.form.gotify.endpoint.placeholder':
+    'https://gotify.example.com/message?token=your-app-token',
+  'page.settings.tab.config.push.form.gotify.endpoint.extra':
+    '完整的 Gotify URL，包括消息端点和令牌',
   'page.settings.tab.config.push.form.gotify.priority': '优先级',
   'page.settings.tab.config.push.form.gotify.priority.extra': '消息优先级 (1-10，默认：5)',
 

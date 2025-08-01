@@ -1,9 +1,19 @@
 <template>
-  <a-form-item field="config.endpoint" :label="t('page.settings.tab.config.push.form.gotify.endpoint')" required>
-    <a-input v-model="model.endpoint" :placeholder="t('page.settings.tab.config.push.form.gotify.endpoint.placeholder')" />
+  <a-form-item
+    field="config.endpoint"
+    :label="t('page.settings.tab.config.push.form.gotify.endpoint')"
+    required
+  >
+    <a-input
+      v-model="model.endpoint"
+      :placeholder="t('page.settings.tab.config.push.form.gotify.endpoint.placeholder')"
+    />
     <template #extra>{{ t('page.settings.tab.config.push.form.gotify.endpoint.extra') }}</template>
   </a-form-item>
-  <a-form-item field="config.priority" :label="t('page.settings.tab.config.push.form.gotify.priority')">
+  <a-form-item
+    field="config.priority"
+    :label="t('page.settings.tab.config.push.form.gotify.priority')"
+  >
     <a-input-number v-model="model.priority" :min="1" :max="10" />
     <template #extra>{{ t('page.settings.tab.config.push.form.gotify.priority.extra') }}</template>
   </a-form-item>
