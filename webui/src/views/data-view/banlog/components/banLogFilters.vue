@@ -301,13 +301,14 @@ watch(() => props.modelValue, (newValue, oldValue) => {
   // Only update if the value actually changed (prevent infinite loops)
   const newValueStr = JSON.stringify(newValue || {})
   const oldValueStr = JSON.stringify(oldValue || {})
+  const currentLocalStr = JSON.stringify(localFilters.value || {})
   
-  if (newValueStr !== oldValueStr) {
+  if (newValueStr !== oldValueStr && newValueStr !== currentLocalStr) {
     localFilters.value = { ...newValue }
     
     // Update active inputs based on current filters
     activeInputs.value.clear()
-    Object.entries(newValue).forEach(([key, value]) => {
+    Object.entries(newValue || {}).forEach(([key, value]) => {
       if (value && value.trim()) {
         activeInputs.value.add(key as keyof BanLogFilters)
       }
@@ -319,7 +320,6 @@ watch(() => props.modelValue, (newValue, oldValue) => {
 <style scoped>
 .filter-bar {
   background: var(--color-fill-1);
-  border: 1px solid var(--color-border-2);
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 16px;

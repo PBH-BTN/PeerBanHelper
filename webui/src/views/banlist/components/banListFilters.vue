@@ -385,7 +385,6 @@ watch(
 <style scoped lang="less">
 .filter-bar {
   background: var(--color-fill-1);
-  border: 1px solid var(--color-border-2);
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 16px;

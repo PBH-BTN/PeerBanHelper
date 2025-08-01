@@ -144,7 +144,8 @@ watch(() => endpointState.endpoint, refresh)
 
 // Watch data changes to update allBanLogs for filter options
 watch(data, (newData) => {
-  if (newData?.data?.results) {
+  if (newData?.data?.results && !forceLoading.value) {
+    // Only update if not currently loading to prevent cycles
     allBanLogs.value = newData.data.results
   }
 }, { immediate: true })
@@ -156,11 +157,14 @@ watch(filters, (newFilters, oldFilters) => {
   const oldFilterStr = JSON.stringify(oldFilters || {})
   
   if (newFilterStr !== oldFilterStr) {
-    forceLoading.value = true
-    run({
-      page: 1, // Reset to first page when filters change
-      pageSize: pageSize.value
-    })
+    // Add a small delay to prevent rapid-fire updates
+    setTimeout(() => {
+      forceLoading.value = true
+      run({
+        page: 1, // Reset to first page when filters change
+        pageSize: pageSize.value
+      })
+    }, 50)
   }
 }, { deep: true })
 
