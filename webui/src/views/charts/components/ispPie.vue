@@ -188,12 +188,7 @@ const props = defineProps<{
 }>()
 
 const { loading, run, refresh } = useRequest(getGeoIPData, {
-  defaultParams: [
-    dayjs().startOf('day').add(-7, 'day').toDate(),
-    new Date(),
-    option.bannedOnly,
-    props.downloader
-  ],
+  defaultParams: [option.range[0], option.range[1], option.bannedOnly, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
       const fieldData = data.data[option.field]
