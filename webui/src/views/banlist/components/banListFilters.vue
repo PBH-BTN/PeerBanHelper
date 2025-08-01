@@ -234,7 +234,7 @@ const filterOptions = ref<FilterOptions>({
   cities: [],
   isps: [],
   netTypes: [],
-  torrentNames: [],
+  torrents: [],
   rules: []
 })
 
@@ -333,7 +333,7 @@ const netTypeOptions = computed(() =>
 )
 
 const contextOptions = computed(() => 
-  filterOptions.value.torrentNames.map(name => ({ label: name, value: name }))
+  filterOptions.value.torrents.map(torrent => ({ label: torrent.name, value: torrent.id }))
 )
 
 const ruleOptions = computed(() => 

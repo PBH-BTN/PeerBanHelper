@@ -97,8 +97,10 @@ public final class PBHBanController extends AbstractFeatureModule {
         options.put("cities", new HashSet<>());
         options.put("isps", new HashSet<>());
         options.put("netTypes", new HashSet<>());
-        options.put("torrentNames", new HashSet<>());
         options.put("rules", new HashSet<>());
+        
+        // For torrents, we need to collect both ID and name pairs
+        Map<String, String> torrentOptions = new HashMap<>(); // id -> name mapping
         
         // Collect data from active banned peers
         downloaderServer.getBannedPeers().values().forEach(banMetadata -> {
@@ -113,9 +115,11 @@ public final class PBHBanController extends AbstractFeatureModule {
                 options.get("rules").add(banMetadata.getRule());
             }
             
-            // Torrent names (for discovery location)
-            if (banMetadata.getTorrent() != null && banMetadata.getTorrent().getName() != null) {
-                options.get("torrentNames").add(banMetadata.getTorrent().getName());
+            // Torrent ID and name pairs (for discovery location)
+            if (banMetadata.getTorrent() != null && 
+                banMetadata.getTorrent().getId() != null && 
+                banMetadata.getTorrent().getName() != null) {
+                torrentOptions.put(banMetadata.getTorrent().getId(), banMetadata.getTorrent().getName());
             }
         });
         
@@ -145,7 +149,16 @@ public final class PBHBanController extends AbstractFeatureModule {
                         entry -> entry.getValue().stream().sorted().collect(Collectors.toList())
                 ));
         
-        ctx.json(new StdResp(true, null, sortedOptions));
+        // Add sorted torrent options as list of objects with id and name
+        List<Map<String, String>> torrentList = torrentOptions.entrySet().stream()
+                .map(entry -> Map.of("id", entry.getKey(), "name", entry.getValue()))
+                .sorted((a, b) -> a.get("name").compareTo(b.get("name")))
+                .collect(Collectors.toList());
+        
+        Map<String, Object> result = new HashMap<>(sortedOptions);
+        result.put("torrents", torrentList);
+        
+        ctx.json(new StdResp(true, null, result));
     }
     
     private void handleBanLogFilterOptions(Context ctx) throws SQLException {

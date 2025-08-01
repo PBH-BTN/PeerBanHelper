@@ -125,7 +125,7 @@ export interface FilterOptions {
   cities: string[]
   isps: string[]
   netTypes: string[]
-  torrentNames: string[]
+  torrents: Array<{ id: string; name: string }>
   rules: string[]
 }
 
