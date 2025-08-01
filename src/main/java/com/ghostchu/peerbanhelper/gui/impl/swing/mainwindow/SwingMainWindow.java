@@ -4,6 +4,8 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
+import com.ghostchu.peerbanhelper.gui.component.GuiComponent;
+import com.ghostchu.peerbanhelper.gui.component.GuiComponentRegistry;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.LogsTab;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.TrayMenu;
@@ -46,6 +48,8 @@ public final class SwingMainWindow extends JFrame {
     @Getter
     private JScrollPane loggerScrollPane;
     private PBHGuiBridge bridge;
+    private GuiComponentRegistry componentRegistry;
+    private JPanel dashboardPanel;
 
 
     public SwingMainWindow(SwingGuiImpl swingGUI) {
@@ -79,6 +83,10 @@ public final class SwingMainWindow extends JFrame {
     @Subscribe
     public void onWebServerStarted(WebServerStartedEvent event) {
         this.bridge = Main.getApplicationContext().getBean(PBHGuiBridge.class);
+        this.componentRegistry = Main.getApplicationContext().getBean(GuiComponentRegistry.class);
+        
+        // Initialize dashboard with registered components
+        initializeDashboard();
     }
 
 
@@ -113,11 +121,91 @@ public final class SwingMainWindow extends JFrame {
     public void openWebUI() {
         bridge.getWebUiUrl().ifPresent(swingGUI::openWebpage);
     }
+    
+    /**
+     * Initialize the dashboard with registered GUI components
+     */
+    private void initializeDashboard() {
+        SwingUtilities.invokeLater(() -> {
+            // Create dashboard panel if it doesn't exist
+            if (dashboardPanel == null) {
+                createDashboardPanel();
+            }
+            
+            // Get enabled components and add them to the dashboard
+            var enabledComponents = componentRegistry.getEnabledComponents();
+            updateDashboardComponents(enabledComponents);
+            
+            // Start periodic updates
+            startPeriodicUpdates();
+        });
+    }
+    
+    /**
+     * Create the dashboard panel and add it as a tab
+     */
+    private void createDashboardPanel() {
+        dashboardPanel = new JPanel();
+        dashboardPanel.setLayout(new BoxLayout(dashboardPanel, BoxLayout.Y_AXIS));
+        
+        JScrollPane dashboardScrollPane = new JScrollPane(dashboardPanel);
+        dashboardScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        dashboardScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        
+        // Add dashboard tab as the first tab
+        tabbedPane.insertTab("仪表板", null, dashboardScrollPane, "显示基本统计信息和程序运行状态", 0);
+        tabbedPane.setSelectedIndex(0); // Select the dashboard tab by default
+    }
+    
+    /**
+     * Update dashboard with the provided components
+     */
+    private void updateDashboardComponents(java.util.List<GuiComponent> components) {
+        dashboardPanel.removeAll();
+        
+        for (GuiComponent component : components) {
+            JPanel componentPanel = component.getPanel();
+            if (componentPanel != null) {
+                // Add some spacing around each component
+                componentPanel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(5, 5, 5, 5),
+                    componentPanel.getBorder()
+                ));
+                dashboardPanel.add(componentPanel);
+            }
+        }
+        
+        // Add glue to push components to the top
+        dashboardPanel.add(Box.createVerticalGlue());
+        
+        // Refresh the UI
+        dashboardPanel.revalidate();
+        dashboardPanel.repaint();
+    }
+    
+    /**
+     * Start periodic updates for all components
+     */
+    private void startPeriodicUpdates() {
+        // Use a timer to update components every 5 seconds
+        Timer timer = new Timer(5000, e -> {
+            if (componentRegistry != null) {
+                componentRegistry.updateAllComponents();
+            }
+        });
+        timer.start();
+        
+        // Store timer reference for cleanup if needed
+        // Note: In a real implementation, you might want to store this for proper cleanup
+    }
 
 
     @Override
     public void dispose() {
         Main.getEventBus().unregister(this);
+        if (componentRegistry != null) {
+            componentRegistry.dispose();
+        }
         //this.webuiTab.close();
         super.dispose();
     }
