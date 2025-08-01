@@ -84,6 +84,13 @@ public class MCPToolsRegistry {
         toolHandlers.clear();
         log.debug("Cleared all registered MCP tools");
     }
+    
+    /**
+     * 获取已注册工具数量
+     */
+    public int getToolCount() {
+        return registeredTools.size();
+    }
 
     /**
      * 创建MCP工具定义
