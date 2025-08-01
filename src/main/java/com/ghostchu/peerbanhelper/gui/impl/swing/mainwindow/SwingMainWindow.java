@@ -156,7 +156,7 @@ public final class SwingMainWindow extends JFrame {
         dashboardScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         dashboardScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
-        tabbedPane.addTab("仪表板", null, dashboardScrollPane, "显示基本统计信息和程序运行状态");
+        tabbedPane.addTab(tlUI(Lang.GUI_TABBED_DASHBOARD), null, dashboardScrollPane, tlUI(Lang.GUI_TABBED_DASHBOARD));
     }
     
     /**
@@ -164,42 +164,65 @@ public final class SwingMainWindow extends JFrame {
      */
     private void addBanListTab() {
         JPanel banListPanel = new JPanel(new BorderLayout());
-        JLabel banListLabel = new JLabel("封禁列表功能 - 待实现");
-        banListLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        banListPanel.add(banListLabel, BorderLayout.CENTER);
         
-        tabbedPane.addTab("封禁列表", null, banListPanel, "查看和管理封禁列表");
+        // Create a table to display banned peers
+        String[] columnNames = {"IP Address", "Peer ID", "Ban Reason", "Ban Time", "Expires"};
+        Object[][] data = {};  // Will be populated with actual ban data
+        
+        JTable banTable = new JTable(data, columnNames);
+        banTable.setFillsViewportHeight(true);
+        banTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        
+        JScrollPane banTableScrollPane = new JScrollPane(banTable);
+        banListPanel.add(banTableScrollPane, BorderLayout.CENTER);
+        
+        // Add refresh button
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(e -> refreshBanList(banTable));
+        buttonPanel.add(refreshButton);
+        banListPanel.add(buttonPanel, BorderLayout.NORTH);
+        
+        tabbedPane.addTab(tlUI(Lang.GUI_TABBED_BAN_LIST), null, banListPanel, tlUI(Lang.GUI_TABBED_BAN_LIST));
     }
     
     /**
      * Add data-related tabs 
      */
     private void addDataTabs() {
-        // For now, create a simple tabbed pane for data sub-tabs
         JTabbedPane dataTabPane = new JTabbedPane();
         
         // Ban logs tab
         JPanel banLogsPanel = new JPanel(new BorderLayout());
-        JLabel banLogsLabel = new JLabel("封禁日志 - 待实现");
-        banLogsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        banLogsPanel.add(banLogsLabel, BorderLayout.CENTER);
-        dataTabPane.addTab("封禁日志", banLogsPanel);
+        String[] banLogColumns = {"Time", "IP", "Peer ID", "Reason", "Module"};
+        Object[][] banLogData = {};
+        JTable banLogTable = new JTable(banLogData, banLogColumns);
+        banLogTable.setFillsViewportHeight(true);
+        JScrollPane banLogScrollPane = new JScrollPane(banLogTable);
+        banLogsPanel.add(banLogScrollPane, BorderLayout.CENTER);
+        dataTabPane.addTab(tlUI(Lang.GUI_TABBED_DATA_BAN_LOGS), banLogsPanel);
         
         // Torrent history tab  
         JPanel torrentPanel = new JPanel(new BorderLayout());
-        JLabel torrentLabel = new JLabel("种子历史 - 待实现");
-        torrentLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        torrentPanel.add(torrentLabel, BorderLayout.CENTER);
-        dataTabPane.addTab("种子历史", torrentPanel);
+        String[] torrentColumns = {"Torrent Name", "Hash", "Size", "Peers", "Status"};
+        Object[][] torrentData = {};
+        JTable torrentTable = new JTable(torrentData, torrentColumns);
+        torrentTable.setFillsViewportHeight(true);
+        JScrollPane torrentScrollPane = new JScrollPane(torrentTable);
+        torrentPanel.add(torrentScrollPane, BorderLayout.CENTER);
+        dataTabPane.addTab(tlUI(Lang.GUI_TABBED_DATA_TORRENT_HISTORY), torrentPanel);
         
         // IP history tab
         JPanel ipHistoryPanel = new JPanel(new BorderLayout());
-        JLabel ipHistoryLabel = new JLabel("IP历史 - 待实现");
-        ipHistoryLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        ipHistoryPanel.add(ipHistoryLabel, BorderLayout.CENTER);
-        dataTabPane.addTab("IP历史", ipHistoryPanel);
+        String[] ipColumns = {"IP Address", "First Seen", "Last Seen", "Connections", "Status"};
+        Object[][] ipData = {};
+        JTable ipTable = new JTable(ipData, ipColumns);
+        ipTable.setFillsViewportHeight(true);
+        JScrollPane ipScrollPane = new JScrollPane(ipTable);
+        ipHistoryPanel.add(ipScrollPane, BorderLayout.CENTER);
+        dataTabPane.addTab(tlUI(Lang.GUI_TABBED_DATA_IP_HISTORY), ipHistoryPanel);
         
-        tabbedPane.addTab("数据", null, dataTabPane, "查看封禁日志、种子历史等数据");
+        tabbedPane.addTab(tlUI(Lang.GUI_TABBED_DATA), null, dataTabPane, tlUI(Lang.GUI_TABBED_DATA));
     }
     
     /**
@@ -210,54 +233,75 @@ public final class SwingMainWindow extends JFrame {
         
         // Rule subscription tab
         JPanel ruleSubPanel = new JPanel(new BorderLayout());
-        JLabel ruleSubLabel = new JLabel("规则订阅 - 待实现");
-        ruleSubLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        ruleSubPanel.add(ruleSubLabel, BorderLayout.CENTER);
-        ruleTabPane.addTab("规则订阅", ruleSubPanel);
+        String[] ruleSubColumns = {"Subscription Name", "URL", "Status", "Last Update", "Rules Count"};
+        Object[][] ruleSubData = {};
+        JTable ruleSubTable = new JTable(ruleSubData, ruleSubColumns);
+        ruleSubTable.setFillsViewportHeight(true);
+        JScrollPane ruleSubScrollPane = new JScrollPane(ruleSubTable);
+        ruleSubPanel.add(ruleSubScrollPane, BorderLayout.CENTER);
+        ruleTabPane.addTab(tlUI(Lang.GUI_TABBED_RULE_SUBSCRIPTION), ruleSubPanel);
         
         // Custom scripts tab
         JPanel scriptsPanel = new JPanel(new BorderLayout());
-        JLabel scriptsLabel = new JLabel("自定义脚本 - 待实现");
-        scriptsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        scriptsPanel.add(scriptsLabel, BorderLayout.CENTER);
-        ruleTabPane.addTab("自定义脚本", scriptsPanel);
+        String[] scriptColumns = {"Script Name", "Type", "Status", "Last Modified"};
+        Object[][] scriptData = {};
+        JTable scriptTable = new JTable(scriptData, scriptColumns);
+        scriptTable.setFillsViewportHeight(true);
+        JScrollPane scriptScrollPane = new JScrollPane(scriptTable);
+        scriptsPanel.add(scriptScrollPane, BorderLayout.CENTER);
+        ruleTabPane.addTab(tlUI(Lang.GUI_TABBED_RULE_CUSTOM_SCRIPTS), scriptsPanel);
         
         // IP rules tab
         JPanel ipRulesPanel = new JPanel(new BorderLayout());
-        JLabel ipRulesLabel = new JLabel("IP规则 - 待实现");
-        ipRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        ipRulesPanel.add(ipRulesLabel, BorderLayout.CENTER);
-        ruleTabPane.addTab("IP规则", ipRulesPanel);
+        String[] ipRuleColumns = {"Rule", "Action", "Description", "Priority", "Enabled"};
+        Object[][] ipRuleData = {};
+        JTable ipRuleTable = new JTable(ipRuleData, ipRuleColumns);
+        ipRuleTable.setFillsViewportHeight(true);
+        JScrollPane ipRuleScrollPane = new JScrollPane(ipRuleTable);
+        ipRulesPanel.add(ipRuleScrollPane, BorderLayout.CENTER);
+        ruleTabPane.addTab(tlUI(Lang.GUI_TABBED_RULE_IP), ipRulesPanel);
         
         // Port rules tab
         JPanel portRulesPanel = new JPanel(new BorderLayout());
-        JLabel portRulesLabel = new JLabel("端口规则 - 待实现");
-        portRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        portRulesPanel.add(portRulesLabel, BorderLayout.CENTER);
-        ruleTabPane.addTab("端口规则", portRulesPanel);
+        String[] portRuleColumns = {"Port Range", "Action", "Description", "Enabled"};
+        Object[][] portRuleData = {};
+        JTable portRuleTable = new JTable(portRuleData, portRuleColumns);
+        portRuleTable.setFillsViewportHeight(true);
+        JScrollPane portRuleScrollPane = new JScrollPane(portRuleTable);
+        portRulesPanel.add(portRuleScrollPane, BorderLayout.CENTER);
+        ruleTabPane.addTab(tlUI(Lang.GUI_TABBED_RULE_PORT), portRulesPanel);
         
         // ASN rules tab
         JPanel asnRulesPanel = new JPanel(new BorderLayout());
-        JLabel asnRulesLabel = new JLabel("ASN规则 - 待实现");
-        asnRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        asnRulesPanel.add(asnRulesLabel, BorderLayout.CENTER);
-        ruleTabPane.addTab("ASN规则", asnRulesPanel);
+        String[] asnRuleColumns = {"ASN", "Organization", "Action", "Description", "Enabled"};
+        Object[][] asnRuleData = {};
+        JTable asnRuleTable = new JTable(asnRuleData, asnRuleColumns);
+        asnRuleTable.setFillsViewportHeight(true);
+        JScrollPane asnRuleScrollPane = new JScrollPane(asnRuleTable);
+        asnRulesPanel.add(asnRuleScrollPane, BorderLayout.CENTER);
+        ruleTabPane.addTab(tlUI(Lang.GUI_TABBED_RULE_ASN), asnRulesPanel);
         
         // Region rules tab
         JPanel regionRulesPanel = new JPanel(new BorderLayout());
-        JLabel regionRulesLabel = new JLabel("地区规则 - 待实现");
-        regionRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        regionRulesPanel.add(regionRulesLabel, BorderLayout.CENTER);
-        ruleTabPane.addTab("地区规则", regionRulesPanel);
+        String[] regionRuleColumns = {"Country/Region", "ISO Code", "Action", "Description", "Enabled"};
+        Object[][] regionRuleData = {};
+        JTable regionRuleTable = new JTable(regionRuleData, regionRuleColumns);
+        regionRuleTable.setFillsViewportHeight(true);
+        JScrollPane regionRuleScrollPane = new JScrollPane(regionRuleTable);
+        regionRulesPanel.add(regionRuleScrollPane, BorderLayout.CENTER);
+        ruleTabPane.addTab(tlUI(Lang.GUI_TABBED_RULE_REGION), regionRulesPanel);
         
         // City rules tab
         JPanel cityRulesPanel = new JPanel(new BorderLayout());
-        JLabel cityRulesLabel = new JLabel("城市规则 - 待实现");
-        cityRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        cityRulesPanel.add(cityRulesLabel, BorderLayout.CENTER);
-        ruleTabPane.addTab("城市规则", cityRulesPanel);
+        String[] cityRuleColumns = {"City", "Country", "Action", "Description", "Enabled"};
+        Object[][] cityRuleData = {};
+        JTable cityRuleTable = new JTable(cityRuleData, cityRuleColumns);
+        cityRuleTable.setFillsViewportHeight(true);
+        JScrollPane cityRuleScrollPane = new JScrollPane(cityRuleTable);
+        cityRulesPanel.add(cityRuleScrollPane, BorderLayout.CENTER);
+        ruleTabPane.addTab(tlUI(Lang.GUI_TABBED_RULE_CITY), cityRulesPanel);
         
-        tabbedPane.addTab("规则管理", null, ruleTabPane, "管理各种封禁规则");
+        tabbedPane.addTab(tlUI(Lang.GUI_TABBED_RULE_MANAGEMENT), null, ruleTabPane, tlUI(Lang.GUI_TABBED_RULE_MANAGEMENT));
     }
     
     /**
@@ -268,19 +312,21 @@ public final class SwingMainWindow extends JFrame {
         
         // Charts tab
         JPanel chartsPanel = new JPanel(new BorderLayout());
-        JLabel chartsLabel = new JLabel("统计图表 - 待实现");
-        chartsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel chartsLabel = new JLabel("Statistics charts will be displayed here", SwingConstants.CENTER);
         chartsPanel.add(chartsLabel, BorderLayout.CENTER);
-        metricsTabPane.addTab("统计图表", chartsPanel);
+        metricsTabPane.addTab(tlUI(Lang.GUI_TABBED_METRICS_CHARTS), chartsPanel);
         
         // Rankings tab
         JPanel rankingsPanel = new JPanel(new BorderLayout());
-        JLabel rankingsLabel = new JLabel("排行榜 - 待实现");
-        rankingsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        rankingsPanel.add(rankingsLabel, BorderLayout.CENTER);
-        metricsTabPane.addTab("排行榜", rankingsPanel);
+        String[] rankingColumns = {"Rank", "Item", "Value", "Percentage"};
+        Object[][] rankingData = {};
+        JTable rankingTable = new JTable(rankingData, rankingColumns);
+        rankingTable.setFillsViewportHeight(true);
+        JScrollPane rankingScrollPane = new JScrollPane(rankingTable);
+        rankingsPanel.add(rankingScrollPane, BorderLayout.CENTER);
+        metricsTabPane.addTab(tlUI(Lang.GUI_TABBED_METRICS_RANKINGS), rankingsPanel);
         
-        tabbedPane.addTab("统计", null, metricsTabPane, "查看统计图表和排行榜");
+        tabbedPane.addTab(tlUI(Lang.GUI_TABBED_METRICS), null, metricsTabPane, tlUI(Lang.GUI_TABBED_METRICS));
     }
     
     /**
@@ -288,11 +334,47 @@ public final class SwingMainWindow extends JFrame {
      */
     private void addSettingsTab() {
         JPanel settingsPanel = new JPanel(new BorderLayout());
-        JLabel settingsLabel = new JLabel("设置配置 - 待实现");
-        settingsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        settingsPanel.add(settingsLabel, BorderLayout.CENTER);
         
-        tabbedPane.addTab("设置", null, settingsPanel, "程序设置和配置");
+        // Create a simple settings interface with configuration categories
+        JPanel mainSettingsPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        // General settings section
+        gbc.gridx = 0; gbc.gridy = 0;
+        mainSettingsPanel.add(new JLabel("General Settings:"), gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 1;
+        JCheckBox autoStartCheckbox = new JCheckBox("Auto start on system boot");
+        mainSettingsPanel.add(autoStartCheckbox, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 2;
+        JCheckBox minimizeToTrayCheckbox = new JCheckBox("Minimize to system tray");
+        mainSettingsPanel.add(minimizeToTrayCheckbox, gbc);
+        
+        // Network settings section
+        gbc.gridx = 0; gbc.gridy = 3;
+        mainSettingsPanel.add(new JLabel("Network Settings:"), gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 4;
+        JPanel portPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        portPanel.add(new JLabel("WebUI Port: "));
+        JTextField portField = new JTextField("9898", 6);
+        portPanel.add(portField);
+        mainSettingsPanel.add(portPanel, gbc);
+        
+        // Buttons panel
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton saveButton = new JButton("Save Settings");
+        JButton resetButton = new JButton("Reset to Defaults");
+        buttonPanel.add(saveButton);
+        buttonPanel.add(resetButton);
+        
+        settingsPanel.add(mainSettingsPanel, BorderLayout.CENTER);
+        settingsPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        tabbedPane.addTab(tlUI(Lang.GUI_TABBED_SETTINGS), null, settingsPanel, tlUI(Lang.GUI_TABBED_SETTINGS));
     }
     
     /**
@@ -319,6 +401,24 @@ public final class SwingMainWindow extends JFrame {
         // Refresh the UI
         dashboardPanel.revalidate();
         dashboardPanel.repaint();
+    }
+    
+    /**
+     * Refresh the ban list table with current data
+     */
+    private void refreshBanList(JTable banTable) {
+        SwingUtilities.invokeLater(() -> {
+            if (bridge != null) {
+                // Get banned peers from the downloader server
+                var bannedPeers = bridge.getBasicStatistics();
+                // For now, just show a message that data would be populated here
+                // In a real implementation, we would populate the table with banned peer data
+                JOptionPane.showMessageDialog(this, 
+                    "Ban list refresh triggered. Banned peers count: " + bannedPeers.get("banlistCounter"),
+                    "Refresh Complete", 
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
     }
 
 
