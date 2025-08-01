@@ -22,6 +22,5 @@ const { t } = useI18n()
 const model = defineModel<GotifyConfig>({ required: true })
 if (model.value.endpoint === undefined)
   model.value.endpoint = 'https://push.example.de/message?token=<apptoken>'
-if (model.value.priority === undefined)
-  model.value.priority = 5
+if (model.value.priority === undefined) model.value.priority = 5
 </script>
