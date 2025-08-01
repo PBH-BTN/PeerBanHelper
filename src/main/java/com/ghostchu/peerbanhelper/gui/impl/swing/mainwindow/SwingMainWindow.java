@@ -85,8 +85,8 @@ public final class SwingMainWindow extends JFrame {
         this.bridge = Main.getApplicationContext().getBean(PBHGuiBridge.class);
         this.componentRegistry = Main.getApplicationContext().getBean(GuiComponentRegistry.class);
         
-        // Initialize dashboard with registered components
-        initializeDashboard();
+        // Initialize GUI tabs with registered components
+        initializeGuiTabs();
     }
 
 
@@ -123,35 +123,176 @@ public final class SwingMainWindow extends JFrame {
     }
     
     /**
-     * Initialize the dashboard with registered GUI components
+     * Initialize the GUI tabs with WebUI-equivalent functionality
      */
-    private void initializeDashboard() {
+    private void initializeGuiTabs() {
         SwingUtilities.invokeLater(() -> {
-            // Create dashboard panel if it doesn't exist
-            if (dashboardPanel == null) {
-                createDashboardPanel();
-            }
+            // Logs tab is already the first tab from the form designer
+            // Add additional tabs that mirror WebUI functionality
+            addDashboardTab();
+            addBanListTab();
+            addDataTabs();
+            addRuleManagementTabs();
+            addMetricsTabs();
+            addSettingsTab();
             
-            // Get enabled components and add them to the dashboard
-            var enabledComponents = componentRegistry.getEnabledComponents();
-            updateDashboardComponents(enabledComponents);
+            // Ensure logs tab remains selected as the default
+            tabbedPane.setSelectedIndex(0);
         });
     }
     
     /**
-     * Create the dashboard panel and add it as a tab
+     * Add dashboard tab (similar to WebUI dashboard)
      */
-    private void createDashboardPanel() {
+    private void addDashboardTab() {
         dashboardPanel = new JPanel();
         dashboardPanel.setLayout(new BoxLayout(dashboardPanel, BoxLayout.Y_AXIS));
+        
+        // Get enabled components and add them to the dashboard
+        var enabledComponents = componentRegistry.getEnabledComponents();
+        updateDashboardComponents(enabledComponents);
         
         JScrollPane dashboardScrollPane = new JScrollPane(dashboardPanel);
         dashboardScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         dashboardScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
-        // Add dashboard tab as the first tab
-        tabbedPane.insertTab("仪表板", null, dashboardScrollPane, "显示基本统计信息和程序运行状态", 0);
-        tabbedPane.setSelectedIndex(0); // Select the dashboard tab by default
+        tabbedPane.addTab("仪表板", null, dashboardScrollPane, "显示基本统计信息和程序运行状态");
+    }
+    
+    /**
+     * Add ban list tab
+     */
+    private void addBanListTab() {
+        JPanel banListPanel = new JPanel(new BorderLayout());
+        JLabel banListLabel = new JLabel("封禁列表功能 - 待实现");
+        banListLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        banListPanel.add(banListLabel, BorderLayout.CENTER);
+        
+        tabbedPane.addTab("封禁列表", null, banListPanel, "查看和管理封禁列表");
+    }
+    
+    /**
+     * Add data-related tabs 
+     */
+    private void addDataTabs() {
+        // For now, create a simple tabbed pane for data sub-tabs
+        JTabbedPane dataTabPane = new JTabbedPane();
+        
+        // Ban logs tab
+        JPanel banLogsPanel = new JPanel(new BorderLayout());
+        JLabel banLogsLabel = new JLabel("封禁日志 - 待实现");
+        banLogsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        banLogsPanel.add(banLogsLabel, BorderLayout.CENTER);
+        dataTabPane.addTab("封禁日志", banLogsPanel);
+        
+        // Torrent history tab  
+        JPanel torrentPanel = new JPanel(new BorderLayout());
+        JLabel torrentLabel = new JLabel("种子历史 - 待实现");
+        torrentLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        torrentPanel.add(torrentLabel, BorderLayout.CENTER);
+        dataTabPane.addTab("种子历史", torrentPanel);
+        
+        // IP history tab
+        JPanel ipHistoryPanel = new JPanel(new BorderLayout());
+        JLabel ipHistoryLabel = new JLabel("IP历史 - 待实现");
+        ipHistoryLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        ipHistoryPanel.add(ipHistoryLabel, BorderLayout.CENTER);
+        dataTabPane.addTab("IP历史", ipHistoryPanel);
+        
+        tabbedPane.addTab("数据", null, dataTabPane, "查看封禁日志、种子历史等数据");
+    }
+    
+    /**
+     * Add rule management tabs
+     */
+    private void addRuleManagementTabs() {
+        JTabbedPane ruleTabPane = new JTabbedPane();
+        
+        // Rule subscription tab
+        JPanel ruleSubPanel = new JPanel(new BorderLayout());
+        JLabel ruleSubLabel = new JLabel("规则订阅 - 待实现");
+        ruleSubLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        ruleSubPanel.add(ruleSubLabel, BorderLayout.CENTER);
+        ruleTabPane.addTab("规则订阅", ruleSubPanel);
+        
+        // Custom scripts tab
+        JPanel scriptsPanel = new JPanel(new BorderLayout());
+        JLabel scriptsLabel = new JLabel("自定义脚本 - 待实现");
+        scriptsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        scriptsPanel.add(scriptsLabel, BorderLayout.CENTER);
+        ruleTabPane.addTab("自定义脚本", scriptsPanel);
+        
+        // IP rules tab
+        JPanel ipRulesPanel = new JPanel(new BorderLayout());
+        JLabel ipRulesLabel = new JLabel("IP规则 - 待实现");
+        ipRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        ipRulesPanel.add(ipRulesLabel, BorderLayout.CENTER);
+        ruleTabPane.addTab("IP规则", ipRulesPanel);
+        
+        // Port rules tab
+        JPanel portRulesPanel = new JPanel(new BorderLayout());
+        JLabel portRulesLabel = new JLabel("端口规则 - 待实现");
+        portRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        portRulesPanel.add(portRulesLabel, BorderLayout.CENTER);
+        ruleTabPane.addTab("端口规则", portRulesPanel);
+        
+        // ASN rules tab
+        JPanel asnRulesPanel = new JPanel(new BorderLayout());
+        JLabel asnRulesLabel = new JLabel("ASN规则 - 待实现");
+        asnRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        asnRulesPanel.add(asnRulesLabel, BorderLayout.CENTER);
+        ruleTabPane.addTab("ASN规则", asnRulesPanel);
+        
+        // Region rules tab
+        JPanel regionRulesPanel = new JPanel(new BorderLayout());
+        JLabel regionRulesLabel = new JLabel("地区规则 - 待实现");
+        regionRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        regionRulesPanel.add(regionRulesLabel, BorderLayout.CENTER);
+        ruleTabPane.addTab("地区规则", regionRulesPanel);
+        
+        // City rules tab
+        JPanel cityRulesPanel = new JPanel(new BorderLayout());
+        JLabel cityRulesLabel = new JLabel("城市规则 - 待实现");
+        cityRulesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        cityRulesPanel.add(cityRulesLabel, BorderLayout.CENTER);
+        ruleTabPane.addTab("城市规则", cityRulesPanel);
+        
+        tabbedPane.addTab("规则管理", null, ruleTabPane, "管理各种封禁规则");
+    }
+    
+    /**
+     * Add metrics tabs
+     */
+    private void addMetricsTabs() {
+        JTabbedPane metricsTabPane = new JTabbedPane();
+        
+        // Charts tab
+        JPanel chartsPanel = new JPanel(new BorderLayout());
+        JLabel chartsLabel = new JLabel("统计图表 - 待实现");
+        chartsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        chartsPanel.add(chartsLabel, BorderLayout.CENTER);
+        metricsTabPane.addTab("统计图表", chartsPanel);
+        
+        // Rankings tab
+        JPanel rankingsPanel = new JPanel(new BorderLayout());
+        JLabel rankingsLabel = new JLabel("排行榜 - 待实现");
+        rankingsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        rankingsPanel.add(rankingsLabel, BorderLayout.CENTER);
+        metricsTabPane.addTab("排行榜", rankingsPanel);
+        
+        tabbedPane.addTab("统计", null, metricsTabPane, "查看统计图表和排行榜");
+    }
+    
+    /**
+     * Add settings tab
+     */
+    private void addSettingsTab() {
+        JPanel settingsPanel = new JPanel(new BorderLayout());
+        JLabel settingsLabel = new JLabel("设置配置 - 待实现");
+        settingsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        settingsPanel.add(settingsLabel, BorderLayout.CENTER);
+        
+        tabbedPane.addTab("设置", null, settingsPanel, "程序设置和配置");
     }
     
     /**
