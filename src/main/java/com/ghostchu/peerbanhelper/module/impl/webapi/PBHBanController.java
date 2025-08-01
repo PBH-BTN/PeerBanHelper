@@ -407,11 +407,9 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .filter(entry -> BanListFilterApplier.applyRuleFilter(entry.getValue(), filters)) // Apply rule filter before baking
                 .map(entry -> {
                     BanDTO dto = new BanDTO(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null);
-                    PeerWrapper peerWrapper = dto.getBanMetadata().getPeer();
-                    if (peerWrapper != null) {
-                        var nullableGeoData = getServer().queryIPDB(peerWrapper.toPeerAddress()).geoData().get();
-                        dto.setIpGeoData(nullableGeoData);
-                    }
+                    // Use the same address source as in the filter options API for consistency
+                    var nullableGeoData = getServer().queryIPDB(entry.getKey()).geoData().get();
+                    dto.setIpGeoData(nullableGeoData);
                     return dto;
                 })
                 .filter(dto -> BanListFilterApplier.applyFilters(dto, filters))

@@ -48,25 +48,27 @@ public class BanListFilterApplier {
 
         // Filter by geographic data
         var geoData = dto.getIpGeoData();
+        String country = null;
+        String city = null;
+        String asn = null;
+        String isp = null;
+        String netType = null;
+        
         if (geoData != null) {
-            String country = geoData.getCountry() != null ? geoData.getCountry().getName() : null;
-            String city = geoData.getCity() != null ? geoData.getCity().getName() : null;
-            String asn = geoData.getAs() != null ? geoData.getAs().getOrganization() : null;
-            String isp = geoData.getNetwork() != null ? geoData.getNetwork().getIsp() : null;
-            String netType = geoData.getNetwork() != null ? geoData.getNetwork().getNetType() : null;
-            
-            if (!matchesStringFilter(country, filters.getCountry()) ||
-                !matchesStringFilter(city, filters.getCity()) ||
-                !matchesStringFilter(asn, filters.getAsn()) ||
-                !matchesStringFilter(isp, filters.getIsp()) ||
-                !matchesStringFilter(netType, filters.getNetType())) {
-                return false;
-            }
-        } else {
-            // If geo data is null but geo filters are set, exclude this entry
-            if (hasGeoFilter(filters)) {
-                return false;
-            }
+            country = geoData.getCountry() != null ? geoData.getCountry().getName() : null;
+            city = geoData.getCity() != null ? geoData.getCity().getName() : null;
+            asn = geoData.getAs() != null ? geoData.getAs().getOrganization() : null;
+            isp = geoData.getNetwork() != null ? geoData.getNetwork().getIsp() : null;
+            netType = geoData.getNetwork() != null ? geoData.getNetwork().getNetType() : null;
+        }
+        
+        // Apply individual geo filters - each field is checked independently
+        if (!matchesStringFilter(country, filters.getCountry()) ||
+            !matchesStringFilter(city, filters.getCity()) ||
+            !matchesStringFilter(asn, filters.getAsn()) ||
+            !matchesStringFilter(isp, filters.getIsp()) ||
+            !matchesStringFilter(netType, filters.getNetType())) {
+            return false;
         }
 
         // Filter by context (maps to torrent ID for discovery location)
@@ -102,18 +104,6 @@ public class BanListFilterApplier {
         }
         
         return actualValue.toLowerCase(Locale.ROOT).contains(filterValue.trim().toLowerCase(Locale.ROOT));
-    }
-    
-    /**
-     * Checks if any geographic filter is set.
-     * 
-     * @param filters The filters to check
-     * @return true if any geographic filter has a value
-     */
-    private static boolean hasGeoFilter(BanListFilters filters) {
-        return isValidFilter(filters.getCountry()) || isValidFilter(filters.getCity()) ||
-               isValidFilter(filters.getAsn()) || isValidFilter(filters.getIsp()) ||
-               isValidFilter(filters.getNetType());
     }
     
     /**
