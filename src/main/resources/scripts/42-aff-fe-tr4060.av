@@ -1,0 +1,22 @@
+## @NAME IPV6 42:aff:fe Transmission 4.0.6 刷流
+## @AUTHOR PBH-BTN Community
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+if(isBlank(peer.clientName)) {
+    return false; ## 下载器必须提供 ClientName
+}
+
+ipAddress = peer.peerAddress.address;
+strIp = toString(ipAddress);
+
+if(!string.contains(peer.clientName, 'Transmission 4.0.6')){
+    return false; ## 不管非 Transmission 4.0.6 的
+}
+
+if(string.contains(strIp, "42:aff:fe")){
+    return "Transmission 4.0.6 (IPV6 42:aff:fe) 多拨伪装吸血";
+}
+
+return false;
