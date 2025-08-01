@@ -141,7 +141,7 @@ public class SystemInfoComponent implements GuiComponent {
         gbc.gridx = 0; gbc.gridy = 3;
         panel.add(new JLabel("运行时间:"), gbc);
         gbc.gridx = 1;
-        uptimeLabel = new JLabel("0s");
+        uptimeLabel = new JLabel("加载中...");
         panel.add(uptimeLabel, gbc);
         
         // Add separator
@@ -162,35 +162,35 @@ public class SystemInfoComponent implements GuiComponent {
         gbc.gridx = 0; gbc.gridy = 6;
         panel.add(new JLabel("已用内存:"), gbc);
         gbc.gridx = 1;
-        usedMemoryLabel = new JLabel("0 B");
+        usedMemoryLabel = new JLabel("加载中...");
         panel.add(usedMemoryLabel, gbc);
         
         // Max Memory
         gbc.gridx = 0; gbc.gridy = 7;
         panel.add(new JLabel("最大内存:"), gbc);
         gbc.gridx = 1;
-        maxMemoryLabel = new JLabel("0 B");
+        maxMemoryLabel = new JLabel("加载中...");
         panel.add(maxMemoryLabel, gbc);
         
         // Total Memory
         gbc.gridx = 0; gbc.gridy = 8;
         panel.add(new JLabel("已分配内存:"), gbc);
         gbc.gridx = 1;
-        totalMemoryLabel = new JLabel("0 B");
+        totalMemoryLabel = new JLabel("加载中...");
         panel.add(totalMemoryLabel, gbc);
         
         // Free Memory
         gbc.gridx = 0; gbc.gridy = 9;
         panel.add(new JLabel("空闲内存:"), gbc);
         gbc.gridx = 1;
-        freeMemoryLabel = new JLabel("0 B");
+        freeMemoryLabel = new JLabel("加载中...");
         panel.add(freeMemoryLabel, gbc);
         
         // Memory Usage Percentage
         gbc.gridx = 0; gbc.gridy = 10;
         panel.add(new JLabel("内存使用率:"), gbc);
         gbc.gridx = 1;
-        memoryUsageLabel = new JLabel("0.0%");
+        memoryUsageLabel = new JLabel("加载中...");
         panel.add(memoryUsageLabel, gbc);
         
         // Memory Progress Bar

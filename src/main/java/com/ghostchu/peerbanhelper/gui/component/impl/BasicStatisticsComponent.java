@@ -63,18 +63,37 @@ public class BasicStatisticsComponent implements GuiComponent {
         this.downloaderServer = serviceProvider.getService(DownloaderServer.class);
         this.trackedSwarmDao = serviceProvider.getService(TrackedSwarmDao.class);
         
+        if (metrics == null) {
+            log.warn("BasicMetrics service not available for BasicStatisticsComponent");
+        }
+        if (downloaderServer == null) {
+            log.warn("DownloaderServer service not available for BasicStatisticsComponent");
+        }
+        if (trackedSwarmDao == null) {
+            log.warn("TrackedSwarmDao service not available for BasicStatisticsComponent");
+        }
+        
         // Initial data update
         updateData();
     }
     
     @Override
     public void updateData() {
-        if (metrics == null || downloaderServer == null) {
-            return;
-        }
-        
         SwingUtilities.invokeLater(() -> {
             try {
+                if (metrics == null || downloaderServer == null) {
+                    // Display loading or unavailable state
+                    checkCounterLabel.setText("加载中...");
+                    banCounterLabel.setText("加载中...");
+                    unbanCounterLabel.setText("加载中...");
+                    banlistCounterLabel.setText("加载中...");
+                    bannedIpCounterLabel.setText("加载中...");
+                    wastedTrafficLabel.setText("加载中...");
+                    trackedSwarmCountLabel.setText("加载中...");
+                    blockRateLabel.setText("加载中...");
+                    return;
+                }
+                
                 // Update basic counters
                 checkCounterLabel.setText(numberFormat.format(metrics.getCheckCounter()));
                 banCounterLabel.setText(numberFormat.format(metrics.getPeerBanCounter()));
@@ -106,13 +125,13 @@ public class BasicStatisticsComponent implements GuiComponent {
                             blockRateLabel.setText("0.00%");
                         }
                     } catch (SQLException e) {
-                        trackedSwarmCountLabel.setText("Error");
-                        blockRateLabel.setText("Error");
+                        trackedSwarmCountLabel.setText("错误");
+                        blockRateLabel.setText("错误");
                         log.error("Failed to query tracked swarm count", e);
                     }
                 } else {
-                    trackedSwarmCountLabel.setText("N/A");
-                    blockRateLabel.setText("N/A");
+                    trackedSwarmCountLabel.setText("不可用");
+                    blockRateLabel.setText("不可用");
                 }
                 
             } catch (Exception e) {
@@ -138,56 +157,56 @@ public class BasicStatisticsComponent implements GuiComponent {
         gbc.gridx = 0; gbc.gridy = 0;
         panel.add(new JLabel("检查次数:"), gbc);
         gbc.gridx = 1;
-        checkCounterLabel = new JLabel("0");
+        checkCounterLabel = new JLabel("加载中...");
         panel.add(checkCounterLabel, gbc);
         
         // Row 1: Ban Counter
         gbc.gridx = 0; gbc.gridy = 1;
         panel.add(new JLabel("封禁次数:"), gbc);
         gbc.gridx = 1;
-        banCounterLabel = new JLabel("0");
+        banCounterLabel = new JLabel("加载中...");
         panel.add(banCounterLabel, gbc);
         
         // Row 2: Unban Counter
         gbc.gridx = 0; gbc.gridy = 2;
         panel.add(new JLabel("解封次数:"), gbc);
         gbc.gridx = 1;
-        unbanCounterLabel = new JLabel("0");
+        unbanCounterLabel = new JLabel("加载中...");
         panel.add(unbanCounterLabel, gbc);
         
         // Row 3: Banlist Counter
         gbc.gridx = 0; gbc.gridy = 3;
         panel.add(new JLabel("封禁列表大小:"), gbc);
         gbc.gridx = 1;
-        banlistCounterLabel = new JLabel("0");
+        banlistCounterLabel = new JLabel("加载中...");
         panel.add(banlistCounterLabel, gbc);
         
         // Row 4: Banned IP Counter
         gbc.gridx = 0; gbc.gridy = 4;
         panel.add(new JLabel("封禁IP数量:"), gbc);
         gbc.gridx = 1;
-        bannedIpCounterLabel = new JLabel("0");
+        bannedIpCounterLabel = new JLabel("加载中...");
         panel.add(bannedIpCounterLabel, gbc);
         
         // Row 5: Wasted Traffic
         gbc.gridx = 0; gbc.gridy = 5;
         panel.add(new JLabel("节省流量:"), gbc);
         gbc.gridx = 1;
-        wastedTrafficLabel = new JLabel("0 B");
+        wastedTrafficLabel = new JLabel("加载中...");
         panel.add(wastedTrafficLabel, gbc);
         
         // Row 6: Tracked Swarm Count
         gbc.gridx = 0; gbc.gridy = 6;
         panel.add(new JLabel("跟踪Peer数量:"), gbc);
         gbc.gridx = 1;
-        trackedSwarmCountLabel = new JLabel("0");
+        trackedSwarmCountLabel = new JLabel("加载中...");
         panel.add(trackedSwarmCountLabel, gbc);
         
         // Row 7: Block Rate
         gbc.gridx = 0; gbc.gridy = 7;
         panel.add(new JLabel("Peer封禁率:"), gbc);
         gbc.gridx = 1;
-        blockRateLabel = new JLabel("0.00%");
+        blockRateLabel = new JLabel("加载中...");
         panel.add(blockRateLabel, gbc);
     }
     

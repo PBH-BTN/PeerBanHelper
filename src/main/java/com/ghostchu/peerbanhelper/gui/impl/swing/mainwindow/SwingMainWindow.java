@@ -135,9 +135,6 @@ public final class SwingMainWindow extends JFrame {
             // Get enabled components and add them to the dashboard
             var enabledComponents = componentRegistry.getEnabledComponents();
             updateDashboardComponents(enabledComponents);
-            
-            // Start periodic updates
-            startPeriodicUpdates();
         });
     }
     
@@ -181,22 +178,6 @@ public final class SwingMainWindow extends JFrame {
         // Refresh the UI
         dashboardPanel.revalidate();
         dashboardPanel.repaint();
-    }
-    
-    /**
-     * Start periodic updates for all components
-     */
-    private void startPeriodicUpdates() {
-        // Use a timer to update components every 5 seconds
-        Timer timer = new Timer(5000, e -> {
-            if (componentRegistry != null) {
-                componentRegistry.updateAllComponents();
-            }
-        });
-        timer.start();
-        
-        // Store timer reference for cleanup if needed
-        // Note: In a real implementation, you might want to store this for proper cleanup
     }
 
 

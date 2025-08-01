@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.component;
 
+import com.ghostchu.peerbanhelper.event.PBHGuiElementPeriodUpdateEvent;
+import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,9 @@ public class GuiComponentRegistry implements GuiServiceProvider {
     
     public GuiComponentRegistry(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        
+        // Register for periodic update events
+        com.ghostchu.peerbanhelper.Main.getEventBus().register(this);
     }
     
     /**
@@ -90,6 +95,14 @@ public class GuiComponentRegistry implements GuiServiceProvider {
     }
     
     /**
+     * Update all registered components (called via event bus)
+     */
+    @Subscribe
+    public void onPeriodUpdate(PBHGuiElementPeriodUpdateEvent event) {
+        updateAllComponents();
+    }
+    
+    /**
      * Update all registered components
      */
     public void updateAllComponents() {
@@ -116,6 +129,13 @@ public class GuiComponentRegistry implements GuiServiceProvider {
      * Dispose all components and clear registry
      */
     public void dispose() {
+        // Unregister from event bus
+        try {
+            com.ghostchu.peerbanhelper.Main.getEventBus().unregister(this);
+        } catch (Exception e) {
+            log.debug("Error unregistering from event bus", e);
+        }
+        
         for (GuiComponent component : new ArrayList<>(registeredComponents.values())) {
             unregisterComponent(component.getComponentId());
         }
