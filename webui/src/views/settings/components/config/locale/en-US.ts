@@ -96,6 +96,7 @@ export default {
   'page.settings.tab.config.push.form.type.serverchan': 'ServerChan',
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
   'page.settings.tab.config.push.form.type.bark': 'Bark',
+  'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
 
   'page.settings.tab.config.push.form.stmp.host': 'Host',
   'page.settings.tab.config.push.form.stmp.port': 'Port',
@@ -116,6 +117,9 @@ export default {
   'page.settings.tab.config.push.form.pushplus.topic': 'Topic',
   'page.settings.tab.config.push.form.pushplus.template': 'Template',
   'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
+
+  'page.settings.tab.config.push.form.pushdeer.endpoint': 'Endpoint',
+  'page.settings.tab.config.push.form.pushdeer.pushkey': 'Push Key',
 
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',
