@@ -229,9 +229,10 @@ public final class PBHBanController extends AbstractFeatureModule {
         // Extract IP and port for more flexible matching
         String ip = peerAddress.getIp();
         int port = peerAddress.getPort();
+        String ipLower = ip.toLowerCase(Locale.ROOT);
         
         // Check IP address only (without port)
-        if (ip.toLowerCase(Locale.ROOT).contains(searchLower)) {
+        if (ipLower.contains(searchLower)) {
             return true;
         }
         
@@ -254,9 +255,38 @@ public final class PBHBanController extends AbstractFeatureModule {
                 return true;
             }
             
-            // Check partial bracket searches (e.g., "[2408")
-            if (searchLower.startsWith("[") && ipWithBrackets.toLowerCase(Locale.ROOT).startsWith(searchLower)) {
-                return true;
+            // Enhanced partial bracket searches
+            if (searchLower.startsWith("[")) {
+                // Check if the bracketed IP starts with the search term
+                if (ipWithBrackets.toLowerCase(Locale.ROOT).startsWith(searchLower)) {
+                    return true;
+                }
+                // Also check if the full standard format starts with the search term
+                if (standardFormat.toLowerCase(Locale.ROOT).startsWith(searchLower)) {
+                    return true;
+                }
+            }
+            
+            // Special handling for IPv6 segment searches (e.g., searching "240e:3" to find "240e:36f")
+            // This is more permissive and allows partial segment matching
+            if (searchLower.contains(":") && !searchLower.startsWith("[")) {
+                // Split both the search term and IP into segments
+                String[] searchSegments = searchLower.split(":");
+                String[] ipSegments = ipLower.split(":");
+                
+                if (searchSegments.length > 0 && ipSegments.length > 0) {
+                    // Check if the IP starts with the same segments as the search
+                    boolean segmentMatch = true;
+                    for (int i = 0; i < Math.min(searchSegments.length, ipSegments.length); i++) {
+                        if (!ipSegments[i].startsWith(searchSegments[i])) {
+                            segmentMatch = false;
+                            break;
+                        }
+                    }
+                    if (segmentMatch) {
+                        return true;
+                    }
+                }
             }
         }
         

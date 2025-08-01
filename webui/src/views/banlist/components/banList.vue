@@ -18,11 +18,13 @@
           </a-button>
         </AsyncMethod>
         <a-input-search
+          v-model="searchInput"
           :style="{ width: '250px' }"
           :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
           allow-clear
           search-button
           @search="handleSearch"
+          @keyup.enter="handleSearch(searchInput)"
         />
       </a-space>
     </a-space>
@@ -69,6 +71,7 @@ import banListItem from './banListItem.vue'
 const endpointState = useEndpointStore()
 const autoUpdateStore = useAutoUpdate()
 const searchString = ref('')
+const searchInput = ref('')
 const { t } = useI18n()
 
 const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
