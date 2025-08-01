@@ -60,29 +60,26 @@ public final class HTTPUtil implements Reloadable {
     }
 
     private void checkReachability() {
-        var client = newBuilder().callTimeout(10, TimeUnit.SECONDS).build();
+        var client = newBuilder()
+                .followSslRedirects(true)
+                .followRedirects(true)
+                .callTimeout(10, TimeUnit.SECONDS).build();
         Request cnNetworkCheck = new Request.Builder()
-                .url("http://connectivitycheck.platform.hicloud.com/generate_204")
-                .get()
+                .url("https://www.qq.com/")
+                .head()
                 .build();
         try (Response response = client.newCall(cnNetworkCheck).execute()) {
-            if (response.isSuccessful()) {
-                networkReachability.setAccessToChinaNetwork(true);
-            }
-            networkReachability.setAccessToChinaNetwork(false);
+            networkReachability.setAccessToChinaNetwork(response.isSuccessful());
         } catch (IOException e) {
             networkReachability.setAccessToChinaNetwork(false);
         }
 
         Request globalNetworkCheck = new Request.Builder()
                 .url("https://www.google.com/generate_204")
-                .get()
+                .head()
                 .build();
         try (Response response = client.newCall(globalNetworkCheck).execute()) {
-            if (response.isSuccessful()) {
-                networkReachability.setAccessToGlobalNetwork(true);
-            }
-            networkReachability.setAccessToGlobalNetwork(false);
+            networkReachability.setAccessToGlobalNetwork(response.isSuccessful());
         } catch (IOException e) {
             networkReachability.setAccessToGlobalNetwork(false);
         }
@@ -118,6 +115,10 @@ public final class HTTPUtil implements Reloadable {
         } else {
             this.proxyInstance = new Proxy(proxyType, InetSocketAddress.createUnresolved(proxyHost, proxyPort));
         }
+    }
+
+    public Proxy.Type getProxyType() {
+        return proxyType;
     }
 
     @SneakyThrows

@@ -47,6 +47,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.net.Proxy;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
@@ -256,7 +257,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         Map<String, Object> network = new LinkedHashMap<>();
         var proxy = Main.getMainConfig().getInt("proxy.setting");
         network.put("internet_access", hTTPUtil.getNetworkReachability());
-        network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
+        network.put("use_proxy", hTTPUtil.getProxyType() != Proxy.Type.DIRECT);
         network.put("reverse_proxy", WebUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
         network.put("nat_type", bTStunManager.getCachedNatType().name());
