@@ -90,12 +90,4 @@ public interface Peer extends Comparable<Peer> {
         //return "pa=" + this.getPeerAddress().toString() + ",pid=" + this.getPeerId() + ",pname=" + this.getClientName();
         return getPeerAddress().getIp() + ':' + getPeerAddress().getPort();
     }
-
-    /**
-     * 获取该 Peer 的原始 IP 表示法，用于返回给下载器封禁 Peer
-     *
-     * @return 原始IP
-     */
-    @NotNull
-    String getRawIp();
 }

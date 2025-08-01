@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 @Setter
 public final class PeerImpl implements Peer {
     private PeerAddress peerAddress;
-    private String rawIp;
     private byte[] peerId;
     private String clientName;
     private long downloadSpeed;
@@ -20,9 +19,8 @@ public final class PeerImpl implements Peer {
     private PeerFlag flags;
     private boolean handshaking;
 
-    public PeerImpl(PeerAddress peerAddress, String rawIp, byte[] peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, boolean handshaking) {
+    public PeerImpl(PeerAddress peerAddress, byte[] peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, boolean handshaking) {
         this.peerAddress = peerAddress;
-        this.rawIp = rawIp;
         this.peerId = peerId;
         this.clientName = clientName;
         this.downloadSpeed = downloadSpeed;
@@ -84,8 +82,7 @@ public final class PeerImpl implements Peer {
         return handshaking;
     }
 
-    @Override
-    public @NotNull String getRawIp() {
-        return rawIp;
+    public void setPeerAddress(@NotNull PeerAddress peerAddress) {
+        this.peerAddress = peerAddress;
     }
 }

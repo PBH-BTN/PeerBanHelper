@@ -5,22 +5,35 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.List;
 
 public abstract class AbstractDownloader implements Downloader {
     public final AlertManager alertManager;
     protected final String id;
+    private final NatAddressProvider natAddressProvider;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private TranslationComponent statusMessage = new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN);
     private int failedLoginAttempts = 0;
     private long nextLoginTry = 0L;
 
-    public AbstractDownloader(String id, AlertManager alertManager) {
+    public AbstractDownloader(String id, AlertManager alertManager, NatAddressProvider natAddressProvider) {
         this.id = id;
         this.alertManager = alertManager;
+        this.natAddressProvider = natAddressProvider;
+    }
+
+    @NotNull
+    public PeerAddress natTranslate(PeerAddress peerAddress) {
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(peerAddress.getIp(), peerAddress.getPort());
+        var translate = natAddressProvider.translate(inetSocketAddress);
+        if (translate == null) return peerAddress;
+        return peerAddress.updateNat(translate.getHostString(), translate.getPort());
     }
 
     @Override
@@ -29,8 +42,13 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     @Override
+    public int getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    @Override
     public @NotNull DownloaderLoginResult login() {
-        if(isPaused()){
+        if (isPaused()) {
             lastStatus = DownloaderLastStatus.PAUSED;
             statusMessage = new TranslationComponent(Lang.STATUS_TEXT_PAUSED);
             return new DownloaderLoginResult(DownloaderLoginResult.Status.PAUSED, new TranslationComponent(Lang.DOWNLOADER_PAUSED));
@@ -78,6 +96,7 @@ public abstract class AbstractDownloader implements Downloader {
             statusMessage = null;
         }
     }
+
 
     public abstract DownloaderLoginResult login0() throws Exception;
 

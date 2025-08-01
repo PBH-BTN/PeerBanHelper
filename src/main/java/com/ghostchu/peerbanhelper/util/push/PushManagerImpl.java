@@ -46,6 +46,7 @@ public final class PushManagerImpl implements Reloadable, PushManager {
             case "telegram" -> provider = TelegramPushProvider.loadFromYaml(name, section, httpUtil);
             case "bark" -> provider = BarkPushProvider.loadFromYaml(name, section, httpUtil);
             case "pushdeer" -> provider = PushDeerPushProvider.loadFromYaml(name, section, httpUtil);
+            case "gotify" -> provider = GotifyPushProvider.loadFromYaml(name, section, httpUtil);
         }
         return provider;
     }
@@ -60,6 +61,7 @@ public final class PushManagerImpl implements Reloadable, PushManager {
             case "telegram" -> provider = TelegramPushProvider.loadFromJson(name, jsonObject, httpUtil);
             case "bark" -> provider = BarkPushProvider.loadFromJson(name, jsonObject, httpUtil);
             case "pushdeer" -> provider = PushDeerPushProvider.loadFromJson(name, jsonObject, httpUtil);
+            case "gotify" -> provider = GotifyPushProvider.loadFromJson(name, jsonObject, httpUtil);
         }
         return provider;
     }

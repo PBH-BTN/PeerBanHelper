@@ -80,6 +80,7 @@ public final class LegacyBtnAbilitySubmitHistory extends AbstractBtnAbility {
             return time;
         } catch (Exception e) {
             log.error("Unable to read timestamp from file", e);
+            writeLastSubmitAtTimestamp(System.currentTimeMillis());
             return System.currentTimeMillis();
         }
     }
