@@ -26,6 +26,7 @@ export default {
   'page.banlist.banlist.filters.reset': '重置',
   'page.banlist.banlist.filters.show': '顯示篩選器',
   'page.banlist.banlist.filters.hide': '隱藏篩選器',
+  'page.banlist.banlist.filters.addFilter': '新增篩選器',
   'page.banlist.banlist.filters.reason': '封禁原因',
   'page.banlist.banlist.filters.reason.placeholder': '輸入封禁原因...',
   'page.banlist.banlist.filters.clientName': '客戶端名稱',

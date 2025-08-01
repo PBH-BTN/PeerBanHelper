@@ -17,6 +17,7 @@ export default {
   // 筛选器
   'page.banlog.filters.showFilters': '显示筛选器',
   'page.banlog.filters.hideFilters': '隐藏筛选器',
+  'page.banlog.filters.addFilter': '添加筛选器',
   'page.banlog.filters.reset': '重置',
   'page.banlog.filters.reason': '封禁原因',
   'page.banlog.filters.reasonPlaceholder': '输入封禁原因...',

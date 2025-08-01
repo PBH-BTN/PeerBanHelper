@@ -17,6 +17,7 @@ export default {
   // Filters
   'page.banlog.filters.showFilters': 'Show Filters',
   'page.banlog.filters.hideFilters': 'Hide Filters',
+  'page.banlog.filters.addFilter': 'Add Filter',
   'page.banlog.filters.reset': 'Reset',
   'page.banlog.filters.reason': 'Ban Reason',
   'page.banlog.filters.reasonPlaceholder': 'Enter ban reason...',

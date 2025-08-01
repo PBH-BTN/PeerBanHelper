@@ -1,152 +1,213 @@
 <template>
-  <a-space direction="vertical" size="medium">
-    <a-space wrap>
-      <a-typography-text bold>{{ t('page.banlist.banlist.filters.title') }}</a-typography-text>
-      <a-button size="small" @click="resetFilters">
-        {{ t('page.banlist.banlist.filters.reset') }}
-      </a-button>
-    </a-space>
+  <div class="filter-bar">
+    <!-- Active Filters and Controls -->
+    <div class="filter-controls">
+      <div class="filter-chips">
+        <!-- Active filter chips -->
+        <a-tag
+          v-for="(value, key) in activeFilters"
+          :key="key"
+          closable
+          @close="removeFilter(key as keyof BanListFilters)"
+          class="filter-chip"
+        >
+          <span class="filter-label">{{ getFilterLabel(key as keyof BanListFilters) }}:</span>
+          <span class="filter-value">{{ value }}</span>
+        </a-tag>
+      </div>
 
-    <a-row :gutter="16" wrap>
-      <!-- Ban Reason Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.reason')">
+      <div class="filter-actions">
+        <!-- Add Filter Dropdown -->
+        <a-dropdown trigger="click" position="bottom">
+          <a-button type="outline" size="small">
+            <template #icon>
+              <icon-plus />
+            </template>
+            {{ t('page.banlist.banlist.filters.addFilter') }}
+          </a-button>
+          <template #content>
+            <a-doption
+              v-for="filterType in availableFilters"
+              :key="filterType.key"
+              @click="addFilter(filterType.key)"
+            >
+              <template #icon>
+                <component :is="filterType.icon" />
+              </template>
+              {{ filterType.label }}
+            </a-doption>
+          </template>
+        </a-dropdown>
+
+        <!-- Reset Button -->
+        <a-button
+          v-if="hasActiveFilters"
+          type="outline"
+          size="small"
+          @click="resetFilters"
+          status="warning"
+        >
+          <template #icon>
+            <icon-refresh />
+          </template>
+          {{ t('page.banlist.banlist.filters.reset') }}
+        </a-button>
+      </div>
+    </div>
+
+    <!-- Active Filter Inputs -->
+    <div v-if="hasActiveInputs" class="filter-inputs">
+      <a-space wrap size="small">
+        <!-- Reason Input -->
+        <div v-if="showFilterInput('reason')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.reason') }}</span>
           <a-input
             v-model="localFilters.reason"
             :placeholder="t('page.banlist.banlist.filters.reason.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- Client Name Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.clientName')">
+        <!-- Client Name Select -->
+        <div v-if="showFilterInput('clientName')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.clientName') }}</span>
           <a-select
             v-model="localFilters.clientName"
             :placeholder="t('page.banlist.banlist.filters.clientName.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             allow-search
             :options="clientNameOptions"
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- PeerID Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.peerId')">
+        <!-- PeerID Input -->
+        <div v-if="showFilterInput('peerId')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.peerId') }}</span>
           <a-input
             v-model="localFilters.peerId"
             :placeholder="t('page.banlist.banlist.filters.peerId.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- Country Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.country')">
+        <!-- Country Select -->
+        <div v-if="showFilterInput('country')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.country') }}</span>
           <a-select
             v-model="localFilters.country"
             :placeholder="t('page.banlist.banlist.filters.country.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             allow-search
             :options="countryOptions"
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- City Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.city')">
+        <!-- City Select -->
+        <div v-if="showFilterInput('city')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.city') }}</span>
           <a-select
             v-model="localFilters.city"
             :placeholder="t('page.banlist.banlist.filters.city.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             allow-search
             :options="cityOptions"
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- ASN Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.asn')">
+        <!-- ASN Input -->
+        <div v-if="showFilterInput('asn')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.asn') }}</span>
           <a-input
             v-model="localFilters.asn"
             :placeholder="t('page.banlist.banlist.filters.asn.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- ISP Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.isp')">
+        <!-- ISP Select -->
+        <div v-if="showFilterInput('isp')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.isp') }}</span>
           <a-select
             v-model="localFilters.isp"
             :placeholder="t('page.banlist.banlist.filters.isp.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             allow-search
             :options="ispOptions"
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- Network Type Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.netType')">
+        <!-- Network Type Select -->
+        <div v-if="showFilterInput('netType')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.netType') }}</span>
           <a-select
             v-model="localFilters.netType"
             :placeholder="t('page.banlist.banlist.filters.netType.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             allow-search
             :options="netTypeOptions"
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- Discovery Location Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.context')">
+        <!-- Discovery Location Select -->
+        <div v-if="showFilterInput('context')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.context') }}</span>
           <a-select
             v-model="localFilters.context"
             :placeholder="t('page.banlist.banlist.filters.context.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             allow-search
             :options="contextOptions"
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
+        </div>
 
-      <!-- Hit Rule Filter -->
-      <a-col :span="24" :md="12" :lg="8">
-        <a-form-item :label="t('page.banlist.banlist.filters.rule')">
+        <!-- Hit Rule Select -->
+        <div v-if="showFilterInput('rule')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlist.banlist.filters.rule') }}</span>
           <a-select
             v-model="localFilters.rule"
             :placeholder="t('page.banlist.banlist.filters.rule.placeholder')"
+            size="small"
+            style="width: 200px"
             allow-clear
             allow-search
             :options="ruleOptions"
             @change="onFilterChange"
           />
-        </a-form-item>
-      </a-col>
-    </a-row>
-  </a-space>
+        </div>
+      </a-space>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { reactive, computed, watch, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDebounceFn } from '@vueuse/core'
 import type { BanListFilters } from '@/service/banList'
@@ -192,6 +253,85 @@ const localFilters = reactive<BanListFilters>({
   rule: props.filters.rule || ''
 })
 
+// Track which filters are currently being shown for input
+const activeInputs = ref<Set<keyof BanListFilters>>(new Set())
+
+// Computed properties
+const activeFilters = computed(() => {
+  const active: Partial<BanListFilters> = {}
+  Object.entries(localFilters).forEach(([key, value]) => {
+    if (value && value.trim()) {
+      active[key as keyof BanListFilters] = value.trim()
+    }
+  })
+  return active
+})
+
+const hasActiveFilters = computed(() => {
+  return Object.keys(activeFilters.value).length > 0
+})
+
+const hasActiveInputs = computed(() => {
+  return activeInputs.value.size > 0
+})
+
+const availableFilters = computed(() => {
+  const filters = [
+    { key: 'reason', label: t('page.banlist.banlist.filters.reason'), icon: 'icon-message' },
+    { key: 'clientName', label: t('page.banlist.banlist.filters.clientName'), icon: 'icon-user' },
+    { key: 'peerId', label: t('page.banlist.banlist.filters.peerId'), icon: 'icon-idcard' },
+    { key: 'country', label: t('page.banlist.banlist.filters.country'), icon: 'icon-location' },
+    { key: 'city', label: t('page.banlist.banlist.filters.city'), icon: 'icon-location' },
+    { key: 'asn', label: t('page.banlist.banlist.filters.asn'), icon: 'icon-global' },
+    { key: 'isp', label: t('page.banlist.banlist.filters.isp'), icon: 'icon-wifi' },
+    { key: 'netType', label: t('page.banlist.banlist.filters.netType'), icon: 'icon-link' },
+    { key: 'context', label: t('page.banlist.banlist.filters.context'), icon: 'icon-compass' },
+    { key: 'rule', label: t('page.banlist.banlist.filters.rule'), icon: 'icon-shield' }
+  ]
+
+  // Filter out already active inputs
+  return filters.filter(f => !activeInputs.value.has(f.key as keyof BanListFilters))
+})
+
+// Methods
+const getFilterLabel = (key: keyof BanListFilters): string => {
+  const labels = {
+    reason: t('page.banlist.banlist.filters.reason'),
+    clientName: t('page.banlist.banlist.filters.clientName'),
+    peerId: t('page.banlist.banlist.filters.peerId'),
+    country: t('page.banlist.banlist.filters.country'),
+    city: t('page.banlist.banlist.filters.city'),
+    asn: t('page.banlist.banlist.filters.asn'),
+    isp: t('page.banlist.banlist.filters.isp'),
+    netType: t('page.banlist.banlist.filters.netType'),
+    context: t('page.banlist.banlist.filters.context'),
+    rule: t('page.banlist.banlist.filters.rule')
+  }
+  return labels[key] || key
+}
+
+const showFilterInput = (key: keyof BanListFilters): boolean => {
+  return activeInputs.value.has(key)
+}
+
+const addFilter = (key: string) => {
+  activeInputs.value.add(key as keyof BanListFilters)
+}
+
+const removeFilter = (key: keyof BanListFilters) => {
+  localFilters[key] = ''
+  activeInputs.value.delete(key)
+  onFilterChange()
+}
+
+const resetFilters = () => {
+  Object.keys(localFilters).forEach(key => {
+    localFilters[key as keyof BanListFilters] = ''
+  })
+  activeInputs.value.clear()
+  onFilterChange()
+}
+
 const debouncedFilterChange = useDebounceFn(() => {
   // Remove empty values before emitting
   const activeFilters: BanListFilters = {}
@@ -213,20 +353,6 @@ const onFilterChange = () => {
   debouncedFilterChange()
 }
 
-const resetFilters = () => {
-  localFilters.reason = ''
-  localFilters.clientName = ''
-  localFilters.peerId = ''
-  localFilters.country = ''
-  localFilters.city = ''
-  localFilters.asn = ''
-  localFilters.isp = ''
-  localFilters.netType = ''
-  localFilters.context = ''
-  localFilters.rule = ''
-  onFilterChange()
-}
-
 // Watch for external filter changes
 watch(
   () => props.filters,
@@ -243,13 +369,116 @@ watch(
       context: newFilters.context || '',
       rule: newFilters.rule || ''
     })
+
+    // Update active inputs based on current filters
+    activeInputs.value.clear()
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value && value.trim()) {
+        activeInputs.value.add(key as keyof BanListFilters)
+      }
+    })
   },
-  { deep: true }
+  { deep: true, immediate: true }
 )
 </script>
 
 <style scoped lang="less">
-.a-form-item {
-  margin-bottom: 0;
+.filter-bar {
+  background: var(--color-fill-1);
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-height: 24px;
+  align-items: center;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-primary-light-1);
+  border: 1px solid var(--color-primary-3);
+  color: var(--color-primary-6);
+  
+  .filter-label {
+    font-weight: 500;
+    margin-right: 4px;
+  }
+  
+  .filter-value {
+    font-family: var(--font-mono-family);
+    opacity: 0.8;
+  }
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-inputs {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-2);
+}
+
+.filter-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .input-label {
+    font-size: 12px;
+    color: var(--color-text-2);
+    white-space: nowrap;
+    font-weight: 500;
+    min-width: 60px;
+  }
+}
+
+/* Empty state for filter chips */
+.filter-chips:empty::before {
+  content: attr(data-empty-text);
+  color: var(--color-text-3);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-actions {
+    justify-content: center;
+  }
+  
+  .filter-input-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    
+    .input-label {
+      min-width: auto;
+    }
+  }
 }
 </style>

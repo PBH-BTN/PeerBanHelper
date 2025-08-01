@@ -26,6 +26,7 @@ export default {
   'page.banlist.banlist.filters.reset': 'Reset',
   'page.banlist.banlist.filters.show': 'Show Filters',
   'page.banlist.banlist.filters.hide': 'Hide Filters',
+  'page.banlist.banlist.filters.addFilter': 'Add Filter',
   'page.banlist.banlist.filters.reason': 'Ban Reason',
   'page.banlist.banlist.filters.reason.placeholder': 'Enter ban reason...',
   'page.banlist.banlist.filters.clientName': 'Client Name',

@@ -26,6 +26,7 @@ export default {
   'page.banlist.banlist.filters.reset': '重置',
   'page.banlist.banlist.filters.show': '显示筛选器',
   'page.banlist.banlist.filters.hide': '隐藏筛选器',
+  'page.banlist.banlist.filters.addFilter': '添加筛选器',
   'page.banlist.banlist.filters.reason': '封禁原因',
   'page.banlist.banlist.filters.reason.placeholder': '输入封禁原因...',
   'page.banlist.banlist.filters.clientName': '客户端名称',

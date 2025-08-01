@@ -1,112 +1,156 @@
 <template>
-  <div class="ban-log-filters">
-    <div class="filter-header">
-      <a-button @click="toggleFilters" type="outline" size="small">
-        <template #icon>
-          <icon-filter v-if="!showFilters" />
-          <icon-eye-invisible v-else />
-        </template>
-        {{ showFilters ? t('page.banlog.filters.hideFilters') : t('page.banlog.filters.showFilters') }}
-      </a-button>
-      <a-button 
-        @click="resetFilters" 
-        type="outline" 
-        size="small" 
-        :disabled="!hasActiveFilters"
-        style="margin-left: 8px;"
-      >
-        <template #icon>
-          <icon-refresh />
-        </template>
-        {{ t('page.banlog.filters.reset') }}
-      </a-button>
+  <div class="filter-bar">
+    <!-- Active Filters and Controls -->
+    <div class="filter-controls">
+      <div class="filter-chips">
+        <!-- Active filter chips -->
+        <a-tag
+          v-for="(value, key) in activeFilters"
+          :key="key"
+          closable
+          @close="removeFilter(key as keyof BanLogFilters)"
+          class="filter-chip"
+        >
+          <span class="filter-label">{{ getFilterLabel(key as keyof BanLogFilters) }}:</span>
+          <span class="filter-value">{{ value }}</span>
+        </a-tag>
+      </div>
+
+      <div class="filter-actions">
+        <!-- Add Filter Dropdown -->
+        <a-dropdown trigger="click" position="bottom">
+          <a-button type="outline" size="small">
+            <template #icon>
+              <icon-plus />
+            </template>
+            {{ t('page.banlog.filters.addFilter') }}
+          </a-button>
+          <template #content>
+            <a-doption
+              v-for="filterType in availableFilters"
+              :key="filterType.key"
+              @click="addFilter(filterType.key)"
+            >
+              <template #icon>
+                <component :is="filterType.icon" />
+              </template>
+              {{ filterType.label }}
+            </a-doption>
+          </template>
+        </a-dropdown>
+
+        <!-- Reset Button -->
+        <a-button
+          v-if="hasActiveFilters"
+          type="outline"
+          size="small"
+          @click="resetFilters"
+          status="warning"
+        >
+          <template #icon>
+            <icon-refresh />
+          </template>
+          {{ t('page.banlog.filters.reset') }}
+        </a-button>
+      </div>
     </div>
-    
-    <a-collapse v-model:active-key="activeKeys" :bordered="false">
-      <a-collapse-item key="filters">
-        <div class="filters-content">
-          <a-row :gutter="16">
-            <a-col :span="8">
-              <a-form-item :label="t('page.banlog.filters.reason')" style="margin-bottom: 16px;">
-                <a-input 
-                  v-model="localFilters.reason" 
-                  :placeholder="t('page.banlog.filters.reasonPlaceholder')"
-                  allow-clear
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="8">
-              <a-form-item :label="t('page.banlog.filters.clientName')" style="margin-bottom: 16px;">
-                <a-select 
-                  v-model="localFilters.clientName" 
-                  :placeholder="t('page.banlog.filters.clientNamePlaceholder')"
-                  allow-clear
-                  allow-search
-                  :options="clientNameOptions"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="8">
-              <a-form-item :label="t('page.banlog.filters.peerId')" style="margin-bottom: 16px;">
-                <a-input 
-                  v-model="localFilters.peerId" 
-                  :placeholder="t('page.banlog.filters.peerIdPlaceholder')"
-                  allow-clear
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          
-          <a-row :gutter="16">
-            <a-col :span="8">
-              <a-form-item :label="t('page.banlog.filters.torrentName')" style="margin-bottom: 16px;">
-                <a-input 
-                  v-model="localFilters.torrentName" 
-                  :placeholder="t('page.banlog.filters.torrentNamePlaceholder')"
-                  allow-clear
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="8">
-              <a-form-item :label="t('page.banlog.filters.module')" style="margin-bottom: 16px;">
-                <a-select 
-                  v-model="localFilters.module" 
-                  :placeholder="t('page.banlog.filters.modulePlaceholder')"
-                  allow-clear
-                  allow-search
-                  :options="moduleOptions"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="8">
-              <a-form-item :label="t('page.banlog.filters.rule')" style="margin-bottom: 16px;">
-                <a-select 
-                  v-model="localFilters.rule" 
-                  :placeholder="t('page.banlog.filters.rulePlaceholder')"
-                  allow-clear
-                  allow-search
-                  :options="ruleOptions"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          
-          <a-row :gutter="16">
-            <a-col :span="8">
-              <a-form-item :label="t('page.banlog.filters.context')" style="margin-bottom: 16px;">
-                <a-select 
-                  v-model="localFilters.context" 
-                  :placeholder="t('page.banlog.filters.contextPlaceholder')"
-                  allow-clear
-                  allow-search
-                  :options="contextOptions"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
+
+    <!-- Active Filter Inputs -->
+    <div v-if="hasActiveInputs" class="filter-inputs">
+      <a-space wrap size="small">
+        <!-- Reason Input -->
+        <div v-if="showFilterInput('reason')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlog.filters.reason') }}</span>
+          <a-input
+            v-model="localFilters.reason"
+            :placeholder="t('page.banlog.filters.reasonPlaceholder')"
+            size="small"
+            style="width: 200px"
+            allow-clear
+          />
         </div>
-      </a-collapse-item>
-    </a-collapse>
+
+        <!-- Client Name Select -->
+        <div v-if="showFilterInput('clientName')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlog.filters.clientName') }}</span>
+          <a-select
+            v-model="localFilters.clientName"
+            :placeholder="t('page.banlog.filters.clientNamePlaceholder')"
+            size="small"
+            style="width: 200px"
+            allow-clear
+            allow-search
+            :options="clientNameOptions"
+          />
+        </div>
+
+        <!-- PeerID Input -->
+        <div v-if="showFilterInput('peerId')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlog.filters.peerId') }}</span>
+          <a-input
+            v-model="localFilters.peerId"
+            :placeholder="t('page.banlog.filters.peerIdPlaceholder')"
+            size="small"
+            style="width: 200px"
+            allow-clear
+          />
+        </div>
+
+        <!-- Torrent Name Input -->
+        <div v-if="showFilterInput('torrentName')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlog.filters.torrentName') }}</span>
+          <a-input
+            v-model="localFilters.torrentName"
+            :placeholder="t('page.banlog.filters.torrentNamePlaceholder')"
+            size="small"
+            style="width: 200px"
+            allow-clear
+          />
+        </div>
+
+        <!-- Module Select -->
+        <div v-if="showFilterInput('module')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlog.filters.module') }}</span>
+          <a-select
+            v-model="localFilters.module"
+            :placeholder="t('page.banlog.filters.modulePlaceholder')"
+            size="small"
+            style="width: 200px"
+            allow-clear
+            allow-search
+            :options="moduleOptions"
+          />
+        </div>
+
+        <!-- Rule Select -->
+        <div v-if="showFilterInput('rule')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlog.filters.rule') }}</span>
+          <a-select
+            v-model="localFilters.rule"
+            :placeholder="t('page.banlog.filters.rulePlaceholder')"
+            size="small"
+            style="width: 200px"
+            allow-clear
+            allow-search
+            :options="ruleOptions"
+          />
+        </div>
+
+        <!-- Context Select -->
+        <div v-if="showFilterInput('context')" class="filter-input-group">
+          <span class="input-label">{{ t('page.banlog.filters.context') }}</span>
+          <a-select
+            v-model="localFilters.context"
+            :placeholder="t('page.banlog.filters.contextPlaceholder')"
+            size="small"
+            style="width: 200px"
+            allow-clear
+            allow-search
+            :options="contextOptions"
+          />
+        </div>
+      </a-space>
+    </div>
   </div>
 </template>
 
@@ -133,13 +177,43 @@ const emit = defineEmits<{
 }>()
 
 // State
-const showFilters = ref(false)
-const activeKeys = ref<string[]>([])
 const localFilters = ref<BanLogFilters>({ ...props.modelValue })
 
+// Track which filters are currently being shown for input
+const activeInputs = ref<Set<keyof BanLogFilters>>(new Set())
+
 // Computed
+const activeFilters = computed(() => {
+  const active: Partial<BanLogFilters> = {}
+  Object.entries(localFilters.value).forEach(([key, value]) => {
+    if (value && value.trim()) {
+      active[key as keyof BanLogFilters] = value.trim()
+    }
+  })
+  return active
+})
+
 const hasActiveFilters = computed(() => {
-  return Object.values(localFilters.value).some(value => value && value.trim() !== '')
+  return Object.keys(activeFilters.value).length > 0
+})
+
+const hasActiveInputs = computed(() => {
+  return activeInputs.value.size > 0
+})
+
+const availableFilters = computed(() => {
+  const filters = [
+    { key: 'reason', label: t('page.banlog.filters.reason'), icon: 'icon-message' },
+    { key: 'clientName', label: t('page.banlog.filters.clientName'), icon: 'icon-user' },
+    { key: 'peerId', label: t('page.banlog.filters.peerId'), icon: 'icon-idcard' },
+    { key: 'torrentName', label: t('page.banlog.filters.torrentName'), icon: 'icon-file' },
+    { key: 'module', label: t('page.banlog.filters.module'), icon: 'icon-apps' },
+    { key: 'rule', label: t('page.banlog.filters.rule'), icon: 'icon-shield' },
+    { key: 'context', label: t('page.banlog.filters.context'), icon: 'icon-compass' }
+  ]
+
+  // Filter out already active inputs
+  return filters.filter(f => !activeInputs.value.has(f.key as keyof BanLogFilters))
 })
 
 // Dynamic options for dropdowns
@@ -166,13 +240,44 @@ const contextOptions = computed(() => {
 })
 
 // Methods
-const toggleFilters = () => {
-  showFilters.value = !showFilters.value
-  activeKeys.value = showFilters.value ? ['filters'] : []
+const getFilterLabel = (key: keyof BanLogFilters): string => {
+  const labels: Record<keyof BanLogFilters, string> = {
+    reason: t('page.banlog.filters.reason'),
+    clientName: t('page.banlog.filters.clientName'),
+    peerId: t('page.banlog.filters.peerId'),
+    torrentName: t('page.banlog.filters.torrentName'),
+    module: t('page.banlog.filters.module'),
+    rule: t('page.banlog.filters.rule'),
+    context: t('page.banlog.filters.context'),
+    // These fields are included in the interface but not currently used in ban log UI
+    country: 'Country',
+    city: 'City', 
+    asn: 'ASN',
+    isp: 'ISP',
+    netType: 'Network Type'
+  }
+  return labels[key] || key
+}
+
+const showFilterInput = (key: keyof BanLogFilters): boolean => {
+  return activeInputs.value.has(key)
+}
+
+const addFilter = (key: string) => {
+  activeInputs.value.add(key as keyof BanLogFilters)
+}
+
+const removeFilter = (key: keyof BanLogFilters) => {
+  if (localFilters.value[key] !== undefined) {
+    delete localFilters.value[key]
+  }
+  activeInputs.value.delete(key)
+  emitFilters()
 }
 
 const resetFilters = () => {
   localFilters.value = {}
+  activeInputs.value.clear()
   emitFilters()
 }
 
@@ -187,33 +292,106 @@ watch(localFilters, () => {
 
 watch(() => props.modelValue, (newValue) => {
   localFilters.value = { ...newValue }
-}, { deep: true })
-
-watch(activeKeys, (newKeys) => {
-  showFilters.value = newKeys.includes('filters')
-})
+  
+  // Update active inputs based on current filters
+  activeInputs.value.clear()
+  Object.entries(newValue).forEach(([key, value]) => {
+    if (value && value.trim()) {
+      activeInputs.value.add(key as keyof BanLogFilters)
+    }
+  })
+}, { deep: true, immediate: true })
 </script>
 
 <style scoped>
-.ban-log-filters {
+.filter-bar {
+  background: var(--color-fill-1);
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  padding: 12px;
   margin-bottom: 16px;
 }
 
-.filter-header {
-  margin-bottom: 8px;
+.filter-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.filters-content {
-  padding: 16px;
-  background-color: var(--color-fill-2);
-  border-radius: 6px;
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-height: 24px;
+  align-items: center;
 }
 
-:deep(.arco-collapse-item-header) {
-  display: none;
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-primary-light-1);
+  border: 1px solid var(--color-primary-3);
+  color: var(--color-primary-6);
+  
+  .filter-label {
+    font-weight: 500;
+    margin-right: 4px;
+  }
+  
+  .filter-value {
+    font-family: var(--font-mono-family);
+    opacity: 0.8;
+  }
 }
 
-:deep(.arco-collapse-item-content) {
-  padding: 0;
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-inputs {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-2);
+}
+
+.filter-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .input-label {
+    font-size: 12px;
+    color: var(--color-text-2);
+    white-space: nowrap;
+    font-weight: 500;
+    min-width: 60px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-actions {
+    justify-content: center;
+  }
+  
+  .filter-input-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    
+    .input-label {
+      min-width: auto;
+    }
+  }
 }
 </style>
