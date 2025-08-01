@@ -97,6 +97,7 @@ export default {
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
   'page.settings.tab.config.push.form.type.bark': 'Bark',
   'page.settings.tab.config.push.form.type.gotify': 'Gotify',
+  'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
 
   'page.settings.tab.config.push.form.stmp.host': 'Host',
   'page.settings.tab.config.push.form.stmp.port': 'Port',
@@ -126,6 +127,9 @@ export default {
   'page.settings.tab.config.push.form.gotify.priority': 'Priority',
   'page.settings.tab.config.push.form.gotify.priority.extra':
     'Message priority level (1-10, default: 5)',
+
+  'page.settings.tab.config.push.form.pushdeer.endpoint': 'PushDeer Endpoint',
+  'page.settings.tab.config.push.form.pushdeer.pushkey': 'PushDeer Key',
 
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',

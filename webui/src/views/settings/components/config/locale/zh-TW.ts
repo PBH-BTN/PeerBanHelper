@@ -96,6 +96,7 @@ export default {
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
   'page.settings.tab.config.push.form.type.bark': 'Bark',
   'page.settings.tab.config.push.form.type.gotify': 'Gotify',
+  'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
 
   'page.settings.tab.config.push.form.stmp.host': '主機',
   'page.settings.tab.config.push.form.stmp.port': '埠號',
@@ -123,6 +124,9 @@ export default {
     '完整的 Gotify URL，包括訊息端點和令牌',
   'page.settings.tab.config.push.form.gotify.priority': '優先級',
   'page.settings.tab.config.push.form.gotify.priority.extra': '訊息優先級 (1-10，預設：5)',
+
+  'page.settings.tab.config.push.form.pushdeer.endpoint': '端點',
+  'page.settings.tab.config.push.form.pushdeer.pushkey': '推送金鑰',
 
   'page.settings.tab.config.push.form.action.ok': '確定',
   'page.settings.tab.config.push.form.action.cancel': '取消',
