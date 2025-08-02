@@ -23,7 +23,7 @@
       @cancel="visible = false"
     >
       <a-space direction="vertical">
-        <a-button @click="model.push('')">
+        <a-button @click="addNewItem">
           <template #icon>
             <icon-plus />
           </template>
@@ -32,7 +32,7 @@
           style="min-width: 200px"
           :virtual-list-props="props.virtualListProps"
           :data="dataWithIndex"
-          :pagination-props="props.paginationProps"
+          :pagination-props="controlledPaginationProps"
         >
           <template #item="{ item }">
             <a-list-item :key="item.index">
@@ -77,9 +77,35 @@ const props = defineProps<{
   virtualListProps?: VirtualListProps
   paginationProps?: PaginationProps
 }>()
+
+// Add pagination state management
+const currentPage = ref(1)
+const pageSize = computed(() => props.paginationProps?.pageSize || 10)
+
+// Create computed pagination props that we can control
+const controlledPaginationProps = computed(() => {
+  if (!props.paginationProps) return undefined
+  return {
+    ...props.paginationProps,
+    current: currentPage.value,
+    onChange: (page: number) => {
+      currentPage.value = page
+    }
+  }
+})
+
 const dataWithIndex = computed(() => {
   return model.value.map((item, index) => ({ item, index }))
 })
+
+const addNewItem = () => {
+  model.value.push('')
+  // Calculate which page the new item will be on and navigate there
+  const totalItems = model.value.length
+  const lastPage = Math.ceil(totalItems / pageSize.value)
+  currentPage.value = lastPage
+}
+
 const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
   if (model.value.some((item: string) => item.trim() === ''))
     cb(t('page.settings.tab.profile.formArray.emptyTips'))

@@ -60,3 +60,4 @@ enable-jcef.txt
 webui/.eslintcache
 **/static
 debug.log
+package-lock.json
