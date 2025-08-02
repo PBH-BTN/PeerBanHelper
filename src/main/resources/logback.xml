@@ -24,6 +24,8 @@
     </appender>
 
     <logger name="com.offbynull.portmapper" level="OFF"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.eclipse.jetty" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

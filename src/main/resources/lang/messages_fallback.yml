@@ -680,6 +680,11 @@ LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_DESCRIPTION: |
   在 Windows 平台上，PeerBanHelper 将在 Full GC（或者每隔一段时间）调用 Win32 API 清空自身进程工作集以释放内存。  
   不活跃的内存页将被转移到操作系统分页文件中，可能引起短暂性能下降和磁盘 I/O，但有助于释放进程占用的物理内存以供其他应用程序使用。  
   更改此设定需要重新启动 PeerBanHelper 以使其生效。
+BACKGROUND_TASK_EXCEPTION_TITLE: "{} 失败"
+BACKGROUND_TASK_EXCEPTION_DESCRIPTION: |
+  最后状态: {}: {}  
+  进度: {}  
+  错误信息: {}
 BTN_HEARTBEAT_TITLE: "心跳更新"
 BTN_HEARTBEAT_DESCRIPTION: |
   该能力允许 BTN 网络请求 PeerBanHelper 每隔一定时间向 BTN 服务器发送一个心跳请求，以更新在 BTN 网络上的状态。
@@ -691,3 +696,37 @@ BTN_HEARTBEAT_UPDATING: "[BTN 网络] 计划任务正在向 BTN 网络更新心�
 BTN_HEARTBEAT_UPDATED: "[BTN 网络] 已通过 {} 次请求向 BTN 网络更新心跳信息。"
 BTN_HEARTBEAT_SUCCESS: "已成功与服务器交换心跳信息"
 BTN_HEARTBEAT_FAILED: "没有任何网路接口可用来发送心跳信息，所有网络请求均已失败"
+
+PORTMAPPER_SCANNING: "[PortMapper] 正在后台探测网络接口上可用的 UPnP-IGD/NAT-PMP/PCP 设备，可能需要一些时间……"
+PORTMAPPER_SCANNED: "[PortMapper] 共找到 {} 个 UPnP-IGD/NAT-PMP/PCP 设备，服务已启动"
+
+BTSTUN_RESTART_FAILED: "[AutoSTUN] 由于意外错误，无法对下载器 {} 启动隧道，请检查日志以获取更多信息"
+BTSTUN_RESTART: "[AutoSTUN] 正在启动下载器 {} 的隧道，请稍等……"
+BTSTUN_ON_TUNNEL_CLOSE: "[AutoSTUN] 下载器 {} 的隧道已关闭"
+BTSTUN_UNABLE_START: "[AutoSTUN] 下载器 {} 的隧道创建失败，请检查日志以获取更多信息"
+BTSTUN_ON_TUNNEL_CREATED: "[AutoSTUN] 下载器 {} 的隧道已创建，本地端点: {}, 远程端点: {}"
+BTSTUN_FORWARDER_EXCEPTION: "[AutoSTUN] 无法创建下载器 {} 的隧道 TCP 数据包转发服务，错误信息: {}"
+BTSTUN_FORWARDER_CREATING: "[AutoSTUN] 正在创建下载器 {} 的隧道 TCP 数据包转发服务，请稍等..."
+BTSTUN_MODIFY_DOWNLOADER_BT_PORT: "[AutoSTUN] 正在修改下载器 {} 的 BT 监听端口为 {}，请稍等..."
+BTSTUN_TUNNEL_CREATE_SUCCESSFULLY: "[AutoSTUN] 下载器 {} 的隧道已成功创建: (Upstream){} <-> (Proxy){} <-> (Downstream){}"
+BTSTUN_SHUTDOWN_DOWNLOADER_OFFLINE: "[AutoSTUN] 下载器 {} 已离线，正在注销并隧道..."
+BTSTUN_SHUTDOWN_DOWNLOADER_ONLINE: "[AutoSTUN] 下载器 {} 已连接，正在注册 AutoSTUN 服务..."
+
+BACKGROUND_TASK_NOT_FOUND: "无法找到指定的后台任务，指定的任务可能已经结束"
+BACKGROUND_TASK_CANNOT_CANCEL: "此任务不支持取消"
+BACKGROUND_TASK_CANCEL_REQUESTED: "已成功通知任务取消"
+BACKGROUND_TASK_PRINT_TITLE: "当前有 {} 个后台任务正在运行中："
+BACKGROUND_TASK_PRINT_ITEM_RUNNING: "[⌛️] {}: {} 运行中"
+BACKGROUND_TASK_PRINT_ITEM_PAUSED: "[⏸] {}: {} 暂停中"
+BACKGROUND_TASK_PRINT_ITEM_NOT_STARTED: "[❓] {}: {} 尚未开始运行"
+BACKGROUND_TASK_PRINT_ITEM_ERROR: "[❌] {} 任务因错误而被终止"
+BACKGROUND_TASK_PRINT_ITEM_CANCELLED: "[🗑️] {}: {} 已取消"
+
+BACKGROUND_TASK_NAME_UPDATE_NAT_STATUS: "更新 NAT 状态"
+
+AUTOSTUN_RESTARTED: "已成功重启所有下载器的 AutoSTUN 隧道"
+AUTOSTUN_DOWNLOADER_NOT_EXISTS: "选择的下载器 {} 不存在"
+AUTOSTUN_DOWNLOADER_TUNNEL_NOT_EXISTS: "下载器 {} 对应的 AutoSTUN 隧道不存在或未启动"
+AUTOSTUN_DOWNLOADER_TUNNEL_FORWARDER_NOT_EXISTS: "下载器 {} 对应的 AutoSTUN 隧道不存在或未启动"
+AUTOSTUN_DOWNLOADER_TUNNEL_UPDATE_PORT_FAILED: "无法更改下载器 {} 的监听端口，目标下载器可能已经离线，或者 PeerBanHelper 无法连接到下载器，正在关闭隧道……"
+AUTOSTUN_CONFIG_REAPPLIED: "已成功保存并正在重启隧道"

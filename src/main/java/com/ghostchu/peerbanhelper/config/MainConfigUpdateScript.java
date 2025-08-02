@@ -32,6 +32,12 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 36)
+    public void stunSettings(YamlConfiguration bundle){
+        conf.set("stun", bundle.getConfigurationSection("stun"));
+        conf.set("auto-stun", bundle.getConfigurationSection("auto-stun"));
+    }
+
     @UpdateScript(version = 35)
     public void migrateProxySettings(){
         switch (conf.getInt("proxy.setting", 0)) { // 旧版本不代理，现在调整为不代理

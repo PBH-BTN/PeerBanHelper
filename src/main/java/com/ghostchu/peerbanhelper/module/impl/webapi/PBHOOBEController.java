@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.DownloaderDiscovery;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -32,6 +33,8 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     private JavalinWebContainer webContainer;
     @Autowired
     private DownloaderManagerImpl downloaderManager;
+    @Autowired
+    private DownloaderDiscovery downloaderDiscovery;
 
     @Override
     public boolean isConfigurable() {
@@ -52,7 +55,18 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .post("/api/oobe/init", this::handleOOBERequest, Role.ANYONE)
+                .get("/api/oobe/scanDownloader", this::handleOOBEScanDownloader, Role.ANYONE)
                 .post("/api/oobe/testDownloader", ctx -> validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject()), Role.ANYONE); // 指定 ANYONE，否则会被鉴权代码拉取鉴权
+    }
+
+    private void handleOOBEScanDownloader(@NotNull Context ctx) {
+        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
+            ctx.status(HttpStatus.FORBIDDEN);
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
+            return;
+        }
+        var downloaders = downloaderDiscovery.scan().join();
+        ctx.json(new StdResp(true, null, downloaders));
     }
 
     private void handleOOBERequest(Context ctx) throws IOException {

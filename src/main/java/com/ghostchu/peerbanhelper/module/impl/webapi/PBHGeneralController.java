@@ -12,8 +12,11 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskRunnable;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -44,6 +47,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.net.Proxy;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
@@ -66,6 +70,12 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private PeerBanHelper peerBanHelper;
     @Autowired
     private DownloaderServer downloaderServer;
+    @Autowired
+    private StunManager bTStunManager;
+    @Autowired
+    private BackgroundTaskManager backgroundTaskManager;
+    @Autowired
+    private HTTPUtil hTTPUtil;
 
     @Override
     public boolean isConfigurable() {
@@ -86,6 +96,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
+                .post("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_WRITE)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
                 .get("/api/general/stacktrace", this::handleDumpStackTrace, Role.USER_READ)
                 .get("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
@@ -95,6 +106,18 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_WRITE)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleRefreshNatStatus(@NotNull Context context) {
+        var bgTask = new BackgroundTaskRunnable(new TranslationComponent(Lang.BACKGROUND_TASK_NAME_UPDATE_NAT_STATUS)) {
+            @Override
+            public void run() {
+                var natType = bTStunManager.refreshNatType();
+                tlog.info("New detected NAT type now is: " + natType.name());
+            }
+        };
+        backgroundTaskManager.registerAndStart(bgTask);
+        context.json(new StdResp(true, null, false, bgTask));
     }
 
     private void handleTriggerCrash(@NotNull Context context) {
@@ -233,10 +256,11 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         var userIp = IPAddressUtil.getIPAddress(userIp(context)).toCompressedString();
         Map<String, Object> network = new LinkedHashMap<>();
         var proxy = Main.getMainConfig().getInt("proxy.setting");
-        network.put("internet_access", true); // ?
-        network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
+        network.put("internet_access", hTTPUtil.getNetworkReachability());
+        network.put("use_proxy", hTTPUtil.getProxyType() != Proxy.Type.DIRECT);
         network.put("reverse_proxy", WebUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
+        network.put("nat_type", bTStunManager.getCachedNatType().name());
         return network;
     }
 

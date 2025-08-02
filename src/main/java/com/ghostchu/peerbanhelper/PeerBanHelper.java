@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.module.impl.ai.mcp.MCPController;
 import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
@@ -17,11 +18,10 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.LazyLoad;
-import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -79,6 +79,12 @@ public class PeerBanHelper implements Reloadable {
     private CrashManager crashManager;
     @Autowired
     private HTTPUtil httpUtil;
+    @Autowired
+    private PBHPortMapper pBHPortMapper;
+    @Autowired
+    private StunManager bTStunManager;
+    @Autowired
+    private DownloaderDiscovery downloaderDiscovery;
 
 
     public PeerBanHelper() {
@@ -110,7 +116,6 @@ public class PeerBanHelper implements Reloadable {
         postCompatibilityCheck();
         registerModules();
         sendSnapshotAlert();
-        runTestCode();
         downloaderServer.load();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
@@ -123,6 +128,7 @@ public class PeerBanHelper implements Reloadable {
                 WorkingSetManagerFactory.trimMemory();
             }
         });
+        runTestCode();
     }
 
     private void checkKnownCrashes() {
@@ -258,6 +264,8 @@ public class PeerBanHelper implements Reloadable {
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
+        moduleManager.register(PBHBackgroundTaskController.class);
+        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(IPBlackList.class);
         moduleManager.register(PeerIdBlacklist.class);
         moduleManager.register(ClientNameBlacklist.class);
@@ -279,7 +287,6 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHPlusController.class);
         moduleManager.register(PBHOOBEController.class);
         moduleManager.register(PBHChartController.class);
-        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(PBHTorrentController.class);
         moduleManager.register(PBHPeerController.class);
         moduleManager.register(PBHAlertController.class);
@@ -290,6 +297,8 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHUtilitiesController.class);
         moduleManager.register(BackgroundModule.class);
         moduleManager.register(SwarmTrackingModule.class);
+        moduleManager.register(MCPController.class);
+        moduleManager.register(PBHAutoStunController.class);
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {

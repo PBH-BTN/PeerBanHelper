@@ -198,7 +198,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.7.0
+        uses: docker/metadata-action@v5.8.0
         with:
           images: ghostchu/peerbanhelper
           tags: |
@@ -234,7 +234,7 @@ jobs:
           password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
       - name: Extract metadata (tags, labels) for Aliyun ACR
         id: meta-acr
-        uses: docker/metadata-action@v5.7.0
+        uses: docker/metadata-action@v5.8.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper
           tags: |
