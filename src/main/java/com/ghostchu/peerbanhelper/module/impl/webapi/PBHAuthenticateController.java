@@ -60,28 +60,24 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             throw new NeedInitException();
         }
-
         if (!webContainer.allowAttemptLogin(userIp(ctx), ctx.userAgent())) {
             throw new IPAddressBannedException();
         }
-
-        if(!ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)){
+        if (!ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)) {
             webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
             ctx.sessionAttribute("authenticated", webContainer.getToken());
             ctx.json(new StdResp(true, "DEBUG: Skipping WebUI login", null));
             return;
         }
-
         LoginRequestBody loginRequestBody = ctx.bodyAsClass(LoginRequestBody.class);
         if (loginRequestBody == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
             return;
         }
-        if (loginRequestBody.getToken() == null || loginRequestBody.getToken().isBlank()) {
-            ctx.status(HttpStatus.BAD_REQUEST);
+        if ("".equalsIgnoreCase(loginRequestBody.getToken())) {
+            ctx.status(HttpStatus.UNAUTHORIZED);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
-            // do not mark login failed, it's webui workaround
             return;
         }
         if (!webContainer.getToken().equals(loginRequestBody.getToken())) {
