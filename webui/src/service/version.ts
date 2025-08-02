@@ -92,10 +92,13 @@ export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mai
   )
 }
 
-export function GetGlobalConfig(): Promise<CommonResponse<GlobalConfig>> {
+export async function GetGlobalConfig(): Promise<CommonResponse<GlobalConfig>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
   const url = new URL(urlJoin(useEndpointStore().endpoint, 'api/general/global'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
-    useEndpointStore().assertResponseLogin(res)
+    endpointStore.assertResponseLogin(res)
     return res.json()
   })
 }
