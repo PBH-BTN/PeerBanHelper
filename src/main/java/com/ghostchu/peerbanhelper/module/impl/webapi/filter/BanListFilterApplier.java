@@ -1,0 +1,135 @@
+package com.ghostchu.peerbanhelper.module.impl.webapi.filter;
+
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
+import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
+
+import java.util.Locale;
+
+/**
+ * Applies filters to ban list data in memory.
+ * Since ban list data comes from active memory rather than database queries,
+ * filtering is performed on the DTO objects after geo data enrichment.
+ */
+public class BanListFilterApplier {
+    
+    /**
+     * Applies the given filters to a BanDTO object.
+     * 
+     * @param dto The ban DTO to check against filters
+     * @param filters The filters to apply
+     * @return true if the DTO passes all filters, false otherwise
+     */
+    public static boolean applyFilters(BanDTO dto, BanListFilters filters) {
+        if (filters == null || !filters.hasAnyFilter()) {
+            return true;
+        }
+
+        BakedBanMetadata metadata = dto.getBanMetadata();
+        
+        // Filter by reason/description
+        if (!matchesStringFilter(metadata.getDescription(), filters.getReason())) {
+            return false;
+        }
+
+        // Filter by client name
+        PeerWrapper peer = metadata.getPeer();
+        String clientName = peer != null ? peer.getClientName() : null;
+        if (!matchesStringFilter(clientName, filters.getClientName())) {
+            return false;
+        }
+
+        // Filter by peer ID
+        String peerId = peer != null ? peer.getId() : null;
+        if (!matchesStringFilter(peerId, filters.getPeerId())) {
+            return false;
+        }
+
+        // Filter by geographic data
+        var geoData = dto.getIpGeoData();
+        String country = null;
+        String city = null;
+        String asn = null;
+        String isp = null;
+        String netType = null;
+        
+        if (geoData != null) {
+            country = geoData.getCountry() != null ? geoData.getCountry().getName() : null;
+            city = geoData.getCity() != null ? geoData.getCity().getName() : null;
+            asn = geoData.getAs() != null ? geoData.getAs().getOrganization() : null;
+            isp = geoData.getNetwork() != null ? geoData.getNetwork().getIsp() : null;
+            netType = geoData.getNetwork() != null ? geoData.getNetwork().getNetType() : null;
+        }
+        
+        // Apply individual geo filters - each field is checked independently
+        if (!matchesStringFilter(country, filters.getCountry()) ||
+            !matchesStringFilter(city, filters.getCity()) ||
+            !matchesStringFilter(asn, filters.getAsn()) ||
+            !matchesStringFilter(isp, filters.getIsp()) ||
+            !matchesStringFilter(netType, filters.getNetType())) {
+            return false;
+        }
+
+        // Filter by context (maps to torrent ID for discovery location)
+        String torrentId = null;
+        if (metadata.getTorrent() != null) {
+            torrentId = metadata.getTorrent().getId();
+        }
+        if (!matchesStringFilter(torrentId, filters.getContext())) {
+            return false;
+        }
+        
+        // Filter by rule - this will be handled in the controller before BakedBanMetadata creation
+        // to access the original rule key instead of the translated text
+        // This filter is intentionally skipped here and handled upstream
+
+        return true;
+    }
+    
+    /**
+     * Checks if the actual value matches the filter value using case-insensitive contains.
+     * 
+     * @param actualValue The actual value from the data
+     * @param filterValue The filter value to match against
+     * @return true if filter passes (filter is empty or actual value contains filter value)
+     */
+    private static boolean matchesStringFilter(String actualValue, String filterValue) {
+        if (filterValue == null || filterValue.trim().isEmpty()) {
+            return true; // No filter applied
+        }
+        
+        if (actualValue == null) {
+            return false; // Cannot match against null value
+        }
+        
+        return actualValue.toLowerCase(Locale.ROOT).contains(filterValue.trim().toLowerCase(Locale.ROOT));
+    }
+    
+    /**
+     * Checks if a filter value is valid (not null and not empty after trimming).
+     * 
+     * @param value The filter value to check
+     * @return true if the value is valid for filtering
+     */
+    private static boolean isValidFilter(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+    
+    /**
+     * Applies rule filter to original BanMetadata before baking.
+     * This allows access to the original rule key instead of translated text.
+     * 
+     * @param banMetadata The original ban metadata
+     * @param filters The filters to apply
+     * @return true if the ban metadata passes the rule filter
+     */
+    public static boolean applyRuleFilter(BanMetadata banMetadata, BanListFilters filters) {
+        if (filters == null || filters.getRule() == null || filters.getRule().trim().isEmpty()) {
+            return true;
+        }
+        
+        String ruleKey = banMetadata.getRule() != null ? banMetadata.getRule().getKey() : null;
+        return matchesStringFilter(ruleKey, filters.getRule());
+    }
+}

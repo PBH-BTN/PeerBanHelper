@@ -11,6 +11,10 @@ import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanListFilters;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanListFilterApplier;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanLogFilters;
+import com.ghostchu.peerbanhelper.module.impl.webapi.filter.BanLogFilterApplier;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -21,8 +25,13 @@ import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
+
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,12 +39,14 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
 @Component
 
 public final class PBHBanController extends AbstractFeatureModule {
+
     @Autowired
     private Database db;
     @Autowired
@@ -77,7 +88,180 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .get("/api/bans", this::handleBans, Role.USER_READ)
                 .get("/api/bans/logs", this::handleLogs, Role.USER_READ)
                 .get("/api/bans/ranks", this::handleRanks, Role.USER_READ)
+                .get("/api/bans/filter-options", this::handleBanListFilterOptions, Role.USER_READ)
+                .get("/api/bans/logs/filter-options", this::handleBanLogFilterOptions, Role.USER_READ)
                 .delete("/api/bans", this::handleBanDelete, Role.USER_WRITE);
+    }
+
+    private void handleBanListFilterOptions(Context ctx) {
+        // For ban list, options come from active banned peers in memory
+        Map<String, Set<String>> options = new HashMap<>();
+        options.put("clientNames", new HashSet<>());
+        options.put("countries", new HashSet<>());
+        options.put("cities", new HashSet<>());
+        options.put("asns", new HashSet<>());
+        options.put("isps", new HashSet<>());
+        options.put("netTypes", new HashSet<>());
+        options.put("rules", new HashSet<>());
+        
+        // For torrents, we need to collect both ID and name pairs
+        Map<String, String> torrentOptions = new HashMap<>(); // id -> name mapping
+        
+        // Collect data from active banned peers
+        downloaderServer.getBannedPeers().values().forEach(banMetadata -> {
+            // Client names
+            PeerWrapper peer = banMetadata.getPeer();
+            if (peer != null && peer.getClientName() != null) {
+                options.get("clientNames").add(peer.getClientName());
+            }
+            
+            // Rules
+            if (banMetadata.getRule() != null) {
+                options.get("rules").add(banMetadata.getRule().getKey());
+            }
+            
+            // Torrent ID and name pairs (for discovery location)
+            if (banMetadata.getTorrent() != null && 
+                banMetadata.getTorrent().getId() != null && 
+                banMetadata.getTorrent().getName() != null) {
+                torrentOptions.put(banMetadata.getTorrent().getId(), banMetadata.getTorrent().getName());
+            }
+        });
+        
+        // Also collect geo data from IP database for currently banned IPs
+        downloaderServer.getBannedPeers().keySet().forEach(peerAddress -> {
+            var geoData = getServer().queryIPDB(peerAddress).geoData().get();
+            if (geoData != null) {
+                if (geoData.getCountry() != null && geoData.getCountry().getName() != null) {
+                    options.get("countries").add(geoData.getCountry().getName());
+                }
+                if (geoData.getCity() != null && geoData.getCity().getName() != null) {
+                    options.get("cities").add(geoData.getCity().getName());
+                }
+                if (geoData.getAs() != null && geoData.getAs().getOrganization() != null) {
+                    options.get("asns").add(geoData.getAs().getOrganization());
+                }
+                if (geoData.getNetwork() != null && geoData.getNetwork().getIsp() != null) {
+                    options.get("isps").add(geoData.getNetwork().getIsp());
+                }
+                if (geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
+                    options.get("netTypes").add(geoData.getNetwork().getNetType());
+                }
+            }
+        });
+        
+        // Convert sets to sorted lists for consistent ordering
+        Map<String, List<String>> sortedOptions = options.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream().sorted().collect(Collectors.toList())
+                ));
+        
+        // Add sorted torrent options as list of objects with id and name
+        List<Map<String, String>> torrentList = torrentOptions.entrySet().stream()
+                .map(entry -> Map.of("id", entry.getKey(), "name", entry.getValue()))
+                .sorted((a, b) -> a.get("name").compareTo(b.get("name")))
+                .collect(Collectors.toList());
+        
+        Map<String, Object> result = new HashMap<>(sortedOptions);
+        result.put("torrents", torrentList);
+        
+        ctx.json(new StdResp(true, null, result));
+    }
+    
+    private void handleBanLogFilterOptions(Context ctx) throws SQLException {
+        if (db == null) {
+            throw new IllegalStateException("Database not initialized on this PeerBanHelper server");
+        }
+        
+        Map<String, List<String>> options = new HashMap<>();
+        
+        // Get unique client names from history
+        var clientNames = historyDao.queryBuilder()
+                .selectColumns("peerClientName")
+                .distinct()
+                .where()
+                .isNotNull("peerClientName")
+                .and()
+                .ne("peerClientName", new SelectArg(""))
+                .query()
+                .stream()
+                .map(h -> h.getPeerClientName())
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        options.put("clientNames", clientNames);
+        
+        // Get unique torrent names from history via join
+        var torrentNames = historyDao.queryBuilder()
+                .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                .selectColumns("torrent.name")
+                .distinct()
+                .where()
+                .isNotNull("torrent.name")
+                .and()
+                .ne("torrent.name", new SelectArg(""))
+                .query()
+                .stream()
+                .map(h -> h.getTorrent() != null ? h.getTorrent().getName() : null)
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        options.put("torrentNames", torrentNames);
+        
+        // Get unique module names from history via rule join
+        var moduleNames = historyDao.queryBuilder()
+                .join(ruleDao.queryBuilder().setAlias("rule")
+                        .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND),
+                        QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                .selectColumns("module.name")
+                .distinct()
+                .where()
+                .isNotNull("module.name")
+                .and()
+                .ne("module.name", new SelectArg(""))
+                .query()
+                .stream()
+                .map(h -> h.getRule() != null && h.getRule().getModule() != null ? h.getRule().getModule().getName() : null)
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        options.put("modules", moduleNames);
+        
+        // Get unique rule descriptions from history via rule join
+        var ruleDescriptions = historyDao.queryBuilder()
+                .join(ruleDao.queryBuilder().setAlias("rule"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                .selectColumns("rule.rule")
+                .distinct()
+                .where()
+                .isNotNull("rule.rule")
+                .and()
+                .ne("rule.rule", new SelectArg(""))
+                .query()
+                .stream()
+                .map(h -> h.getRule() != null ? h.getRule().getRule().getKey() : null)
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        options.put("rules", ruleDescriptions);
+        
+        // Get unique downloaders (context) from history
+        var contexts = historyDao.queryBuilder()
+                .selectColumns("downloader")
+                .distinct()
+                .where()
+                .isNotNull("downloader")
+                .and()
+                .ne("downloader", new SelectArg(""))
+                .query()
+                .stream()
+                .map(h -> h.getDownloader())
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+        options.put("contexts", contexts);
+        
+        ctx.json(new StdResp(true, null, options));
     }
 
     private void handleBanDelete(Context context) {
@@ -110,7 +294,19 @@ public final class PBHBanController extends AbstractFeatureModule {
         persistMetrics.flush();
         Pageable pageable = new Pageable(ctx);
         Orderable orderable = new Orderable(Map.of("banAt", false), ctx);
-        var queryResult = historyDao.queryByPaging(orderable
+        
+        // Extract filter parameters for ban logs - only database-supported filters
+        BanLogFilters filters = new BanLogFilters(
+                ctx.queryParam("filterReason"),
+                ctx.queryParam("filterClientName"), 
+                ctx.queryParam("filterPeerId"),
+                ctx.queryParam("filterTorrentName"),
+                ctx.queryParam("filterModule"),
+                ctx.queryParam("filterRule"),
+                ctx.queryParam("filterContext")  // Maps to downloader field
+        );
+
+        var queryBuilder = orderable
                 .addMapping("torrent.name", "torrentName")
                 .addMapping("torrent.infoHash", "torrentInfoHash")
                 .addMapping("torrent.size", "torrentSize")
@@ -121,7 +317,12 @@ public final class PBHBanController extends AbstractFeatureModule {
                         .join(ruleDao.queryBuilder().setAlias("rule")
                                         .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
                                 , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                ), pageable);
+                );
+
+        // Apply filters to the query using the new filter applier
+        queryBuilder = BanLogFilterApplier.applyFilters(queryBuilder, filters);
+
+        var queryResult = historyDao.queryByPaging(queryBuilder, pageable);
         var result = queryResult.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
@@ -140,6 +341,20 @@ public final class PBHBanController extends AbstractFeatureModule {
         boolean ignoreBanForDisconnect =
                 Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
         String search = ctx.queryParam("search");
+        
+        // Extract filter parameters
+        BanListFilters filters = new BanListFilters(
+                ctx.queryParam("filterReason"),
+                ctx.queryParam("filterClientName"),
+                ctx.queryParam("filterPeerId"),
+                ctx.queryParam("filterCountry"),
+                ctx.queryParam("filterCity"),
+                ctx.queryParam("filterAsn"),
+                ctx.queryParam("filterIsp"),
+                ctx.queryParam("filterNetType"),
+                ctx.queryParam("filterContext"),
+                ctx.queryParam("filterRule")
+        );
 
         if (hasPageParam) {
             /* ---------------- Pagination path ---------------- */
@@ -150,7 +365,8 @@ public final class PBHBanController extends AbstractFeatureModule {
                     -1,       // lastBanTime unused
                     -1,       // limit unused
                     ignoreBanForDisconnect,
-                    search);
+                    search,
+                    filters);
 
             List<BanDTO> allResults = banStream.toList();
             long total = allResults.size();
@@ -167,7 +383,7 @@ public final class PBHBanController extends AbstractFeatureModule {
             long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
             long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
 
-            var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit, ignoreBanForDisconnect, search);
+            var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit, ignoreBanForDisconnect, search, filters);
             ctx.json(new StdResp(true, null, banResponseList.toList()));
         }
     }
@@ -178,7 +394,7 @@ public final class PBHBanController extends AbstractFeatureModule {
     }
 
 
-    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
+    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search, BanListFilters filters) {
         var banResponseList = downloaderServer.getBannedPeers()
                 .entrySet()
                 .stream()
@@ -188,7 +404,15 @@ public final class PBHBanController extends AbstractFeatureModule {
                 })
                 .filter(b -> search == null || b.getKey().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
-                .map(entry -> new BanDTO(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null))
+                .filter(entry -> BanListFilterApplier.applyRuleFilter(entry.getValue(), filters)) // Apply rule filter before baking
+                .map(entry -> {
+                    BanDTO dto = new BanDTO(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null);
+                    // Use the same address source as in the filter options API for consistency
+                    var nullableGeoData = getServer().queryIPDB(entry.getKey()).geoData().get();
+                    dto.setIpGeoData(nullableGeoData);
+                    return dto;
+                })
+                .filter(dto -> BanListFilterApplier.applyFilters(dto, filters))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
             banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);
@@ -196,13 +420,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         if (limit > 0) {
             banResponseList = banResponseList.limit(limit);
         }
-        banResponseList = banResponseList.peek(response -> {
-            PeerWrapper peerWrapper = response.getBanMetadata().getPeer();
-            if (peerWrapper != null) {
-                var nullableGeoData = getServer().queryIPDB(peerWrapper.toPeerAddress()).geoData().get();
-                response.setIpGeoData(nullableGeoData);
-            }
-        });
         return banResponseList;
     }
+
 }
