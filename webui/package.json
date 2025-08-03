@@ -76,6 +76,7 @@
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
   },
+  "_ai_agent_hint": "This project using pnpm's patch feature so you MUST use pnpm, not npm or yarn. If pnpm not installed, you MUST install it first.",
   "pnpm": {
     "patchedDependencies": {
       "vue-request@2.0.4": "patches/vue-request@2.0.4.patch"
