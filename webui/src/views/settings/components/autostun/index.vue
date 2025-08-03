@@ -103,7 +103,7 @@
 
         <!-- Tunnel Information Section -->
         <a-card :title="t('page.settings.tab.autostun.tunnel_info')">
-          <a-spin :loading="loadingTunnels">
+          <a-spin :loading="loadingTunnelsRequest">
             <div v-if="tunnels.length === 0" style="text-align: center; padding: 40px">
               <a-empty :description="t('page.settings.tab.autostun.no_tunnels')" />
             </div>
@@ -114,6 +114,7 @@
                     <a-button
                       size="small"
                       type="outline"
+                      :disabled="!item.tunnel.valid"
                       @click="handleViewConnections(item.downloader.id, item.downloader.name)"
                     >
                       {{ t('page.settings.tab.autostun.view_connections') }}
@@ -191,70 +192,39 @@
       :title="`${connectionModalTitle} - ${t('page.settings.tab.autostun.connection_table')}`"
       width="80%"
       :footer="false"
+      unmount-on-close
     >
       <a-spin :loading="loadingConnections">
         <a-table
-          :key="connectionTableKey"
+          :columns="connectionTableColumns"
           :data="connections"
           :pagination="false"
           :scroll="{ x: 1000 }"
+          stripe
+          size="medium"
         >
           <template #empty>
             <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
           </template>
-          <a-table-column
-            :title="t('page.settings.tab.autostun.connection_downstream')"
-            data-index="downstreamHost"
-            :width="180"
-          >
-            <template #cell="{ record }">
-              {{ record.downstreamHost }}:{{ record.downstreamPort }}
-            </template>
-          </a-table-column>
-          <a-table-column
-            :title="t('page.settings.tab.autostun.connection_proxy')"
-            data-index="proxyHost"
-            :width="180"
-          >
-            <template #cell="{ record }"> {{ record.proxyHost }}:{{ record.proxyPort }} </template>
-          </a-table-column>
-          <a-table-column
-            :title="t('page.settings.tab.autostun.connection_upstream')"
-            data-index="upstreamHost"
-            :width="180"
-          >
-            <template #cell="{ record }">
-              {{ record.upstreamHost }}:{{ record.upstreamPort }}
-            </template>
-          </a-table-column>
-          <a-table-column
-            :title="t('page.settings.tab.autostun.connection_established')"
-            data-index="establishedAt"
-            :width="150"
-          >
-            <template #cell="{ record }">
-              {{ formatTimestamp(record.establishedAt) }}
-            </template>
-          </a-table-column>
-          <a-table-column
-            :title="t('page.settings.tab.autostun.connection_activity')"
-            data-index="lastActivityAt"
-            :width="150"
-          >
-            <template #cell="{ record }">
-              {{ formatTimestamp(record.lastActivityAt) }}
-            </template>
-          </a-table-column>
-          <a-table-column
-            :title="t('page.settings.tab.autostun.connection_bytes')"
-            data-index="bytes"
-            :width="200"
-          >
-            <template #cell="{ record }">
-              <div>↓ {{ formatBytes(record.toDownstreamBytes) }}</div>
-              <div>↑ {{ formatBytes(record.toUpstreamBytes) }}</div>
-            </template>
-          </a-table-column>
+          <template #downstream="{ record }">
+            {{ record.downstreamHost }}:{{ record.downstreamPort }}
+          </template>
+          <template #proxy="{ record }">
+            {{ record.proxyHost }}:{{ record.proxyPort }}
+          </template>
+          <template #upstream="{ record }">
+            {{ record.upstreamHost }}:{{ record.upstreamPort }}
+          </template>
+          <template #established="{ record }">
+            {{ formatTimestamp(record.establishedAt) }}
+          </template>
+          <template #activity="{ record }">
+            {{ formatTimestamp(record.lastActivityAt) }}
+          </template>
+          <template #bytes="{ record }">
+            <div>↓ {{ formatBytes(record.toDownstreamBytes) }}</div>
+            <div>↑ {{ formatBytes(record.toUpstreamBytes) }}</div>
+          </template>
         </a-table>
       </a-spin>
     </a-modal>
@@ -264,8 +234,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRequest } from 'vue-request'
+import { useRequest, usePagination } from 'vue-request'
 import { Message } from '@arco-design/web-vue'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import {
   getAutoSTUNStatus,
   saveAutoSTUNConfig,
@@ -285,16 +256,48 @@ import dayjs from 'dayjs'
 
 const { t } = useI18n()
 
+// Connection table columns definition
+const connectionTableColumns = [
+  {
+    title: t('page.settings.tab.autostun.connection_downstream'),
+    slotName: 'downstream',
+    width: 180
+  },
+  {
+    title: t('page.settings.tab.autostun.connection_proxy'),
+    slotName: 'proxy',
+    width: 180
+  },
+  {
+    title: t('page.settings.tab.autostun.connection_upstream'),
+    slotName: 'upstream',
+    width: 180
+  },
+  {
+    title: t('page.settings.tab.autostun.connection_established'),
+    slotName: 'established',
+    width: 150
+  },
+  {
+    title: t('page.settings.tab.autostun.connection_activity'),
+    slotName: 'activity',
+    width: 150
+  },
+  {
+    title: t('page.settings.tab.autostun.connection_bytes'),
+    slotName: 'bytes',
+    width: 200
+  }
+]
+
 // Reactive data
 const firstLoading = ref(true)
 const refreshingNAT = ref(false)
 const savingConfig = ref(false)
-const loadingTunnels = ref(false)
 const loadingConnections = ref(false)
 const connectionModalVisible = ref(false)
 const connectionModalTitle = ref('')
 const configChanged = ref(false)
-const connectionTableKey = ref(0)
 
 const config = reactive<AutoSTUNConfig>({
   enabled: false,
@@ -384,24 +387,10 @@ const { refresh: refreshStatus } = useRequest(
 
 // Load tunnels
 const loadTunnels = async () => {
-  if (!config.enabled) {
-    tunnels.value = []
-    return
-  }
-
   try {
-    loadingTunnels.value = true
-    const res = await getAutoSTUNTunnels()
-    if (res.success) {
-      tunnels.value = res.data
-    }
-
-    // Start auto-refresh after initial load
-    refreshTunnels()
+    await refreshTunnels()
   } catch (error) {
     console.error('Failed to load tunnels:', error)
-  } finally {
-    loadingTunnels.value = false
   }
 }
 
@@ -460,9 +449,6 @@ const handleViewConnections = async (downloaderId: string, downloaderName: strin
     // Clear previous connections to avoid showing stale data
     connections.value = []
 
-    // Force table re-render
-    connectionTableKey.value++
-
     // Show modal after state is set
     connectionModalVisible.value = true
 
@@ -482,9 +468,6 @@ const handleViewConnections = async (downloaderId: string, downloaderName: strin
 
       // Set the data
       connections.value = connectionData
-
-      // Force another re-render
-      connectionTableKey.value++
 
       console.log('Connections value set to:', connections.value)
       console.log('Connections length:', connections.value.length)
@@ -529,28 +512,29 @@ const formatTimestamp = (timestamp: number): string => {
   return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
 }
 
-// Auto-refresh tunnels using vue-request
-const { refresh: refreshTunnels } = useRequest(
+// Auto-refresh tunnels using useAutoUpdatePlugin
+const { data: tunnelsData, loading: loadingTunnelsRequest, refresh: refreshTunnels } = useRequest(
   async () => {
     if (!config.enabled) {
-      tunnels.value = []
-      return null
+      return []
     }
 
     const res = await getAutoSTUNTunnels()
     if (res.success) {
-      tunnels.value = res.data
+      return res.data
     }
-    return res.data
+    return []
   },
   {
-    pollingInterval: 30000, // Auto-refresh every 30 seconds
-    pollingWhenHidden: false, // Don't refresh when tab is hidden
-    refreshOnWindowFocus: true, // Refresh when window regains focus
-    manual: true, // Don't run immediately, will be triggered by loadTunnels
+    manual: true,
+    onSuccess: (data) => {
+      tunnels.value = data || []
+    },
     onError: (error) => {
       console.error('Failed to refresh tunnels:', error)
+      tunnels.value = []
     }
-  }
+  },
+  [useAutoUpdatePlugin]
 )
 </script>
