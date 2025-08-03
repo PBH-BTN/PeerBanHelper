@@ -6,7 +6,6 @@ import AutoSTUNLocale from '../components/autostun/locale/zh-TW'
 export default {
   'page.settings.tab.config': '基礎設定',
   'page.settings.tab.profile': '偏好設定',
-  'page.settings.tab.labs': '實驗室',
   ...ProfileLocale,
   ...ConfigLocale,
   ...InfoLocale,

@@ -6,7 +6,6 @@ import AutoSTUNLocale from '../components/autostun/locale/en-US'
 export default {
   'page.settings.tab.config': 'Settings',
   'page.settings.tab.profile': 'Profile',
-  'page.settings.tab.labs': 'Labs',
   ...ProfileLocale,
   ...ConfigLocale,
   ...InfoLocale,
