@@ -48,7 +48,7 @@ const emit = defineEmits<{
 
 // Computed
 const natTypeDisplayName = computed(() => {
-  return t(`page.settings.tab.autostun.nat_type.${props.natType.toLowerCase()}`)
+  return t(`page.settings.tab.autostun.nat_type.${props.natType}`)
 })
 
 const natTypeColor = computed(() => {

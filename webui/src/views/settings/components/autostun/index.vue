@@ -87,6 +87,7 @@ const loadingConnections = ref(false)
 const connectionModalVisible = ref(false)
 const connectionModalTitle = ref('')
 const configChanged = ref(false)
+const currentConnectionDownloaderId = ref<string>('')
 
 const config = reactive<AutoSTUNConfig>({
   enabled: false,
@@ -122,6 +123,14 @@ watch(
   { deep: true }
 )
 
+// Watch for modal visibility changes to clean up connection data
+watch(connectionModalVisible, (visible) => {
+  if (!visible) {
+    currentConnectionDownloaderId.value = ''
+    connections.value = []
+  }
+})
+
 // Auto-refresh tunnels using useAutoUpdatePlugin
 const { loading: loadingTunnelsRequest, refresh: refreshTunnels } = useRequest(
   async () => {
@@ -143,6 +152,37 @@ const { loading: loadingTunnelsRequest, refresh: refreshTunnels } = useRequest(
     onError: (error) => {
       console.error('Failed to refresh tunnels:', error)
       tunnels.value = []
+    }
+  },
+  [useAutoUpdatePlugin]
+)
+
+// Auto-refresh connections when modal is visible
+const { refresh: refreshConnections } = useRequest(
+  async () => {
+    if (!connectionModalVisible.value || !currentConnectionDownloaderId.value) {
+      return []
+    }
+
+    const res = await getTunnelConnections(currentConnectionDownloaderId.value)
+    if (res.success && res.data) {
+      return Array.isArray(res.data) ? res.data : []
+    }
+    return []
+  },
+  {
+    manual: true,
+    refreshDeps: [connectionModalVisible],
+    onSuccess: (data) => {
+      if (connectionModalVisible.value) {
+        connections.value = data || []
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to refresh connections:', error)
+      if (connectionModalVisible.value) {
+        connections.value = []
+      }
     }
   },
   [useAutoUpdatePlugin]
@@ -252,6 +292,7 @@ const handleViewConnections = async (downloaderId: string, downloaderName: strin
   try {
     // Set up modal state
     connectionModalTitle.value = downloaderName
+    currentConnectionDownloaderId.value = downloaderId
     loadingConnections.value = true
 
     // Clear previous connections to avoid showing stale data
@@ -286,6 +327,9 @@ const handleViewConnections = async (downloaderId: string, downloaderName: strin
       } else {
         console.log('Successfully loaded', connections.value.length, 'connections')
       }
+
+      // Start auto-refresh for connections
+      refreshConnections()
     } else {
       console.error('API returned error:', res.message)
       Message.error(res.message || 'Failed to load connections')
