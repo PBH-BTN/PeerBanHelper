@@ -56,7 +56,9 @@
                   </a-col>
                   <a-col :span="8">
                     <div>
-                      <strong>{{ t('page.settings.tab.autostun.tunnel_downstream_bytes') }}:</strong>
+                      <strong
+                        >{{ t('page.settings.tab.autostun.tunnel_downstream_bytes') }}:</strong
+                      >
                       {{ formatBytes(item.tunnel.totalToDownstreamBytes) }}
                     </div>
                     <div>

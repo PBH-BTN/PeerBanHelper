@@ -3,9 +3,9 @@
     <a-form :model="config" layout="vertical">
       <a-form-item field="enabled" :label="t('page.settings.tab.autostun.enable')">
         <a-switch
-          v-model="config.enabled"
+          :model-value="config.enabled"
           :disabled="!isNATCompatible"
-          @change="$emit('configChange')"
+          @update:model-value="(value) => $emit('configChange', { enabled: value as boolean })"
         />
         <template #extra>
           {{ t('page.settings.tab.autostun.enable.tips') }}
@@ -17,9 +17,11 @@
         :label="t('page.settings.tab.autostun.friendly_mapping')"
       >
         <a-switch
-          v-model="config.useFriendlyLoopbackMapping"
+          :model-value="config.useFriendlyLoopbackMapping"
           :disabled="!config.enabled"
-          @change="$emit('configChange')"
+          @update:model-value="
+            (value) => $emit('configChange', { useFriendlyLoopbackMapping: value as boolean })
+          "
         />
         <template #extra>
           {{ t('page.settings.tab.autostun.friendly_mapping.tips') }}
@@ -28,9 +30,9 @@
 
       <a-form-item :label="t('page.settings.tab.autostun.select_downloaders')">
         <a-checkbox-group
-          v-model="config.downloaders"
+          :model-value="config.downloaders"
           :disabled="!config.enabled"
-          @change="$emit('configChange')"
+          @update:model-value="(value) => $emit('configChange', { downloaders: value as string[] })"
         >
           <a-space v-if="downloaders.length > 0" direction="vertical">
             <a-checkbox
@@ -78,7 +80,7 @@ defineProps<Props>()
 
 // Emits
 defineEmits<{
-  configChange: []
+  configChange: [config: Partial<AutoSTUNConfig>]
   saveConfig: []
 }>()
 </script>

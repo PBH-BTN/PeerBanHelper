@@ -1,10 +1,11 @@
 <template>
   <a-modal
-    v-model:visible="visible"
+    :visible="visible"
     :title="`${modalTitle} - ${t('page.settings.tab.autostun.connection_table')}`"
     width="80%"
     :footer="false"
     unmount-on-close
+    @update:visible="$emit('update:visible', $event)"
   >
     <a-spin :loading="loading">
       <a-table
@@ -21,9 +22,7 @@
         <template #downstream="{ record }">
           {{ record.downstreamHost }}:{{ record.downstreamPort }}
         </template>
-        <template #proxy="{ record }">
-          {{ record.proxyHost }}:{{ record.proxyPort }}
-        </template>
+        <template #proxy="{ record }"> {{ record.proxyHost }}:{{ record.proxyPort }} </template>
         <template #upstream="{ record }">
           {{ record.upstreamHost }}:{{ record.upstreamPort }}
         </template>

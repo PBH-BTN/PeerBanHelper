@@ -28,7 +28,7 @@
           :is-n-a-t-compatible="isNATCompatible"
           :config-changed="configChanged"
           :saving-config="savingConfig"
-          @config-change="handleConfigChange"
+          @config-change="(partialConfig) => Object.assign(config, partialConfig)"
           @save-config="handleSaveConfig"
         />
 
@@ -123,7 +123,7 @@ watch(
 )
 
 // Auto-refresh tunnels using useAutoUpdatePlugin
-const { data: tunnelsData, loading: loadingTunnelsRequest, refresh: refreshTunnels } = useRequest(
+const { loading: loadingTunnelsRequest, refresh: refreshTunnels } = useRequest(
   async () => {
     if (!config.enabled) {
       return []
@@ -180,7 +180,7 @@ const refreshStatus = async () => {
     if (res.success) {
       natType.value = res.data.natType
       // Map the selected downloaders to an array of IDs
-      const downloaderIds = res.data.selectedDownloaders.map(d => d.id)
+      const downloaderIds = res.data.selectedDownloaders.map((d) => d.id)
       Object.assign(config, {
         enabled: res.data.enabled,
         useFriendlyLoopbackMapping: res.data.useFriendlyLoopbackMapping,
@@ -225,10 +225,6 @@ const handleRefreshNAT = async () => {
   } finally {
     refreshingNAT.value = false
   }
-}
-
-const handleConfigChange = () => {
-  // Config change is automatically tracked by the watcher
 }
 
 const handleSaveConfig = async () => {
