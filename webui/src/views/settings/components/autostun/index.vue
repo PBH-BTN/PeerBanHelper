@@ -193,7 +193,12 @@
       :footer="false"
     >
       <a-spin :loading="loadingConnections">
-        <a-table :data="connections" :pagination="false" :scroll="{ x: 1000 }">
+        <a-table
+          :key="connectionTableKey"
+          :data="connections"
+          :pagination="false"
+          :scroll="{ x: 1000 }"
+        >
           <template #empty>
             <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
           </template>
@@ -257,7 +262,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import { Message } from '@arco-design/web-vue'
@@ -289,6 +294,7 @@ const loadingConnections = ref(false)
 const connectionModalVisible = ref(false)
 const connectionModalTitle = ref('')
 const configChanged = ref(false)
+const connectionTableKey = ref(0)
 
 const config = reactive<AutoSTUNConfig>({
   enabled: false,
@@ -389,6 +395,9 @@ const loadTunnels = async () => {
     if (res.success) {
       tunnels.value = res.data
     }
+
+    // Start auto-refresh after initial load
+    refreshTunnels()
   } catch (error) {
     console.error('Failed to load tunnels:', error)
   } finally {
@@ -444,29 +453,52 @@ const handleSaveConfig = async () => {
 
 const handleViewConnections = async (downloaderId: string, downloaderName: string) => {
   try {
+    // Set up modal state
     connectionModalTitle.value = downloaderName
-    connectionModalVisible.value = true
     loadingConnections.value = true
+
     // Clear previous connections to avoid showing stale data
     connections.value = []
+
+    // Force table re-render
+    connectionTableKey.value++
+
+    // Show modal after state is set
+    connectionModalVisible.value = true
 
     console.log('Fetching connections for downloader:', downloaderId)
     const res = await getTunnelConnections(downloaderId)
     console.log('API response:', res)
-    
-    if (res.success) {
+
+    if (res.success && res.data) {
       console.log('Connection data:', res.data)
-      console.log('Number of connections:', res.data?.length)
-      connections.value = res.data || []
+      console.log('Number of connections:', res.data.length)
+
+      // Ensure we have an array
+      const connectionData = Array.isArray(res.data) ? res.data : []
+
+      // Wait for next tick to ensure reactivity
+      await nextTick()
+
+      // Set the data
+      connections.value = connectionData
+
+      // Force another re-render
+      connectionTableKey.value++
+
       console.log('Connections value set to:', connections.value)
-      
+      console.log('Connections length:', connections.value.length)
+
       if (connections.value.length === 0) {
         console.warn('API returned success but no connections data')
+        Message.warning(t('page.settings.tab.autostun.no_connections'))
+      } else {
+        console.log('Successfully loaded', connections.value.length, 'connections')
       }
     } else {
       console.error('API returned error:', res.message)
       Message.error(res.message || 'Failed to load connections')
-      throw new Error(res.message)
+      connections.value = []
     }
   } catch (error) {
     console.error('Error loading connections:', error)
@@ -497,10 +529,28 @@ const formatTimestamp = (timestamp: number): string => {
   return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
 }
 
-// Auto-refresh tunnels every 30 seconds when enabled
-setInterval(() => {
-  if (config.enabled && !firstLoading.value) {
-    loadTunnels()
+// Auto-refresh tunnels using vue-request
+const { refresh: refreshTunnels } = useRequest(
+  async () => {
+    if (!config.enabled) {
+      tunnels.value = []
+      return null
+    }
+
+    const res = await getAutoSTUNTunnels()
+    if (res.success) {
+      tunnels.value = res.data
+    }
+    return res.data
+  },
+  {
+    pollingInterval: 30000, // Auto-refresh every 30 seconds
+    pollingWhenHidden: false, // Don't refresh when tab is hidden
+    refreshOnWindowFocus: true, // Refresh when window regains focus
+    manual: true, // Don't run immediately, will be triggered by loadTunnels
+    onError: (error) => {
+      console.error('Failed to refresh tunnels:', error)
+    }
   }
-}, 30000)
+)
 </script>
