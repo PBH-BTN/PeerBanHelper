@@ -193,15 +193,10 @@
       :footer="false"
     >
       <a-spin :loading="loadingConnections">
-        <div v-if="connections.length === 0 && !loadingConnections" style="text-align: center; padding: 40px">
-          <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
-        </div>
-        <div v-else-if="connections.length > 0">
-          <p>Debug: Found {{ connections.length }} connections</p>
-          <a-table :data="connections" :pagination="false" :scroll="{ x: 1000 }">
-            <template #empty>
-              <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
-            </template>
+        <a-table :data="connections" :pagination="false" :scroll="{ x: 1000 }">
+          <template #empty>
+            <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
+          </template>
           <a-table-column
             :title="t('page.settings.tab.autostun.connection_downstream')"
             data-index="downstreamHost"
@@ -256,7 +251,6 @@
             </template>
           </a-table-column>
         </a-table>
-        </div>
       </a-spin>
     </a-modal>
   </a-space>
@@ -453,6 +447,8 @@ const handleViewConnections = async (downloaderId: string, downloaderName: strin
     connectionModalTitle.value = downloaderName
     connectionModalVisible.value = true
     loadingConnections.value = true
+    // Clear previous connections to avoid showing stale data
+    connections.value = []
 
     console.log('Fetching connections for downloader:', downloaderId)
     const res = await getTunnelConnections(downloaderId)
@@ -460,15 +456,23 @@ const handleViewConnections = async (downloaderId: string, downloaderName: strin
     
     if (res.success) {
       console.log('Connection data:', res.data)
-      connections.value = res.data
+      console.log('Number of connections:', res.data?.length)
+      connections.value = res.data || []
       console.log('Connections value set to:', connections.value)
+      
+      if (connections.value.length === 0) {
+        console.warn('API returned success but no connections data')
+      }
     } else {
       console.error('API returned error:', res.message)
+      Message.error(res.message || 'Failed to load connections')
       throw new Error(res.message)
     }
   } catch (error) {
     console.error('Error loading connections:', error)
     Message.error(error instanceof Error ? error.message : 'Failed to load connections')
+    // Keep modal open but show empty state
+    connections.value = []
   } finally {
     loadingConnections.value = false
   }

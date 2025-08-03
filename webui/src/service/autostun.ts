@@ -62,7 +62,12 @@ export async function getTunnelConnections(
     ),
     location.href
   )
+  
+  console.log('Making API request to:', url.toString())
+  
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    console.log('Response status:', res.status)
+    console.log('Response ok:', res.ok)
     endpointStore.assertResponseLogin(res)
     return res.json()
   })
