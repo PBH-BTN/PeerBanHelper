@@ -140,6 +140,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             } catch (Exception ignored) {
             }
         });
+        perDownloaderStun.clear();
         enabled = false;
     }
 
