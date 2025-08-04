@@ -75,13 +75,13 @@
 
 <script setup lang="ts">
 import AsyncMethod from '@/components/asyncMethod.vue'
-import { getBanListPaginated, unbanIP } from '@/service/banList'
+import { getBanListPaginated, unbanIP, type BanListFilters } from '@/service/banList'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { IconFilter } from '@arco-design/web-vue/es/icon'
 import { useDebounceFn } from '@vueuse/core'
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 import banListItem from './banListItem.vue'

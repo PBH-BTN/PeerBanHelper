@@ -221,7 +221,7 @@ const columns = [
     tooltip: true
   }
 ]
-const list = computed(() => data.value?.data.results)
+const list = computed(() => data.value?.data?.results || [])
 const sorterChange = (dataIndex: string, direction: string) => {
   if (!direction)
     run({
