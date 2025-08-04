@@ -131,6 +131,40 @@ watch(connectionModalVisible, (visible) => {
   }
 })
 
+// Auto-refresh NAT status using useAutoUpdatePlugin
+const { refresh: refreshStatus } = useRequest(
+  async () => {
+    const res = await getAutoSTUNStatus()
+    if (res.success) {
+      return res.data
+    }
+    throw new Error(res.message || 'Failed to get AutoSTUN status')
+  },
+  {
+    manual: true,
+    onSuccess: (data) => {
+      natType.value = data.natType
+      // Map the selected downloaders to an array of IDs
+      const downloaderIds = data.selectedDownloaders.map((d) => d.id)
+      Object.assign(config, {
+        enabled: data.enabled,
+        useFriendlyLoopbackMapping: data.useFriendlyLoopbackMapping,
+        downloaders: downloaderIds
+      })
+      Object.assign(originalConfig, {
+        enabled: data.enabled,
+        useFriendlyLoopbackMapping: data.useFriendlyLoopbackMapping,
+        downloaders: downloaderIds
+      })
+      configChanged.value = false
+    },
+    onError: (error) => {
+      console.error('Failed to refresh status:', error)
+    }
+  },
+  [useAutoUpdatePlugin]
+)
+
 // Auto-refresh tunnels using useAutoUpdatePlugin
 const { loading: loadingTunnelsRequest, refresh: refreshTunnels } = useRequest(
   async () => {
@@ -214,30 +248,6 @@ const init = async () => {
   }
 }
 
-const refreshStatus = async () => {
-  try {
-    const res = await getAutoSTUNStatus()
-    if (res.success) {
-      natType.value = res.data.natType
-      // Map the selected downloaders to an array of IDs
-      const downloaderIds = res.data.selectedDownloaders.map((d) => d.id)
-      Object.assign(config, {
-        enabled: res.data.enabled,
-        useFriendlyLoopbackMapping: res.data.useFriendlyLoopbackMapping,
-        downloaders: downloaderIds
-      })
-      Object.assign(originalConfig, {
-        enabled: res.data.enabled,
-        useFriendlyLoopbackMapping: res.data.useFriendlyLoopbackMapping,
-        downloaders: downloaderIds
-      })
-      configChanged.value = false
-    }
-  } catch (error) {
-    console.error('Failed to refresh status:', error)
-  }
-}
-
 const loadTunnels = async () => {
   try {
     await refreshTunnels()
@@ -252,7 +262,7 @@ const handleRefreshNAT = async () => {
     refreshingNAT.value = true
     const res = await refreshNATType()
     if (res.success) {
-      Message.success('NAT type refresh requested')
+      Message.success(t('page.settings.tab.autostun.nat_type.refreshing'))
       // Refresh status after a delay
       setTimeout(() => {
         refreshStatus()

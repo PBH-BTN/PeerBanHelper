@@ -1,34 +1,35 @@
 export default {
   'page.settings.tab.autostun': 'AutoSTUN',
-  'page.settings.tab.autostun.title': 'AutoSTUN Network Penetration',
+  'page.settings.tab.autostun.title': 'AutoSTUN',
   'page.settings.tab.autostun.description':
-    'AutoSTUN can automatically perform port mapping and NAT hole punching in NAT1 network environments to improve BitTorrent connectivity.',
+    'AutoSTUN can automatically perform port mapping and NAT traversal for IPv4 protocol stacks in NAT1 network environments. To further enhance connectivity, it is recommended to enable IPv6 networks for the downloader simultaneously.',
   'page.settings.tab.autostun.warning':
-    'Note: This feature is only recommended when NAT type is FullCone. For users with public IP or other port forwarding tools, traditional solutions are preferred.',
+    'Works only in NAT1 network environments and does not support other NAT types. For public IP users, it is recommended to use the traditional port mapping + IPv6 dual-stack network solution for optimal connectivity.',
 
   // Enable/Disable section
   'page.settings.tab.autostun.enable': 'Enable AutoSTUN',
   'page.settings.tab.autostun.enable.tips':
-    'When enabled, network penetration services will be automatically provided for selected downloaders',
-  'page.settings.tab.autostun.friendly_mapping': 'Enable Friendly Loopback Address Mapping',
+    'Once enabled, tunnels will be automatically created for the selected downloader',
+  'page.settings.tab.autostun.friendly_mapping': 'Enable Friendly Local Loopback Address Mapping',
   'page.settings.tab.autostun.friendly_mapping.tips':
-    'When enabled, the reverse proxy server will use a more friendly local address mapping method, which may improve compatibility',
+    'When enabled, the reverse proxy server will use a more friendly local address mapping method, and it can also resolve the side effects of disabling "Allow multiple connections from the same IP address" (a necessary option for PeerBanHelper to work) on the downloader on the local device.',
 
   // NAT Status section
   'page.settings.tab.autostun.nat_status': 'NAT Status',
   'page.settings.tab.autostun.nat_type': 'NAT Type',
   'page.settings.tab.autostun.nat_type.refresh': 'Refresh NAT Type',
-  'page.settings.tab.autostun.nat_type.refreshing': 'Detecting...',
-  'page.settings.tab.autostun.nat_type.UdpBlocked': 'UDP Blocked',
+  'page.settings.tab.autostun.nat_type.refreshing':
+    'Background NAT type update task has started, please wait...',
+  'page.settings.tab.autostun.nat_type.UdpBlocked': '[/] UDP Blocked (UdpBlocked)',
   'page.settings.tab.autostun.nat_type.OpenInternet': '[NAT0] Open Internet',
-  'page.settings.tab.autostun.nat_type.SymmetricUdpFirewall': 'Symmetric UDP Firewall',
+  'page.settings.tab.autostun.nat_type.SymmetricUdpFirewall': '[/] Symmetric UDP Firewall',
   'page.settings.tab.autostun.nat_type.FullCone': '[NAT1] Full Cone NAT',
   'page.settings.tab.autostun.nat_type.RestrictedCone': '[NAT2] Restricted Cone NAT',
   'page.settings.tab.autostun.nat_type.PortRestrictedCone': '[NAT3] Port Restricted Cone NAT',
   'page.settings.tab.autostun.nat_type.Symmetric': '[NAT4] Symmetric NAT',
   'page.settings.tab.autostun.nat_type.Unknown': 'Unknown',
   'page.settings.tab.autostun.nat_compatible': '✅ Compatible with AutoSTUN',
-  'page.settings.tab.autostun.nat_incompatible': '❌ Incompatible with AutoSTUN',
+  'page.settings.tab.autostun.nat_incompatible': '❌ Not Compatible with AutoSTUN',
 
   // Downloader Configuration section
   'page.settings.tab.autostun.downloader_config': 'Downloader Configuration',
@@ -36,7 +37,7 @@ export default {
   'page.settings.tab.autostun.no_downloaders': 'No available downloaders',
   'page.settings.tab.autostun.save_config': 'Save Configuration',
   'page.settings.tab.autostun.save_success': 'Configuration saved successfully',
-  'page.settings.tab.autostun.save_failed': 'Failed to save configuration',
+  'page.settings.tab.autostun.save_failed': 'Configuration save failed',
 
   // Tunnel Information section
   'page.settings.tab.autostun.tunnel_info': 'Tunnel Information',
@@ -53,8 +54,8 @@ export default {
   'page.settings.tab.autostun.tunnel_handled': 'Handled',
   'page.settings.tab.autostun.tunnel_failed': 'Failed',
   'page.settings.tab.autostun.tunnel_blocked': 'Blocked',
-  'page.settings.tab.autostun.tunnel_downstream_bytes': 'Downstream',
-  'page.settings.tab.autostun.tunnel_upstream_bytes': 'Upstream',
+  'page.settings.tab.autostun.tunnel_downstream_bytes': 'Outbound',
+  'page.settings.tab.autostun.tunnel_upstream_bytes': 'Inbound',
   'page.settings.tab.autostun.view_connections': 'View Connection Table',
 
   // Connection Table Modal
@@ -64,6 +65,6 @@ export default {
   'page.settings.tab.autostun.connection_upstream': 'Upstream Address',
   'page.settings.tab.autostun.connection_established': 'Established Time',
   'page.settings.tab.autostun.connection_activity': 'Last Activity',
-  'page.settings.tab.autostun.connection_bytes': 'Data Transfer',
+  'page.settings.tab.autostun.connection_bytes': 'Transferred Data',
   'page.settings.tab.autostun.no_connections': 'No active connections'
 }
