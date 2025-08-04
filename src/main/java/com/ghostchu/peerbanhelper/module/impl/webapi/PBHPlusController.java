@@ -127,6 +127,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
         licenseManager.getLicenseBackend().getLicensesMap().forEach((key, license) -> {
             var dto = new LicenseKeyPairDTO(key,
                     license instanceof V2License ? 2 : (license instanceof V1License ? 1 : -1),
+                    licenseManager.getLicenseBackend().getLicenseStatus(license),
                     license);
             licenseKeyPairDTOList.add(dto);
         });
