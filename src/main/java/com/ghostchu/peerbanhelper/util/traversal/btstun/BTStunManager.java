@@ -137,6 +137,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
         perDownloaderStun.values().forEach(instance -> {
             try {
                 instance.close();
+                natAddressProviderRegistry.remove(instance);
             } catch (Exception ignored) {
             }
         });
