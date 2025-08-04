@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
@@ -141,7 +142,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         boolean ignoreBanForDisconnect =
                 Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
         String search = ctx.queryParam("search");
-        if (search!=null) search = URLDecoder.decode(search);
+        if (search != null) search = URLDecoder.decode(search, StandardCharsets.UTF_8);
         if (hasPageParam) {
             /* ---------------- Pagination path ---------------- */
             Pageable pageable = new Pageable(ctx); // reads page & pageSize
