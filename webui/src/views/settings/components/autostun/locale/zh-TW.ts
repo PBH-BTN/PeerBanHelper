@@ -1,6 +1,6 @@
 export default {
   'page.settings.tab.autostun': 'AutoSTUN',
-  'page.settings.tab.autostun.title': 'AutoSTUN',
+  'page.settings.tab.autostun.title': 'AutoSTUN（實驗性功能）',
   'page.settings.tab.autostun.description':
     'AutoSTUN 可以在 NAT1 網路環境下為 IPv4 協議棧自動進行埠映射和 NAT 打洞。為進一步提升連線性，建議為下載器同時啟用 IPv6 網路。',
   'page.settings.tab.autostun.warning':

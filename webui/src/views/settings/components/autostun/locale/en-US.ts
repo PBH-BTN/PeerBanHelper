@@ -1,6 +1,6 @@
 export default {
   'page.settings.tab.autostun': 'AutoSTUN',
-  'page.settings.tab.autostun.title': 'AutoSTUN',
+  'page.settings.tab.autostun.title': 'AutoSTUN (Experimental)',
   'page.settings.tab.autostun.description':
     'AutoSTUN can automatically perform port mapping and NAT traversal for IPv4 protocol stacks in NAT1 network environments. To further enhance connectivity, it is recommended to enable IPv6 networks for the downloader simultaneously.',
   'page.settings.tab.autostun.warning':
