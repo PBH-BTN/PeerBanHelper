@@ -101,6 +101,10 @@ public final class PBHPlusController extends AbstractFeatureModule {
     }
 
     private void handleLicenseRenew(@NotNull Context context) throws Exception {
+        if (licenseManager.isFeatureEnabled("basic")) {
+            context.json(new StdResp(false, tlUI(Lang.PBH_PLUS_FREE_LICENSE_DENIED_EXISTS), null));
+            return;
+        }
         var local = licenseManager.getLicenseParser().generateLocalLicense();
         var keyList = Main.getMainConfig().getStringList("pbh-plus-key");
         if (!keyList.contains(local))
