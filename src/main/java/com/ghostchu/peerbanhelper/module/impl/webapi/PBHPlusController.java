@@ -7,6 +7,8 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.LicenseKeyPairDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PBHPlusStatusDTO;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseDownloader;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
+import com.ghostchu.peerbanhelper.pbhplus.bean.V1License;
+import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -123,7 +125,9 @@ public final class PBHPlusController extends AbstractFeatureModule {
     private void handleStatus(@NotNull Context context) {
         List<LicenseKeyPairDTO> licenseKeyPairDTOList = new ArrayList<>();
         licenseManager.getLicenseBackend().getLicensesMap().forEach((key, license) -> {
-            var dto = new LicenseKeyPairDTO(key, license);
+            var dto = new LicenseKeyPairDTO(key,
+                    license instanceof V2License ? 2 : (license instanceof V1License ? 1 : -1),
+                    license);
             licenseKeyPairDTOList.add(dto);
         });
         context.json(new StdResp(true, null, new PBHPlusStatusDTO(licenseManager.getLicenseBackend().getAllFeatures(), licenseKeyPairDTOList)));

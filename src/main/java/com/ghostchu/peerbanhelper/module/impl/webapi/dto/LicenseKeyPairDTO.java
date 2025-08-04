@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class LicenseKeyPairDTO {
     private String key;
+    private int version;
     private License data;
 }
