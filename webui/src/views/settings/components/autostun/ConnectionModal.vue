@@ -2,22 +2,20 @@
   <a-modal
     :visible="visible"
     :title="`${modalTitle} - ${t('page.settings.tab.autostun.connection_table')}`"
-    width="90%"
+    width="auto"
     :footer="false"
     unmount-on-close
     @update:visible="$emit('update:visible', $event)"
   >
-    <a-space direction="vertical" fill style="max-width: 100%">
+    <a-space direction="vertical" fill style="max-width: 1400px">
       <a-spin :loading="loading">
         <a-table
           :columns="connectionTableColumns"
           :data="connections"
           :pagination="false"
-          :scroll="{ x: 1200 }"
           stripe
           size="medium"
           column-resizable
-          style="width: 100%"
         >
           <template #empty>
             <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
@@ -133,32 +131,32 @@ const connectionTableColumns = [
   {
     title: t('page.settings.tab.autostun.connection_downstream'),
     slotName: 'downstream',
-    width: 220
+    width: 200
   },
   {
     title: t('page.settings.tab.autostun.connection_proxy'),
     slotName: 'proxy',
-    width: 220
+    width: 200
   },
   {
     title: t('page.settings.tab.autostun.connection_upstream'),
     slotName: 'upstream',
-    width: 220
+    width: 180
   },
   {
     title: t('page.settings.tab.autostun.connection_established'),
     slotName: 'established',
-    width: 180
+    width: 160
   },
   {
     title: t('page.settings.tab.autostun.connection_activity'),
     slotName: 'activity',
-    width: 180
+    width: 160
   },
   {
     title: t('page.settings.tab.autostun.connection_bytes'),
     slotName: 'bytes',
-    width: 160
+    width: 140
   }
 ]
 
