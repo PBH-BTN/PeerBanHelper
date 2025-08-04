@@ -229,8 +229,28 @@ const showThreadName = ref(false)
   opacity: 0;
 }
 
-.log-line-container:hover .hover-display-btn {
-  transition: opacity 0.15s ease-in-out;
-  opacity: 1;
+.log-line-container {
+  &:hover .hover-display-btn {
+    transition: opacity 0.15s ease-in-out;
+    opacity: 1;
+  }
+}
+
+/* Fix for log entry height issue */
+.arco-list-item {
+  min-height: auto !important;
+  height: auto !important;
+  padding: 8px 0 !important;
+}
+
+.log-line-container {
+  min-height: 32px;
+  max-height: 48px;
+  align-items: center;
+}
+
+.log-line {
+  align-items: center;
+  min-height: 32px;
 }
 </style>
