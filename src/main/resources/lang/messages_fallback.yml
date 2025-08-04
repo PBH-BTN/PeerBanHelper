@@ -738,3 +738,6 @@ PBH_LICENSE_KEY_EXPIRED: "正在添加的许可证已经过期"
 PBH_LICENSE_KEY_REVOKED: "正在添加的许可证已被吊销"
 PBH_PLUS_LICENSE_UPDATED: "许可证信息更新成功"
 PBH_PLUS_FREE_LICENSE_DENIED_EXISTS: "当前已有活动且有效的 basic 许可证，无需重复创建"
+
+POW_CAPTCHA_SERVER_NOT_FOUND: "验证码 ID 错误或者已过期"
+POW_CAPTCHA_SERVER_VERIFY_FAILED: "验证码验证失败，请重试"
