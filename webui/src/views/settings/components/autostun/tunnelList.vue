@@ -169,7 +169,7 @@ const formatBytes = (bytes: number): string => {
 <style lang="less">
 .tunnel-item {
   .arco-descriptions-item-label {
-    min-width: 100px;
+    min-width: 140px;
     font-weight: 500;
   }
 
