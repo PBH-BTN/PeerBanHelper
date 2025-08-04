@@ -27,7 +27,7 @@
       :rules="[{ validator: nonEmptyValidator }]"
     >
       <a-space direction="vertical">
-        <a-button @click="model.banned_peer_id.unshift({ method: 'STARTS_WITH', content: '' })">
+        <a-button @click="addNewItem">
           <template #icon>
             <icon-plus />
           </template>
@@ -35,7 +35,7 @@
         <a-list
           ref="list"
           style="min-width: 800px"
-          :pagination-props="{ pageSize: 5, total: model.banned_peer_id.length }"
+          :pagination-props="controlledPaginationProps"
           :data="dataWithIndex"
         >
           <template #item="{ item }">
@@ -67,12 +67,26 @@
 <script setup lang="ts">
 import { type PeerIdBlacklist } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banRuleListItem from './banRuleListItem.vue'
 
 const { t } = useI18n()
 const model = defineModel<PeerIdBlacklist>({ required: true })
+
+// Add pagination state management
+const currentPage = ref(1)
+const pageSize = computed(() => 5)
+
+// Create computed pagination props that we can control
+const controlledPaginationProps = computed(() => ({
+  pageSize: pageSize.value,
+  total: model.value.banned_peer_id.length,
+  current: currentPage.value,
+  onChange: (page: number) => {
+    currentPage.value = page
+  }
+}))
 
 const dataWithIndex = computed(() => {
   return model.value.banned_peer_id.map((item, index) => ({ ...item, index }))
@@ -83,6 +97,14 @@ const useGlobalBanTime = computed({
     model.value.ban_duration = value ? 'default' : 259200000
   }
 })
+
+const addNewItem = () => {
+  model.value.banned_peer_id.push({ method: 'STARTS_WITH', content: '' })
+  // Calculate which page the new item will be on and navigate there
+  const totalItems = model.value.banned_peer_id.length
+  const lastPage = Math.ceil(totalItems / pageSize.value)
+  currentPage.value = lastPage
+}
 
 const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
   if (model.value.banned_peer_id.some((item) => item.content === ''))

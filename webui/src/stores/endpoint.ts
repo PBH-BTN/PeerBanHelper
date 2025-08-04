@@ -65,7 +65,10 @@ export const useEndpointStore = defineStore('endpoint', () => {
       pushLock()
     }
     try {
-      await login(token ?? '')
+      if (token === null) {
+        throw new IncorrectTokenError()
+      }
+      await login(token)
       if (!isChecking) {
         serverAvailable.value.resolve()
         error.value = null

@@ -94,6 +94,9 @@ export default {
   'page.settings.tab.config.push.form.type.pushplus': 'Push+',
   'page.settings.tab.config.push.form.type.serverchan': 'Server醬',
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
+  'page.settings.tab.config.push.form.type.bark': 'Bark',
+  'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
+  'page.settings.tab.config.push.form.type.gotify': 'Gotify',
 
   'page.settings.tab.config.push.form.stmp.host': '主機',
   'page.settings.tab.config.push.form.stmp.port': '埠號',
@@ -113,6 +116,12 @@ export default {
   'page.settings.tab.config.push.form.pushplus.topic': 'Topic',
   'page.settings.tab.config.push.form.pushplus.template': '範本',
   'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
+
+  'page.settings.tab.config.push.form.pushdeer.endpoint': '端點',
+  'page.settings.tab.config.push.form.pushdeer.pushkey': '推送金鑰',
+
+  'page.settings.tab.config.push.form.gotify.endpoint': '端點',
+  'page.settings.tab.config.push.form.gotify.priority': '優先級',
 
   'page.settings.tab.config.push.form.action.ok': '確定',
   'page.settings.tab.config.push.form.action.cancel': '取消',

@@ -40,7 +40,7 @@
             </a-input-password>
           </a-form-item>
           <a-form-item field="rememberPassword" class="login-form-password-actions">
-            <a-checkbox checked="rememberPassword" :model-value="loginConfig.rememberPassword">
+            <a-checkbox v-model="loginConfig.rememberPassword" checked="rememberPassword">
               {{ t('login.form.rememberPassword') }}
             </a-checkbox>
             <a-link

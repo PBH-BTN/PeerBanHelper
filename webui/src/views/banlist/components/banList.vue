@@ -75,21 +75,19 @@
 
 <script setup lang="ts">
 import AsyncMethod from '@/components/asyncMethod.vue'
-import { type BanList } from '@/api/model/banlist'
-import { getBanListPaginated, unbanIP, type BanListFilters } from '@/service/banList'
-import { useAutoUpdate, useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { getBanListPaginated, unbanIP } from '@/service/banList'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { IconFilter } from '@arco-design/web-vue/es/icon'
 import { useDebounceFn } from '@vueuse/core'
-import { computed, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 import banListItem from './banListItem.vue'
 import BanListFiltersComponent from './banListFilters.vue'
 
 const endpointState = useEndpointStore()
-const autoUpdateStore = useAutoUpdate()
 const searchString = ref('')
 const currentFilters = reactive<BanListFilters>({})
 const showFilters = ref(false)
@@ -115,16 +113,6 @@ const { total, data, current, pageSize, loading, changeCurrent, changePageSize, 
     },
     [useAutoUpdatePlugin]
   )
-
-const pollingHandler = autoUpdateStore.polling(() => {
-  if (current.value === 1) refresh()
-})
-
-onUnmounted(() => {
-  if (pollingHandler) {
-    pollingHandler('unmount')
-  }
-})
 
 const handleUnban = async (address: string) => {
   const { count } = await (await unbanIP(address)).data

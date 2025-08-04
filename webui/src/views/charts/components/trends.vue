@@ -139,7 +139,7 @@ const props = defineProps<{
   downloader?: string
 }>()
 const { loading, run, refresh } = useRequest(getTrends, {
-  defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), props.downloader],
+  defaultParams: [option.range[0], option.range[1], props.downloader],
   onSuccess: (data) => {
     if (data.data) {
       chartOptions.value.series[0].data = data.data.connectedPeersTrend

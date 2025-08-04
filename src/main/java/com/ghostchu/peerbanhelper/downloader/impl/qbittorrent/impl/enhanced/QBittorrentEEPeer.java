@@ -40,7 +40,6 @@ public final class QBittorrentEEPeer implements Peer {
     @SerializedName("shadowbanned")
     private Boolean shadowBanned;
     private transient PeerAddress peerAddress;
-    private String rawIp;
 
     public QBittorrentEEPeer() {
     }
@@ -48,7 +47,7 @@ public final class QBittorrentEEPeer implements Peer {
     @Override
     public @NotNull PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
-            this.peerAddress = new PeerAddress(ip, port);
+            this.peerAddress = new PeerAddress(ip, port, ip);
         }
         return this.peerAddress;
     }
@@ -100,13 +99,12 @@ public final class QBittorrentEEPeer implements Peer {
         return dlSpeed <= 0 && upSpeed <= 0;
     }
 
-    @Override
-    public @NotNull String getRawIp() {
-        return rawIp == null ? ip : rawIp;
-    }
-
     public String getConnection() {
         return connection;
+    }
+
+    public void setPeerAddress(PeerAddress peerAddress) {
+        this.peerAddress = peerAddress;
     }
 
     @Override
@@ -125,8 +123,6 @@ public final class QBittorrentEEPeer implements Peer {
                ", upSpeed=" + upSpeed +
                ", uploaded=" + uploaded +
                ", shadowBanned=" + shadowBanned +
-               ", peerAddress=" + peerAddress +
-               ", rawIp='" + rawIp + '\'' +
-               '}';
+                ", peerAddress=" + peerAddress + '}';
     }
 }

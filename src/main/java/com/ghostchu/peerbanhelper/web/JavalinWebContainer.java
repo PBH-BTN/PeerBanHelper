@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
@@ -45,6 +46,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public final class JavalinWebContainer {
     private final Javalin javalin;
+    private final PBHPortMapper pBHPortMapper;
     @Setter
     @Getter
     private String token;
@@ -56,7 +58,7 @@ public final class JavalinWebContainer {
     @Getter
     private volatile boolean started;
 
-    public JavalinWebContainer(ActivationManager activationManager) {
+    public JavalinWebContainer(ActivationManager activationManager, PBHPortMapper pBHPortMapper) {
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -170,8 +172,10 @@ public final class JavalinWebContainer {
                         throw new NotLoggedInException();
                     }
                 })
-                .options("/*", ctx -> ctx.status(200));
+                .options("/*", ctx -> ctx.status(200))
+                .after(ctx -> ctx.header("Server", Main.getUserAgent()));
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+        this.pBHPortMapper = pBHPortMapper;
     }
 
     private boolean securityCheck(Context ctx) {
@@ -209,6 +213,35 @@ public final class JavalinWebContainer {
         javalin.start(host, port);
         this.started = true;
         Main.getEventBus().post(new WebServerStartedEvent());
+        // TODO: stun random test code, need remove when publish it...
+//        try {
+//            new StunTcpTunnel(pBHPortMapper,new StunListener() {
+//                @Override
+//                public void onCreate(@NotNull InetSocketAddress inter, @NotNull InetSocketAddress outer) {
+//                   try{
+//                       System.out.println("NAT1 外部端口已打开："+outer.getHostString()+":"+outer.getPort());
+//                       HttpServer httpServer = HttpServer.create(inter, 0);
+//                       httpServer.createContext("/test", exchange -> {
+//                           exchange.sendResponseHeaders(200, 0);
+//                           // print ok!
+//                           exchange.getResponseBody().write("ok".getBytes());
+//                           exchange.getResponseBody().flush();
+//                           exchange.close();
+//                       });
+//                       httpServer.start();
+//                   }catch (Exception e){
+//                       e.printStackTrace();
+//                   }
+//                }
+//
+//                @Override
+//                public void onClose(@Nullable Throwable throwable) {
+//                    System.out.println("Tunnel closed: " + (throwable != null ? throwable.getMessage() : "No error"));
+//                }
+//            }).createMapping(11334);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public Javalin javalin() {

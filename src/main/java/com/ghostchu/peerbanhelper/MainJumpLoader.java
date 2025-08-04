@@ -13,6 +13,7 @@ public final class MainJumpLoader {
         // Do something before real Main class
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {
             setupCharsets();
+            System.setProperty("sun.net.useExclusiveBind", "false");
         }
         Main.main(args);
     }
