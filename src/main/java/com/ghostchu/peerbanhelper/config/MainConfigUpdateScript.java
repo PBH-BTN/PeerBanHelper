@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.config;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,8 @@ import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,24 +35,54 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 37)
+    public void synologyNetworkModeChangeTweaks() {
+        if (!ExternalSwitch.parseBoolean("pbh.pkg.synology", false)) return;
+        var client = conf.getConfigurationSection("client");
+        if (client == null) return;
+        for (String key : client.getKeys(false)) {
+            var downloaderSection = client.getConfigurationSection(key);
+            if (downloaderSection == null) continue;
+            var endpoint = downloaderSection.getString("endpoint");
+            if (endpoint == null) continue;
+            var uri = URI.create(endpoint);
+            var host = uri.getHost();
+            if (host.startsWith("172.")) {
+                try {
+                    log.info("Updating endpoint for downloader {} for Synology DSM package upgrade from {} to {}.", key, endpoint, downloaderSection.getString("endpoint"));
+                    downloaderSection.set("endpoint", new URI(uri.getScheme(), "127.0.0.1", uri.getPath(), uri.getFragment()));
+                } catch (URISyntaxException e) {
+                    log.error("Unable to update endpoint for downloader {} on Synology DSM: {}", key, e.getMessage());
+                }
+            }
+        }
+    }
+
     @UpdateScript(version = 36)
-    public void stunSettings(YamlConfiguration bundle){
+    public void stunSettings(YamlConfiguration bundle) {
         conf.set("stun", bundle.getConfigurationSection("stun"));
         conf.set("auto-stun", bundle.getConfigurationSection("auto-stun"));
     }
 
     @UpdateScript(version = 35)
-    public void migrateProxySettings(){
+    public void migrateProxySettings() {
         switch (conf.getInt("proxy.setting", 0)) { // 旧版本不代理，现在调整为不代理
-            case 0 -> {} // 旧版本是不代理，现在也不代理
-            case 1 -> { conf.set("proxy.setting", 0); } // 旧版本是跟随系统代理，现在调整为不代理
-            case 2 -> { conf.set("proxy.setting", 1); } // HTTP 代理保持现状
-            case 3 -> { conf.set("proxy.setting", 2); } // SOCKS 代理保持现状
+            case 0 -> {
+            } // 旧版本是不代理，现在也不代理
+            case 1 -> {
+                conf.set("proxy.setting", 0);
+            } // 旧版本是跟随系统代理，现在调整为不代理
+            case 2 -> {
+                conf.set("proxy.setting", 1);
+            } // HTTP 代理保持现状
+            case 3 -> {
+                conf.set("proxy.setting", 2);
+            } // SOCKS 代理保持现状
         }
     }
 
     @UpdateScript(version = 34)
-    public void cleanupUnusedFiles(){
+    public void cleanupUnusedFiles() {
         File decentralized = new File(Main.getDataDirectory(), "decentralized");
         CommonUtil.deleteFileOrDirectory(decentralized);
         File ipfs = new File(Main.getDataDirectory(), "ipfs");
@@ -59,7 +92,7 @@ public final class MainConfigUpdateScript {
     }
 
     @UpdateScript(version = 33)
-    public void cleanupDownloadedJCEFComponents(){
+    public void cleanupDownloadedJCEFComponents() {
         File jcefDirectory = new File(Main.getDataDirectory(), "jcef");
         CommonUtil.deleteFileOrDirectory(jcefDirectory);
     }
