@@ -52,6 +52,7 @@ export default {
   'page.settings.tab.autostun.tunnel_stats': 'Statistics',
   'page.settings.tab.autostun.tunnel_handled': 'Handled',
   'page.settings.tab.autostun.tunnel_failed': 'Failed',
+  'page.settings.tab.autostun.tunnel_blocked': 'Blocked',
   'page.settings.tab.autostun.tunnel_downstream_bytes': 'Downstream',
   'page.settings.tab.autostun.tunnel_upstream_bytes': 'Upstream',
   'page.settings.tab.autostun.view_connections': 'View Connection Table',
@@ -64,11 +65,5 @@ export default {
   'page.settings.tab.autostun.connection_established': 'Established Time',
   'page.settings.tab.autostun.connection_activity': 'Last Activity',
   'page.settings.tab.autostun.connection_bytes': 'Data Transfer',
-  'page.settings.tab.autostun.no_connections': 'No active connections',
-
-  // Units
-  'page.settings.tab.autostun.bytes': 'Bytes',
-  'page.settings.tab.autostun.kb': 'KB',
-  'page.settings.tab.autostun.mb': 'MB',
-  'page.settings.tab.autostun.gb': 'GB'
+  'page.settings.tab.autostun.no_connections': 'No active connections'
 }

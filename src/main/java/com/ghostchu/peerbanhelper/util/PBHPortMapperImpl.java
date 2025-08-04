@@ -137,17 +137,18 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 Map<PortMapper, MappedPort> mappedPorts = new LinkedHashMap<>();
                 for (PortMapper mapper : mappers) {
                     try {
-                        MappedPort mappedPort = mapper.mapPort(portType, localPort, localPort, 600);
+                        MappedPort mappedPort = mapper.mapPort(portType, localPort, localPort, 60 * 60 * 24);
                         originalToRefreshedPortMap.put(mappedPort, mappedPort);
                         sched.scheduleWithFixedDelay(() -> {
                             try {
-                                var newMapperPort = mapper.refreshPort(mappedPort, 600);
+                                var newMapperPort = mapper.refreshPort(mappedPort, 60 * 60 * 24);
                                 originalToRefreshedPortMap.put(mappedPort, newMapperPort);
                             } catch (Exception e) {
                                 if (ExternalSwitch.parse("pbh.portMapper.disableRefreshFailRetry", "false").equals("true")) {
                                     return;
                                 }
                                 log.error(tlUI(Lang.PORT_MAPPER_PORT_MAPPING_FAILED, mapper.getSourceAddress().getHostAddress(), mappedPort.getPortType().name(), mappedPort.getInternalPort()), e);
+                                unmapPort(mappers, mappedPort);
                                 mapPort(mappers, portType, localPort);
                             }
                         }, mappedPort.getLifetime() / 2, mappedPort.getLifetime() / 2, TimeUnit.SECONDS);

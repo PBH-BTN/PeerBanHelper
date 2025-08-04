@@ -48,6 +48,10 @@
                 <div class="stat-label">{{ t('page.settings.tab.autostun.tunnel_failed') }}</div>
                 <div class="stat-value error">{{ item.tunnel.connectionsFailed }}</div>
               </div>
+              <div class="stat-item">
+                <div class="stat-label">{{ t('page.settings.tab.autostun.tunnel_blocked') }}</div>
+                <div class="stat-value warning">{{ item.tunnel.connectionsBlocked }}</div>
+              </div>
             </div>
 
             <div class="stats-row">

@@ -48,6 +48,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private final Map<InetSocketAddress, Socket> socketAddressSocketMap = Collections.synchronizedMap(new HashMap<>());
     private final LongAdder connectionHandled = new LongAdder();
     private final LongAdder connectionFailed = new LongAdder();
+    private final LongAdder connectionBlocked = new LongAdder();
 
     public TCPForwarderImpl(Map<PeerAddress, ?> banListReference, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort) {
         this.banListReference = banListReference;
@@ -74,6 +75,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                     log.debug("Closing connection from banned address from banEvent: {}", inetSocketAddress);
                     closeSocket(downstreamSocket);
                     closeSocket(upstreamSocket);
+                    connectionBlocked.increment();
                 }
             }
         }
@@ -129,6 +131,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                     try {
                         downstreamSocket.setOption(StandardSocketOptions.SO_LINGER, 1);
                         downstreamSocket.close();
+                        connectionBlocked.increment();
                     } catch (IOException ignored) {
                     }
                     return;
@@ -261,6 +264,11 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     @Override
     public long getConnectionHandled() {
         return connectionHandled.sum();
+    }
+
+    @Override
+    public long getConnectionBlocked() {
+        return connectionBlocked.sum();
     }
 
     @Override

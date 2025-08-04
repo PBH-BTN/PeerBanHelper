@@ -33,6 +33,7 @@ export interface TunnelInfo {
   lastSuccessHeartbeatAt: number
   connectionsHandled: number
   connectionsFailed: number
+  connectionsBlocked: number
   totalToDownstreamBytes: number
   totalToUpstreamBytes: number
   establishedConnections: number

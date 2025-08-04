@@ -136,6 +136,11 @@ public class PBHAutoStunController extends AbstractFeatureModule {
             );
             connectionList.add(tunnelProxyConnectionDTO);
         }
+        //connectionList.sort(Comparator.comparing(TunnelProxyConnectionDTO::getToDownstreamBytes).reversed());
+        //order connections by  toDownstreamBytes and toUpstreamBytes
+        connectionList.sort(Comparator.comparing(TunnelProxyConnectionDTO::getToDownstreamBytes)
+                .thenComparing(TunnelProxyConnectionDTO::getToUpstreamBytes)
+                .reversed());
         context.json(new StdResp(true, null, connectionList));
     }
 
@@ -172,6 +177,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 stunInstance.getTunnel() != null ? stunInstance.getTunnel().getLastSuccessHeartbeatAt() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionHandled() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionFailed() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionBlocked() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getTotalUploaded() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getTotalDownloaded() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getEstablishedConnections() : 0,

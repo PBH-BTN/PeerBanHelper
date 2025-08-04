@@ -2,101 +2,98 @@
   <a-modal
     :visible="visible"
     :title="`${modalTitle} - ${t('page.settings.tab.autostun.connection_table')}`"
-    width="auto"
+    width="100%"
     :footer="false"
     unmount-on-close
     @update:visible="$emit('update:visible', $event)"
   >
-    <a-space direction="vertical" fill style="max-width: 1400px">
-      <a-spin :loading="loading">
-        <a-table
-          :columns="connectionTableColumns"
-          :data="connections"
-          :pagination="false"
-          stripe
-          size="medium"
-          column-resizable
-        >
-          <template #empty>
-            <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
-          </template>
-          <template #downstream="{ record }">
-            <a-typography-text code>
-              <queryIpLink :ip="record.downstreamHost" style="color: var(--color-text-2)">
-                {{ record.downstreamHost }}:{{ record.downstreamPort }}
-              </queryIpLink>
-              <a-button
-                type="text"
-                size="mini"
-                style="margin-left: 8px"
-                @click="copyToClipboard(`${record.downstreamHost}:${record.downstreamPort}`)"
-              >
-                <template #icon>
-                  <icon-copy />
-                </template>
-              </a-button>
+    <a-space direction="vertical" fill width="auto">
+      <a-table
+        :columns="connectionTableColumns"
+        :data="connections"
+        :pagination="false"
+        stripe
+        column-resizable
+      >
+        <template #empty>
+          <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
+        </template>
+        <template #downstream="{ record }">
+          <a-typography-text code>
+            <queryIpLink :ip="record.downstreamHost" style="color: var(--color-text-2)">
+              {{ record.downstreamHost }}:{{ record.downstreamPort }}
+            </queryIpLink>
+            <a-button
+              type="text"
+              size="mini"
+              style="margin-left: 8px"
+              @click="copyToClipboard(`${record.downstreamHost}:${record.downstreamPort}`)"
+            >
+              <template #icon>
+                <icon-copy />
+              </template>
+            </a-button>
+          </a-typography-text>
+        </template>
+        <template #proxy="{ record }">
+          <a-typography-text code>
+            {{ record.proxyOutgoingHost }}:{{ record.proxyOutgoingPort }}
+            <a-button
+              type="text"
+              size="mini"
+              style="margin-left: 8px"
+              @click="copyToClipboard(`${record.proxyOutgoingHost}:${record.proxyOutgoingPort}`)"
+            >
+              <template #icon>
+                <icon-copy />
+              </template>
+            </a-button>
+          </a-typography-text>
+        </template>
+        <template #upstream="{ record }">
+          <a-typography-text code>
+            {{ record.upstreamHost }}:{{ record.upstreamPort }}
+            <a-button
+              type="text"
+              size="mini"
+              style="margin-left: 8px"
+              @click="copyToClipboard(`${record.upstreamHost}:${record.upstreamPort}`)"
+            >
+              <template #icon>
+                <icon-copy />
+              </template>
+            </a-button>
+          </a-typography-text>
+        </template>
+        <template #established="{ record }">
+          <a-space direction="vertical">
+            <a-typography-text>
+              <icon-clock-circle />
+              {{ formatTimestamp(record.establishedAt) }}
             </a-typography-text>
-          </template>
-          <template #proxy="{ record }">
-            <a-typography-text code>
-              {{ record.proxyOutgoingHost }}:{{ record.proxyOutgoingPort }}
-              <a-button
-                type="text"
-                size="mini"
-                style="margin-left: 8px"
-                @click="copyToClipboard(`${record.proxyOutgoingHost}:${record.proxyOutgoingPort}`)"
-              >
-                <template #icon>
-                  <icon-copy />
-                </template>
-              </a-button>
+          </a-space>
+        </template>
+        <template #activity="{ record }">
+          <a-space direction="vertical">
+            <a-typography-text>
+              <icon-history />
+              {{ formatTimestamp(record.lastActivityAt) }}
             </a-typography-text>
-          </template>
-          <template #upstream="{ record }">
-            <a-typography-text code>
-              {{ record.upstreamHost }}:{{ record.upstreamPort }}
-              <a-button
-                type="text"
-                size="mini"
-                style="margin-left: 8px"
-                @click="copyToClipboard(`${record.upstreamHost}:${record.upstreamPort}`)"
-              >
-                <template #icon>
-                  <icon-copy />
-                </template>
-              </a-button>
+          </a-space>
+        </template>
+        <template #bytes="{ record }">
+          <a-space direction="vertical">
+            <a-typography-text>
+              <icon-arrow-up class="green" />
+              {{ formatFileSize(record.toDownstreamBytes) }}
             </a-typography-text>
-          </template>
-          <template #established="{ record }">
-            <a-space direction="vertical">
-              <a-typography-text>
-                <icon-clock-circle />
-                {{ formatTimestamp(record.establishedAt) }}
-              </a-typography-text>
-            </a-space>
-          </template>
-          <template #activity="{ record }">
-            <a-space direction="vertical">
-              <a-typography-text>
-                <icon-history />
-                {{ formatTimestamp(record.lastActivityAt) }}
-              </a-typography-text>
-            </a-space>
-          </template>
-          <template #bytes="{ record }">
-            <a-space direction="vertical">
-              <a-typography-text>
-                <icon-arrow-up class="green" />
-                {{ formatFileSize(record.toUpstreamBytes) }}
-              </a-typography-text>
-              <a-typography-text>
-                <icon-arrow-down class="red" />
-                {{ formatFileSize(record.toDownstreamBytes) }}
-              </a-typography-text>
-            </a-space>
-          </template>
-        </a-table>
-      </a-spin>
+            <a-typography-text>
+              <icon-arrow-down class="red" />
+              {{ formatFileSize(record.toUpstreamBytes) }}
+            </a-typography-text>
+          </a-space>
+        </template>
+      </a-table>
     </a-space>
   </a-modal>
 </template>

@@ -11,6 +11,7 @@ public class TunnelInfoDTO {
     private long lastSuccessHeartbeatAt;
     private long connectionsHandled;
     private long connectionsFailed;
+    private long connectionsBlocked;
     private long totalToDownstreamBytes;
     private long totalToUpstreamBytes;
     private long establishedConnections;

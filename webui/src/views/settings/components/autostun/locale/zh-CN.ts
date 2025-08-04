@@ -51,6 +51,7 @@ export default {
   'page.settings.tab.autostun.tunnel_stats': '统计信息',
   'page.settings.tab.autostun.tunnel_handled': '已处理',
   'page.settings.tab.autostun.tunnel_failed': '失败',
+  'page.settings.tab.autostun.tunnel_blocked': '拒绝',
   'page.settings.tab.autostun.tunnel_downstream_bytes': '下行',
   'page.settings.tab.autostun.tunnel_upstream_bytes': '上行',
   'page.settings.tab.autostun.view_connections': '查看连接表',
@@ -63,11 +64,5 @@ export default {
   'page.settings.tab.autostun.connection_established': '建立时间',
   'page.settings.tab.autostun.connection_activity': '最后活动',
   'page.settings.tab.autostun.connection_bytes': '传输数据',
-  'page.settings.tab.autostun.no_connections': '暂无活动连接',
-
-  // Units
-  'page.settings.tab.autostun.bytes': '字节',
-  'page.settings.tab.autostun.kb': 'KB',
-  'page.settings.tab.autostun.mb': 'MB',
-  'page.settings.tab.autostun.gb': 'GB'
+  'page.settings.tab.autostun.no_connections': '暂无活动连接'
 }

@@ -27,6 +27,8 @@ public interface Forwarder extends AutoCloseable, NatAddressProvider {
 
     long getConnectionHandled();
 
+    long getConnectionBlocked();
+
     int getProxyPort();
 
     int getUpstreamPort();
