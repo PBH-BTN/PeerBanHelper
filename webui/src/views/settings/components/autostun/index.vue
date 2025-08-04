@@ -15,14 +15,14 @@
     <a-spin :loading="firstLoading" style="width: 100%; min-height: 400px">
       <a-space v-if="!firstLoading" direction="vertical" fill size="large">
         <!-- NAT Status Section -->
-        <NATStatus
+        <NatStatus
           :nat-type="natType"
           :refreshing-n-a-t="refreshingNAT"
           @refresh-n-a-t="handleRefreshNAT"
         />
 
         <!-- Configuration Section -->
-        <AutoSTUNConfigComponent
+        <AutoStunConfigComponent
           :config="config"
           :downloaders="downloaders"
           :is-n-a-t-compatible="isNATCompatible"
@@ -52,30 +52,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch, nextTick } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import { Message } from '@arco-design/web-vue'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import {
   getAutoSTUNStatus,
-  saveAutoSTUNConfig,
   getAutoSTUNTunnels,
   getTunnelConnections,
-  refreshNATType
+  refreshNATType,
+  saveAutoSTUNConfig
 } from '@/service/autostun'
 import { getDownloaders } from '@/service/downloaders'
 import type {
   AutoSTUNConfig,
-  TunnelData,
   ConnectionInfo,
+  DownloaderBasicInfo,
   NATType,
-  DownloaderBasicInfo
+  TunnelData
 } from '@/api/model/autostun'
-import NATStatus from './NATStatus.vue'
-import AutoSTUNConfigComponent from './AutoSTUNConfig.vue'
-import TunnelList from './TunnelList.vue'
-import ConnectionModal from './ConnectionModal.vue'
+import NatStatus from './natStatus.vue'
+import AutoStunConfigComponent from './autoStunConfig.vue'
+import TunnelList from './tunnelList.vue'
+import ConnectionModal from './connectionModal.vue'
 
 const { t } = useI18n()
 

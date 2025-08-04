@@ -17,9 +17,7 @@
       <ProfileForm />
     </a-tab-pane>
     <a-tab-pane :key="3">
-      <template #title>
-        <IconFont type="icon-network" /> &nbsp;{{ t('page.settings.tab.autostun') }}
-      </template>
+      <template #title> <icon-bar-chart /> &nbsp;{{ t('page.settings.tab.autostun') }} </template>
       <AutoSTUN />
     </a-tab-pane>
     <a-tab-pane :key="4">
@@ -37,6 +35,7 @@ import RunningStatus from './components/info/index.vue'
 import Labs from './components/labs/index.vue'
 import ProfileForm from './components/profile/index.vue'
 import AutoSTUN from './components/autostun/index.vue'
+
 const { t } = useI18n()
 
 const { query } = useRoute()
