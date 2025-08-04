@@ -28,8 +28,8 @@ export default {
     '[NAT3] 端口受限圆锥型 NAT (PortRestrictedCone)',
   'page.settings.tab.autostun.nat_type.Symmetric': '[NAT4] 对称型 NAT (Symmetric)',
   'page.settings.tab.autostun.nat_type.Unknown': '未知',
-  'page.settings.tab.autostun.nat_compatible': '✅ 兼容 AutoSTUN',
-  'page.settings.tab.autostun.nat_incompatible': '❌ 不兼容 AutoSTUN',
+  'page.settings.tab.autostun.nat_incompatible': '❌ NAT 类型不兼容',
+  'page.settings.tab.autostun.netdriver_incompatible': '❌ Docker 网络配置问题',
 
   // Downloader Configuration section
   'page.settings.tab.autostun.downloader_config': '下载器配置',

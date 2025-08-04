@@ -656,9 +656,11 @@ public final class BitComet extends AbstractDownloader {
                 log.error(tlUI(Lang.DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED));
                 return;
             }
-            var configResp = JsonUtil.standard().fromJson(response.body().string(), BCConfigSetResponse.class);
+            var json = response.body().string();
+            var configResp = JsonUtil.standard().fromJson(json, BCConfigSetResponse.class);
             if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
                 log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT));
+                System.out.println(json);
                 throw new IllegalStateException("Failed to save BitComet BT Protocol Port: " + configResp.getErrorMessage());
             }
         }catch (Exception e){

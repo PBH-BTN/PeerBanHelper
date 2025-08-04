@@ -18,6 +18,7 @@
         <NatStatus
           :nat-type="natType"
           :refreshing-n-a-t="refreshingNAT"
+          :is-bridge-net-driver="isBridgeNetDriver"
           @refresh-n-a-t="handleRefreshNAT"
         />
 
@@ -26,6 +27,7 @@
           :config="config"
           :downloaders="downloaders"
           :is-n-a-t-compatible="isNATCompatible"
+          :is-bridge-net-driver="isBridgeNetDriver"
           :config-changed="configChanged"
           :saving-config="savingConfig"
           @config-change="(partialConfig) => Object.assign(config, partialConfig)"
@@ -100,7 +102,7 @@ const originalConfig = reactive<AutoSTUNConfig>({
   useFriendlyLoopbackMapping: false,
   downloaders: []
 })
-
+const isBridgeNetDriver = ref<boolean>(false)
 const natType = ref<NATType>('Unknown')
 const tunnels = ref<TunnelData[]>([])
 const connections = ref<ConnectionInfo[]>([])
@@ -144,6 +146,7 @@ const { refresh: refreshStatus } = useRequest(
     manual: true,
     onSuccess: (data) => {
       natType.value = data.natType
+      isBridgeNetDriver.value = data.isBridgeNetDriver
       // Map the selected downloaders to an array of IDs
       const downloaderIds = data.selectedDownloaders.map((d) => d.id)
       Object.assign(config, {
@@ -310,43 +313,28 @@ const handleViewConnections = async (downloaderId: string, downloaderName: strin
 
     // Show modal after state is set
     connectionModalVisible.value = true
-
-    console.log('Fetching connections for downloader:', downloaderId)
     const res = await getTunnelConnections(downloaderId)
-    console.log('API response:', res)
 
     if (res.success && res.data) {
-      console.log('Connection data:', res.data)
-      console.log('Number of connections:', res.data.length)
-
       // Ensure we have an array
       const connectionData = Array.isArray(res.data) ? res.data : []
-
       // Wait for next tick to ensure reactivity
       await nextTick()
-
       // Set the data
       connections.value = connectionData
-
-      console.log('Connections value set to:', connections.value)
-      console.log('Connections length:', connections.value.length)
 
       if (connections.value.length === 0) {
         console.warn('API returned success but no connections data')
         Message.warning(t('page.settings.tab.autostun.no_connections'))
-      } else {
-        console.log('Successfully loaded', connections.value.length, 'connections')
       }
 
       // Start auto-refresh for connections
       refreshConnections()
     } else {
-      console.error('API returned error:', res.message)
       Message.error(res.message || 'Failed to load connections')
       connections.value = []
     }
   } catch (error) {
-    console.error('Error loading connections:', error)
     Message.error(error instanceof Error ? error.message : 'Failed to load connections')
     // Keep modal open but show empty state
     connections.value = []

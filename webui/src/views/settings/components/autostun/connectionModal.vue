@@ -2,7 +2,7 @@
   <a-modal
     :visible="visible"
     :title="`${modalTitle} - ${t('page.settings.tab.autostun.connection_table')}`"
-    width="100%"
+    width="auto"
     :footer="false"
     unmount-on-close
     @update:visible="$emit('update:visible', $event)"
@@ -10,6 +10,7 @@
     <a-space direction="vertical" fill width="auto">
       <a-table
         :columns="connectionTableColumns"
+        :bordered="{ cell: true }"
         :data="connections"
         :pagination="false"
         stripe
@@ -73,16 +74,16 @@
             </a-typography-text>
           </a-space>
         </template>
-        <template #activity="{ record }">
-          <a-space direction="vertical">
-            <a-typography-text>
-              <icon-history />
-              {{ formatTimestamp(record.lastActivityAt) }}
-            </a-typography-text>
-          </a-space>
-        </template>
+        <!--        <template #activity="{ record }">-->
+        <!--          <a-space direction="vertical">-->
+        <!--            <a-typography-text>-->
+        <!--              <icon-history />-->
+        <!--              {{ formatTimestamp(record.lastActivityAt) }}-->
+        <!--            </a-typography-text>-->
+        <!--          </a-space>-->
+        <!--        </template>-->
         <template #bytes="{ record }">
-          <a-space direction="vertical">
+          <a-space direction="horizontal">
             <a-typography-text>
               <icon-arrow-up class="green" />
               {{ formatFileSize(record.toDownstreamBytes) }}
@@ -128,32 +129,32 @@ const connectionTableColumns = [
   {
     title: t('page.settings.tab.autostun.connection_downstream'),
     slotName: 'downstream',
-    width: 200
+    width: '15%'
   },
   {
     title: t('page.settings.tab.autostun.connection_proxy'),
     slotName: 'proxy',
-    width: 200
+    width: '15%'
   },
   {
     title: t('page.settings.tab.autostun.connection_upstream'),
     slotName: 'upstream',
-    width: 180
+    width: '15%'
   },
   {
     title: t('page.settings.tab.autostun.connection_established'),
     slotName: 'established',
-    width: 160
+    width: '30%'
   },
-  {
-    title: t('page.settings.tab.autostun.connection_activity'),
-    slotName: 'activity',
-    width: 160
-  },
+  // {
+  //   title: t('page.settings.tab.autostun.connection_activity'),
+  //   slotName: 'activity',
+  //   width: 160
+  // },
   {
     title: t('page.settings.tab.autostun.connection_bytes'),
     slotName: 'bytes',
-    width: 140
+    width: '20%'
   }
 ]
 

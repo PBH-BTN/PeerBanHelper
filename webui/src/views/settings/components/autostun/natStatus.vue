@@ -5,11 +5,11 @@
         <a-space>
           <span>{{ t('page.settings.tab.autostun.nat_type') }}:</span>
           <a-tag :color="natTypeColor">{{ natTypeDisplayName }}</a-tag>
-          <a-tag v-if="isNATCompatible" color="green">
-            {{ t('page.settings.tab.autostun.nat_compatible') }}
-          </a-tag>
-          <a-tag v-else color="red">
+          <a-tag v-if="!isNATCompatible" color="red">
             {{ t('page.settings.tab.autostun.nat_incompatible') }}
+          </a-tag>
+          <a-tag v-if="isBridgeNetDriver" color="red">
+            {{ t('page.settings.tab.autostun.netdriver_incompatible') }}
           </a-tag>
         </a-space>
       </a-col>
@@ -37,6 +37,7 @@ const { t } = useI18n()
 interface Props {
   natType: NATType
   refreshingNAT: boolean
+  isBridgeNetDriver: boolean
 }
 
 const props = defineProps<Props>()
@@ -57,7 +58,6 @@ const natTypeColor = computed(() => {
       return 'green'
     case 'RestrictedCone':
     case 'PortRestrictedCone':
-      return 'orange'
     case 'Symmetric':
     case 'UdpBlocked':
       return 'red'
@@ -68,6 +68,10 @@ const natTypeColor = computed(() => {
 
 const isNATCompatible = computed(() => {
   return props.natType === 'FullCone'
+})
+
+const isBridgeNetDriver = computed(() => {
+  return props.isBridgeNetDriver
 })
 
 // Event handlers

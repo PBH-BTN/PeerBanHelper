@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
@@ -20,6 +21,7 @@ import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import oshi.SystemInfo;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -34,14 +36,16 @@ public class PBHAutoStunController extends AbstractFeatureModule {
     private final StunManager stunManager;
     private final BTStunManager bTStunManager;
     private final DownloaderManager downloaderManager;
+    private final SystemInfo systemInfo;
 
-    public PBHAutoStunController(JavalinWebContainer javalinWebContainer, BackgroundTaskManager backgroundTaskManager, StunManager stunManager, BTStunManager bTStunManager, DownloaderManager downloaderManager) {
+    public PBHAutoStunController(JavalinWebContainer javalinWebContainer, BackgroundTaskManager backgroundTaskManager, StunManager stunManager, BTStunManager bTStunManager, DownloaderManager downloaderManager, SystemInfo systemInfo) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.backgroundTaskManager = backgroundTaskManager;
         this.stunManager = stunManager;
         this.bTStunManager = bTStunManager;
         this.downloaderManager = downloaderManager;
+        this.systemInfo = systemInfo;
     }
 
     @Override
@@ -74,6 +78,11 @@ public class PBHAutoStunController extends AbstractFeatureModule {
     private void getModuleStatus(@NotNull Context context) {
         var section = Main.getMainConfig().getConfigurationSection("auto-stun");
         if (section == null) throw new IllegalStateException("Auto-stun configuration section not found");
+        var defaultIpv4Gateway = systemInfo.getOperatingSystem().getNetworkParams().getIpv4DefaultGateway();
+        boolean isDockerBridge =
+                defaultIpv4Gateway.startsWith("172.")
+                        && ExternalSwitch.parse("pbh.release", "unknown").toLowerCase(Locale.ROOT).contains("docker")
+                        && ExternalSwitch.parseBoolean("pbh.autostun.checkdockerbridge", true);
         AutoStunConfigDto autoStunConfigDto = new AutoStunConfigDto(
                 section.getBoolean("enabled", false),
                 section.getBoolean("use-friendly-loopback-mapping", true),
@@ -81,7 +90,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                         .map(downloaderManager::getDownloaderById)
                         .filter(Objects::nonNull)
                         .map(downloaderManager::getDownloadInfo).toList(),
-                stunManager.getCachedNatType());
+                stunManager.getCachedNatType(), isDockerBridge);
         context.json(new StdResp(true, null, autoStunConfigDto));
     }
 

@@ -14,4 +14,5 @@ public class AutoStunConfigDto {
     private boolean useFriendlyLoopbackMapping;
     private List<DownloaderBasicInfo> selectedDownloaders;
     private NatType natType;
+    private boolean isBridgeNetDriver;
 }

@@ -19,6 +19,7 @@ export interface AutoSTUNStatus {
   useFriendlyLoopbackMapping: boolean
   selectedDownloaders: DownloaderBasicInfo[]
   natType: NATType
+  isBridgeNetDriver: boolean
 }
 
 export interface AutoSTUNConfig {
