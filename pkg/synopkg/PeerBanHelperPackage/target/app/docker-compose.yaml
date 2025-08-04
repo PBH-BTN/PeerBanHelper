@@ -9,3 +9,4 @@ services:
     network_mode: host
     environment:
       - PBH_USER_LOCALE=zh-CN
+      - PBH_PKG_SYNOLOGY=true
