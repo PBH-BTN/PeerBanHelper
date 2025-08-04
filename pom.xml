@@ -562,5 +562,11 @@
             <artifactId>portmapper</artifactId>
             <version>2.0.6</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.12.0</version>
+        </dependency>
     </dependencies>
 </project>

@@ -730,3 +730,10 @@ AUTOSTUN_DOWNLOADER_TUNNEL_NOT_EXISTS: "下载器 {} 对应的 AutoSTUN 隧道�
 AUTOSTUN_DOWNLOADER_TUNNEL_FORWARDER_NOT_EXISTS: "下载器 {} 对应的 AutoSTUN 隧道不存在或未启动"
 AUTOSTUN_DOWNLOADER_TUNNEL_UPDATE_PORT_FAILED: "无法更改下载器 {} 的监听端口，目标下载器可能已经离线，或者 PeerBanHelper 无法连接到下载器，正在关闭隧道……"
 AUTOSTUN_CONFIG_REAPPLIED: "已成功保存并正在重启隧道"
+
+PBH_LICENSE_PARSE_FAILED: "解析失败，许可证无效或已损坏：{}"
+PBH_LICENSE_KEY_DELETED: "已成功移除许可证"
+PBH_LICENSE_KEY_DELETE_FAILED_NOT_EXISTS: "指定要删除的许可证无效或者不存在"
+PBH_LICENSE_KEY_EXPIRED: "正在添加的许可证已经过期"
+PBH_LICENSE_KEY_REVOKED: "正在添加的许可证已被吊销"
+PBH_PLUS_LICENSE_UPDATED: "许可证信息更新成功"

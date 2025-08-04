@@ -11,6 +11,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +34,16 @@ public final class MainConfigUpdateScript {
 //            conf.set("server.token", UUID.randomUUID().toString());
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
+    }
+
+    @UpdateScript(version = 38)
+    public void pbhKeyString2List() {
+        var key = Main.getMainConfig().getString("pbh-plus-key");
+        List<String> keys = new ArrayList<>();
+        if (key != null && !key.isBlank()) {
+            keys.add(key);
+        }
+        Main.getMainConfig().set("pbh-plus-key", keys);
     }
 
     @UpdateScript(version = 37)

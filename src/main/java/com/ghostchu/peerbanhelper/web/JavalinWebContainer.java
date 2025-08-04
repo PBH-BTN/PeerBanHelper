@@ -4,7 +4,7 @@ import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
-import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
+import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -58,7 +58,7 @@ public final class JavalinWebContainer {
     @Getter
     private volatile boolean started;
 
-    public JavalinWebContainer(ActivationManager activationManager, PBHPortMapper pBHPortMapper) {
+    public JavalinWebContainer(LicenseManager licenseManager, PBHPortMapper pBHPortMapper) {
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -142,7 +142,7 @@ public final class JavalinWebContainer {
                         return;
                     }
                     if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
-                        if (!activationManager.isActivated()) {
+                        if (!licenseManager.isFeatureEnabled("basic")) {
                             throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
                         }
                     }

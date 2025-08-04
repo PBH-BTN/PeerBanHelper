@@ -1,36 +1,48 @@
 package com.ghostchu.peerbanhelper.pbhplus;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.pbhplus.bean.License;
+import com.ghostchu.peerbanhelper.pbhplus.bean.V1License;
+import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.Nullable;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
-public final class ActivationKeyManager {
+public class LicenseParser {
     public static final String OFFICIAL_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCHxgRTk+Zx/pkN8rpK+Lbr1/f1meapIRDJIgBiSfFy4xdbmDF8wE9PJhdM+3peThz9dJQlt6dkeduIVp65rGS9oZdj7gO5YKtUCDir4NgGQGe1p2C41Xv6RiOXObLmF+ubAJILsimwtDyJT8IysEh9hgaZWnvRXT8JX9wB0Ti2rwIDAQAB";
     private static final String hardwareUUIDHash;
+    private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
 
     static {
         SystemInfo systemInfo = new SystemInfo();
@@ -38,52 +50,57 @@ public final class ActivationKeyManager {
         hardwareUUIDHash = Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString().substring(0, 10);
     }
 
-    private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
-
-    public ActivationKeyManager() throws Exception {
+    public LicenseParser() throws Exception {
         localKeyPair = loadLocalKeyPair();
     }
 
-    /**
-     * 从密文获取 KeyData
-     *
-     * @param key 密文
-     * @return KeyData （如果有效），否则 null
-     */
-    @Nullable
-    public KeyData fromKey(String pubKey, String key) {
-        try {
-            byte[] encrypted = Base64.getDecoder().decode(key);
-            String json = new String(RSAUtils.decryptByPublicKey(encrypted, pubKey), StandardCharsets.UTF_8);
-            KeyData keyData = JsonUtil.standard().fromJson(json, KeyData.class);
-            if (keyData == null) {
-                throw new IllegalStateException("Incorrect key schema");
-            }
-            String description = keyData.description;
-            if (description != null) {
-                if (description.equalsIgnoreCase("No description")
-                    || description.isBlank()) {
-                    description = null;
-                }
-            }
-            keyData.setDescription(description);
-            if ("PeerBanHelper".equals(keyData.verifyMagic)) {
-                return keyData;
-            }
-            throw new IllegalStateException("Incorrect key: " + json);
-        } catch (Exception e) {
-            return null;
-        }
+    @NotNull
+    public License fromLicense(String encryptedLicense) throws IllegalArgumentException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, IOException, InvalidKeyException {
+        byte[] encrypted = Base64.getDecoder().decode(encryptedLicense);
+        String json = new String(RSAUtils.decryptByPublicKey(encrypted, OFFICIAL_PUBLIC_KEY), StandardCharsets.UTF_8);
+        JsonElement parser = JsonParser.parseString(json);
+        if (!parser.isJsonObject())
+            throw new IllegalArgumentException("License data is not a valid JSON object");
+        var licenseObject = parser.getAsJsonObject();
+        var verifyMagicObj = licenseObject.get("verifyMagic");
+        if (verifyMagicObj == null || !verifyMagicObj.isJsonPrimitive())
+            throw new IllegalArgumentException("License data is missing 'verifyMagic' field or it is not a string");
+        if (!"PeerBanHelper".equals(verifyMagicObj.getAsString()))
+            throw new IllegalArgumentException("Incorrect verify magic: excepted->PeerBanHelper, actual->" + verifyMagicObj);
+        var version = licenseObject.get("licenseVersion");
+        if (version == null)
+            return fromLicenseV1(json);
+        else if (version.getAsInt() == 2)
+            return fromLicenseV2(json);
+        throw new IllegalArgumentException("Unsupported license version: " + version.getAsInt() + ", Try update PeerBanHelper.");
+    }
+
+    private @NotNull License fromLicenseV2(@NotNull String json) {
+        return JsonUtil.standard().fromJson(json, V2License.class);
+    }
+
+    private @NotNull License fromLicenseV1(@NotNull String json) {
+        return JsonUtil.standard().fromJson(json, V1License.class);
     }
 
     public String generateLocalLicense() throws Exception {
-        var key = new KeyData("PeerBanHelper",
+        var key = new V2License("PeerBanHelper",
+                2,
+                "local",
                 tlUI(Lang.FREE_LICENSE_SOURCE),
                 System.getProperty("user.name", "Local User"),
+                null,
+                null,
+                null,
+                null,
+                null,
+                BigDecimal.ZERO,
+                System.currentTimeMillis(),
                 System.currentTimeMillis(),
                 LocalDateTime.now().plusDays(15).atOffset(ZoneOffset.UTC).toInstant().toEpochMilli(),
                 tlUI(Lang.FREE_LICENSE_DESCRIPTION),
-                "Local License", "local");
+                "Local License",
+                List.of("basic"));
         var encrypted = (RSAUtils.encryptByPrivateKey(new Gson().toJson(key).getBytes(StandardCharsets.UTF_8),
                 Base64.getEncoder().encodeToString(getLocalKeyPair().getKey().getEncoded())));
         return Base64.getEncoder().encodeToString(encrypted);
@@ -94,8 +111,8 @@ public final class ActivationKeyManager {
     }
 
     private Map.Entry<PrivateKey, PublicKey> loadLocalKeyPair() throws Exception {
-        File publicKeyFile = new File(Main.getDataDirectory(), "local_license_keypair_" + hardwareUUIDHash + ".pub");
-        File privateKeyFile = new File(Main.getDataDirectory(), "local_license_keypair_" + hardwareUUIDHash + ".key");
+        File publicKeyFile = new File(Main.getDataDirectory(), "local_license2_keypair_" + hardwareUUIDHash + ".pub");
+        File privateKeyFile = new File(Main.getDataDirectory(), "local_license2_keypair_" + hardwareUUIDHash + ".key");
 
         if (!publicKeyFile.exists() || !privateKeyFile.exists()) {
             var map = RSAUtils.genKeyPair();
@@ -113,29 +130,4 @@ public final class ActivationKeyManager {
 
         return Map.entry(privateKey, publicKey);
     }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class KeyData {
-        // verifyMagic 应固定为 PeerBanHelper
-        private String verifyMagic;
-        // source 为来源
-        private String source;
-        // 授权给（用户名）
-        private String licenseTo;
-        // Key 创建时间
-        private Long createAt;
-        // Key 过期时间，通常是 100 年以后
-        private Long expireAt;
-        // 许可证描述
-        @Nullable
-        private String description;
-        // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
-        @Nullable
-        private String hidden;
-        @Nullable
-        private String type = "afdian"; // 默认字段
-    }
-
 }

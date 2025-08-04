@@ -1,4 +1,4 @@
-config-version: 37
+config-version: 38
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -21,7 +21,7 @@ gui: auto
 # so your support is vital to us.
 # If you don't want to donate PeerBanHelper, please create a local free license via WebUI,
 # which is functionally identical to the donation key obtained via donation.
-pbh-plus-key: ""
+pbh-plus-key: [ ]
 # Http 服务器设置
 # Http Server Settings
 server:
