@@ -128,33 +128,23 @@ defineEmits<{
 const connectionTableColumns = [
   {
     title: t('page.settings.tab.autostun.connection_downstream'),
-    slotName: 'downstream',
-    width: '15%'
+    slotName: 'downstream'
   },
   {
     title: t('page.settings.tab.autostun.connection_proxy'),
-    slotName: 'proxy',
-    width: '15%'
+    slotName: 'proxy'
   },
   {
     title: t('page.settings.tab.autostun.connection_upstream'),
-    slotName: 'upstream',
-    width: '15%'
+    slotName: 'upstream'
   },
   {
     title: t('page.settings.tab.autostun.connection_established'),
-    slotName: 'established',
-    width: '30%'
+    slotName: 'established'
   },
-  // {
-  //   title: t('page.settings.tab.autostun.connection_activity'),
-  //   slotName: 'activity',
-  //   width: 160
-  // },
   {
     title: t('page.settings.tab.autostun.connection_bytes'),
-    slotName: 'bytes',
-    width: '20%'
+    slotName: 'bytes'
   }
 ]
 
