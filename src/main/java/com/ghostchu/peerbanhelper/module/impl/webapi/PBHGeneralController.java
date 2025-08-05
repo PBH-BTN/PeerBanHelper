@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
-import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskRunnable;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
@@ -109,15 +108,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private void handleRefreshNatStatus(@NotNull Context context) {
-        var bgTask = new BackgroundTaskRunnable(new TranslationComponent(Lang.BACKGROUND_TASK_NAME_UPDATE_NAT_STATUS)) {
-            @Override
-            public void run() {
-                var natType = bTStunManager.refreshNatType();
-                tlog.info("New detected NAT type now is: " + natType.name());
-            }
-        };
-        backgroundTaskManager.registerAndStart(bgTask);
-        context.json(new StdResp(true, null, false, bgTask));
+        Thread.ofVirtual().name("Refresh NAT Status").start(() -> bTStunManager.refreshNatType());
+        context.json(new StdResp(true, "Refreshing NAT Status", null));
     }
 
     private void handleTriggerCrash(@NotNull Context context) {

@@ -8,8 +8,6 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
-import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskRunnable;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunInstance;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunManager;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
@@ -32,16 +30,14 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 public class PBHAutoStunController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
-    private final BackgroundTaskManager backgroundTaskManager;
     private final StunManager stunManager;
     private final BTStunManager bTStunManager;
     private final DownloaderManager downloaderManager;
     private final SystemInfo systemInfo;
 
-    public PBHAutoStunController(JavalinWebContainer javalinWebContainer, BackgroundTaskManager backgroundTaskManager, StunManager stunManager, BTStunManager bTStunManager, DownloaderManager downloaderManager, SystemInfo systemInfo) {
+    public PBHAutoStunController(JavalinWebContainer javalinWebContainer, StunManager stunManager, BTStunManager bTStunManager, DownloaderManager downloaderManager, SystemInfo systemInfo) {
         super();
         this.javalinWebContainer = javalinWebContainer;
-        this.backgroundTaskManager = backgroundTaskManager;
         this.stunManager = stunManager;
         this.bTStunManager = bTStunManager;
         this.downloaderManager = downloaderManager;
@@ -208,15 +204,8 @@ public class PBHAutoStunController extends AbstractFeatureModule {
 
     @SuppressWarnings("DuplicatedCode")
     private void refreshNatType(@NotNull Context context) {
-        var bgTask = new BackgroundTaskRunnable(new TranslationComponent(Lang.BACKGROUND_TASK_NAME_UPDATE_NAT_STATUS)) {
-            @Override
-            public void run() {
-                var natType = stunManager.refreshNatType();
-                tlog.info("New detected NAT type now is: " + natType.name());
-            }
-        };
-        backgroundTaskManager.registerAndStart(bgTask);
-        context.json(new StdResp(true, null, false, bgTask));
+        Thread.ofVirtual().name("Refresh NAT Status").start(stunManager::refreshNatType);
+        context.json(new StdResp(true, "Refreshing NAT Status", null));
     }
 
     @Override

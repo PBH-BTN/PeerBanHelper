@@ -18,6 +18,7 @@ import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManage
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.asynctask.AsyncTask;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
@@ -194,6 +195,20 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
+
+        Thread.ofPlatform().start(() -> {
+            try (var task = AsyncTask.create(new TranslationComponent(Lang.MOTD, "TEST"))) {
+                for (int i = 0; i < 1000; i++) {
+                    task.setMax(1000);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    task.increment();
+                }
+            }
+        });
     }
 
 
@@ -263,7 +278,7 @@ public class PeerBanHelper implements Reloadable {
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
-        moduleManager.register(PBHBackgroundTaskController.class);
+        moduleManager.register(PBHAsyncTaskController.class);
         moduleManager.register(PBHGeneralController.class);
         moduleManager.register(IPBlackList.class);
         moduleManager.register(PeerIdBlacklist.class);

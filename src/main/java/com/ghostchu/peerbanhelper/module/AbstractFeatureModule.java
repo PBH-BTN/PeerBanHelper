@@ -32,7 +32,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Getter
     private boolean register;
     @Autowired
-    private JavalinWebContainer javalinWebContainer;
+    JavalinWebContainer javalinWebContainer;
 
     @Override
     public boolean isModuleEnabled() {
@@ -111,4 +111,5 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     public String userIp(Context context) {
         return WebUtil.userIp(context);
     }
+
 }
