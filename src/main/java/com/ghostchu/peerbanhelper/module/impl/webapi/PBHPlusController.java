@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.FreeLicenseRequestBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.LicenseDeleteBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.LicensePutRequestBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.LicenseKeyPairDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PBHPlusStatusDTO;
@@ -81,7 +82,6 @@ public final class PBHPlusController extends AbstractFeatureModule {
     private void claimRenewFreeLicenseCaptcha(@NotNull Context context) {
         var server = new PoWServer(powCaptchaDifficultyBits, powCaptchaAlgorithm);
         var challengeId = UUID.randomUUID().toString();
-        ;
         powCaptcha.put(challengeId, server);
         context.json(new StdResp(true, null, new PowCaptchaData(challengeId, Base64.getEncoder().encodeToString(server.getChallenge()), server.getDifficultyBits(), powCaptchaAlgorithm)));
     }
@@ -150,22 +150,27 @@ public final class PBHPlusController extends AbstractFeatureModule {
     }
 
     private void handleLicenseDelete(@NotNull Context context) throws Exception {
-        String key = context.bodyAsClass(LicensePutRequestBody.class).key();
+        String key = context.bodyAsClass(LicenseDeleteBody.class).getLicenseId();
+        var mappedLicense = licenseManager.getLicenseBackend().getLicensesMap().get(key);
+        if (licenseManager == null) {
+            context.json(new StdResp(false, tlUI(Lang.PBH_LICENSE_KEY_DELETE_FAILED_NOT_EXISTS), "Not found mappedLicense"));
+            return;
+        }
         var keyList = Main.getMainConfig().getStringList("pbh-plus-key");
-        if (keyList.remove(key.trim())) {
+        if (keyList.remove(mappedLicense.getKeyText())) {
             Main.getMainConfig().set("pbh-plus-key", keyList);
             Main.getMainConfig().save(Main.getMainConfigFile());
             licenseManager.reloadModule();
             context.json(new StdResp(true, tlUI(Lang.PBH_LICENSE_KEY_DELETED), null));
         } else {
-            context.json(new StdResp(false, tlUI(Lang.PBH_LICENSE_KEY_DELETE_FAILED_NOT_EXISTS), null));
+            context.json(new StdResp(false, tlUI(Lang.PBH_LICENSE_KEY_DELETE_FAILED_NOT_EXISTS), "Not found target keyText"));
         }
     }
 
     private void handleStatus(@NotNull Context context) {
         List<LicenseKeyPairDTO> licenseKeyPairDTOList = new ArrayList<>();
-        licenseManager.getLicenseBackend().getLicensesMap().forEach((key, license) -> {
-            var dto = new LicenseKeyPairDTO(key,
+        licenseManager.getLicenseBackend().getLicensesMap().forEach((licenseId, license) -> {
+            var dto = new LicenseKeyPairDTO(licenseId,
                     license instanceof V2License ? 2 : (license instanceof V1License ? 1 : -1),
                     licenseManager.getLicenseBackend().getLicenseStatus(license),
                     license);

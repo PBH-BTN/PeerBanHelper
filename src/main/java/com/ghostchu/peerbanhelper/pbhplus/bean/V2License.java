@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class V2License implements License {
+    private transient String keyText;
     // verifyMagic 应固定为 PeerBanHelper
     private String verifyMagic;
     private int licenseVersion;
@@ -29,4 +30,16 @@ public class V2License implements License {
     private String description;
     private String hidden;
     private List<String> features;
+
+
+    @Override
+    public String getKeyText() {
+        return keyText;
+    }
+
+    @Override
+    public void setKeyText(String keyText) {
+        this.keyText = keyText;
+    }
+
 }

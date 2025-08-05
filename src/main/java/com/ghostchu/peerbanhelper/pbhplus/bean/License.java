@@ -16,6 +16,10 @@ public interface License {
 
     long getExpireAt();
 
+    String getKeyText();
+
+    void setKeyText(String keyText);
+
     long getStartAt();
 
     String getDescription();

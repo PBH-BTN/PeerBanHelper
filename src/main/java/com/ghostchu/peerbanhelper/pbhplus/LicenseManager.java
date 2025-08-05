@@ -7,11 +7,13 @@ import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.hash.Hashing;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,7 +37,7 @@ public class LicenseManager implements Reloadable {
         for (String key : keyTexts) {
             try {
                 var license = licenseParser.fromLicense(key);
-                licenseList.put(key, license);
+                licenseList.put(Hashing.sha256().hashString(key, StandardCharsets.UTF_8).toString(), license);
             } catch (Exception e) {
                 log.warn(tlUI(Lang.PBH_LICENSE_PARSE_FAILED, e.getClass().getName() + ": " + e.getMessage()), e);
             }

@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.hash.Hashing;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.jetbrains.annotations.NotNull;
@@ -68,11 +67,15 @@ public class LicenseParser {
         if (!"PeerBanHelper".equals(verifyMagicObj.getAsString()))
             throw new IllegalArgumentException("Incorrect verify magic: excepted->PeerBanHelper, actual->" + verifyMagicObj);
         var version = licenseObject.get("licenseVersion");
+        License license = null;
         if (version == null)
-            return fromLicenseV1(json);
+            license = fromLicenseV1(json);
         else if (version.getAsInt() == 2)
-            return fromLicenseV2(json);
-        throw new IllegalArgumentException("Unsupported license version: " + version.getAsInt() + ", Try update PeerBanHelper.");
+            license = fromLicenseV2(json);
+        if (license == null)
+            throw new IllegalArgumentException("Unsupported license version: " + version.getAsInt() + ", Try update PeerBanHelper.");
+        license.setKeyText(encryptedLicense);
+        return license;
     }
 
     private @NotNull License fromLicenseV2(@NotNull String json) {
@@ -84,7 +87,8 @@ public class LicenseParser {
     }
 
     public String generateLocalLicense() throws Exception {
-        var key = new V2License("PeerBanHelper",
+        var key = new V2License("",
+                "PeerBanHelper",
                 2,
                 "local",
                 tlUI(Lang.FREE_LICENSE_SOURCE),
@@ -101,7 +105,7 @@ public class LicenseParser {
                 tlUI(Lang.FREE_LICENSE_DESCRIPTION),
                 "Local License",
                 List.of("basic"));
-        var encrypted = (RSAUtils.encryptByPrivateKey(new Gson().toJson(key).getBytes(StandardCharsets.UTF_8),
+        var encrypted = (RSAUtils.encryptByPrivateKey(JsonUtil.standard().toJson(key).getBytes(StandardCharsets.UTF_8),
                 Base64.getEncoder().encodeToString(getLocalKeyPair().getKey().getEncoded())));
         return Base64.getEncoder().encodeToString(encrypted);
     }

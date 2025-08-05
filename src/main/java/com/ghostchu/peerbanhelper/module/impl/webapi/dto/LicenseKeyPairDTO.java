@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class LicenseKeyPairDTO {
-    private String key;
+    private String licenseId;
     private int version;
     private LicenseStatus status;
     private License data;

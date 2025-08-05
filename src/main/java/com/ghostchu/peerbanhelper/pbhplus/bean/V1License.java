@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class V1License implements License {
+    private transient String keyText;
     // verifyMagic 应固定为 PeerBanHelper
     private String verifyMagic;
     // source 为来源
@@ -30,6 +31,16 @@ public class V1License implements License {
     private String hidden;
     @Nullable
     private String type = "afdian"; // 默认字段
+
+    @Override
+    public String getKeyText() {
+        return keyText;
+    }
+
+    @Override
+    public void setKeyText(String keyText) {
+        this.keyText = keyText;
+    }
 
     @Override
     public long getStartAt() {
