@@ -206,6 +206,7 @@ public class PeerBanHelper implements Reloadable {
                         throw new RuntimeException(e);
                     }
                     task.increment();
+                    task.log("here we go: " + System.currentTimeMillis());
                 }
             }
         });
