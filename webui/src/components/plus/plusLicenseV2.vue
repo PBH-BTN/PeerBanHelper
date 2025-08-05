@@ -123,27 +123,27 @@ const showPurchaseInfo = () => {
   Modal.info({
     title: t('plus.license.v2.purchaseInfo'),
     content: () =>
-      h(Descriptions, { column: 1, size: 'small' }, [
-        h(DescriptionsItem, { label: t('plus.license.v2.orderId') }, [
-          h(TypographyText, { copyable: true }, status?.data?.orderId ?? 'N/A')
+      h(Descriptions, { column: 1, size: 'small' }, () => [
+        h(DescriptionsItem, { label: t('plus.license.v2.orderId') }, () => [
+          h(TypographyText, { copyable: true }, () => status?.data?.orderId ?? 'N/A')
         ]),
-        h(DescriptionsItem, { label: t('plus.license.v2.paid') }, [
+        h(DescriptionsItem, { label: t('plus.license.v2.paid') }, () => [
           `${status?.data?.paid ?? 'N/A'} CNY`
         ]),
-        h(DescriptionsItem, { label: t('plus.license.v2.paymentGateway') }, [
+        h(DescriptionsItem, { label: t('plus.license.v2.paymentGateway') }, () => [
           h(
             Tag,
             {
               color: status?.data?.paymentGateway ? getColor(status?.data?.paymentGateway) : 'gray'
             },
-            status?.data?.paymentGateway ?? 'N/A'
+            () => status?.data?.paymentGateway ?? 'N/A'
           )
         ]),
-        h(DescriptionsItem, { label: t('plus.license.v2.paymentOrderId') }, [
-          h(TypographyText, { copyable: true }, status?.data?.paymentOrderId ?? 'N/A')
+        h(DescriptionsItem, { label: t('plus.license.v2.paymentOrderId') }, () => [
+          h(TypographyText, { copyable: true }, () => status?.data?.paymentOrderId ?? 'N/A')
         ]),
         ...(status?.data?.sku
-          ? [h(DescriptionsItem, { label: 'SKU' }, [h(Tag, {}, status.data.sku)])]
+          ? [h(DescriptionsItem, { label: 'SKU' }, () => [h(Tag, {}, () => status.data.sku)])]
           : [])
       ])
   })
