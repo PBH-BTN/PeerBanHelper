@@ -2,9 +2,9 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.body.FreeLicenseRequestBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.LicenseDeleteBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.LicensePutRequestBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.PowCaptchaBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.LicenseKeyPairDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PBHPlusStatusDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PowCaptchaData;
@@ -124,7 +124,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
     }
 
     private void handleLicenseRenew(@NotNull Context context) throws Exception {
-        var body = context.bodyAsClass(FreeLicenseRequestBody.class);
+        var body = context.bodyAsClass(PowCaptchaBody.class);
         var captchaServer = powCaptcha.getIfPresent(body.getCaptchaId());
         if (captchaServer == null) {
             context.json(new StdResp(false, tlUI(Lang.POW_CAPTCHA_SERVER_NOT_FOUND), null));

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class FreeLicenseRequestBody {
+public class PowCaptchaBody {
     private String captchaId;
     private String captchaNonce;
 }

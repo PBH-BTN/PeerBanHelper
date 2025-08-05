@@ -56,7 +56,14 @@ public class LicenseParser {
     @NotNull
     public License fromLicense(String encryptedLicense) throws IllegalArgumentException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, IOException, InvalidKeyException {
         byte[] encrypted = Base64.getDecoder().decode(encryptedLicense);
-        String json = new String(RSAUtils.decryptByPublicKey(encrypted, OFFICIAL_PUBLIC_KEY), StandardCharsets.UTF_8);
+        String json = null;
+        try {
+            json = new String(RSAUtils.decryptByPublicKey(encrypted, Base64.getEncoder().encodeToString(localKeyPair.getValue().getEncoded())), StandardCharsets.UTF_8);
+        } catch (Exception ignored) {
+        }
+        if (json == null) {
+            json = new String(RSAUtils.decryptByPublicKey(encrypted, OFFICIAL_PUBLIC_KEY), StandardCharsets.UTF_8);
+        }
         JsonElement parser = JsonParser.parseString(json);
         if (!parser.isJsonObject())
             throw new IllegalArgumentException("License data is not a valid JSON object");
