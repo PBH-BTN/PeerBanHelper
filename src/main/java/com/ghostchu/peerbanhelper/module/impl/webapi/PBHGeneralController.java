@@ -12,7 +12,6 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
-import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
@@ -71,8 +70,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private DownloaderServer downloaderServer;
     @Autowired
     private StunManager bTStunManager;
-    @Autowired
-    private BackgroundTaskManager backgroundTaskManager;
     @Autowired
     private HTTPUtil hTTPUtil;
 
