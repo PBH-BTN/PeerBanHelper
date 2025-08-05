@@ -7,7 +7,7 @@
     width="48rem"
     draggable
   >
-    <a-space v-if="!pbhPlusActivited">
+    <a-space v-if="endpointStore.plusStatus?.licenses.length === 0">
       <a-space
         direction="vertical"
         fill
@@ -119,7 +119,7 @@
 import { deletePHBPlusKey } from '@/service/plus'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import mbd from './mbdBadge.vue'
 import LicenseV1 from './plusLicenseV1.vue'
@@ -128,11 +128,6 @@ import tryModal from './plusTryModal.vue'
 const endpointStore = useEndpointStore()
 
 const { t } = useI18n()
-const pbhPlusActivited = computed(
-  () =>
-    endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
-    endpointStore.plusStatus?.enabledFeatures?.includes('paid')
-)
 
 const showModal = ref(false)
 const currentActiveKey = ref(0)
