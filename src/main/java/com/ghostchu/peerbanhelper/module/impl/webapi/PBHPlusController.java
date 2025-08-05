@@ -140,9 +140,11 @@ public final class PBHPlusController extends AbstractFeatureModule {
         }
         var local = licenseManager.getLicenseParser().generateLocalLicense();
         var keyList = Main.getMainConfig().getStringList("pbh-plus-key");
-        if (!keyList.contains(local))
+        if (!keyList.contains(local)) {
             keyList.add(local);
-        Main.getMainConfig().save(Main.getMainConfigFile());
+            Main.getMainConfig().set("pbh-plus-key", keyList);
+            Main.getMainConfig().save(Main.getMainConfigFile());
+        }
         licenseManager.reloadModule();
         context.json(new StdResp(true, tlUI(Lang.PBH_PLUS_LICENSE_UPDATED), null));
     }
