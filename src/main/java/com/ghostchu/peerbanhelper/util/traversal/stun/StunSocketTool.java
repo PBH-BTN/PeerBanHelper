@@ -7,6 +7,7 @@ import java.net.StandardSocketOptions;
 public class StunSocketTool {
     public static Socket getSocket() throws IOException {
         Socket socket = new Socket();
+        socket.setReuseAddress(true);
         if (socket.supportedOptions().contains(StandardSocketOptions.SO_REUSEPORT)) {
             socket.setOption(StandardSocketOptions.SO_REUSEPORT, true);
         }
