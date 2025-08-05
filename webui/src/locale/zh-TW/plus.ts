@@ -16,7 +16,7 @@ export default {
   'plus.begging':
     'PeerBanHelper 是一群志同道合的人共同用愛發電的一個開源項目，為了更好地支持 PeerBanHelper 的發展，部分進階功能需要捐贈後解鎖，請給我們買一杯咖啡吧！',
   'plug.begging.local':
-    'PeerBanHelper 是一個非營利，開放原始碼的免費軟體。免費許可證授權這台電腦的個人用途，您不得重新出售或者用於違反服務條款的用途。如果 PeerBanHelper 幫助到了你，請考慮在愛發電上捐贈支持我們：',
+    'PeerBanHelper 是一個非營利，開放原始碼的免費軟體。免費許可證授權這台電腦的個人用途，您不得重新出售或者用於違反服務條款的用途。如果 PeerBanHelper 幫助到了你，請考慮在面包多上捐贈支持我們：',
   'plus.activeTips': '已經捐贈？在這裡輸入您的許可證以啟用您的訂閱',
   'plus.addLicense': '請輸入您的許可證',
   'plus.activeSuccess': '啟用成功',
