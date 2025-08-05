@@ -1,5 +1,5 @@
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
-import type { donateStatus, GlobalConfig, mainfest } from '@/api/model/manifest'
+import type { GlobalConfig, mainfest } from '@/api/model/manifest'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Octokit } from '@octokit/core'
 import urlJoin from 'url-join'
@@ -31,42 +31,6 @@ export function getLatestVersion(token = useEndpointStore().accessToken) {
       }
     })
     .then((res) => res.data)
-}
-
-export async function getPBHPlusStatus(): Promise<CommonResponse<donateStatus>> {
-  const endpointStore = useEndpointStore()
-  await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, '/api/pbhplus/status'), location.href)
-  return fetch(url, { headers: getCommonHeader() }).then((res) => {
-    useEndpointStore().assertResponseLogin(res)
-    return res.json()
-  })
-}
-
-export function setPHBPlusKey(key: string): Promise<CommonResponseWithoutData> {
-  const url = new URL(urlJoin(useEndpointStore().endpoint, '/api/pbhplus/key'), location.href)
-  return fetch(url, {
-    method: 'PUT',
-    headers: getCommonHeader(),
-    body: JSON.stringify({ key })
-  }).then((res) => {
-    useEndpointStore().assertResponseLogin(res)
-    return res.json()
-  })
-}
-
-export function obtainFreeTrial(): Promise<CommonResponseWithoutData> {
-  const url = new URL(
-    urlJoin(useEndpointStore().endpoint, 'api/pbhplus/renewFreeLicense'),
-    location.href
-  )
-  return fetch(url, {
-    method: 'POST',
-    headers: getCommonHeader()
-  }).then((res) => {
-    useEndpointStore().assertResponseLogin(res)
-    return res.json()
-  })
 }
 
 export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mainfest> {

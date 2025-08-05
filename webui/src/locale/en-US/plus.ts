@@ -18,6 +18,7 @@ export default {
   'plug.begging.local':
     ' PeerBanHelper is a non-profit, open-source free software. The free license authorizes personal use on this computer. You may not resell it or use it to violate the terms of service. If PeerBanHelper has been helpful to you, please consider supporting us on Afdian',
   'plus.activeTips': 'Already donated? Input your license here to activate your subscription',
+  'plus.addLicense': 'Please enter your license',
   'plus.activeSuccess': 'Activation successful',
 
   'plus.or': 'Or',
@@ -28,5 +29,15 @@ export default {
     "Even if you don't want to donate, PBH-BTN can still provide you with a 15-day Plus subscription. After 15 days, you can activate it again.",
   'plus.tryModal.content2': `PBH-BTN also maintains multiple online services and infrastructure that require continuous investment, such as GeoIP DB distribution, BTN, public BitTorrent Tracker, and China CDN acceleration. All these online services require a certain cost every month, which increases with the increase of users. If PBH helps you, please consider donating to us. For the price of a cup of coffee, you can get a permanent license for PBH Plus, and help us go further in maintaining the BitTorrent environment.`,
   'plus.tryModal.ok': 'Ok',
-  'plus.tryModal.cancel': 'Cancel'
+  'plus.tryModal.cancel': 'Cancel',
+  'plus.license.delete': 'Delete',
+  'plus.license.delete.confirm': 'Are you sure you want to delete this license?',
+
+  'plus.license.v2.feature': 'Feature Set',
+  'plus.license.v2.purchaseInfo': 'Purchase Info',
+  'plus.license.v2.purchaseInfo.click': 'Click to view',
+  'plus.license.v2.orderId': 'Order ID',
+  'plus.license.v2.paid': 'Amount Paid',
+  'plus.license.v2.paymentGateway': 'Payment Method',
+  'plus.license.v2.paymentOrderId': 'Payment Order ID'
 }

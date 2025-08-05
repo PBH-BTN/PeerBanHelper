@@ -160,15 +160,15 @@
             <a-collapse-item
               key="1"
               :header="t('page.ipList.label.accessHistory')"
-              :disabled="!plusStatus?.activated"
+              :disabled="!pbhPlusActivited"
               class="collapse-table"
             >
               <template #expand-icon="{ active }">
-                <icon-plus v-if="plusStatus?.activated && !active" />
-                <icon-minus v-else-if="plusStatus?.activated && active" />
+                <icon-plus v-if="pbhPlusActivited && !active" />
+                <icon-minus v-else-if="pbhPlusActivited && active" />
                 <icon-lock v-else />
               </template>
-              <template v-if="!plusStatus?.activated" #extra>
+              <template v-if="!pbhPlusActivited" #extra>
                 <a-tooltip :content="t('page.ipList.plusLock')">
                   <a-tag size="small">Plus</a-tag>
                 </a-tooltip>
@@ -178,15 +178,15 @@
             <a-collapse-item
               key="2"
               :header="t('page.ipList.label.banHistory')"
-              :disabled="!plusStatus?.activated"
+              :disabled="!pbhPlusActivited"
               class="collapse-table"
             >
               <template #expand-icon="{ active }">
-                <icon-plus v-if="plusStatus?.activated && !active" />
-                <icon-minus v-else-if="plusStatus?.activated && active" />
+                <icon-plus v-if="pbhPlusActivited && !active" />
+                <icon-minus v-else-if="pbhPlusActivited && active" />
                 <icon-lock v-else />
               </template>
-              <template v-if="!plusStatus?.activated" #extra>
+              <template v-if="!pbhPlusActivited" #extra>
                 <a-tooltip :content="t('page.ipList.plusLock')">
                   <a-tag size="small">Plus</a-tag>
                 </a-tooltip>
@@ -228,7 +228,6 @@ const { data, loading, run, error } = useRequest(GetIPBasicData, {
 })
 
 const endpointStore = useEndpointStore()
-const plusStatus = computed(() => endpointStore.plusStatus)
 
 const activatedTab = ref<(string | number)[]>([])
 
@@ -256,6 +255,12 @@ onMounted(() => {
     handleSearch(searchInput.value)
   }
 })
+
+const pbhPlusActivited = computed(
+  () =>
+    endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
+    endpointStore.plusStatus?.enabledFeatures?.includes('paid')
+)
 </script>
 <style>
 .collapse-table {

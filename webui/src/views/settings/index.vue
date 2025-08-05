@@ -16,11 +16,11 @@
       </template>
       <ProfileForm />
     </a-tab-pane>
-    <a-tab-pane :key="3">
+    <!-- <a-tab-pane :key="3">
       <template #title> <icon-bar-chart /> &nbsp;{{ t('page.settings.tab.autostun') }} </template>
       <AutoSTUN />
-    </a-tab-pane>
-    <a-tab-pane :key="4">
+    </a-tab-pane> -->
+    <a-tab-pane :key="3">
       <template #title> <icon-experiment /> &nbsp;{{ t('page.settings.tab.labs') }} </template>
       <Labs />
     </a-tab-pane>
@@ -34,7 +34,6 @@ import ConfigForm from './components/config/index.vue'
 import RunningStatus from './components/info/index.vue'
 import Labs from './components/labs/index.vue'
 import ProfileForm from './components/profile/index.vue'
-import AutoSTUN from './components/autostun/index.vue'
 
 const { t } = useI18n()
 
@@ -44,8 +43,8 @@ const defaultActiveKey = query.tab
       info: 0,
       config: 1,
       profile: 2,
-      autostun: 3,
-      lab: 4
+      // autostun: 3,
+      lab: 3
     }[query.tab as string] ?? 0)
   : 0
 </script>

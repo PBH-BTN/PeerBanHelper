@@ -18,6 +18,7 @@ export default {
   'plug.begging.local':
     'PeerBanHelper 是一个非营利，开放源代码的免费软件。免费许可证授权这台计算机的个人用途，您不得重新出售或者用于违反服务条款的用途。如果 PeerBanHelper 帮助到了你，请考虑在爱发电上捐赠支持我们：',
   'plus.activeTips': '已经捐赠？在这里输入您的许可证以激活您的订阅',
+  'plus.addLicense': '请输入您的许可证',
   'plus.activeSuccess': '激活成功',
 
   'plus.or': '或者',
@@ -30,5 +31,15 @@ export default {
         PBH 帮助到了你，请考虑捐赠我们。只需一杯咖啡的价格，您就可以获得一个 PBH Plus
         的永久许可证，并能帮助我们在维护 BitTorrent 环境的道路上走得更远。`,
   'plus.tryModal.ok': '确定',
-  'plus.tryModal.cancel': '取消'
+  'plus.tryModal.cancel': '取消',
+  'plus.license.delete': '删除',
+  'plus.license.delete.confirm': '您确定要删除此许可证吗？',
+
+  'plus.license.v2.feature': '功能集',
+  'plus.license.v2.purchaseInfo': '购买信息',
+  'plus.license.v2.purchaseInfo.click': '点击查看',
+  'plus.license.v2.orderId': '订单号',
+  'plus.license.v2.paid': '实际支付金额',
+  'plus.license.v2.paymentGateway': '支付方式',
+  'plus.license.v2.paymentOrderId': '支付订单号'
 }

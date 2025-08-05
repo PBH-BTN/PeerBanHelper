@@ -9,6 +9,7 @@ export function getCommonHeader(): Headers {
   const lang = document.querySelector('html')?.getAttribute('lang') || getNavigatorLanguage()
   const headers = new Headers()
   headers.set('Accept-Language', lang)
+  headers.set('Content-Type', 'application/json')
 
   // X-TimeZone
   dayjs.extend(utc)
