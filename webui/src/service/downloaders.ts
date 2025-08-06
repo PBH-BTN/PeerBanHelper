@@ -135,14 +135,14 @@ export async function getPeer(
     ),
     location.href
   )
-  
+
   if (sortBy) {
     url.searchParams.set('sortBy', sortBy)
   }
   if (sortOrder) {
     url.searchParams.set('sortOrder', sortOrder)
   }
-  
+
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()

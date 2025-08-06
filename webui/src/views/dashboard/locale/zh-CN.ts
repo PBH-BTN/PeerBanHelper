@@ -77,7 +77,8 @@ export default {
   'page.dashboard.peerList.column.actions': '操作',
   'page.dashboard.peerList.banPeer': '屏蔽',
   'page.dashboard.peerList.banConfirmTitle': '确认屏蔽Peer',
-  'page.dashboard.peerList.banConfirmMessage': '确定要屏蔽IP地址 {ip} 吗？这将把它添加到基于IP规则的屏蔽列表中。',
+  'page.dashboard.peerList.banConfirmMessage':
+    '确定要屏蔽IP地址 {ip} 吗？这将把它添加到基于IP规则的屏蔽列表中。',
   'page.dashboard.peerList.banSuccess': '成功屏蔽IP {ip}',
   'page.dashboard.peerList.banError': '屏蔽IP {ip} 失败',
   'page.dashboard.peerList.column.flags.P': 'μtp',

@@ -13,7 +13,7 @@
       :columns="columns"
       :data="data?.data"
       :loading="!loading && !data"
-      style="width: 1700px"
+      style="width: 1350px"
       :virtual-list-props="{ height: 500 }"
       :pagination="false"
       @sorter-change="onSorterChange"
@@ -142,7 +142,7 @@ const handleOk = () => {
 }
 
 const { data, loading, run, cancel } = useRequest(
-  (downloaderId: string, torrentId: string) => 
+  (downloaderId: string, torrentId: string) =>
     getPeer(downloaderId, torrentId, currentSortBy.value, currentSortOrder.value),
   {
     defaultParams: [downloader.value, tid.value],
@@ -194,7 +194,7 @@ const columns = [
     title: () => t('page.dashboard.peerList.column.flag'),
     slotName: 'flags',
     dataIndex: 'flags',
-    width: 110,
+    width: 80,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -203,12 +203,12 @@ const columns = [
   {
     title: 'Peer ID',
     dataIndex: 'peer.id',
-    width: 100
+    width: 80
   },
   {
     title: () => t('page.dashboard.peerList.column.clientName'),
-    dataIndex: 'clientName',
-    width: 300,
+    dataIndex: 'peer.clientName',
+    width: 200,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -218,7 +218,7 @@ const columns = [
     title: () => t('page.dashboard.peerList.column.speed'),
     slotName: 'speed',
     dataIndex: 'uploadSpeed',
-    width: 140,
+    width: 120,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -226,19 +226,18 @@ const columns = [
   },
   {
     title: () => t('page.dashboard.peerList.column.downloadSpeed'),
-    dataIndex: 'downloadSpeed',
-    width: 120,
+    dataIndex: 'peer.downloadSpeed',
+    width: 100,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
-    },
-    render: ({ record }: { record: any }) => formatFileSize(record.peer.downloadSpeed) + '/s'
+    }
   },
   {
     title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
     slotName: 'uploadDownload',
     dataIndex: 'uploaded',
-    width: 140,
+    width: 120,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -246,13 +245,12 @@ const columns = [
   },
   {
     title: () => t('page.dashboard.peerList.column.downloaded'),
-    dataIndex: 'downloaded',
-    width: 120,
+    dataIndex: 'peer.downloaded',
+    width: 100,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
-    },
-    render: ({ record }: { record: any }) => formatFileSize(record.peer.downloaded)
+    }
   },
   {
     title: () => t('page.dashboard.peerList.column.progress'),
@@ -267,7 +265,7 @@ const columns = [
   {
     title: () => t('page.dashboard.peerList.column.actions'),
     slotName: 'actions',
-    width: 120
+    width: 100
   }
 ]
 

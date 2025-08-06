@@ -77,7 +77,8 @@ export default {
   'page.dashboard.peerList.column.actions': 'Actions',
   'page.dashboard.peerList.banPeer': 'Ban',
   'page.dashboard.peerList.banConfirmTitle': 'Confirm Ban Peer',
-  'page.dashboard.peerList.banConfirmMessage': 'Are you sure you want to ban the IP address {ip}? This will add it to the IP-based blocking rules.',
+  'page.dashboard.peerList.banConfirmMessage':
+    'Are you sure you want to ban the IP address {ip}? This will add it to the IP-based blocking rules.',
   'page.dashboard.peerList.banSuccess': 'Successfully banned IP {ip}',
   'page.dashboard.peerList.banError': 'Failed to ban IP {ip}',
   'page.dashboard.peerList.column.flags.P': 'μtp',
