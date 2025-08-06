@@ -150,10 +150,6 @@ public final class JavalinWebContainer {
                     if (token == null || token.isBlank()) {
                         throw new NeedInitException();
                     }
-                    String authenticated = ctx.sessionAttribute("authenticated");
-                    if (authenticated != null && authenticated.equals(token)) {
-                        return;
-                    }
                     // 开始登陆验证
                     if (!allowAttemptLogin(WebUtil.userIp(ctx), ctx.userAgent())) {
                         throw new IPAddressBannedException();
