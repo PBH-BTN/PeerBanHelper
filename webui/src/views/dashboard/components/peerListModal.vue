@@ -13,9 +13,10 @@
       :columns="columns"
       :data="data?.data"
       :loading="!loading && !data"
-      style="width: 1350px"
+      style="width: 1230px"
       :virtual-list-props="{ height: 500 }"
       :pagination="false"
+      size="small"
       @sorter-change="onSorterChange"
     >
       <template #peerAddress="{ record }">
@@ -29,43 +30,43 @@
         </a-space>
       </template>
       <template #speed="{ record }">
-        <a-space fill style="justify-content: space-between">
-          <a-space fill direction="vertical">
-            <a-typography-text>
-              <icon-arrow-up class="green" />
-              {{ formatFileSize(record.peer.uploadSpeed) }}/s
-            </a-typography-text>
-            <a-typography-text>
-              <icon-arrow-down class="red" />
-              {{ formatFileSize(record.peer.downloadSpeed) }}/s
-            </a-typography-text>
-          </a-space>
-        </a-space>
+        <div style="font-size: 12px; line-height: 1.2">
+          <div style="margin-bottom: 2px">
+            <icon-arrow-up class="green" style="margin-right: 4px" />
+            {{ formatFileSize(record.peer.uploadSpeed) }}/s
+          </div>
+          <div>
+            <icon-arrow-down class="red" style="margin-right: 4px" />
+            {{ formatFileSize(record.peer.downloadSpeed) }}/s
+          </div>
+        </div>
       </template>
       <template #uploadDownload="{ record }">
-        <a-space fill style="justify-content: space-between">
-          <a-space fill direction="vertical">
-            <a-typography-text
-              ><icon-arrow-up class="green" />
-              {{ formatFileSize(record.peer.uploaded) }}</a-typography-text
-            >
-            <a-typography-text
-              ><icon-arrow-down class="red" />
-              {{ formatFileSize(record.peer.downloaded) }}</a-typography-text
-            >
-          </a-space>
-        </a-space>
+        <div style="font-size: 12px; line-height: 1.2">
+          <div style="margin-bottom: 2px">
+            <icon-arrow-up class="green" style="margin-right: 4px" />
+            {{ formatFileSize(record.peer.uploaded) }}
+          </div>
+          <div>
+            <icon-arrow-down class="red" style="margin-right: 4px" />
+            {{ formatFileSize(record.peer.downloaded) }}
+          </div>
+        </div>
       </template>
       <template #progress="{ record }">
-        <a-space>
-          <a-progress :percent="record.peer.progress" size="mini" />
-          <a-typography-text>
-            {{ (record.peer.progress * 100).toFixed(2) + '%' }}
-          </a-typography-text>
-        </a-space>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <a-progress
+            :percent="record.peer.progress"
+            size="mini"
+            style="flex: 1; min-width: 60px"
+          />
+          <span style="font-size: 12px; white-space: nowrap">
+            {{ (record.peer.progress * 100).toFixed(1) + '%' }}
+          </span>
+        </div>
       </template>
       <template #flags="{ record }">
-        <p>
+        <div style="font-size: 12px">
           {{ record.peer.flags }}
           <a-tooltip v-if="record.peer.flags">
             <template #content>
@@ -73,15 +74,15 @@
                 {{ description }}
               </p>
             </template>
-            <icon-info-circle />
+            <icon-info-circle style="margin-left: 4px" />
           </a-tooltip>
-        </p>
+        </div>
       </template>
       <template #actions="{ record }">
         <a-button
           type="primary"
           status="danger"
-          size="small"
+          size="mini"
           @click="() => confirmBanPeer(record.peer.address.ip)"
         >
           <template #icon>
@@ -184,7 +185,7 @@ const columns = [
     title: () => t('page.dashboard.peerList.column.address'),
     slotName: 'peerAddress',
     dataIndex: 'address',
-    width: 320,
+    width: 300,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -194,7 +195,7 @@ const columns = [
     title: () => t('page.dashboard.peerList.column.flag'),
     slotName: 'flags',
     dataIndex: 'flags',
-    width: 80,
+    width: 70,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -203,12 +204,12 @@ const columns = [
   {
     title: 'Peer ID',
     dataIndex: 'peer.id',
-    width: 80
+    width: 70
   },
   {
     title: () => t('page.dashboard.peerList.column.clientName'),
     dataIndex: 'peer.clientName',
-    width: 200,
+    width: 180,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -218,7 +219,7 @@ const columns = [
     title: () => t('page.dashboard.peerList.column.speed'),
     slotName: 'speed',
     dataIndex: 'uploadSpeed',
-    width: 120,
+    width: 110,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -227,7 +228,7 @@ const columns = [
   {
     title: () => t('page.dashboard.peerList.column.downloadSpeed'),
     dataIndex: 'peer.downloadSpeed',
-    width: 100,
+    width: 90,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -237,7 +238,7 @@ const columns = [
     title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
     slotName: 'uploadDownload',
     dataIndex: 'uploaded',
-    width: 120,
+    width: 110,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -246,7 +247,7 @@ const columns = [
   {
     title: () => t('page.dashboard.peerList.column.downloaded'),
     dataIndex: 'peer.downloaded',
-    width: 100,
+    width: 90,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -256,7 +257,7 @@ const columns = [
     title: () => t('page.dashboard.peerList.column.progress'),
     slotName: 'progress',
     dataIndex: 'progress',
-    width: 100,
+    width: 120,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
@@ -265,7 +266,7 @@ const columns = [
   {
     title: () => t('page.dashboard.peerList.column.actions'),
     slotName: 'actions',
-    width: 100
+    width: 90
   }
 ]
 
