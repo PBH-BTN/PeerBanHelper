@@ -379,28 +379,9 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 } else {
                     icon.displayMessage(title, description, TrayIcon.MessageType.INFO);
                 }
-                if (System.getProperty("os.name").contains("Windows")) {
-                    CommonUtil.getScheduler().schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
-                }
                 return;
             }
         }
         super.createNotification(level, title, description);
-    }
-
-    private synchronized void refreshTrayIcon() {
-        var swingTray = mainWindow.getTrayMenu().getSwingTrayDialog();
-        if (swingTray != null) {
-            var icon = swingTray.getTrayIcon();
-            if (icon != null) {
-                try {
-                    SystemTray tray = SystemTray.getSystemTray();
-                    tray.remove(icon); // fix https://github.com/PBH-BTN/PeerBanHelper/issues/515
-                    tray.add(icon);
-                } catch (AWTException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
     }
 }
