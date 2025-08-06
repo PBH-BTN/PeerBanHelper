@@ -62,7 +62,7 @@ jobs:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: installer-dist
           path: target/media
@@ -98,31 +98,31 @@ jobs:
       statuses: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: maven-dist
           path: target/
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: installer-dist
           path: target/media
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: spk-dist
           path: target/media
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: deb-dist
           path: target/media
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: portable-dist
           path: target/media
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: freebsd-pkg-13.4-dist
           path: target/media
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: freebsd-pkg-14.1-dist
           path: target/media
@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: maven-dist
           path: target
