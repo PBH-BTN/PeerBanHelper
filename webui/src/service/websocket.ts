@@ -27,7 +27,7 @@ export class WebSocketHandler<T> {
   open(offset: number, callback: (data: T) => unknown, errroCallback: (e: Error) => void): boolean {
     try {
       this.ws?.close() // 关闭旧链接
-      this.url.searchParams.append('offset', offset.toString())
+      this.url.searchParams.set('offset', offset.toString())
       this.ws = new WebSocket(this.url)
       this.ws.onopen = () => {
         this._isOpen = true

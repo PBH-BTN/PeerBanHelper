@@ -4,17 +4,21 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Torrents;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class TRTorrent implements Torrent {
     private final Torrents backend;
+    private final Function<PeerAddress, PeerAddress> natConverter;
 
-    public TRTorrent(Torrents backend) {
+    public TRTorrent(Torrents backend, Function<PeerAddress, PeerAddress> natConverter) {
         this.backend = backend;
+        this.natConverter = natConverter;
     }
 
     @Override
@@ -64,7 +68,7 @@ public final class TRTorrent implements Torrent {
 
     @NotNull
     public List<Peer> getPeers() {
-        return backend.getPeers().stream().map(TRPeer::new).collect(Collectors.toList());
+        return backend.getPeers().stream().map(backend -> new TRPeer(backend, natConverter)).collect(Collectors.toList());
     }
 
     public Integer getPeerLimit() {

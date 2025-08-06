@@ -51,6 +51,8 @@ public interface Downloader extends AutoCloseable {
     @NotNull
     String getType();
 
+    int getFailedLoginAttempts();
+
     /**
      * 登录到此下载器
      *
@@ -214,4 +216,7 @@ public interface Downloader extends AutoCloseable {
      * @param speedLimiter 限速配置
      */
     void setSpeedLimiter(@Nullable DownloaderSpeedLimiter speedLimiter);
+
+    int getBTProtocolPort();
+    void setBTProtocolPort(int port);
 }

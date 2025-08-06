@@ -79,6 +79,7 @@ public final class Fields {
     public static final String WANTED = "wanted";
     public static final String WEB_SEEDS = "webseeds";
     public static final String WEB_SEEDS_SENDING_TO_US = "webseedsSendingToUs";
+    public static final String PEER_PORT = "peer-port";
 
     private Fields() {
     }

@@ -24,6 +24,7 @@ public enum BCEndpoint {
     GET_REMOTE_ACCESS_CONFIG("/api/config/remote_access/get"),
     SET_REMOTE_ACCESS_CONFIG("/api/config/remote_access/set"),
     TASK_UNBAN_PEERS("/api/task/peers/unban_peers"),
+
     ;
     private final String endpoint;
 

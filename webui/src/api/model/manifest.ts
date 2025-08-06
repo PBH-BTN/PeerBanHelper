@@ -21,29 +21,6 @@ export interface mainfest {
   version: version
   modules: module[]
 }
-
-export interface donateStatus {
-  activated: boolean
-  key: string
-  keyData?: KeyData
-}
-
-export enum LicenseType {
-  LicenseLocal = 'local',
-  LicenseAifadian = 'afdian',
-  LicenseMbd = 'mbd'
-}
-export interface KeyData {
-  createAt: number
-  description: string
-  expireAt: number
-  hidden: string
-  licenseTo: string
-  source: string
-  verifyMagic: string
-  type: LicenseType
-}
-
 export interface GlobalConfig {
   globalPaused: boolean
 }
