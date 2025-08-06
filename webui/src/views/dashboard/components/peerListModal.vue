@@ -13,7 +13,7 @@
       :columns="columns"
       :data="data?.data"
       :loading="!loading && !data"
-      style="width: 1230px"
+      style="width: 1050px"
       :virtual-list-props="{ height: 500 }"
       :pagination="false"
       size="small"
@@ -226,28 +226,10 @@ const columns = [
     }
   },
   {
-    title: () => t('page.dashboard.peerList.column.downloadSpeed'),
-    dataIndex: 'peer.downloadSpeed',
-    width: 90,
-    sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
-      sorter: true
-    }
-  },
-  {
     title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
     slotName: 'uploadDownload',
     dataIndex: 'uploaded',
     width: 110,
-    sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
-      sorter: true
-    }
-  },
-  {
-    title: () => t('page.dashboard.peerList.column.downloaded'),
-    dataIndex: 'peer.downloaded',
-    width: 90,
     sortable: {
       sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
