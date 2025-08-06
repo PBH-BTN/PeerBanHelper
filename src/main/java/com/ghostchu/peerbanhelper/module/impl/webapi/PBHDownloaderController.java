@@ -208,12 +208,17 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
         Downloader downloader = selected.get();
         boolean ptr = Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup");
+        
+        // Get sorting parameters
+        String sortBy = ctx.queryParam("sortBy");
+        String sortOrder = ctx.queryParam("sortOrder");
+        
         List<PopulatedPeerDTO> peerWrappers = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::parallelStream)
                 .filter(p -> p.getDownloader().id().equals(downloader.getId()))
                 .filter(p -> p.getTorrent().getId().equals(torrentId))
-                .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
+                .sorted(createPeerComparator(sortBy, sortOrder))
                 .map(dat -> populatePeerDTO(dat, ptr))
                 .toList();
         ctx.json(new StdResp(true, null, peerWrappers));
@@ -239,6 +244,53 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
 
         return dto;
+    }
+
+    private Comparator<PeerMetadata> createPeerComparator(String sortBy, String sortOrder) {
+        boolean ascending = "asc".equals(sortOrder);
+        
+        Comparator<PeerMetadata> comparator;
+        
+        switch (sortBy != null ? sortBy : "uploadSpeed") {
+            case "uploadSpeed":
+                comparator = (o1, o2) -> Long.compare(o1.getPeer().getUploadSpeed(), o2.getPeer().getUploadSpeed());
+                break;
+            case "downloadSpeed":
+                comparator = (o1, o2) -> Long.compare(o1.getPeer().getDownloadSpeed(), o2.getPeer().getDownloadSpeed());
+                break;
+            case "uploaded":
+                comparator = (o1, o2) -> Long.compare(o1.getPeer().getUploaded(), o2.getPeer().getUploaded());
+                break;
+            case "downloaded":
+                comparator = (o1, o2) -> Long.compare(o1.getPeer().getDownloaded(), o2.getPeer().getDownloaded());
+                break;
+            case "progress":
+                comparator = (o1, o2) -> Double.compare(o1.getPeer().getProgress(), o2.getPeer().getProgress());
+                break;
+            case "address":
+                comparator = (o1, o2) -> o1.getPeer().getAddress().getIp().compareTo(o2.getPeer().getAddress().getIp());
+                break;
+            case "clientName":
+                comparator = (o1, o2) -> {
+                    String name1 = o1.getPeer().getClientName() != null ? o1.getPeer().getClientName() : "";
+                    String name2 = o2.getPeer().getClientName() != null ? o2.getPeer().getClientName() : "";
+                    return name1.compareTo(name2);
+                };
+                break;
+            case "flags":
+                comparator = (o1, o2) -> {
+                    String flags1 = o1.getPeer().getFlags() != null ? o1.getPeer().getFlags() : "";
+                    String flags2 = o2.getPeer().getFlags() != null ? o2.getPeer().getFlags() : "";
+                    return flags1.compareTo(flags2);
+                };
+                break;
+            default:
+                // Default to upload speed desc (existing behavior)
+                comparator = (o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed());
+                return comparator;
+        }
+        
+        return ascending ? comparator : comparator.reversed();
     }
 
     private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderId) {

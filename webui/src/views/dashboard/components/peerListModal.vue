@@ -13,9 +13,10 @@
       :columns="columns"
       :data="data?.data"
       :loading="!loading && !data"
-      style="width: 1600px"
+      style="width: 1700px"
       :virtual-list-props="{ height: 500 }"
       :pagination="false"
+      @sorter-change="onSorterChange"
     >
       <template #peerAddress="{ record }">
         <a-space :wrap="false">
@@ -76,23 +77,54 @@
           </a-tooltip>
         </p>
       </template>
+      <template #actions="{ record }">
+        <a-button
+          type="primary"
+          status="danger"
+          size="small"
+          @click="() => confirmBanPeer(record.peer.address.ip)"
+        >
+          <template #icon>
+            <icon-stop />
+          </template>
+          {{ t('page.dashboard.peerList.banPeer') }}
+        </a-button>
+      </template>
     </a-table>
+  </a-modal>
+
+  <!-- Ban confirmation modal -->
+  <a-modal
+    v-model:visible="banModalVisible"
+    :title="t('page.dashboard.peerList.banConfirmTitle')"
+    @ok="executeBan"
+    @cancel="banModalVisible = false"
+  >
+    <p>{{ t('page.dashboard.peerList.banConfirmMessage', { ip: selectedPeerIP }) }}</p>
   </a-modal>
 </template>
 <script setup lang="ts">
 import countryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getPeer } from '@/service/downloaders'
+import { addBlackList } from '@/service/blacklist'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import { Message } from '@arco-design/web-vue'
+
 const { t } = useI18n()
 const visible = ref(false)
 const downloader = ref('')
 const tid = ref('')
 const tname = ref('')
+const banModalVisible = ref(false)
+const selectedPeerIP = ref('')
+const currentSortBy = ref('')
+const currentSortOrder = ref('')
+
 defineExpose({
   showModal: (downloaderId: string, torrentId: string, torrentName: string) => {
     downloader.value = downloaderId
@@ -102,26 +134,71 @@ defineExpose({
     run(downloaderId, torrentId)
   }
 })
+
 const handleOk = () => {
   visible.value = false
   downloader.value = ''
   tid.value = ''
 }
-const { data, loading, run, cancel } = useRequest(getPeer, {
-  defaultParams: [downloader.value, tid.value],
-  manual: true,
-  pollingInterval: 1000
-})
+
+const { data, loading, run, cancel } = useRequest(
+  (downloaderId: string, torrentId: string) => 
+    getPeer(downloaderId, torrentId, currentSortBy.value, currentSortOrder.value),
+  {
+    defaultParams: [downloader.value, tid.value],
+    manual: true,
+    pollingInterval: 1000
+  }
+)
+
+const onSorterChange = (dataIndex: string, direction: string) => {
+  if (direction) {
+    currentSortBy.value = dataIndex
+    currentSortOrder.value = direction === 'ascend' ? 'asc' : 'desc'
+  } else {
+    currentSortBy.value = ''
+    currentSortOrder.value = ''
+  }
+  // Re-fetch data with new sorting
+  run(downloader.value, tid.value)
+}
+
+const confirmBanPeer = (ip: string) => {
+  selectedPeerIP.value = ip
+  banModalVisible.value = true
+}
+
+const executeBan = async () => {
+  try {
+    await addBlackList(selectedPeerIP.value, 'ip')
+    Message.success(t('page.dashboard.peerList.banSuccess', { ip: selectedPeerIP.value }))
+    banModalVisible.value = false
+  } catch (error) {
+    Message.error(t('page.dashboard.peerList.banError', { ip: selectedPeerIP.value }))
+    console.error('Failed to ban peer:', error)
+  }
+}
+
 const columns = [
   {
     title: () => t('page.dashboard.peerList.column.address'),
     slotName: 'peerAddress',
-    width: 320
+    dataIndex: 'address',
+    width: 320,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    }
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
     slotName: 'flags',
-    width: 110
+    dataIndex: 'flags',
+    width: 110,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    }
   },
   {
     title: 'Peer ID',
@@ -130,25 +207,70 @@ const columns = [
   },
   {
     title: () => t('page.dashboard.peerList.column.clientName'),
-    dataIndex: 'peer.clientName',
-    width: 300
+    dataIndex: 'clientName',
+    width: 300,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    }
   },
   {
     title: () => t('page.dashboard.peerList.column.speed'),
     slotName: 'speed',
-    width: 140
+    dataIndex: 'uploadSpeed',
+    width: 140,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    }
+  },
+  {
+    title: () => t('page.dashboard.peerList.column.downloadSpeed'),
+    dataIndex: 'downloadSpeed',
+    width: 120,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
+    render: ({ record }: { record: any }) => formatFileSize(record.peer.downloadSpeed) + '/s'
   },
   {
     title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
     slotName: 'uploadDownload',
-    width: 140
+    dataIndex: 'uploaded',
+    width: 140,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    }
+  },
+  {
+    title: () => t('page.dashboard.peerList.column.downloaded'),
+    dataIndex: 'downloaded',
+    width: 120,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
+    render: ({ record }: { record: any }) => formatFileSize(record.peer.downloaded)
   },
   {
     title: () => t('page.dashboard.peerList.column.progress'),
     slotName: 'progress',
-    width: 100
+    dataIndex: 'progress',
+    width: 100,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    }
+  },
+  {
+    title: () => t('page.dashboard.peerList.column.actions'),
+    slotName: 'actions',
+    width: 120
   }
 ]
+
 const parseFlags = (flags: string) =>
   flags
     .split(' ')

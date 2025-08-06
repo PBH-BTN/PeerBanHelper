@@ -122,7 +122,9 @@ export async function DeleteDownloader(name: string): Promise<CommonResponseWith
 
 export async function getPeer(
   downloaderId: string,
-  torrentId: string
+  torrentId: string,
+  sortBy?: string,
+  sortOrder?: string
 ): Promise<CommonResponse<PeerInfo[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -133,6 +135,14 @@ export async function getPeer(
     ),
     location.href
   )
+  
+  if (sortBy) {
+    url.searchParams.set('sortBy', sortBy)
+  }
+  if (sortOrder) {
+    url.searchParams.set('sortOrder', sortOrder)
+  }
+  
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
