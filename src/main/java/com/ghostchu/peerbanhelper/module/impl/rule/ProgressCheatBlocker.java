@@ -41,10 +41,7 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -228,9 +225,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         if (isHandShaking(peer)) {
             return handshaking();
         }
-        if (!isTransferringToPeer(peer)) { // 有时候超级做种模式也会出现进度倒退，但超级做种的 Peer 不会从我们这里下载数据，所以检查一下上传情况
-            return pass();
-        }
         // 处理 IPV6
         IPAddress peerPrefix;
         IPAddress peerIp = peer.getPeerAddress().getAddress();
@@ -406,10 +400,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             clientTask.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), clientTask.getLastTorrentCompletedSize()));
             progressRecorder.put(client, lastRecordedProgress);
         }
-    }
-
-    private boolean isTransferringToPeer(@NotNull Peer peer) {
-        return peer.getUploadSpeed() > 0;
     }
 
     private boolean isUploadingToPeer(Peer peer) {
