@@ -16,11 +16,14 @@
       </template>
       <ProfileForm />
     </a-tab-pane>
-    <!-- <a-tab-pane :key="3">
-      <template #title> <icon-bar-chart /> &nbsp;{{ t('page.settings.tab.autostun') }} </template>
-      <AutoSTUN />
-    </a-tab-pane> -->
     <a-tab-pane :key="3">
+      <template #title>
+        <icon-bar-chart />
+        {{ t('page.settings.tab.autostun') }}
+      </template>
+      <AutoSTUN />
+    </a-tab-pane>
+    <a-tab-pane :key="4">
       <template #title> <icon-experiment /> &nbsp;{{ t('page.settings.tab.labs') }} </template>
       <Labs />
     </a-tab-pane>
