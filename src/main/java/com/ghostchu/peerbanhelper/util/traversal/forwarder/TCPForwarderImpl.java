@@ -97,7 +97,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         this.bossGroup = new MultiThreadIoEventLoopGroup(ioHandlerFactory);
         this.workerGroup = new MultiThreadIoEventLoopGroup(ioHandlerFactory);
         //log.info("Netty TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
-        sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 15, TimeUnit.SECONDS);
+        sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 30, TimeUnit.SECONDS);
         Main.getEventBus().register(this);
     }
 
@@ -161,14 +161,13 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         if (downstreamChannel != null && downstreamChannel.hasAttr(RelayHandler.RELAY_CHANNEL_KEY)) {
             Channel upstreamChannel = downstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).get();
             if (upstreamChannel != null) {
-                upstreamChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+                upstreamChannel.close();
             }
         }
         if (downstreamChannel != null) {
-            downstreamChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+            downstreamChannel.close();
         }
     }
-
 
     @ChannelHandler.Sharable
     public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
@@ -179,13 +178,17 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
             // --- Ban Check ---
             IPAddress downstreamIpAddress = IPAddressUtil.getIPAddress(downstreamSocketAddress.getAddress().getHostAddress());
-            for (PeerAddress peerAddress : banListReference.keySet()) {
-                if (peerAddress.getAddress().contains(downstreamIpAddress)) {
-                    log.debug("Decline banned connection from {}:{}", downstreamIpAddress, downstreamSocketAddress.getPort());
-                    inboundChannel.close();
-                    connectionBlocked.increment();
-                    return;
-                }
+            if (ifBannedAddress(downstreamIpAddress)) {
+                log.debug("Decline banned connection from {}:{}", downstreamIpAddress, downstreamSocketAddress.getPort());
+                inboundChannel.close();
+                connectionBlocked.increment();
+                return;
+            }
+            // 检查连接表，检查 IP 地址是否已有另一个链接
+            if (isDuplicateConnection(downstreamSocketAddress)) {
+                log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
+                inboundChannel.close();
+                return;
             }
 
             connectionHandled.increment();
@@ -203,14 +206,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                         }
                     })
                     .option(ChannelOption.SO_KEEPALIVE, true);
-            // 检查连接表，检查 IP 地址是否已有另一个链接
-            for (InetSocketAddress inetSocketAddress : connectionMap.keySet()) {
-                if (Arrays.equals(downstreamSocketAddress.getAddress().getAddress(), inetSocketAddress.getAddress().getAddress())) {
-                    log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
-                    inboundChannel.close();
-                    return;
-                }
-            }
+
 
             Thread.ofVirtual().name("Connection establisher").start(() -> {
                 // --- Friendly Address Binding Logic ---
@@ -251,6 +247,15 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                     }
                 });
             });
+        }
+
+        private boolean ifBannedAddress(IPAddress downstreamIpAddress) {
+            for (PeerAddress peerAddress : banListReference.keySet()) {
+                if (peerAddress.getAddress().contains(downstreamIpAddress)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private ChannelFuture connectToUpstreamFriendly(Bootstrap b, InetSocketAddress downstreamSocket) {
@@ -305,6 +310,15 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             ctx.close();
             connectionFailed.increment();
         }
+    }
+
+    private boolean isDuplicateConnection(InetSocketAddress downstreamSocketAddress) {
+        for (InetSocketAddress inetSocketAddress : connectionMap.keySet()) {
+            if (Arrays.equals(downstreamSocketAddress.getAddress().getAddress(), inetSocketAddress.getAddress().getAddress())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
