@@ -568,5 +568,11 @@
             <artifactId>opencsv</artifactId>
             <version>5.12.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.2.3.Final</version>
+        </dependency>
     </dependencies>
 </project>
