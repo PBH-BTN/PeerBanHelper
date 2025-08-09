@@ -175,21 +175,21 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
-            final Channel fromDownstreamChannel = ctx.channel();
-            InetSocketAddress downstreamSocketAddress = (InetSocketAddress) fromDownstreamChannel.remoteAddress();
+            final Channel downstreamChannel = ctx.channel();
+            InetSocketAddress downstreamSocketAddress = (InetSocketAddress) downstreamChannel.remoteAddress();
 
             // --- Ban Check ---
             IPAddress downstreamIpAddress = IPAddressUtil.getIPAddress(downstreamSocketAddress.getAddress().getHostAddress());
             if (ifBannedAddress(downstreamIpAddress)) {
                 log.debug("Decline banned connection from {}:{}", downstreamIpAddress, downstreamSocketAddress.getPort());
-                fromDownstreamChannel.close();
+                downstreamChannel.close();
                 connectionBlocked.increment();
                 return;
             }
             // 检查连接表，检查 IP 地址是否已有另一个链接
             if (isDuplicateConnection(downstreamSocketAddress)) {
                 log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
-                fromDownstreamChannel.close();
+                downstreamChannel.close();
                 return;
             }
 
@@ -198,13 +198,13 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
             // --- Connect to Upstream ---
             Bootstrap b = new Bootstrap();
-            b.group(fromDownstreamChannel.eventLoop()) // 使用同一个 EventLoop 避免线程切换
+            b.group(downstreamChannel.eventLoop()) // 使用同一个 EventLoop 避免线程切换
                     .channel(NioSocketChannel.class)
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
                             // 在上游 pipeline 中添加一个中继处理器，将数据转发给下游
-                            ch.pipeline().addLast(new RelayHandler(fromDownstreamChannel));
+                            ch.pipeline().addLast(new RelayHandler(downstreamChannel));
                         }
                     })
                     .option(ChannelOption.SO_KEEPALIVE, true);
@@ -215,35 +215,35 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                 ChannelFuture connectFuture = connectToUpstreamFriendly(b, downstreamSocketAddress);
                 connectFuture.addListener((ChannelFuture future) -> {
                     if (future.isSuccess()) {
-                        final Channel toUpstreamChannel = future.channel();
-                        log.debug("Connected to upstream: {}, starting dual directory forward channel", toUpstreamChannel.remoteAddress());
+                        final Channel upstreamChannel = future.channel();
+                        log.debug("Connected to upstream: {}, starting dual directory forward channel", upstreamChannel.remoteAddress());
 
                         // 连接成功，将下游的处理器替换为中继处理器
-                        ctx.pipeline().addLast(new RelayHandler(toUpstreamChannel));
+                        ctx.pipeline().addLast(new RelayHandler(upstreamChannel));
                         // 绑定双向 Channel 引用
-                        fromDownstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(toUpstreamChannel);
-                        toUpstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(fromDownstreamChannel);
+                        downstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(upstreamChannel);
+                        upstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(downstreamChannel);
 
                         // 记录连接信息
                         ConnectionStatistics stats = new ConnectionStatistics();
                         stats.setEstablishedAt();
 
-                        InetSocketAddress upstreamLocalSocketAddress = (InetSocketAddress) toUpstreamChannel.localAddress();
+                        InetSocketAddress upstreamLocalSocketAddress = (InetSocketAddress) upstreamChannel.localAddress();
                         connectionMap.put(downstreamSocketAddress, upstreamLocalSocketAddress);
                         connectionStats.put(downstreamSocketAddress, stats);
-                        downstreamChannelMap.put(downstreamSocketAddress, fromDownstreamChannel);
+                        downstreamChannelMap.put(downstreamSocketAddress, downstreamChannel);
 
                         // 添加统计处理器
-                        fromDownstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, true, totalToUpstream, totalToDownstream));
-                        toUpstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, false, totalToUpstream, totalToDownstream));
+                        downstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, true, totalToUpstream, totalToDownstream));
+                        upstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, false, totalToUpstream, totalToDownstream));
 
                         // 移除当前处理器
                         ctx.pipeline().remove(this);
                         // 全部设置完毕，开始读取下游数据
-                        fromDownstreamChannel.config().setAutoRead(true);
+                        downstreamChannel.config().setAutoRead(true);
                     } else {
                         log.error("Error connecting to upstream server", future.cause());
-                        fromDownstreamChannel.close();
+                        downstreamChannel.close();
                         connectionFailed.increment();
                     }
                 });
@@ -393,16 +393,16 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     public static class TrafficCounterHandler extends ChannelDuplexHandler {
         private final ConnectionStatistics stats;
-        private final boolean isFromDownstreamChannel;
+        private final boolean downstreamChannel;
         private final LongAdder totalToUpstream;
         private final LongAdder totalToDownstream;
 
         public TrafficCounterHandler(ConnectionStatistics stats,
-                                     boolean isFromDownstreamChannel,
+                                     boolean downstreamChannel,
                                      LongAdder totalToUpstream,
                                      LongAdder totalToDownstream) {
             this.stats = stats;
-            this.isFromDownstreamChannel = isFromDownstreamChannel;
+            this.downstreamChannel = downstreamChannel;
             this.totalToUpstream = totalToUpstream;
             this.totalToDownstream = totalToDownstream;
         }
@@ -411,7 +411,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             if (msg instanceof io.netty.buffer.ByteBuf) {
                 int readableBytes = ((io.netty.buffer.ByteBuf) msg).readableBytes();
-                if (isFromDownstreamChannel) {
+                if (downstreamChannel) {
                     stats.getToUpstreamBytes().add(readableBytes);
                     totalToUpstream.add(readableBytes);
                 } else {
