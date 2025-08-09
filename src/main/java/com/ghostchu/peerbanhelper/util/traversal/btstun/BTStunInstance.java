@@ -90,7 +90,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         var downloaderHost = URI.create(downloader.getEndpoint()).getHost();
         log.info(tlUI(Lang.BTSTUN_FORWARDER_CREATING, downloader.getName()));
         this.tcpForwarder = new TCPForwarderImpl(banList,
-                ExternalSwitch.parseBoolean("pbh.btstun.ipv6support", false) ? "[::]" : "0.0.0.0",
+                ExternalSwitch.parseBoolean("pbh.btstun.ipv6support", true) ? "[::]" : "0.0.0.0",
                 forwarderServerPort, downloaderHost, downloaderShouldListenOn);
         try {
             tcpForwarder.start();
