@@ -72,6 +72,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private Channel serverChannel;
 
     private final Class<? extends ServerSocketChannel> serverSocketChannel;
+    private final ForwarderIOHandlerType forwarderIOHandlerType;
 
     public TCPForwarderImpl(Map<PeerAddress, ?> banListReference, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort) {
         this.banListReference = banListReference;
@@ -83,15 +84,19 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         if (IoUring.isAvailable()) { // 性能最好
             ioHandlerFactory = IoUringIoHandler.newFactory();
             this.serverSocketChannel = IoUringServerSocketChannel.class;
+            forwarderIOHandlerType = ForwarderIOHandlerType.IO_URING;
         } else if (Epoll.isAvailable()) { // 性能很不错！
             ioHandlerFactory = EpollIoHandler.newFactory();
             this.serverSocketChannel = EpollServerSocketChannel.class;
+            forwarderIOHandlerType = ForwarderIOHandlerType.EPOLL;
         } else if (KQueue.isAvailable()) { // FreeBSD/MacOS
             ioHandlerFactory = KQueueIoHandler.newFactory();
             this.serverSocketChannel = KQueueServerSocketChannel.class;
+            forwarderIOHandlerType = ForwarderIOHandlerType.KQUEUE;
         } else { // oh shit
             ioHandlerFactory = NioIoHandler.newFactory();
             this.serverSocketChannel = NioServerSocketChannel.class;
+            forwarderIOHandlerType = ForwarderIOHandlerType.NIO;
         }
         log.debug("Handler Factory selected: {}", ioHandlerFactory.getClass().getSimpleName());
         log.debug("Connection Channel Factory selected: {}", this.serverSocketChannel.getSimpleName());
@@ -504,5 +509,10 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     @Override
     public @Nullable InetSocketAddress translate(@Nullable InetSocketAddress nattedAddress) {
         return connectionMap.inverse().get(nattedAddress);
+    }
+
+    @Override
+    public ForwarderIOHandlerType getForwarderIOHandlerType() {
+        return forwarderIOHandlerType;
     }
 }

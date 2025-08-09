@@ -36,4 +36,6 @@ public interface Forwarder extends AutoCloseable, NatAddressProvider {
     String getProxyHost();
 
     String getUpstremHost();
+
+    ForwarderIOHandlerType getForwarderIOHandlerType();
 }

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.ForwarderIOHandlerType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -19,4 +20,5 @@ public class TunnelInfoDTO {
     private int proxyPort;
     private String upstreamHost;
     private int upstreamPort;
+    private ForwarderIOHandlerType forwarderIOHandlerType;
 }

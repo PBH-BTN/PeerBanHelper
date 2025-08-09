@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunInstance;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunManager;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.ForwarderIOHandlerType;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -189,7 +190,8 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getProxyHost() : "???",
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getProxyPort() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getUpstremHost() : "???",
-                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getUpstreamPort() : 0
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getUpstreamPort() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getForwarderIOHandlerType() : ForwarderIOHandlerType.DEFAULT
         );
     }
 
