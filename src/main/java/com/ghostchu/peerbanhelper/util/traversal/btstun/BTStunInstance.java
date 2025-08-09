@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.btstun;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -88,7 +89,9 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         var downloaderShouldListenOn = outer.getPort();
         var downloaderHost = URI.create(downloader.getEndpoint()).getHost();
         log.info(tlUI(Lang.BTSTUN_FORWARDER_CREATING, downloader.getName()));
-        this.tcpForwarder = new TCPForwarderImpl(banList, "0.0.0.0", forwarderServerPort, downloaderHost, downloaderShouldListenOn);
+        this.tcpForwarder = new TCPForwarderImpl(banList,
+                ExternalSwitch.parseBoolean("pbh.btstun.ipv6support", false) ? "[::]" : "0.0.0.0",
+                forwarderServerPort, downloaderHost, downloaderShouldListenOn);
         try {
             tcpForwarder.start();
         } catch (IOException e) {

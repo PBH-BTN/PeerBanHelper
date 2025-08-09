@@ -121,7 +121,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
         try {
             serverChannel = b.bind(proxyHost, proxyPort).sync().channel();
-            log.info("Netty TCPForwarder started and listening on {}:{}", proxyHost, proxyPort);
+            log.debug("Netty TCPForwarder started and listening on {}:{}", proxyHost, proxyPort);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("Netty TCPForwarder failed to start", e);
@@ -177,19 +177,18 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         public void channelActive(ChannelHandlerContext ctx) {
             final Channel downstreamChannel = ctx.channel();
             InetSocketAddress downstreamSocketAddress = (InetSocketAddress) downstreamChannel.remoteAddress();
-
+            // 检查连接表，检查 IP 地址是否已有另一个链接
+            if (isDuplicateConnection(downstreamSocketAddress)) {
+                log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
+                downstreamChannel.close();
+                return;
+            }
             // --- Ban Check ---
             IPAddress downstreamIpAddress = IPAddressUtil.getIPAddress(downstreamSocketAddress.getAddress().getHostAddress());
             if (ifBannedAddress(downstreamIpAddress)) {
                 log.debug("Decline banned connection from {}:{}", downstreamIpAddress, downstreamSocketAddress.getPort());
                 downstreamChannel.close();
                 connectionBlocked.increment();
-                return;
-            }
-            // 检查连接表，检查 IP 地址是否已有另一个链接
-            if (isDuplicateConnection(downstreamSocketAddress)) {
-                log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
-                downstreamChannel.close();
                 return;
             }
 
