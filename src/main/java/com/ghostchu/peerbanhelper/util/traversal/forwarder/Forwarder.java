@@ -19,9 +19,9 @@ public interface Forwarder extends AutoCloseable, NatAddressProvider {
 
     Map<InetSocketAddress, ConnectionStatistics> getDownstreamAddressAsKeyConnectionStats();
 
-    long getTotalDownloaded();
+    long getTotalToUpstream();
 
-    long getTotalUploaded();
+    long getTotalToDownstream();
 
     long getConnectionFailed();
 

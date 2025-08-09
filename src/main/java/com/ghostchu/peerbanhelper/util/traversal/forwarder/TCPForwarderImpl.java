@@ -66,6 +66,9 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private final LongAdder connectionFailed = new LongAdder();
     private final LongAdder connectionBlocked = new LongAdder();
 
+    private final LongAdder totalToUpstream = new LongAdder();
+    private final LongAdder totalToDownstream = new LongAdder();
+
     private Channel serverChannel;
 
     private final Class<? extends ServerSocketChannel> serverSocketChannel;
@@ -231,9 +234,8 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                         downstreamChannelMap.put(downstreamSocketAddress, inboundChannel);
 
                         // 添加统计处理器
-                        inboundChannel.pipeline().addFirst(new TrafficCounterHandler(stats, true));
-                        outboundChannel.pipeline().addFirst(new TrafficCounterHandler(stats, false));
-
+                        inboundChannel.pipeline().addFirst(new TrafficCounterHandler(stats, true, totalToUpstream, totalToDownstream));
+                        outboundChannel.pipeline().addFirst(new TrafficCounterHandler(stats, false, totalToUpstream, totalToDownstream));
 
                         // 移除当前处理器
                         ctx.pipeline().remove(this);
@@ -391,21 +393,30 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     public static class TrafficCounterHandler extends ChannelDuplexHandler {
         private final ConnectionStatistics stats;
-        private final boolean isDownstreamToUpstream;
+        private final boolean isDownstreamReading;
+        private final LongAdder totalToUpstream;
+        private final LongAdder totalToDownstream;
 
-        public TrafficCounterHandler(ConnectionStatistics stats, boolean isDownstreamToUpstream) {
+        public TrafficCounterHandler(ConnectionStatistics stats,
+                                     boolean isDownstreamReading,
+                                     LongAdder totalToUpstream,
+                                     LongAdder totalToDownstream) {
             this.stats = stats;
-            this.isDownstreamToUpstream = isDownstreamToUpstream;
+            this.isDownstreamReading = isDownstreamReading;
+            this.totalToUpstream = totalToUpstream;
+            this.totalToDownstream = totalToDownstream;
         }
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             if (msg instanceof io.netty.buffer.ByteBuf) {
                 int readableBytes = ((io.netty.buffer.ByteBuf) msg).readableBytes();
-                if (isDownstreamToUpstream) {
+                if (isDownstreamReading) {
                     stats.getToUpstreamBytes().add(readableBytes);
+                    totalToUpstream.add(readableBytes);
                 } else {
                     stats.getToDownstreamBytes().add(readableBytes);
+                    totalToDownstream.add(readableBytes);
                 }
                 stats.setLastActivityAt();
             }
@@ -447,13 +458,13 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     }
 
     @Override
-    public long getTotalDownloaded() {
-        return connectionStats.values().stream().mapToLong(stats -> stats.getToDownstreamBytes().sum()).sum();
+    public long getTotalToUpstream() {
+        return totalToUpstream.sum();
     }
 
     @Override
-    public long getTotalUploaded() {
-        return connectionStats.values().stream().mapToLong(stats -> stats.getToUpstreamBytes().sum()).sum();
+    public long getTotalToDownstream() {
+        return totalToDownstream.sum();
     }
 
     @Override
