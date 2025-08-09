@@ -68,7 +68,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         log.info(tlUI(Lang.BTSTUN_RESTART, downloader.getName()));
         this.tunnel = new StunTcpTunnelImpl(portMapper, this);
         try {
-            this.tunnel.createMapping(0);
+            this.tunnel.createMapping(ExternalSwitch.parseInt("pbh.btstun.localPort", 0));
         } catch (IOException e) {
             log.warn(tlUI(Lang.BTSTUN_UNABLE_START, downloader.getName()), e);
             try {
