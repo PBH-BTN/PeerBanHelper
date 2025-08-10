@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.iohandler.*;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.BiMap;
@@ -17,19 +18,10 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollIoHandler;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.kqueue.KQueue;
-import io.netty.channel.kqueue.KQueueIoHandler;
-import io.netty.channel.kqueue.KQueueServerSocketChannel;
-import io.netty.channel.nio.NioIoHandler;
-import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.uring.IoUring;
-import io.netty.channel.uring.IoUringIoHandler;
-import io.netty.channel.uring.IoUringServerSocketChannel;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -70,9 +62,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private final LongAdder totalToDownstream = new LongAdder();
 
     private Channel serverChannel;
-
-    private final Class<? extends ServerSocketChannel> serverSocketChannel;
-    private final ForwarderIOHandlerType forwarderIOHandlerType;
+    private final ForwarderIOHandler ioHandler;
 
     public TCPForwarderImpl(Map<PeerAddress, ?> banListReference, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort) {
         this.banListReference = banListReference;
@@ -82,27 +72,18 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         this.upstreamPort = upstreamPort;
         IoHandlerFactory ioHandlerFactory;
         if (IoUring.isAvailable()) { // 性能最好
-            ioHandlerFactory = IoUringIoHandler.newFactory();
-            this.serverSocketChannel = IoUringServerSocketChannel.class;
-            forwarderIOHandlerType = ForwarderIOHandlerType.IO_URING;
+            ioHandler = new IOUringHandler();
         } else if (Epoll.isAvailable()) { // 性能很不错！
-            ioHandlerFactory = EpollIoHandler.newFactory();
-            this.serverSocketChannel = EpollServerSocketChannel.class;
-            forwarderIOHandlerType = ForwarderIOHandlerType.EPOLL;
+            ioHandler = new EpollHandler();
         } else if (KQueue.isAvailable()) { // FreeBSD/MacOS
-            ioHandlerFactory = KQueueIoHandler.newFactory();
-            this.serverSocketChannel = KQueueServerSocketChannel.class;
-            forwarderIOHandlerType = ForwarderIOHandlerType.KQUEUE;
+            ioHandler = new KQueueHandler();
         } else { // oh shit
-            ioHandlerFactory = NioIoHandler.newFactory();
-            this.serverSocketChannel = NioServerSocketChannel.class;
-            forwarderIOHandlerType = ForwarderIOHandlerType.NIO;
+            ioHandler = new NioHandler();
         }
-        log.debug("Handler Factory selected: {}", ioHandlerFactory.getClass().getSimpleName());
-        log.debug("Connection Channel Factory selected: {}", this.serverSocketChannel.getSimpleName());
+        log.debug("IOHandler selected: {}", ioHandler.getClass().getSimpleName());
 
-        this.bossGroup = new MultiThreadIoEventLoopGroup(ioHandlerFactory);
-        this.workerGroup = new MultiThreadIoEventLoopGroup(ioHandlerFactory);
+        this.bossGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
+        this.workerGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
         //log.info("Netty TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
         sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 30, TimeUnit.SECONDS);
         Main.getEventBus().register(this);
@@ -111,16 +92,15 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     @Override
     public void start() {
         ServerBootstrap b = new ServerBootstrap();
-        b.group(bossGroup, workerGroup)
-                .channel(serverSocketChannel)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) {
-                        ch.pipeline().addLast(new ProxyFrontendHandler());
-                    }
-                })
+        ioHandler.apply(b.group(bossGroup, workerGroup)
+                        .channel(ioHandler.serverSocketChannelClass())
+                        .childHandler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            protected void initChannel(SocketChannel ch) {
+                                ch.pipeline().addLast(new ProxyFrontendHandler());
+                            }
+                        }))
                 .option(ChannelOption.SO_BACKLOG, 128)
-                .option(ChannelOption.SO_REUSEADDR, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.AUTO_READ, false); // 在连接到上游之前，暂停读取
 
@@ -513,6 +493,6 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     @Override
     public ForwarderIOHandlerType getForwarderIOHandlerType() {
-        return forwarderIOHandlerType;
+        return ioHandler.ioHandlerType();
     }
 }
