@@ -99,7 +99,9 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         if (results.isEmpty()) {
             return new TrafficDataComputed(startOfToday, 0, 0);
         } else {
-            return new TrafficDataComputed(startOfToday, results.getFirst().getDataOverallUploaded(), results.getFirst().getDataOverallDownloaded());
+            long totalUploaded = results.stream().mapToLong(TrafficDataComputed::getDataOverallUploaded).sum();
+            long totalDownloaded = results.stream().mapToLong(TrafficDataComputed::getDataOverallDownloaded).sum();
+            return new TrafficDataComputed(startOfToday, totalUploaded, totalDownloaded);
         }
     }
 
