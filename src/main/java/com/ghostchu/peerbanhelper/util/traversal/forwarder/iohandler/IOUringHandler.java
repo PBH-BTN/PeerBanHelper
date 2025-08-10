@@ -5,9 +5,9 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.IoHandlerFactory;
 import io.netty.channel.ServerChannel;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.uring.IoUringChannelOption;
 import io.netty.channel.uring.IoUringIoHandler;
+import io.netty.channel.uring.IoUringServerSocketChannel;
 import io.netty.channel.uring.IoUringSocketChannel;
 
 public class IOUringHandler implements ForwarderIOHandler {
@@ -29,7 +29,7 @@ public class IOUringHandler implements ForwarderIOHandler {
 
     @Override
     public Class<? extends ServerChannel> serverSocketChannelClass() {
-        return EpollServerSocketChannel.class;
+        return IoUringServerSocketChannel.class;
     }
 
     @Override
