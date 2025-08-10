@@ -20,7 +20,6 @@ import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.kqueue.KQueue;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.uring.IoUring;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
@@ -183,7 +182,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             // --- Connect to Upstream ---
             Bootstrap b = new Bootstrap();
             b.group(downstreamChannel.eventLoop()) // 使用同一个 EventLoop 避免线程切换
-                    .channel(NioSocketChannel.class)
+                    .channel(ioHandler.clientSocketChannelClass())
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {

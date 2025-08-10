@@ -2,11 +2,13 @@ package com.ghostchu.peerbanhelper.util.traversal.forwarder.iohandler;
 
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.ForwarderIOHandlerType;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.IoHandlerFactory;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -38,5 +40,10 @@ public class NioHandler implements ForwarderIOHandler {
     @Override
     public Class<? extends ServerChannel> serverSocketChannelClass() {
         return NioServerSocketChannel.class;
+    }
+
+    @Override
+    public Class<? extends Channel> clientSocketChannelClass() {
+        return NioSocketChannel.class;
     }
 }
