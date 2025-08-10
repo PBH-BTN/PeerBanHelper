@@ -28,10 +28,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class PushManagerImpl implements Reloadable, PushManager {
     @Getter
     private final List<PushProvider> providerList = new ArrayList<>();
-    @Autowired
-    private HTTPUtil httpUtil;
+    private final HTTPUtil httpUtil;
 
-    public PushManagerImpl() {
+    public PushManagerImpl(HTTPUtil httpUtil) {
+        this.httpUtil = httpUtil;
         reloadConfig();
     }
 
