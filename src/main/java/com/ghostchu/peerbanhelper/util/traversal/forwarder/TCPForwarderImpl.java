@@ -98,6 +98,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                             }
                         }))
                 .option(ChannelOption.SO_BACKLOG, 128)
+                .option(ChannelOption.SO_REUSEADDR, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.AUTO_READ, false); // 在连接到上游之前，暂停读取
 
