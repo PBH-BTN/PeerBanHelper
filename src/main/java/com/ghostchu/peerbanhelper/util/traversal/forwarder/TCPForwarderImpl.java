@@ -69,7 +69,6 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         this.proxyPort = proxyPort;
         this.upstreamHost = upstreamHost;
         this.upstreamPort = upstreamPort;
-        IoHandlerFactory ioHandlerFactory;
         if (IoUring.isAvailable()) { // 性能最好
             ioHandler = new IOUringHandler();
         } else if (Epoll.isAvailable()) { // 性能很不错！
@@ -80,10 +79,9 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             ioHandler = new NioHandler();
         }
         log.debug("IOHandler selected: {}", ioHandler.getClass().getSimpleName());
-
         this.bossGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
         this.workerGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
-        //log.info("Netty TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
+        log.debug("Netty TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
         sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 30, TimeUnit.SECONDS);
         Main.getEventBus().register(this);
     }
@@ -289,7 +287,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             if (!(cause instanceof java.io.IOException)) { // 忽略常见的 IO 异常日志
-                log.error("Exception in ProxyFrontendHandler", cause);
+                log.debug("Exception in ProxyFrontendHandler", cause);
             }
             ctx.close();
             connectionFailed.increment();
@@ -351,7 +349,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             if (!(cause instanceof java.io.IOException)) { // 忽略常见的 IO 异常日志
-                log.error("Exception in RelayHandler from {}", ctx.channel().remoteAddress(), cause);
+                log.debug("Exception in RelayHandler from {}", ctx.channel().remoteAddress(), cause);
             }
             ctx.close();
             // 确保对端也关闭
