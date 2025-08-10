@@ -14,7 +14,6 @@ public class KQueueHandler implements ForwarderIOHandler {
     @Override
     public ServerBootstrap apply(ServerBootstrap bootstrap) {
         return bootstrap
-                .channel(KQueueServerSocketChannel.class)
                 .option(KQueueChannelOption.SO_REUSEPORT, true);
     }
 

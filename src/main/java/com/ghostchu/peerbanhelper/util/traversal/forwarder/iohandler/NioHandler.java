@@ -15,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 public class NioHandler implements ForwarderIOHandler {
     @Override
     public ServerBootstrap apply(ServerBootstrap bootstrap) {
-        bootstrap = bootstrap
-                .channel(NioServerSocketChannel.class);
         if (NioChannelOption.exists("SO_REUSEPORT")) {
             try {
                 bootstrap = bootstrap.option(NioChannelOption.valueOf("SO_REUSEPORT"), true);

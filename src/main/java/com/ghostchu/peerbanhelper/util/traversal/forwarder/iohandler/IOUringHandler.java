@@ -8,14 +8,12 @@ import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.uring.IoUringChannelOption;
 import io.netty.channel.uring.IoUringIoHandler;
-import io.netty.channel.uring.IoUringServerSocketChannel;
 import io.netty.channel.uring.IoUringSocketChannel;
 
 public class IOUringHandler implements ForwarderIOHandler {
     @Override
     public ServerBootstrap apply(ServerBootstrap bootstrap) {
         return bootstrap
-                .channel(IoUringServerSocketChannel.class)
                 .option(IoUringChannelOption.SO_REUSEPORT, true);
     }
 

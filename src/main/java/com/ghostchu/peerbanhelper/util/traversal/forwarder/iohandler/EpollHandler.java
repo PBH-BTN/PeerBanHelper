@@ -14,7 +14,6 @@ public class EpollHandler implements ForwarderIOHandler {
     @Override
     public ServerBootstrap apply(ServerBootstrap bootstrap) {
         return bootstrap
-                .channel(EpollServerSocketChannel.class)
                 .option(EpollChannelOption.SO_REUSEPORT, true);
     }
 
