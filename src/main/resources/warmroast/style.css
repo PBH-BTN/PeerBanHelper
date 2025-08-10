@@ -1,0 +1,166 @@
+@import url(https://fonts.googleapis.com/css?family=Lato);
+
+body {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 150%;
+    margin: 0;
+    padding: 54px 20px 20px 20px;
+}
+
+ul {
+    margin: 0;
+    padding: 0 0 0 18px;
+}
+
+li {
+    margin: 0;
+    margin-left: -10px;
+    padding: 0;
+    list-style: none;
+    border-left: 1px solid #ccc;
+}
+
+a:link, a:visited {
+    color: #FF3213;
+    text-decoration: none;
+    border-bottom: 1px solid #CCC;
+}
+
+a:hover, a:active {
+    color: #000;
+    border-color: black;
+    text-decoration: none;
+}
+
+.stack {
+    margin-left: 60px;
+}
+
+.name {
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA10lEQVR4Xt2Tu8rCQBSEzzlJmYBvYJ7EShArfQ1BrPNDyoB5DRHsrUQQQc3lcfxBiKbIHjfiCuayKSwEB6ZYPpjdGVhkZvhEJP3dALMMgmB+FoI7ddUQEYhw7bp/48YAkYtOfzCEJu22m5G2gnjeHIYxxHGiXJwV11dQTzdN4w0QKa4JULplGcymkwo4Rkn7iCjNOcNiuVK3vQZ0ug5gWwAgPnpalgW1+yDqA4hQmmSADVVGBW8bES7RaW+zYOBSNSSENL0etAGe5/UkMKBZ/77vv8APfKY7cvZVTt7VqzwAAAAASUVORK5CYII=) center left no-repeat;
+    padding-left: 20px;
+    cursor: pointer;
+}
+
+.name:hover {
+    background-color: #CCC;
+}
+
+.name:hover + ul {
+    background: #EFEFEF;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+}
+
+.matched {
+    background: #CCC;
+    border-radius: 3px;
+    padding: 0 4px;
+}
+
+.multiple-matches {
+    background: #FF3213;
+    color: #FFF;
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+.matched:hover, .multiple-matches:hover {
+    background: #000000;
+    color: #FFF;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.percent {
+    color: #6b98ff;
+    font-size: 90%;
+    border-radius: 3px;
+    padding: 0 4px;
+}
+
+.bar {
+    display: inline-block;
+    width: 100px;
+    height: 15px;
+    margin-left: 20px;
+    border: 1px solid #CCC;
+    position: absolute;
+    right: 30px;
+    background: #FFF;
+}
+
+.bar-inner {
+    display: inline-block;
+    height: 16px;
+    background: #6b98ff;
+}
+
+#overlay span {
+    position: absolute;
+    color: #6b98ff;
+    font-size: 90%;
+    z-index: 10;
+    line-height: 150%;
+    left: 20px;
+    width: 50px;
+    text-align: right;
+}
+
+.time {
+    display: none;
+    margin: 0;
+    color: #888;
+    font-size: 90%;
+    border-radius: 3px;
+    padding: 0 4px;
+}
+
+.name:hover .time {
+    display: inline;
+}
+
+ul {
+    display: none;
+}
+
+.collapsed > .name {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA7ElEQVR4Xt1TzYrCQAxOYo8z0GeRZY+eBPGkryGIZ4UeC/Yx/EHvnqTssot/9XF2YUHXQyd2RtuC2OnBg2AgJF/CfJkvwyAzwyNGiT+XwLktBMHwRyl270lDRCDCRb8/aBcSqFi59UYTiuwzXLasEtR18nYbQRTt4f2tqqPGad8uIb2641TyKUSJp307gbH/0wl63U4Ks3y925e/AibOMcN4OofRZKZLOmps6lj2CoBodAohspKUMtePaCcgQqNZCGlw+PFt8nwXWLZE+NttviQrBr6RhoRwOBxXVgLP82pJqECx/fq+n4EX+ExnBI9csQQ1hIoAAAAASUVORK5CYII=);
+}
+
+h1 {
+    background: #FFF;
+    color: #111;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 20px;
+    margin: 0;
+    font-size: 14pt;
+    font-weight: normal;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    z-index: 20;
+}
+
+.footer {
+    background: #FFF;
+    color: #333;
+    margin: 100px 0 0 0;
+    font-size: 10pt;
+    font-weight: normal;
+    text-align: right;
+}
+
+.loading {
+    font-size: 130%;
+    background: #EFEFEF;
+    border: 1px solid #CCC;
+    padding: 8px;
+    border-radius: 3px;
+}
+
+.no-results {
+    font-size: 130%;
+    color: #800000;
+}
