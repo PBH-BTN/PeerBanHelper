@@ -184,6 +184,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionHandled() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionFailed() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionBlocked() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionRejected() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getTotalToDownstream() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getTotalToUpstream() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getEstablishedConnections() : 0,

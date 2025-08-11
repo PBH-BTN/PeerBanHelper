@@ -59,6 +59,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private final LongAdder connectionHandled = new LongAdder();
     private final LongAdder connectionFailed = new LongAdder();
     private final LongAdder connectionBlocked = new LongAdder();
+    private final LongAdder connectionRejected = new LongAdder();
 
     private final LongAdder totalToUpstream = new LongAdder();
     private final LongAdder totalToDownstream = new LongAdder();
@@ -139,6 +140,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                 if (bannedAddress.contains(clientIp)) {
                     log.debug("Closing connection from banned address during cleanup: {}", clientAddress);
                     closeConnectionByDownstreamAddress(clientAddress);
+                    connectionBlocked.increment();
                 }
             });
         });
@@ -167,6 +169,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             if (isDuplicateConnection(downstreamSocketAddress)) {
                 log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
                 downstreamChannel.close();
+                connectionRejected.increment();
                 return;
             }
             // --- Ban Check ---
@@ -303,7 +306,6 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         return false;
     }
 
-
     public class RelayHandler extends ChannelInboundHandlerAdapter {
         public static final AttributeKey<Channel> RELAY_CHANNEL_KEY = AttributeKey.valueOf("relayChannel");
         private final Channel relayChannel;
@@ -343,7 +345,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            if (!(cause instanceof java.io.IOException)) {
+            if (!(cause instanceof IOException)) {
                 log.debug("Exception in RelayHandler from {}", ctx.channel().remoteAddress(), cause);
             }
             ctx.close();
@@ -453,6 +455,11 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     @Override
     public long getConnectionBlocked() {
         return connectionBlocked.sum();
+    }
+
+    @Override
+    public long getConnectionRejected() {
+        return connectionRejected.sum();
     }
 
     @Override
