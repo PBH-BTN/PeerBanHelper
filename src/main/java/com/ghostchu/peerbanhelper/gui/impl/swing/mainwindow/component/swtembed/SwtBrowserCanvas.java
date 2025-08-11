@@ -65,7 +65,6 @@ public final class SwtBrowserCanvas extends Canvas {
                 }
             } catch (Exception ignored) {
             }
-            this.browser.addListener
             this.browserInitialized = true;
             // 应用正确的大小
             updateBrowserSize();

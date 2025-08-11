@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.*;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +63,17 @@ public final class SwingMainWindow extends JFrame {
         setIconImage(imageIcon.getImage());
         setVisible(!swingGUI.isSilentStart());
         tabs.add(new LogsTab(this));
-        tabs.add(new WebUITab(this));
-        if (Main.getMeta().isSnapshotOrBeta()) {
-            tabs.add(new PerfProfilerTab(this));
+        if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT")) {
+            try { // SWT possible be null here on unsupported platform
+                tabs.add(new WebUITab(this));
+                if (Main.getMeta().isSnapshotOrBeta()) {
+                    tabs.add(new PerfProfilerTab(this));
+                }
+            } catch (Exception e) {
+                log.error("Unable to create WebUITab or PerfProfilerTab", e);
+            }
+        } else {
+            log.debug("SWT is not available, WebUITab and PerfProfilerTab will not be created.");
         }
         //this.webuiTab = new WebUITab(this);
         Main.getEventBus().register(this);
