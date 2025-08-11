@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.WebUITab;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.browser.Browser;
@@ -13,8 +12,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public final class SwtBrowserCanvas extends Canvas {
     private final Thread swtEventLoop;
@@ -24,9 +21,8 @@ public final class SwtBrowserCanvas extends Canvas {
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
     private double dpiScaleFactor = 1.0;
     private boolean browserInitialized = false;
-    private ScheduledExecutorService sched = Executors.newScheduledThreadPool(1);
 
-    public SwtBrowserCanvas(WebUITab webUITab) {
+    public SwtBrowserCanvas() {
         // 在 JVM 启动时设置 Hi-DPI 支持
         this.setupHiDPISupport();
         this.swtEventLoop = this.createEventLoop();
@@ -163,6 +159,7 @@ public final class SwtBrowserCanvas extends Canvas {
                 }
             });
         }
+        swtEventLoop.interrupt();
         super.removeNotify();
     }
 
