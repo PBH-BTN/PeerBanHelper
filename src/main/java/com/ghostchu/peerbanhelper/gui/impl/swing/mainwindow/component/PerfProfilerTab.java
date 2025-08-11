@@ -7,24 +7,58 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed.SwtBrowserCanvas;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.common.eventbus.Subscribe;
+import com.sk89q.warmroast.WarmRoastManager;
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
 import lombok.SneakyThrows;
+import org.slf4j.event.Level;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class WebUITab implements WindowTab {
+public class PerfProfilerTab implements WindowTab {
     private final SwingMainWindow parent;
     private final JPanel webuiPanel;
+    private final JPanel mainPanel;
     private SwtBrowserCanvas webBrowser;
     private PBHGuiBridge bridge;
 
-    public WebUITab(SwingMainWindow parent) {
+    public PerfProfilerTab(SwingMainWindow parent) {
         this.parent = parent;
+        this.mainPanel = new JPanel(new BorderLayout());
         this.webuiPanel = new JPanel(new BorderLayout());
-        parent.getTabbedPane().addTab(tlUI(Lang.GUI_TABBED_WEBUI), webuiPanel);
+        mainPanel.add(webuiPanel, BorderLayout.CENTER);
+        mainPanel.add(createToolbar(), BorderLayout.NORTH);
+        parent.getTabbedPane().addTab(tlUI(Lang.GUI_TABBED_PERF), mainPanel);
         Main.getEventBus().register(this);
+    }
+
+    private JPanel createToolbar() {
+        var panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        var resetButton = new JButton(tlUI(Lang.PERF_RESTART));
+        resetButton.addActionListener(e -> {
+            WarmRoastManager.stopAndReset();
+            try {
+                WarmRoastManager.start();
+                Main.getGuiManager().createDialog(Level.INFO, tlUI(Lang.PERF_RESTARTED_TITLE), tlUI(Lang.PERF_RESTARTED_DESCRIPTION), () -> {
+                });
+            } catch (IOException | AttachNotSupportedException | AgentLoadException | AgentInitializationException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        var refreshButton = new JButton(tlUI(Lang.PERF_REFRESH));
+        refreshButton.addActionListener(e -> {
+            if (webBrowser != null) {
+                webBrowser.refresh();
+            }
+        });
+        panel.add(resetButton);
+        panel.add(refreshButton);
+        return panel;
     }
 
     @Subscribe
@@ -87,7 +121,7 @@ public class WebUITab implements WindowTab {
 
     private void navigateToIndex() {
         if (webBrowser != null) {
-            bridge.getWebUiUrl().ifPresent(uri -> webBrowser.setUrl(uri.toString()));
+            bridge.getPerfUrl().ifPresent(uri -> webBrowser.setUrl(uri.toString()));
         }
     }
 }

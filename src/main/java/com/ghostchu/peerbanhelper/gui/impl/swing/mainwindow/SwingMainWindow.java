@@ -63,6 +63,9 @@ public final class SwingMainWindow extends JFrame {
         setVisible(!swingGUI.isSilentStart());
         tabs.add(new LogsTab(this));
         tabs.add(new WebUITab(this));
+        if (Main.getMeta().isSnapshotOrBeta()) {
+            tabs.add(new PerfProfilerTab(this));
+        }
         //this.webuiTab = new WebUITab(this);
         Main.getEventBus().register(this);
         tabs.forEach(WindowTab::onWindowShow);

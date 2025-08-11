@@ -1,12 +1,15 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.sk89q.warmroast.RoastOptions;
 import com.sk89q.warmroast.StackNode;
 import com.sk89q.warmroast.WarmRoast;
-import com.sun.tools.attach.*;
+import com.sk89q.warmroast.WarmRoastManager;
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
@@ -47,6 +52,7 @@ public class PBHPerfWarmRoastController extends AbstractFeatureModule {
         javalinWebContainer.javalin()
                 .get("/warmroast", this::handleWarmRoastRequest, Role.USER_READ)
                 .get("/warmroast/launch", this::handleWarmRoastStartProfile, Role.USER_READ)
+                .get("/warmroast/reset", this::handleWarmRoastResetProfile, Role.USER_READ)
                 .get("/warmroast/warmroast.js", ctx -> {
                     ctx.result(WarmRoast.class.getResourceAsStream("/warmroast/warmroast.js"));
                     ctx.contentType("application/javascript");
@@ -57,29 +63,20 @@ public class PBHPerfWarmRoastController extends AbstractFeatureModule {
                 }, Role.ANYONE);
     }
 
+    private void handleWarmRoastResetProfile(@NotNull Context context) throws AgentLoadException, IOException, AttachNotSupportedException, AgentInitializationException {
+        WarmRoastManager.stopAndReset();
+        WarmRoastManager.start();
+        context.result(tl(locale(context), Lang.PERF_RESTARTED_DESCRIPTION));
+    }
+
     private void handleWarmRoastStartProfile(@NotNull Context context) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
-        RoastOptions opt = new RoastOptions();
-        VirtualMachine vm;
-        long pid = ProcessHandle.current().pid();
-        System.setProperty("jdk.attach.allowAttachSelf", "true");
-        vm = VirtualMachine.attach(String.valueOf(pid));
-        log.debug("Attached to VM with PID: {}", pid);
-        if (vm == null) {
-            List<VirtualMachineDescriptor> descriptors = VirtualMachine.list();
-            vm = VirtualMachine.attach(descriptors.getFirst());
-        }
-        this.roast = new WarmRoast(vm, opt.interval);
-        if (opt.timeout != null && opt.timeout > 0) {
-            roast.setEndTime(System.currentTimeMillis() + opt.timeout * 1000);
-        }
-        roast.connect();
-        roast.start();
-        context.result("Performance profiling started for 600s. Please wait for the snapshot to be retrieved on /warmroast.");
+        WarmRoastManager.start();
+        context.result(tl(locale(context), Lang.PERF_RESTARTED_DESCRIPTION));
     }
 
     private void handleWarmRoastRequest(@NotNull Context ctx) {
-        if (roast == null) {
-            ctx.status(503).result("WarmRoast is not running. Please send a GET to /warmroast/launch to start it.");
+        if (WarmRoastManager.getRoast() == null) {
+            ctx.status(503).result(tl(locale(ctx), Lang.PERF_NOT_RUNNING));
             return;
         }
         StringBuilder html = new StringBuilder();
@@ -89,7 +86,7 @@ public class PBHPerfWarmRoastController extends AbstractFeatureModule {
         html.append("<h1>WarmRoast</h1>");
         html.append("<div class=\"loading\">Downloading snapshot; please wait...</div>");
         html.append("<div class=\"stack\" style=\"display: none\">");
-        Collection<StackNode> nodes = roast.getData().values();
+        Collection<StackNode> nodes = List.copyOf(WarmRoastManager.getRoast().getData().values());
         for (StackNode node : nodes) {
             html.append(node.toHtml());
         }

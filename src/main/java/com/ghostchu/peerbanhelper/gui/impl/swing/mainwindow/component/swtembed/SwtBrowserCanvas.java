@@ -59,12 +59,13 @@ public final class SwtBrowserCanvas extends Canvas {
             this.shell = SWT_AWT.new_Shell(display, this);
             this.browser = new Browser(this.shell, SWT.NONE);
             this.browser.setVisible(true);
-            try (var input = Main.class.getResourceAsStream("/webui-placeholder.html")) {
+            try (var input = Main.class.getResourceAsStream("/placeholder.html")) {
                 if (input != null) {
                     this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
                 }
             } catch (Exception ignored) {
             }
+            this.browser.addListener
             this.browserInitialized = true;
             // 应用正确的大小
             updateBrowserSize();
@@ -171,5 +172,11 @@ public final class SwtBrowserCanvas extends Canvas {
             }
         }
         return false;
+    }
+
+    public void refresh() {
+        if (browser != null && !browser.isDisposed()) {
+            display.asyncExec(browser::refresh);
+        }
     }
 }

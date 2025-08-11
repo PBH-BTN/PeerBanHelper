@@ -20,6 +20,6 @@ package com.sk89q.warmroast;
 
 public class RoastOptions {
     public Integer interval = 100;
-    public Integer timeout = 600;
+    public Integer timeout = 60 * 60 * 24 * 365;
 
 }

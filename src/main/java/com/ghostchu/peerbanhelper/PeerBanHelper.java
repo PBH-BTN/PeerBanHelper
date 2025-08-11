@@ -191,7 +191,7 @@ public class PeerBanHelper implements Reloadable {
 
     @SneakyThrows
     private void runTestCode() {
-        if (!Main.getMeta().isSnapshotOrBeta() && !"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+        if (!Main.getMeta().isSnapshotOrBeta()) {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));

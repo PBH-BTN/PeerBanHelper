@@ -22,7 +22,6 @@ import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -38,7 +37,6 @@ import java.lang.management.ThreadMXBean;
 import java.util.*;
 
 @Slf4j
-@Component
 public class WarmRoast extends TimerTask {
 
     private final int interval;
