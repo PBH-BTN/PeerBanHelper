@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="11.0.4" transformSequenceNumber="11">
+<install4j version="11.0.5" transformSequenceNumber="11">
   <directoryPresets config="../native/qt6" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="21" javaMaxVersion="25">
     <languages>
@@ -22,13 +22,22 @@
   <files keepModificationTimes="true">
     <filesets>
       <fileset name="disable-checking-updates" id="263" />
+      <fileset name="platform-natives-windows-x86_64" id="306" />
+      <fileset name="platform-natives-macos-aarch64" id="308" />
+      <fileset name="platform-macos-x86_64" id="310" />
     </filesets>
     <roots>
       <root id="264" fileset="263" />
+      <root id="307" fileset="306" />
+      <root id="309" fileset="308" />
+      <root id="311" fileset="310" />
     </roots>
     <mountPoints>
       <mountPoint id="24" />
       <mountPoint id="265" root="264" />
+      <mountPoint id="312" root="307" />
+      <mountPoint id="313" root="309" />
+      <mountPoint id="314" root="311" />
     </mountPoints>
     <entries>
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
@@ -36,6 +45,9 @@
       <dirEntry mountPoint="24" file="./scripts" overwriteMode="1" overrideOverwriteMode="true" entryMode="subdir" subDirectory="scripts" />
       <variableEntry mountPoint="24" name="jarPath" />
       <fileEntry mountPoint="265" file="./disable-checking-updates.txt" />
+      <dirEntry mountPoint="312" file="../platform-natives/windows-x86_64/libraries" entryMode="subdir" subDirectory="libraries" />
+      <dirEntry mountPoint="313" file="../platform-natives/macos-aarch64/libraries" entryMode="subdir" subDirectory="libraries" />
+      <dirEntry mountPoint="314" file="../platform-natives/macos-x86_64/libraries" entryMode="subdir" subDirectory="libraries" />
     </entries>
     <components>
       <component name="${i18n:components.peerbanhelper}" id="245" customizedId="peerbanhelper" changeable="false">

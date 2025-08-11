@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
+import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.LogsTab;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
@@ -24,7 +25,6 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.SwingProgressDialog;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
-import com.google.common.eventbus.Subscribe;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -154,6 +154,11 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         createMainWindow();
     }
 
+    @Override
+    public boolean isDarkMode() {
+        return OsThemeDetector.getDetector().isDark();
+    }
+
     private void setupSwingDefaultFonts() {
 //        FontUIResource fontRes = new FontUIResource(new Font("Microsoft YaHei UI" , Font.PLAIN, 16));
 //        for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements();) {
@@ -171,10 +176,6 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateGuiStuff, 0, 1, TimeUnit.SECONDS);
     }
 
-    @Subscribe
-    public void needReloadThemes(PBHLookAndFeelNeedReloadEvent event) {
-        updateTheme(OsThemeDetector.getDetector().isDark());
-    }
 
     private void updateTheme(Boolean isDark) {
         pbhFlatLafTheme = new StandardLafTheme();
@@ -225,6 +226,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             } else {
                 pbhFlatLafTheme.applyLight();
             }
+            Main.getEventBus().post(new PBHLookAndFeelNeedReloadEvent(isDark));
             FlatLaf.updateUILater();
         } finally {
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
@@ -285,8 +287,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private void initLoggerRedirection() {
-        JScrollPane scrollPane = mainWindow.getLoggerScrollPane();  // 获取 JList 所在的 JScrollPane
-        JList<LogEntry> logList = mainWindow.getLoggerTextList();
+        JScrollPane scrollPane = mainWindow.getTab(LogsTab.class).getLoggerScrollPane();  // 获取 JList 所在的 JScrollPane
+        JList<LogEntry> logList = mainWindow.getTab(LogsTab.class).getLoggerTextList();
         BoundedRangeModel scrollModel = scrollPane.getVerticalScrollBar().getModel();
 
         // 用于追踪用户是否在最底部

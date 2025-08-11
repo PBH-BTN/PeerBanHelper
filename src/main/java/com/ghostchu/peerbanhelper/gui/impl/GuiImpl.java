@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 
 public interface GuiImpl {
+    boolean isDarkMode();
+
     void setup();
 
     void createMainWindow();
