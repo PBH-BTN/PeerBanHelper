@@ -27,10 +27,6 @@ import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
-import com.sk89q.warmroast.WarmRoastManager;
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -114,13 +110,6 @@ public class Main {
         loadFlagsProperties();
         setupConfiguration();
         meta = buildMeta();
-        if (meta.isSnapshotOrBeta()) {
-            try {
-                WarmRoastManager.start();
-            } catch (IOException | AttachNotSupportedException | AgentLoadException | AgentInitializationException e) {
-                log.warn("Unable to start WarmRoast to profiling the application performance under debug mode, is flags set or running in JRE? skipping...", e);
-            }
-        }
         setupLogback();
         String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
         log.info("Current system language tag: {}", defLocaleTag);

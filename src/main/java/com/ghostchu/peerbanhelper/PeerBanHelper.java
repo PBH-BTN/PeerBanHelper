@@ -314,7 +314,6 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(SwarmTrackingModule.class);
         // moduleManager.register(MCPController.class);
         moduleManager.register(PBHAutoStunController.class);
-        moduleManager.register(PBHPerfWarmRoastController.class);
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {

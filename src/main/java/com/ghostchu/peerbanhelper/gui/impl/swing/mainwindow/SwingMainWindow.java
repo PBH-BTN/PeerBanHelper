@@ -66,9 +66,6 @@ public final class SwingMainWindow extends JFrame {
         if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT")) {
             try { // SWT possible be null here on unsupported platform
                 tabs.add(new WebUITab(this));
-                if (Main.getMeta().isSnapshotOrBeta()) {
-                    tabs.add(new PerfProfilerTab(this));
-                }
             } catch (Exception e) {
                 log.error("Unable to create WebUITab or PerfProfilerTab", e);
             }
