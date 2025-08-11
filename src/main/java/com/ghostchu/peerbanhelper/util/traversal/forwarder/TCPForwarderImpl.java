@@ -10,11 +10,13 @@ import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStati
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -25,6 +27,7 @@ import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -160,7 +163,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         public void channelActive(ChannelHandlerContext ctx) {
             final Channel downstreamChannel = ctx.channel();
             InetSocketAddress downstreamSocketAddress = (InetSocketAddress) downstreamChannel.remoteAddress();
-            // 检查连接表，检查 IP 地址是否已有另一个链接
+            // 检查连接表，检查 IP 地址是否已有另一个链接，不允许多重连接，会干扰 ProgressCheatBlocker
             if (isDuplicateConnection(downstreamSocketAddress)) {
                 log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
                 downstreamChannel.close();
@@ -185,12 +188,10 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            // 在上游 pipeline 中添加一个中继处理器，将数据转发给下游
                             ch.pipeline().addLast(new RelayHandler(downstreamChannel));
                         }
                     })
                     .option(ChannelOption.SO_KEEPALIVE, true);
-
 
             Thread.ofVirtual().name("Connection establisher").start(() -> {
                 // --- Friendly Address Binding Logic ---
@@ -278,16 +279,14 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                     // fall through to default
                 }
             }
-            // 再次失败则退回系统默认行为
             Bootstrap b3 = b.clone();
             log.debug("Failed to bind to friendly address, falling back to default.");
-            // 默认连接行为
             return b3.localAddress(null).connect(upstreamAddress);
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            if (!(cause instanceof java.io.IOException)) { // 忽略常见的 IO 异常日志
+            if (!(cause instanceof IOException)) {
                 log.debug("Exception in ProxyFrontendHandler", cause);
             }
             ctx.close();
@@ -321,17 +320,14 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             if (relayChannel.isActive()) {
-                // 直接将 ByteBuf 写入另一个 Channel，实现零拷贝转发
                 relayChannel.writeAndFlush(msg).addListener((ChannelFuture future) -> {
                     if (future.isSuccess()) {
-                        // 成功发送后，继续从当前 channel 读取数据
                         ctx.channel().read();
                     } else {
                         future.channel().close();
                     }
                 });
             } else {
-                // 如果对方 Channel 已关闭，释放消息并关闭自己
                 io.netty.util.ReferenceCountUtil.release(msg);
                 ctx.close();
             }
@@ -340,27 +336,23 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         @Override
         public void channelInactive(ChannelHandlerContext ctx) {
             if (relayChannel.isActive()) {
-                // 当前端关闭时，发送一个空包并附带关闭监听器，以优雅地关闭对端
                 relayChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
             }
-            // 清理连接信息
             cleanupConnectionState(ctx.channel());
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            if (!(cause instanceof java.io.IOException)) { // 忽略常见的 IO 异常日志
+            if (!(cause instanceof java.io.IOException)) {
                 log.debug("Exception in RelayHandler from {}", ctx.channel().remoteAddress(), cause);
             }
             ctx.close();
-            // 确保对端也关闭
             if (relayChannel.isActive()) {
                 relayChannel.close();
             }
         }
 
         private void cleanupConnectionState(Channel channel) {
-            // 这个方法会在任何一端关闭时被调用
             Channel downstreamChannel = channel.hasAttr(RELAY_CHANNEL_KEY) ? channel.attr(RELAY_CHANNEL_KEY).get().attr(RELAY_CHANNEL_KEY).get() : channel;
             if (downstreamChannel != null) {
                 InetSocketAddress downstreamAddress = (InetSocketAddress) downstreamChannel.remoteAddress();
@@ -391,8 +383,8 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (msg instanceof io.netty.buffer.ByteBuf) {
-                int readableBytes = ((io.netty.buffer.ByteBuf) msg).readableBytes();
+            if (msg instanceof ByteBuf buf) {
+                int readableBytes = buf.readableBytes();
                 if (downstreamChannel) {
                     stats.getToUpstreamBytes().add(readableBytes);
                     totalToUpstream.add(readableBytes);
@@ -417,8 +409,6 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         workerGroup.shutdownGracefully().syncUninterruptibly();
     }
 
-    // --- Interface Methods Implementation ---
-
     @Override
     public long getEstablishedConnections() {
         return downstreamChannelMap.size();
@@ -426,17 +416,18 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     @Override
     public BiMap<InetSocketAddress, InetSocketAddress> getDownstreamAddressAsKeyConnectionMap() {
-        return connectionMap;
+        return ImmutableBiMap.copyOf(connectionMap);
     }
 
     @Override
     public BiMap<InetSocketAddress, InetSocketAddress> getProxyLAddressAsKeyConnectionMap() {
-        return connectionMap.inverse();
+        return ImmutableBiMap.copyOf(connectionMap.inverse());
+
     }
 
     @Override
     public Map<InetSocketAddress, ConnectionStatistics> getDownstreamAddressAsKeyConnectionStats() {
-        return connectionStats;
+        return Map.copyOf(connectionStats);
     }
 
     @Override
