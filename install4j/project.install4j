@@ -24,20 +24,20 @@
       <fileset name="disable-checking-updates" id="263" />
       <fileset name="platform-natives-windows-x86_64" id="306" />
       <fileset name="platform-natives-macos-aarch64" id="308" />
-      <fileset name="platform-macos-x86_64" id="310" />
+      <fileset name="platform-natives-macos-x86_64" id="320" />
     </filesets>
     <roots>
       <root id="264" fileset="263" />
       <root id="307" fileset="306" />
       <root id="309" fileset="308" />
-      <root id="311" fileset="310" />
+      <root id="321" fileset="320" />
     </roots>
     <mountPoints>
       <mountPoint id="24" />
       <mountPoint id="265" root="264" />
       <mountPoint id="312" root="307" />
       <mountPoint id="313" root="309" />
-      <mountPoint id="314" root="311" />
+      <mountPoint id="325" root="321" />
     </mountPoints>
     <entries>
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
@@ -47,7 +47,7 @@
       <fileEntry mountPoint="265" file="./disable-checking-updates.txt" />
       <dirEntry mountPoint="312" file="../platform-natives/windows-x86_64/libraries" entryMode="subdir" subDirectory="libraries" />
       <dirEntry mountPoint="313" file="../platform-natives/macos-aarch64/libraries" entryMode="subdir" subDirectory="libraries" />
-      <dirEntry mountPoint="314" file="../platform-natives/macos-x86_64/libraries" entryMode="subdir" subDirectory="libraries" />
+      <dirEntry mountPoint="325" file="../platform-natives/macos-x86_64/libraries" entryMode="subdir" subDirectory="libraries" />
     </entries>
     <components>
       <component name="${i18n:components.peerbanhelper}" id="245" customizedId="peerbanhelper" changeable="false">
@@ -64,6 +64,21 @@
         <dependencies>
           <component id="245" />
         </dependencies>
+      </component>
+      <component name="${i18n:components.windows.x86_64.native}" id="319" changeable="false" hidden="true">
+        <include>
+          <entry filesetId="306" />
+        </include>
+      </component>
+      <component name="${i18n:components.macos.aarch64.native}" id="326" changeable="false" hidden="true">
+        <include>
+          <entry filesetId="308" />
+        </include>
+      </component>
+      <component name="${i18n:components.macos.x86_64.native}" id="327" changeable="false" hidden="true">
+        <include>
+          <entry filesetId="320" />
+        </include>
       </component>
     </components>
   </files>
@@ -1833,21 +1848,73 @@ return true;</property>
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="64" />
+    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="64">
+      <excludedComponents>
+        <component id="326" />
+        <component id="327" />
+      </excludedComponents>
+    </windows>
     <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
+      <excludedComponents>
+        <component id="326" />
+        <component id="327" />
+      </excludedComponents>
       <jreBundle jreBundleSource="none" />
     </windows>
-    <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="arm64" />
+    <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="arm64">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
+    </windows>
     <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="arm64">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
       <jreBundle jreBundleSource="none" />
     </windows>
-    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="universal" />
-    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}" architecture="universal">
+    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="320" />
+      </exclude>
+    </macosFolder>
+    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="320" />
+      </exclude>
       <jreBundle jreBundleSource="none" />
     </macosFolder>
-    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_rpm_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
-    <unixInstaller name="x64 Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true" />
+    <macosFolder name="macOS Folder (Intel)" id="335" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="amd64">
+      <excludedComponents>
+        <component id="319" />
+        <component id="326" />
+      </excludedComponents>
+    </macosFolder>
+    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_rpm_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
+    </linuxRPM>
+    <unixInstaller name="x64 Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
+    </unixInstaller>
     <unixInstaller name="aarch64 Linux Installer" id="127" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
       <jreBundle platform="linux-aarch64" />
     </unixInstaller>
   </mediaSets>
