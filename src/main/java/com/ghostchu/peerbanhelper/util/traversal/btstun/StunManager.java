@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.traversal.btstun;
 
 import com.cdnbye.core.nat.NatType;
-import com.cdnbye.core.nat.StunClient;
+import com.cdnbye.core.nat.NettyStunClient;
 import com.ghostchu.peerbanhelper.Main;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public class StunManager implements AutoCloseable {
                 continue;
             }
             try {
-                NatType natType = StunClient.query(stun[0], Integer.parseInt(stun[1]), InetAddress.getLocalHost().getHostAddress()).getNatType();
+                NatType natType = NettyStunClient.query(stun[0], Integer.parseInt(stun[1]), InetAddress.getLocalHost().getHostAddress()).getNatType();
                 if (natType != NatType.Unknown && natType != NatType.UdpBlocked) {
                     this.cachedNatType = natType;
                     log.debug("Successfully determined NAT type {} using server {}", natType, stunServer);
