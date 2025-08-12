@@ -25,7 +25,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class PBHPortMapperImpl implements PBHPortMapper {
     private final GatewayDiscover gatewayDiscover = new GatewayDiscover();
-    private final Object scanMappersLock = new Object();
+    private final Object discoverLock = new Object();
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(16, Thread.ofVirtual().factory());
     private final List<MappedPort> mappedPorts = Collections.synchronizedList(new ArrayList<>());
 
@@ -34,7 +34,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
         Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-                for (GatewayDevice gatewayDevice : List.copyOf(gatewayDiscover.getAllGateways().values())) {
+                for (GatewayDevice gatewayDevice : getGatewayDevices()) {
                     for (MappedPort mappedPort : mappedPorts) {
                         executor.submit(() -> {
                             try {
@@ -51,7 +51,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     }
 
     private void scanMappers() {
-        synchronized (scanMappersLock) {
+        synchronized (discoverLock) {
             if (!gatewayDiscover.getAllGateways().isEmpty()) return;
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
             try {
@@ -67,11 +67,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     @Override
     public Collection<GatewayDevice> getGatewayDevices() {
         if (gatewayDiscover.getValidGateway() == null) {
-            try {
-                gatewayDiscover.discover();
-            } catch (IOException | SAXException | ParserConfigurationException e) {
-                log.debug("Unable to discover UPnP gateways on live-scan", e);
-            }
+            scanMappers();
         }
         return List.copyOf(gatewayDiscover.getAllGateways().values());
     }
@@ -79,7 +75,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     @Override
     public CompletableFuture<@NotNull Boolean> mapPort(int port, Protocol protocol, String description) {
         return CompletableFuture.supplyAsync(() -> {
-            var gateways = gatewayDiscover.getAllGateways().values();
+            var gateways = getGatewayDevices();
             if (gateways.isEmpty()) {
                 log.debug("No UPnP gateways found, mapPort failed...");
                 return false;
@@ -107,7 +103,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     @Override
     public CompletableFuture<@NotNull Boolean> unmapPort(int port, Protocol protocol) {
         return CompletableFuture.supplyAsync(() -> {
-            var gateways = gatewayDiscover.getAllGateways().values();
+            var gateways = getGatewayDevices();
             if (gateways.isEmpty()) {
                 log.debug("No UPnP gateways found, unmapPort failed...");
                 return false;
