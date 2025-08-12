@@ -211,7 +211,6 @@
                     <exclude>assets/</exclude>
                     <exclude>static/</exclude>
                     <exclude>native/</exclude>
-                    <exclude>warmroast/</exclude>
                 </excludes>
                 <filtering>true</filtering>
             </resource>
@@ -234,11 +233,6 @@
             <resource>
                 <directory>src/main/resources/native</directory>
                 <targetPath>native</targetPath>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources/warmroast</directory>
-                <targetPath>warmroast</targetPath>
                 <filtering>false</filtering>
             </resource>
             <resource>
