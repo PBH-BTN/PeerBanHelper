@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.util.traversal.stun.tunnel;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.portmapper.Protocol;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
@@ -53,8 +55,9 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         try {
             if (Main.getMainConfig().getBoolean("stun.availableTest", true)) {
                 var testPass = testMapping(interResult, outerResult);
+                testPass = false;
                 if (!testPass) {
-                    stunListener.onClose(new IllegalStateException("Available test failed, mapping might not be valid"));
+                    stunListener.onNotApplicable(new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_TEST_FAILED));
                     return;
                 }
             }

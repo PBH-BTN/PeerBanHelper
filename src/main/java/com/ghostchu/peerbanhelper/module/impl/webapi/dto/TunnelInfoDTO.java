@@ -22,4 +22,5 @@ public class TunnelInfoDTO {
     private String upstreamHost;
     private int upstreamPort;
     private ForwarderIOHandlerType forwarderIOHandlerType;
+    private String shutdownReason;
 }

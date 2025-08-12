@@ -162,7 +162,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
             context.json(new StdResp(false, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_NOT_EXISTS, downloader.getName())), null));
             return;
         }
-        context.json(new StdResp(true, null, toTunnelInfoDto(stunInstance)));
+        context.json(new StdResp(true, null, toTunnelInfoDto(locale(context), stunInstance)));
     }
 
     private void tunnels(@NotNull Context context) {
@@ -170,13 +170,13 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         for (Map.Entry<Downloader, BTStunInstance> entry : bTStunManager.getDownloadStunInstances().entrySet()) {
             var downloader = entry.getKey();
             var stunInstance = entry.getValue();
-            tunnels.add(new TunnelsDTO(downloaderManager.getDownloadInfo(downloader), toTunnelInfoDto(stunInstance)));
+            tunnels.add(new TunnelsDTO(downloaderManager.getDownloadInfo(downloader), toTunnelInfoDto(locale(context), stunInstance)));
 
         }
         context.json(new StdResp(true, null, tunnels));
     }
 
-    private TunnelInfoDTO toTunnelInfoDto(BTStunInstance stunInstance) {
+    private TunnelInfoDTO toTunnelInfoDto(String locale, BTStunInstance stunInstance) {
         return new TunnelInfoDTO(
                 stunInstance.getTunnel() != null && stunInstance.getTunnel().isValid(),
                 stunInstance.getTunnel() != null ? stunInstance.getTunnel().getStartedAt() : 0,
@@ -192,7 +192,8 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getProxyPort() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getUpstremHost() : "???",
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getUpstreamPort() : 0,
-                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getForwarderIOHandlerType() : ForwarderIOHandlerType.DEFAULT
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getForwarderIOHandlerType() : ForwarderIOHandlerType.DEFAULT,
+                tl(locale, stunInstance.getShutdownReason())
         );
     }
 

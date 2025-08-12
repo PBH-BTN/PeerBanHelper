@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.Forwarder;
@@ -38,6 +39,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     @Nullable
     private Forwarder tcpForwarder;
+    private @Nullable TranslationComponent shutdownReason = null;
 
     public BTStunInstance(Map<PeerAddress, ?> banList, PBHPortMapper portMapper, Downloader downloader, BTStunManager manager) {
         this.banList = banList;
@@ -119,7 +121,27 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
 
     @Override
     public void onClose(@Nullable Throwable throwable) {
-        log.info(tlUI(Lang.BTSTUN_ON_TUNNEL_CLOSE, downloader.getName()), throwable);
+        log.warn(tlUI(Lang.BTSTUN_ON_TUNNEL_CLOSE, downloader.getName()), throwable);
+        if (throwable == null) {
+            this.shutdownReason = null;
+        } else {
+            this.shutdownReason = new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_ERRORED, throwable.getClass().getName() + ": " + throwable.getMessage());
+        }
+    }
+
+    @Override
+    public void onNotApplicable(@NotNull TranslationComponent reason) {
+        try {
+            close();
+            this.shutdownReason = reason;
+            log.warn(tlUI(Lang.BTSTUN_ON_TUNNEL_CLOSE_WITH_REASON, downloader.getName(), reason));
+        } catch (Exception e) {
+            log.error("Shutting down tunnel failed", e);
+        }
+    }
+
+    public @Nullable TranslationComponent getShutdownReason() {
+        return shutdownReason;
     }
 
     public @Nullable Forwarder getTcpForwarder() {
