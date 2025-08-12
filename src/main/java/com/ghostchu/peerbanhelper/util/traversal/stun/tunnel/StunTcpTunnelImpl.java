@@ -1,12 +1,11 @@
 package com.ghostchu.peerbanhelper.util.traversal.stun.tunnel;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.util.PBHPortMapper;
+import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
+import com.ghostchu.peerbanhelper.util.portmapper.Protocol;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunSocketTool;
 import com.ghostchu.peerbanhelper.util.traversal.stun.TcpStunClient;
-import com.offbynull.portmapper.mapper.PortMapper;
-import com.offbynull.portmapper.mapper.PortType;
 import com.sun.net.httpserver.HttpServer;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,6 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.StandardSocketOptions;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +26,6 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
     private final ScheduledExecutorService keepAliveService = Executors.newScheduledThreadPool(1, runnable -> Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").unstarted(runnable));
     private final AtomicBoolean valid = new AtomicBoolean(false);
     private final PBHPortMapper pbhPortMapper;
-    private final List<PortMapper> portMappers;
     private Socket keepAliveSocket;
     private long startedAt;
     private long lastSuccessHeartbeatAt;
@@ -36,7 +33,6 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
     public StunTcpTunnelImpl(PBHPortMapper pbhPortMapper, StunListener stunListener) {
         this.pbhPortMapper = pbhPortMapper;
         this.stunListener = stunListener;
-        this.portMappers = pbhPortMapper.getMappers();
     }
 
     @Override
@@ -48,7 +44,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
             localPort = tmpSocket.getLocalPort();
             tmpSocket.close();
         }
-        pbhPortMapper.mapPort(portMappers, PortType.TCP, localPort).join();
+        pbhPortMapper.mapPort(localPort, Protocol.TCP, "PeerBanHelper STUN Hole Puncher (TCP/" + localPort + ")").join();
         TcpStunClient tcpStunClient = new TcpStunClient(Main.getMainConfig().getStringList("stun.tcp-servers"), "0.0.0.0", localPort);
         var mappingResult = tcpStunClient.getMapping();
         var interResult = mappingResult.interAddress();
@@ -172,7 +168,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         valid.set(false);
         keepAliveService.close();
         stunListener.onClose(null);
-        if(keepAliveSocket != null && !keepAliveSocket.isClosed()) {
+        if (keepAliveSocket != null && !keepAliveSocket.isClosed()) {
             try {
                 keepAliveSocket.close();
             } catch (IOException ignored) {

@@ -698,7 +698,8 @@ BTN_HEARTBEAT_SUCCESS: "已成功与服务器交换心跳信息"
 BTN_HEARTBEAT_FAILED: "没有任何网路接口可用来发送心跳信息，所有网络请求均已失败"
 
 PORTMAPPER_SCANNING: "[PortMapper] 正在后台探测网络接口上可用的 UPnP-IGD/NAT-PMP/PCP 设备，可能需要一些时间……"
-PORTMAPPER_SCANNED: "[PortMapper] 共找到 {} 个 UPnP-IGD/NAT-PMP/PCP 设备，服务已启动"
+PORTMAPPER_SCANNED: "[PortMapper] 共找到 {} 个 UPnP 设备，服务已启动"
+PORTMAPPER_SELECTED_GATEWAY: "[PortMapper] 首选 UPnP 网关: {}"
 
 BTSTUN_RESTART_FAILED: "[AutoSTUN] 由于意外错误，无法对下载器 {} 启动隧道，请检查日志以获取更多信息"
 BTSTUN_RESTART: "[AutoSTUN] 正在启动下载器 {} 的隧道，请稍等……"
@@ -744,3 +745,5 @@ POW_CAPTCHA_SERVER_VERIFY_FAILED: "验证码验证失败，请重试"
 
 BGTASK_TITLE_EMPTY: "未命名后台任务"
 BGTASK_WEBSOCKET_TASK_NOT_FOUND: "未找到指定的后台任务，任务可能已结束"
+
+PORT_MAPPER_PORT_MAPPED_NEW: "[PortMapper] 已在网卡 {} 的网关上上为本地端口 {}/{} 创建了一个端口映射，网关地址: {} ({} - {} {} {})"
