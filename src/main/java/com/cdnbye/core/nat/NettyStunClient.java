@@ -103,7 +103,15 @@ public class NettyStunClient {
         handler.doTransaction(test2Request, remoteAddress, channel)
                 .whenComplete((test2Response, ex) -> {
                     if (ex == null && test2Response != null) {
-                        finalResultFuture.complete(new StunResult(NatType.OpenInternet, test1Response.getMappedAddress()));
+                        // Check if the response actually came from a different IP/port
+                        if (isResponseFromDifferentAddress(test2Response, remoteAddress)) {
+                            finalResultFuture.complete(new StunResult(NatType.OpenInternet, test1Response.getMappedAddress()));
+                        } else {
+                            log.warn("STUN server at {}:{} did not change IP/port as requested in Test II (change IP=true, change port=true). " +
+                                            "This violates STUN RFC 3489. Server behavior is non-compliant.",
+                                    remoteAddress.getHostString(), remoteAddress.getPort());
+                            finalResultFuture.complete(new StunResult(NatType.Unknown, test1Response.getMappedAddress()));
+                        }
                     } else {
                         finalResultFuture.complete(new StunResult(NatType.SymmetricUdpFirewall, test1Response.getMappedAddress()));
                     }
@@ -116,8 +124,16 @@ public class NettyStunClient {
         handler.doTransaction(test2Request, remoteAddress, channel)
                 .whenComplete((test2Response, ex) -> {
                     if (ex == null && test2Response != null) {
-                        // Full Cone NAT if response received
-                        finalResultFuture.complete(new StunResult(NatType.FullCone, test1Response.getMappedAddress()));
+                        // Check if the response actually came from a different IP/port
+                        if (isResponseFromDifferentAddress(test2Response, remoteAddress)) {
+                            // Full Cone NAT if response received from different address
+                            finalResultFuture.complete(new StunResult(NatType.FullCone, test1Response.getMappedAddress()));
+                        } else {
+                            log.warn("STUN server at {}:{} did not change IP/port as requested in Test II (change IP=true, change port=true). " +
+                                            "This violates STUN RFC 3489. Server behavior is non-compliant.",
+                                    remoteAddress.getHostString(), remoteAddress.getPort());
+                            finalResultFuture.complete(new StunResult(NatType.Unknown, test1Response.getMappedAddress()));
+                        }
                     } else {
                         // Could be Symmetric, Restricted, or Port Restricted
                         handleRestrictedNatPath(handler, test1Response, channel, finalResultFuture);
@@ -158,5 +174,33 @@ public class NettyStunClient {
                                 });
                     }
                 });
+    }
+
+    /**
+     * Checks if the STUN response came from a different IP/port than the original request destination.
+     * This is used to verify that the STUN server properly honored the CHANGE-REQUEST attribute.
+     *
+     * @param response The STUN response message
+     * @param originalRemoteAddress The original destination address where the request was sent
+     * @return true if the response came from a different address, false otherwise
+     */
+    private static boolean isResponseFromDifferentAddress(StunMessage response, InetSocketAddress originalRemoteAddress) {
+        InetSocketAddress sourceAddress = response.getSourceAddress();
+        if (sourceAddress == null) {
+            // If we can't determine the source address, we can't verify compliance
+            log.debug("STUN response does not contain SOURCE-ADDRESS attribute, cannot verify server compliance");
+            return false;
+        }
+
+        // Check if IP or port is different
+        boolean ipDifferent = !sourceAddress.getAddress().equals(originalRemoteAddress.getAddress());
+        boolean portDifferent = sourceAddress.getPort() != originalRemoteAddress.getPort();
+
+        log.debug("STUN server compliance check: original={}:{}, response_source={}:{}, ip_changed={}, port_changed={}",
+                originalRemoteAddress.getHostString(), originalRemoteAddress.getPort(),
+                sourceAddress.getHostString(), sourceAddress.getPort(),
+                ipDifferent, portDifferent);
+
+        return ipDifferent || portDifferent;
     }
 }
