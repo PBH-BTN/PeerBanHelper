@@ -1,14 +1,11 @@
 package com.cdnbye.core.nat;
 
-import com.ghostchu.peerbanhelper.util.traversal.forwarder.iohandler.*;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.kqueue.KQueue;
+import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.channel.uring.IoUring;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
@@ -44,17 +41,7 @@ public class NettyStunClient {
         if (stunHost == null || localIP == null) {
             throw new InvalidParameterException("Host and localIP cannot be null");
         }
-        ForwarderIOHandler ioHandler;
-        if (IoUring.isAvailable()) { // 性能最好
-            ioHandler = new IOUringHandler();
-        } else if (Epoll.isAvailable()) { // 性能很不错！
-            ioHandler = new EpollHandler();
-        } else if (KQueue.isAvailable()) { // FreeBSD/MacOS
-            ioHandler = new KQueueHandler();
-        } else { // oh shit
-            ioHandler = new NioHandler();
-        }
-        EventLoopGroup group = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
+        EventLoopGroup group = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
         try {
             // A CompletableFuture to hold the final result of our multi-step STUN test
             CompletableFuture<StunResult> finalResultFuture = new CompletableFuture<>();
