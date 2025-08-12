@@ -83,12 +83,8 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             ioHandler = new NioHandler();
         }
         log.debug("IOHandler selected: {}", ioHandler.getClass().getSimpleName());
-        this.bossGroup = new MultiThreadIoEventLoopGroup(r -> {
-            return Thread.ofPlatform().name("TCPForwarder-BossGroup-" + proxyHost + ":" + proxyPort).daemon(true).priority(Thread.MIN_PRIORITY).unstarted(r);
-        }, ioHandler.ioHandlerFactory());
-        this.workerGroup = new MultiThreadIoEventLoopGroup(r -> {
-            return Thread.ofPlatform().name("TCPForwarder-WorkerGroup-" + proxyHost + ":" + proxyPort).daemon(true).priority(Thread.MIN_PRIORITY).unstarted(r);
-        }, ioHandler.ioHandlerFactory());
+        this.bossGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
+        this.workerGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
         log.debug("Netty TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
         sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 30, TimeUnit.SECONDS);
         Main.getEventBus().register(this);
