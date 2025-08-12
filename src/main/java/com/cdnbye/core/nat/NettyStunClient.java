@@ -74,7 +74,7 @@ public class NettyStunClient {
             return finalResultFuture.get(TOTAL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.error("STUN query failed or timed out.", e);
+            log.debug("STUN query failed or timed out.", e);
             return new StunResult(NatType.Unknown, null);
         } finally {
             group.shutdownGracefully();
@@ -146,7 +146,7 @@ public class NettyStunClient {
         handler.doTransaction(test12Request, changedAddress, channel)
                 .whenComplete((test12Response, ex) -> {
                     if (ex != null) {
-                        log.error("STUN Test I(II) failed to get a response.");
+                        log.debug("STUN Test I(II) failed to get a response.");
                         finalResultFuture.complete(new StunResult(NatType.Unknown, test1Response.getMappedAddress()));
                         return;
                     }
