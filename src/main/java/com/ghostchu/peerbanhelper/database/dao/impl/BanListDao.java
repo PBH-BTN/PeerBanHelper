@@ -28,8 +28,8 @@ public final class BanListDao extends AbstractPBHDao<BanListEntity, String> {
         Map<PeerAddress, BanMetadata> map = new HashMap<>();
         try {
             queryForAll().forEach(e -> map.put(
-                    JsonUtil.standard().fromJson(e.getAddress(), PeerAddress.class)
-                    , JsonUtil.standard().fromJson(e.getMetadata(), BanMetadata.class)));
+                    JsonUtil.tiny().fromJson(e.getAddress(), PeerAddress.class)
+                    , JsonUtil.tiny().fromJson(e.getMetadata(), BanMetadata.class)));
         } catch (Exception e) {
             log.error("Unable to read stored banlist, skipping...", e);
         }
@@ -42,8 +42,8 @@ public final class BanListDao extends AbstractPBHDao<BanListEntity, String> {
         return callBatchTasks(() -> {
             List<BanListEntity> entityList = new ArrayList<>();
             banlist.forEach((key, value) -> entityList.add(new BanListEntity(
-                    JsonUtil.standard().toJson(key)
-                    , JsonUtil.standard().toJson(value))));
+                    JsonUtil.tiny().toJson(key)
+                    , JsonUtil.tiny().toJson(value))));
             TableUtils.clearTable(getConnectionSource(), BanListEntity.class);
             return create(entityList);
         });

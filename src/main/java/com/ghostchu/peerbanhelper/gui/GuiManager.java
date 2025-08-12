@@ -7,6 +7,8 @@ import org.slf4j.event.Level;
 public interface GuiManager {
     void setup();
 
+    boolean isDarkMode();
+
     String getName();
 
     boolean isGuiAvailable();

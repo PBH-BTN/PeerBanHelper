@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableList;
@@ -52,8 +53,8 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(id, alertManager);
+    public Deluge(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(id, alertManager, natAddressProvider);
         this.config = config;
         this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpUtil, null, null);
     }
@@ -63,14 +64,14 @@ public final class Deluge extends AbstractDownloader {
         return config.getName();
     }
 
-    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = Config.readFromYaml(section, id);
-        return new Deluge(id, config, alertManager, httpUtil);
+        return new Deluge(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(id, config, alertManager, httpUtil);
+        return new Deluge(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
     @Override
@@ -132,7 +133,7 @@ public final class Deluge extends AbstractDownloader {
                         peerId = peerId.substring(0, 8);
                     }
                     DelugePeer delugePeer = new DelugePeer(
-                            new PeerAddress(peer.getIp(), peer.getPort()),
+                            natTranslate(new PeerAddress(peer.getIp(), peer.getPort(), peer.getIp())),
                             peerId,
                             peer.getClientName(),
                             peer.getTotalDownload(),
@@ -264,6 +265,16 @@ public final class Deluge extends AbstractDownloader {
         } catch (DelugeException e) {
             log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
         }
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        return 0;
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+
     }
 
     @Override

@@ -4,12 +4,13 @@ import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
-import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
+import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
@@ -45,6 +46,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public final class JavalinWebContainer {
     private final Javalin javalin;
+    private final PBHPortMapper pBHPortMapper;
     @Setter
     @Getter
     private String token;
@@ -56,7 +58,7 @@ public final class JavalinWebContainer {
     @Getter
     private volatile boolean started;
 
-    public JavalinWebContainer(ActivationManager activationManager) {
+    public JavalinWebContainer(LicenseManager licenseManager, PBHPortMapper pBHPortMapper) {
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -140,7 +142,7 @@ public final class JavalinWebContainer {
                         return;
                     }
                     if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
-                        if (!activationManager.isActivated()) {
+                        if (!licenseManager.isFeatureEnabled("basic")) {
                             throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
                         }
                     }
@@ -170,8 +172,10 @@ public final class JavalinWebContainer {
                         throw new NotLoggedInException();
                     }
                 })
-                .options("/*", ctx -> ctx.status(200));
+                .options("/*", ctx -> ctx.status(200))
+                .after(ctx -> ctx.header("Server", Main.getUserAgent()));
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+        this.pBHPortMapper = pBHPortMapper;
     }
 
     private boolean securityCheck(Context ctx) {

@@ -34,3 +34,4 @@ runatlogin.option.yes=Launch with visible window
 runatlogin.option.silent=Launch silently to system tray
 
 installing.edgewebview2=Installing Microsoft Edge WebView2...
+windows.x86_64.native=Windows x86_64 Native

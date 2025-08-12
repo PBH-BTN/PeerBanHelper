@@ -17,11 +17,15 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.DownloaderDiscovery;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
+import com.ghostchu.peerbanhelper.util.asynctask.AsyncTask;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -79,6 +83,12 @@ public class PeerBanHelper implements Reloadable {
     private CrashManager crashManager;
     @Autowired
     private HTTPUtil httpUtil;
+    @Autowired
+    private PBHPortMapper pBHPortMapper;
+    @Autowired
+    private StunManager bTStunManager;
+    @Autowired
+    private DownloaderDiscovery downloaderDiscovery;
 
 
     public PeerBanHelper() {
@@ -99,23 +109,22 @@ public class PeerBanHelper implements Reloadable {
     public void start() {
         checkKnownCrashes();
         setupIPDB();
+        Main.getReloadManager().register(this);
+        postCompatibilityCheck();
+        registerModules();
+        sendSnapshotAlert();
+        downloaderServer.load();
+        Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
+        crashManager.putRunningFlag();
+        Main.getEventBus().post(new PBHServerStartedEvent());
         registerHttpServer();
+        Main.getGuiManager().onPBHFullyStarted(this);
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
                 log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://127.0.0.1:" + webContainer.javalin().port()));
             }
             Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
         }
-        Main.getReloadManager().register(this);
-        postCompatibilityCheck();
-        registerModules();
-        sendSnapshotAlert();
-        runTestCode();
-        downloaderServer.load();
-        Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
-        crashManager.putRunningFlag();
-        Main.getEventBus().post(new PBHServerStartedEvent());
-        Main.getGuiManager().onPBHFullyStarted(this);
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         System.gc();
         Thread.startVirtualThread(() -> {
@@ -123,6 +132,7 @@ public class PeerBanHelper implements Reloadable {
                 WorkingSetManagerFactory.trimMemory();
             }
         });
+        runTestCode();
     }
 
     private void checkKnownCrashes() {
@@ -185,10 +195,25 @@ public class PeerBanHelper implements Reloadable {
 
     @SneakyThrows
     private void runTestCode() {
-        if (!Main.getMeta().isSnapshotOrBeta() && !"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+        if (!Main.getMeta().isSnapshotOrBeta()) {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
+
+        Thread.ofPlatform().start(() -> {
+            try (var task = AsyncTask.create(new TranslationComponent(Lang.MOTD, "TEST"))) {
+                for (int i = 0; i < 1000; i++) {
+                    task.setMax(1000);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    task.increment();
+                    task.log("here we go: " + System.currentTimeMillis());
+                }
+            }
+        });
     }
 
 
@@ -258,6 +283,8 @@ public class PeerBanHelper implements Reloadable {
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
+        moduleManager.register(PBHAsyncTaskController.class);
+        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(IPBlackList.class);
         moduleManager.register(PeerIdBlacklist.class);
         moduleManager.register(ClientNameBlacklist.class);
@@ -279,7 +306,6 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHPlusController.class);
         moduleManager.register(PBHOOBEController.class);
         moduleManager.register(PBHChartController.class);
-        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(PBHTorrentController.class);
         moduleManager.register(PBHPeerController.class);
         moduleManager.register(PBHAlertController.class);
@@ -290,6 +316,8 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHUtilitiesController.class);
         moduleManager.register(BackgroundModule.class);
         moduleManager.register(SwarmTrackingModule.class);
+        // moduleManager.register(MCPController.class);
+        moduleManager.register(PBHAutoStunController.class);
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {

@@ -16,8 +16,9 @@ export default {
   'plus.begging':
     'PeerBanHelper 是一群志同道合的人共同用愛發電的一個開源項目，為了更好地支持 PeerBanHelper 的發展，部分進階功能需要捐贈後解鎖，請給我們買一杯咖啡吧！',
   'plug.begging.local':
-    'PeerBanHelper 是一個非營利，開放原始碼的免費軟體。免費許可證授權這台電腦的個人用途，您不得重新出售或者用於違反服務條款的用途。如果 PeerBanHelper 幫助到了你，請考慮在愛發電上捐贈支持我們：',
+    'PeerBanHelper 是一個非營利，開放原始碼的免費軟體。免費許可證授權這台電腦的個人用途，您不得重新出售或者用於違反服務條款的用途。如果 PeerBanHelper 幫助到了你，請考慮在面包多上捐贈支持我們：',
   'plus.activeTips': '已經捐贈？在這裡輸入您的許可證以啟用您的訂閱',
+  'plus.addLicense': '請輸入您的許可證',
   'plus.activeSuccess': '啟用成功',
 
   'plus.or': '或者',
@@ -30,5 +31,15 @@ export default {
         PBH 幫助到了你，請考慮捐贈我們。只需一杯咖啡的價格，您就可以獲得一個 PBH Plus
         的永久許可證，並能幫助我們在維護 BitTorrent 環境的道路上走得更遠。`,
   'plus.tryModal.ok': '確定',
-  'plus.tryModal.cancel': '取消'
+  'plus.tryModal.cancel': '取消',
+  'plus.license.delete': '刪除',
+  'plus.license.delete.confirm': '您確定要刪除此許可證嗎？',
+
+  'plus.license.v2.feature': '功能集',
+  'plus.license.v2.purchaseInfo': '購買信息',
+  'plus.license.v2.purchaseInfo.click': '點擊查看',
+  'plus.license.v2.orderId': '訂單號',
+  'plus.license.v2.paid': '實際支付金額',
+  'plus.license.v2.paymentGateway': '支付方式',
+  'plus.license.v2.paymentOrderId': '支付訂單號'
 }

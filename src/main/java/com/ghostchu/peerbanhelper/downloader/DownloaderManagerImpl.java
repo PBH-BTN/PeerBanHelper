@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced.QBit
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProviderRegistry;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -34,10 +35,12 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
 
     private final AlertManager alertManager;
     private final HTTPUtil httpUtil;
+    private final NatAddressProviderRegistry natAddressProviderRegistry;
 
-    public DownloaderManagerImpl(AlertManager alertManager, HTTPUtil httpUtil) {
+    public DownloaderManagerImpl(AlertManager alertManager, HTTPUtil httpUtil, NatAddressProviderRegistry natAddressProviderRegistry) {
         this.alertManager = alertManager;
         this.httpUtil = httpUtil;
+        this.natAddressProviderRegistry = natAddressProviderRegistry;
         Main.getReloadManager().register(this);
         load();
     }
@@ -73,13 +76,18 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
     public Downloader createDownloader(String id, ConfigurationSection downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager,httpUtil);
-            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
+            case "qbittorrent" ->
+                    downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "qbittorrentee" ->
+                    downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager,httpUtil);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
-            case "raccoonfink/deluge", "deluge" -> downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
+                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "biglybt" ->
+                    downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "raccoonfink/deluge", "deluge" ->
+                    downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "bitcomet" ->
+                    downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -91,13 +99,18 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
         var builder =  httpUtil.newBuilder();
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
-            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
+            case "qbittorrent" ->
+                    downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "qbittorrentee" ->
+                    downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager, httpUtil);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
-            case "raccoonfink/deluge", "deluge" -> downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager, httpUtil);
+                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "biglybt" ->
+                    downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "raccoonfink/deluge", "deluge" ->
+                    downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "bitcomet" ->
+                    downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;

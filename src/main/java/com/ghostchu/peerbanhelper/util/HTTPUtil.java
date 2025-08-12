@@ -7,6 +7,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.net.InetAddresses;
+import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -48,12 +50,41 @@ public final class HTTPUtil implements Reloadable {
     private int proxyPort;
     private final List<Pattern> proxyBypasses = Collections.synchronizedList(new ArrayList<>());
     private Proxy proxyInstance;
-
+    private final NetworkReachability networkReachability = new NetworkReachability();
+    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
     public HTTPUtil() {
         Main.getReloadManager().register(this);
         reloadConfig();
+        sched.scheduleAtFixedRate(this::checkReachability, 0, 1, TimeUnit.HOURS);
     }
+
+    private void checkReachability() {
+        var client = newBuilder()
+                .followSslRedirects(true)
+                .followRedirects(true)
+                .callTimeout(10, TimeUnit.SECONDS).build();
+        Request cnNetworkCheck = new Request.Builder()
+                .url("https://www.qq.com/")
+                .head()
+                .build();
+        try (Response response = client.newCall(cnNetworkCheck).execute()) {
+            networkReachability.setAccessToChinaNetwork(response.isSuccessful());
+        } catch (IOException e) {
+            networkReachability.setAccessToChinaNetwork(false);
+        }
+
+        Request globalNetworkCheck = new Request.Builder()
+                .url("https://www.google.com/generate_204")
+                .head()
+                .build();
+        try (Response response = client.newCall(globalNetworkCheck).execute()) {
+            networkReachability.setAccessToGlobalNetwork(response.isSuccessful());
+        } catch (IOException e) {
+            networkReachability.setAccessToGlobalNetwork(false);
+        }
+    }
+
 
     @Override
     public ReloadResult reloadModule() throws Exception {
@@ -84,6 +115,10 @@ public final class HTTPUtil implements Reloadable {
         } else {
             this.proxyInstance = new Proxy(proxyType, InetSocketAddress.createUnresolved(proxyHost, proxyPort));
         }
+    }
+
+    public Proxy.Type getProxyType() {
+        return proxyType;
     }
 
     @SneakyThrows
@@ -292,5 +327,16 @@ public final class HTTPUtil implements Reloadable {
             List<Cookie> cookies = cookieStore.get(httpUrl.host());
             return cookies != null ? cookies : new ArrayList<>();
         }
+    }
+
+    @NotNull
+    public NetworkReachability getNetworkReachability() {
+        return networkReachability;
+    }
+
+    @Data
+    public static class NetworkReachability {
+        private Boolean accessToChinaNetwork;
+        private Boolean accessToGlobalNetwork; // if access to global network is false then we must use high-cost CDN for service
     }
 }
