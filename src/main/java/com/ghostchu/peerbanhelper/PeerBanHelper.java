@@ -105,13 +105,6 @@ public class PeerBanHelper implements Reloadable {
     public void start() {
         checkKnownCrashes();
         setupIPDB();
-        registerHttpServer();
-        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
-            for (int i = 0; i < 50; i++) {
-                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://127.0.0.1:" + webContainer.javalin().port()));
-            }
-            Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
-        }
         Main.getReloadManager().register(this);
         postCompatibilityCheck();
         registerModules();
@@ -120,7 +113,14 @@ public class PeerBanHelper implements Reloadable {
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
         Main.getEventBus().post(new PBHServerStartedEvent());
+        registerHttpServer();
         Main.getGuiManager().onPBHFullyStarted(this);
+        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
+            for (int i = 0; i < 50; i++) {
+                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://127.0.0.1:" + webContainer.javalin().port()));
+            }
+            Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
+        }
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         System.gc();
         Thread.startVirtualThread(() -> {

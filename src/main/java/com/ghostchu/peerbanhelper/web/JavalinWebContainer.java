@@ -213,35 +213,6 @@ public final class JavalinWebContainer {
         javalin.start(host, port);
         this.started = true;
         Main.getEventBus().post(new WebServerStartedEvent());
-        // TODO: stun random test code, need remove when publish it...
-//        try {
-//            new StunTcpTunnel(pBHPortMapper,new StunListener() {
-//                @Override
-//                public void onCreate(@NotNull InetSocketAddress inter, @NotNull InetSocketAddress outer) {
-//                   try{
-//                       System.out.println("NAT1 外部端口已打开："+outer.getHostString()+":"+outer.getPort());
-//                       HttpServer httpServer = HttpServer.create(inter, 0);
-//                       httpServer.createContext("/test", exchange -> {
-//                           exchange.sendResponseHeaders(200, 0);
-//                           // print ok!
-//                           exchange.getResponseBody().write("ok".getBytes());
-//                           exchange.getResponseBody().flush();
-//                           exchange.close();
-//                       });
-//                       httpServer.start();
-//                   }catch (Exception e){
-//                       e.printStackTrace();
-//                   }
-//                }
-//
-//                @Override
-//                public void onClose(@Nullable Throwable throwable) {
-//                    System.out.println("Tunnel closed: " + (throwable != null ? throwable.getMessage() : "No error"));
-//                }
-//            }).createMapping(11334);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     public Javalin javalin() {

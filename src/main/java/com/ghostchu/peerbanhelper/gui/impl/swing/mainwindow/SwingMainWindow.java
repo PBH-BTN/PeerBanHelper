@@ -20,6 +20,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +63,21 @@ public final class SwingMainWindow extends JFrame {
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
         setIconImage(imageIcon.getImage());
         setVisible(!swingGUI.isSilentStart());
+        if (SwingUtilities.isEventDispatchThread()) {
+            registerTabs();
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(this::registerTabs);
+            } catch (InterruptedException | InvocationTargetException e) {
+                log.debug("Unable to register Tabs", e);
+            }
+        }
+        //this.webuiTab = new WebUITab(this);
+        Main.getEventBus().register(this);
+
+    }
+
+    private void registerTabs() {
         tabs.add(new LogsTab(this));
         if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT")) {
             try { // SWT possible be null here on unsupported platform
@@ -72,8 +88,6 @@ public final class SwingMainWindow extends JFrame {
         } else {
             log.debug("SWT is not available, WebUITab and PerfProfilerTab will not be created.");
         }
-        //this.webuiTab = new WebUITab(this);
-        Main.getEventBus().register(this);
         tabs.forEach(WindowTab::onWindowShow);
     }
 
@@ -115,7 +129,6 @@ public final class SwingMainWindow extends JFrame {
 
     public void sync() {
     }
-
 
 
     public void openWebUI() {
