@@ -55,7 +55,6 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         try {
             if (Main.getMainConfig().getBoolean("stun.availableTest", true)) {
                 var testPass = testMapping(interResult, outerResult);
-                testPass = false;
                 if (!testPass) {
                     stunListener.onNotApplicable(new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_TEST_FAILED));
                     return;
