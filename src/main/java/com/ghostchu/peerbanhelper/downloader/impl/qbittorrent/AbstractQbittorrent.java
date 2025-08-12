@@ -338,7 +338,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 "up_limit", uploadLimit,
                 "dl_limit", downloadLimit,
                 "alt_up_limit", uploadLimit,
-                "alt_dl_limit", downloadLimit
+                "alt_dl_limit", downloadLimit,
+                "limit_utp_rate", true,
+                "limit_tcp_overhead", true,
+                "limit_lan_peers", true,
+                "scheduler_enabled", false
         );
 
         FormBody formBody = new FormBody.Builder()
