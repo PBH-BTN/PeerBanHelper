@@ -80,6 +80,7 @@ public class NettyStunClient {
                 .whenComplete((test1Response, ex) -> {
                     if (ex != null) {
                         // UDP Blocked if Test I fails
+                        log.debug("UDP seems to be blocked, no response from STUN server at {}:{}", stunHost, stunPort, ex);
                         finalResultFuture.complete(new StunResult(NatType.UdpBlocked, null));
                         return;
                     }
@@ -149,7 +150,7 @@ public class NettyStunClient {
         handler.doTransaction(test12Request, changedAddress, channel)
                 .whenComplete((test12Response, ex) -> {
                     if (ex != null) {
-                        log.debug("STUN Test I(II) failed to get a response.");
+                        log.debug("STUN Test I(II) failed to get a response.", ex);
                         finalResultFuture.complete(new StunResult(NatType.Unknown, test1Response.getMappedAddress()));
                         return;
                     }
