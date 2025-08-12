@@ -108,7 +108,7 @@ public class NettyStunClient {
                         if (isResponseFromDifferentAddress(test2Response, remoteAddress)) {
                             finalResultFuture.complete(new StunResult(NatType.OpenInternet, test1Response.getMappedAddress()));
                         } else {
-                            log.warn("STUN server at {}:{} did not change IP/port as requested in Test II (change IP=true, change port=true). " +
+                            log.debug("STUN server at {}:{} did not change IP/port as requested in Test II (change IP=true, change port=true). " +
                                             "This violates STUN RFC 3489. Server behavior is non-compliant.",
                                     remoteAddress.getHostString(), remoteAddress.getPort());
                             finalResultFuture.complete(new StunResult(NatType.Unknown, test1Response.getMappedAddress()));
@@ -130,7 +130,7 @@ public class NettyStunClient {
                             // Full Cone NAT if response received from different address
                             finalResultFuture.complete(new StunResult(NatType.FullCone, test1Response.getMappedAddress()));
                         } else {
-                            log.warn("STUN server at {}:{} did not change IP/port as requested in Test II (change IP=true, change port=true). " +
+                            log.debug("STUN server at {}:{} did not change IP/port as requested in Test II (change IP=true, change port=true). " +
                                             "This violates STUN RFC 3489. Server behavior is non-compliant.",
                                     remoteAddress.getHostString(), remoteAddress.getPort());
                             finalResultFuture.complete(new StunResult(NatType.Unknown, test1Response.getMappedAddress()));
