@@ -83,13 +83,12 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             ioHandler = new NioHandler();
         }
         log.debug("IOHandler selected: {}", ioHandler.getClass().getSimpleName());
-        boolean useVirtualThread = ExternalSwitch.parseBoolean("pbh.TCPForwarder.useVirtualThread", true);
-        this.bossGroup = new MultiThreadIoEventLoopGroup(r -> useVirtualThread
-                ? Thread.ofVirtual().name("TCPForwarder-BossGroup-" + proxyHost + ":" + proxyPort).unstarted(r)
-                : Thread.ofPlatform().name("TCPForwarder-BossGroup-" + proxyHost + ":" + proxyPort).daemon(true).priority(Thread.MIN_PRIORITY).unstarted(r), ioHandler.ioHandlerFactory());
-        this.workerGroup = new MultiThreadIoEventLoopGroup(r -> useVirtualThread
-                ? Thread.ofVirtual().name("TCPForwarder-WorkerGroup-" + proxyHost + ":" + proxyPort).unstarted(r)
-                : Thread.ofPlatform().name("TCPForwarder-WorkerGroup-" + proxyHost + ":" + proxyPort).daemon(true).priority(Thread.MIN_PRIORITY).unstarted(r), ioHandler.ioHandlerFactory());
+        this.bossGroup = new MultiThreadIoEventLoopGroup(r -> {
+            return Thread.ofPlatform().name("TCPForwarder-BossGroup-" + proxyHost + ":" + proxyPort).daemon(true).priority(Thread.MIN_PRIORITY).unstarted(r);
+        }, ioHandler.ioHandlerFactory());
+        this.workerGroup = new MultiThreadIoEventLoopGroup(r -> {
+            return Thread.ofPlatform().name("TCPForwarder-WorkerGroup-" + proxyHost + ":" + proxyPort).daemon(true).priority(Thread.MIN_PRIORITY).unstarted(r);
+        }, ioHandler.ioHandlerFactory());
         log.debug("Netty TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
         sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 30, TimeUnit.SECONDS);
         Main.getEventBus().register(this);
