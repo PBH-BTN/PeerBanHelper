@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +42,8 @@ public class StunManager implements AutoCloseable {
                 continue;
             }
             try {
-                NatType natType = NettyStunClient.query(stun[0], Integer.parseInt(stun[1]), InetAddress.getLocalHost().getHostAddress()).getNatType();
+                NatType natType = NettyStunClient.query(stun[0], Integer.parseInt(stun[1]), "0.0.0.0")
+                        .getNatType();
                 if (natType != NatType.Unknown && natType != NatType.UdpBlocked) {
                     this.cachedNatType = natType;
                     log.debug("Successfully determined NAT type {} using server {}", natType, stunServer);
