@@ -558,11 +558,6 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.modelcontextprotocol.sdk/mcp -->
         <dependency>
-            <groupId>io.modelcontextprotocol.sdk</groupId>
-            <artifactId>mcp</artifactId>
-            <version>0.10.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
             <version>RELEASE</version>
