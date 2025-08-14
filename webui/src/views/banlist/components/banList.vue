@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import AsyncMethod from '@/components/asyncMethod.vue'
 import { getBanListPaginated, unbanIP } from '@/service/banList'
-import { useAutoUpdate, useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useAutoUpdate } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -72,24 +72,20 @@ const searchString = ref('')
 const { t } = useI18n()
 
 const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
-  usePagination(
-    getBanListPaginated,
-    {
-      defaultParams: [
-        {
-          page: 1,
-          pageSize: 10,
-          search: ''
-        }
-      ],
-      pagination: {
-        currentKey: 'page',
-        pageSizeKey: 'pageSize',
-        totalKey: 'data.total'
+  usePagination(getBanListPaginated, {
+    defaultParams: [
+      {
+        page: 1,
+        pageSize: 10,
+        search: ''
       }
-    },
-    [useAutoUpdatePlugin]
-  )
+    ],
+    pagination: {
+      currentKey: 'page',
+      pageSizeKey: 'pageSize',
+      totalKey: 'data.total'
+    }
+  })
 
 const pollingHandler = autoUpdateStore.polling(() => {
   if (current.value === 1) refresh()
