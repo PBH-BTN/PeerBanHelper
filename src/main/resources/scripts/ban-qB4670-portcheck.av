@@ -1,0 +1,82 @@
+## @NAME qb4670 8088 8089端口检测封禁
+## @AUTHOR nlsdt
+## @CACHEABLE true
+## @VERSION 1.1
+## @THREADSAFE true
+
+## BSD Zero Clause License
+##
+## Copyright (C) 2025 by nlsdt <xsfx0313@proton.me>
+##
+## Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted.
+##
+## THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+## MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+## RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+## CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+##
+## SPDX-License-Identifier: 0BSD
+
+## 常量参数
+let _TIMEOUT = 2000; ## 超时时间 ，单位为毫秒
+let _PORT_1  = 8088; ## 检查端口1
+let _PORT_2  = 8089; ## 检查端口2
+
+## 基础检查
+
+    if(isBlank(peer.clientName) || isBlank(peer.peerId)) {
+        return false; ## 二元组任意为空都不能继续检查，需要下载器支持
+    }
+    if (!string.startsWith(peer.peerId, "-qB4670-")) {
+        return false; ## 必须是 qB4670
+    }
+
+
+## 端口检查
+    ## 获取IP地址
+    let ipAddress = peer.peerAddress.address; ## 获取peerip
+    let strIp = toString(ipAddress);  ## 转化为字符串
+
+    ## TODO:将 ::ffff: v6 转换为 v4，目前为直接抛弃所有v6
+    if (string.startsWith(strIp, "::ffff:")) {
+        strIp = string.substring(strIp, 7); ##提取 v4
+    } elsif (string.contains(strIp, ":")) {
+        return false; ##纯 v6 拒绝
+    }
+    ## 导入 java 静态方法
+    use java.net.Socket;
+    use java.net.InetSocketAddress;
+    use java.io.IOException;
+
+    ## checkport主函数
+    let check_port = lambda(ip, port, timeout_ms) ->
+        let timeout = timeout_ms != nil ? timeout_ms : 2000;
+        let socket = nil;
+        try {
+            socket = new Socket();
+            let address = new InetSocketAddress(ip, port);
+            connect(socket, address, timeout);
+            return true;
+            } catch (IOException e) {
+                return false;
+            } finally {
+                if socket != nil {
+                try {
+                    close(socket);
+                } catch(IOException e) {
+                ## 忽略关闭时的异常
+                }
+            }
+        }
+    end;
+
+## 端口封禁检测
+let port1_open = check_port(strIp, _PORT_1, _TIMEOUT);
+let port2_open = check_port(strIp, _PORT_2, _TIMEOUT);
+if (port1_open && port2_open) {
+    ##let result = "qb4670 " + _PORT_1 + "/" + _PORT_2 " 端口开放"
+    ##return result;
+    ## TODO: 端口字符串拼接
+    return "qB4670 8088/8089 端口开放";
+}
+return false;
