@@ -11,10 +11,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
-import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
-import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
-import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
-import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
+import com.ghostchu.peerbanhelper.web.exception.*;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -129,11 +126,14 @@ public final class JavalinWebContainer {
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
                     log.error("500 Internal Server Error", e);
                 })
+                .exception(BlockScannerException.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.NOT_FOUND);
+                    ctx.header("Server", "nginx");
+                    ctx.result( "404 not found");
+                })
                 .beforeMatched(ctx -> {
                     if (!securityCheck(ctx)) {
-                        ctx.status(404);
-                        ctx.result("404 not found");
-                        return;
+                        throw new BlockScannerException();
                     }
                     if (ctx.routeRoles().isEmpty()) {
                         return;
