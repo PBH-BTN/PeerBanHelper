@@ -103,8 +103,8 @@ public class TrayMenu {
         var bannedIps = 0L;
         var server = Main.getServer();
         if (server != null) {
-            bannedIps = Main.getServer().getDownloaderServer().getBanList().directAccessBanList().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
-            bannedPeers = Main.getServer().getDownloaderServer().getBanList().directAccessBanList().size();
+            bannedIps = Main.getServer().getDownloaderServer().getBanList().directAccess().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
+            bannedPeers = Main.getServer().getDownloaderServer().getBanList().directAccess().size();
         }
         return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
     }

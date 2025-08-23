@@ -184,7 +184,7 @@ public final class PBHBanController extends AbstractFeatureModule {
 
 
     private @NotNull Stream<BanDTO> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
-        var banResponseList = banList.directAccessBanList()
+        var banResponseList = banList.directAccess()
                 .entrySet()
                 .stream()
                 .filter(b -> {

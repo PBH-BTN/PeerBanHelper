@@ -107,7 +107,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
-        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : banList.directAccessBanList().entrySet()) {
+        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : banList.directAccess().entrySet()) {
             if (bannedPeerEntry.getValue().isBanForDisconnect()) {
                 continue;
             }

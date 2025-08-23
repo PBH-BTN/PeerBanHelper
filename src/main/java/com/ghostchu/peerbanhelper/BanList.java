@@ -14,60 +14,60 @@ import java.util.function.BiConsumer;
 
 @Component
 public class BanList {
-    private final Map<PeerAddress, BanMetadata> BAN_LIST = Collections.synchronizedMap(new HashMap<>());
+    private final Map<PeerAddress, BanMetadata> delegate = Collections.synchronizedMap(new HashMap<>());
 
     @Nullable
     public BanMetadata add(@NotNull PeerAddress address, @NotNull BanMetadata metadata){
-        return BAN_LIST.put(address, metadata);
+        return delegate.put(address, metadata);
     }
 
     @Nullable
     public BanMetadata remove(@NotNull PeerAddress address){
-        return BAN_LIST.remove(address);
+        return delegate.remove(address);
     }
 
     public int size(){
-        return BAN_LIST.size();
+        return delegate.size();
     }
 
     @NotNull
-    public Map<PeerAddress, BanMetadata> copyBanList() {
-        return Map.copyOf(BAN_LIST);
+    public Map<PeerAddress, BanMetadata> copy() {
+        return Map.copyOf(delegate);
     }
 
     @NotNull
-    public Map<PeerAddress, BanMetadata> directAccessBanList() {
-        return BAN_LIST;
+    public Map<PeerAddress, BanMetadata> directAccess() {
+        return delegate;
     }
 
     @NotNull
     public Set<PeerAddress> copyKeySet(){
-        return Set.copyOf(BAN_LIST.keySet());
+        return Set.copyOf(delegate.keySet());
     }
 
     @NotNull
     public Set<PeerAddress> directAccessKeySet(){
-        return BAN_LIST.keySet();
+        return delegate.keySet();
     }
 
     public boolean contains(@NotNull PeerAddress address){
-        return BAN_LIST.containsKey(address);
+        return delegate.containsKey(address);
     }
 
     @Nullable
     public BanMetadata get(@NotNull PeerAddress address){
-        return BAN_LIST.get(address);
+        return delegate.get(address);
     }
 
     public void addAll(@NotNull Map<PeerAddress, BanMetadata> map){
-        BAN_LIST.putAll(map);
+        delegate.putAll(map);
     }
 
     public void forEach(@NotNull  BiConsumer<? super PeerAddress, ? super BanMetadata> action){
-        BAN_LIST.forEach(action);
+        delegate.forEach(action);
     }
 
     public void reset(){
-        BAN_LIST.clear();
+        delegate.clear();
     }
 }
