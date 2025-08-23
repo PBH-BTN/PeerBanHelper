@@ -283,7 +283,7 @@ public final class JavalinWebContainer {
         if (ipAddr.isIPv4()) {
             ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 24);
         } else {
-            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 60);
+            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 50);
         }
         return ipAddr;
     }
