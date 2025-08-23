@@ -160,7 +160,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
 
     private int unbanIps(List<Rule> rules) {
         int ct = 0;
-        for (PeerAddress pa : btnNetwork.getServer().getBannedPeers().keySet()) {
+        for (PeerAddress pa : btnNetwork.getServer().getBanList().directAccessKeySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, pa.toString());
             if (matchResult.hit()) {
                 btnNetwork.getServer().scheduleUnBanPeer(pa);
@@ -172,7 +172,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
 
     private int unbanClientName(List<Rule> rules) {
         int ct = 0;
-        for (var entry : btnNetwork.getServer().getBannedPeers().entrySet()) {
+        for (var entry : btnNetwork.getServer().getBanList().directAccessBanList().entrySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, entry.getValue().getPeer().getClientName());
             if (matchResult.hit()) {
                 btnNetwork.getServer().scheduleUnBanPeer(entry.getKey());
@@ -184,7 +184,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
 
     private int unbanPeerId(List<Rule> rules) {
         int ct = 0;
-        for (var entry : btnNetwork.getServer().getBannedPeers().entrySet()) {
+        for (var entry : btnNetwork.getServer().getBanList().directAccessBanList().entrySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, entry.getValue().getPeer().getId());
             if (matchResult.hit()) {
                 btnNetwork.getServer().scheduleUnBanPeer(entry.getKey());
@@ -196,7 +196,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
 
     private int unbanPort(List<Rule> rules) {
         int ct = 0;
-        for (var entry : btnNetwork.getServer().getBannedPeers().entrySet()) {
+        for (var entry : btnNetwork.getServer().getBanList().directAccessBanList().entrySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, Integer.toString(entry.getValue().getPeer().getAddress().getPort()));
             if (matchResult.hit()) {
                 btnNetwork.getServer().scheduleUnBanPeer(entry.getKey());

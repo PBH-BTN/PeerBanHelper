@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.BanListEntity;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -36,7 +37,7 @@ public final class BanListDao extends AbstractPBHDao<BanListEntity, String> {
         return map;
     }
 
-    public int saveBanList(Map<PeerAddress, BanMetadata> banlist) throws SQLException {
+    public int saveBanList(BanList banlist) throws SQLException {
 //        TableUtils.dropTable(this, true);
 //        TableUtils.createTableIfNotExists(getConnectionSource(), BanListEntity.class);
         return callBatchTasks(() -> {

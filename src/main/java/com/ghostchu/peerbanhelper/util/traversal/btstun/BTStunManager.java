@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.btstun;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -30,10 +31,12 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     private final PBHPortMapper pBHPortMapper;
     private final DownloaderServer downloaderServer;
     private final NatAddressProviderRegistry natAddressProviderRegistry;
+    private final BanList banList;
     private boolean enabled = false;
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
-    public BTStunManager(DownloaderManager downloaderManager, PBHPortMapper pBHPortMapper, DownloaderServer downloaderServer, NatAddressProviderRegistry natAddressProviderRegistry) {
+    public BTStunManager(BanList banList, DownloaderManager downloaderManager, PBHPortMapper pBHPortMapper, DownloaderServer downloaderServer, NatAddressProviderRegistry natAddressProviderRegistry) {
+        this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.pBHPortMapper = pBHPortMapper;
         this.downloaderServer = downloaderServer;
@@ -92,7 +95,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             log.debug("Downloader does not support live update of BT protocol port: {}", downloader.getId());
             return false;
         }
-        var instance = new BTStunInstance(downloaderServer.getBannedPeersDirect(), pBHPortMapper, downloader, this);
+        var instance = new BTStunInstance(banList.directAccessBanList(), pBHPortMapper, downloader, this);
         perDownloaderStun.put(downloader, instance);
         natAddressProviderRegistry.add(instance);
         return true;

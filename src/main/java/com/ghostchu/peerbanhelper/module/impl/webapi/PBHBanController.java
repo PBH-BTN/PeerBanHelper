@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
@@ -57,6 +58,8 @@ public final class PBHBanController extends AbstractFeatureModule {
     private ModuleDao moduleDao;
     @Autowired
     private RuleDao ruleDao;
+    @Autowired
+    private BanList banList;
 
     @Override
     public boolean isConfigurable() {
@@ -86,10 +89,10 @@ public final class PBHBanController extends AbstractFeatureModule {
         List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
         List<PeerAddress> pendingRemovals = new ArrayList<>();
         if (request.contains("*")) {
-            pendingRemovals.addAll(downloaderServer.getBannedPeers().keySet());
+            pendingRemovals.addAll(banList.copyKeySet());
             downloaderServer.getNeedReApplyBanList().set(true);
         } else {
-            for (PeerAddress address : downloaderServer.getBannedPeers().keySet()) {
+            for (PeerAddress address : banList.copyKeySet()) {
                 if (request.contains(address.getIp())) {
                     pendingRemovals.add(address);
                 }
@@ -181,7 +184,7 @@ public final class PBHBanController extends AbstractFeatureModule {
 
 
     private @NotNull Stream<BanDTO> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
-        var banResponseList = downloaderServer.getBannedPeers()
+        var banResponseList = banList.directAccessBanList()
                 .entrySet()
                 .stream()
                 .filter(b -> {

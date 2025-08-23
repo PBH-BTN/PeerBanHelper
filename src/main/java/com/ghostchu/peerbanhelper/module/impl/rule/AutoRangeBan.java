@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
@@ -41,6 +42,8 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     private long banDuration;
     @Autowired
     private DownloaderServer downloaderServer;
+    @Autowired
+    private BanList banList;
 
     @Override
     public @NotNull String getName() {
@@ -97,14 +100,14 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         if (isHandShaking(peer)) {
             return pass();
         }
-        if (downloaderServer.getBannedPeersDirect().containsKey(peer.getPeerAddress())) {
+        if (banList.contains(peer.getPeerAddress())) {
             return pass();
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
-        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : downloaderServer.getBannedPeersDirect().entrySet()) {
+        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : banList.directAccessBanList().entrySet()) {
             if (bannedPeerEntry.getValue().isBanForDisconnect()) {
                 continue;
             }
