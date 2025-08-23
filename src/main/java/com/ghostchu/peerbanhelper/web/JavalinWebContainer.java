@@ -130,6 +130,7 @@ public final class JavalinWebContainer {
                     ctx.status(HttpStatus.NOT_FOUND);
                     ctx.header("Server", "nginx");
                     ctx.result( "404 not found");
+                    ctx.attribute("skipAfter", true);
                 })
                 .beforeMatched(ctx -> {
                     if (!securityCheck(ctx)) {
@@ -173,7 +174,10 @@ public final class JavalinWebContainer {
                     }
                 })
                 .options("/*", ctx -> ctx.status(200))
-                .after(ctx -> ctx.header("Server", Main.getUserAgent()));
+                .after(ctx -> {
+                    if(ctx.attribute("skipAfter") != null) return;
+                    ctx.header("Server", Main.getUserAgent());
+                });
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
         this.pBHPortMapper = pBHPortMapper;
     }
