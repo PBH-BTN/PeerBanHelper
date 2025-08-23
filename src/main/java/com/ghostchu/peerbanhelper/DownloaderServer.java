@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
+import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -17,6 +18,8 @@ public interface DownloaderServer {
     void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer);
 
     void scheduleUnBanPeer(@NotNull PeerAddress peer);
+
+    void scheduleUnBanPeer(@NotNull IPAddress peer);
 
     Map<PeerAddress, List<PeerMetadata>> getLivePeersSnapshot();
 
