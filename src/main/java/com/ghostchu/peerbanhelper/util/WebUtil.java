@@ -50,8 +50,9 @@ public final class WebUtil {
             if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
                 ip = context.ip();
             }
+            return ip;
         }
-        return ip;
+        return context.ip();
     }
 
     public record TimeQueryModel(
