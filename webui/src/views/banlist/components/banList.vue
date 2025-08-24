@@ -14,11 +14,7 @@
             position="bottom"
             :before-ok="unban"
           >
-            <a-button
-              type="secondary"
-              :disabled="(list?.length ?? 0) === 0"
-              :loading="unbanning"
-            >
+            <a-button type="secondary" :disabled="(list?.length ?? 0) === 0" :loading="unbanning">
               {{ t('page.banlist.banlist.listItem.unbanall') }}
             </a-button>
           </a-popconfirm>
