@@ -152,17 +152,17 @@ export const routerOptions: RouteRecordRaw[] = [
         },
         component: GenericBlackList,
         props: { type: 'city' }
+      },
+      {
+        path: '/ruleNetType',
+        name: 'rule_management_netType',
+        meta: {
+          label: 'page.rule_management.nettype',
+          icon: genIconComponent('icon-kuandai'),
+          needLogin: true
+        },
+        component: () => import('@/views/rule-management/components/networkType/index.vue')
       }
-      // {
-      //   path: '/ruleNetType',
-      //   name: 'rule_management_netType',
-      //   meta: {
-      //     label: 'page.rule_management.netType',
-      //     icon: genIconComponent('icon-kuandai'),
-      //     needLogin: true
-      //   },
-      //   component: GenericBlackList, props: { type: 'netType' }
-      // }
     ]
   },
   {
