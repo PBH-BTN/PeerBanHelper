@@ -43,7 +43,7 @@ public class StunManager implements AutoCloseable {
             }
             try {
                 NatType natType = NettyStunClient.query(stun[0], Integer.parseInt(stun[1]), "0.0.0.0")
-                        .getNatType();
+                        .natType();
                 if (natType != NatType.Unknown && natType != NatType.UdpBlocked) {
                     this.cachedNatType = natType;
                     log.debug("Successfully determined NAT type {} using server {}", natType, stunServer);
@@ -60,7 +60,7 @@ public class StunManager implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (!this.scheduledExecutorService.isShutdown()) {
             this.scheduledExecutorService.shutdown();
         }

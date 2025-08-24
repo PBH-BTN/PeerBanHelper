@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.iohandler.*;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;

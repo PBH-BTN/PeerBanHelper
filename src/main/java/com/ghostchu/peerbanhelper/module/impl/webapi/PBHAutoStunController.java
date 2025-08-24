@@ -206,7 +206,6 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         context.json(new StdResp(true, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_RESTARTED)), null));
     }
 
-    @SuppressWarnings("DuplicatedCode")
     private void refreshNatType(@NotNull Context context) {
         Thread.ofVirtual().name("Refresh NAT Status").start(stunManager::refreshNatType);
         context.json(new StdResp(true, "Refreshing NAT Status", null));

@@ -135,7 +135,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
 
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         perDownloaderStun.values().forEach(instance -> {
             try {
                 instance.close();

@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.util.traversal.forwarder.TCPForwarderImpl;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
 import com.ghostchu.peerbanhelper.util.traversal.stun.tunnel.StunTcpTunnel;
 import com.ghostchu.peerbanhelper.util.traversal.stun.tunnel.StunTcpTunnelImpl;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -93,15 +91,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         this.tcpForwarder = new TCPForwarderImpl(banList,
                 ExternalSwitch.parseBoolean("pbh.btstun.ipv6support", true) ? "[::]" : "0.0.0.0",
                 forwarderServerPort, downloaderHost, downloaderShouldListenOn);
-        try {
-            tcpForwarder.start();
-        } catch (IOException e) {
-            log.info(tlUI(Lang.BTSTUN_FORWARDER_EXCEPTION, downloader.getName()), e);
-            try {
-                tunnel.close();
-            } catch (Exception ignored) {
-            }
-        }
+        tcpForwarder.start();
         try {
             if (downloader.getBTProtocolPort() != downloaderShouldListenOn) {
                 log.info(tlUI(Lang.BTSTUN_MODIFY_DOWNLOADER_BT_PORT, downloader.getName(), downloaderShouldListenOn));
@@ -148,7 +138,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         shutdown.set(true);
         sched.shutdown();
         if (this.tunnel != null) {

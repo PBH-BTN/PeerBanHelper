@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.metric.impl.inmemory;
 
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

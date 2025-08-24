@@ -535,8 +535,7 @@ public class StunMessage {
     }
 
     private static String conver2HexStr(byte b) {
-        StringBuffer result = new StringBuffer();
-        return result.append(Long.toString(b & 0xff, 2)).toString();
+        return Long.toString(b & 0xff, 2);
     }
 
     private static int byte2Int(byte b) {
@@ -544,9 +543,9 @@ public class StunMessage {
     }
 
     private static int bytes2Int(byte[] b) {
-        StringBuffer result = new StringBuffer();
-        for (int i = 0; i < b.length; i++) {
-            result.append(conver2HexStr(b[i]));
+        StringBuilder result = new StringBuilder();
+        for (byte value : b) {
+            result.append(conver2HexStr(value));
         }
         return Integer.valueOf(result.toString(), 2);
     }

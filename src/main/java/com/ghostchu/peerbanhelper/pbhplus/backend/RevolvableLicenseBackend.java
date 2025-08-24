@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class RevolvableLicenseBackend extends BasicLicenseBackend {
     private final Set<License> revokedLicenses = Collections.synchronizedSet(new LinkedHashSet<>());
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofPlatform().name("License Revoke Checker").factory());
-    private List<LicenseRevokeValidator> revokeValidators;
+    private final List<LicenseRevokeValidator> revokeValidators;
 
     public RevolvableLicenseBackend(List<LicenseRevokeValidator> revokeValidators) {
         this.revokeValidators = revokeValidators;

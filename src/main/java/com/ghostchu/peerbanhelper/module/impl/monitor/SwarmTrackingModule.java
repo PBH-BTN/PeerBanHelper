@@ -96,7 +96,6 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
         } catch (SQLException e) {
             log.error("Unable to retrieve tracked swarm data", e);
             context.status(500).json(new StdResp(false, "Unable to retrieve tracked swarm data", null));
-            return;
         }
     }
 

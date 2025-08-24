@@ -13,8 +13,6 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import inet.ipaddr.IPAddress;
 import okhttp3.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;

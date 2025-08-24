@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 
 public interface Forwarder extends AutoCloseable, NatAddressProvider {
-    void start() throws IOException;
+    void start();
 
     long getEstablishedConnections();
 

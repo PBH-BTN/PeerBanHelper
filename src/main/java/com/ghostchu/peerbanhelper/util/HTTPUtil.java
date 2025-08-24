@@ -87,7 +87,7 @@ public final class HTTPUtil implements Reloadable {
 
 
     @Override
-    public ReloadResult reloadModule() throws Exception {
+    public ReloadResult reloadModule() {
         reloadConfig();
         return new ReloadResult(ReloadStatus.SUCCESS, "", null);
     }

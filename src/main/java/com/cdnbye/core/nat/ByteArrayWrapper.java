@@ -1,5 +1,7 @@
 package com.cdnbye.core.nat;
 
+import com.ghostchu.peerbanhelper.util.ByteUtil;
+
 import java.util.Arrays;
 
 /**
@@ -34,10 +36,6 @@ public final class ByteArrayWrapper {
     @Override
     public String toString() {
         // Provide a more readable representation for logging
-        StringBuilder sb = new StringBuilder();
-        for (byte b : data) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
+        return ByteUtil.bytesToHex(data);
     }
 }

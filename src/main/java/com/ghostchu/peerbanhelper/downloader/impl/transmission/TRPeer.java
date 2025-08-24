@@ -11,7 +11,7 @@ import java.util.function.Function;
 public final class TRPeer implements Peer {
 
     private final Peers backend;
-    private transient PeerAddress peerAddress;
+    private final transient PeerAddress peerAddress;
 
     public TRPeer(Peers backend, Function<PeerAddress, PeerAddress> natConverter) {
         this.backend = backend;

@@ -60,9 +60,7 @@ public class StunClientHandler extends SimpleChannelInboundHandler<DatagramPacke
         transaction.channel.writeAndFlush(packet);
 
         // Schedule a timeout check for this attempt
-        ScheduledFuture<?> timeoutFuture = transaction.channel.eventLoop().schedule(() -> {
-            sendAndScheduleTimeout(transaction, attempt + 1);
-        }, transactionTimeoutMs, TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> timeoutFuture = transaction.channel.eventLoop().schedule(() -> sendAndScheduleTimeout(transaction, attempt + 1), transactionTimeoutMs, TimeUnit.MILLISECONDS);
 
         // Associate the scheduled timeout so we can cancel it if a response arrives
         transaction.setTimeoutFuture(timeoutFuture);
@@ -70,7 +68,7 @@ public class StunClientHandler extends SimpleChannelInboundHandler<DatagramPacke
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) {
         byte[] bytes = new byte[packet.content().readableBytes()];
         packet.content().readBytes(bytes);
 

@@ -12,7 +12,7 @@ public class WorkingSetManagerFactory {
     private static final Logger logger = LoggerFactory.getLogger(WorkingSetManagerFactory.class);
     
     private static volatile WindowsWorkingSetManager instance;
-    private static volatile boolean isWindows;
+    private static final boolean isWindows;
     
     static {
         // 检测操作系统

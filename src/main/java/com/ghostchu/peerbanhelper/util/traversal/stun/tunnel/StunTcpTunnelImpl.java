@@ -166,7 +166,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
 
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         valid.set(false);
         keepAliveService.close();
         stunListener.onClose(null);

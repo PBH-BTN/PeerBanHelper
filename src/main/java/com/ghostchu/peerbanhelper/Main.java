@@ -94,7 +94,7 @@ public class Main {
     @Getter
     private static String[] startupArgs;
     @Getter
-    private static long startupAt = System.currentTimeMillis();
+    private static final long startupAt = System.currentTimeMillis();
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 12;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.0";

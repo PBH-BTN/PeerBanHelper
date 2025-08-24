@@ -14,12 +14,12 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 public class LogsTab implements WindowTab {
     private final SwingMainWindow parent;
-    private JPanel tabbedPaneLogs;
+    private final JPanel tabbedPaneLogs;
     @Getter
-    private JList<LogEntry> loggerTextList;
+    private final JList<LogEntry> loggerTextList;
 
     @Getter
-    private JScrollPane loggerScrollPane;
+    private final JScrollPane loggerScrollPane;
 
     public LogsTab(SwingMainWindow parent) {
         this.parent = parent;
