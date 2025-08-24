@@ -35,11 +35,13 @@ public class LicenseManager implements Reloadable {
     private void load() {
         var keyTexts = Main.getMainConfig().getStringList("pbh-plus-key");
         Map<String, License> licenseList = new LinkedHashMap<>();
-        for (String key : keyTexts) {
+        var keyIterator = keyTexts.iterator();
+        while (keyIterator.hasNext()) {
+            var key = keyIterator.next().trim();
             try {
                 var license = licenseParser.fromLicense(key);
                 licenseList.put(Hashing.sha256().hashString(key, StandardCharsets.UTF_8).toString(), license);
-                keyTexts.remove(key);
+                keyIterator.remove();
             } catch (Exception e) {
                 log.warn(tlUI(Lang.PBH_LICENSE_PARSE_FAILED, e.getClass().getName() + ": " + e.getMessage()), e);
             }
