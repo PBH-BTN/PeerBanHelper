@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
@@ -46,7 +47,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private final String proxyHost;
     private final String upstreamHost;
     private final int upstreamPort;
-    private final Map<PeerAddress, ?> banListReference;
+    private final BanList banList;
 
     private final EventLoopGroup bossGroup;
     private final EventLoopGroup workerGroup;
@@ -67,8 +68,8 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private Channel serverChannel;
     private final ForwarderIOHandler ioHandler;
 
-    public TCPForwarderImpl(Map<PeerAddress, ?> banListReference, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort) {
-        this.banListReference = banListReference;
+    public TCPForwarderImpl(BanList banList, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort) {
+        this.banList = banList;
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
         this.upstreamHost = upstreamHost;
@@ -133,16 +134,13 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     }
 
     private void cleanupBannedConnections() {
-        banListReference.keySet().forEach(peerAddress -> {
-            IPAddress bannedAddress = peerAddress.getAddress();
-            downstreamChannelMap.forEach((clientAddress, channel) -> {
-                IPAddress clientIp = IPAddressUtil.getIPAddress(clientAddress.getAddress().getHostAddress());
-                if (bannedAddress.contains(clientIp)) {
-                    log.debug("Closing connection from banned address during cleanup: {}", clientAddress);
-                    closeConnectionByDownstreamAddress(clientAddress);
-                    connectionBlocked.increment();
-                }
-            });
+        downstreamChannelMap.forEach((clientAddress, channel) -> {
+            IPAddress clientIp = IPAddressUtil.getIPAddress(clientAddress.getAddress().getHostAddress());
+            if (banList.contains(clientIp)) {
+                log.debug("Closing connection from banned address during cleanup: {}", clientAddress);
+                closeConnectionByDownstreamAddress(clientAddress);
+                connectionBlocked.increment();
+            }
         });
     }
 
@@ -237,12 +235,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         }
 
         private boolean ifBannedAddress(IPAddress downstreamIpAddress) {
-            for (PeerAddress peerAddress : banListReference.keySet()) {
-                if (peerAddress.getAddress().contains(downstreamIpAddress)) {
-                    return true;
-                }
-            }
-            return false;
+           return banList.contains(downstreamIpAddress);
         }
 
         private ChannelFuture connectToUpstreamFriendly(Bootstrap b, InetSocketAddress downstreamSocket) {

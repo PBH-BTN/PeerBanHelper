@@ -3,46 +3,53 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
+import inet.ipaddr.format.util.AssociativeAddressTrie;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Component
 public class BanList {
-    private final AtomicReference<DualIPv4v6AssociativeTries<BanMetadata>> delegate = new AtomicReference<>(new DualIPv4v6AssociativeTries<>());
+    private final DualIPv4v6AssociativeTries<BanMetadata> delegate = new DualIPv4v6AssociativeTries<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+    public Map<IPAddress, BanMetadata> toMap() {
+        Map<IPAddress, BanMetadata> map = new HashMap<>();
+        try {
+            lock.readLock().lock();
+            delegate.forEach(ip -> map.put(ip, delegate.get(ip)));
+        } finally {
+            lock.readLock().unlock();
+        }
+        return map;
+    }
 
     @Nullable
     public BanMetadata add(@NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         try {
             lock.writeLock().lock();
-            return delegate.get().put(address.getAddress(), metadata);
-        } finally {
-            lock.writeLock().unlock();
-        }
-
-    }
-
-    public boolean remove(@NotNull PeerAddress address) {
-        try {
-            lock.writeLock().lock();
-            return delegate.get().remove(address.getAddress());
+            return delegate.put(address.getAddress(), metadata);
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public boolean remove(@NotNull IPAddress address) {
+    public AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata> remove(@NotNull PeerAddress address) {
+       return remove(address.getAddress());
+    }
+
+    public AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata> remove(@NotNull IPAddress address) {
         try {
             lock.writeLock().lock();
-            return delegate.get().remove(address);
+            return delegate.removeElementsContainedBy(address);
         } finally {
             lock.writeLock().unlock();
         }
@@ -51,7 +58,7 @@ public class BanList {
     public int size() {
         try {
             lock.readLock().lock();
-            return delegate.get().size();
+            return delegate.size();
         } finally {
             lock.readLock().unlock();
         }
@@ -61,7 +68,7 @@ public class BanList {
     public DualIPv4v6AssociativeTries<BanMetadata> copy() {
         try {
             lock.writeLock().lock();
-            return delegate.get().clone();
+            return delegate.clone();
         } finally {
             lock.writeLock().unlock();
         }
@@ -74,7 +81,7 @@ public class BanList {
             } else {
                 lock.readLock().lock();
             }
-            consumer.accept(delegate.get());
+            consumer.accept(delegate);
         } finally {
             if (write) {
                 lock.writeLock().unlock();
@@ -90,7 +97,19 @@ public class BanList {
         Set<IPAddress> ipAddresses = new HashSet<>();
         try {
             lock.readLock().lock();
-            delegate.get().forEach(ipAddresses::add);
+            delegate.forEach(ipAddresses::add);
+        } finally {
+            lock.readLock().unlock();
+        }
+        return ipAddresses;
+    }
+
+    @NotNull
+    public List<IPAddress> copyValues() {
+        List<IPAddress> ipAddresses = new ArrayList<>();
+        try {
+            lock.readLock().lock();
+            delegate.forEach(ipAddresses::add);
         } finally {
             lock.readLock().unlock();
         }
@@ -100,7 +119,7 @@ public class BanList {
     public boolean contains(@NotNull PeerAddress address) {
         try {
             lock.readLock().lock();
-            return delegate.get().elementContains(address.getAddress());
+            return delegate.elementContains(address.getAddress());
         } finally {
             lock.readLock().unlock();
         }
@@ -109,7 +128,7 @@ public class BanList {
     public boolean contains(@NotNull IPAddress address) {
         try {
             lock.readLock().lock();
-            return delegate.get().elementContains(address);
+            return delegate.elementContains(address);
         } finally {
             lock.readLock().unlock();
         }
@@ -119,7 +138,7 @@ public class BanList {
     public BanMetadata get(@NotNull PeerAddress address) {
         try {
             lock.readLock().lock();
-            return delegate.get().elementsContaining(address.getAddress()).getValue();
+            return delegate.elementsContaining(address.getAddress()).getValue();
         } finally {
             lock.readLock().unlock();
         }
@@ -129,7 +148,7 @@ public class BanList {
     public BanMetadata get(@NotNull IPAddress address) {
         try {
             lock.readLock().lock();
-            return delegate.get().elementsContaining(address).getValue();
+            return delegate.elementsContaining(address).getValue();
         } finally {
             lock.readLock().unlock();
         }
@@ -138,7 +157,7 @@ public class BanList {
     public void addAll(@NotNull Map<IPAddress, BanMetadata> map) {
         try {
             lock.writeLock().lock();
-            map.forEach(delegate.get()::put);
+            map.forEach(delegate::put);
         } finally {
             lock.writeLock().unlock();
         }
@@ -147,8 +166,8 @@ public class BanList {
     public void forEach(@NotNull BiConsumer<? super IPAddress, ? super BanMetadata> action) {
         try {
             lock.readLock().lock();
-            delegate.get().forEach(ip -> {
-                var value = delegate.get().get(ip);
+            delegate.forEach(ip -> {
+                var value = delegate.get(ip);
                 action.accept(ip, value);
             });
         } finally {
@@ -159,9 +178,21 @@ public class BanList {
     public void reset() {
         try {
             lock.writeLock().lock();
-            delegate.set(new DualIPv4v6AssociativeTries<>());
+            delegate.getIPv4Trie().clear();
+            delegate.getIPv6Trie().clear();
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    public void readStream(Consumer<Stream<AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata>>> streamConsumer) {
+        try {
+            lock.readLock().lock();
+            var spliterator = Spliterators.spliteratorUnknownSize(delegate.nodeIterator(false), 0);
+            var stream = StreamSupport.stream(spliterator, false);
+            streamConsumer.accept(stream);
+        } finally {
+            lock.readLock().unlock();
         }
     }
 }
