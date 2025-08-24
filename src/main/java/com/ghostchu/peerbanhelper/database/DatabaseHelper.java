@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.config.ConfigTransfer;
 import com.ghostchu.peerbanhelper.database.table.*;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Level;
@@ -51,7 +53,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "17"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "18"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -161,6 +163,23 @@ public final class DatabaseHelper {
                 log.error("Unable to upgrade database schema", err);
             }
             v = 17;
+        }
+        if (v == 17) {
+            try {
+                var banListDao = DaoManager.createDao(getDataSource(), BanListEntity.class);
+                recordBatchUpdate("Address Converting (BanList)", banListDao, (banListEntity -> {
+                    var peerAddress = banListEntity.getAddress();
+                    try {
+                        var peerAddr = JsonUtil.tiny().fromJson(peerAddress, PeerAddress.class);
+                        banListEntity.setAddress(peerAddr.getAddress().toNormalizedString());
+                    } catch (Exception err) {
+                        log.warn("Unable to convert BanList to Address", err);
+                    }
+                }));
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 18;
         }
 
         version.setValue(String.valueOf(v));

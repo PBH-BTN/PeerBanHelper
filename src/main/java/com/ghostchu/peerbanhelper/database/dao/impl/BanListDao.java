@@ -43,7 +43,7 @@ public final class BanListDao extends AbstractPBHDao<BanListEntity, String> {
         return callBatchTasks(() -> {
             List<BanListEntity> entityList = new ArrayList<>();
             banlist.forEach((key, value) -> entityList.add(new BanListEntity(
-                    JsonUtil.tiny().toJson(key)
+                    key.toNormalizedString()
                     , JsonUtil.tiny().toJson(value))));
             TableUtils.clearTable(getConnectionSource(), BanListEntity.class);
             return create(entityList);
