@@ -33,7 +33,7 @@ public abstract class AbstractDownloader implements Downloader {
         InetSocketAddress inetSocketAddress = new InetSocketAddress(peerAddress.getIp(), peerAddress.getPort());
         var translate = natAddressProvider.translate(inetSocketAddress);
         if (translate == null) return peerAddress;
-        return peerAddress.updateNat(translate.getHostString(), translate.getPort());
+        return peerAddress.setNat(translate.getHostString(), translate.getPort());
     }
 
     @Override

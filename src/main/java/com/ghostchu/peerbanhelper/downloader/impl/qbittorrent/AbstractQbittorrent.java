@@ -21,6 +21,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import inet.ipaddr.Address;
+import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -183,7 +185,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -590,9 +592,23 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         });
     }
 
-    protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    protected void setBanListFull(Collection<IPAddress> bannedAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+        bannedAddresses.stream().distinct().forEach(ipAddr -> {
+            joiner.add(ipAddr.toNormalizedString());
+            if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
+                Address ipv6 = ipAddr.toIPv6();
+                if (ipv6 != null) {
+                    joiner.add(ipv6.toNormalizedString());
+                }
+            }
+            if(ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
+                Address ipv4 = ipAddr.toIPv4();
+                if (ipv4 != null) {
+                    joiner.add(ipv4.toNormalizedString());
+                }
+            }
+        });
 
         FormBody formBody = new FormBody.Builder()
                 .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))

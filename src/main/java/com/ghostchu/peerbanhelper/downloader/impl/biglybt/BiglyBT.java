@@ -33,6 +33,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.vdurmont.semver4j.Semver;
+import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -249,7 +250,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -414,8 +415,8 @@ public final class BiglyBT extends AbstractDownloader {
         }
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
-        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).distinct().toList(), false);
+    private void setBanListFull(Collection<IPAddress> peerAddresses) {
+        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(IPAddress::toNormalizedString).distinct().toList(), false);
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/bans")

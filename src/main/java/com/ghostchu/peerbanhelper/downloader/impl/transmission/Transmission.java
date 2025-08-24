@@ -20,6 +20,7 @@ import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
 import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
+import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -202,7 +203,7 @@ public final class Transmission extends AbstractDownloader {
 
     @SneakyThrows
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {

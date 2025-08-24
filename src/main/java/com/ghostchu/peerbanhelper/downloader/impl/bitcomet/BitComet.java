@@ -22,6 +22,7 @@ import com.google.common.net.HostAndPort;
 import com.google.gson.JsonObject;
 import com.spotify.futures.CompletableFutures;
 import com.vdurmont.semver4j.Semver;
+import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import okhttp3.*;
@@ -451,7 +452,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList && !is211Newer()) {
             setBanListIncrement(added);
         } else {
@@ -468,9 +469,9 @@ public final class BitComet extends AbstractDownloader {
         operateBanListLegacy("merge", joiner.toString());
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    private void setBanListFull(Collection<IPAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+        peerAddresses.stream().map(IPAddress::toNormalizedString).distinct().forEach(joiner::add);
         operateBanListLegacy("replace", joiner.toString());
     }
 

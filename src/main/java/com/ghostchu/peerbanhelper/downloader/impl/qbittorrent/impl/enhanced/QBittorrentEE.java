@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -85,7 +86,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             banHandler.setBanListIncrement(added);
         } else {
@@ -152,7 +153,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
         void setBanListIncrement(Collection<BanMetadata> added);
 
-        void setBanListFull(Collection<PeerAddress> peerAddresses);
+        void setBanListFull(Collection<IPAddress> peerAddresses);
     }
 
     public static class BanHandlerNormal implements BanHandler {
@@ -174,7 +175,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<PeerAddress> peerAddresses) {
+        public void setBanListFull(Collection<IPAddress> peerAddresses) {
             downloader.setBanListFull(peerAddresses);
         }
     }
@@ -251,9 +252,9 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<PeerAddress> peerAddresses) {
+        public void setBanListFull(Collection<IPAddress> peerAddresses) {
             StringJoiner joiner = new StringJoiner("\n");
-            peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+            peerAddresses.stream().map(IPAddress::toNormalizedString).distinct().forEach(joiner::add);
             
             FormBody formBody = new FormBody.Builder()
                     .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString())))

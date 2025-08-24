@@ -23,8 +23,6 @@ public final class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private DownloaderServer downloaderServer;
-    @Autowired
     private BanList banList;
 
     @Override
@@ -42,21 +40,21 @@ public final class BlockListController extends AbstractFeatureModule {
 
     private void blocklistDatEmule(@NotNull Context ctx) {
         StringBuilder builder = new StringBuilder();
-        for (PeerAddress addr : banList.copyKeySet()) {
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(addr.getIp());
+        for (IPAddress ipAddress : banList.copyKeySet()) {
             if (ipAddress == null) continue;
-            String fullIp = ipAddress.toFullString();
-            builder.append(fullIp).append(" - ").append(fullIp).append(" , 000 , ").append(UUID.randomUUID().toString().replace("-", "")).append("\n");
+            String start = ipAddress.getLower().toNormalizedString();
+            String end = ipAddress.getUpper().toNormalizedString();
+            builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toNormalizedString()).append("\n");
         }
         ctx.result(builder.toString());
     }
 
     private void blocklistP2pPlain(@NotNull Context ctx) {
         StringBuilder builder = new StringBuilder();
-        for (PeerAddress addr : banList.copyKeySet()) {
+        for (IPAddress addr : banList.copyKeySet()) {
             String ruleName = UUID.randomUUID().toString().replace("-", "");
-            String start = addr.getIp();
-            String end = addr.getIp();
+            String start = addr.getLower().toNormalizedString();
+            String end = addr.getUpper().toNormalizedString();
             builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
         }
         ctx.result(builder.toString());
@@ -64,8 +62,8 @@ public final class BlockListController extends AbstractFeatureModule {
 
     private void blocklistIp(@NotNull Context ctx) {
         StringBuilder builder = new StringBuilder();
-        for (PeerAddress addr : banList.copyKeySet()) {
-            builder.append(addr.getIp()).append("\n");
+        for (IPAddress ipAddress : banList.copyKeySet()) {
+            builder.append(ipAddress.toNormalizedString()).append("\n");
         }
         ctx.result(builder.toString());
     }

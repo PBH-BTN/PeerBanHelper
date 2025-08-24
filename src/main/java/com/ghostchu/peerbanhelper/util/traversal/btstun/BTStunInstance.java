@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.btstun;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
@@ -13,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
 import com.ghostchu.peerbanhelper.util.traversal.stun.tunnel.StunTcpTunnel;
 import com.ghostchu.peerbanhelper.util.traversal.stun.tunnel.StunTcpTunnelImpl;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +35,8 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     private final Downloader downloader;
     private final PBHPortMapper portMapper;
     private final BTStunManager manager;
-    private final Map<PeerAddress, ?> banList;
+    private final BanList banList;
+    @Getter
     private StunTcpTunnel tunnel;
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -41,7 +44,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     private Forwarder tcpForwarder;
     private @Nullable TranslationComponent shutdownReason = null;
 
-    public BTStunInstance(Map<PeerAddress, ?> banList, PBHPortMapper portMapper, Downloader downloader, BTStunManager manager) {
+    public BTStunInstance(BanList banList, PBHPortMapper portMapper, Downloader downloader, BTStunManager manager) {
         this.banList = banList;
         this.portMapper = portMapper;
         this.downloader = downloader;
@@ -78,10 +81,6 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
             } catch (Exception ignored) {
             }
         }
-    }
-
-    public StunTcpTunnel getTunnel() {
-        return tunnel;
     }
 
     @Override

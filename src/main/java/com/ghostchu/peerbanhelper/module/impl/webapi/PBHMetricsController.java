@@ -216,7 +216,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         map.put("peerBanCounter", metrics.getPeerBanCounter());
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
         map.put("banlistCounter", downloaderServer.getBanList().size());
-        map.put("bannedIpCounter", downloaderServer.getBanList().directAccessKeySet().stream().map(PeerAddress::getIp).distinct().count());
+        // todo 这里需要改变
+        map.put("bannedIpCounter", downloaderServer.getBanList().copyKeySet().stream().distinct().count());
         map.put("wastedTraffic", metrics.getWastedTraffic());
         //map.put("savedTraffic", metrics.getSavedTraffic());
         try {

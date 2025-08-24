@@ -26,7 +26,6 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
     private int port;
     private int noNatPort;
 
-
     public PeerAddress(String ip, int port, String rawIp) {
         this.ip = ip;
         this.rawIp = rawIp;
@@ -35,7 +34,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
         this.noNatPort = port;
     }
 
-    public PeerAddress updateNat(String nattedIp, int nattedPort) {
+    public PeerAddress setNat(String nattedIp, int nattedPort) {
         this.ip = nattedIp;
         this.rawIp = nattedIp;
         this.port = nattedPort;
