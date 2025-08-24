@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,9 +39,16 @@ public class LicenseManager implements Reloadable {
             try {
                 var license = licenseParser.fromLicense(key);
                 licenseList.put(Hashing.sha256().hashString(key, StandardCharsets.UTF_8).toString(), license);
+                keyTexts.remove(key);
             } catch (Exception e) {
                 log.warn(tlUI(Lang.PBH_LICENSE_PARSE_FAILED, e.getClass().getName() + ": " + e.getMessage()), e);
             }
+        }
+        Main.getMainConfig().set("pbh-plus-key", keyTexts);
+        try {
+            Main.getMainConfig().save(Main.getMainConfigFile());
+        } catch (IOException e) {
+            log.error("Unable to save main configuration file!", e);
         }
         licenseBackend.setLicenses(licenseList);
         if (isFeatureEnabled("basic")) {
