@@ -54,8 +54,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class PeerBanHelper implements Reloadable {
     @Autowired
-    private TrackedSwarmDao trackerPeersDao;
-    @Autowired
     @Getter
     private DownloaderManager downloaderManager;
     @Autowired
@@ -83,13 +81,6 @@ public class PeerBanHelper implements Reloadable {
     private CrashManager crashManager;
     @Autowired
     private HTTPUtil httpUtil;
-    @Autowired
-    private PBHPortMapper pBHPortMapper;
-    @Autowired
-    private StunManager bTStunManager;
-    @Autowired
-    private DownloaderDiscovery downloaderDiscovery;
-
 
     public PeerBanHelper() {
         reloadConfig();
@@ -154,28 +145,6 @@ public class PeerBanHelper implements Reloadable {
                 }
             }
         }
-
-
-//        if (!crashManager.isRunningFlagExists()) return;
-//        Main.getGuiManager().createDialog(Level.WARN, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
-//            if ("SWING".equals(Main.getGuiManager().getName())) {
-//                String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-//                if (os.startsWith("win")) {
-//                    Main.getGuiManager().createYesNoDialog(Level.INFO, tlUI(Lang.CRASH_MANAGER_GUI_RELATED_TITLE), tlUI(Lang.CRASH_MANAGER_GUI_RELATED_DESCRIPTION),
-//                            () -> {
-//                                Main.getMainConfig().set("gui", "swt");
-//                                try {
-//                                    Main.getMainConfig().save(Main.getMainConfigFile());
-//                                    System.exit(0);
-//                                } catch (IOException e) {
-//                                    Main.getGuiManager().createDialog(Level.ERROR, "Unable to save configuration", e.getMessage(), () -> {
-//                                    });
-//                                }
-//                            }, null
-//                    );
-//                }
-//            }
-//        });
     }
 
     private void postCompatibilityCheck() {
