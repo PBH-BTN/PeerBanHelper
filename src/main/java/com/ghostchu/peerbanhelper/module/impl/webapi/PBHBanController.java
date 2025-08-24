@@ -181,7 +181,8 @@ public final class PBHBanController extends AbstractFeatureModule {
                     if (!ignoreBanForDisconnect) return true;
                     return !b.getValue().isBanForDisconnect();
                 })
-                .filter(b -> search == null || b.getKey().toNormalizedString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
+                .filter(b -> search == null
+                        || Arrays.stream(b.getKey().toStandardStrings()).anyMatch(ip->ip.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                 .map(entry -> new BanDTO(entry.getKey().toNormalizedString(), new BakedBanMetadata(locale, entry.getValue()), null))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
