@@ -47,7 +47,6 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
     }
 
     private void handleLogout(Context ctx) {
-        ctx.sessionAttribute("authenticated", null);
         ctx.json(new StdResp(true, "success", null));
     }
 
@@ -65,7 +64,6 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
         }
         if (!ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)) {
             webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
-            ctx.sessionAttribute("authenticated", webContainer.getToken());
             ctx.json(new StdResp(true, "DEBUG: Skipping WebUI login", null));
             return;
         }
@@ -87,7 +85,6 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
             return;
         }
         webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
-        ctx.sessionAttribute("authenticated", webContainer.getToken());
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }
 
