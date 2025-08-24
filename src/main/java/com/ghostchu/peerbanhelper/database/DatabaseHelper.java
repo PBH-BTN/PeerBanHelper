@@ -167,15 +167,9 @@ public final class DatabaseHelper {
         if (v == 17) {
             try {
                 var banListDao = DaoManager.createDao(getDataSource(), BanListEntity.class);
-                recordBatchUpdate("Address Converting (BanList)", banListDao, (banListEntity -> {
-                    var peerAddress = banListEntity.getAddress();
-                    try {
-                        var peerAddr = JsonUtil.tiny().fromJson(peerAddress, PeerAddress.class);
-                        banListEntity.setAddress(peerAddr.getAddress().toNormalizedString());
-                    } catch (Exception err) {
-                        log.warn("Unable to convert BanList to Address", err);
-                    }
-                }));
+                log.info("Dropping old banlist table and re-creating for IPAddress format change");
+                TableUtils.clearTable(database.getDataSource(), BanListEntity.class);
+                TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
             }
@@ -198,7 +192,7 @@ public final class DatabaseHelper {
                         log.info(tlUI(Lang.DATABASE_UPGRADING_RECORDS, processName, processing, total));
                     }
                     consumer.accept(entity);
-                    dao.update(entity);
+                    dao.createOrUpdate(entity);
                 } catch (Exception e) {
                     log.error("Unhandled error", e);
                 }

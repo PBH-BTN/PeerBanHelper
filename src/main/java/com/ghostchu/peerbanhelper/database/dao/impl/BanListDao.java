@@ -30,7 +30,8 @@ public final class BanListDao extends AbstractPBHDao<BanListEntity, String> {
     public Map<IPAddress, BanMetadata> readBanList() {
         Map<IPAddress, BanMetadata> map = new HashMap<>();
         try {
-            queryForAll().forEach(e -> map.put(IPAddressUtil.getIPAddress(e.getAddress()), JsonUtil.tiny().fromJson(e.getMetadata(), BanMetadata.class)));
+            queryForAll().forEach(e -> map.put(IPAddressUtil.getIPAddress(e.getAddress()),
+                    JsonUtil.tiny().fromJson(e.getMetadata(), BanMetadata.class)));
         } catch (Exception e) {
             log.error("Unable to read stored banlist, skipping...", e);
         }
