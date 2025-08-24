@@ -169,7 +169,7 @@ public final class DatabaseHelper {
                 var banListDao = DaoManager.createDao(getDataSource(), BanListEntity.class);
                 log.info("Dropping old banlist table and re-creating for IPAddress format change");
                 TableUtils.clearTable(database.getDataSource(), BanListEntity.class);
-                TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
+                TableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
             }
