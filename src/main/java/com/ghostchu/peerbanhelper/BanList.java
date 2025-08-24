@@ -21,6 +21,7 @@ public class BanList {
     private final DualIPv4v6AssociativeTries<BanMetadata> delegate = new DualIPv4v6AssociativeTries<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
+    @NotNull
     public Map<IPAddress, BanMetadata> toMap() {
         Map<IPAddress, BanMetadata> map = new HashMap<>();
         try {
@@ -42,10 +43,12 @@ public class BanList {
         }
     }
 
+    @Nullable
     public AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata> remove(@NotNull PeerAddress address) {
        return remove(address.getAddress());
     }
 
+    @Nullable
     public AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata> remove(@NotNull IPAddress address) {
         try {
             lock.writeLock().lock();
@@ -74,16 +77,16 @@ public class BanList {
         }
     }
 
-    public void directAccess(boolean write, Consumer<DualIPv4v6AssociativeTries<BanMetadata>> consumer) {
+    public void directAccess(boolean writeLock, @NotNull Consumer<DualIPv4v6AssociativeTries<BanMetadata>> consumer) {
         try {
-            if (write) {
+            if (writeLock) {
                 lock.writeLock().lock();
             } else {
                 lock.readLock().lock();
             }
             consumer.accept(delegate);
         } finally {
-            if (write) {
+            if (writeLock) {
                 lock.writeLock().unlock();
             } else {
                 lock.readLock().unlock();
@@ -185,7 +188,7 @@ public class BanList {
         }
     }
 
-    public void readStream(Consumer<Stream<AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata>>> streamConsumer) {
+    public void readStream(@NotNull Consumer<Stream<AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata>>> streamConsumer) {
         try {
             lock.readLock().lock();
             var spliterator = Spliterators.spliteratorUnknownSize(delegate.nodeIterator(false), 0);
