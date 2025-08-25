@@ -78,7 +78,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
                 .delete("/api/modules/ipblacklist/region", this::handleRegionDelete, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/city", this::handleCities, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/city", this::handleCitiesDelete, Role.USER_WRITE)
-                .put("/api/modules/ipblacklist/nettype", this::handleNetTypePut, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/netType", this::handleNetTypePut, Role.USER_WRITE)
         ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
         Main.getReloadManager().register(this);
     }
