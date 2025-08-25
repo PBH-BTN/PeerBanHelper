@@ -8,6 +8,8 @@ import type { StyleValue } from 'vue'
 
 const { ip } = defineProps<{
   ip: string
-  style?: StyleValue
+  style: {
+    type: StyleValue | undefined
+  }
 }>()
 </script>
