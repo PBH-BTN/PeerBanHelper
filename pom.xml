@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>8.0.12</version>
+    <version>8.1.0-25w34c</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -375,7 +375,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-dom</artifactId>
-            <version>0.8.12</version>
+            <version>0.8.13</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -386,7 +386,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-core</artifactId>
-            <version>0.8.12</version>
+            <version>0.8.13</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -397,7 +397,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-storage</artifactId>
-            <version>0.8.12</version>
+            <version>0.8.13</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -424,7 +424,7 @@
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark</artifactId>
-            <version>0.25.0</version>
+            <version>0.25.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.tukaani/xz -->
         <dependency>
@@ -544,11 +544,37 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
-            <version>5.10.0</version> </dependency>
+            <version>5.17.0</version> </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
-            <version>5.10.0</version>
+            <version>5.17.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.modelcontextprotocol.sdk/mcp -->
+        <dependency>
+            <groupId>org.bitlet</groupId>
+            <artifactId>weupnp</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.12.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.2.3.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.swt</groupId>
+            <artifactId>swt-classpath</artifactId>
+            <version>4.37-M2</version>
+            <scope>system
+            </scope> <!-- 由于 SWT 不同平台包类结构相同，因此必须按照平台将对应的 swt 二进制引入 classpath，此处的仅用于解决Maven依赖，实际由 install4j 或者构建脚本负责拷贝 SWT 二进制文件，调试时需要手动引入类路径 -->
+            <systemPath>${project.basedir}/platform-natives/windows-x86_64/libraries/swt.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

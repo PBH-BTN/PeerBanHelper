@@ -18,6 +18,11 @@ public class PBHGuiManager implements GuiManager {
     }
 
     @Override
+    public boolean isDarkMode() {
+        return gui.isDarkMode();
+    }
+
+    @Override
     public String getName() {
         return gui.getName();
     }

@@ -121,7 +121,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
     private List<LegacyBtnBan> generateBans() {
         List<LegacyBtnBan> list = new ArrayList<>();
         Map<LegacyBtnPeer, BanMetadata> map = new HashMap<>();
-        btnNetwork.getServer().getBannedPeers().forEach((pa, meta) -> map.put(LegacyBtnPeer.from(meta.getTorrent(), meta.getPeer()), meta));
+        btnNetwork.getServer().getBanList().forEach((pa, meta) -> map.put(LegacyBtnPeer.from(meta.getTorrent(), meta.getPeer()), meta));
         for (Map.Entry<LegacyBtnPeer, BanMetadata> e : map.entrySet()) {
             if (e.getValue().getBanAt() <= lastReport) {
                 continue;

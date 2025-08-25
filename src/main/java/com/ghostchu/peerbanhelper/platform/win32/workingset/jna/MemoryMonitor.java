@@ -45,13 +45,12 @@ public class MemoryMonitor {
     public String getMemorySummary() {
         MemoryUsage heap = getHeapMemoryUsage();
         MemoryUsage nonHeap = getNonHeapMemoryUsage();
+
+        String sb = "内存使用情况:\n" +
+                "  堆内存: " + formatMemoryUsage(heap) + "\n" +
+                "  非堆内存: " + formatMemoryUsage(nonHeap);
         
-        StringBuilder sb = new StringBuilder();
-        sb.append("内存使用情况:\n");
-        sb.append("  堆内存: ").append(formatMemoryUsage(heap)).append("\n");
-        sb.append("  非堆内存: ").append(formatMemoryUsage(nonHeap));
-        
-        return sb.toString();
+        return sb;
     }
     
     /**

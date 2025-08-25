@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 
 import java.sql.Timestamp;
@@ -31,23 +32,27 @@ public final class WebUtil {
     }
 
     public static String userIp(Context context) {
-        String ip = context.header("CF-Connecting-IP");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("X-Real-IP");
+        IPAddress ipAddress = IPAddressUtil.getIPAddress(context.ip());
+        if (ipAddress.isAnyLocal() || ipAddress.isLoopback() || ipAddress.isLocal()) {
+            String ip = context.header("CF-Connecting-IP");
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                ip = context.header("X-Real-IP");
+            }
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                ip = context.header("X-Forwarded-For");
+            }
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                ip = context.header("Proxy-Client-IP");
+            }
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                ip = context.header("WL-Proxy-Client-IP");
+            }
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                ip = context.ip();
+            }
+            return ip;
         }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("X-Forwarded-For");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.ip();
-        }
-        return ip;
+        return context.ip();
     }
 
     public record TimeQueryModel(

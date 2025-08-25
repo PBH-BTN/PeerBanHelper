@@ -6,7 +6,7 @@
 <script lang="ts" setup>
 import type { StyleValue } from 'vue'
 
-const { ip } = defineProps<{
+const { ip, style = undefined } = defineProps<{
   ip: string
   style?: StyleValue
 }>()

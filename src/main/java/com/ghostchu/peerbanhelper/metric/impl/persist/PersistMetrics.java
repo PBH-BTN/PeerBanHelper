@@ -16,7 +16,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -99,7 +99,7 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
-    public void recordPeerBan( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public void recordPeerBan(@NotNull IPAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
@@ -125,8 +125,8 @@ public final class PersistMetrics implements BasicMetrics {
                     null,
                     new Timestamp(metadata.getBanAt()),
                     new Timestamp(metadata.getUnbanAt()),
-                    address.getAddress().toNormalizedString(),
-                    address.getPort(),
+                    address.toNormalizedString(),
+                    metadata.getPeer().getAddress().getPort(),
                     metadata.getPeer().getId(),
                     metadata.getPeer().getClientName(),
                     metadata.getPeer().getUploaded(),
@@ -146,7 +146,7 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
-    public void recordPeerUnban( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public void recordPeerUnban(@NotNull IPAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }

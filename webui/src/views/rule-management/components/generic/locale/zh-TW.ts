@@ -11,6 +11,5 @@ export default {
   'page.rule_management.asn.placeholder': '114514',
   'page.rule_management.port.placeholder': '8080',
   'page.rule_management.region.placeholder': 'CN',
-  'page.rule_management.city.placeholder': 'Shanghai',
-  'page.rule_management.netType.placeholder': '寬頻'
+  'page.rule_management.city.placeholder': 'Shanghai'
 }

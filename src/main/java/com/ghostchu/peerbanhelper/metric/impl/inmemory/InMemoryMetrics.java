@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.metric.impl.inmemory;
 
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +46,7 @@ public final class InMemoryMetrics implements BasicMetrics {
     }
 
     @Override
-    public synchronized void recordPeerBan( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public synchronized void recordPeerBan(@NotNull IPAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
@@ -56,7 +56,7 @@ public final class InMemoryMetrics implements BasicMetrics {
     }
 
     @Override
-    public synchronized void recordPeerUnban( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public synchronized void recordPeerUnban(@NotNull IPAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }

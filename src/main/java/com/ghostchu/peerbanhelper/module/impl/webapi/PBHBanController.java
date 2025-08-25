@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
@@ -11,6 +12,7 @@ import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -18,9 +20,9 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.j256.ormlite.stmt.QueryBuilder;
+import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +59,8 @@ public final class PBHBanController extends AbstractFeatureModule {
     private ModuleDao moduleDao;
     @Autowired
     private RuleDao ruleDao;
+    @Autowired
+    private BanList banList;
 
     @Override
     public boolean isConfigurable() {
@@ -84,15 +88,13 @@ public final class PBHBanController extends AbstractFeatureModule {
 
     private void handleBanDelete(Context context) {
         List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
-        List<PeerAddress> pendingRemovals = new ArrayList<>();
+        List<IPAddress> pendingRemovals = new ArrayList<>();
         if (request.contains("*")) {
-            pendingRemovals.addAll(downloaderServer.getBannedPeers().keySet());
+            pendingRemovals.addAll(banList.copyKeySet());
             downloaderServer.getNeedReApplyBanList().set(true);
         } else {
-            for (PeerAddress address : downloaderServer.getBannedPeers().keySet()) {
-                if (request.contains(address.getIp())) {
-                    pendingRemovals.add(address);
-                }
+            for (String s : request) {
+                pendingRemovals.add(IPAddressUtil.getIPAddress(s));
             }
         }
         pendingRemovals.forEach(pa -> downloaderServer.scheduleUnBanPeer(pa));
@@ -143,35 +145,26 @@ public final class PBHBanController extends AbstractFeatureModule {
                 Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
         String search = ctx.queryParam("search");
         if (search != null) search = URLDecoder.decode(search, StandardCharsets.UTF_8);
-        if (hasPageParam) {
-            /* ---------------- Pagination path ---------------- */
-            Pageable pageable = new Pageable(ctx); // reads page & pageSize
+        /* ---------------- Pagination path ---------------- */
+        Pageable pageable = new Pageable(ctx); // reads page & pageSize
 
-            // We always sort by ban time (desc) as default
-            var banStream = getBanResponseStream(locale(ctx),
-                    -1,       // lastBanTime unused
-                    -1,       // limit unused
-                    ignoreBanForDisconnect,
-                    search);
+        // We always sort by ban time (desc) as default
+        var banStream = getBanResponseStream(locale(ctx),
+                -1,       // lastBanTime unused
+                -1,       // limit unused
+                ignoreBanForDisconnect,
+                search);
 
-            List<BanDTO> allResults = banStream.toList();
-            long total = allResults.size();
+        List<BanDTO> allResults = banStream.toList();
+        long total = allResults.size();
 
-            long skip = pageable.getZeroBasedPage() * pageable.getSize();
-            List<BanDTO> pageResults = allResults.stream()
-                    .skip(skip)
-                    .limit(pageable.getSize())
-                    .toList();
+        long skip = pageable.getZeroBasedPage() * pageable.getSize();
+        List<BanDTO> pageResults = allResults.stream()
+                .skip(skip)
+                .limit(pageable.getSize())
+                .toList();
 
-            ctx.json(new StdResp(true, null, new Page<>(pageable, total, pageResults)));
-        } else {
-            /* ---------------- Legacy feed-stream path ---------------- */
-            long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
-            long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
-
-            var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit, ignoreBanForDisconnect, search);
-            ctx.json(new StdResp(true, null, banResponseList.toList()));
-        }
+        ctx.json(new StdResp(true, null, new Page<>(pageable, total, pageResults)));
     }
 
     @Override
@@ -179,18 +172,18 @@ public final class PBHBanController extends AbstractFeatureModule {
 
     }
 
-
     private @NotNull Stream<BanDTO> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
-        var banResponseList = downloaderServer.getBannedPeers()
+        var banResponseList = banList.toMap()
                 .entrySet()
                 .stream()
                 .filter(b -> {
                     if (!ignoreBanForDisconnect) return true;
                     return !b.getValue().isBanForDisconnect();
                 })
-                .filter(b -> search == null || b.getKey().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
+                .filter(b -> search == null
+                        || Arrays.stream(b.getKey().toStandardStrings()).anyMatch(ip->ip.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
-                .map(entry -> new BanDTO(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null))
+                .map(entry -> new BanDTO(entry.getKey().toNormalizedString(), new BakedBanMetadata(locale, entry.getValue()), null))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
             banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);

@@ -11,7 +11,6 @@ import java.io.File;
 
 @Configuration
 @ComponentScan(value = "com.ghostchu.peerbanhelper")
-@ComponentScan(value = "com.ghostchu.lib.jni")
 @EnableScheduling
 @Slf4j
 public class AppConfig {

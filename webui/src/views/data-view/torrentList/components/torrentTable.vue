@@ -60,7 +60,7 @@
         <a-space wrap>
           <a-tooltip
             :content="
-              plusStatus?.activated
+              pbhPlusActivited
                 ? t('page.torrentList.column.actions.history')
                 : t('page.ipList.plusLock')
             "
@@ -71,18 +71,18 @@
               class="edit-btn"
               shape="circle"
               type="text"
-              :disabled="!plusStatus?.activated"
+              :disabled="!pbhPlusActivited"
               @click="accessHistoryModal?.showModal(record.infoHash, record.name)"
             >
               <template #icon>
-                <icon-history v-if="plusStatus?.activated" />
+                <icon-history v-if="pbhPlusActivited" />
                 <icon-lock v-else />
               </template>
             </a-button>
           </a-tooltip>
           <a-tooltip
             :content="
-              plusStatus?.activated
+              pbhPlusActivited
                 ? t('page.torrentList.column.actions.ban')
                 : t('page.ipList.plusLock')
             "
@@ -93,11 +93,11 @@
               class="edit-btn"
               shape="circle"
               type="text"
-              :disabled="!plusStatus?.activated"
+              :disabled="!pbhPlusActivited"
               @click="banHistoryModal?.showModal(record.infoHash, record.name)"
             >
               <template #icon>
-                <icon-stop v-if="plusStatus?.activated" />
+                <icon-stop v-if="pbhPlusActivited" />
                 <icon-lock v-else />
               </template>
             </a-button>
@@ -187,13 +187,17 @@ const columns = [
 const list = computed(() => data.value?.data.results)
 const accessHistoryModal = ref<InstanceType<typeof AccessHistoryModal>>()
 const banHistoryModal = ref<InstanceType<typeof BanHistoryModal>>()
+const pbhPlusActivited = computed(
+  () =>
+    endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
+    endpointStore.plusStatus?.enabledFeatures?.includes('paid')
+)
 
 const handleSearch = debounce((value: string) => {
   changeCurrent(1)
   run({ page: 1, pageSize: pageSize.value, keyword: value })
 }, 300)
 const endpointStore = useEndpointStore()
-const plusStatus = computed(() => endpointStore.plusStatus)
 </script>
 <style scoped>
 .edit-btn {

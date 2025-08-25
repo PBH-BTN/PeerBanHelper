@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.metric;
 
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 
 public interface BasicMetrics {
@@ -17,9 +17,9 @@ public interface BasicMetrics {
 
     void recordCheck();
 
-    void recordPeerBan(@NotNull PeerAddress address, @NotNull BanMetadata metadata);
+    void recordPeerBan(@NotNull IPAddress address, @NotNull BanMetadata metadata);
 
-    void recordPeerUnban(@NotNull PeerAddress address, @NotNull BanMetadata metadata);
+    void recordPeerUnban(@NotNull IPAddress address, @NotNull BanMetadata metadata);
 
     void flush();
 

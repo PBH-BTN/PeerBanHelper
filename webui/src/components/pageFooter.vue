@@ -16,10 +16,7 @@
             <div v-else>{{ serverVersion?.version }}</div>
             <br />
             <a-button
-              v-if="
-                endpointStore.plusStatus?.activated &&
-                endpointStore.plusStatus.keyData?.type !== LicenseType.LicenseLocal
-              "
+              v-if="endpointStore.plusStatus?.enabledFeatures.includes('paid')"
               class="plus-button"
               type="outline"
               size="mini"
@@ -54,7 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { LicenseType } from '@/api/model/manifest'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Button, Notification } from '@arco-design/web-vue'
 import { IconHistory } from '@arco-design/web-vue/es/icon'
@@ -63,7 +59,7 @@ import { compare } from 'compare-versions'
 import { computed, h, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ChangelogViewer from './changelogViewer.vue'
-import PlusModal from './plus/plusModal.vue'
+import PlusModal from './plus/plusModalContainer.vue'
 
 const { t } = useI18n()
 const version = __APP_VERSION__

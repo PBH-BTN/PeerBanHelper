@@ -10,12 +10,16 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,8 +32,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
-    public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(id, config, alertManager, httpUtil);
+    public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(id, config, alertManager, httpUtil, natAddressProvider);
         if (config.isUseShadowBan()) {
             this.banHandler = new BanHandlerShadowBan(httpClient, config.getName(), apiEndpoint);
         } else {
@@ -50,14 +54,14 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
     }
 
-    public static QBittorrentEE loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static QBittorrentEE loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
-        return new QBittorrentEE(id, config, alertManager, httpUtil);
+        return new QBittorrentEE(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static QBittorrentEE loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static QBittorrentEE loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         QBittorrentEEConfigImpl config = QBittorrentEEConfigImpl.readFromYaml(section, id);
-        return new QBittorrentEE(id, config, alertManager, httpUtil);
+        return new QBittorrentEE(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
     public DownloaderLoginResult login0() {
@@ -81,7 +85,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             banHandler.setBanListIncrement(added);
         } else {
@@ -116,7 +120,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
-                    if (qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")) {
+                    if (s.contains(".onion") || s.contains(".i2p")) {
                         continue;
                     }
                     if (qbPeer.getShadowBanned() != null && qbPeer.getShadowBanned()) {
@@ -132,7 +136,8 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                             qbPeer.setClient(mid);
                         }
                     }
-                    qbPeer.setRawIp(s);
+                    qbPeer.getPeerAddress().setRawIp(s);
+                    qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
                     peersList.add(qbPeer);
                 }
                 return peersList;
@@ -147,7 +152,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
         void setBanListIncrement(Collection<BanMetadata> added);
 
-        void setBanListFull(Collection<PeerAddress> peerAddresses);
+        void setBanListFull(Collection<IPAddress> peerAddresses);
     }
 
     public static class BanHandlerNormal implements BanHandler {
@@ -169,7 +174,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<PeerAddress> peerAddresses) {
+        public void setBanListFull(Collection<IPAddress> peerAddresses) {
             downloader.setBanListFull(peerAddresses);
         }
     }
@@ -246,9 +251,9 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<PeerAddress> peerAddresses) {
+        public void setBanListFull(Collection<IPAddress> peerAddresses) {
             StringJoiner joiner = new StringJoiner("\n");
-            peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+            peerAddresses.stream().map(IPAddress::toNormalizedString).distinct().forEach(joiner::add);
             
             FormBody formBody = new FormBody.Builder()
                     .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString())))
