@@ -122,10 +122,12 @@ const { loading, refresh } = useRequest(async () => {
 
 const options = computed(() => {
   const selected = dataSource.map((item) => item.data)
-  return netTypeArray.filter((item) => !selected.includes(item)).map((item) => ({
-    label: t('page.rule_management.nettype.' + item),
-    value: item
-  }))
+  return netTypeArray
+    .filter((item) => !selected.includes(item))
+    .map((item) => ({
+      label: t('page.rule_management.nettype.' + item),
+      value: item
+    }))
 })
 
 const handleAddOne = () => {
