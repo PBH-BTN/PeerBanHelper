@@ -46,7 +46,7 @@
         <a-space v-else style="display: flex; justify-content: space-between" fill>
           <a-select v-model="record.data" :options="options">
             <template #label="{ data }">
-              <span>{{ t('page.rule_management.nettype.' + data.value) }}</span>
+              <span>{{ t('page.rule_management.netType.' + data.value) }}</span>
             </template>
           </a-select>
           <a-space>
@@ -85,7 +85,7 @@
   </a-space>
 </template>
 <script lang="ts" setup>
-import { netTypeArray, type nettype } from '@/api/model/blacklist'
+import { netTypeArray, type netType } from '@/api/model/blacklist'
 import AsyncMethod from '@/components/asyncMethod.vue'
 import { addBlackList, deleteBlackList, getBlackList } from '@/service/blacklist'
 import { Message, type TableColumnData } from '@arco-design/web-vue'
@@ -94,12 +94,12 @@ import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 const { t } = useI18n()
 type dataSourceItem = {
-  data: nettype
-  oldData: nettype
+  data: netType
+  oldData: netType
   editing: boolean
   isNew: boolean
 }
-const type = 'nettype'
+const type = 'netType'
 const dataSource = reactive([]) as Reactive<dataSourceItem[]>
 const columns: TableColumnData[] = [
   {
@@ -125,7 +125,7 @@ const options = computed(() => {
   return netTypeArray
     .filter((item) => !selected.includes(item))
     .map((item) => ({
-      label: t('page.rule_management.nettype.' + item),
+      label: t('page.rule_management.netType.' + item),
       value: item
     }))
 })
@@ -172,7 +172,7 @@ const handleSubmit = async (index: number) => {
   }
 }
 
-const handleDelete = async (target: nettype) => {
+const handleDelete = async (target: netType) => {
   try {
     const resp = await deleteBlackList(target, type)
     if (!resp.success) {

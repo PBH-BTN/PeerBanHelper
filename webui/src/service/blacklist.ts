@@ -1,4 +1,4 @@
-import type { BlackList, nettype, ruleType } from '@/api/model/blacklist'
+import type { BlackList, netType, ruleType } from '@/api/model/blacklist'
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
@@ -44,7 +44,7 @@ export async function addBlackList<T extends ruleType>(
 }
 
 export async function deleteBlackList<T extends ruleType>(
-  target: T extends 'nettype' ? nettype : T extends 'port' | 'asn' ? number : string,
+  target: T extends 'netType' ? netType : T extends 'port' | 'asn' ? number : string,
   type: T
 ): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()
