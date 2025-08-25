@@ -122,13 +122,16 @@ const { loading, refresh } = useRequest(async () => {
 
 const options = computed(() => {
   const selected = dataSource.map((item) => item.data)
-  return netTypeArray.filter((item) => !selected.includes(item))
+  return netTypeArray.filter((item) => !selected.includes(item)).map((item) => ({
+    label: t('page.rule_management.nettype.' + item),
+    value: item
+  }))
 })
 
 const handleAddOne = () => {
   dataSource.unshift({
-    data: options.value[0],
-    oldData: options.value[0],
+    data: options.value[0].value,
+    oldData: options.value[0].value,
     editing: true,
     isNew: true
   })
