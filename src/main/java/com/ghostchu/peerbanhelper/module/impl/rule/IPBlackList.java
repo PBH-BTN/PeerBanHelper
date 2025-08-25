@@ -253,6 +253,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
             case "netType" -> map.put("netType", networkType);
             default -> {
                 ctx.status(HttpStatus.NOT_FOUND);
+                ctx.json(new StdResp(false, "Illegal pathParams: ruleType not acceptable.", null));
                 return;
             }
         }
