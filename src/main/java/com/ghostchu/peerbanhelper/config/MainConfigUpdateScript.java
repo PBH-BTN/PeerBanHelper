@@ -36,6 +36,42 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 39)
+    public void ipAddressBlockerNetType() {
+        var section = Main.getMainConfig().getConfigurationSection("module.ip-address-blocker.net-type");
+        if(section == null ) return;
+        List<String> keys = new ArrayList<>();
+        if(section.getBoolean("wideband")){
+            keys.add("wideband");
+        }
+        if(section.getBoolean("base-station")){
+            keys.add("baseStation");
+        }
+        if(section.getBoolean("government-and-enterprise-line")){
+            keys.add("governmentAndEnterpriseLine");
+        }
+        if(section.getBoolean("business-platform")){
+            keys.add("businessPlatform");
+        }
+        if(section.getBoolean("backbone-network")){
+            keys.add("backboneNetwork");
+        }
+        if(section.getBoolean("ip-private-network")){
+            keys.add("ipPrivateNetwork");
+        }
+        if(section.getBoolean("internet-cafe")){
+            keys.add("internetCafe");
+        }
+        if(section.getBoolean("iot")){
+            keys.add("iot");
+        }
+        if(section.getBoolean("datacenter")){
+            keys.add("dataCenter");
+        }
+        Main.getMainConfig().set("module.ip-address-blocker.net-type", keys);
+    }
+
+
     @UpdateScript(version = 38)
     public void pbhKeyString2List() {
         var key = Main.getMainConfig().getString("pbh-plus-key");

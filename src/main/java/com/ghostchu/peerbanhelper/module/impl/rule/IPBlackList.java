@@ -41,7 +41,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private Set<Integer> ports;
     private Set<Long> asns;
     private Set<String> regions;
-    private NetworkTypeDTO networkType;
+    private Set<String> networkType;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
@@ -84,7 +84,8 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     }
 
     private void handleNetTypePut(@NotNull Context context) {
-        this.networkType = context.bodyAsClass(NetworkTypeDTO.class);
+        String[] inputNetTypes = context.bodyAsClass(String[].class);
+        this.networkType = new HashSet<>(Arrays.asList(inputNetTypes));
         try {
             saveConfig();
             getCache().invalidateAll();
@@ -280,15 +281,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getConfig().set("asns", List.copyOf(asns));
         getConfig().set("regions", List.copyOf(regions));
         getConfig().set("cities", List.copyOf(cities));
-        getConfig().set("net-type.wideband", networkType.isWideband());
-        getConfig().set("net-type.base-station", networkType.isBaseStation());
-        getConfig().set("net-type.government-and-enterprise-line", networkType.isGovernmentAndEnterpriseLine());
-        getConfig().set("net-type.business-platform", networkType.isBusinessPlatform());
-        getConfig().set("net-type.backbone-network", networkType.isBackboneNetwork());
-        getConfig().set("net-type.ip-private-network", networkType.isIpPrivateNetwork());
-        getConfig().set("net-type.internet-cafe", networkType.isInternetCafe());
-        getConfig().set("net-type.iot", networkType.isIot());
-        getConfig().set("net-type.datacenter", networkType.isDatacenter());
+        getConfig().set("net-type", List.copyOf(networkType));
         super.saveConfig();
     }
 
@@ -303,17 +296,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         this.regions = new HashSet<>(getConfig().getStringList("regions"));
         this.asns = new HashSet<>(getConfig().getLongList("asns"));
         this.cities = new HashSet<>(getConfig().getStringList("cities"));
-        this.networkType = new NetworkTypeDTO(
-                getConfig().getBoolean("net-type.wideband"),
-                getConfig().getBoolean("net-type.base-station"),
-                getConfig().getBoolean("net-type.government-and-enterprise-line"),
-                getConfig().getBoolean("net-type.business-platform"),
-                getConfig().getBoolean("net-type.backbone-network"),
-                getConfig().getBoolean("net-type.ip-private-network"),
-                getConfig().getBoolean("net-type.internet-cafe"),
-                getConfig().getBoolean("net-type.iot"),
-                getConfig().getBoolean("net-type.datacenter")
-        );
+        this.networkType = new HashSet<>(getConfig().getStringList("net-type"));
         getCache().invalidateAll();
     }
 
@@ -372,15 +355,15 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         if (networkType != null && geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
             String netType = geoData.getNetwork().getNetType();
             boolean hit = switch (netType) {
-                case "宽带" -> networkType.isWideband();
-                case "基站" -> networkType.isBaseStation();
-                case "政企专线" -> networkType.isGovernmentAndEnterpriseLine();
-                case "业务平台" -> networkType.isBusinessPlatform();
-                case "骨干网" -> networkType.isBackboneNetwork();
-                case "IP 专网", "IP专网" -> networkType.isIpPrivateNetwork();
-                case "网吧" -> networkType.isInternetCafe();
-                case "物联网" -> networkType.isIot();
-                case "数据中心" -> networkType.isDatacenter();
+                case "宽带" -> networkType.contains("wideband");
+                case "基站" -> networkType.contains("baseStation");
+                case "政企专线" -> networkType.contains("governmentAndEnterpriseLine");
+                case "业务平台" -> networkType.contains("businessPlatform");
+                case "骨干网" -> networkType.contains("backboneNetwork");
+                case "IP 专网", "IP专网" -> networkType.contains("ipPrivateNetwork");
+                case "网吧" -> networkType.contains("internetCafe");
+                case "物联网" -> networkType.contains("iot");
+                case "数据中心" -> networkType.contains("dataCenter");
                 default -> false;
             };
             if (hit) {
