@@ -25,6 +25,42 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+
+    @UpdateScript(version = 29)
+    public void ipAddressBlockerNetType() {
+        var section = conf.getConfigurationSection("module.ip-address-blocker.net-type");
+        if (section == null) return;
+        List<String> keys = new ArrayList<>();
+        if (section.getBoolean("wideband")) {
+            keys.add("wideband");
+        }
+        if (section.getBoolean("base-station")) {
+            keys.add("baseStation");
+        }
+        if (section.getBoolean("government-and-enterprise-line")) {
+            keys.add("governmentAndEnterpriseLine");
+        }
+        if (section.getBoolean("business-platform")) {
+            keys.add("businessPlatform");
+        }
+        if (section.getBoolean("backbone-network")) {
+            keys.add("backboneNetwork");
+        }
+        if (section.getBoolean("ip-private-network")) {
+            keys.add("ipPrivateNetwork");
+        }
+        if (section.getBoolean("internet-cafe")) {
+            keys.add("internetCafe");
+        }
+        if (section.getBoolean("iot")) {
+            keys.add("iot");
+        }
+        if (section.getBoolean("datacenter")) {
+            keys.add("dataCenter");
+        }
+        conf.set("module.ip-address-blocker.net-type", keys);
+    }
+
     @UpdateScript(version = 28)
     public void swarmTrackingEnabled(YamlConfiguration bundled) {
         conf.set("module.swarm-tracking.enabled", true);
@@ -38,7 +74,8 @@ public final class ProfileUpdateScript {
         conf.set("module.active-monitoring.traffic-sliding-capping.max-speed", 10485760);
         conf.set("module.active-monitoring.traffic-sliding-capping.min-speed", 0);
     }
-//    @UpdateScript(version = 26)
+
+    //    @UpdateScript(version = 26)
 //    public void trafficSpeedLimiter(YamlConfiguration bundled) {
 //        conf.set("module.active-monitoring.traffic-capping.enabled", false);
 //        conf.set("module.active-monitoring.traffic-capping.daily-max-allowed-upload-traffic", 25000000000L);
