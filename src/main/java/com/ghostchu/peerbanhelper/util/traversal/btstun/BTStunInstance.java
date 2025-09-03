@@ -98,9 +98,9 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         log.info(tlUI(Lang.BTSTUN_FORWARDER_CREATING, downloader.getName()));
         String hostAddress = null;
         HostName hostName = new HostName(downloaderHost);
-        if(hostName.isAddress()){
+        if (hostName.isAddress()) {
             hostAddress = hostName.getAddress().toNormalizedString();
-        }else{
+        } else {
             try {
                 hostAddress = InetAddress.getByName(hostName.getHost()).getHostAddress();
             } catch (UnknownHostException e) {
@@ -108,10 +108,10 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
             }
         }
 
-        if(hostAddress != null){
+        if (hostAddress != null) {
             var ipAddrObj = IPAddressUtil.getIPAddress(hostAddress);
-            if(!ipAddrObj.isLocal() && !ipAddrObj.isAnyLocal() && !ipAddrObj.isLoopback() && !ipAddrObj.isLinkLocal()
-               && !ipAddrObj.isZeroHost() && !ipAddrObj.isMulticast() && !ExternalSwitch.parseBoolean("pbh.btstun.allowPublicIpAsDownloaderHost", false)){
+            if (!ipAddrObj.isLocal() && !ipAddrObj.isAnyLocal() && !ipAddrObj.isLoopback() && !ipAddrObj.isLinkLocal()
+                    && !ipAddrObj.isZeroHost() && !ipAddrObj.isMulticast() && !ExternalSwitch.parseBoolean("pbh.btstun.allowPublicIpAsDownloaderHost", false)) {
                 manager.unregister(downloader);
                 close();
                 this.shutdownReason = new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_HOST_NOT_LAN_ADDRESS, downloaderHost);
