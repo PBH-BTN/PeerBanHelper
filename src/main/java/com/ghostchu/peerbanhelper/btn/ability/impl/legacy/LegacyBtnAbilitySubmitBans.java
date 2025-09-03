@@ -126,7 +126,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
             if (e.getValue().getBanAt() <= lastReport) {
                 continue;
             }
-            if (e.getValue().isBanForDisconnect()) {
+            if (e.getValue().isBanForDisconnect() || e.getValue().isExcludeFromReport()) {
                 continue;
             }
             LegacyBtnBan btnBan = new LegacyBtnBan();

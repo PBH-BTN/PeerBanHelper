@@ -193,6 +193,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .entrySet()
                 .stream()
                 .filter(b -> {
+                    if(b.getValue().isExcludeFromDisplay()) return false;
                     if (!ignoreBanForDisconnect) return true;
                     return !b.getValue().isBanForDisconnect();
                 })

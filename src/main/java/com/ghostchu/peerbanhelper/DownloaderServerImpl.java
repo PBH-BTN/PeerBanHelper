@@ -265,7 +265,10 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                         BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
                                                 UUID.randomUUID().toString().replace("-", "")
                                                 , downloaderManager.getDownloadInfo(downloader.getId()),
-                                                System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                                System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
+                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                                 detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(), detail.result().structuredData());
                                         bannedPeers.add(banMetadata);
                                         banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
@@ -648,7 +651,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 getClass().getName(),
                 UUID.randomUUID().toString(),
                 downloaderManager.getDownloadInfo(downloaderManager.getDownloaders().getFirst()),
-                0, 0, false, torrent, peer,
+                0, 0, false, true, false, torrent, peer,
                 new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_TITLE),
                 new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_DESCRIPTION, addr),
                 new StructuredData<String, Object>().add("ip", addr));

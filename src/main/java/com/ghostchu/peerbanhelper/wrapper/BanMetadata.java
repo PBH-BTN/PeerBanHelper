@@ -20,11 +20,13 @@ public class BanMetadata extends PeerMetadata implements Serializable {
     private long banAt;
     private long unbanAt;
     private boolean banForDisconnect;
+    private boolean excludeFromReport;
+    private boolean excludeFromDisplay;
     private TranslationComponent rule;
     private TranslationComponent description;
     private StructuredData<String, Object> structuredData;
 
-    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
+    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, Torrent torrent, Peer peer, TranslationComponent rule,
                        TranslationComponent description, StructuredData<String, Object> structuredData) {
         super(downloader, torrent, peer);
         this.context = context;
@@ -32,12 +34,14 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.banAt = banAt;
         this.unbanAt = unbanAt;
         this.banForDisconnect = banForDisconnect;
+        this.excludeFromDisplay = excludeFromDisplay;
+        this.excludeFromReport = excludeFromReport;
         this.rule = rule;
         this.description = description;
         this.structuredData = structuredData;
     }
 
-    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
+    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
                        TranslationComponent description, StructuredData<String, Object> structuredData) {
         super(downloader, torrent, peer);
         this.context = context;
@@ -45,20 +49,11 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.banAt = banAt;
         this.unbanAt = unbanAt;
         this.banForDisconnect = banForDisconnect;
+        this.excludeFromDisplay = excludeFromDisplay;
+        this.excludeFromReport = excludeFromReport;
         this.rule = rule;
         this.description = description;
         this.structuredData = structuredData;
     }
 
-    @Override
-    public String toString() {
-        return "BanMetadata{" +
-                "context='" + context + '\'' +
-                ", banAt=" + banAt +
-                ", unbanAt=" + unbanAt +
-                ", banForDisconnect=" + banForDisconnect +
-                ", rule=" + rule +
-                ", description=" + description +
-                '}';
-    }
 }
