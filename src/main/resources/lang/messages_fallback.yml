@@ -750,3 +750,4 @@ BGTASK_WEBSOCKET_TASK_NOT_FOUND: "未找到指定的后台任务，任务可能�
 PORT_MAPPER_PORT_MAPPED_NEW: "[PortMapper] 已在网卡 {} 的网关上上为本地端口 {}/{} 创建了一个端口映射，网关地址: {} ({} - {} {} {})"
 AUTOSTUN_DOWNLOADER_TUNNEL_TEST_FAILED: "NAT1 隧道测试失败，您的网络环境可能不支持 AutoSTUN 功能，有关更多信息，请查阅 PeerBanHelper 在线文档"
 AUTOSTUN_DOWNLOADER_TUNNEL_ERRORED: "预期外错误: {}"
+AUTOSTUN_DOWNLOADER_HOST_NOT_LAN_ADDRESS: "给定的下载器 IP 地址 {} 为非 LAN 地址"
