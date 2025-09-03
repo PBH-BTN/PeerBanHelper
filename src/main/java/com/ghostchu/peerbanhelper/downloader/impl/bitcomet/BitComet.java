@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -465,13 +466,13 @@ public final class BitComet extends AbstractDownloader {
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
         StringJoiner joiner = new StringJoiner("\n");
-        added.stream().map(meta -> meta.getPeer().getAddress().getIp()).distinct().forEach(joiner::add);
+        added.stream().map(meta -> IPAddressUtil.getIPAddress(meta.getPeer().getAddress().getIp()).toPrefixBlock().toNormalizedString()).distinct().forEach(joiner::add);
         operateBanListLegacy("merge", joiner.toString());
     }
 
     private void setBanListFull(Collection<IPAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.stream().map(IPAddress::toNormalizedString).distinct().forEach(joiner::add);
+        peerAddresses.stream().map(IPAddress::toPrefixBlock).map(IPAddress::toNormalizedString).distinct().forEach(joiner::add);
         operateBanListLegacy("replace", joiner.toString());
     }
 

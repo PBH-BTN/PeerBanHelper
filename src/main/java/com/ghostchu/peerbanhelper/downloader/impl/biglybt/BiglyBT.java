@@ -26,6 +26,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -398,7 +399,9 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
-        BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).distinct().toList());
+        BanBean bean = new BanBean(added.stream()
+                .map(b -> IPAddressUtil.getIPAddress(b.getPeer().getAddress().getIp()).toPrefixBlock().toNormalizedString())
+                .distinct().toList());
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/bans")
@@ -416,7 +419,10 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListFull(Collection<IPAddress> peerAddresses) {
-        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(IPAddress::toNormalizedString).distinct().toList(), false);
+        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream()
+                .map(IPAddress::toPrefixBlock)
+                .map(IPAddress::toNormalizedString)
+                .distinct().toList(), false);
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/bans")
