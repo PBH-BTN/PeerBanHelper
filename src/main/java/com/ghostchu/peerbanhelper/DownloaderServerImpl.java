@@ -632,8 +632,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 new BanDetail(torrent,
                         peer,
                         new CheckResult(getClass(), PeerAction.BAN, banDuration,
-                                new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE),
-                                new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON),
+                                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_TITLE),
+                                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_DESCRIPTION),
                                 StructuredData.create().add("type", "manually"))
                         , banDuration)
         )));
