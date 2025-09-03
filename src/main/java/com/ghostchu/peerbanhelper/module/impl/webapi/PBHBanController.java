@@ -2,6 +2,10 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.ModuleDao;
@@ -12,6 +16,8 @@ import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
@@ -19,8 +25,7 @@ import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
+import com.ghostchu.peerbanhelper.wrapper.*;
 import com.j256.ormlite.stmt.QueryBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -83,7 +88,18 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .get("/api/bans", this::handleBans, Role.USER_READ)
                 .get("/api/bans/logs", this::handleLogs, Role.USER_READ)
                 .get("/api/bans/ranks", this::handleRanks, Role.USER_READ)
-                .delete("/api/bans", this::handleBanDelete, Role.USER_WRITE);
+                .delete("/api/bans", this::handleBanDelete, Role.USER_WRITE)
+                .put("/api/bans", this::handleBanAdd, Role.USER_WRITE);
+    }
+
+    private void handleBanAdd(@NotNull Context context) {
+        List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
+        int size = 0;
+        for (String s : request) {
+            downloaderServer.scheduleBanPeerNoAssign(new PeerAddress(s, 0, s));
+            size++;
+        }
+        context.json(new StdResp(true, null, Map.of("count", size)));
     }
 
     private void handleBanDelete(Context context) {
@@ -181,7 +197,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                     return !b.getValue().isBanForDisconnect();
                 })
                 .filter(b -> search == null
-                        || Arrays.stream(b.getKey().toStandardStrings()).anyMatch(ip->ip.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
+                        || Arrays.stream(b.getKey().toStandardStrings()).anyMatch(ip -> ip.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                 .map(entry -> new BanDTO(entry.getKey().toNormalizedString(), new BakedBanMetadata(locale, entry.getValue()), null))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));

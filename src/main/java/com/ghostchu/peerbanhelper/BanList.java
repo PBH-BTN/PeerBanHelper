@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
@@ -37,7 +38,7 @@ public class BanList {
     public BanMetadata add(@NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         try {
             lock.writeLock().lock();
-            return delegate.put(address.getAddress(), metadata);
+            return delegate.put(address.getAddress().toPrefixBlock(), metadata);
         } finally {
             lock.writeLock().unlock();
         }
@@ -141,7 +142,8 @@ public class BanList {
     public BanMetadata get(@NotNull PeerAddress address) {
         try {
             lock.readLock().lock();
-            return delegate.elementsContaining(address.getAddress()).getValue();
+            var obj = delegate.elementsContaining(address.getAddress());
+            return obj == null ? null : obj.getValue();
         } finally {
             lock.readLock().unlock();
         }
@@ -151,7 +153,8 @@ public class BanList {
     public BanMetadata get(@NotNull IPAddress address) {
         try {
             lock.readLock().lock();
-            return delegate.elementsContaining(address).getValue();
+            var obj = delegate.elementsContaining(address);
+            return obj == null ? null : obj.getValue();
         } finally {
             lock.readLock().unlock();
         }
@@ -160,7 +163,7 @@ public class BanList {
     public void addAll(@NotNull Map<IPAddress, BanMetadata> map) {
         try {
             lock.writeLock().lock();
-            map.forEach(delegate::put);
+            map.forEach((k,v)-> delegate.put(k.toPrefixBlock(), v));
         } finally {
             lock.writeLock().unlock();
         }

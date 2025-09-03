@@ -3,7 +3,9 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
@@ -49,6 +51,7 @@ import org.springframework.stereotype.Component;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -233,7 +236,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     banDetails.add(banning.detail());
                     downloaderBanDetailMap.put(banning.downloader(), banDetails);
                 } else {
-                    PeerAddress address = (PeerAddress) ops.object();
+                    var address = (PeerAddress) ops.object();
                     BanMetadata banMetadata = banList.get(address);
                     if (banMetadata != null) {
                         unbannedPeers.add(banMetadata);
@@ -617,12 +620,41 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     @Override
-    public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
+    public void scheduleBanPeerNoAssign(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
         Downloader downloader = downloaderManager.stream().filter(d -> d.getId().equals(banMetadata.getDownloader().id()))
                 .findFirst().orElseThrow();
         banPeer(banList.copyKeySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
                 downloader,
+                new BanDetail(torrent,
+                        peer,
+                        new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                                new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE),
+                                new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON),
+                                StructuredData.create().add("type", "manually"))
+                        , banDuration)
+        )));
+    }
+
+    @Override
+    public void scheduleBanPeerNoAssign(@NotNull PeerAddress addr) {
+        String mockTorrentHash = "00000000000000000000";
+        Torrent torrent = new TorrentImpl(mockTorrentHash, "User Operation", mockTorrentHash, 0, 0, 0.0d, 0, 0, false);
+        Peer peer = new PeerImpl(addr,
+                "-USROPS-".getBytes(StandardCharsets.ISO_8859_1),
+                "User Operation",
+                0, 0, 0, 0, 0, null, false);
+        BanMetadata banMetadata = new BanMetadata(
+                getClass().getName(),
+                UUID.randomUUID().toString(),
+                downloaderManager.getDownloadInfo(downloaderManager.getDownloaders().getFirst()),
+                0, 0, false, torrent, peer,
+                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_TITLE),
+                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_DESCRIPTION, addr),
+                new StructuredData<String, Object>().add("ip", addr));
+        banPeer(banList.copyKeySet(), banMetadata, torrent, peer);
+        scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
+                downloaderManager.getDownloaders().getFirst(),
                 new BanDetail(torrent,
                         peer,
                         new CheckResult(getClass(), PeerAction.BAN, banDuration,
@@ -642,7 +674,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Override
     public void scheduleUnBanPeer(@NotNull IPAddress peer) {
         unbanPeer(peer);
-        scheduledBanListOperations.add(new ScheduledBanListOperation(false, peer));
+        scheduledBanListOperations.add(new ScheduledBanListOperation(false, new PeerAddress(peer.toNormalizedString(), 0, peer.toNormalizedString())));
     }
 
 

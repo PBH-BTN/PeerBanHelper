@@ -36,8 +36,8 @@ public final class BlockListController extends AbstractFeatureModule {
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : banList.copyKeySet()) {
             if (ipAddress == null) continue;
-            String start = ipAddress.getLower().toNormalizedString();
-            String end = ipAddress.getUpper().toNormalizedString();
+            String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
+            String end = ipAddress.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
             builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toNormalizedString()).append("\n");
         }
         ctx.result(builder.toString());
@@ -47,8 +47,8 @@ public final class BlockListController extends AbstractFeatureModule {
         StringBuilder builder = new StringBuilder();
         for (IPAddress addr : banList.copyKeySet()) {
             String ruleName = UUID.randomUUID().toString().replace("-", "");
-            String start = addr.getLower().toNormalizedString();
-            String end = addr.getUpper().toNormalizedString();
+            String start = addr.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
+            String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
             builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
         }
         ctx.result(builder.toString());
@@ -57,7 +57,7 @@ public final class BlockListController extends AbstractFeatureModule {
     private void blocklistIp(@NotNull Context ctx) {
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : banList.copyKeySet()) {
-            builder.append(ipAddress.toNormalizedString()).append("\n");
+            builder.append(ipAddress.toPrefixBlock().toNormalizedString()).append("\n");
         }
         ctx.result(builder.toString());
     }

@@ -44,7 +44,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
 
     public IPAddress getAddress() {
         if (address == null) {
-            address = IPAddressUtil.getIPAddress(ip);
+            address = IPAddressUtil.getIPAddress(ip).toPrefixBlock();
         }
         return address;
     }
