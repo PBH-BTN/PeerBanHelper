@@ -341,7 +341,6 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 "alt_up_limit", uploadLimit,
                 "alt_dl_limit", downloadLimit,
                 "limit_utp_rate", true,
-                "limit_tcp_overhead", true,
                 "limit_lan_peers", true,
                 "scheduler_enabled", false
         );
