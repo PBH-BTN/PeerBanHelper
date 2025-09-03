@@ -400,7 +400,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
         BanBean bean = new BanBean(added.stream()
-                .map(b -> IPAddressUtil.getIPAddress(b.getPeer().getAddress().getIp()).toPrefixBlock().toNormalizedString())
+                .map(b ->b.getPeer().getAddress().getAddress().toPrefixBlock().toNormalizedString())
                 .distinct().toList());
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
