@@ -221,7 +221,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private PopulatedPeerDTO populatePeerDTO(PeerMetadata p, boolean resolvePTR) {
         PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
-        PeerBanHelper.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
+        PeerBanHelper.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress().getAddress().toInetAddress());
         IPGeoData geoData = response.geoData().get();
         if (geoData != null) {
             dto.setGeo(geoData);

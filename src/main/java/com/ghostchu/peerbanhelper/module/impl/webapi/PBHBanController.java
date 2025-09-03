@@ -194,7 +194,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         banResponseList = banResponseList.peek(response -> {
             PeerWrapper peerWrapper = response.getBanMetadata().getPeer();
             if (peerWrapper != null) {
-                var nullableGeoData = getServer().queryIPDB(peerWrapper.toPeerAddress()).geoData().get();
+                var nullableGeoData = getServer().queryIPDB(peerWrapper.toPeerAddress().getAddress().toInetAddress()).geoData().get();
                 response.setIpGeoData(nullableGeoData);
             }
         });

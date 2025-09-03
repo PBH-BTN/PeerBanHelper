@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.module.impl.rule.dto.NetworkTypeDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -46,6 +46,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private JavalinWebContainer webContainer;
     private long banDuration;
     private Set<String> cities;
+    private boolean preloadBanList;
 
     @Override
     public @NotNull String getName() {
@@ -119,16 +120,6 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         saveConfig();
         getCache().invalidateAll();
     }
-//
-//    private void handleNetTypeDelete(Context context) throws IOException {
-//        if (netTypes.removeIf(netType -> netType.equals(context.))) {
-//            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
-//        } else {
-//            context.status(HttpStatus.NOT_FOUND);
-//            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
-//        }
-//        saveConfig();
-//    }
 
     private void handleRegionDelete(Context context) throws IOException {
         if (regions.removeIf(region -> region.equals(context.bodyAsClass(UserRegionRequest.class).region()))) {
@@ -287,6 +278,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
 
     private void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
+        this.preloadBanList = getConfig().getBoolean("preload-banlist", false);
         this.ips = new HashSet<>();
         for (String s : getConfig().getStringList("ips")) {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
@@ -319,7 +311,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
                 }
             }
             try {
-                CheckResult ipdbResult = checkIPDB(torrent, peer);
+                CheckResult ipdbResult = checkIPDB(peer.getPeerAddress().getAddress().toInetAddress());
                 if (ipdbResult.action() != PeerAction.NO_ACTION) {
                     return ipdbResult;
                 }
@@ -330,11 +322,11 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         }, true);
     }
 
-    private CheckResult checkIPDB(Torrent torrent, Peer peer) {
+    private CheckResult checkIPDB(InetAddress addr) {
         if (regions.isEmpty() && asns.isEmpty()) {
             return pass();
         }
-        var geoData = getServer().queryIPDB(peer.getPeerAddress()).geoData().get();
+        var geoData = getServer().queryIPDB(addr).geoData().get();
         if (geoData == null) {
             return pass();
         }

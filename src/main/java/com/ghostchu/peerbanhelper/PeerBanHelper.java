@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -284,15 +285,15 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHAutoStunController.class);
     }
 
-    public IPDBResponse queryIPDB(PeerAddress address) {
+    public IPDBResponse queryIPDB(InetAddress address) {
         try {
-            return geoIpCache.get(address.getIp(), () -> {
+            return geoIpCache.get(address.getHostAddress(), () -> {
                 if (ipdb == null) {
                     return new IPDBResponse(new LazyLoad<>(() -> null));
                 } else {
                     return new IPDBResponse(new LazyLoad<>(() -> {
                         try {
-                            return ipdb.query(InetAddresses.forString(address.getIp()));
+                            return ipdb.query(address);
                         } catch (Exception ignored) {
                             return null;
                         }
