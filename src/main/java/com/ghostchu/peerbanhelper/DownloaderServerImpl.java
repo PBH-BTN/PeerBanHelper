@@ -648,15 +648,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 "User Operation",
                 0, 0, 0, 0, 0, null, false);
         long yearPlus100 = 100L * 365 * 24 * 60 * 60 * 1000;
-        BanMetadata banMetadata = new BanMetadata(
-                getClass().getName(),
-                UUID.randomUUID().toString(),
-                downloaderManager.getDownloadInfo(downloaderManager.getDownloaders().getFirst()),
-                System.currentTimeMillis(), System.currentTimeMillis() + yearPlus100, false, true, false, torrent, peer,
-                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_TITLE),
-                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_DESCRIPTION, addr),
-                new StructuredData<String, Object>().add("ip", addr));
-        banPeer(banList.copyKeySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
                 downloaderManager.getDownloaders().getFirst(),
                 new BanDetail(torrent,
@@ -664,7 +655,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                         new CheckResult(getClass(), PeerAction.BAN, banDuration,
                                 new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_TITLE),
                                 new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_DESCRIPTION, addr),
-                                StructuredData.create().add("type", "manually"))
+                                StructuredData.create().add("type", "manually").add("ip", addr))
                         , yearPlus100)
         )));
     }
