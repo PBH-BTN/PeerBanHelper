@@ -66,6 +66,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     }
 
     private void scanAndLoad() {
+        if (!enabled) return;
         var autoStun = Main.getMainConfig().getConfigurationSection("auto-stun");
         for (String downloaderId : autoStun.getStringList("downloaders")) {
             var downloader = downloaderManager.getDownloaderById(downloaderId);
@@ -138,6 +139,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
 
     @Override
     public void close() {
+        enabled = false;
         perDownloaderStun.values().forEach(instance -> {
             try {
                 instance.close();
@@ -146,7 +148,6 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             }
         });
         perDownloaderStun.clear();
-        enabled = false;
     }
 
 
