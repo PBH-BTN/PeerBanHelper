@@ -9,8 +9,10 @@ import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -61,8 +63,8 @@ public final class MainConfigUpdateScript {
             if (host.startsWith("172.")) {
                 try {
                     log.info("Updating endpoint for downloader {} for Synology DSM package upgrade from {} to {}.", key, endpoint, downloaderSection.getString("endpoint"));
-                    downloaderSection.set("endpoint", new URI(uri.getScheme(), "127.0.0.1", uri.getPath(), uri.getFragment()));
-                } catch (URISyntaxException e) {
+                    downloaderSection.set("endpoint", new URL(uri.getScheme(), "127.0.0.1", uri.getPort(), uri.getPath()).toString());
+                } catch (MalformedURLException e) {
                     log.error("Unable to update endpoint for downloader {} on Synology DSM: {}", key, e.getMessage());
                 }
             }
