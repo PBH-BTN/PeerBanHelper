@@ -464,7 +464,7 @@ module:
   # This module protects the downloader that associated with PBH from DoS attack
   idle-connection-dos-protection:
     enabled: true
-    ban-duration: 180000
+    ban-duration: 900000
     # 允许的最长闲置连接时间 - Max allowed idle time
     # 当一个 Peer 长时间没有任何数据传输或状态更新，且速度持续低于 idle-speed-threshold 时，将被视为闲置连接
     max-allowed-idle-time: 300000
