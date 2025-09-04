@@ -8,20 +8,14 @@
           once
           :async-fn="() => handleUnban('*')"
         >
-          <a-popconfirm
-            :content="t('page.banlist.banlist.unbanAllConfirm')"
-            type="warning"
-            position="bottom"
-            @ok="unban"
+          <a-button
+            type="secondary"
+            :disabled="(list?.length ?? 0) === 0"
+            :loading="unbaning"
+            @click="unban"
           >
-            <a-button
-              type="secondary"
-              :disabled="(list?.length ?? 0) === 0"
-              :loading="unbaning"
-            >
-              {{ t('page.banlist.banlist.listItem.unbanall') }}
-            </a-button>
-          </a-popconfirm>
+            {{ t('page.banlist.banlist.listItem.unbanall') }}
+          </a-button>
         </AsyncMethod>
         <a-input-search
           :style="{ width: '250px' }"
