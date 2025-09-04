@@ -130,4 +130,18 @@ public abstract class AbstractDownloader implements Downloader {
     public int getMaxConcurrentPeerRequestSlots() {
         return 16;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        // check id if equals
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        AbstractDownloader that = (AbstractDownloader) obj;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProviderRegistry;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +35,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     private final NatAddressProviderRegistry natAddressProviderRegistry;
     private final BanList banList;
     private final Laboratory laboratory;
+    @Getter
     private boolean enabled = false;
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
@@ -86,9 +88,8 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     }
 
     public boolean register(Downloader downloader) {
-        for (Downloader registeredDownloader : perDownloaderStun.keySet()) {
-            if(registeredDownloader.getId().equals(downloader.getId()))
-                return false;
+        if(perDownloaderStun.containsKey(downloader)){
+            return false;
         }
         if (!downloader.login().success()) {
             log.debug("Login failed for downloader: {}", downloader.getId());
@@ -114,10 +115,6 @@ public class BTStunManager implements AutoCloseable, Reloadable {
                 log.error("Failed to close BTStunInstance for downloader: {}", downloader.getId(), e);
             }
         }
-    }
-
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Nullable
