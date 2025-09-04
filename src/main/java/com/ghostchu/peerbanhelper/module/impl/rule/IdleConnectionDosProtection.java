@@ -4,9 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.CheckResult;
-import com.ghostchu.peerbanhelper.module.PeerAction;
+import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
@@ -23,13 +21,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
-public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule implements Reloadable {
+public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule implements Reloadable, BatchMonitorFeatureModule {
     private final Map<HostAndPort, ConnectionInfo> idleConnections = new ConcurrentHashMap<>();
     private long banDuration;
     private long maxAllowedIdleTime;
@@ -92,7 +91,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
             return pass();
         }
         // 如果速度不够快，则从 map 里获取连接信息
-        ConnectionInfo info = idleConnections.getOrDefault(hostAndPort, new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded()));
+        ConnectionInfo info = idleConnections.getOrDefault(hostAndPort, new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), 0));
         long computedAvgUploadSpeed = (peer.getUploaded() - info.getUploaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
         long computedAvgDownloadSpeed = (peer.getDownloaded() - info.getDownloaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
         double percentageChange = Math.abs(peer.getProgress() - info.getPercentage());
@@ -127,11 +126,32 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
                             .add("upload_speed", peer.getUploadSpeed())
                             .add("download_speed", peer.getDownloadSpeed())
             );
-        } else {
-            log.debug("Updating idle info for peer {}, already idled {} ms, percentage change {}%, uploaded {}, downloaded {}", hostAndPort, alreadyIdled, percentageChange, peer.getUploaded(), peer.getDownloaded());
-            idleConnections.put(hostAndPort, info);
         }
+        log.debug("Updating idle info for peer {}, already idled {} ms, percentage change {}%, uploaded {}, downloaded {}", hostAndPort, alreadyIdled, percentageChange, peer.getUploaded(), peer.getDownloaded());
+        info.setNotHitCounter(info.getNotHitCounter() + 1);
         return pass();
+    }
+
+    @Override
+    public void onPeersRetrieved(@NotNull Map<Downloader, Map<Torrent, List<Peer>>> peers) {
+        var allPeers = peers.values().stream()
+                .flatMap(map -> map.values().stream())
+                .flatMap(Collection::stream)
+                .map(peer -> HostAndPort.fromParts(peer.getPeerAddress().getIp(), peer.getPeerAddress().getPort()))
+                .toList();
+        int count = idleConnections.size();
+        idleConnections.entrySet().removeIf(entry -> {
+            var hostAndPort = entry.getKey();
+            if (!allPeers.contains(hostAndPort)) {
+                entry.getValue().setNotHitCounter(entry.getValue().getNotHitCounter() + 1);
+            }
+            if(entry.getValue().getNotHitCounter() > 5){
+                log.debug("Removing idle connection {} due to not being seen for 5 checks", hostAndPort);
+                return true;
+            }
+            return false;
+        });
+        log.debug("Removed {} disconnected connections.", count - idleConnections.size());
     }
 
     @Data
@@ -141,5 +161,6 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         private double percentage;
         private long uploaded;
         private long downloaded;
+        private int notHitCounter;
     }
 }

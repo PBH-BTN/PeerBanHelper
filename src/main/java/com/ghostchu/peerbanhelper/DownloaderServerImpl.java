@@ -203,7 +203,12 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 更新 LIVE_PEERS 用于数据展示
             banWaveWatchDog.setLastOperation("Update live peers");
             updateLivePeers(peers);
-
+            banWaveWatchDog.setLastOperation("Notify BatchMonitorFeatureModules");
+            for (FeatureModule module : moduleManager.getModules()) {
+                if (module instanceof BatchMonitorFeatureModule batchMonitorFeatureModule) {
+                    batchMonitorFeatureModule.onPeersRetrieved(peers);
+                }
+            }
             peers.forEach((downloader, entry) -> {
                 banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules");
                 for (FeatureModule module : moduleManager.getModules()) {
