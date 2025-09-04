@@ -4,7 +4,6 @@
       <a-form-item field="enabled" :label="t('page.settings.tab.autostun.enable')">
         <a-switch
           :model-value="config.enabled"
-          :disabled="(!isNATCompatible || isBridgeNetDriver) && !config.enabled"
           @update:model-value="(value) => $emit('configChange', { enabled: value as boolean })"
         />
         <template #extra>
