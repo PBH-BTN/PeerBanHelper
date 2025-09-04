@@ -128,7 +128,6 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
             );
         }
         log.debug("Updating idle info for peer {}, already idled {} ms, percentage change {}%, uploaded {}, downloaded {}", hostAndPort, alreadyIdled, percentageChange, peer.getUploaded(), peer.getDownloaded());
-        info.setNotHitCounter(info.getNotHitCounter() + 1);
         return pass();
     }
 
