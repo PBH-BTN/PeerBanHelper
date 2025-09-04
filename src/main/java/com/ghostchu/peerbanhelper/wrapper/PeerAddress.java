@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.google.common.net.HostAndPort;
 import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,7 +52,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
 
     @Override
     public String toString() {
-        return ip + ":" + port;
+        return HostAndPort.fromParts(ip, port).toString();
     }
 
     @Override
