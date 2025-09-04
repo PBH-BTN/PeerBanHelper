@@ -4,12 +4,12 @@
       <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
       <a-space class="list-header-right-group" wrap>
         <AsyncMethod
-          v-slot="{ run: unban, loading: unbanning }"
+          v-slot="{ run: unban, loading: unbaning }"
           once
           :async-fn="() => handleUnban('*')"
         >
           <a-popconfirm
-            :content="t('page.banlist.banlist.listItem.unbanall.confirm')"
+            :content="t('page.banlist.banlist.unbanAllConfirm')"
             type="warning"
             position="bottom"
             @ok="unban"
@@ -17,7 +17,7 @@
             <a-button
               type="secondary"
               :disabled="(list?.length ?? 0) === 0"
-              :loading="unbanning"
+              :loading="unbaning"
             >
               {{ t('page.banlist.banlist.listItem.unbanall') }}
             </a-button>

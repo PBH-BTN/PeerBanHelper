@@ -18,7 +18,7 @@ export default {
   'page.banlist.banlist.bottomReached': '已經到底啦！',
   'page.banlist.banlist.listItem.unban': '解除封禁',
   'page.banlist.banlist.listItem.unbanall': '解封全部',
-  'page.banlist.banlist.listItem.unbanall.confirm': '您確定要解封所有 IP 位址嗎？此操作無法撤銷',
+  'page.banlist.banlist.unbanAllConfirm': '您確定要解封所有 IP 位址嗎？此操作無法撤銷',
   'page.banlist.banlist.listItem.unbanUnexcepted': '沒有 IP 位址被成功解除封禁',
   'page.banlist.banlist.listItem.unbanSuccess': '成功解封 {count} 個 IP 位址',
   'page.banlist.banlist.listItem.threatAnalyse': '威脅分析'
