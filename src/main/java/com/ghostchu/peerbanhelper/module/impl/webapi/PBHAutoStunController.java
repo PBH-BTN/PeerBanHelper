@@ -171,7 +171,6 @@ public class PBHAutoStunController extends AbstractFeatureModule {
             var downloader = entry.getKey();
             var stunInstance = entry.getValue();
             tunnels.add(new TunnelsDTO(downloaderManager.getDownloadInfo(downloader), toTunnelInfoDto(locale(context), stunInstance)));
-
         }
         context.json(new StdResp(true, null, tunnels));
     }

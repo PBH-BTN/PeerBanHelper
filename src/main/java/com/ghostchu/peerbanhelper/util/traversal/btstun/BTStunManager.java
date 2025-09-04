@@ -86,9 +86,9 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     }
 
     public boolean register(Downloader downloader) {
-        if (perDownloaderStun.containsKey(downloader)) {
-            //log.debug("Duplicate registration for downloader: {}", downloader.getId());
-            return false;
+        for (Downloader registeredDownloader : perDownloaderStun.keySet()) {
+            if(registeredDownloader.getId().equals(downloader.getId()))
+                return false;
         }
         if (!downloader.login().success()) {
             log.debug("Login failed for downloader: {}", downloader.getId());
