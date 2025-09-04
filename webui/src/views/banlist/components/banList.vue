@@ -12,7 +12,7 @@
             :content="t('page.banlist.banlist.listItem.unbanall.confirm')"
             type="warning"
             position="bottom"
-            :before-ok="unban"
+            @ok="unban"
           >
             <a-button
               type="secondary"
