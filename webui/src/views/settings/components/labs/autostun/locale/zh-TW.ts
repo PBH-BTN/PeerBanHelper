@@ -9,7 +9,7 @@ export default {
   // Enable/Disable section
   'page.settings.tab.autostun.enable': '啟用 AutoSTUN',
   'page.settings.tab.autostun.enable.tips': '啟用後將自動為選擇的下載器建立隧道',
-  'page.settings.tab.autostun.friendly_mapping': '啟用友善本地回環位址映射',
+  'page.settings.tab.autostun.friendly_mapping': '友善位址映射',
   'page.settings.tab.autostun.friendly_mapping.tips':
     '啟用後反向代理伺服器將使用更友善的本地位址映射方式，同時還可解決本機設備上為下載器停用「允許來自同一 IP 位址的多重連線」（保證 PeerBanHelper 工作的必須選項）的副作用',
 
@@ -28,12 +28,23 @@ export default {
     '[NAT3] 埠受限圓錐型 NAT (PortRestrictedCone)',
   'page.settings.tab.autostun.nat_type.Symmetric': '[NAT4] 對稱型 NAT (Symmetric)',
   'page.settings.tab.autostun.nat_type.Unknown': '未知',
-  'page.settings.tab.autostun.nat_compatible': '✅ 相容 AutoSTUN',
-  'page.settings.tab.autostun.nat_incompatible': '❌ 不相容 AutoSTUN',
+  'page.settings.tab.autostun.nat_incompatible': 'NAT 類型不相容',
+  'page.settings.tab.autostun.nat_incompatible.tooltip':
+    '目前 NAT 類型不支援 AutoSTUN 功能，需要 NAT1 (完全圓錐型) 環境',
+  'page.settings.tab.autostun.netdriver_incompatible': 'Docker 網路設定問題',
+  'page.settings.tab.autostun.netdriver_incompatible.tooltip':
+    'Docker Bridge 網路模式下 AutoSTUN 可能無法正常工作',
+  'page.settings.tab.autostun.netdriver_compatible': '網路驅動相容',
+  'page.settings.tab.autostun.network_driver': '網路驅動',
+  'page.settings.tab.autostun.compatibility': '相容性',
+  'page.settings.tab.autostun.compatible': '相容',
+  'page.settings.tab.autostun.incompatible': '不相容',
 
   // Downloader Configuration section
   'page.settings.tab.autostun.downloader_config': '下載器設定',
-  'page.settings.tab.autostun.select_downloaders': '選擇要啟用 AutoSTUN 的下載器',
+  'page.settings.tab.autostun.select_downloaders': '啟用的下載器',
+  'page.settings.tab.autostun.available_downloaders': '可用',
+  'page.settings.tab.autostun.enabled_downloaders': '啟用',
   'page.settings.tab.autostun.no_downloaders': '暫無可用的下載器',
   'page.settings.tab.autostun.save_config': '儲存設定',
   'page.settings.tab.autostun.save_success': '設定儲存成功',

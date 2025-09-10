@@ -23,7 +23,9 @@
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime')"
-      :tooltip="t('page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime.tips')"
+      :tooltip="
+        t('page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime.tips')
+      "
       field="model.max_allowed_idle_time"
     >
       <a-input-number v-model="model.max_allowed_idle_time" style="width: 200px" :min="0">
@@ -33,7 +35,9 @@
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold')"
-      :tooltip="t('page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold.tips')"
+      :tooltip="
+        t('page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold.tips')
+      "
       field="model.idle_speed_threshold"
     >
       <a-input-number v-model="model.idle_speed_threshold" style="width: 200px" :min="0">
@@ -41,14 +45,20 @@
       </a-input-number>
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage')"
-      :tooltip="t('page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage.tips')"
+      :label="
+        t('page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage.tips'
+        )
+      "
       field="model.min_status_change_percentage"
     >
-      <a-input-number 
-        v-model="model.min_status_change_percentage" 
-        style="width: 200px" 
-        :min="0" 
+      <a-input-number
+        v-model="model.min_status_change_percentage"
+        style="width: 200px"
+        :min="0"
         :max="1"
         :step="0.01"
       >
@@ -57,7 +67,9 @@
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange')"
-      :tooltip="t('page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips')"
+      :tooltip="
+        t('page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips')
+      "
       field="model.reset_on_status_change"
     >
       <a-switch v-model="model.reset_on_status_change" />

@@ -10,7 +10,7 @@ export default {
   'page.settings.tab.autostun.enable': 'Enable AutoSTUN',
   'page.settings.tab.autostun.enable.tips':
     'Once enabled, tunnels will be automatically created for the selected downloader',
-  'page.settings.tab.autostun.friendly_mapping': 'Enable Friendly Local Loopback Address Mapping',
+  'page.settings.tab.autostun.friendly_mapping': 'Friendly Address Mapping',
   'page.settings.tab.autostun.friendly_mapping.tips':
     'When enabled, the reverse proxy server will use a more friendly local address mapping method, and it can also resolve the side effects of disabling "Allow multiple connections from the same IP address" (a necessary option for PeerBanHelper to work) on the downloader on the local device.',
 
@@ -28,12 +28,23 @@ export default {
   'page.settings.tab.autostun.nat_type.PortRestrictedCone': '[NAT3] Port Restricted Cone NAT',
   'page.settings.tab.autostun.nat_type.Symmetric': '[NAT4] Symmetric NAT',
   'page.settings.tab.autostun.nat_type.Unknown': 'Unknown',
-  'page.settings.tab.autostun.nat_compatible': '✅ Compatible with AutoSTUN',
-  'page.settings.tab.autostun.nat_incompatible': '❌ Not Compatible with AutoSTUN',
+  'page.settings.tab.autostun.nat_incompatible': 'NAT Type Incompatible',
+  'page.settings.tab.autostun.nat_incompatible.tooltip':
+    'Current NAT type does not support AutoSTUN, requires NAT1 (Full Cone) environment',
+  'page.settings.tab.autostun.netdriver_incompatible': 'Docker Network Issue',
+  'page.settings.tab.autostun.netdriver_incompatible.tooltip':
+    'AutoSTUN may not work properly in Docker Bridge network mode',
+  'page.settings.tab.autostun.netdriver_compatible': 'Network Driver Compatible',
+  'page.settings.tab.autostun.network_driver': 'Network Driver',
+  'page.settings.tab.autostun.compatibility': 'Compatibility',
+  'page.settings.tab.autostun.compatible': 'Compatible',
+  'page.settings.tab.autostun.incompatible': 'Incompatible',
 
   // Downloader Configuration section
   'page.settings.tab.autostun.downloader_config': 'Downloader Configuration',
-  'page.settings.tab.autostun.select_downloaders': 'Select downloaders to enable AutoSTUN',
+  'page.settings.tab.autostun.select_downloaders': 'Selected downloaders',
+  'page.settings.tab.autostun.available_downloaders': 'Available',
+  'page.settings.tab.autostun.enabled_downloaders': 'Enabled',
   'page.settings.tab.autostun.no_downloaders': 'No available downloaders',
   'page.settings.tab.autostun.save_config': 'Save Configuration',
   'page.settings.tab.autostun.save_success': 'Configuration saved successfully',

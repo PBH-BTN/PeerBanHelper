@@ -157,17 +157,22 @@ export default {
     'This module will force to do PTR query on Peer IP, and try to resolve the hostname that bind with IP address. If the IP address bind with a hostname and the hostname match the rules below, then do the action',
 
   'page.settings.tab.profile.module.idleConnectionDosProtection.title': 'DoS Protection Module',
-  'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime': 'Use global ban duration',
-  'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime': 'Max allowed idle time',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime':
+    'Use global ban duration',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime':
+    'Max allowed idle time',
   'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime.tips':
     'When a Peer has no data transfer or status updates for a long time and speed is consistently below the idle speed threshold, it will be considered as an idle connection',
-  'page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold': 'Idle speed threshold',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold':
+    'Idle speed threshold',
   'page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold.tips':
     'Connection with speed lower than this value will be considered as idle connection',
-  'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage': 'Minimum status change percentage',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage':
+    'Minimum status change percentage',
   'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage.tips':
     'When status updates, changes below this percentage will still be considered idle',
-  'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange': 'Reset timer on status change',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
+    'Reset timer on status change',
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
     'Consider connection active when status update (e.g progress), reset the timer'
 }
