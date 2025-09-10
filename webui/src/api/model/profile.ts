@@ -20,6 +20,7 @@ export interface Module {
   ip_address_blocker_rules: IpAddressBlockerRules
   active_monitoring: ActiveMonitoring
   ptr_blacklist: PtrBlacklist
+  idle_connection_dos_protection: IdleConnectionDosProtection
 }
 
 export interface PeerIdBlacklist {
@@ -147,4 +148,13 @@ export interface PtrBlacklist {
   enabled: boolean
   ban_duration: BanDuration
   ptr_rules: PeerRule[]
+}
+
+export interface IdleConnectionDosProtection {
+  enabled: boolean
+  ban_duration: BanDuration
+  max_allowed_idle_time: number
+  idle_speed_threshold: number
+  min_status_change_percentage: number
+  reset_on_status_change: boolean
 }

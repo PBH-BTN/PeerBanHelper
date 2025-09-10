@@ -141,5 +141,20 @@ export default {
   'page.settings.tab.profile.module.ptrBlackList.reserveName': '封禁域名',
   'page.settings.tab.profile.module.ptrBlackList.placeholder': '反向解析域名',
   'page.settings.tab.profile.module.ptrBlackList.tooltip':
-    '此模組將強制對 Peer IP 進行 PTR 查詢，並試圖解析其 IP 位址綁定的主機名稱。如果 IP 位址綁定了一個主機名稱且主機名稱匹配下列規則，則執行操作'
+    '此模組將強制對 Peer IP 進行 PTR 查詢，並試圖解析其 IP 位址綁定的主機名稱。如果 IP 位址綁定了一個主機名稱且主機名稱匹配下列規則，則執行操作',
+
+  'page.settings.tab.profile.module.idleConnectionDosProtection.title': '拒絕服務攻擊保護',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime': '使用全域封禁時間',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime': '允許的最長閒置連線時間',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime.tips':
+    '當一個 Peer 長時間沒有任何資料傳輸或狀態更新，且速度持續低於閒置速度閾值時，將被視為閒置連線',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold': '閒置速度閾值',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold.tips':
+    '持續低於此速度將被視為閒置連線',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage': '狀態更新最小變化百分比',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage.tips':
+    '狀態更新時，變化百分比低於此值時仍視為閒置',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange': '狀態更新時重置計時器',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
+    '當狀態更新時視為連線活動，重置計時器（如任務進度）'
 }
