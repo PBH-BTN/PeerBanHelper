@@ -7,8 +7,9 @@
     <div style="width: 100%; display: flex; justify-content: center">
       <div style="max-width: 60rem; width: 100%">
         <a-alert type="info" style="margin-bottom: 20px">
-          {{ t('page.settings.tab.autostun.description')
-          }}{{ t('page.settings.tab.autostun.warning') }}
+          {{ t('page.settings.tab.autostun.description') }}
+          <br />
+          {{ t('page.settings.tab.autostun.warning') }}
         </a-alert>
 
         <a-spin :loading="firstLoading" style="width: 100%; min-height: 400px">

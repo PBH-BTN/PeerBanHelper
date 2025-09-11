@@ -67,7 +67,6 @@
 import type { AutoSTUNConfig } from '@/api/model/autostun'
 import { getAutoSTUNStatus, saveAutoSTUNConfig } from '@/service/autostun'
 import { getDownloaders } from '@/service/downloaders'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { Message } from '@arco-design/web-vue'
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -99,34 +98,30 @@ const { data: allDownloaders } = useRequest(getDownloaders, {
 })
 
 // Load AutoSTUN status (depends on downloaders being loaded)
-const { refresh } = useRequest(
-  getAutoSTUNStatus,
-  {
-    ready: computed(() => (allDownloaders?.value?.data?.length ?? 0) > 0),
-    manual: false,
-    onSuccess: (response) => {
-      if (response.success) {
-        const data = response.data
-        // Map the selected downloaders to an array of IDs for the transfer component
-        const downloaderIds = data.selectedDownloaders.map((d) => d.id)
-        Object.assign(config, {
-          enabled: data.enabled,
-          useFriendlyLoopbackMapping: data.useFriendlyLoopbackMapping,
-          downloaders: downloaderIds
-        })
-        Object.assign(originalConfig, {
-          enabled: data.enabled,
-          useFriendlyLoopbackMapping: data.useFriendlyLoopbackMapping,
-          downloaders: downloaderIds
-        })
-      }
-    },
-    onError: (error) => {
-      console.error('Failed to refresh config status:', error)
+const { refresh } = useRequest(getAutoSTUNStatus, {
+  ready: computed(() => (allDownloaders?.value?.data?.length ?? 0) > 0),
+  manual: false,
+  onSuccess: (response) => {
+    if (response.success) {
+      const data = response.data
+      // Map the selected downloaders to an array of IDs for the transfer component
+      const downloaderIds = data.selectedDownloaders.map((d) => d.id)
+      Object.assign(config, {
+        enabled: data.enabled,
+        useFriendlyLoopbackMapping: data.useFriendlyLoopbackMapping,
+        downloaders: downloaderIds
+      })
+      Object.assign(originalConfig, {
+        enabled: data.enabled,
+        useFriendlyLoopbackMapping: data.useFriendlyLoopbackMapping,
+        downloaders: downloaderIds
+      })
     }
   },
-  [useAutoUpdatePlugin]
-)
+  onError: (error) => {
+    console.error('Failed to refresh config status:', error)
+  }
+})
 
 // Computed
 const configChanged = computed(() => {
