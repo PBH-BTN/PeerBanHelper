@@ -472,6 +472,6 @@ module:
     # 单位：字节 - Units: bytes
     idle-speed-threshold: 64
     # 状态更新最小变化百分比 - Minimum status change percentage
-    min-status-change-percentage: 0.0001
+    min-status-change-percentage: 0.001
     # 当状态更新时视为连接活动，重置计时器（如任务进度） - Consider connection active when status update (e.g progress)
     reset-on-status-change: true

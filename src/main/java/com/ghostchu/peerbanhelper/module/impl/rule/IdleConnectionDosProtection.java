@@ -94,7 +94,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         ConnectionInfo info = idleConnections.getOrDefault(hostAndPort, new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), 0));
         long computedAvgUploadSpeed = (peer.getUploaded() - info.getUploaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
         long computedAvgDownloadSpeed = (peer.getDownloaded() - info.getDownloaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
-        double percentageChange = Math.abs(peer.getProgress() - info.getPercentage());
+        double percentageChange = Math.abs(peer.getProgress()*100.0d - info.getPercentage());
         if (computedAvgUploadSpeed > idleSpeedThreshold || computedAvgDownloadSpeed > idleSpeedThreshold) {
             log.debug("Peer {} computed avg speed is above threshold, not idle", hostAndPort);
             idleConnections.remove(hostAndPort);
