@@ -5,6 +5,7 @@ services:
     container_name: "peerbanhelper"
     volumes:
       - ./:/app/data
+      - /tmp:/tmp
     ports:
       - "9898:9898"
     stop_grace_period: 30s
