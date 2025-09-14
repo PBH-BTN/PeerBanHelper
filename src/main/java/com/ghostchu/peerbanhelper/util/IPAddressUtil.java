@@ -64,7 +64,7 @@ public final class IPAddressUtil {
 
     @NotNull
     public static IPAddress toPrefixBlock(IPAddress ipAddress, int length) {
-        return ipAddress.toPrefixBlock(length).toZeroHost();
+        return ipAddress.withoutPrefixLength().toPrefixBlock(length).toZeroHost();
     }
 
     public static String adaptIP(byte[] localAddress) throws UnknownHostException {
