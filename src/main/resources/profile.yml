@@ -470,8 +470,8 @@ module:
     max-allowed-idle-time: 300000
     # 闲置速度阈值，持续低于此速度将被视为闲置连接 - Idle speed threshold, connection with speed lower than this value will be considered as idle connection
     # 单位：字节 - Units: bytes
-    idle-speed-threshold: 1024
+    idle-speed-threshold: 64
     # 状态更新最小变化百分比 - Minimum status change percentage
-    min-status-change-percentage: 0.01
+    min-status-change-percentage: 0.0001
     # 当状态更新时视为连接活动，重置计时器（如任务进度） - Consider connection active when status update (e.g progress)
     reset-on-status-change: true
