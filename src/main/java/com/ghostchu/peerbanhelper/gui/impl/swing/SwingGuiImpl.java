@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Slf4j
-public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
+public final class SwingGuiImpl extends ConsoleGuiImpl {
     @Getter
     private final boolean silentStart;
     private SwingMainWindow mainWindow;

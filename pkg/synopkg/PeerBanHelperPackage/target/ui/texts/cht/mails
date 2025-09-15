@@ -1,0 +1,23 @@
+[general_info]
+Category: PeerBanHelper
+Level: NOTIFICATION_INFO
+Desktop: %DESKTOP%
+Subject: %SUBJECT%
+
+%DESCRIPTION%
+
+[general_warn]
+Category: PeerBanHelper
+Level: NOTIFICATION_WARN
+Desktop: %DESKTOP%
+Subject: %SUBJECT%
+
+%DESCRIPTION%
+
+[general_error]
+Category: PeerBanHelper
+Level: NOTIFICATION_ERROR
+Desktop: %DESKTOP%
+Subject: %SUBJECT%
+
+%DESCRIPTION%

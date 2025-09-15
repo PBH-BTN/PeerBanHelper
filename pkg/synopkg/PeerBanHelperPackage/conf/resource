@@ -19,5 +19,14 @@
             }
         ]
     },
-    "systemd-unit": {}
+    "systemd-unit": {},
+    "sysnotify": {
+      "texts_dir": "ui/texts",
+      "app_privileges": [
+        {
+          "app_id": "SYNO.SDS.peerbanhelper.Application",
+          "categories": ["PeerBanHelper"]
+        }
+      ]
+    }
 }
