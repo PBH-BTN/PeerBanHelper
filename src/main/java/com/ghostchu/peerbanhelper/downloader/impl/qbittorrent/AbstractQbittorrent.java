@@ -332,7 +332,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
      *                     应该为大于等于 0 的值，单位是 bytes，0 表示不限制
      */
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         long downloadLimit = speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download();
         long uploadLimit = speedLimiter.isUploadUnlimited() ? 0 : speedLimiter.upload();
         var requestParam = Map.of(

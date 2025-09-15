@@ -578,7 +578,7 @@ public final class BitComet extends AbstractDownloader {
      * @param speedLimiter 限速配置
      */
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         //{"connection_config":{"max_download_speed":25395200,"max_upload_speed":524288,"enable_listen_tcp":true,"listen_port_tcp":27675}}
         try {
             Map<String, Object> map = new HashMap<>();

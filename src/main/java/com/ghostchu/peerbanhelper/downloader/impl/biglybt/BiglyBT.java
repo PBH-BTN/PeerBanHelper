@@ -122,7 +122,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         SetSpeedLimiterBean bean = new SetSpeedLimiterBean(speedLimiter.upload(), speedLimiter.download());
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()

@@ -254,7 +254,7 @@ public final class Deluge extends AbstractDownloader {
      * @param speedLimiter 限速配置
      */
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         long uploadLimit = speedLimiter.isUploadUnlimited() ? 0 : speedLimiter.upload() / 1024;
         long downloadLimit = speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download() / 1024;
         var config = new ConfigRequest();

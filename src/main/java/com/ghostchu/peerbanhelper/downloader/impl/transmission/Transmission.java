@@ -317,7 +317,7 @@ public final class Transmission extends AbstractDownloader {
      * @param speedLimiter 限速配置
      */
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         RqSessionSet set = RqSessionSet.builder()
                 .altSpeedEnabled(false)
                 .altSpeedTimeEnabled(false)
