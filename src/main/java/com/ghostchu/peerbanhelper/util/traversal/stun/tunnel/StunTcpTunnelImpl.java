@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.stun.tunnel;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -28,13 +29,16 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
     private final ScheduledExecutorService keepAliveService = Executors.newScheduledThreadPool(1, runnable -> Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").unstarted(runnable));
     private final AtomicBoolean valid = new AtomicBoolean(false);
     private final PBHPortMapper pbhPortMapper;
+    private final String testHost;
     private Socket keepAliveSocket;
     private long startedAt;
     private long lastSuccessHeartbeatAt;
+    private int keepAliveConsecutiveFailures = 0;
 
     public StunTcpTunnelImpl(PBHPortMapper pbhPortMapper, StunListener stunListener) {
         this.pbhPortMapper = pbhPortMapper;
         this.stunListener = stunListener;
+        this.testHost = ExternalSwitch.parse("pbh.stunTcpTunnel.testHost", "qq.com");
     }
 
     @Override
@@ -125,7 +129,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         try {
             log.debug("Sending NAT Keep-Alive request from {}:{}", keepAliveHost, keepAlivePort);
             Socket socket = getKeepAliveSocket(keepAliveHost, keepAlivePort);
-            socket.getOutputStream().write(("HEAD / HTTP/1.1\r\nHost: qq.com\r\nUser-Agent: PeerBanHelper-NAT-Keeper/1.0\r\nConnection: keep-alive\r\n\r\n").getBytes());
+            socket.getOutputStream().write(("HEAD / HTTP/1.1\r\nHost: "+testHost+"\r\nUser-Agent: PeerBanHelper-NAT-Keeper/1.0\r\nConnection: keep-alive\r\n\r\n").getBytes());
             socket.getOutputStream().flush();
             byte[] buffer = new byte[1024];
             int bytesRead = socket.getInputStream().read(buffer);
@@ -144,6 +148,12 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
                 }
                 keepAliveSocket = null;
             }
+            keepAliveConsecutiveFailures ++;
+            if(keepAliveConsecutiveFailures > ExternalSwitch.parseInt("pbh.stunTcpTunnel.maxKeepAliveFailures", 10)){
+                log.error("NAT Keep-Alive failed {} times, marking tunnel as invalid", keepAliveConsecutiveFailures);
+                valid.set(false);
+                stunListener.onClose(new IOException("NAT Keep-Alive failed " + keepAliveConsecutiveFailures + " times, network interface may disconnected"));
+            }
         }
     }
 
@@ -160,7 +170,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         if (keepAliveSocket.supportedOptions().contains(StandardSocketOptions.SO_REUSEADDR)) {
             keepAliveSocket.setOption(StandardSocketOptions.SO_REUSEADDR, true);
         }
-        keepAliveSocket.connect(new InetSocketAddress("qq.com", 80), 1000);
+        keepAliveSocket.connect(new InetSocketAddress(testHost, 80), 1000);
         return keepAliveSocket;
     }
 
