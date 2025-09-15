@@ -1,4 +1,4 @@
-config-version: 30
+config-version: 31
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -475,3 +475,8 @@ module:
     min-status-change-percentage: 0.001
     # 当状态更新时视为连接活动，重置计时器（如任务进度） - Consider connection active when status update (e.g progress)
     reset-on-status-change: true
+    # 选择保护模式 - Choose protection mode
+    # 模式0 - 在支持 Peer Flags 的下载器上保护下载任务和做种任务 - Mode 0 - Protect both downloading and seeding tasks on downloaders that support Peer Flags
+    # 模式1 - 仅保护做种任务 - Mode 1 - Protect seeding tasks only
+    # 模式2 - 保护下载任务和做种任务，无论 Peer Flags 支持与否，可能引发误判 - Mode 2 - Protect both downloading and seeding tasks, no matter Peer Flags supported or not, may lead to false positive
+    protect-mode: 0

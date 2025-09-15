@@ -25,11 +25,15 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 31)
+    public void idleConnectionDosProtectionUpdate(YamlConfiguration bundled) {
+        conf.set("module.idle-connection-dos-protection", bundled.get("module.idle-connection-dos-protection"));
+    }
+
     @UpdateScript(version = 30)
     public void idleConnectionDosProtection(YamlConfiguration bundled) {
         conf.set("module.idle-connection-dos-protection", bundled.get("module.idle-connection-dos-protection"));
     }
-
 
     @UpdateScript(version = 29)
     public void ipAddressBlockerNetType() {

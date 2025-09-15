@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -7,18 +8,14 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.rule.Rule;
-import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.net.HostAndPort;
-import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -35,6 +32,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
     private long idleSpeedThreshold;
     private boolean resetOnStatusChange;
     private double minStatusChangePercentage;
+    private ProtectionMode protectionMode;
 
     @Override
     public @NotNull String getName() {
@@ -79,10 +77,31 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         this.idleSpeedThreshold = getConfig().getLong("idle-speed-threshold");
         this.minStatusChangePercentage = getConfig().getDouble("min-status-change-percentage");
         this.resetOnStatusChange = getConfig().getBoolean("reset-on-status-change");
+        this.protectionMode = ProtectionMode.fromCode(getConfig().getInt("protect-mode", 0));
     }
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+        // 先检查种子状态
+        if (protectionMode == ProtectionMode.ALWAYS_SEEDING && !torrent.isSeeding()) {
+            return pass();
+        }
+        var flags = peer.getFlags();
+        if (protectionMode == ProtectionMode.DETERMINED_BY_PEER_FLAGS) {
+            // 如果是做种种子，那么无论如何都要保护
+            if (!torrent.isSeeding()) {
+                // 现在是下载种子，检查 Peer Flags 可用性
+                if (flags == null) {
+                    return pass(); // 不支持 Peer Flags 的下载器不保护下载种子
+                }
+                // 检查 Peer Flags
+                if((flags.isInteresting()    // 存在 d/D，兴趣系统在工作，应该已发送 BIT_FIELD，连接活动
+                        || flags.isRemoteInterested() // 存在 u/U，远程对我们感兴趣，连接活动
+                ) && ExternalSwitch.parseBoolean("pbh.module.idle-connection-dos-protection.ignore-if-any-interested", true)){
+                    return pass(); // 这类种子一般连接挺好的，忽略它们
+                }
+            }
+        }
         HostAndPort hostAndPort = HostAndPort.fromParts(peer.getPeerAddress().getIp(), peer.getPeerAddress().getPort());
         // 如果速度够快，那么认为不是空闲连接
         if (peer.getUploadSpeed() > idleSpeedThreshold || peer.getDownloadSpeed() > idleSpeedThreshold) {
@@ -94,7 +113,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         ConnectionInfo info = idleConnections.getOrDefault(hostAndPort, new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), 0));
         long computedAvgUploadSpeed = (peer.getUploaded() - info.getUploaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
         long computedAvgDownloadSpeed = (peer.getDownloaded() - info.getDownloaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
-        double percentageChange = Math.abs(peer.getProgress()*100.0d - info.getPercentage());
+        double percentageChange = Math.abs(peer.getProgress() * 100.0d - info.getPercentage());
         if (computedAvgUploadSpeed > idleSpeedThreshold || computedAvgDownloadSpeed > idleSpeedThreshold) {
             log.debug("Peer {} computed avg speed is above threshold, not idle", hostAndPort);
             idleConnections.remove(hostAndPort);
@@ -145,7 +164,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
             if (!allPeers.contains(hostAndPort)) {
                 entry.getValue().setNotHitCounter(entry.getValue().getNotHitCounter() + 1);
             }
-            if(entry.getValue().getNotHitCounter() > 5){
+            if (entry.getValue().getNotHitCounter() > 5) {
                 log.debug("Removing idle connection {} due to not being seen for 5 checks", hostAndPort);
                 return true;
             }
@@ -162,5 +181,30 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         private long uploaded;
         private long downloaded;
         private int notHitCounter;
+    }
+
+    enum ProtectionMode {
+        DETERMINED_BY_PEER_FLAGS(0),
+        ALWAYS_SEEDING(1),
+        ALWAYS_SEEDING_AND_DOWNLOADING(2);
+
+        private final int code;
+
+        ProtectionMode(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public static ProtectionMode fromCode(int code) {
+            for (ProtectionMode mode : values()) {
+                if (mode.code == code) {
+                    return mode;
+                }
+            }
+            return DETERMINED_BY_PEER_FLAGS;
+        }
     }
 }
