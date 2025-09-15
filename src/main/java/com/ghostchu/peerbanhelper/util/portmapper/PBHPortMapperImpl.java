@@ -26,7 +26,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class PBHPortMapperImpl implements PBHPortMapper {
     private final GatewayDiscover gatewayDiscover = new GatewayDiscover();
     private final Object discoverLock = new Object();
-    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(16, Thread.ofVirtual().factory());
     private final List<MappedPort> mappedPorts = Collections.synchronizedList(new ArrayList<>());
 
     public PBHPortMapperImpl() {
