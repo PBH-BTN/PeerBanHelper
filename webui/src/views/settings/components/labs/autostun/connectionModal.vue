@@ -19,6 +19,20 @@
         <template #empty>
           <a-empty :description="t('page.settings.tab.autostun.no_connections')" />
         </template>
+        <template #region="{ record }">
+          <div v-if="record.ipGeoData?.country?.iso">
+            <CountryFlag
+                v-if="record.ipGeoData?.country?.iso"
+                :iso="record.ipGeoData?.country?.iso"
+                :title="`${record.ipGeoData?.country?.name ?? ''}`"
+            />
+            {{ `${record.ipGeoData?.city?.name ?? ''} ${record.ipGeoData?.network?.isp ?? ''} ${record.ipGeoData?.network?.netType ?? ''}` }}
+          </div>
+          <div v-else>
+            {{'N/A'}}
+          </div>
+
+        </template>
         <template #downstream="{ record }">
           <a-typography-text code>
             <queryIpLink :ip="record.downstreamHost" style="color: var(--color-text-2)">
@@ -106,6 +120,7 @@ import type { ConnectionInfo } from '@/api/model/autostun'
 import { formatFileSize } from '@/utils/file'
 import queryIpLink from '@/components/queryIpLink.vue'
 import dayjs from 'dayjs'
+import CountryFlag from "@/components/countryFlag.vue";
 
 const { t } = useI18n()
 
@@ -126,6 +141,10 @@ defineEmits<{
 
 // Connection table columns definition
 const connectionTableColumns = [
+  {
+    title: t('page.settings.tab.autostun.region'),
+    slotName: 'region'
+  },
   {
     title: t('page.settings.tab.autostun.connection_downstream'),
     slotName: 'downstream'

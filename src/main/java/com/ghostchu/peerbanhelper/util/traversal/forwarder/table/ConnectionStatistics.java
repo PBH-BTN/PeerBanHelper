@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder.table;
 
+import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+
 import java.util.concurrent.atomic.LongAdder;
 
 public class ConnectionStatistics {
@@ -7,6 +9,7 @@ public class ConnectionStatistics {
     private final LongAdder toDownstreamBytes = new LongAdder();
     private long establishedAt;
     private long lastActivityAt;
+    private IPGeoData ipGeoData;
 
     public LongAdder getToUpstreamBytes() {
         return toUpstreamBytes;
@@ -24,6 +27,10 @@ public class ConnectionStatistics {
         return lastActivityAt;
     }
 
+    public IPGeoData getIpGeoData() {
+        return ipGeoData;
+    }
+
     public void setEstablishedAt() {
         this.establishedAt = System.currentTimeMillis();
     }
@@ -38,5 +45,9 @@ public class ConnectionStatistics {
 
     public void setLastActivityAt(long lastActivityAt) {
         this.lastActivityAt = lastActivityAt;
+    }
+
+    public void setIpGeoData(IPGeoData ipGeoData) {
+        this.ipGeoData = ipGeoData;
     }
 }

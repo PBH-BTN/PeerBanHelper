@@ -127,6 +127,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
             ConnectionStatistics statistics = forwarder.getDownstreamAddressAsKeyConnectionStats().get(downstreamAddr);
             if (statistics == null) continue; // disconnected during getting
             TunnelProxyConnectionDTO tunnelProxyConnectionDTO = new TunnelProxyConnectionDTO(
+                    statistics.getIpGeoData(),
                     downstreamAddr.getHostString(),
                     downstreamAddr.getPort(),
                     forwarder.getProxyHost(),

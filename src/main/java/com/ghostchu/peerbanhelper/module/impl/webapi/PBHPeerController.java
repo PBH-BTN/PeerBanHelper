@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
@@ -48,11 +49,13 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final TorrentDao torrentDao;
     private final RuleDao ruleDao;
     private final ModuleDao moduleDao;
+    private final IPDBManager iPDBManager;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
-                             Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager, TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao) {
+                             Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager,
+                             TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao, IPDBManager iPDBManager) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
@@ -64,6 +67,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         this.torrentDao = torrentDao;
         this.ruleDao = ruleDao;
         this.moduleDao = moduleDao;
+        this.iPDBManager = iPDBManager;
     }
 
     @Override
@@ -143,7 +147,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         if (lastTimeSeen != null) {
             lastTimeSeenTS = new Timestamp(lastTimeSeen.getLastTimeSeen().getTime()).getTime();
         }
-        IPDB ipdb = getServer().getIpdb();
+        IPDB ipdb = iPDBManager.getIpdb();
         IPGeoData geoIP = null;
         try {
             if (ipdb != null) {

@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -46,6 +47,8 @@ public final class PBHChartController extends AbstractFeatureModule {
     private HistoryDao historyDao;
     @Autowired
     private TrafficJournalDao trafficJournalDao;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     @Override
     public boolean isConfigurable() {
@@ -188,7 +191,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     }
 
     private void handleGeoIP(Context ctx) throws Exception {
-        IPDB ipdb = getServer().getIpdb();
+        IPDB ipdb = iPDBManager.getIpdb();
         if (ipdb == null) {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.CHARTS_IPDB_NEED_INIT), null));
             return;

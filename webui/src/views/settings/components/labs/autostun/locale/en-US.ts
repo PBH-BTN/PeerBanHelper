@@ -70,6 +70,7 @@ export default {
   'page.settings.tab.autostun.view_connections': 'View Connection Table',
 
   // Connection Table Modal
+  'page.settings.tab.autostun.region': 'Country/Region',
   'page.settings.tab.autostun.connection_table': 'Connection Table',
   'page.settings.tab.autostun.connection_downstream': 'Downstream Address',
   'page.settings.tab.autostun.connection_proxy': 'Proxy Address',

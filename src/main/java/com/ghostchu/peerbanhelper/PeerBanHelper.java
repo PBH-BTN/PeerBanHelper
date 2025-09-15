@@ -19,15 +19,10 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.asynctask.AsyncTask;
-import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
-import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.net.InetAddresses;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -37,12 +32,10 @@ import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -55,20 +48,12 @@ public class PeerBanHelper implements Reloadable {
     @Autowired
     @Getter
     private DownloaderServerImpl downloaderServer;
-    private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000), TimeUnit.MILLISECONDS)
-            .maximumSize(ExternalSwitch.parseInt("pbh.geoIpCache.size", 300))
-            .softValues()
-            .build();
     @Getter
     private int httpdPort;
     @Autowired
     private Database databaseManager;
     @Autowired
     private ModuleManager moduleManager;
-    @Getter
-    @Nullable
-    private IPDB ipdb = null;
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
@@ -77,6 +62,8 @@ public class PeerBanHelper implements Reloadable {
     private CrashManager crashManager;
     @Autowired
     private HTTPUtil httpUtil;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     public PeerBanHelper() {
         reloadConfig();
@@ -95,7 +82,6 @@ public class PeerBanHelper implements Reloadable {
 
     public void start() {
         checkKnownCrashes();
-        setupIPDB();
         Main.getReloadManager().register(this);
         postCompatibilityCheck();
         registerModules();
@@ -191,19 +177,6 @@ public class PeerBanHelper implements Reloadable {
     }
 
 
-    private void setupIPDB() {
-        try {
-            String accountId = Main.getMainConfig().getString("ip-database.account-id", "");
-            String licenseKey = Main.getMainConfig().getString("ip-database.license-key", "");
-            String databaseCity = Main.getMainConfig().getString("ip-database.database-city", "GeoLite2-City");
-            String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "GeoLite2-ASN");
-            boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
-            this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
-                    databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), httpUtil);
-        } catch (Exception e) {
-            log.info(tlUI(Lang.IPDB_INVALID),e );
-        }
-    }
 
 
     public void shutdown() {
@@ -211,9 +184,6 @@ public class PeerBanHelper implements Reloadable {
         downloaderServer.close();
         this.moduleManager.unregisterAll();
         this.databaseManager.close();
-        if (this.ipdb != null) {
-            this.ipdb.close();
-        }
         try {
             downloaderManager.close();
         } catch (Exception e) {
@@ -286,24 +256,9 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(IdleConnectionDosProtection.class);
     }
 
-    public IPDBResponse queryIPDB(InetAddress address) {
-        try {
-            return geoIpCache.get(address.getHostAddress(), () -> {
-                if (ipdb == null) {
-                    return new IPDBResponse(new LazyLoad<>(() -> null));
-                } else {
-                    return new IPDBResponse(new LazyLoad<>(() -> {
-                        try {
-                            return ipdb.query(address);
-                        } catch (Exception ignored) {
-                            return null;
-                        }
-                    }));
-                }
-            });
-        } catch (ExecutionException e) {
-            return new IPDBResponse(null);
-        }
+    @Deprecated(forRemoval = true)
+    public IPDBManager.IPDBResponse queryIPDB(InetAddress address) {
+      return iPDBManager.queryIPDB(address);
     }
 
     /**
@@ -314,11 +269,6 @@ public class PeerBanHelper implements Reloadable {
     @Nullable
     public JavalinWebContainer getWebContainer() {
         return webContainer;
-    }
-
-    public record IPDBResponse(
-            LazyLoad<IPGeoData> geoData
-    ) {
     }
 
 }

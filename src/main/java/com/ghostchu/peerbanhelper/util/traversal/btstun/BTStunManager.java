@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProviderRegistry;
@@ -35,11 +36,12 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     private final NatAddressProviderRegistry natAddressProviderRegistry;
     private final BanList banList;
     private final Laboratory laboratory;
+    private final IPDBManager iPDBManager;
     @Getter
     private boolean enabled = false;
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
-    public BTStunManager(BanList banList, DownloaderManager downloaderManager, PBHPortMapper pBHPortMapper, DownloaderServer downloaderServer, NatAddressProviderRegistry natAddressProviderRegistry, Laboratory laboratory) {
+    public BTStunManager(BanList banList, DownloaderManager downloaderManager, PBHPortMapper pBHPortMapper, DownloaderServer downloaderServer, NatAddressProviderRegistry natAddressProviderRegistry, Laboratory laboratory, IPDBManager iPDBManager) {
         this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.pBHPortMapper = pBHPortMapper;
@@ -55,6 +57,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
         }));
         Main.getEventBus().register(this);
         this.laboratory = laboratory;
+        this.iPDBManager = iPDBManager;
     }
 
     private void load() {
@@ -99,7 +102,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             log.debug("Downloader does not support live update of BT protocol port: {}", downloader.getId());
             return false;
         }
-        var instance = new BTStunInstance(banList, pBHPortMapper, downloader, this, laboratory);
+        var instance = new BTStunInstance(banList, pBHPortMapper, downloader, this, laboratory, iPDBManager);
         perDownloaderStun.put(downloader, instance);
         natAddressProviderRegistry.add(instance);
         return true;

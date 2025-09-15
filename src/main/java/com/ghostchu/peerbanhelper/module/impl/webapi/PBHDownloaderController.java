@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
@@ -15,6 +14,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.DownloaderDiscovery;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
@@ -56,6 +56,8 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     private DownloaderServer downloaderServer;
     @Autowired
     private DownloaderDiscovery downloaderDiscovery;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     @Override
     public boolean isConfigurable() {
@@ -221,7 +223,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private PopulatedPeerDTO populatePeerDTO(PeerMetadata p, boolean resolvePTR) {
         PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
-        PeerBanHelper.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress().getAddress().toInetAddress());
+        IPDBManager.IPDBResponse response = iPDBManager.queryIPDB(p.getPeer().toPeerAddress().getAddress().toInetAddress());
         IPGeoData geoData = response.geoData().get();
         if (geoData != null) {
             dto.setGeo(geoData);

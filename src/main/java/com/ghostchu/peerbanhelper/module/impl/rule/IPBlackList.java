@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -47,6 +48,8 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private long banDuration;
     private Set<String> cities;
     private boolean preloadBanList;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     @Override
     public @NotNull String getName() {
@@ -326,7 +329,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         if (regions.isEmpty() && asns.isEmpty()) {
             return pass();
         }
-        var geoData = getServer().queryIPDB(addr).geoData().get();
+        var geoData = iPDBManager.queryIPDB(addr).geoData().get();
         if (geoData == null) {
             return pass();
         }

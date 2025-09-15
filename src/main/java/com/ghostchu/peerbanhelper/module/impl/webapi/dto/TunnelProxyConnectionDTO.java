@@ -1,11 +1,13 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
+import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @AllArgsConstructor
 @Data
 public class TunnelProxyConnectionDTO {
+    private IPGeoData ipGeoData;
     private String downstreamHost;
     private int downstreamPort;
     private String proxyHost;

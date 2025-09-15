@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.iohandler.*;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
@@ -39,6 +40,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
 
 @Slf4j
 public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressProvider {
@@ -63,16 +65,18 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     private final LongAdder totalToUpstream = new LongAdder();
     private final LongAdder totalToDownstream = new LongAdder();
+    private final IPDBManager ipdb;
 
     private Channel serverChannel;
     private final ForwarderIOHandler ioHandler;
 
-    public TCPForwarderImpl(BanList banList, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort) {
+    public TCPForwarderImpl(BanList banList, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort, IPDBManager ipdb) {
         this.banList = banList;
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
         this.upstreamHost = upstreamHost;
         this.upstreamPort = upstreamPort;
+        this.ipdb = ipdb;
         if (IoUring.isAvailable()) { // 性能最好
             ioHandler = new IOUringHandler();
         } else if (Epoll.isAvailable()) { // 性能很不错！
@@ -213,6 +217,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
                         InetSocketAddress upstreamLocalSocketAddress = (InetSocketAddress) upstreamChannel.localAddress();
                         connectionMap.put(downstreamSocketAddress, upstreamLocalSocketAddress);
+                        stats.setIpGeoData(ipdb.queryIPDB(downstreamSocketAddress.getAddress()).geoData().get());
                         connectionStats.put(downstreamSocketAddress, stats);
                         downstreamChannelMap.put(downstreamSocketAddress, downstreamChannel);
 
@@ -234,7 +239,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         }
 
         private boolean ifBannedAddress(IPAddress downstreamIpAddress) {
-           return banList.contains(downstreamIpAddress);
+            return banList.contains(downstreamIpAddress);
         }
 
         private ChannelFuture connectToUpstreamFriendly(Bootstrap b, InetSocketAddress downstreamSocket) {

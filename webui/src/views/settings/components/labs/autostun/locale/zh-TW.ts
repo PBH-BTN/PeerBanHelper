@@ -70,6 +70,7 @@ export default {
   'page.settings.tab.autostun.view_connections': '檢視連線表',
 
   // Connection Table Modal
+  'page.settings.tab.autostun.region': '國家/地區',
   'page.settings.tab.autostun.connection_table': '連線表',
   'page.settings.tab.autostun.connection_downstream': '下游位址',
   'page.settings.tab.autostun.connection_proxy': '代理位址',

@@ -19,6 +19,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -66,6 +67,8 @@ public final class PBHBanController extends AbstractFeatureModule {
     private RuleDao ruleDao;
     @Autowired
     private BanList banList;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     @Override
     public boolean isConfigurable() {
@@ -211,7 +214,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         banResponseList = banResponseList.peek(response -> {
             PeerWrapper peerWrapper = response.getBanMetadata().getPeer();
             if (peerWrapper != null) {
-                var nullableGeoData = getServer().queryIPDB(peerWrapper.toPeerAddress().getAddress().toInetAddress()).geoData().get();
+                var nullableGeoData = iPDBManager.queryIPDB(peerWrapper.toPeerAddress().getAddress().toInetAddress()).geoData().get();
                 response.setIpGeoData(nullableGeoData);
             }
         });
