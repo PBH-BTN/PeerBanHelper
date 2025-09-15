@@ -215,8 +215,8 @@ public final class PeerFlag {
         boolean remoteInterested = false;
         boolean choked = false;
         boolean optimisticUnchoke = false;
-        boolean snubbed = false;
-        boolean localConnection = false;
+        boolean snubbed = true;
+        boolean localConnection = true;
         boolean fromDHT = false;
         boolean fromPEX = false;
         boolean fromLSD = false;
