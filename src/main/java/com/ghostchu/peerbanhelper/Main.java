@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
+import com.ghostchu.peerbanhelper.gui.impl.synodsm.SynoDsmGui;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.*;
@@ -318,10 +319,14 @@ public class Main {
         if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
             guiType = "console";
         }
+        if(ExternalSwitch.parseBoolean("PBH_PKG_SYNOLOGY")){
+            guiType = "synodsm";
+        }
 
         switch (guiType) {
             //case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
             case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
+            case  "synodsm" -> guiManager = new PBHGuiManager(new SynoDsmGui(args));
             default -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
         }
 
