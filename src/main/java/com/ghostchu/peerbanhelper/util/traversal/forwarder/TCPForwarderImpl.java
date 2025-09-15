@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 
@@ -230,9 +231,12 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                         // 全部设置完毕，开始读取下游数据
                         downstreamChannel.config().setAutoRead(true);
                     } else {
-                        log.error("Error connecting to upstream server", future.cause());
+                        log.debug("Error connecting to upstream server", future.cause());
                         downstreamChannel.close();
                         connectionFailed.increment();
+                        if(connectionFailed.sum() % 50 == 0){
+                            log.error("Error connecting to upstream server, there have {} failed connections. Is downloader down?", connectionFailed.sum(), future.cause());
+                        }
                     }
                 });
             });
