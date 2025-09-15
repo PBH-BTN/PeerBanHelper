@@ -15,7 +15,7 @@ export JAVA_VERSION=${JAVA_VERSION:-21}
 : ${peerbanhelper_user:="root"}
 : ${peerbanhelper_dir:="/usr/local/var/db/peerbanhelper"}
 : ${peerbanhelper_classpath:="/usr/local/lib/peerbanhelper/PeerBanHelper.jar"}
-: ${peerbanhelper_jvm_flags:="-Djdk.attach.allowAttachSelf=true -Dpbh.release=freebsd -Dpbh.datadir=${peerbanhelper_dir} -Xmx512M -XX:+UseG1GC -Xms16M -Xss512k -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"}
+: ${peerbanhelper_jvm_flags:="-Djdk.attach.allowAttachSelf=true -Dpbh.release=freebsd -Dpbh.datadir=${peerbanhelper_dir} -Xmx512M -XX:+UseG1GC -Xms16M -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps"}
 : ${peerbanhelper_command:="/usr/local/bin/java ${peerbanhelper_jvm_flags} -jar ${peerbanhelper_classpath}"}
 
 command="/usr/sbin/daemon"
