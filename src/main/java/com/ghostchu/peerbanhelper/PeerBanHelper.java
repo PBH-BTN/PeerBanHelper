@@ -150,21 +150,6 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
-
-        Thread.ofPlatform().start(() -> {
-            try (var task = AsyncTask.create(new TranslationComponent(Lang.MOTD, "TEST"))) {
-                for (int i = 0; i < 1000; i++) {
-                    task.setMax(1000);
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    task.increment();
-                    task.log("here we go: " + System.currentTimeMillis());
-                }
-            }
-        });
     }
 
 
