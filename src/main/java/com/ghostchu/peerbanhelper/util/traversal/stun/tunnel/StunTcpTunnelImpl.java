@@ -34,6 +34,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
     private long startedAt;
     private long lastSuccessHeartbeatAt;
     private int keepAliveConsecutiveFailures = 0;
+    private int localPort;
 
     public StunTcpTunnelImpl(PBHPortMapper pbhPortMapper, StunListener stunListener) {
         this.pbhPortMapper = pbhPortMapper;
@@ -50,6 +51,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
             localPort = tmpSocket.getLocalPort();
             tmpSocket.close();
         }
+        this.localPort = localPort;
         pbhPortMapper.mapPort(localPort, Protocol.TCP, "PeerBanHelper STUN Hole Puncher (TCP/" + localPort + ")").join();
         TcpStunClient tcpStunClient = new TcpStunClient(Main.getMainConfig().getStringList("stun.tcp-servers"), "0.0.0.0", localPort);
         var mappingResult = tcpStunClient.getMapping();
@@ -129,7 +131,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         try {
             log.debug("Sending NAT Keep-Alive request from {}:{}", keepAliveHost, keepAlivePort);
             Socket socket = getKeepAliveSocket(keepAliveHost, keepAlivePort);
-            socket.getOutputStream().write(("HEAD / HTTP/1.1\r\nHost: "+testHost+"\r\nUser-Agent: PeerBanHelper-NAT-Keeper/1.0\r\nConnection: keep-alive\r\n\r\n").getBytes());
+            socket.getOutputStream().write(("HEAD / HTTP/1.1\r\nHost: " + testHost + "\r\nUser-Agent: PeerBanHelper-NAT-Keeper/1.0\r\nConnection: keep-alive\r\n\r\n").getBytes());
             socket.getOutputStream().flush();
             byte[] buffer = new byte[1024];
             int bytesRead = socket.getInputStream().read(buffer);
@@ -148,8 +150,8 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
                 }
                 keepAliveSocket = null;
             }
-            keepAliveConsecutiveFailures ++;
-            if(keepAliveConsecutiveFailures > ExternalSwitch.parseInt("pbh.stunTcpTunnel.maxKeepAliveFailures", 10)){
+            keepAliveConsecutiveFailures++;
+            if (keepAliveConsecutiveFailures > ExternalSwitch.parseInt("pbh.stunTcpTunnel.maxKeepAliveFailures", 10)) {
                 log.error("NAT Keep-Alive failed {} times, marking tunnel as invalid", keepAliveConsecutiveFailures);
                 valid.set(false);
                 stunListener.onClose(new IOException("NAT Keep-Alive failed " + keepAliveConsecutiveFailures + " times, network interface may disconnected"));
@@ -180,6 +182,9 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         valid.set(false);
         keepAliveService.close();
         stunListener.onClose(null);
+        if (localPort > 0) {
+            pbhPortMapper.unmapPort(localPort, Protocol.TCP);
+        }
         if (keepAliveSocket != null && !keepAliveSocket.isClosed()) {
             try {
                 keepAliveSocket.close();
