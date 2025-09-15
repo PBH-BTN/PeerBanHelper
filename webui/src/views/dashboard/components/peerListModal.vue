@@ -18,14 +18,26 @@
       :pagination="false"
     >
       <template #peerAddress="{ record }">
-        <a-space :wrap="false">
-          <countryFlag v-if="record.geo?.country?.iso" :iso="record.geo.country.iso" />
-          <a-typography-text copyable code style="white-space: nowrap">
-            <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
-              {{ formatIPAddressPort(record.peer.address.ip, record.peer.address.port) }}
-            </queryIpLink>
-          </a-typography-text>
+        <a-space direction="vertical" :wrap="false" fill>
+          <div>
+            <CountryFlag
+                v-if="record.geo?.country?.iso"
+                :iso="record.geo?.country?.iso"
+                :title="`${record.geo?.country?.name ?? ''}`"
+            />
+            {{ `${record.geo?.city?.name ?? ''} ${record.geo?.network?.isp ?? ''} ${record.geo?.network?.netType ?? ''}` }}
+
+          </div>
+          <div>
+            <a-typography-text copyable code style="white-space: nowrap">
+              <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
+                {{ formatIPAddressPort(record.peer.address.ip, record.peer.address.port) }}
+              </queryIpLink>
+            </a-typography-text>
+          </div>
         </a-space>
+
+
       </template>
       <template #speed="{ record }">
         <a-space fill style="justify-content: space-between">
@@ -88,6 +100,7 @@ import { formatIPAddressPort } from '@/utils/string'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import CountryFlag from "@/components/countryFlag.vue";
 const { t } = useI18n()
 const visible = ref(false)
 const downloader = ref('')
