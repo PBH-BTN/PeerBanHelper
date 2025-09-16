@@ -22,16 +22,17 @@
         <template #region="{ record }">
           <div v-if="record.ipGeoData?.country?.iso">
             <CountryFlag
-                v-if="record.ipGeoData?.country?.iso"
-                :iso="record.ipGeoData?.country?.iso"
-                :title="`${record.ipGeoData?.country?.name ?? ''}`"
+              v-if="record.ipGeoData?.country?.iso"
+              :iso="record.ipGeoData?.country?.iso"
+              :title="`${record.ipGeoData?.country?.name ?? ''}`"
             />
-            {{ `${record.ipGeoData?.city?.name ?? ''} ${record.ipGeoData?.network?.isp ?? ''} ${record.ipGeoData?.network?.netType ?? ''}` }}
+            {{
+              `${record.ipGeoData?.city?.name ?? ''} ${record.ipGeoData?.network?.isp ?? ''} ${record.ipGeoData?.network?.netType ?? ''}`
+            }}
           </div>
           <div v-else>
-            {{'N/A'}}
+            {{ 'N/A' }}
           </div>
-
         </template>
         <template #downstream="{ record }">
           <a-typography-text code>
@@ -120,7 +121,7 @@ import type { ConnectionInfo } from '@/api/model/autostun'
 import { formatFileSize } from '@/utils/file'
 import queryIpLink from '@/components/queryIpLink.vue'
 import dayjs from 'dayjs'
-import CountryFlag from "@/components/countryFlag.vue";
+import CountryFlag from '@/components/countryFlag.vue'
 
 const { t } = useI18n()
 

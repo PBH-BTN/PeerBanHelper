@@ -1,6 +1,6 @@
 {
   "name": "pbh-fe",
-  "version": "2.4.8",
+  "version": "2.4.9",
   "private": true,
   "type": "module",
   "scripts": {

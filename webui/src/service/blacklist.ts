@@ -43,6 +43,25 @@ export async function addBlackList<T extends ruleType>(
   })
 }
 
+export async function updateRuleTypeBackList(rules: netType[]): Promise<CommonResponseWithoutData> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `/api/modules/ipblacklist/netType`),
+    location.href
+  )
+
+  return fetch(url, {
+    method: 'PUT',
+    headers: getCommonHeader(),
+    body: JSON.stringify(rules)
+  }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
+  })
+}
+
 export async function deleteBlackList<T extends ruleType>(
   target: T extends 'netType' ? netType : T extends 'port' | 'asn' ? number : string,
   type: T
