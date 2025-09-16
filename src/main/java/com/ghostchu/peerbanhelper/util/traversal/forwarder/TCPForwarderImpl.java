@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
@@ -42,6 +43,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressProvider {
@@ -116,7 +119,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             log.debug("Netty TCPForwarder started and listening on {}:{}", proxyHost, proxyPort);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("Netty TCPForwarder failed to start", e);
+            log.error(tlUI(Lang.AUTOSTUN_TCP_FORWARDER_UNABLE_START), e);
             close();
         }
     }
@@ -234,8 +237,8 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                         log.debug("Error connecting to upstream server", future.cause());
                         downstreamChannel.close();
                         connectionFailed.increment();
-                        if(connectionFailed.sum() % 50 == 0){
-                            log.error("Error connecting to upstream server, there have {} failed connections. Is downloader down?", connectionFailed.sum(), future.cause());
+                        if (connectionFailed.sum() % 50 == 0) {
+                            log.error(tlUI(Lang.AUTOSTUN_TCP_FORWARDER_UNABLE_CONNECT_UPSTREAM, upstreamHost + ":" + upstreamPort, connectionFailed.sum()), future.cause());
                         }
                     }
                 });

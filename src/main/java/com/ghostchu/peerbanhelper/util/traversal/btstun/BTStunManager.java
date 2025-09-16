@@ -115,7 +115,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             try {
                 instance.close();
             } catch (Exception e) {
-                log.error("Failed to close BTStunInstance for downloader: {}", downloader.getId(), e);
+                log.debug("Failed to close BTStunInstance for downloader: {}", downloader.getId(), e);
             }
         }
     }

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.traversal.btstun;
 import com.cdnbye.core.nat.NatType;
 import com.cdnbye.core.nat.NettyStunClient;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
@@ -54,7 +57,7 @@ public class StunManager implements AutoCloseable {
                 log.debug("Failed to query STUN server {}: {}, trying next server", stunServer, e.getMessage());
             }
         }
-        log.error("All STUN servers failed or returned Unknown NAT type, NAT type check failed");
+        log.error(tlUI(Lang.AUTOSTUN_STUN_SERVICE_UNAVAILABLE));
         this.cachedNatType = NatType.UdpBlocked;
         return cachedNatType;
     }

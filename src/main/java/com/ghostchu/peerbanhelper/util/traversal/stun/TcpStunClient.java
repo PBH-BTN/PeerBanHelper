@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.stun;
 
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -8,6 +9,8 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class TcpStunClient {
@@ -45,7 +48,7 @@ public class TcpStunClient {
                 currentServerIndex = (currentServerIndex + 1) % stunServerList.size();
                 // 如果回到第一个服务器，说明所有服务器都试过了
                 if (stunServerList.get(currentServerIndex).equals(firstServer)) {
-                    log.error("No available STUN servers after trying all: {}", stunServerList, e);
+                    log.error(tlUI(Lang.STUN_CLIENT_NO_AVAILABLE_SERVER), stunServerList, e);
                     try {
                         Thread.sleep(10000); // 等待10秒后重试
                     } catch (InterruptedException ie) {

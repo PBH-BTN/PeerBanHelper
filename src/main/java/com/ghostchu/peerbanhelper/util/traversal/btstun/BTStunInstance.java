@@ -61,7 +61,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         this.laboratory = laboratory;
         this.ipdb = ipdb;
         if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT)) {
-            throw new IllegalArgumentException("Downloader does not support live update of BT protocol port");
+            throw new IllegalArgumentException(tlUI(Lang.AUTOSTUN_DOWNLOADER_NOT_SUPPORT_LIVE_UPDATE_PORT, downloader.getName()));
         }
         sched.scheduleWithFixedDelay(() -> {
             try {
@@ -84,7 +84,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         log.info(tlUI(Lang.BTSTUN_RESTART, downloader.getName()));
         this.tunnel = new StunTcpTunnelImpl(portMapper, this);
         try {
-            this.tunnel.createMapping(ExternalSwitch.parseInt("pbh.btstun.localPort", 0));
+            this.tunnel.createMapping(ExternalSwitch.parseInt("pbh.btstun.localPort." + downloader.getId(), 0));
         } catch (IOException e) {
             log.warn(tlUI(Lang.BTSTUN_UNABLE_START, downloader.getName()), e);
             try {
@@ -109,7 +109,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
             try {
                 hostAddress = InetAddress.getByName(hostName.getHost()).getHostAddress();
             } catch (UnknownHostException e) {
-                log.debug("Unable to resolve downloader host", e);
+                log.debug(tlUI(Lang.AUTOSTUN_DOWNLOADER_UNABLE_RESOLVE_DOWNLOADER_HOST, downloader.getName(), e));
             }
         }
 
@@ -140,7 +140,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
             try {
                 manager.unregister(downloader);
             } catch (Exception ex) {
-                log.debug("(Uncaught) Unable to close", ex);
+                log.debug(tlUI(Lang.AUTOSTUN_DOWNLOADER_UNABLE_TO_CLOSE_UNCAUGHT, downloader.getName()), ex);
             }
         }
     }
@@ -162,7 +162,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
             this.shutdownReason = reason;
             log.warn(tlUI(Lang.BTSTUN_ON_TUNNEL_CLOSE_WITH_REASON, downloader.getName(), reason));
         } catch (Exception e) {
-            log.error("Shutting down tunnel failed", e);
+            log.error(tlUI(Lang.AUTOSTUN_DOWNLOADER_UNABLE_TO_SHUTDOWN), e);
         }
     }
 
