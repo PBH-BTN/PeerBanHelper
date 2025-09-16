@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow;
 
 import com.formdev.flatlaf.util.SystemInfo;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
@@ -79,7 +80,7 @@ public final class SwingMainWindow extends JFrame {
 
     private void registerTabs() {
         tabs.add(new LogsTab(this));
-        if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT")) {
+        if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT") && ExternalSwitch.parseBoolean("pbh.swingui.webuiTab", true)) {
             try { // SWT possible be null here on unsupported platform
                 tabs.add(new WebUITab(this));
             } catch (Exception e) {
