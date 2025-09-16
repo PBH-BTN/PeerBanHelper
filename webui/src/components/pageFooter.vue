@@ -101,27 +101,27 @@ watch(hasNewVersion, () => {
 watch(
   () => endpointStore.checkUpgradeError,
   (error) => {
-    if (error instanceof RequestError) {
-      if (error?.message.includes('limit')) {
-        Notification.error({
-          title: t('settings.accessToken.error'),
-          content: t('settings.accessToken.error.limit'),
-          footer: () =>
-            h(
-              Button,
-              {
-                type: 'primary',
-                onClick: () => endpointStore.emitter.emit('open-settings-modal')
-              },
-              () => t('settings.open')
-            )
-        })
-      }
-    } else
-      Notification.error({
-        title: t('settings.accessToken.error'),
-        content: error?.message ?? ''
-      })
+    // if (error instanceof RequestError) {
+    //   if (error?.message.includes('limit')) {
+    //     Notification.error({
+    //       title: t('settings.accessToken.error'),
+    //       content: t('settings.accessToken.error.limit'),
+    //       footer: () =>
+    //         h(
+    //           Button,
+    //           {
+    //             type: 'primary',
+    //             onClick: () => endpointStore.emitter.emit('open-settings-modal')
+    //           },
+    //           () => t('settings.open')
+    //         )
+    //     })
+    //   }
+    // } else
+    //   Notification.error({
+    //     title: t('settings.accessToken.error'),
+    //     content: error?.message ?? ''
+    //   })
   }
 )
 
