@@ -8,7 +8,7 @@ import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
-import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
+import com.ghostchu.peerbanhelper.module.impl.background.SQLiteOptimizerModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
@@ -17,8 +17,6 @@ import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManage
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.LazyLoad;
-import com.ghostchu.peerbanhelper.util.asynctask.AsyncTask;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -35,7 +33,6 @@ import org.springframework.stereotype.Component;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -234,7 +231,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
         moduleManager.register(PBHUtilitiesController.class);
-        moduleManager.register(BackgroundModule.class);
+        moduleManager.register(SQLiteOptimizerModule.class);
         moduleManager.register(SwarmTrackingModule.class);
         // moduleManager.register(MCPController.class);
         moduleManager.register(PBHAutoStunController.class);

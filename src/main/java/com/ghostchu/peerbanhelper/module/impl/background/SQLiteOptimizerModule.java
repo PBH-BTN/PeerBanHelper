@@ -15,11 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public final class BackgroundModule extends AbstractFeatureModule implements Reloadable {
+public final class SQLiteOptimizerModule extends AbstractFeatureModule implements Reloadable {
     private final TorrentDao torrentDao;
     private ScheduledExecutorService pool;
 
-    public BackgroundModule(TorrentDao torrentDao) {
+    public SQLiteOptimizerModule(TorrentDao torrentDao) {
         super();
         this.torrentDao = torrentDao;
     }
