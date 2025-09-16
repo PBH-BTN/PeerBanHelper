@@ -32,15 +32,6 @@ public class PBHGuiBridge {
         }
     }
 
-    public Optional<URI> getPerfUrl() {
-        if (javalinWebContainer.isStarted()) {
-            return Optional.of(URI.create("http://127.0.0.1:" + javalinWebContainer.javalin().port() + "/warmroast/?token=" + javalinWebContainer.getToken()));
-        } else {
-            return Optional.empty();
-        }
-
-    }
-
     public List<AlertEntity> getAlerts() {
         return alertManager.getUnreadAlerts();
     }
