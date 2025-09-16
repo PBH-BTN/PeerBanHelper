@@ -753,3 +753,8 @@ AUTOSTUN_STUN_SERVICE_UNAVAILABLE: "Unable to connect to any STUN server, NAT ty
 AUTOSTUN_TCP_FORWARDER_UNABLE_START: "Netty packet forwarding service failed to start"
 AUTOSTUN_TCP_FORWARDER_UNABLE_CONNECT_UPSTREAM: "Packet forwarding service unable to connect to upstream downloader address {}, failed {} attempts, is the downloader not started or has the listening port changed?"
 STUN_CLIENT_NO_AVAILABLE_SERVER: "Unable to connect to any STUN server: {}"
+PORT_MAPPER_NIC_CHANGES_DETECTED: "[PortMapper] Network interface (NIC) changes detected, rediscovering UPnP-IGD/NAT-PMP/PCP devices list..."
+PORT_MAPPER_DISCOVER_IGD_FAILED: "[PortMapper] Failed to discover UPnP-IGD devices"
+AUTOSTUN_KEEP_ALIVE_FAILED_RETRYING: "[AutoSTUN] Unable to send Keep-Alive heartbeat through {} tunnel, retrying {}/{}: {}"
+AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS: "[AutoSTUN] Unable to send Keep-Alive heartbeat through {} tunnel, maximum retry count reached, closing tunnel..."
+AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS_CLOSE_REASON: "NAT keep-alive requests consecutively failed and reached maximum retry limit, network interface card or IP address may have changed, tunnel has been closed"

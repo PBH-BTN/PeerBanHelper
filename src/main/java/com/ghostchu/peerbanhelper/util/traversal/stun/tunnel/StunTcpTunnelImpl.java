@@ -23,6 +23,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class StunTcpTunnelImpl implements StunTcpTunnel {
     private final StunListener stunListener;
@@ -140,8 +142,11 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
                 log.debug("NAT Keep-Alive request result: {}", statusLine);
             }
             lastSuccessHeartbeatAt = System.currentTimeMillis();
+            keepAliveConsecutiveFailures = 0;
         } catch (IOException e) {
-            log.warn("Failed to send NAT Keep-Alive request: {}", e.getMessage());
+            int maxAllowedRetries = ExternalSwitch.parseInt("pbh.stunTcpTunnel.maxKeepAliveFailures", 5);
+            keepAliveConsecutiveFailures++;
+            log.warn(tlUI(Lang.AUTOSTUN_KEEP_ALIVE_FAILED_RETRYING, keepAliveHost + ":" + keepAlivePort, keepAliveConsecutiveFailures, maxAllowedRetries, e.getMessage()));
             if (keepAliveSocket != null) {
                 try {
                     keepAliveSocket.close();
@@ -150,11 +155,10 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
                 }
                 keepAliveSocket = null;
             }
-            keepAliveConsecutiveFailures++;
-            if (keepAliveConsecutiveFailures > ExternalSwitch.parseInt("pbh.stunTcpTunnel.maxKeepAliveFailures", 10)) {
-                log.error("NAT Keep-Alive failed {} times, marking tunnel as invalid", keepAliveConsecutiveFailures);
+            if (keepAliveConsecutiveFailures >= maxAllowedRetries) {
+                log.error(tlUI(Lang.AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS, keepAliveHost + ":" + keepAlivePort));
                 valid.set(false);
-                stunListener.onClose(new IOException("NAT Keep-Alive failed " + keepAliveConsecutiveFailures + " times, network interface may disconnected"));
+                stunListener.onClose(new IOException(tlUI(Lang.AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS_CLOSE_REASON)));
             }
         }
     }

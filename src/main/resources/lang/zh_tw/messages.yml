@@ -752,3 +752,8 @@ AUTOSTUN_STUN_SERVICE_UNAVAILABLE: "無法連接到任何 STUN 伺服器，NAT �
 AUTOSTUN_TCP_FORWARDER_UNABLE_START: "Netty 封包轉發服務啟動失敗"
 AUTOSTUN_TCP_FORWARDER_UNABLE_CONNECT_UPSTREAM: "封包轉發服務無法連接到上游下載器位址 {}，已嘗試失敗 {} 次，下載器是否未啟動或者監聽埠發生了變動？"
 STUN_CLIENT_NO_AVAILABLE_SERVER: "無法連接到任何 STUN 伺服器：{}"
+PORT_MAPPER_NIC_CHANGES_DETECTED: "[PortMapper] 檢測到裝置網路介面 (NIC) 發生變動，正在重新發現 UPnP-IGD/NAT-PMP/PCP 裝置列表……"
+PORT_MAPPER_DISCOVER_IGD_FAILED: "[PortMapper] 發現 UPnP-IGD 裝置失敗"
+AUTOSTUN_KEEP_ALIVE_FAILED_RETRYING: "[AutoSTUN] 無法透過 {} 隧道發送 Keep-Alive 心跳包，正在重試 {}/{}: {}"
+AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS: "[AutoSTUN] 無法透過 {} 隧道發送 Keep-Alive 心跳包，已達到最大重試次數，正在關閉隧道……"
+AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS_CLOSE_REASON: "NAT 保活請求連續失敗達到最大重試上限，網路介面卡或者 IP 位址可能發生更改，隧道已關閉"

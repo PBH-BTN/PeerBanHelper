@@ -759,3 +759,8 @@ AUTOSTUN_STUN_SERVICE_UNAVAILABLE: "无法连接到任何 STUN 服务器，NAT �
 AUTOSTUN_TCP_FORWARDER_UNABLE_START: "Netty 数据包转发服务启动失败"
 AUTOSTUN_TCP_FORWARDER_UNABLE_CONNECT_UPSTREAM: "数据包转发服务无法连接到上游下载器地址 {}，已尝试失败 {} 次，下载器是否未启动或者监听端口发生了变动？"
 STUN_CLIENT_NO_AVAILABLE_SERVER: "无法连接到任何 STUN 服务器：{}"
+PORT_MAPPER_NIC_CHANGES_DETECTED: "[PortMapper] 检测到设备网络接口 (NIC) 发生变动，正在重新发现 UPnP-IGD/NAT-PMP/PCP 设备列表……"
+PORT_MAPPER_DISCOVER_IGD_FAILED: "[PortMapper] 发现 UPnP-IGD 设备失败"
+AUTOSTUN_KEEP_ALIVE_FAILED_RETRYING: "[AutoSTUN] 无法通过 {} 隧道发送 Keep-Alive 心跳包，正在重试 {}/{}: {}"
+AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS: "[AutoSTUN] 无法通过 {} 隧道发送 Keep-Alive 心跳包，已达到最大重试次数，正在关闭隧道……"
+AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS_CLOSE_REASON: "NAT 保活请求连续失败达到最大重试上限，网络接口卡或者 IP 地址可能发生更改，隧道已关闭"
