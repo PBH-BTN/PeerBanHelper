@@ -44,7 +44,7 @@ export default {
   'page.settings.tab.autostun.downloader_config': '下載器設定',
   'page.settings.tab.autostun.select_downloaders': '啟用的下載器',
   'page.settings.tab.autostun.available_downloaders': '可用',
-  'page.settings.tab.autostun.enabled_downloaders': '啟用',
+  'page.settings.tab.autostun.enabled_downloaders': '已啟用',
   'page.settings.tab.autostun.no_downloaders': '暫無可用的下載器',
   'page.settings.tab.autostun.save_config': '儲存設定',
   'page.settings.tab.autostun.save_success': '設定儲存成功',
