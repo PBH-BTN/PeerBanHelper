@@ -98,8 +98,8 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     @Override
     public void onCreate(@NotNull InetSocketAddress inter, @NotNull InetSocketAddress outer) {
         log.info(tlUI(Lang.BTSTUN_ON_TUNNEL_CREATED, downloader.getName(), inter.getHostString() + ":" + inter.getPort(), outer.getHostString() + ":" + outer.getPort()));
-        var forwarderServerPort = inter.getPort();
-        var downloaderShouldListenOn = outer.getPort();
+        var forwarderServerPort = ExternalSwitch.parseInt("pbh.btsun.forwarderPort." + downloader.getId(), inter.getPort());
+        var downloaderShouldListenOn = ExternalSwitch.parseInt("pbh.btsun.downloaderShouldListenOn." + downloader.getId(), outer.getPort());
         if (forwarderServerPort == downloaderShouldListenOn){
             // 1:1 NAT (Cloud Server?)
             // pick random port
