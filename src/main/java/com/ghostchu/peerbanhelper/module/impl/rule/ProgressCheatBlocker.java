@@ -7,7 +7,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
-import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
+import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;

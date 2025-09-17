@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.PeerBanEvent;
+import com.ghostchu.peerbanhelper.event.banwave.PeerBanEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
@@ -40,9 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Function;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 

@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.event;
+package com.ghostchu.peerbanhelper.event.btn;
 
 import lombok.Data;
 

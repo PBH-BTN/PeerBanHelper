@@ -7,7 +7,7 @@ import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
-import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
+import com.ghostchu.peerbanhelper.event.program.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;

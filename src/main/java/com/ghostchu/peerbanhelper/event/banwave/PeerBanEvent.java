@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.event;
+package com.ghostchu.peerbanhelper.event.banwave;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;

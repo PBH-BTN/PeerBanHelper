@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
+import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.*;

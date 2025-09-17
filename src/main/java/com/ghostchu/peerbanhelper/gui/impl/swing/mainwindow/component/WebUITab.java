@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
+import com.ghostchu.peerbanhelper.event.gui.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed.SwtBrowserCanvas;

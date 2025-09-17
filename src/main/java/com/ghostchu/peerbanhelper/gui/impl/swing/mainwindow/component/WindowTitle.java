@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.text.Lang;

@@ -13,10 +13,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
-import com.ghostchu.peerbanhelper.event.BanWaveLifeCycleEvent;
-import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
-import com.ghostchu.peerbanhelper.event.PeerBanEvent;
-import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
+import com.ghostchu.peerbanhelper.event.banwave.*;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
@@ -221,6 +218,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_NOTIFY_BATCH_MONITOR_MODULES));
             for (FeatureModule module : moduleManager.getModules()) {
                 if (module instanceof BatchMonitorFeatureModule batchMonitorFeatureModule) {
+                    Main.getEventBus().post(new FeatureModuleExecuteEvent(module));
                     batchMonitorFeatureModule.onPeersRetrieved(peers);
                 }
             }
@@ -230,6 +228,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules");
                 for (FeatureModule module : moduleManager.getModules()) {
                     if (module instanceof MonitorFeatureModule monitorFeatureModule) {
+                        Main.getEventBus().post(new FeatureModuleExecuteEvent(module));
                         entry.forEach((torrent, plist) -> monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist));
                     }
                 }
@@ -545,6 +544,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 if (!(registeredModule instanceof RuleFeatureModule module)) {
                     continue;
                 }
+                Main.getEventBus().post(new FeatureModuleExecuteEvent(registeredModule));
                 try {
                     CheckResult checkResult;
                     if (module.isThreadSafe()) {

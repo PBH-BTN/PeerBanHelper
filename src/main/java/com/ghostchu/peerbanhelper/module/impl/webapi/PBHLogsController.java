@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
+import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractWebSocketFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebSocketLogEntryDTO;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;

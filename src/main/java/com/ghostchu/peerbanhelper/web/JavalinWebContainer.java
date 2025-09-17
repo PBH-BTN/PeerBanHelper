@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.web;
 import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
+import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;

@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.event;
+package com.ghostchu.peerbanhelper.event.program;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.event;
+package com.ghostchu.peerbanhelper.event.program.logger;
 
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 
