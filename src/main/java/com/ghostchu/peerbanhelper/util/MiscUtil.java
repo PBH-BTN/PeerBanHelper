@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
@@ -30,7 +31,6 @@ public final class MiscUtil {
     }
 
 
-
     public static void gzip(InputStream is, OutputStream os) throws IOException {
         GZIPOutputStream gzipOs = new GZIPOutputStream(os);
         byte[] buffer = new byte[1024];
@@ -40,6 +40,7 @@ public final class MiscUtil {
         }
         gzipOs.close();
     }
+
     /**
      * Get this class available or not
      *
@@ -138,5 +139,16 @@ public final class MiscUtil {
         }
 
         return result;
+    }
+
+    public static int randomAvailablePort() {
+        try {
+            var tmpSocket = new ServerSocket(0);
+            var localPort = tmpSocket.getLocalPort();
+            tmpSocket.close();
+            return localPort;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }
