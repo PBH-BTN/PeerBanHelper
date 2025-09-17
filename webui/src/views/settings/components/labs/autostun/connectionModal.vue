@@ -115,13 +115,13 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import { Message } from '@arco-design/web-vue'
 import type { ConnectionInfo } from '@/api/model/autostun'
-import { formatFileSize } from '@/utils/file'
-import queryIpLink from '@/components/queryIpLink.vue'
-import dayjs from 'dayjs'
 import CountryFlag from '@/components/countryFlag.vue'
+import queryIpLink from '@/components/queryIpLink.vue'
+import { formatFileSize } from '@/utils/file'
+import { Message } from '@arco-design/web-vue'
+import dayjs from 'dayjs'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
