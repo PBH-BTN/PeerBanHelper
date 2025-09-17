@@ -100,7 +100,7 @@
               <a-button
                 type="primary"
                 size="small"
-                :disabled="!item.tunnel.valid"
+                :disabled="!item.tunnel.valid || item.tunnel.establishedConnections === 0"
                 @click="$emit('viewConnections', item.downloader.id, item.downloader.name)"
               >
                 <template #icon>
