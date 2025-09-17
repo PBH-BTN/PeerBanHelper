@@ -288,7 +288,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.2.8</version>
+            <version>6.2.11</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
