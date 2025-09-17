@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.portmapper.Protocol;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
@@ -48,10 +49,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
     public void createMapping(int localPort) throws IOException {
         startedAt = System.currentTimeMillis();
         if (localPort == 0) {
-            @Cleanup
-            var tmpSocket = new ServerSocket(0);
-            localPort = tmpSocket.getLocalPort();
-            tmpSocket.close();
+           localPort = MiscUtil.randomAvailablePort();
         }
         this.localPort = localPort;
         pbhPortMapper.mapPort(localPort, Protocol.TCP, "PeerBanHelper STUN Hole Puncher (TCP/" + localPort + ")").join();
