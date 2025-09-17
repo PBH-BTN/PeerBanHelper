@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
@@ -100,11 +99,6 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         log.info(tlUI(Lang.BTSTUN_ON_TUNNEL_CREATED, downloader.getName(), inter.getHostString() + ":" + inter.getPort(), outer.getHostString() + ":" + outer.getPort()));
         var forwarderServerPort = inter.getPort();
         var downloaderShouldListenOn = outer.getPort();
-        if (forwarderServerPort == downloaderShouldListenOn){
-            // 1:1 NAT (Cloud Server?)
-            // pick random port
-            forwarderServerPort = MiscUtil.randomAvailablePort();
-        }
         var downloaderHost = URI.create(downloader.getEndpoint()).getHost();
         log.info(tlUI(Lang.BTSTUN_FORWARDER_CREATING, downloader.getName()));
         String hostAddress = null;
@@ -139,7 +133,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
             if (downloader.getBTProtocolPort() != downloaderShouldListenOn) {
                 log.info(tlUI(Lang.BTSTUN_MODIFY_DOWNLOADER_BT_PORT, downloader.getName(), downloaderShouldListenOn));
                 downloader.setBTProtocolPort(downloaderShouldListenOn);
-                log.info(tlUI(Lang.BTSTUN_TUNNEL_CREATE_SUCCESSFULLY, downloader.getName(), downloaderHost + ":" + downloaderShouldListenOn, inter.getHostString() + ":" + forwarderServerPort, outer.getHostString() + ":" + outer.getPort()));
+                log.info(tlUI(Lang.BTSTUN_TUNNEL_CREATE_SUCCESSFULLY, downloader.getName(), downloaderHost + ":" + downloaderShouldListenOn, inter.getHostString() + ":" + inter.getPort(), outer.getHostString() + ":" + outer.getPort()));
             }
         } catch (Exception e) {
             log.warn(tlUI(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_UPDATE_PORT_FAILED, downloader.getName()), e);
