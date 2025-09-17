@@ -28,18 +28,7 @@ public final class ModuleManagerImpl implements ModuleManager {
     public void register(@NotNull Class<? extends FeatureModule> moduleClass) {
         // Main.registerBean(moduleClass, null);
         FeatureModule module = context.getBean(moduleClass);
-        if (module.isModuleEnabled()) {
-            synchronized (modules) {
-                var moduleRegisterEvent = new ModuleRegisterEvent(module);
-                Main.getEventBus().post(moduleRegisterEvent);
-                if (moduleRegisterEvent.isCancelled()) {
-                    log.debug("Module {} registration cancelled: {}", module.getName(), moduleRegisterEvent.getCancelReason());
-                    return;
-                }
-                this.modules.add(module);
-                module.enable();
-            }
-        }
+        attemptRegister(module);
     }
 
     /**
@@ -50,6 +39,10 @@ public final class ModuleManagerImpl implements ModuleManager {
     @Override
     public void register(@NotNull FeatureModule module, String beanName) {
         //  Main.registerBean(module.getClass(), beanName);
+        attemptRegister(module);
+    }
+
+    private void attemptRegister(FeatureModule module){
         if (module.isModuleEnabled()) {
             synchronized (modules) {
                 var moduleRegisterEvent = new ModuleRegisterEvent(module);
