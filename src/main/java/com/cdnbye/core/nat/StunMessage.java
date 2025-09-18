@@ -534,7 +534,7 @@ public class StunMessage {
         return new InetSocketAddress(ip, port);
     }
 
-    private static String byteToBinaryString(byte b) {
+    private static String conver2HexStr(byte b) {
         return Long.toString(b & 0xff, 2);
     }
 
