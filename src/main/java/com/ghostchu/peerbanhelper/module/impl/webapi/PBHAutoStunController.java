@@ -8,6 +8,8 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunInstance;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunManager;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
@@ -104,6 +106,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
     }
 
     private void tunnelConnections(@NotNull Context context) {
+        Pageable pageable = new Pageable(context);
         var downloaderId = context.pathParam("downloader");
         var downloader = downloaderManager.getDownloaderById(downloaderId);
         if (downloader == null) {
@@ -148,7 +151,9 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         connectionList.sort(Comparator.comparing(TunnelProxyConnectionDTO::getToDownstreamBytes)
                 .thenComparing(TunnelProxyConnectionDTO::getToUpstreamBytes)
                 .reversed());
-        context.json(new StdResp(true, null, connectionList));
+        long total = connectionList.size();
+        long skip = pageable.getZeroBasedPage() * pageable.getSize();
+        context.json(new StdResp(true, null, new Page<>(pageable, total, connectionList.stream().skip(skip).limit(pageable.getSize()).toList())));
     }
 
     private void tunnelInfo(@NotNull Context context) {
