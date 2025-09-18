@@ -93,6 +93,7 @@
 </template>
 
 <script setup lang="ts">
+import CountryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getTunnelConnections } from '@/service/autostun'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
