@@ -50,7 +50,7 @@ const model = defineModel<string | undefined>({ required: true })
 
 loader.config({
   paths: {
-    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs'
+    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.53.0/min/vs'
   }
 })
 const AV = 'aviatorscript'
