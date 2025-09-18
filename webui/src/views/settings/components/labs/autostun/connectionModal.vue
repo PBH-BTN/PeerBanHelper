@@ -96,7 +96,6 @@
 import CountryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getTunnelConnections } from '@/service/autostun'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { formatFileSize } from '@/utils/file'
 import dayjs from 'dayjs'
 import { ref } from 'vue'
@@ -150,25 +149,22 @@ const close = () => {
 
 // Auto-refresh connections logic
 const { run, cancel, data, loading, total, current, pageSize, changeCurrent, changePageSize } =
-  usePagination(
-    getTunnelConnections,
-    {
-      defaultParams: [
-        {
-          downloaderId: '',
-          page: 1,
-          pageSize: 20
-        }
-      ],
-      manual: true,
-      pagination: {
-        currentKey: 'page',
-        pageSizeKey: 'pageSize',
-        totalKey: 'data.total'
+  usePagination(getTunnelConnections, {
+    defaultParams: [
+      {
+        downloaderId: '',
+        page: 1,
+        pageSize: 20
       }
+    ],
+    manual: true,
+    pagination: {
+      currentKey: 'page',
+      pageSizeKey: 'pageSize',
+      totalKey: 'data.total'
     },
-    [useAutoUpdatePlugin]
-  )
+    pollingInterval: 5000
+  })
 
 // Utility functions
 const formatTimestamp = (timestamp: number): string => {
