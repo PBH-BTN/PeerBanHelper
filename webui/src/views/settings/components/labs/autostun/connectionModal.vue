@@ -15,17 +15,17 @@
       </template>
       <template #region="{ record }">
         <div v-if="record.ipGeoData?.country?.iso">
-          <CountryFlag
-            v-if="record.ipGeoData?.country?.iso"
-            :iso="record.ipGeoData?.country?.iso"
-            :title="`${record.ipGeoData?.country?.name ?? ''}`"
-          />
           <a-typography-text
             :ellipsis="{
               rows: 1,
               showTooltip: true
             }"
           >
+            <CountryFlag
+              v-if="record.ipGeoData?.country?.iso"
+              :iso="record.ipGeoData?.country?.iso"
+              :title="`${record.ipGeoData?.country?.name ?? ''}`"
+            />
             {{
               `${record.ipGeoData?.city?.name ?? ''} ${record.ipGeoData?.network?.isp ?? ''} ${record.ipGeoData?.network?.netType ?? ''}`
             }}
