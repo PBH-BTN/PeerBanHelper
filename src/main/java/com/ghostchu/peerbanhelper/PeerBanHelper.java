@@ -58,8 +58,6 @@ public class PeerBanHelper implements Reloadable {
     @Autowired
     private CrashManager crashManager;
     @Autowired
-    private HTTPUtil httpUtil;
-    @Autowired
     private IPDBManager iPDBManager;
 
     public PeerBanHelper() {

@@ -477,11 +477,6 @@
             <artifactId>yamlconfiguration</artifactId>
             <version>3.0.3</version>
         </dependency>
-        <dependency>
-            <groupId>org.simplejavamail</groupId>
-            <artifactId>simple-java-mail</artifactId>
-            <version>8.12.6</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -550,7 +545,6 @@
             <artifactId>jna-platform</artifactId>
             <version>5.17.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.modelcontextprotocol.sdk/mcp -->
         <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
@@ -572,8 +566,7 @@
             <groupId>org.eclipse.swt</groupId>
             <artifactId>swt-classpath</artifactId>
             <version>4.37-M2</version>
-            <scope>system
-            </scope> <!-- 由于 SWT 不同平台包类结构相同，因此必须按照平台将对应的 swt 二进制引入 classpath，此处的仅用于解决Maven依赖，实际由 install4j 或者构建脚本负责拷贝 SWT 二进制文件，调试时需要手动引入类路径 -->
+            <scope>system</scope> <!-- 由于 SWT 不同平台包类结构相同，因此必须按照平台将对应的 swt 二进制引入 classpath，此处的仅用于解决Maven依赖，实际由 install4j 或者构建脚本负责拷贝 SWT 二进制文件，调试时需要手动引入类路径 -->
             <systemPath>${project.basedir}/platform-natives/windows-x86_64/libraries/swt.jar</systemPath>
         </dependency>
     </dependencies>
