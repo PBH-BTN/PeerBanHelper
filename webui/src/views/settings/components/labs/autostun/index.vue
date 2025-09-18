@@ -24,20 +24,8 @@
             <TunnelList @view-connections="handleViewConnections" />
           </a-space>
         </a-spin>
-
         <!-- Connection Table Modal -->
-        <a-modal
-          v-model:visible="connectionModalVisible"
-          :title="`${connectionModalTitle} - ${t('page.settings.tab.autostun.connection_table')}`"
-          width="100rem"
-          :footer="false"
-          unmount-on-close
-        >
-          <ConnectionModal
-            :downloader-id="currentConnectionDownloaderId"
-            :modal-title="connectionModalTitle"
-          />
-        </a-modal>
+        <ConnectionModal ref="connectionModal" />
       </div>
     </div>
   </a-space>
@@ -55,9 +43,6 @@ const { t } = useI18n()
 
 // Reactive data
 const firstLoading = ref(true)
-const connectionModalVisible = ref(false)
-const connectionModalTitle = ref('')
-const currentConnectionDownloaderId = ref<string>('')
 
 // Initialize data
 const init = async () => {
@@ -72,11 +57,10 @@ const init = async () => {
 }
 
 // Handlers
+const connectionModal = ref<InstanceType<typeof ConnectionModal>>()
 
 const handleViewConnections = (downloaderId: string, downloaderName: string) => {
-  connectionModalTitle.value = downloaderName
-  currentConnectionDownloaderId.value = downloaderId
-  connectionModalVisible.value = true
+  connectionModal.value?.showModal(downloaderId, downloaderName)
 }
 
 // Initialize on mount

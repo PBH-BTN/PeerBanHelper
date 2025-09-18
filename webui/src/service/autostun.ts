@@ -1,4 +1,3 @@
-import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import type {
   AutoSTUNConfig,
   AutoSTUNStatus,
@@ -6,6 +5,11 @@ import type {
   ConnectionInfo,
   TunnelData
 } from '@/api/model/autostun'
+import type {
+  CommonResponse,
+  CommonResponseWithoutData,
+  CommonResponseWithPage
+} from '@/api/model/common'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -49,25 +53,29 @@ export async function getAutoSTUNTunnels(): Promise<CommonResponse<TunnelData[]>
   })
 }
 
-export async function getTunnelConnections(
+export async function getTunnelConnections(params: {
   downloaderId: string
-): Promise<CommonResponse<ConnectionInfo[]>> {
+  page: number
+  pageSize?: number
+}): Promise<CommonResponseWithPage<ConnectionInfo[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
   const url = new URL(
     urlJoin(
       endpointStore.endpoint,
-      `api/autostun/tunnel/${encodeURIComponent(downloaderId)}/connections`
+      `api/autostun/tunnel/${encodeURIComponent(params.downloaderId)}/connections`
     ),
     location.href
   )
-
-  console.log('Making API request to:', url.toString())
+  if (params.page) {
+    url.searchParams.set('page', String(params.page))
+  }
+  if (params.pageSize) {
+    url.searchParams.set('pageSize', String(params.pageSize))
+  }
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
-    console.log('Response status:', res.status)
-    console.log('Response ok:', res.ok)
     endpointStore.assertResponseLogin(res)
     return res.json()
   })
