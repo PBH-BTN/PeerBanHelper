@@ -123,6 +123,7 @@
 <script setup lang="ts">
 import type { TunnelData } from '@/api/model/autostun'
 import { getAutoSTUNTunnels } from '@/service/autostun'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { formatFileSize } from '@/utils/file.ts'
 import { IconArrowRight, IconEye } from '@arco-design/web-vue/es/icon'
 import { ref } from 'vue'
@@ -147,7 +148,8 @@ const { loading } = useRequest(
       console.error('Failed to refresh tunnels:', error)
       tunnels.value = []
     }
-  }
+  },
+  [useAutoUpdatePlugin]
 )
 
 defineEmits<{

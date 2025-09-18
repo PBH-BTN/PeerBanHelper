@@ -91,7 +91,7 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import countryFlag from '@/components/countryFlag.vue'
+import CountryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'
@@ -99,7 +99,6 @@ import { formatIPAddressPort } from '@/utils/string'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import CountryFlag from '@/components/countryFlag.vue'
 const { t } = useI18n()
 const visible = ref(false)
 const downloader = ref('')
