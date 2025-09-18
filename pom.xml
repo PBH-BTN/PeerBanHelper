@@ -17,7 +17,7 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <install4j.home>/opt/install4j</install4j.home>
-        <flatlafVersion>3.6</flatlafVersion>
+        <flatlafVersion>3.6.1</flatlafVersion>
         <ormlite.version>6.1</ormlite.version>
     </properties>
 
@@ -56,7 +56,7 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
-                        <version>11.0.4</version>
+                        <version>11.0.5</version>
                         <executions>
                             <execution>
                                 <id>compile-installers</id>
@@ -85,7 +85,7 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
-                        <version>11.0.4</version>
+                        <version>11.0.5</version>
                         <executions>
                             <execution>
                                 <id>compile-installers</id>
@@ -127,7 +127,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.38</version>
+                            <version>1.18.42</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -293,14 +293,14 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
+            <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>26.0.2</version>
+            <version>26.0.2-1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -440,7 +440,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
-            <version>3.6</version>
+            <version>3.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -450,7 +450,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>3.6</version>
+            <version>3.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.ghostchu</groupId>
@@ -460,7 +460,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.13.1</version>
+            <version>2.13.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -560,7 +560,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.2.3.Final</version>
+            <version>4.2.6.Final</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.swt</groupId>
