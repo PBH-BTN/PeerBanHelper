@@ -106,6 +106,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
         loadBanListToMemory();
+        load();
     }
 
     @Override
@@ -121,7 +122,11 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
-        reApplyBanListForDownloaders();
+        if (laboratory.isExperimentActivated(Experiments.LAB_EXPERIMENT_ASYNC_BANLIST_APPLY.getExperiment())) {
+            CompletableFuture.runAsync(this::reApplyBanListForDownloaders);
+        } else {
+            reApplyBanListForDownloaders();
+        }
         unbanWhitelistedPeers();
         registerTimer();
     }
@@ -152,7 +157,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Map<IPAddress, BanMetadata> data = banListDao.readBanList();
             this.banList.addAll(data);
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
-            Thread.startVirtualThread(this::reApplyBanListForDownloaders);
         } catch (Exception e) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST), e);
         }
@@ -364,11 +368,15 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     private void reApplyBanListForDownloaders() {
-        downloaderManager.forEach(downloader -> {
-            if (downloader.login().success()) {
-                downloader.setBanList(banList.copyKeySet(), null, null, true);
-            }
-        });
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            downloaderManager.forEach(downloader -> {
+                executor.submit(() -> {
+                    if (downloader.login().success()) {
+                        downloader.setBanList(banList.copyKeySet(), null, null, true);
+                    }
+                });
+            });
+        }
     }
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
