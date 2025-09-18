@@ -45,7 +45,7 @@ defineExpose({
 
 const formatter = (value: string) => {
   const values = value.split('.')
-  values[0] = values[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  values[0] = values[0]!.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 
   return values.join('.')
 }

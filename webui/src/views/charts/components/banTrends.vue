@@ -133,14 +133,14 @@ const chartOptions = ref({
 })
 
 watch(option, (v) => {
-  run(v.range[0], v.range[1], props.downloader)
+  run(v.range[0]!, v.range[1]!, props.downloader)
 })
 
 const { loading, run, refresh } = useRequest(getBanTrends, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), props.downloader],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.series[0].data = data.data
+      chartOptions.value.series![0]!.data = data.data
         .sort((kv1, kv2) => kv1.key - kv2.key)
         .map((kv) => [new Date(kv.key), kv.value])
     }

@@ -155,7 +155,7 @@ function hasLeadingZeroBits(hash: Uint8Array, bits: number): boolean {
   // 检查剩余的位
   if (remainingBits > 0) {
     const mask = 0xff << (8 - remainingBits)
-    return (hash[fullBytes] & mask) === 0
+    return (hash[fullBytes]! & mask) === 0
   }
 
   return true

@@ -124,7 +124,7 @@ const usedOption = computed(() => ({
     },
     formatter: function (value: CallbackDataParams[]) {
       return (
-        d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
+        d((value[0]!.data as OptionDataValue[])[0] as Date, 'short') +
         ':<br/>' +
         value
           .map((params: CallbackDataParams) => {
@@ -181,21 +181,21 @@ const chartOptions = ref({
 })
 
 watch(option, (v) => {
-  run(v.range[0], v.range[1], props.downloader)
+  run(v.range[0]!, v.range[1]!, props.downloader)
 })
 const props = defineProps<{
   downloader?: string
 }>()
 
 const { loading, run, refresh, data } = useRequest(getTraffic, {
-  defaultParams: [option.range[0], option.range[1], props.downloader],
+  defaultParams: [option.range[0]!, option.range[1]!, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.series[0].data = data.data.map((v) => [
+      chartOptions.value.series![0]!.data = data.data.map((v) => [
         new Date(v.timestamp),
         v.dataOverallDownloaded
       ])
-      chartOptions.value.series[1].data = data.data.map((v) => [
+      chartOptions.value.series![1]!.data = data.data.map((v) => [
         new Date(v.timestamp),
         v.dataOverallUploaded
       ])

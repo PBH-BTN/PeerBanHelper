@@ -77,7 +77,7 @@ const loginForm = ref<FormInstance>()
 const handleSubmit: FormInstance['onSubmit'] = async ({ errors, values }) => {
   const errorFields = errors ? Object.keys(errors) : []
   if (errorFields.length > 0) {
-    loginForm.value?.scrollToField(errorFields[0])
+    loginForm.value?.scrollToField(errorFields[0]!)
     return
   }
   const { token, rememberPassword } = values as UnwrapRef<typeof loginConfig>

@@ -179,8 +179,8 @@ const getColor = (level: Level) => {
 }
 
 const markAsRead = (index: number) => {
-  list.value[index].readAt = Date.now()
-  DismissAlert(list.value[index].id).catch((e) => {
+  list.value[index]!.readAt = Date.now()
+  DismissAlert(list.value[index]!.id).catch((e) => {
     if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
   })
 }
