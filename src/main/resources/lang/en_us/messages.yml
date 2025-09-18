@@ -758,3 +758,5 @@ PORT_MAPPER_DISCOVER_IGD_FAILED: "[PortMapper] Failed to discover UPnP-IGD devic
 AUTOSTUN_KEEP_ALIVE_FAILED_RETRYING: "[AutoSTUN] Unable to send Keep-Alive heartbeat through {} tunnel, retrying {}/{}: {}"
 AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS: "[AutoSTUN] Unable to send Keep-Alive heartbeat through {} tunnel, maximum retry count reached, closing tunnel..."
 AUTOSTUN_KEEP_ALIVE_FAILED_TOO_MANY_FAILS_CLOSE_REASON: "NAT keep-alive requests consecutively failed and reached maximum retry limit, network interface card or IP address may have changed, tunnel has been closed"
+LAB_EXPERIMENT_ASYNC_BANLIST_APPLY: "Async banlist application at startup"
+LAB_EXPERIMENT_ASYNC_BANLIST_APPLY_DESCRIPTION: "At startup, apply the banlist asynchronously to avoid blocking the startup thread and improve startup speed."
