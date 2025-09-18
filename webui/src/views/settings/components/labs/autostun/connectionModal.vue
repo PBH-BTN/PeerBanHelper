@@ -3,9 +3,10 @@
     v-model:visible="visible"
     :title="`${title} - ${t('page.settings.tab.autostun.connection_table')}`"
     width="100rem"
-    :footer="false"
+    hide-cancel
     unmount-on-close
-    @close="cancel()"
+    :footer="false"
+    @close="close()"
   >
     <a-space direction="vertical" fill>
       <a-table
@@ -13,6 +14,9 @@
         :bordered="{ cell: true }"
         :data="data?.data.results"
         :pagination="{
+          total,
+          current,
+          pageSize,
           showPageSize: true,
           baseSize: 5,
           bufferSize: 1
@@ -149,8 +153,13 @@ const connectionTableColumns = [
   }
 ]
 
+const close = () => {
+  cancel()
+  visible.value = false
+}
+
 // Auto-refresh connections logic
-const { run, data, loading, total, current, pageSize, changeCurrent, changePageSize, cancel } =
+const { run, cancel, data, loading, total, current, pageSize, changeCurrent, changePageSize } =
   usePagination(
     getTunnelConnections,
     {
