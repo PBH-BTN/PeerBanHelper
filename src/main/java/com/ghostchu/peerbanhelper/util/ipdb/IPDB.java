@@ -330,6 +330,8 @@ public final class IPDB implements AutoCloseable {
                                     fileOutputStream.write(buffer, 0, len);
                                 }
                             }
+                            // validate mmdb
+                            validateMMDB(tmp);
                             Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
@@ -362,6 +364,12 @@ public final class IPDB implements AutoCloseable {
                 log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
             }
         });
+    }
+
+    private void validateMMDB(File tmp) throws IOException {
+       try(var reader = new Reader(tmp, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache())){
+          log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().getDatabaseType());
+       }
     }
 
     @Override

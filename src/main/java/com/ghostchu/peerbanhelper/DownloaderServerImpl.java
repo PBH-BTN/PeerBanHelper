@@ -122,7 +122,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
-        if (laboratory.isExperimentActivated(Experiments.LAB_EXPERIMENT_ASYNC_BANLIST_APPLY.getExperiment())) {
+        if (laboratory.isExperimentActivated(Experiments.ASYNC_BANLIST_APPLY.getExperiment())) {
             CompletableFuture.runAsync(this::reApplyBanListForDownloaders);
         } else {
             reApplyBanListForDownloaders();
