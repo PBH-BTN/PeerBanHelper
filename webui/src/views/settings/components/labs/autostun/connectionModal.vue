@@ -2,7 +2,7 @@
   <a-modal
     v-model:visible="visible"
     :title="`${title} - ${t('page.settings.tab.autostun.connection_table')}`"
-    width="100rem"
+    width="140vh"
     hide-cancel
     unmount-on-close
     :footer="false"
@@ -67,11 +67,6 @@
             {{ record.proxyOutgoingHost }}:{{ record.proxyOutgoingPort }}
           </a-typography-text>
         </template>
-        <template #upstream="{ record }">
-          <a-typography-text code copyable>
-            {{ record.upstreamHost }}:{{ record.upstreamPort }}
-          </a-typography-text>
-        </template>
         <template #established="{ record }">
           <a-space direction="vertical">
             <a-typography-text>
@@ -98,7 +93,6 @@
 </template>
 
 <script setup lang="ts">
-import CountryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getTunnelConnections } from '@/service/autostun'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
@@ -124,22 +118,17 @@ const connectionTableColumns = [
   {
     title: t('page.settings.tab.autostun.region'),
     slotName: 'region',
-    width: 300
+    width: 350
   },
   {
     title: t('page.settings.tab.autostun.connection_downstream'),
     slotName: 'downstream',
-    width: 250
+    width: 230
   },
   {
     title: t('page.settings.tab.autostun.connection_proxy'),
     slotName: 'proxy',
-    width: 250
-  },
-  {
-    title: t('page.settings.tab.autostun.connection_upstream'),
-    slotName: 'upstream',
-    width: 200
+    width: 230
   },
   {
     title: t('page.settings.tab.autostun.connection_established'),
@@ -149,7 +138,7 @@ const connectionTableColumns = [
   {
     title: t('page.settings.tab.autostun.connection_bytes'),
     slotName: 'bytes',
-    width: 240
+    width: 200
   }
 ]
 
