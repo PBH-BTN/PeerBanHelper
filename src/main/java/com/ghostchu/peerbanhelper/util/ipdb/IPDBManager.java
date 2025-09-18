@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
+import com.ghostchu.peerbanhelper.util.lab.Experiments;
+import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -32,9 +35,13 @@ public class IPDBManager {
     @Nullable
     private IPDB ipdb = null;
 
-    public IPDBManager(HTTPUtil hTTPUtil) {
+    public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory) {
         this.hTTPUtil = hTTPUtil;
-        setupIPDB();
+        if (laboratory.isExperimentActivated(Experiments.ASYNC_IPDB_SETUP.getExperiment())) {
+            CompletableFuture.runAsync(this::setupIPDB);
+        } else {
+            setupIPDB();
+        }
     }
 
     private void setupIPDB() {
