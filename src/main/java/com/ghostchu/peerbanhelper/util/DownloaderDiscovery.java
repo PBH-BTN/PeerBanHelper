@@ -24,8 +24,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class DownloaderDiscovery {
     private final OkHttpClient httpClient;
+    private final SystemInfo systemInfo;
 
-    public DownloaderDiscovery(HTTPUtil hTTPUtil) {
+    public DownloaderDiscovery(HTTPUtil hTTPUtil, SystemInfo systemInfo) {
+        this.systemInfo = systemInfo;
         this.httpClient = hTTPUtil.newBuilder()
                 .callTimeout(8, TimeUnit.SECONDS)
                 .followRedirects(true)
@@ -37,12 +39,12 @@ public class DownloaderDiscovery {
                     return chain.proceed(requestBuilder.build());
                 })
                 .build();
+
     }
 
     public CompletableFuture<List<DiscoveredDownloader>> scan() {
         return CompletableFuture.supplyAsync(() -> {
             List<DiscoveredDownloader> found = Collections.synchronizedList(new ArrayList<>());
-            SystemInfo systemInfo = new SystemInfo();
             var listenConnections = systemInfo.getOperatingSystem().getInternetProtocolStats().getConnections()
                     .stream()
                     .filter(conn -> conn.getState() == InternetProtocolStats.TcpState.LISTEN)

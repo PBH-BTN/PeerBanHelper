@@ -40,17 +40,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class LicenseParser {
     public static final String OFFICIAL_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCHxgRTk+Zx/pkN8rpK+Lbr1/f1meapIRDJIgBiSfFy4xdbmDF8wE9PJhdM+3peThz9dJQlt6dkeduIVp65rGS9oZdj7gO5YKtUCDir4NgGQGe1p2C41Xv6RiOXObLmF+ubAJILsimwtDyJT8IysEh9hgaZWnvRXT8JX9wB0Ti2rwIDAQAB";
-    private static final String hardwareUUIDHash;
     private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
+    private final String hardwareUUIDHash;
 
-    static {
-        SystemInfo systemInfo = new SystemInfo();
-        String hardwareUUID = systemInfo.getHardware().getComputerSystem().getHardwareUUID();
-        hardwareUUIDHash = Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString().substring(0, 10);
-    }
-
-    public LicenseParser() throws Exception {
+    public LicenseParser(SystemInfo systemInfo) throws Exception {
         localKeyPair = loadLocalKeyPair();
+        String hardwareUUID = systemInfo.getHardware().getComputerSystem().getHardwareUUID();
+        this.hardwareUUIDHash = Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString().substring(0, 10);
     }
 
     @NotNull

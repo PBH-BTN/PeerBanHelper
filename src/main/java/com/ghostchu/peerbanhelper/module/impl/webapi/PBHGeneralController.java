@@ -72,6 +72,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private StunManager bTStunManager;
     @Autowired
     private HTTPUtil hTTPUtil;
+    @Autowired
+    private SystemInfo systemInfo;
 
     @Override
     public boolean isConfigurable() {
@@ -187,7 +189,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleStatusGet(Context context) {
         // 有点大而全了，需要和前端看看哪些不需要可以删了
-        SystemInfo systemInfo = new SystemInfo();
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("jvm", generateJvmData());
         data.put("system", generateSystemData(context, systemInfo));
