@@ -26,7 +26,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public final class PBHPortMapperImpl implements PBHPortMapper {
-    private final GatewayDiscover gatewayDiscover = new GatewayDiscover();
+    private GatewayDiscover gatewayDiscover = null;
     private final Object discoverLock = new Object();
     private final List<MappedPort> mappedPorts = Collections.synchronizedList(new ArrayList<>());
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1);
@@ -34,7 +34,6 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     private final Lock nicCheckChangeLock = new ReentrantLock();
 
     public PBHPortMapperImpl() {
-        gatewayDiscover.setTimeout(10);
         Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -72,10 +71,13 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     private void scanMappers() {
         synchronized (discoverLock) {
-            if (!gatewayDiscover.getAllGateways().isEmpty()) return;
+            if(gatewayDiscover != null ){
+                return;
+            }
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
             try {
                 updateNICsList();
+                gatewayDiscover = new GatewayDiscover();
                 gatewayDiscover.setTimeout(1000 * 15);
                 gatewayDiscover.discover();
                 log.info(tlUI(Lang.PORTMAPPER_SCANNED, gatewayDiscover.getAllGateways().size()));
