@@ -1,13 +1,13 @@
-import type { donateStatus, GlobalConfig, mainfest, release } from '@/api/model/manifest'
+import type { GlobalConfig, mainfest, release } from '@/api/model/manifest'
+import type { LicenseManifest } from '@/api/model/plus'
 import { basePath } from '@/router'
 import { IncorrectTokenError, login, NeedInitError } from '@/service/login'
+import { getPBHPlusStatus, setPHBPlusKey } from '@/service/plus'
 import {
   GetGlobalConfig,
   getLatestVersion,
   getManifest,
   GetManifestError,
-  getPBHPlusStatus,
-  setPHBPlusKey,
   UpdateGlobalConfig
 } from '@/service/version'
 import networkFailRetryNotication from '@/utils/networkRetry'
@@ -65,7 +65,10 @@ export const useEndpointStore = defineStore('endpoint', () => {
       pushLock()
     }
     try {
-      await login(token ?? '')
+      if (token === null) {
+        throw new IncorrectTokenError()
+      }
+      await login(token)
       if (!isChecking) {
         serverAvailable.value.resolve()
         error.value = null
@@ -145,7 +148,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
     }
   }
 
-  const plusStatus = ref<donateStatus | null>()
+  const plusStatus = ref<LicenseManifest | null>()
   const getPlusStatus = async () => {
     const result = await getPBHPlusStatus()
     plusStatus.value = result.data

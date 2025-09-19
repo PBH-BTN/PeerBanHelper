@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
+import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;

@@ -51,7 +51,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "17"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "19"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -162,6 +162,16 @@ public final class DatabaseHelper {
             }
             v = 17;
         }
+        if (v <= 18) {
+            try {
+                log.info("Dropping old banlist table and re-creating for IPAddress format change");
+                TableUtils.clearTable(database.getDataSource(), BanListEntity.class);
+                TableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 19;
+        }
 
         version.setValue(String.valueOf(v));
         metadata.update(version);
@@ -179,7 +189,7 @@ public final class DatabaseHelper {
                         log.info(tlUI(Lang.DATABASE_UPGRADING_RECORDS, processName, processing, total));
                     }
                     consumer.accept(entity);
-                    dao.update(entity);
+                    dao.createOrUpdate(entity);
                 } catch (Exception e) {
                     log.error("Unhandled error", e);
                 }

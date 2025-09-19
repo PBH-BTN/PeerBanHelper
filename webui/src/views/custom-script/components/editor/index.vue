@@ -50,7 +50,7 @@ const model = defineModel<string | undefined>({ required: true })
 
 loader.config({
   paths: {
-    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs'
+    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.53.0/min/vs'
   }
 })
 const AV = 'aviatorscript'
@@ -81,8 +81,7 @@ const handleChange = (value: string | undefined) => {
   if (!value) return
   const ast = grammarParser.parse(value + '\n')
   const markers = []
-  for (let i = 0; i < ast.errors.length; i++) {
-    const error = ast.errors[i]
+  for (const error of ast.errors) {
     markers.push({
       severity: monacoRef.value!.MarkerSeverity.Error,
       startLineNumber: error.line,
@@ -92,8 +91,7 @@ const handleChange = (value: string | undefined) => {
       message: error.message
     })
   }
-  for (let i = 1; i < ast.ast.children.length - 1; i++) {
-    const child = ast.ast.children[i]
+  for (const child of ast.ast.children) {
     markers.push({
       severity: monacoRef.value!.MarkerSeverity.Error,
       startLineNumber: child.line,

@@ -15,7 +15,7 @@ jobs:
   delete-files-from-s3:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Remove from S3
         uses: vitorsgomes/s3-rm-action@master
         with:

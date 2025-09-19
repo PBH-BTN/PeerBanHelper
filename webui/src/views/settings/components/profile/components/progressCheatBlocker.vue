@@ -1,6 +1,5 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-alert>{{ t('page.settings.tab.profile.module.progressCheatBlocker.tips') }}</a-alert>
     <a-form-item :label="t('page.settings.tab.profile.module.enable')" field="model.enabled">
       <a-switch v-model="model.enabled" />
     </a-form-item>

@@ -219,13 +219,13 @@
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.version.plus')">
             <button class="tag-button" @click="endpointStore.emitter.emit('open-plus-modal')">
-              <a-tag :color="endpointStore.plusStatus?.activated ? 'green' : 'red'">
-                <template v-if="endpointStore.plusStatus?.activated" #icon>
+              <a-tag :color="pbhPlusActivited ? 'green' : 'red'">
+                <template v-if="pbhPlusActivited" #icon>
                   <icon-check-circle-fill />
                 </template>
                 {{
                   t(
-                    endpointStore.plusStatus?.activated
+                    pbhPlusActivited
                       ? 'page.settings.tab.info.version.plus.active'
                       : 'page.settings.tab.info.version.plus.inactive'
                   )
@@ -590,6 +590,12 @@ const isClientIpLocal = computed(() => {
   }
   return false
 })
+
+const pbhPlusActivited = computed(
+  () =>
+    endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
+    endpointStore.plusStatus?.enabledFeatures?.includes('paid')
+)
 
 const osLogo = {
   Windows: genIconComponent('icon-Windows'),

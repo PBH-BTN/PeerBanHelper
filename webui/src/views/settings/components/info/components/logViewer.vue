@@ -147,7 +147,7 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
     if (enable) {
       console.log('open auto refresh')
       return ws.open(
-        logBuffer.value.length > 0 ? logBuffer.value[logBuffer.value.length - 1].offset : 0,
+        logBuffer.value.length > 0 ? logBuffer.value[logBuffer.value.length - 1]!.offset : 0,
         (newLog) => {
           logBuffer.value.push(newLog)
           modules.value.add(newLog.thread)

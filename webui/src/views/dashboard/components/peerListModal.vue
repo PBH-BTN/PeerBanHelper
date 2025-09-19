@@ -18,13 +18,24 @@
       :pagination="false"
     >
       <template #peerAddress="{ record }">
-        <a-space :wrap="false">
-          <countryFlag v-if="record.geo?.country?.iso" :iso="record.geo.country.iso" />
-          <a-typography-text copyable code style="white-space: nowrap">
-            <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
-              {{ formatIPAddressPort(record.peer.address.ip, record.peer.address.port) }}
-            </queryIpLink>
-          </a-typography-text>
+        <a-space direction="vertical" :wrap="false" fill>
+          <div>
+            <CountryFlag
+              v-if="record.geo?.country?.iso"
+              :iso="record.geo?.country?.iso"
+              :title="`${record.geo?.country?.name ?? ''}`"
+            />
+            {{
+              `${record.geo?.city?.name ?? ''} ${record.geo?.network?.isp ?? ''} ${record.geo?.network?.netType ?? ''}`
+            }}
+          </div>
+          <div>
+            <a-typography-text copyable code style="white-space: nowrap">
+              <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
+                {{ formatIPAddressPort(record.peer.address.ip, record.peer.address.port) }}
+              </queryIpLink>
+            </a-typography-text>
+          </div>
         </a-space>
       </template>
       <template #speed="{ record }">
@@ -80,7 +91,7 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import countryFlag from '@/components/countryFlag.vue'
+import CountryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'

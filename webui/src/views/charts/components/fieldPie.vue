@@ -175,18 +175,18 @@ const { loading, run, refresh } = useRequest(getAnalysisDataByField, {
             map.set(key, it.count)
           }
         })
-        chartOption.value.legend.data = []
-        chartOption.value.series[0].data = []
+        chartOption.value.legend!.data = []
+        chartOption.value.series![0]!.data = []
         Array.from(map).forEach(([key, value]) => {
-          chartOption.value.legend.data.push(key)
-          chartOption.value.series[0].data.push({
+          chartOption.value.legend!.data!.push(key)
+          chartOption.value.series![0]!.data!.push({
             name: key,
             value
           })
         })
       } else {
-        chartOption.value.legend.data = nonEmptyData.map((it) => it.data)
-        chartOption.value.series[0].data = nonEmptyData.map((it) => ({
+        chartOption.value.legend!.data = nonEmptyData.map((it) => it.data)
+        chartOption.value.series![0]!.data = nonEmptyData.map((it) => ({
           name: it.data,
           value: it.count
         }))

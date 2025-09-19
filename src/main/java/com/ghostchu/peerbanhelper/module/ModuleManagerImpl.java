@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.module;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.event.module.ModuleRegisterEvent;
+import com.ghostchu.peerbanhelper.event.module.ModuleUnregisterEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +26,9 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public void register(@NotNull Class<? extends FeatureModule> moduleClass) {
-       // Main.registerBean(moduleClass, null);
+        // Main.registerBean(moduleClass, null);
         FeatureModule module = context.getBean(moduleClass);
-        if (module.isModuleEnabled()) {
-            synchronized (modules) {
-                this.modules.add(module);
-                module.enable();
-            }
-        }
+        attemptRegister(module);
     }
 
     /**
@@ -40,9 +38,19 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public void register(@NotNull FeatureModule module, String beanName) {
-      //  Main.registerBean(module.getClass(), beanName);
+        //  Main.registerBean(module.getClass(), beanName);
+        attemptRegister(module);
+    }
+
+    private void attemptRegister(FeatureModule module){
         if (module.isModuleEnabled()) {
             synchronized (modules) {
+                var moduleRegisterEvent = new ModuleRegisterEvent(module);
+                Main.getEventBus().post(moduleRegisterEvent);
+                if (moduleRegisterEvent.isCancelled()) {
+                    log.debug("Module {} registration cancelled: {}", module.getName(), moduleRegisterEvent.getCancelReason());
+                    return;
+                }
                 this.modules.add(module);
                 module.enable();
             }
@@ -58,6 +66,8 @@ public final class ModuleManagerImpl implements ModuleManager {
     @Override
     public boolean unregister(@NotNull FeatureModule module) {
         synchronized (modules) {
+            var moduleUnregisterEvent = new ModuleUnregisterEvent(module);
+            Main.getEventBus().post(moduleUnregisterEvent);
             module.disable();
             return this.modules.remove(module);
         }
@@ -77,7 +87,11 @@ public final class ModuleManagerImpl implements ModuleManager {
                     moduleList.add(featureModule);
                 }
             }
-            moduleList.forEach(this::unregister);
+            moduleList.forEach(unregisteringModule -> {
+                var moduleUnregisterEvent = new ModuleUnregisterEvent(unregisteringModule);
+                Main.getEventBus().post(moduleUnregisterEvent);
+                unregister(unregisteringModule);
+            });
         }
     }
 
@@ -86,7 +100,11 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public void unregisterAll() {
-        List.copyOf(this.modules).forEach(this::unregister);
+        List.copyOf(this.modules).forEach(unregisteringModule -> {
+            var moduleUnregisterEvent = new ModuleUnregisterEvent(unregisteringModule);
+            Main.getEventBus().post(moduleUnregisterEvent);
+            unregister(unregisteringModule);
+        });
     }
 
     /**

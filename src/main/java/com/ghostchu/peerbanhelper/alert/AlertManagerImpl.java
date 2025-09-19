@@ -36,7 +36,7 @@ public final class AlertManagerImpl implements AlertManager {
 
     private void cleanup() {
         try {
-            int removed = this.alertDao.deleteOldAlerts(new Timestamp(System.currentTimeMillis() - 1209600000));
+            int removed = this.alertDao.deleteOldAlerts(new Timestamp(System.currentTimeMillis() - 31536000000L));
             log.info(tlUI(Lang.ALERT_MANAGER_CLEAN_UP, removed));
         } catch (SQLException e) {
             log.warn("Unable to cleanup expired history alerts", e);

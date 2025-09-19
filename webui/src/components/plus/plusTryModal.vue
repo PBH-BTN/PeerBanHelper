@@ -21,13 +21,13 @@
   </a-modal>
 </template>
 <script lang="ts" setup>
-import { obtainFreeTrial } from '@/service/version'
+import { obtainFreeTrial } from '@/service/plus'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { computed, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const DEFAULT_COUNTDOWN = 10
+const DEFAULT_COUNTDOWN = process.env.NODE_ENV === 'production' ? 10 : 2
 
 const { t } = useI18n()
 const timer = ref<NodeJS.Timeout | null>()

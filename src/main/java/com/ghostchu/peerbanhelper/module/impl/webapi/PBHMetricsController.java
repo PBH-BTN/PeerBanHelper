@@ -12,7 +12,6 @@ import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -215,8 +214,9 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         map.put("checkCounter", metrics.getCheckCounter());
         map.put("peerBanCounter", metrics.getPeerBanCounter());
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
-        map.put("banlistCounter", downloaderServer.getBannedPeers().size());
-        map.put("bannedIpCounter", downloaderServer.getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
+        map.put("banlistCounter", downloaderServer.getBanList().size());
+        // todo 这里需要改变
+        map.put("bannedIpCounter", downloaderServer.getBanList().copyKeySet().stream().distinct().count());
         map.put("wastedTraffic", metrics.getWastedTraffic());
         //map.put("savedTraffic", metrics.getSavedTraffic());
         try {

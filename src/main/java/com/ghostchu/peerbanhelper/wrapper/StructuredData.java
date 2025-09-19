@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import java.util.LinkedHashMap;
 
-public class StructuredData<K,V> extends LinkedHashMap<K,V> {
+public final class StructuredData<K,V> extends LinkedHashMap<K,V> {
     public static StructuredData<String, Object> create(){
         return new StructuredData<>();
     }

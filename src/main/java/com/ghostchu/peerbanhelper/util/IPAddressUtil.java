@@ -8,6 +8,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 @Slf4j
 /**
  * IP 地址工具类
@@ -59,6 +64,46 @@ public final class IPAddressUtil {
 
     @NotNull
     public static IPAddress toPrefixBlock(IPAddress ipAddress, int length) {
-        return ipAddress.toPrefixBlock(length).toZeroHost();
+        return ipAddress.withoutPrefixLength().toPrefixBlock(length).toZeroHost();
+    }
+
+    public static String adaptIP(byte[] localAddress) throws UnknownHostException {
+        if (localAddress.length == 0) {
+            // 空地址，默认使用IPv4回环地址
+            return "127.0.0.1";
+        }
+
+        byte[] ipBytes = normalizeAddress(localAddress);
+        var inetAddress = InetAddress.getByAddress(ipBytes);
+
+        if (inetAddress instanceof Inet4Address inet4Address) {
+            if (inet4Address.isAnyLocalAddress()) return "127.0.0.1";
+            return inetAddress.getHostAddress();
+        } else if (inetAddress instanceof Inet6Address inet6Address) {
+            if (inet6Address.isAnyLocalAddress()) return "127.0.0.1"; // 改为IPv4回环地址
+            String hostAddress = inet6Address.getHostAddress();
+            // 处理IPv6地址的方括号格式
+            if (hostAddress.contains(":")) {
+                return "[" + hostAddress + "]";
+            }
+            return hostAddress;
+        }
+        throw new IllegalStateException("Unreachable code");
+    }
+
+
+    public static byte[] normalizeAddress(byte[] localAddress) {
+        if (localAddress.length == 4) {
+            // IPv4 地址，直接返回
+            return localAddress;
+        } else if (localAddress.length <= 16) {
+            // IPv6 地址，可能被截断
+            byte[] fullAddress = new byte[16];
+            System.arraycopy(localAddress, 0, fullAddress, 0, localAddress.length);
+            // 剩余字节已经是0，符合IPv6地址补零的要求
+            return fullAddress;
+        } else {
+            throw new IllegalArgumentException("Invalid address length: " + localAddress.length);
+        }
     }
 }

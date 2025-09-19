@@ -1,16 +1,13 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow;
 
 import com.formdev.flatlaf.util.SystemInfo;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
+import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
-import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.LogsTab;
-import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.TrayMenu;
-import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.WindowMenuBar;
-import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.WindowTitle;
-import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.*;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,28 +21,25 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public final class SwingMainWindow extends JFrame {
     @Getter
     private final SwingGuiImpl swingGUI;
     @Getter
-    private final LogsTab logsTab;
-    @Getter
     private final WindowMenuBar windowMenuBar;
     @Getter
     private final TrayMenu trayMenu;
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
-    private JPanel tabbedPaneLogs;
-    @Getter
-    private JList<LogEntry> loggerTextList;
-    @Getter
-    private JScrollPane loggerScrollPane;
+
     private PBHGuiBridge bridge;
+    private final List<WindowTab> tabs = Collections.synchronizedList(new ArrayList<>());
 
 
     public SwingMainWindow(SwingGuiImpl swingGUI) {
@@ -59,7 +53,6 @@ public final class SwingMainWindow extends JFrame {
         setSize(maxAllowedWidth, maxAllowedHeight);
         setContentPane(mainPanel);
         this.windowMenuBar = new WindowMenuBar(this);
-        setupTabbedPane();
         this.trayMenu = new TrayMenu(this);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -71,14 +64,48 @@ public final class SwingMainWindow extends JFrame {
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
         setIconImage(imageIcon.getImage());
         setVisible(!swingGUI.isSilentStart());
-        this.logsTab = new LogsTab(this);
+        if (SwingUtilities.isEventDispatchThread()) {
+            registerTabs();
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(this::registerTabs);
+            } catch (InterruptedException | InvocationTargetException e) {
+                log.debug("Unable to register Tabs", e);
+            }
+        }
         //this.webuiTab = new WebUITab(this);
         Main.getEventBus().register(this);
+
+    }
+
+    private void registerTabs() {
+        tabs.add(new LogsTab(this));
+        if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT") && ExternalSwitch.parseBoolean("pbh.swingui.webuiTab", true)) {
+            try { // SWT possible be null here on unsupported platform
+                tabs.add(new WebUITab(this));
+            } catch (Exception e) {
+                log.error("Unable to create WebUITab or PerfProfilerTab", e);
+            }
+        } else {
+            log.debug("SWT is not available, WebUITab and PerfProfilerTab will not be created.");
+        }
+        tabs.forEach(WindowTab::onWindowShow);
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+        super.setVisible(b);
+        if (b) {
+            tabs.forEach(WindowTab::onWindowShow);
+        } else {
+            tabs.forEach(WindowTab::onWindowHide);
+        }
     }
 
     @Subscribe
     public void onWebServerStarted(WebServerStartedEvent event) {
         this.bridge = Main.getApplicationContext().getBean(PBHGuiBridge.class);
+        tabs.forEach(tab -> tab.onStarted(bridge));
     }
 
 
@@ -102,11 +129,6 @@ public final class SwingMainWindow extends JFrame {
 
 
     public void sync() {
-    }
-
-
-    private void setupTabbedPane() {
-        setTabTitle(tabbedPaneLogs, tlUI(Lang.GUI_TABBED_LOGS));
     }
 
 
@@ -139,40 +161,9 @@ public final class SwingMainWindow extends JFrame {
         mainPanel.setLayout(new BorderLayout(0, 0));
         tabbedPane = new JTabbedPane();
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
-        tabbedPaneLogs = new JPanel();
-        tabbedPaneLogs.setLayout(new BorderLayout(0, 0));
-        tabbedPane.addTab("Logs", tabbedPaneLogs);
-        loggerScrollPane = new JScrollPane();
-        loggerScrollPane.setEnabled(true);
-        Font loggerScrollPaneFont = this.$$$getFont$$$(null, -1, -1, loggerScrollPane.getFont());
-        if (loggerScrollPaneFont != null) loggerScrollPane.setFont(loggerScrollPaneFont);
-        loggerScrollPane.setVerticalScrollBarPolicy(22);
-        tabbedPaneLogs.add(loggerScrollPane, BorderLayout.CENTER);
-        loggerTextList = new JList();
-        Font loggerTextListFont = UIManager.getFont("TextArea.font");
-        if (loggerTextListFont != null) loggerTextList.setFont(loggerTextListFont);
-        loggerScrollPane.setViewportView(loggerTextList);
+
     }
 
-    /** @noinspection ALL */
-    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
-        if (currentFont == null) return null;
-        String resultName;
-        if (fontName == null) {
-            resultName = currentFont.getName();
-        } else {
-            Font testFont = new Font(fontName, Font.PLAIN, 10);
-            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
-                resultName = fontName;
-            } else {
-                resultName = currentFont.getName();
-            }
-        }
-        Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
-        boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
-        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
-        return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
-    }
 
     /** @noinspection ALL */
     public JComponent $$$getRootComponent$$$() {
@@ -180,7 +171,7 @@ public final class SwingMainWindow extends JFrame {
     }
 
     /** @noinspection ALL */
-    protected Font getFont(String fontName, int style, int size, Font currentFont) {
+    public Font getFont(String fontName, int style, int size, Font currentFont) {
         if (currentFont == null) return null;
         String resultName;
         if (fontName == null) {
@@ -199,10 +190,22 @@ public final class SwingMainWindow extends JFrame {
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
+    public <T extends WindowTab> T getTab(Class<T> tabClass) {
+        for (WindowTab tab : tabs) {
+            if (tab.getClass().equals(tabClass)) {
+                //noinspection unchecked
+                return (T) tab;
+            }
+        }
+        throw new IllegalStateException("Tab not found: " + tabClass.getName());
+    }
+
 
     private void createUIComponents() {
         // TODO: place custom component creation code here
     }
 
-
+    public JTabbedPane getTabbedPane() {
+        return tabbedPane;
+    }
 }

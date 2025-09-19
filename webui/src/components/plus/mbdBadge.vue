@@ -1,6 +1,18 @@
 <template>
-  <div>
-    <div class="mbd-badge">
+  <div
+    :style="{
+      width: width + 'px',
+      height: height + 'px',
+      overflow: 'hidden'
+    }"
+  >
+    <div
+      class="mbd-badge"
+      :style="{
+        transform: `scale(${width / 380})`,
+        'transform-origin': 'left top'
+      }"
+    >
       <div class="mbd-logo">
         <img src="https://mbd.pub/o/_nuxt/img/4ed3725.svg" alt="面包多Logo" />
       </div>
@@ -11,6 +23,18 @@
     </div>
   </div>
 </template>
+<script setup lang="ts">
+const { width, height } = defineProps({
+  width: {
+    type: Number,
+    default: 380
+  },
+  height: {
+    type: Number,
+    default: 138
+  }
+})
+</script>
 <style scoped>
 .mbd-badge {
   width: 380px;

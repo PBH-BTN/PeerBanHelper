@@ -14,17 +14,19 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.net.HostAndPort;
 import com.google.gson.JsonObject;
-import okhttp3.*;
-
 import com.spotify.futures.CompletableFutures;
 import com.vdurmont.semver4j.Semver;
+import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import okhttp3.*;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -56,8 +57,8 @@ public final class BitComet extends AbstractDownloader {
     private String serverName;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
-    public BitComet(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(id, alertManager);
+    public BitComet(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(id, alertManager, natAddressProvider);
         BCAESTool.init();
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
@@ -86,20 +87,20 @@ public final class BitComet extends AbstractDownloader {
         return config.getName();
     }
 
-    public static BitComet loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static BitComet loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = Config.readFromYaml(section, id);
-        return new BitComet(id, config, alertManager, httpUtil);
+        return new BitComet(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static BitComet loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static BitComet loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = JsonUtil.getGson().fromJson(section, Config.class);
-        return new BitComet(id, config, alertManager, httpUtil);
+        return new BitComet(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
     private static PeerAddress parseAddress(String address, int port, int listenPort) {
         address = address.trim();
         HostAndPort hostAndPort = HostAndPort.fromString(address);
-        return new PeerAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(port));
+        return new PeerAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(port), hostAndPort.getHost());
     }
 
     @Override
@@ -107,6 +108,7 @@ public final class BitComet extends AbstractDownloader {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
         if (is211Newer()) {
             flags.add(DownloaderFeatureFlag.UNBAN_IP);
+            flags.add(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
         }
         return flags;
     }
@@ -433,8 +435,9 @@ public final class BitComet extends AbstractDownloader {
                         || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
                         || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
             }
-            return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
-                    peer.getIp(),
+            return stream.map(peer -> new PeerImpl(
+                    natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
+
                     ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),
@@ -450,7 +453,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList && !is211Newer()) {
             setBanListIncrement(added);
         } else {
@@ -463,13 +466,13 @@ public final class BitComet extends AbstractDownloader {
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
         StringJoiner joiner = new StringJoiner("\n");
-        added.stream().map(meta -> meta.getPeer().getAddress().getIp()).distinct().forEach(joiner::add);
+        added.stream().map(meta -> meta.getPeer().getAddress().getAddress().toPrefixBlock().toNormalizedString()).distinct().forEach(joiner::add);
         operateBanListLegacy("merge", joiner.toString());
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    private void setBanListFull(Collection<IPAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+        peerAddresses.stream().map(IPAddress::toPrefixBlock).map(IPAddress::toNormalizedString).distinct().forEach(joiner::add);
         operateBanListLegacy("replace", joiner.toString());
     }
 
@@ -526,7 +529,9 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public void close() {
-
+        if(!parallelService.isShutdown()) {
+            parallelService.shutdownNow();
+        }
     }
 
     @Override
@@ -573,7 +578,7 @@ public final class BitComet extends AbstractDownloader {
      * @param speedLimiter 限速配置
      */
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         //{"connection_config":{"max_download_speed":25395200,"max_upload_speed":524288,"enable_listen_tcp":true,"listen_port_tcp":27675}}
         try {
             Map<String, Object> map = new HashMap<>();
@@ -601,6 +606,67 @@ public final class BitComet extends AbstractDownloader {
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), e.getClass().getName() + ": " + e.getMessage()), e);
+        }
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(map), MediaType.get("application/json"));
+            Request request = new Request.Builder()
+                    .url(apiEndpoint + BCEndpoint.GET_CONNECTION_CONFIG.getEndpoint())
+                    .post(requestBody)
+                    .header("Authorization", "Bearer " + this.deviceToken)
+                    .build();
+
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), response.code() + " " + response.body().string()));
+                    return -1;
+                }
+                var configResp = JsonUtil.standard().fromJson(response.body().string(), BCConnectionConfigResponse.class);
+                if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
+                    log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), configResp.getErrorMessage()));
+                }
+                return configResp.getConnectionConfig().getListenPortTcp();
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), e.getClass().getName() + ": " + e.getMessage()), e);
+            return -1;
+        }
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+        Map<String, Object> settings = new HashMap<>() {{
+            put("connection_config", new HashMap<>() {{
+                put("enable_listen_tcp", true);
+                put("listen_port_tcp", port);
+            }});
+        }};
+
+        RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(settings), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + BCEndpoint.SET_CONNECTION_CONFIG.getEndpoint())
+                .post(requestBody)
+                .header("Authorization", "Bearer " + this.deviceToken)
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED));
+                return;
+            }
+            var json = response.body().string();
+            var configResp = JsonUtil.standard().fromJson(json, BCConfigSetResponse.class);
+            if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT));
+                System.out.println(json);
+                throw new IllegalStateException("Failed to save BitComet BT Protocol Port: " + configResp.getErrorMessage());
+            }
+        }catch (Exception e){
+            throw new IllegalStateException("Failed to save BitComet BT Protocol Port",e);
         }
     }
 

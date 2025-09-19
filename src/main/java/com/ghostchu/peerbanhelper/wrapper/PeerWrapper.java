@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public final class PeerWrapper {
-    private PeerAddressWrapper address;
+    private PeerAddress address;
     private String rawIp;
     private String id;
     private String clientName;
@@ -22,8 +22,8 @@ public final class PeerWrapper {
 
     public PeerWrapper(Peer peer) {
         this.id = peer.getPeerId();
-        this.rawIp = peer.getRawIp();
-        this.address = new PeerAddressWrapper(peer.getPeerAddress());
+        this.rawIp = peer.getPeerAddress().getRawIp();
+        this.address = peer.getPeerAddress();
         this.clientName = peer.getClientName();
         this.downloaded = peer.getDownloaded();
         this.downloadSpeed = peer.getDownloadSpeed();
@@ -34,6 +34,6 @@ public final class PeerWrapper {
     }
 
     public PeerAddress toPeerAddress() {
-        return new PeerAddress(address.getIp(), address.getPort());
+        return new PeerAddress(address.getIp(), address.getPort(), rawIp);
     }
 }

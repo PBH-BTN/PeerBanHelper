@@ -3,17 +3,15 @@ package com.ghostchu.peerbanhelper.web;
 import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
-import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
+import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
+import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
-import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
-import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
-import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
+import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
+import com.ghostchu.peerbanhelper.web.exception.*;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -45,6 +43,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public final class JavalinWebContainer {
     private final Javalin javalin;
+    private final PBHPortMapper pBHPortMapper;
     @Setter
     @Getter
     private String token;
@@ -56,7 +55,7 @@ public final class JavalinWebContainer {
     @Getter
     private volatile boolean started;
 
-    public JavalinWebContainer(ActivationManager activationManager) {
+    public JavalinWebContainer(LicenseManager licenseManager, PBHPortMapper pBHPortMapper) {
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -127,11 +126,15 @@ public final class JavalinWebContainer {
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
                     log.error("500 Internal Server Error", e);
                 })
+                .exception(BlockScannerException.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.NOT_FOUND);
+                    ctx.header("Server", "nginx");
+                    ctx.result( "404 not found");
+                    ctx.attribute("skipAfter", true);
+                })
                 .beforeMatched(ctx -> {
                     if (!securityCheck(ctx)) {
-                        ctx.status(404);
-                        ctx.result("404 not found");
-                        return;
+                        throw new BlockScannerException();
                     }
                     if (ctx.routeRoles().isEmpty()) {
                         return;
@@ -140,7 +143,7 @@ public final class JavalinWebContainer {
                         return;
                     }
                     if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
-                        if (!activationManager.isActivated()) {
+                        if (!licenseManager.isFeatureEnabled("basic")) {
                             throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
                         }
                     }
@@ -170,8 +173,13 @@ public final class JavalinWebContainer {
                         throw new NotLoggedInException();
                     }
                 })
-                .options("/*", ctx -> ctx.status(200));
+                .options("/*", ctx -> ctx.status(200))
+                .after(ctx -> {
+                    if(ctx.attribute("skipAfter") != null) return;
+                    ctx.header("Server", Main.getUserAgent());
+                });
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+        this.pBHPortMapper = pBHPortMapper;
     }
 
     private boolean securityCheck(Context ctx) {
@@ -275,7 +283,7 @@ public final class JavalinWebContainer {
         if (ipAddr.isIPv4()) {
             ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 24);
         } else {
-            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 60);
+            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 50);
         }
         return ipAddr;
     }

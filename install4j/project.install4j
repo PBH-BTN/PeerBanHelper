@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="11.0.4" transformSequenceNumber="11">
+<install4j version="11.0.5" transformSequenceNumber="11">
   <directoryPresets config="../native/qt6" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="21" javaMaxVersion="25">
     <languages>
@@ -13,9 +13,8 @@
     <variables>
       <variable name="jarPath" value="../target/PeerBanHelper.jar" />
       <variable name="librariesPath" value="../target/libraries" />
-      <variable name="startupFlagPlatform" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatform}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" />
-      <variable name="startupFlagPlatformNoGUI" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true" overrideWindows="true" valueWindows="-XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
-      <variable name="startupFlagPlatformNoGUILowRAM" value="-Xmx168M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true -Dpbh.geoIpCache.timeout=30000 -Dpbh.geoIpCache.size=100 -Dpbh.moduleMatchCache.weight=25000 -Dpbh.modulematchcache.timeout=30000 -Dpbh.gui.logs.maxSize=50 -Dpbh.logger.logEntryDeque.size=100 -Dpbh.logger.ringDeque.size=50 -Dpbh.module.activeMonitorModule.diskWriteCache.timeout=30000 -Dpbh.module.activeMonitorModule.diskWriteCache.size=1500 -Dpbh.module.progressCheatBlocker.recorder.timeout=30000 -Dpbh.module.progressCheatBlocker.recorder.weight=6000000" overrideWindows="true" valueWindows="-XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUILowRAM}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUILowRAM}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUILowRAM}" />
+      <variable name="startupFlagPlatform" value="-Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatform}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" />
+      <variable name="startupFlagPlatformNoGUI" value="-Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
       <variable name="jvmOptionsFile" value="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideWindows="true" valueWindows="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideMacos="true" valueMacos="${user.home}/Library/Application Support/PeerBanHelper" overrideUnix="true" valueUnix="${user.home}/.config/PeerBanHelper" />
     </variables>
     <jreBundles jdkProviderId="JBR" release="21/21.0.8-b1038.68" />
@@ -23,13 +22,22 @@
   <files keepModificationTimes="true">
     <filesets>
       <fileset name="disable-checking-updates" id="263" />
+      <fileset name="platform-natives-windows-x86_64" id="306" />
+      <fileset name="platform-natives-macos-aarch64" id="308" />
+      <fileset name="platform-natives-macos-x86_64" id="320" />
     </filesets>
     <roots>
       <root id="264" fileset="263" />
+      <root id="307" fileset="306" />
+      <root id="309" fileset="308" />
+      <root id="321" fileset="320" />
     </roots>
     <mountPoints>
       <mountPoint id="24" />
       <mountPoint id="265" root="264" />
+      <mountPoint id="312" root="307" />
+      <mountPoint id="313" root="309" />
+      <mountPoint id="325" root="321" />
     </mountPoints>
     <entries>
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
@@ -37,6 +45,9 @@
       <dirEntry mountPoint="24" file="./scripts" overwriteMode="1" overrideOverwriteMode="true" entryMode="subdir" subDirectory="scripts" />
       <variableEntry mountPoint="24" name="jarPath" />
       <fileEntry mountPoint="265" file="./disable-checking-updates.txt" />
+      <dirEntry mountPoint="312" file="../platform-natives/windows-x86_64/libraries" entryMode="subdir" subDirectory="libraries" />
+      <dirEntry mountPoint="313" file="../platform-natives/macos-aarch64/libraries" entryMode="subdir" subDirectory="libraries" />
+      <dirEntry mountPoint="325" file="../platform-natives/macos-x86_64/libraries" entryMode="subdir" subDirectory="libraries" />
     </entries>
     <components>
       <component name="${i18n:components.peerbanhelper}" id="245" customizedId="peerbanhelper" changeable="false">
@@ -54,6 +65,21 @@
           <component id="245" />
         </dependencies>
       </component>
+      <component name="${i18n:components.windows.x86_64.native}" id="319" changeable="false" hidden="true">
+        <include>
+          <entry filesetId="306" />
+        </include>
+      </component>
+      <component name="${i18n:components.macos.aarch64.native}" id="326" changeable="false" hidden="true">
+        <include>
+          <entry filesetId="308" />
+        </include>
+      </component>
+      <component name="${i18n:components.macos.x86_64.native}" id="327" changeable="false" hidden="true">
+        <include>
+          <entry filesetId="320" />
+        </include>
+      </component>
     </components>
   </files>
   <launchers>
@@ -67,7 +93,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="-23" line="-XX:+ZGenerational" />
+          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="25-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
         </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
@@ -87,7 +115,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="-23" line="-XX:+ZGenerational" />
+          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="25-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
         </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
@@ -107,7 +137,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="-23" line="-XX:+ZGenerational" />
+          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="25-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
         </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
@@ -127,31 +159,12 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
+          <options version="-23" line="-XX:+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
       <iconImageFiles>
         <file path="./updater.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="PeerBanHelper NoGUI LowRAM" id="267" excludeFromMenu="true" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-NoGUI-LowRAM" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" checkConsoleParameter="true">
-        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
-      </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatformNoGUILowRAM}" arguments="nogui nojcef">
-        <classPath>
-          <scanDirectory location="libraries" failOnError="false" />
-          <archive location="PeerBanHelper.jar" failOnError="false" />
-        </classPath>
-        <vmOptions>
-          <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
-        </vmOptions>
-      </java>
-      <vmOptionsFile mode="content" overwriteMode="2">
-        <content>-include-options ${compiler:jvmOptionsFile}</content>
-      </vmOptionsFile>
-      <iconImageFiles>
-        <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
     <launcher name="PeerBanHelper Service" id="291" excludeFromMenu="true" checkUpdater="true">
@@ -164,7 +177,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="-23" line="-XX:+ZGenerational" />
+          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
+          <options version="25" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
         </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
@@ -478,6 +493,55 @@ return true;
                 </serializedBean>
                 <condition>context.getBooleanVariable("registerSystemService")</condition>
               </action>
+              <group name="Firewall Settings" id="305" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
+                <beans>
+                  <action name="Firewall Main Executable" id="299" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">26</property>
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(Main) Incoming TCP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall Silent Executable" id="300" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">66</property>
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(GUI Silent) Incoming TCP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall NoGUI Executable" id="301" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">28</property>
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(NoGUI) Incoming TCP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall Main Executable" id="302" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">26</property>
+                      <property name="protocol" type="enum" class="com.install4j.runtime.beans.actions.firewall.WindowsFirewallProtocol" value="UDP" />
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(Main) Incoming UDP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall Silent Executable" id="303" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">66</property>
+                      <property name="protocol" type="enum" class="com.install4j.runtime.beans.actions.firewall.WindowsFirewallProtocol" value="UDP" />
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(GUI Silent) Incoming UDP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall NoGUI Executable" id="304" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">28</property>
+                      <property name="protocol" type="enum" class="com.install4j.runtime.beans.actions.firewall.WindowsFirewallProtocol" value="UDP" />
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(NoGUI) Incoming UDP</property>
+                    </serializedBean>
+                  </action>
+                </beans>
+              </group>
               <group name="Install Microsoft Edge Webview2 on Windows" id="287" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <beans>
                   <action id="288" beanClass="com.install4j.runtime.beans.actions.registry.ReadRegistryValueAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
@@ -1788,21 +1852,73 @@ return true;</property>
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="64" />
+    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="64">
+      <excludedComponents>
+        <component id="326" />
+        <component id="327" />
+      </excludedComponents>
+    </windows>
     <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
+      <excludedComponents>
+        <component id="326" />
+        <component id="327" />
+      </excludedComponents>
       <jreBundle jreBundleSource="none" />
     </windows>
-    <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="arm64" />
+    <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="arm64">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
+    </windows>
     <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="arm64">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
       <jreBundle jreBundleSource="none" />
     </windows>
-    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="universal" />
-    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}" architecture="universal">
+    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="320" />
+      </exclude>
+    </macosFolder>
+    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="320" />
+      </exclude>
       <jreBundle jreBundleSource="none" />
     </macosFolder>
-    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_rpm_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
-    <unixInstaller name="x64 Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true" />
+    <macosFolder name="macOS Folder (Intel)" id="335" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="amd64">
+      <excludedComponents>
+        <component id="319" />
+        <component id="326" />
+      </excludedComponents>
+    </macosFolder>
+    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_rpm_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
+    </linuxRPM>
+    <unixInstaller name="x64 Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
+    </unixInstaller>
     <unixInstaller name="aarch64 Linux Installer" id="127" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+        <entry filesetId="320" />
+      </exclude>
       <jreBundle platform="linux-aarch64" />
     </unixInstaller>
   </mediaSets>

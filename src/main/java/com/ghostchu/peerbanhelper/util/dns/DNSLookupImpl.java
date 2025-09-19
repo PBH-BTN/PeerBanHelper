@@ -21,10 +21,12 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Component
 public final class DNSLookupImpl implements Reloadable, DNSLookup {
+    private final SystemInfo systemInfo;
     private volatile ExtendedResolver resolver;
     private volatile boolean bootComplete = false;
 
-    public DNSLookupImpl() {
+    public DNSLookupImpl(SystemInfo systemInfo) {
+        this.systemInfo = systemInfo;
         reloadConfig();
         Main.getReloadManager().register(this);
     }
@@ -39,7 +41,6 @@ public final class DNSLookupImpl implements Reloadable, DNSLookup {
         // get system dns via oshi
         try {
             resolver = new ExtendedResolver();
-            SystemInfo systemInfo = new SystemInfo();
             var dnsServers = systemInfo.getOperatingSystem().getNetworkParams().getDnsServers();
             List<String> dns = Main.getMainConfig().getStringList("resolvers.servers");
             if (Main.getMainConfig().getBoolean("resolvers.use-system", true)) {

@@ -18,6 +18,14 @@ public final class JsonUtil {
             .disableHtmlEscaping()
             .create();
 
+    private static final Gson TINY_JSON = new GsonBuilder()
+            .enableComplexMapKeySerialization()
+            .setExclusionStrategies(new HiddenAnnotationExclusionStrategy())
+            .registerTypeAdapter(Timestamp.class, TimestampTypeAdapter.INSTANCE)
+            .registerTypeAdapter(TranslationComponent.class, TranslationComponentTypeAdapter.INSTANCE)
+            .disableHtmlEscaping()
+            .create();
+
     @NotNull
     @Deprecated
     public static Gson get() {
@@ -27,6 +35,10 @@ public final class JsonUtil {
     @NotNull
     public static Gson standard() {
         return STANDARD_GSON;
+    }
+
+    public static Gson tiny() {
+        return TINY_JSON;
     }
 
     public static Gson getGson() {

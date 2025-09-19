@@ -133,21 +133,21 @@ const chartOptions = ref({
 })
 
 watch(option, (v) => {
-  run(v.range[0], v.range[1], props.downloader)
+  run(v.range[0]!, v.range[1]!, props.downloader)
 })
 const props = defineProps<{
   downloader?: string
 }>()
 const { loading, run, refresh } = useRequest(getTrends, {
-  defaultParams: [option.range[0], option.range[1], props.downloader],
+  defaultParams: [option.range[0]!, option.range[1]!, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.series[0].data = data.data.connectedPeersTrend
+      chartOptions.value.series![0]!.data = data.data.connectedPeersTrend
         .sort((a, b) => a.key - b.key)
         .map((it) => {
           return [new Date(it.key), it.value]
         })
-      chartOptions.value.series[1].data = data.data.bannedPeersTrend
+      chartOptions.value.series![1]!.data = data.data.bannedPeersTrend
         .sort((a, b) => a.key - b.key)
         .map((it) => {
           return [new Date(it.key), it.value]

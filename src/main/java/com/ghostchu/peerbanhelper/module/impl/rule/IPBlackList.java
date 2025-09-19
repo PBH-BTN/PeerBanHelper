@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -40,11 +42,14 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private Set<Integer> ports;
     private Set<Long> asns;
     private Set<String> regions;
-    private Set<String> netTypes;
+    private Set<String> networkType;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
     private Set<String> cities;
+    private boolean preloadBanList;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     @Override
     public @NotNull String getName() {
@@ -77,8 +82,24 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
                 .delete("/api/modules/ipblacklist/region", this::handleRegionDelete, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/city", this::handleCities, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/city", this::handleCitiesDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/netType", this::handleNetTypePut, Role.USER_WRITE)
         ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
         Main.getReloadManager().register(this);
+    }
+
+    private void handleNetTypePut(@NotNull Context context) {
+        String[] inputNetTypes = context.bodyAsClass(String[].class);
+        this.networkType = new HashSet<>(Arrays.asList(inputNetTypes));
+        try {
+            saveConfig();
+            getCache().invalidateAll();
+            context.status(HttpStatus.OK);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        } catch (IOException e) {
+            log.error("Unable to save config file", e);
+            context.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            context.json(new StdResp(false, "Unable to save config file", null));
+        }
     }
 
     private void handleCitiesDelete(Context context) throws IOException {
@@ -102,16 +123,6 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         saveConfig();
         getCache().invalidateAll();
     }
-//
-//    private void handleNetTypeDelete(Context context) throws IOException {
-//        if (netTypes.removeIf(netType -> netType.equals(context.))) {
-//            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
-//        } else {
-//            context.status(HttpStatus.NOT_FOUND);
-//            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
-//        }
-//        saveConfig();
-//    }
 
     private void handleRegionDelete(Context context) throws IOException {
         if (regions.removeIf(region -> region.equals(context.bodyAsClass(UserRegionRequest.class).region()))) {
@@ -234,15 +245,17 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
             case "asn" -> map.put("asn", asns);
             case "region" -> map.put("region", regions);
             case "city" -> map.put("city", cities);
-            case "netType" -> map.put("netType", netTypes);
+            case "netType" -> map.put("netType", networkType);
             default -> {
                 ctx.status(HttpStatus.NOT_FOUND);
+                ctx.json(new StdResp(false, "Illegal pathParams: ruleType not acceptable.", null));
                 return;
             }
         }
         ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, map));
     }
+
 
     @Override
     public void onDisable() {
@@ -262,11 +275,13 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getConfig().set("asns", List.copyOf(asns));
         getConfig().set("regions", List.copyOf(regions));
         getConfig().set("cities", List.copyOf(cities));
+        getConfig().set("net-type", List.copyOf(networkType));
         super.saveConfig();
     }
 
     private void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
+        this.preloadBanList = getConfig().getBoolean("preload-banlist", false);
         this.ips = new HashSet<>();
         for (String s : getConfig().getStringList("ips")) {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
@@ -276,35 +291,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         this.regions = new HashSet<>(getConfig().getStringList("regions"));
         this.asns = new HashSet<>(getConfig().getLongList("asns"));
         this.cities = new HashSet<>(getConfig().getStringList("cities"));
-        this.netTypes = new HashSet<>();
-        // GeoCN 字段名就是中文
-        if (getConfig().getBoolean("net-type.wideband")) {
-            this.netTypes.add("宽带");
-        }
-        if (getConfig().getBoolean("net-type.base-station")) {
-            this.netTypes.add("基站");
-        }
-        if (getConfig().getBoolean("net-type.government-and-enterprise-line")) {
-            this.netTypes.add("政企专线");
-        }
-        if (getConfig().getBoolean("net-type.business-platform")) {
-            this.netTypes.add("业务平台");
-        }
-        if (getConfig().getBoolean("net-type.backbone-network")) {
-            this.netTypes.add("骨干网");
-        }
-        if (getConfig().getBoolean("net-type.ip-private-network")) {
-            this.netTypes.add("IP专网");
-        }
-        if (getConfig().getBoolean("net-type.internet-cafe")) {
-            this.netTypes.add("网吧");
-        }
-        if (getConfig().getBoolean("net-type.iot")) {
-            this.netTypes.add("物联网");
-        }
-        if (getConfig().getBoolean("net-type.datacenter")) {
-            this.netTypes.add("数据中心");
-        }
+        this.networkType = new HashSet<>(getConfig().getStringList("net-type"));
         getCache().invalidateAll();
     }
 
@@ -327,7 +314,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
                 }
             }
             try {
-                CheckResult ipdbResult = checkIPDB(torrent, peer);
+                CheckResult ipdbResult = checkIPDB(peer.getPeerAddress().getAddress().toInetAddress());
                 if (ipdbResult.action() != PeerAction.NO_ACTION) {
                     return ipdbResult;
                 }
@@ -338,11 +325,11 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         }, true);
     }
 
-    private CheckResult checkIPDB(Torrent torrent, Peer peer) {
+    private CheckResult checkIPDB(InetAddress addr) {
         if (regions.isEmpty() && asns.isEmpty()) {
             return pass();
         }
-        var geoData = getServer().queryIPDB(peer.getPeerAddress()).geoData().get();
+        var geoData = iPDBManager.queryIPDB(addr).geoData().get();
         if (geoData == null) {
             return pass();
         }
@@ -360,9 +347,21 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
                         StructuredData.create().add("type", "iso").add("rule", iso));
             }
         }
-        if (!netTypes.isEmpty() && geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
+        if (networkType != null && geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
             String netType = geoData.getNetwork().getNetType();
-            if (netTypes.contains(netType)) {
+            boolean hit = switch (netType) {
+                case "宽带" -> networkType.contains("wideband");
+                case "基站" -> networkType.contains("baseStation");
+                case "政企专线" -> networkType.contains("governmentAndEnterpriseLine");
+                case "业务平台" -> networkType.contains("businessPlatform");
+                case "骨干网" -> networkType.contains("backboneNetwork");
+                case "IP 专网", "IP专网" -> networkType.contains("ipPrivateNetwork");
+                case "网吧" -> networkType.contains("internetCafe");
+                case "物联网" -> networkType.contains("iot");
+                case "数据中心" -> networkType.contains("dataCenter");
+                default -> false;
+            };
+            if (hit) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_NETTYPE_RULE, netType), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, netType),
                         StructuredData.create().add("type", "netTypes").add("rule", netType));
             }

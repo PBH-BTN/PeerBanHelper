@@ -30,6 +30,7 @@ import ConfigForm from './components/config/index.vue'
 import RunningStatus from './components/info/index.vue'
 import Labs from './components/labs/index.vue'
 import ProfileForm from './components/profile/index.vue'
+
 const { t } = useI18n()
 
 const { query } = useRoute()

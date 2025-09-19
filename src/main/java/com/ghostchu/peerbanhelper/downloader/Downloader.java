@@ -5,8 +5,8 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
+import inet.ipaddr.IPAddress;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,6 +50,8 @@ public interface Downloader extends AutoCloseable {
      */
     @NotNull
     String getType();
+
+    int getFailedLoginAttempts();
 
     /**
      * 登录到此下载器
@@ -127,7 +129,7 @@ public interface Downloader extends AutoCloseable {
      * @param removed       移除列表
      * @param applyFullList 强制应用全量列表
      */
-    void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
+    void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
 
     /**
      * 获取客户端最后一次请求的状态
@@ -213,5 +215,8 @@ public interface Downloader extends AutoCloseable {
      * 设置当前下载器的限速配置
      * @param speedLimiter 限速配置
      */
-    void setSpeedLimiter(@Nullable DownloaderSpeedLimiter speedLimiter);
+    void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter);
+
+    int getBTProtocolPort();
+    void setBTProtocolPort(int port);
 }

@@ -7,7 +7,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
-import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
+import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -108,7 +108,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     @Subscribe
     public void onPeerUnBan(PeerUnbanEvent event) {
         IPAddress peerPrefix;
-        IPAddress peerIp = event.getPeer().getAddress();
+        IPAddress peerIp = event.getAddress();
         if (peerIp.isIPv4()) {
             peerPrefix = IPAddressUtil.toPrefixBlock(peerIp, ipv4PrefixLength);
         } else {
@@ -272,13 +272,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 return pass();
             }
 
-            var structuredData =  StructuredData.create()
+            var structuredData = StructuredData.create()
                     .add("torrentSize", torrentSize)
                     .add("completedSize", completedSize)
                     .add("computedCompletedSize", computedCompletedSize)
                     .add("peerReportUploaded", peer.getUploaded())
                     .add("peerLastReportUploaded", clientTask.getLastReportUploaded())
-                    .add("prefixTrackingUploadedIncreaseTotal",prefixTrackingUploadedIncreaseTotal)
+                    .add("prefixTrackingUploadedIncreaseTotal", prefixTrackingUploadedIncreaseTotal)
                     .add("actualUploaded", actualUploaded)
                     .add("uploadedIncremental", uploadedIncremental)
                     .add("clientTask", clientTask)

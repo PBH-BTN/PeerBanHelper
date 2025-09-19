@@ -4,20 +4,18 @@
       <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
       <a-space class="list-header-right-group" wrap>
         <AsyncMethod
-          v-slot="{ run: unban, loading: unbanning }"
+          v-slot="{ run: unban, loading: unbaning }"
           once
           :async-fn="() => handleUnban('*')"
         >
-          <a-popconfirm
-            :content="t('page.banlist.banlist.listItem.unbanall.confirm')"
-            type="warning"
-            position="bottom"
-            :before-ok="unban"
+          <a-button
+            type="secondary"
+            :disabled="(list?.length ?? 0) === 0"
+            :loading="unbaning"
+            @click="unban"
           >
-            <a-button type="secondary" :disabled="(list?.length ?? 0) === 0" :loading="unbanning">
-              {{ t('page.banlist.banlist.listItem.unbanall') }}
-            </a-button>
-          </a-popconfirm>
+            {{ t('page.banlist.banlist.listItem.unbanall') }}
+          </a-button>
         </AsyncMethod>
         <a-input-search
           :style="{ width: '250px' }"
@@ -60,16 +58,15 @@
 <script setup lang="ts">
 import AsyncMethod from '@/components/asyncMethod.vue'
 import { getBanListPaginated, unbanIP } from '@/service/banList'
-import { useAutoUpdate, useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { useDebounceFn } from '@vueuse/core'
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 import banListItem from './banListItem.vue'
 const endpointState = useEndpointStore()
-const autoUpdateStore = useAutoUpdate()
 const searchString = ref('')
 const { t } = useI18n()
 
@@ -92,16 +89,6 @@ const { total, data, current, pageSize, loading, changeCurrent, changePageSize, 
     },
     [useAutoUpdatePlugin]
   )
-
-const pollingHandler = autoUpdateStore.polling(() => {
-  if (current.value === 1) refresh()
-})
-
-onUnmounted(() => {
-  if (pollingHandler) {
-    pollingHandler('unmount')
-  }
-})
 
 const handleUnban = async (address: string) => {
   const { count } = await (await unbanIP(address)).data

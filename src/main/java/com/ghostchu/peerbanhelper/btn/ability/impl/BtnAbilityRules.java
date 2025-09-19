@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRuleset;
 import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
-import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
+import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.URLUtil;

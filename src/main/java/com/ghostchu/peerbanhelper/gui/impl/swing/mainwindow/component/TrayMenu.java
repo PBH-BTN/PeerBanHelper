@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
-import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingTray;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
@@ -103,8 +103,9 @@ public class TrayMenu {
         var bannedIps = 0L;
         var server = Main.getServer();
         if (server != null) {
-            bannedIps = Main.getServer().getDownloaderServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
-            bannedPeers = Main.getServer().getDownloaderServer().getBannedPeers().size();
+            // todo 这里要改
+            bannedIps = Main.getServer().getDownloaderServer().getBanList().copyKeySet().stream().distinct().count();
+            bannedPeers = Main.getServer().getDownloaderServer().getBanList().size();
         }
         return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
     }

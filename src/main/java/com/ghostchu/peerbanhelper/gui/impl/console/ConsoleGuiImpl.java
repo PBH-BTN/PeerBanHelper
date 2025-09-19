@@ -20,6 +20,11 @@ public class ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
+    public boolean isDarkMode() {
+        return false;
+    }
+
+    @Override
     public void setup() {
         System.setProperty("java.awt.headless", "true");
     }

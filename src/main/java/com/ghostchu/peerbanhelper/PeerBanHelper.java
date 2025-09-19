@@ -3,13 +3,12 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
-import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
-import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
+import com.ghostchu.peerbanhelper.module.impl.background.SQLiteOptimizerModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
@@ -18,17 +17,10 @@ import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManage
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.LazyLoad;
-import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
-import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
-import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.net.InetAddresses;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -38,11 +30,9 @@ import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -50,27 +40,17 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class PeerBanHelper implements Reloadable {
     @Autowired
-    private TrackedSwarmDao trackerPeersDao;
-    @Autowired
     @Getter
     private DownloaderManager downloaderManager;
     @Autowired
     @Getter
     private DownloaderServerImpl downloaderServer;
-    private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000), TimeUnit.MILLISECONDS)
-            .maximumSize(ExternalSwitch.parseInt("pbh.geoIpCache.size", 300))
-            .softValues()
-            .build();
     @Getter
     private int httpdPort;
     @Autowired
     private Database databaseManager;
     @Autowired
     private ModuleManager moduleManager;
-    @Getter
-    @Nullable
-    private IPDB ipdb = null;
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
@@ -78,8 +58,7 @@ public class PeerBanHelper implements Reloadable {
     @Autowired
     private CrashManager crashManager;
     @Autowired
-    private HTTPUtil httpUtil;
-
+    private IPDBManager iPDBManager;
 
     public PeerBanHelper() {
         reloadConfig();
@@ -98,24 +77,22 @@ public class PeerBanHelper implements Reloadable {
 
     public void start() {
         checkKnownCrashes();
-        setupIPDB();
+        Main.getReloadManager().register(this);
+        postCompatibilityCheck();
+        registerModules();
+        sendSnapshotAlert();
+        downloaderServer.load();
+        Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
+        crashManager.putRunningFlag();
+        Main.getEventBus().post(new PBHServerStartedEvent());
         registerHttpServer();
+        Main.getGuiManager().onPBHFullyStarted(this);
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
                 log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://127.0.0.1:" + webContainer.javalin().port()));
             }
             Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
         }
-        Main.getReloadManager().register(this);
-        postCompatibilityCheck();
-        registerModules();
-        sendSnapshotAlert();
-        runTestCode();
-        downloaderServer.load();
-        Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
-        crashManager.putRunningFlag();
-        Main.getEventBus().post(new PBHServerStartedEvent());
-        Main.getGuiManager().onPBHFullyStarted(this);
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         System.gc();
         Thread.startVirtualThread(() -> {
@@ -123,6 +100,7 @@ public class PeerBanHelper implements Reloadable {
                 WorkingSetManagerFactory.trimMemory();
             }
         });
+        runTestCode();
     }
 
     private void checkKnownCrashes() {
@@ -144,28 +122,6 @@ public class PeerBanHelper implements Reloadable {
                 }
             }
         }
-
-
-//        if (!crashManager.isRunningFlagExists()) return;
-//        Main.getGuiManager().createDialog(Level.WARN, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
-//            if ("SWING".equals(Main.getGuiManager().getName())) {
-//                String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-//                if (os.startsWith("win")) {
-//                    Main.getGuiManager().createYesNoDialog(Level.INFO, tlUI(Lang.CRASH_MANAGER_GUI_RELATED_TITLE), tlUI(Lang.CRASH_MANAGER_GUI_RELATED_DESCRIPTION),
-//                            () -> {
-//                                Main.getMainConfig().set("gui", "swt");
-//                                try {
-//                                    Main.getMainConfig().save(Main.getMainConfigFile());
-//                                    System.exit(0);
-//                                } catch (IOException e) {
-//                                    Main.getGuiManager().createDialog(Level.ERROR, "Unable to save configuration", e.getMessage(), () -> {
-//                                    });
-//                                }
-//                            }, null
-//                    );
-//                }
-//            }
-//        });
     }
 
     private void postCompatibilityCheck() {
@@ -185,7 +141,7 @@ public class PeerBanHelper implements Reloadable {
 
     @SneakyThrows
     private void runTestCode() {
-        if (!Main.getMeta().isSnapshotOrBeta() && !"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+        if (!Main.getMeta().isSnapshotOrBeta()) {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
@@ -201,19 +157,6 @@ public class PeerBanHelper implements Reloadable {
     }
 
 
-    private void setupIPDB() {
-        try {
-            String accountId = Main.getMainConfig().getString("ip-database.account-id", "");
-            String licenseKey = Main.getMainConfig().getString("ip-database.license-key", "");
-            String databaseCity = Main.getMainConfig().getString("ip-database.database-city", "GeoLite2-City");
-            String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "GeoLite2-ASN");
-            boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
-            this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
-                    databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), httpUtil);
-        } catch (Exception e) {
-            log.info(tlUI(Lang.IPDB_INVALID),e );
-        }
-    }
 
 
     public void shutdown() {
@@ -221,9 +164,6 @@ public class PeerBanHelper implements Reloadable {
         downloaderServer.close();
         this.moduleManager.unregisterAll();
         this.databaseManager.close();
-        if (this.ipdb != null) {
-            this.ipdb.close();
-        }
         try {
             downloaderManager.close();
         } catch (Exception e) {
@@ -258,6 +198,8 @@ public class PeerBanHelper implements Reloadable {
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
+        moduleManager.register(PBHAsyncTaskController.class);
+        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(IPBlackList.class);
         moduleManager.register(PeerIdBlacklist.class);
         moduleManager.register(ClientNameBlacklist.class);
@@ -279,7 +221,6 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHPlusController.class);
         moduleManager.register(PBHOOBEController.class);
         moduleManager.register(PBHChartController.class);
-        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(PBHTorrentController.class);
         moduleManager.register(PBHPeerController.class);
         moduleManager.register(PBHAlertController.class);
@@ -288,34 +229,17 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
         moduleManager.register(PBHUtilitiesController.class);
-        moduleManager.register(BackgroundModule.class);
+        moduleManager.register(SQLiteOptimizerModule.class);
         moduleManager.register(SwarmTrackingModule.class);
+        // moduleManager.register(MCPController.class);
+        moduleManager.register(PBHAutoStunController.class);
+        moduleManager.register(IdleConnectionDosProtection.class);
     }
 
-    public IPDBResponse queryIPDB(PeerAddress address) {
-        try {
-            return geoIpCache.get(address.getIp(), () -> {
-                if (ipdb == null) {
-                    return new IPDBResponse(new LazyLoad<>(() -> null));
-                } else {
-                    return new IPDBResponse(new LazyLoad<>(() -> {
-                        try {
-                            return ipdb.query(InetAddresses.forString(address.getIp()));
-                        } catch (Exception ignored) {
-                            return null;
-                        }
-                    }));
-                }
-            });
-        } catch (ExecutionException e) {
-            return new IPDBResponse(null);
-        }
+    @Deprecated(forRemoval = true)
+    public IPDBManager.IPDBResponse queryIPDB(InetAddress address) {
+      return iPDBManager.queryIPDB(address);
     }
-
-    public String getWebUiUrl() {
-        return "http://localhost:" + Main.getServer().getHttpdPort() + "/?token=" + UrlEncoderDecoder.encodePath(webContainer.getToken());
-    }
-
 
     /**
      * Use @Autowired if available
@@ -325,11 +249,6 @@ public class PeerBanHelper implements Reloadable {
     @Nullable
     public JavalinWebContainer getWebContainer() {
         return webContainer;
-    }
-
-    public record IPDBResponse(
-            LazyLoad<IPGeoData> geoData
-    ) {
     }
 
 }

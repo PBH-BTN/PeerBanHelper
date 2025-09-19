@@ -7,7 +7,7 @@ import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
-import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
+import com.ghostchu.peerbanhelper.event.program.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
@@ -94,7 +94,7 @@ public class Main {
     @Getter
     private static String[] startupArgs;
     @Getter
-    private static long startupAt = System.currentTimeMillis();
+    private static final long startupAt = System.currentTimeMillis();
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 12;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.0";
@@ -104,6 +104,7 @@ public class Main {
     public static void main(String[] args) {
         bootSince = System.currentTimeMillis();
         startupArgs = args;
+        System.setProperty("sun.net.useExclusiveBind", "false");
         setupReloading();
         setupConfDirectory(args);
         loadFlagsProperties();

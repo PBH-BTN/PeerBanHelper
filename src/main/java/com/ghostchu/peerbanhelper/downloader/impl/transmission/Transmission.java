@@ -10,8 +10,8 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.vdurmont.semver4j.Semver;
 import cordelia.client.TrClient;
@@ -19,6 +19,7 @@ import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
 import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
+import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -41,8 +42,8 @@ public final class Transmission extends AbstractDownloader {
     private final String blocklistUrl;
     private final Config config;
 
-    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(id, alertManager);
+    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(id, alertManager, natAddressProvider);
         this.config = config;
         this.client = new TrClient(httpUtil, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl());
         this.blocklistUrl = blocklistUrl;
@@ -58,14 +59,14 @@ public final class Transmission extends AbstractDownloader {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = Config.readFromYaml(section, id);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil, natAddressProvider);
     }
 
     @Override
@@ -95,7 +96,7 @@ public final class Transmission extends AbstractDownloader {
 
     @Override
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
+        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS ,DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
     }
 
     @Override
@@ -173,7 +174,7 @@ public final class Transmission extends AbstractDownloader {
                     return true;
                 })
                 .filter(t -> includePrivate || !t.getIsPrivate())
-                .map(TRTorrent::new).collect(Collectors.toList());
+                .map(backend -> new TRTorrent(backend, this::natTranslate)).collect(Collectors.toList());
     }
 
     @Override
@@ -201,7 +202,7 @@ public final class Transmission extends AbstractDownloader {
 
     @SneakyThrows
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
@@ -316,7 +317,7 @@ public final class Transmission extends AbstractDownloader {
      * @param speedLimiter 限速配置
      */
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         RqSessionSet set = RqSessionSet.builder()
                 .altSpeedEnabled(false)
                 .altSpeedTimeEnabled(false)
@@ -328,6 +329,30 @@ public final class Transmission extends AbstractDownloader {
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
         if (!sessionSetResp.isSuccess()) {
             log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), sessionSetResp.getResult()));
+        }
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        RqSessionGet sessionGet = new RqSessionGet(List.of(Fields.PEER_PORT));
+        TypedResponse<RsSessionGet> sessionGetResp = client.execute(sessionGet);
+        if (sessionGetResp.isSuccess()) {
+            RsSessionGet args = sessionGetResp.getArgs();
+            return args.getPeerPort();
+        }
+        log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), sessionGetResp.getResult()));
+        return -1;
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+        RqSessionSet set = RqSessionSet.builder()
+                .peerPortRandomOnStart(false)
+                .peerPort(port)
+                .build();
+        TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
+        if (!sessionSetResp.isSuccess()) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT, getName(), sessionSetResp.getResult()));
         }
     }
 

@@ -9,17 +9,17 @@ jobs:
   install4jc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: java_info
         uses: YunaBraska/java-info-action@main
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: maven-dist
           path: target/
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
-          version: 11.0.4
+          version: 11.0.5
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Make installers
         run: |

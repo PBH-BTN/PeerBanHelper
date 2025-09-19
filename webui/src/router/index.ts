@@ -2,7 +2,13 @@ import { genIconComponent } from '@/components/iconFont'
 import BanList from '@/views/banlist/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
-import { IconCloud, IconCodeSquare, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
+import {
+  IconCloud,
+  IconCodeSquare,
+  IconLocation,
+  IconStorage,
+  IconWifi
+} from '@arco-design/web-vue/es/icon'
 import { computed, h } from 'vue'
 import {
   createRouter,
@@ -152,17 +158,17 @@ export const routerOptions: RouteRecordRaw[] = [
         },
         component: GenericBlackList,
         props: { type: 'city' }
+      },
+      {
+        path: '/ruleNetType',
+        name: 'rule_management_netType',
+        meta: {
+          label: 'page.rule_management.netType',
+          icon: () => h(IconWifi),
+          needLogin: true
+        },
+        component: () => import('@/views/rule-management/components/networkType/index.vue')
       }
-      // {
-      //   path: '/ruleNetType',
-      //   name: 'rule_management_netType',
-      //   meta: {
-      //     label: 'page.rule_management.netType',
-      //     icon: genIconComponent('icon-kuandai'),
-      //     needLogin: true
-      //   },
-      //   component: GenericBlackList, props: { type: 'netType' }
-      // }
     ]
   },
   {

@@ -58,6 +58,12 @@
             <a-radio :value="PushType.Bark">{{
               t('page.settings.tab.config.push.form.type.' + PushType.Bark)
             }}</a-radio>
+            <a-radio :value="PushType.PushDeer">{{
+              t('page.settings.tab.config.push.form.type.' + PushType.PushDeer)
+            }}</a-radio>
+            <a-radio :value="PushType.Gotify">{{
+              t('page.settings.tab.config.push.form.type.' + PushType.Gotify)
+            }}</a-radio>
           </a-grid>
         </a-radio-group>
       </a-form-item>
@@ -109,6 +115,12 @@ const formMap: Record<PushType, Component> = {
   ),
   [PushType.Bark]: defineAsyncComponent(
     () => import('@/views/settings/components/config/components/push/forms/barkForm.vue')
+  ),
+  [PushType.PushDeer]: defineAsyncComponent(
+    () => import('@/views/settings/components/config/components/push/forms/pushdeerForm.vue')
+  ),
+  [PushType.Gotify]: defineAsyncComponent(
+    () => import('@/views/settings/components/config/components/push/forms/gotifyForm.vue')
   )
 }
 

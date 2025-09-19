@@ -1,19 +1,15 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.DownloaderServer;
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -21,7 +17,7 @@ public final class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private DownloaderServer downloaderServer;
+    private BanList banList;
 
     @Override
     public boolean isConfigurable() {
@@ -38,21 +34,21 @@ public final class BlockListController extends AbstractFeatureModule {
 
     private void blocklistDatEmule(@NotNull Context ctx) {
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<PeerAddress, BanMetadata> pair : downloaderServer.getBannedPeers().entrySet()) {
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(pair.getKey().getIp());
+        for (IPAddress ipAddress : banList.copyKeySet()) {
             if (ipAddress == null) continue;
-            String fullIp = ipAddress.toFullString();
-            builder.append(fullIp).append(" - ").append(fullIp).append(" , 000 , ").append(UUID.randomUUID().toString().replace("-", "")).append("\n");
+            String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
+            String end = ipAddress.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
+            builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toNormalizedString()).append("\n");
         }
         ctx.result(builder.toString());
     }
 
     private void blocklistP2pPlain(@NotNull Context ctx) {
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<PeerAddress, BanMetadata> pair : downloaderServer.getBannedPeers().entrySet()) {
+        for (IPAddress addr : banList.copyKeySet()) {
             String ruleName = UUID.randomUUID().toString().replace("-", "");
-            String start = pair.getKey().getIp();
-            String end = pair.getKey().getIp();
+            String start = addr.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
+            String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
             builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
         }
         ctx.result(builder.toString());
@@ -60,8 +56,8 @@ public final class BlockListController extends AbstractFeatureModule {
 
     private void blocklistIp(@NotNull Context ctx) {
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<PeerAddress, BanMetadata> pair : downloaderServer.getBannedPeers().entrySet()) {
-            builder.append(pair.getKey().getIp()).append("\n");
+        for (IPAddress ipAddress : banList.copyKeySet()) {
+            builder.append(ipAddress.toPrefixBlock().toNormalizedString()).append("\n");
         }
         ctx.result(builder.toString());
     }
