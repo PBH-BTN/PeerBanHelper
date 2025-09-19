@@ -333,7 +333,6 @@ public final class IPDB implements AutoCloseable {
                             // validate mmdb
                             validateMMDB(tmp);
                             Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                            Files.deleteIfExists(tmp.toPath());
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         } catch (IOException e) {
