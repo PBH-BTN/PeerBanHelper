@@ -318,11 +318,12 @@ public final class IPDB implements AutoCloseable {
                     .build();
 
             try (Response response = httpClient.newCall(request).execute()) {
+                var body = response.body();
                 if (response.code() == 200) {
                     if (mirror.supportXzip()) {
                         try {
                             File tmp = File.createTempFile(databaseName, ".tmp");
-                            try (XZInputStream gzipInputStream = new XZInputStream(response.body().byteStream());
+                            try (XZInputStream gzipInputStream = new XZInputStream(body.byteStream());
                                  FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
                                 byte[] buffer = new byte[1024];
                                 int len;
@@ -337,11 +338,11 @@ public final class IPDB implements AutoCloseable {
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         } catch (IOException e) {
-                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED, databaseName));
+                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED, databaseName), e);
                         }
                     } else {
                         // 直接保存文件
-                        try (var source = response.body().source();
+                        try (var source = body.source();
                              var sink = Okio.buffer(Okio.sink(path))) {
                             sink.writeAll(source);
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
