@@ -288,6 +288,7 @@ public final class BitComet extends AbstractDownloader {
     public @NotNull List<Torrent> getTorrents() {
         Map<String, String> requirements = new HashMap<>();
         requirements.put("state_group", "ACTIVE");
+        requirements.put("group_state", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
@@ -298,6 +299,7 @@ public final class BitComet extends AbstractDownloader {
     @Override
     public @NotNull List<Torrent> getAllTorrents() {
         Map<String, String> requirements = new HashMap<>();
+        requirements.put("state_group", "ALL");
         requirements.put("group_state", "ALL");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
