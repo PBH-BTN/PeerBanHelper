@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
+import com.maxmind.db.Reader;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
@@ -25,9 +26,7 @@ import okhttp3.Response;
 import okio.Okio;
 import org.tukaani.xz.XZInputStream;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,17 +72,17 @@ public final class IPDB implements AutoCloseable {
         this.httpUtil = httpUtil;
 //        this.userAgent = userAgent;
         this.httpClient = httpUtil.addProgressTracker(httpUtil.newBuilder()
-                .connectTimeout(Duration.ofSeconds(15))
-                .readTimeout(Duration.ofMinutes(1))
-                .callTimeout(Duration.ofMinutes(2))
-                .followRedirects(true)
-                .authenticator((route, response) -> {
-                    if (response.request().header("Authorization") != null) {
-                        return null; // 已经尝试过认证，不再重试
-                    }
-                    String credential = Credentials.basic(accountId, licenseKey);
-                    return response.request().newBuilder().header("Authorization", credential).build();
-                }))
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .readTimeout(Duration.ofMinutes(1))
+                        .callTimeout(Duration.ofMinutes(2))
+                        .followRedirects(true)
+                        .authenticator((route, response) -> {
+                            if (response.request().header("Authorization") != null) {
+                                return null; // 已经尝试过认证，不再重试
+                            }
+                            String credential = Credentials.basic(accountId, licenseKey);
+                            return response.request().newBuilder().header("Authorization", credential).build();
+                        }))
                 .build();
         if (needUpdateMMDB(mmdbCityFile)) {
             updateMMDB(databaseCity, mmdbCityFile);
@@ -333,7 +332,7 @@ public final class IPDB implements AutoCloseable {
                             }
                             // validate mmdb
                             validateMMDB(tmp);
-                            Files.copy(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                            Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                             Files.deleteIfExists(tmp.toPath());
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
@@ -369,9 +368,10 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void validateMMDB(File tmp) throws IOException {
-       try(var reader = new Reader(tmp, Reader.FileMode.MEMORY_MAPPED, NoCache.getInstance())){
-          log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().getDatabaseType());
-       }
+        try (InputStream is = new FileInputStream(tmp);
+             var reader = new Reader(is, NoCache.getInstance())) {
+            log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().getDatabaseType());
+        }
     }
 
     @Override
