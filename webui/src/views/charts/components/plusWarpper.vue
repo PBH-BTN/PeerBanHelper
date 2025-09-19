@@ -1,8 +1,7 @@
 <template>
   <slot
     v-if="
-      endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
-      endpointStore.plusStatus?.enabledFeatures?.includes('paid')
+      endpointStore.plusStatus?.enabledFeatures?.includes('basic')
     "
   ></slot>
   <a-card v-else hoverable :title="title">
