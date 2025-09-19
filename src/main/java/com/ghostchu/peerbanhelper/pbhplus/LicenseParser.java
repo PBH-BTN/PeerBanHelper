@@ -44,9 +44,9 @@ public class LicenseParser {
     private final String hardwareUUIDHash;
 
     public LicenseParser(SystemInfo systemInfo) throws Exception {
-        localKeyPair = loadLocalKeyPair();
         String hardwareUUID = systemInfo.getHardware().getComputerSystem().getHardwareUUID();
         this.hardwareUUIDHash = Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString().substring(0, 10);
+        localKeyPair = loadLocalKeyPair();
     }
 
     @NotNull
