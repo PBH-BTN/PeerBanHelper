@@ -181,14 +181,14 @@ const chartOption = ref({
 })
 
 watch(option, (v) => {
-  run(v.range[0], v.range[1], option.bannedOnly, props.downloader)
+  run(v.range[0]!, v.range[1]!, option.bannedOnly, props.downloader)
 })
 const props = defineProps<{
   downloader?: string
 }>()
 
 const { loading, run, refresh } = useRequest(getGeoIPData, {
-  defaultParams: [option.range[0], option.range[1], option.bannedOnly, props.downloader],
+  defaultParams: [option.range[0]!, option.range[1]!, option.bannedOnly, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
       const fieldData = data.data[option.field]
@@ -204,15 +204,15 @@ const { loading, run, refresh } = useRequest(getGeoIPData, {
         // 不进行过滤
         processedData = fieldData
       }
-      chartOption.value.legend.data = processedData.map((it) => it.key)
-      chartOption.value.series[0].data = processedData.map((it) => ({
+      chartOption.value.legend!.data = processedData.map((it) => it.key)
+      chartOption.value.series![0]!.data = processedData.map((it) => ({
         name:
           it.key === 'N/A' && option.field === 'province'
             ? t('page.charts.data.province.na') // 因为省份数据是中国大陆地区才有的，N/A我们就认为它们是海外或者没有收录的数据吧
             : it.key,
         value: it.value
       }))
-      chartOption.value.series[0].name = t('page.charts.options.field.' + option.field)
+      chartOption.value.series![0]!.name = t('page.charts.options.field.' + option.field)
     }
   },
   onError: (e) => {

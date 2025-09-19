@@ -137,25 +137,25 @@ const handleAddOne = () => {
 }
 const handleSubmit = async (index: number) => {
   try {
-    if (dataSource[index].isNew) {
+    if (dataSource[index]!.isNew) {
       // add new item
-      const resp = await addBlackList(dataSource[index].data, type.value)
+      const resp = await addBlackList(dataSource[index]!.data, type.value)
       if (!resp.success) {
         throw new Error(resp.message)
       }
       Message.success({ content: resp.message, resetOnHover: true })
     } else {
-      if (dataSource[index].data === dataSource[index].oldData) {
+      if (dataSource[index]!.data === dataSource[index]!.oldData) {
         //没有变化直接返回
-        dataSource[index].editing = false
+        dataSource[index]!.editing = false
         return
       }
       // update item 先添加，再删除，避免添加失败
-      let resp = await addBlackList(dataSource[index].data, type.value)
+      let resp = await addBlackList(dataSource[index]!.data, type.value)
       if (!resp.success) {
         throw new Error(resp.message)
       }
-      resp = await deleteBlackList(dataSource[index].oldData, type.value)
+      resp = await deleteBlackList(dataSource[index]!.oldData, type.value)
       if (!resp.success) {
         throw new Error(resp.message)
       }

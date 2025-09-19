@@ -23,6 +23,9 @@
       dot
     />
     <a-space v-else direction="vertical" fill size="large">
+      <a-typography-title :heading="5" style="text-indent: 2em">
+        {{ t('page.settings.tab.labs.list') }}
+      </a-typography-title>
       <a-form :model="config">
         <a-form-item field="enabled" :label="t('page.settings.tab.labs.enable')">
           <a-switch
@@ -34,9 +37,7 @@
           </template>
         </a-form-item>
       </a-form>
-      <a-typography-title v-if="config.enabled" :heading="5" style="text-indent: 2em">
-        {{ t('page.settings.tab.labs.list') }}
-      </a-typography-title>
+
       <br />
       <div v-if="config.enabled" style="width: 100%; display: flex; justify-content: center">
         <a-list :data="data?.data.experiments" style="max-width: 60rem" :loading="loading">
@@ -67,6 +68,9 @@
           </template>
         </a-list>
       </div>
+
+      <!-- AutoSTUN Section -->
+      <AutoSTUN />
     </a-space>
   </a-space>
 </template>
@@ -77,6 +81,7 @@ import { Message } from '@arco-design/web-vue'
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import AutoSTUN from './autostun/index.vue'
 const { t } = useI18n()
 const firstLoading = ref(true)
 const config = reactive({

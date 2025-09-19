@@ -30,7 +30,6 @@ public class PBHGuiBridge {
         }else{
             return  Optional.empty();
         }
-
     }
 
     public List<AlertEntity> getAlerts() {

@@ -7,9 +7,11 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleStringIntKVDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -45,6 +47,8 @@ public final class PBHChartController extends AbstractFeatureModule {
     private HistoryDao historyDao;
     @Autowired
     private TrafficJournalDao trafficJournalDao;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     @Override
     public boolean isConfigurable() {
@@ -187,7 +191,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     }
 
     private void handleGeoIP(Context ctx) throws Exception {
-        IPDB ipdb = getServer().getIpdb();
+        IPDB ipdb = iPDBManager.getIpdb();
         if (ipdb == null) {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.CHARTS_IPDB_NEED_INIT), null));
             return;
@@ -236,7 +240,11 @@ public final class PBHChartController extends AbstractFeatureModule {
                     var ip = ipIterator.next();
                     service.submit(() -> {
                         try {
-                            IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(ip));
+                            String determindIp = ip;
+                            if (IPAddressUtil.getIPAddress(determindIp).isPrefixed()) {
+                                determindIp = IPAddressUtil.getIPAddress(determindIp).toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
+                            }
+                            IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(determindIp));
                             String isp = "N/A";
                             if (ipGeoData.getAs() != null) {
                                 isp = ipGeoData.getAs().getOrganization();
@@ -266,7 +274,6 @@ public final class PBHChartController extends AbstractFeatureModule {
                             cnCityCounter.computeIfAbsent(city, k -> new AtomicInteger()).incrementAndGet();
                             countryOrRegionCounter.computeIfAbsent(countryOrRegion, k -> new AtomicInteger()).incrementAndGet();
                             netTypeCounter.computeIfAbsent(netType, k -> new AtomicInteger()).incrementAndGet();
-
                         } catch (UnknownHostException e) {
                             log.error("Unable to resolve the GeoIP data for ip {}", ip, e);
                         }

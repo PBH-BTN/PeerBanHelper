@@ -4,7 +4,7 @@ COPY webui /webui
 WORKDIR /webui
 RUN corepack enable pnpm && CI=1 pnpm i && pnpm run build
 
-FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.10-eclipse-temurin-21-alpine AS build
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS build
 COPY . /build
 WORKDIR /build
 COPY --from=build_web webui/dist src/main/resources/static
@@ -16,7 +16,7 @@ LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 EXPOSE 9898
 ENV TZ=UTC
-ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
+ENV JAVA_OPTS="-Djdk.attach.allowAttachSelf=true -Dsun.net.useExclusiveBind=false -Dpbh.release=docker -Djava.awt.headless=true -XX:+UseZGC -XX:+ZGenerational -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -XX:MaxRAMPercentage=85.0"
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/libraries /app/libraries

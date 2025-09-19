@@ -2,11 +2,12 @@ version: "3.9"
 services:
   peerbanhelper:
     image: @IMAGE@
-    restart: always
+    restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
       - /var/packages/peerbanhelper/shares/peerbanhelper:/app/data
-    ports:
-      - "9898:9898"
+    network_mode: host
     environment:
       - PBH_USER_LOCALE=zh-CN
+      - PBH_PKG_SYNOLOGY=true
+    stop_grace_period: 30s

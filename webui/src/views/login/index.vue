@@ -40,7 +40,7 @@
             </a-input-password>
           </a-form-item>
           <a-form-item field="rememberPassword" class="login-form-password-actions">
-            <a-checkbox checked="rememberPassword" :model-value="loginConfig.rememberPassword">
+            <a-checkbox v-model="loginConfig.rememberPassword" checked="rememberPassword">
               {{ t('login.form.rememberPassword') }}
             </a-checkbox>
             <a-link
@@ -77,7 +77,7 @@ const loginForm = ref<FormInstance>()
 const handleSubmit: FormInstance['onSubmit'] = async ({ errors, values }) => {
   const errorFields = errors ? Object.keys(errors) : []
   if (errorFields.length > 0) {
-    loginForm.value?.scrollToField(errorFields[0])
+    loginForm.value?.scrollToField(errorFields[0]!)
     return
   }
   const { token, rememberPassword } = values as UnwrapRef<typeof loginConfig>

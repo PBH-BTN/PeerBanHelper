@@ -6,7 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
+import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
 import com.google.common.collect.EvictingQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.event.Level;

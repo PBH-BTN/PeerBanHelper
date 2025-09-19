@@ -14,10 +14,12 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
+import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -52,8 +54,8 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(id, alertManager);
+    public Deluge(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(id, alertManager, natAddressProvider);
         this.config = config;
         this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpUtil, null, null);
     }
@@ -63,14 +65,14 @@ public final class Deluge extends AbstractDownloader {
         return config.getName();
     }
 
-    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = Config.readFromYaml(section, id);
-        return new Deluge(id, config, alertManager, httpUtil);
+        return new Deluge(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(id, config, alertManager, httpUtil);
+        return new Deluge(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
     @Override
@@ -132,7 +134,7 @@ public final class Deluge extends AbstractDownloader {
                         peerId = peerId.substring(0, 8);
                     }
                     DelugePeer delugePeer = new DelugePeer(
-                            new PeerAddress(peer.getIp(), peer.getPort()),
+                            natTranslate(new PeerAddress(peer.getIp(), peer.getPort(), peer.getIp())),
                             peerId,
                             peer.getClientName(),
                             peer.getTotalDownload(),
@@ -191,7 +193,7 @@ public final class Deluge extends AbstractDownloader {
 
     @SneakyThrows
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -199,9 +201,9 @@ public final class Deluge extends AbstractDownloader {
         }
     }
 
-    private void setBanListFull(Collection<PeerAddress> fullList) {
+    private void setBanListFull(Collection<IPAddress> fullList) {
         try {
-            this.client.replaceBannedPeers(fullList.stream().map(PeerAddress::getIp).distinct().toList());
+            this.client.replaceBannedPeers(fullList.stream().map(IPAddress::toNormalizedString).distinct().toList());
         } catch (DelugeException e) {
             log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
         }
@@ -252,7 +254,7 @@ public final class Deluge extends AbstractDownloader {
      * @param speedLimiter 限速配置
      */
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         long uploadLimit = speedLimiter.isUploadUnlimited() ? 0 : speedLimiter.upload() / 1024;
         long downloadLimit = speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download() / 1024;
         var config = new ConfigRequest();
@@ -264,6 +266,16 @@ public final class Deluge extends AbstractDownloader {
         } catch (DelugeException e) {
             log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
         }
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        return 0;
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+
     }
 
     @Override

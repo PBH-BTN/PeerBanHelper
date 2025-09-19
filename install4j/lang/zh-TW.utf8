@@ -34,3 +34,4 @@ runatlogin.option.yes=顯式視窗啟動
 runatlogin.option.silent=靜默啟動到系統匣
 
 installing.edgewebview2=正在安裝 Microsoft Edge WebView 2...
+windows.x86_64.native=Windows x86_64 Native

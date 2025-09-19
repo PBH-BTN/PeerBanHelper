@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.btn.BtnExceptionRule;
 import com.ghostchu.peerbanhelper.btn.BtnExceptionRuleParsed;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
-import com.ghostchu.peerbanhelper.event.BtnExceptionRuleUpdateEvent;
+import com.ghostchu.peerbanhelper.event.btn.BtnExceptionRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.URLUtil;
@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import okhttp3.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -100,12 +100,12 @@ public final class BtnAbilityException extends AbstractBtnAbility {
         } else {
             version = btnExceptionRule.getVersion();
         }
-        
+
         Request request = new Request.Builder()
                 .url(URLUtil.appendUrl(endpoint, Map.of("rev", version)))
                 .get()
                 .build();
-                
+
         try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
             if (response.code() == 204) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE, this.btnExceptionRule.getVersion()));
@@ -159,51 +159,52 @@ public final class BtnAbilityException extends AbstractBtnAbility {
     }
 
     private int unbanIps(List<Rule> rules) {
-        int ct = 0;
-        for (PeerAddress pa : btnNetwork.getServer().getBannedPeers().keySet()) {
-            RuleMatchResult matchResult = RuleParser.matchRule(rules, pa.toString());
+        AtomicInteger ct = new AtomicInteger(0);
+        btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
+            RuleMatchResult matchResult = RuleParser.matchRule(rules, addr.toNormalizedString());
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(pa);
-                ct++;
+                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                ct.incrementAndGet();
             }
-        }
-        return ct;
+        });
+        return ct.get();
     }
 
     private int unbanClientName(List<Rule> rules) {
-        int ct = 0;
-        for (var entry : btnNetwork.getServer().getBannedPeers().entrySet()) {
-            RuleMatchResult matchResult = RuleParser.matchRule(rules, entry.getValue().getPeer().getClientName());
+        AtomicInteger ct = new AtomicInteger(0);
+        btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
+            RuleMatchResult matchResult = RuleParser.matchRule(rules, meta.getPeer().getClientName());
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(entry.getKey());
-                ct++;
+                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                ct.incrementAndGet();
             }
-        }
-        return ct;
+        });
+
+        return ct.get();
     }
 
     private int unbanPeerId(List<Rule> rules) {
-        int ct = 0;
-        for (var entry : btnNetwork.getServer().getBannedPeers().entrySet()) {
-            RuleMatchResult matchResult = RuleParser.matchRule(rules, entry.getValue().getPeer().getId());
+        AtomicInteger ct = new AtomicInteger(0);
+        btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
+            RuleMatchResult matchResult = RuleParser.matchRule(rules, meta.getPeer().getId());
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(entry.getKey());
-                ct++;
+                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                ct.incrementAndGet();
             }
-        }
-        return ct;
+        });
+        return ct.get();
     }
 
     private int unbanPort(List<Rule> rules) {
-        int ct = 0;
-        for (var entry : btnNetwork.getServer().getBannedPeers().entrySet()) {
-            RuleMatchResult matchResult = RuleParser.matchRule(rules, Integer.toString(entry.getValue().getPeer().getAddress().getPort()));
+        AtomicInteger ct = new AtomicInteger(0);
+        btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
+            RuleMatchResult matchResult = RuleParser.matchRule(rules, Integer.toString(meta.getPeer().getAddress().getPort()));
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(entry.getKey());
-                ct++;
+                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                ct.incrementAndGet();
             }
-        }
-        return ct;
+        });
+        return ct.get();
     }
 
     @Override

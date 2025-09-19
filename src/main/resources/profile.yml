@@ -1,4 +1,4 @@
-config-version: 26
+config-version: 31
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -383,8 +383,8 @@ module:
   # Allow PBH records all data that fetched from downloader and save them into SQLite database
   # 其产生的数据可被其它模块调用（如：生成图表报表等）
   # The data produced by this module can be re-used by other modules
-  # 注意：使用 SD 卡或者 EMMC 的设备【不建议】开启此功能，此功能对于存储设备的读写压力较高，可能加快 Flash 存储芯片磨损或导致存储设备过热
-  # NOTE: It is not recommended to enable this module if PBH running on SDCard or EMMC Flash chip.
+  # 注意：使用 SD 卡或者 eMMC 的设备【不建议】开启此功能，此功能对于存储设备的读写压力较高，可能加快 Flash 存储芯片磨损或导致存储设备过热
+  # NOTE: It is not recommended to enable this module if PBH running on SDCard or eMMC Flash chip.
   # 另请注意：此功能可能还会导致本地数据库文件大小快速变大，不建议在存储空间不充足的存储设备上使用此功能
   # NOTE: This may lead database size increase quickly
   active-monitoring:
@@ -459,3 +459,24 @@ module:
       - '{"method":"EQUALS","content":"example.com"}'
   peers-local-track:
     enabled: true
+  # 拒绝服务攻击保护模块 - DoS Protection Module
+  # 此模块保护与 PeerBanHelper 关联的下载器的拒绝服务攻击
+  # This module protects the downloader that associated with PBH from DoS attack
+  idle-connection-dos-protection:
+    enabled: true
+    ban-duration: 900000
+    # 允许的最长闲置连接时间 - Max allowed idle time
+    # 当一个 Peer 长时间没有任何数据传输或状态更新，且速度持续低于 idle-speed-threshold 时，将被视为闲置连接
+    max-allowed-idle-time: 300000
+    # 闲置速度阈值，持续低于此速度将被视为闲置连接 - Idle speed threshold, connection with speed lower than this value will be considered as idle connection
+    # 单位：字节 - Units: bytes
+    idle-speed-threshold: 64
+    # 状态更新最小变化百分比 - Minimum status change percentage
+    min-status-change-percentage: 0.001
+    # 当状态更新时视为连接活动，重置计时器（如任务进度） - Consider connection active when status update (e.g progress)
+    reset-on-status-change: true
+    # 选择保护模式 - Choose protection mode
+    # 模式0 - 在支持 Peer Flags 的下载器上保护下载任务和做种任务 - Mode 0 - Protect both downloading and seeding tasks on downloaders that support Peer Flags
+    # 模式1 - 仅保护做种任务 - Mode 1 - Protect seeding tasks only
+    # 模式2 - 保护下载任务和做种任务，无论 Peer Flags 支持与否，可能引发误判 - Mode 2 - Protect both downloading and seeding tasks, no matter Peer Flags supported or not, may lead to false positive
+    protect-mode: 0

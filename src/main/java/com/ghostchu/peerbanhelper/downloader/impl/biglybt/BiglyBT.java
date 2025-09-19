@@ -13,7 +13,9 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetListenPort;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetSpeedLimiterBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.CurrentListenPort;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.CurrentSpeedLimiterBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.MetadataCallbackBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
@@ -24,12 +26,15 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.vdurmont.semver4j.Semver;
+import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,8 +64,8 @@ public final class BiglyBT extends AbstractDownloader {
     private final String connectorPayload;
     private Semver semver = new Semver("0.0.0");
 
-    public BiglyBT(String uuid, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(uuid, alertManager);
+    public BiglyBT(String uuid, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(uuid, alertManager, natAddressProvider);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -87,14 +92,14 @@ public final class BiglyBT extends AbstractDownloader {
         return config.getName();
     }
 
-    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(id, config, alertManager, httpUtil);
+        return new BiglyBT(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = Config.readFromYaml(section, id);
-        return new BiglyBT(id, config, alertManager, httpUtil);
+        return new BiglyBT(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
     @Override
@@ -117,7 +122,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+    public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         SetSpeedLimiterBean bean = new SetSpeedLimiterBean(speedLimiter.upload(), speedLimiter.download());
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
@@ -134,6 +139,39 @@ public final class BiglyBT extends AbstractDownloader {
             throw new IllegalStateException(e);
         }
 
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        Request request = new Request.Builder().url(apiEndpoint + "/listenport").get().build();
+        try (Response resp = httpClient.newCall(request).execute()) {
+            if (!resp.isSuccessful()) {
+                throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), resp.code(), resp.body()));
+            }
+            CurrentListenPort listenPort = JsonUtil.getGson().fromJson(resp.body().string(), CurrentListenPort.class);
+            return listenPort.getPort();
+        } catch (IOException e) {
+            throw new DownloaderRequestException(e);
+        }
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+        SetListenPort bean = new SetListenPort(port);
+        RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/listenport")
+                .post(requestBody)
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), response.code(), response.body().string()));
+                throw new DownloaderRequestException("Save BiglyBT ListenPort error: statusCode=" + response.code());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), "N/A", e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
@@ -213,7 +251,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -342,8 +380,7 @@ public final class BiglyBT extends AbstractDownloader {
                     peer.setIp(peer.getIp().substring(1));
                 }
                 peersList.add(new PeerImpl(
-                        new PeerAddress(peer.getIp(), peer.getPort()),
-                        peer.getIp(),
+                        natTranslate(new PeerAddress(peer.getIp(), peer.getPort(), peer.getIp())),
                         peerId,
                         peer.getClient(),
                         peer.getStats().getRtDownloadSpeed(),
@@ -362,7 +399,9 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
-        BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).distinct().toList());
+        BanBean bean = new BanBean(added.stream()
+                .map(b ->b.getPeer().getAddress().getAddress().toPrefixBlock().toNormalizedString())
+                .distinct().toList());
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/bans")
@@ -379,8 +418,11 @@ public final class BiglyBT extends AbstractDownloader {
         }
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
-        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).distinct().toList(), false);
+    private void setBanListFull(Collection<IPAddress> peerAddresses) {
+        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream()
+                .map(IPAddress::toPrefixBlock)
+                .map(IPAddress::toNormalizedString)
+                .distinct().toList(), false);
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/bans")

@@ -82,7 +82,7 @@
 
       <a-descriptions-item :label="t('page.dashboard.clientStatus.card.status')">
         <a-tooltip :content="client.data.lastStatusMessage">
-          <a-typography-text :type="getStatusSafe(client.data)[0]">
+          <a-typography-text :type="getStatusSafe(client.data)[0]!">
             <icon-check-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY" />
             <icon-close-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.ERROR" />
             <icon-question-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.UNKNOWN" />
@@ -90,7 +90,7 @@
             <icon-exclamation-polygon-fill
               v-if="client.data.lastStatus == ClientStatusEnum.NEED_TAKE_ACTION"
             />
-            {{ t(getStatusSafe(client.data)[1]) }}
+            {{ t(getStatusSafe(client.data)[1]!) }}
           </a-typography-text>
         </a-tooltip>
       </a-descriptions-item>
@@ -160,7 +160,7 @@ const downloader = computed(() => props.downloader)
 const endpointState = useEndpointStore()
 
 const getStatusSafe = (status: ClientStatus | undefined): string[] =>
-  statusMap[status?.lastStatus ?? ClientStatusEnum.UNKNOWN] ?? statusMap[ClientStatusEnum.UNKNOWN]
+  statusMap[status?.lastStatus ?? ClientStatusEnum.UNKNOWN] ?? statusMap[ClientStatusEnum.UNKNOWN]!
 
 const { data: client } = useRequest(
   getClientStatus,

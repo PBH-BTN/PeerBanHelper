@@ -3,7 +3,9 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
@@ -11,9 +13,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
-import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
-import com.ghostchu.peerbanhelper.event.PeerBanEvent;
-import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
+import com.ghostchu.peerbanhelper.event.banwave.*;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
@@ -36,6 +36,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.j256.ormlite.misc.TransactionManager;
 import inet.ipaddr.IPAddress;
+import inet.ipaddr.format.util.AssociativeAddressTrie;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Component;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,7 +64,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private final DualIPv4v6Tries ignoreAddresses = new DualIPv4v6Tries();
     private final Lock banWaveLock = new ReentrantLock();
-    private final Map<PeerAddress, BanMetadata> BAN_LIST = Collections.synchronizedMap(new HashMap<>());
+    private final BanList banList;
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
     private final DownloaderManagerImpl downloaderManager;
     private final BasicMetrics metrics;
@@ -88,11 +90,12 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
 
-    public DownloaderServerImpl(DownloaderManagerImpl downloaderManager,
+    public DownloaderServerImpl(BanList banList, DownloaderManagerImpl downloaderManager,
                                 @Qualifier("persistMetrics") BasicMetrics metrics,
                                 ModuleManagerImpl moduleManager, BanListDao banListDao,
                                 DNSLookup dnsLookup, Laboratory laboratory,
                                 AlertManager alertManager, Database databaseManager) {
+        this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.metrics = metrics;
         this.banListDao = banListDao;
@@ -103,6 +106,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
         loadBanListToMemory();
+        load();
     }
 
     @Override
@@ -118,7 +122,11 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
-        reApplyBanListForDownloaders();
+        if (laboratory.isExperimentActivated(Experiments.ASYNC_BANLIST_APPLY.getExperiment())) {
+            CompletableFuture.runAsync(this::reApplyBanListForDownloaders);
+        } else {
+            reApplyBanListForDownloaders();
+        }
         unbanWhitelistedPeers();
         registerTimer();
     }
@@ -131,24 +139,24 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     private void unbanWhitelistedPeers() {
-        for (PeerAddress peerAddress : BAN_LIST.keySet()) {
-            var node = ignoreAddresses.elementsContaining(peerAddress.getAddress());
-            if (node != null) {
-                scheduleUnBanPeer(peerAddress);
-            }
-        }
+        banList.forEach((addr, meta) -> {
+                    var node = ignoreAddresses.elementsContaining(addr);
+                    if (node != null) {
+                        scheduleUnBanPeer(addr);
+                    }
+                }
+        );
     }
 
     private void loadBanListToMemory() {
         if (!Main.getMainConfig().getBoolean("persist.banlist")) {
             return;
         }
-        this.BAN_LIST.clear();
+        this.banList.reset();
         try {
-            Map<PeerAddress, BanMetadata> data = banListDao.readBanList();
-            this.BAN_LIST.putAll(data);
+            Map<IPAddress, BanMetadata> data = banListDao.readBanList();
+            this.banList.addAll(data);
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
-            Thread.startVirtualThread(this::reApplyBanListForDownloaders);
         } catch (Exception e) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST), e);
         }
@@ -159,7 +167,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             return;
         }
         try {
-            int count = banListDao.saveBanList(BAN_LIST);
+            int count = banListDao.saveBanList(banList);
             log.info(tlUI(Lang.SAVED_BANLIST, count));
         } catch (Exception e) {
             log.error(tlUI(Lang.SAVE_BANLIST_FAILED), e);
@@ -174,8 +182,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
                 return;
             }
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.STARTING));
             if (isGlobalPaused()) {
-                if (needReApplyBanList.get()) reApplyBanListForDownloaders();
+                if (needReApplyBanList.get()) {
+                    Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_REAPPLY_BAN_LIST));
+                    reApplyBanListForDownloaders();
+                    Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_REAPPLY_BAN_LIST));
+                }
                 return;
             }
             banWaveWatchDog.setLastOperation("Ban wave - start");
@@ -185,30 +198,50 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 声明基本集合
             // 执行计划任务
             banWaveWatchDog.setLastOperation("Run scheduled tasks");
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_EXECUTE_DOWNLOADER_SCHEDULED_TASKS));
             downloaderManager.forEach(Downloader::runScheduleTasks);
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_EXECUTE_DOWNLOADER_SCHEDULED_TASKS));
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_REMOVE_EXPIRED_BANS));
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_REMOVE_EXPIRED_BANS));
             // 被新封禁的对等体列表
             Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>();
             // 当前所有活跃的对等体列表
             banWaveWatchDog.setLastOperation("Collect peers");
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_COLLECT_PEERS));
             Map<Downloader, Map<Torrent, List<Peer>>> peers = collectPeers();
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_COLLECT_PEERS));
             // 更新 LIVE_PEERS 用于数据展示
             banWaveWatchDog.setLastOperation("Update live peers");
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_UPDATE_LIVE_PEERS));
             updateLivePeers(peers);
-
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_UPDATE_LIVE_PEERS));
+            banWaveWatchDog.setLastOperation("Notify BatchMonitorFeatureModules");
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_NOTIFY_BATCH_MONITOR_MODULES));
+            for (FeatureModule module : moduleManager.getModules()) {
+                if (module instanceof BatchMonitorFeatureModule batchMonitorFeatureModule) {
+                    Main.getEventBus().post(new FeatureModuleExecuteEvent(module));
+                    batchMonitorFeatureModule.onPeersRetrieved(peers);
+                }
+            }
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_NOTIFY_BATCH_MONITOR_MODULES));
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_NOTIFY_MONITOR_MODULES));
             peers.forEach((downloader, entry) -> {
                 banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules");
                 for (FeatureModule module : moduleManager.getModules()) {
                     if (module instanceof MonitorFeatureModule monitorFeatureModule) {
+                        Main.getEventBus().post(new FeatureModuleExecuteEvent(module));
                         entry.forEach((torrent, plist) -> monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist));
                     }
                 }
             });
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_NOTIFY_MONITOR_MODULES));
             // ========== 处理封禁逻辑 ==========
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
             banWaveWatchDog.setLastOperation("Check Bans");
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_CHECK_BANS));
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
                 peers.keySet().forEach(downloader -> protect.getService().submit(() -> {
                     try {
@@ -219,7 +252,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     }
                 }));
             }
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_CHECK_BANS));
             // 处理计划操作
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_PROCESS_SCHEDULED_TASKS));
             int scheduled = 0;
             while (!scheduledBanListOperations.isEmpty()) {
                 ScheduledBanListOperation ops = scheduledBanListOperations.poll();
@@ -230,8 +265,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     banDetails.add(banning.detail());
                     downloaderBanDetailMap.put(banning.downloader(), banDetails);
                 } else {
-                    PeerAddress address = (PeerAddress) ops.object();
-                    BanMetadata banMetadata = BAN_LIST.get(address);
+                    var address = (PeerAddress) ops.object();
+                    BanMetadata banMetadata = banList.get(address);
                     if (banMetadata != null) {
                         unbannedPeers.add(banMetadata);
                     }
@@ -241,12 +276,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             if (scheduled > 0) {
                 log.info(tlUI(Lang.SCHEDULED_OPERATIONS, scheduled));
             }
-
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_PROCESS_SCHEDULED_TASKS));
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_HANDLE_BAN_ENTRIES));
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist");
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_ADD_BANS)))) {
                 Callable<Object> callable = () -> {
-                    var banlistClone = BAN_LIST.keySet();
+                    var banlistClone = banList.copyKeySet();
                     downloaderBanDetailMap.forEach((downloader, details) -> {
                         try {
                             details.forEach(detail -> protect.getService().submit(() -> {
@@ -259,7 +295,10 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                         BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
                                                 UUID.randomUUID().toString().replace("-", "")
                                                 , downloaderManager.getDownloadInfo(downloader.getId()),
-                                                System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                                System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
+                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                                 detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(), detail.result().structuredData());
                                         bannedPeers.add(banMetadata);
                                         banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
@@ -293,6 +332,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     callable.call();
                 }
             }
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_HANDLE_BAN_ENTRIES));
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_APPLY_BAN_LIST));
             banWaveWatchDog.setLastOperation("Apply banlist");
             // 如果需要，则应用更改封禁列表到下载器
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST)))) {
@@ -311,6 +352,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_APPLIED_BAN_LIST));
             banWaveWatchDog.setLastOperation("Completed");
         } catch (InterruptedException e) {
             log.error("Thread interrupted");
@@ -321,15 +363,20 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             banWaveWatchDog.feed();
             metrics.recordCheck();
             banWaveLock.unlock();
+            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.ENDED));
         }
     }
 
     private void reApplyBanListForDownloaders() {
-        downloaderManager.forEach(downloader -> {
-            if (downloader.login().success()) {
-                downloader.setBanList(BAN_LIST.keySet(), null, null, true);
-            }
-        });
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            downloaderManager.forEach(downloader -> {
+                executor.submit(() -> {
+                    if (downloader.login().success()) {
+                        downloader.setBanList(banList.copyKeySet(), null, null, true);
+                    }
+                });
+            });
+        }
     }
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
@@ -395,7 +442,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             } else {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.message());
             }
-            downloader.setBanList(BAN_LIST.keySet(), added, removed, applyFullList);
+            downloader.setBanList(banList.copyKeySet(), added, removed, applyFullList);
         } catch (Throwable th) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint()), th);
             downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_EXCEPTION, th.getClass().getName() + ": " + th.getMessage()));
@@ -408,14 +455,14 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
      * @return 当封禁条目过期时，移除它们（解封禁）
      */
     public Collection<BanMetadata> removeExpiredBans() {
-        List<PeerAddress> removeBan = new ArrayList<>();
+        List<IPAddress> removeBan = new ArrayList<>();
         List<BanMetadata> metadata = new ArrayList<>();
-        for (Map.Entry<PeerAddress, BanMetadata> pair : BAN_LIST.entrySet()) {
-            if (System.currentTimeMillis() >= pair.getValue().getUnbanAt()) {
-                removeBan.add(pair.getKey());
-                metadata.add(pair.getValue());
+        banList.forEach((key, value) -> {
+            if (System.currentTimeMillis() >= value.getUnbanAt()) {
+                removeBan.add(key);
+                metadata.add(value);
             }
-        }
+        });
         removeBan.forEach(this::unbanPeer);
         long normalUnbanCount = metadata.stream().filter(meta -> !meta.isBanForDisconnect()).count();
         if (normalUnbanCount > 0) {
@@ -505,6 +552,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 if (!(registeredModule instanceof RuleFeatureModule module)) {
                     continue;
                 }
+                Main.getEventBus().post(new FeatureModuleExecuteEvent(registeredModule));
                 try {
                     CheckResult checkResult;
                     if (module.isThreadSafe()) {
@@ -571,26 +619,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
 
-    /**
-     * 获取目前所有被封禁的对等体的集合的拷贝
-     *
-     * @return 不可修改的集合拷贝
-     */
-    @Override
-    public @NotNull Map<PeerAddress, BanMetadata> getBannedPeers() {
-        return Map.copyOf(BAN_LIST);
-    }
-
-    /**
-     * 获取目前所有被封禁的对等体的集合的拷贝
-     *
-     * @return 不可修改的集合拷贝
-     */
-    @Override
-    public @NotNull Map<PeerAddress, BanMetadata> getBannedPeersDirect() {
-        return BAN_LIST;
-    }
-
     @Override
     public @NotNull Map<PeerAddress, List<PeerMetadata>> getPeerSnapshot() {
         return LIVE_PEERS;
@@ -603,14 +631,14 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
      * @param peer        对等体 IP 地址
      * @param banMetadata 封禁元数据
      */
-    private void banPeer(@NotNull Collection<PeerAddress> compareWith, @NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
-        if (compareWith.contains(peer.getPeerAddress())) {
+    private void banPeer(@NotNull Set<IPAddress> compareWith, @NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
+        if (compareWith.contains(peer.getPeerAddress().getAddress())) {
             log.error(tlUI(Lang.DUPLICATE_BAN, banMetadata));
             needReApplyBanList.set(true);
             log.warn(tlUI(Lang.SCHEDULED_FULL_BANLIST_APPLY));
         }
-        BAN_LIST.put(peer.getPeerAddress(), banMetadata);
-        metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
+        banList.add(peer.getPeerAddress(), banMetadata);
+        metrics.recordPeerBan(peer.getPeerAddress().getAddress(), banMetadata);
         banMetadata.setReverseLookup("N/A");
         if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
             Thread.ofVirtual().start(() -> {
@@ -634,26 +662,53 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     @Override
-    public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
+    public void scheduleBanPeerNoAssign(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
         Downloader downloader = downloaderManager.stream().filter(d -> d.getId().equals(banMetadata.getDownloader().id()))
                 .findFirst().orElseThrow();
-        banPeer(BAN_LIST.keySet(), banMetadata, torrent, peer);
+        banPeer(banList.copyKeySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
                 downloader,
                 new BanDetail(torrent,
                         peer,
                         new CheckResult(getClass(), PeerAction.BAN, banDuration,
-                                new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE),
-                                new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON),
+                                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_TITLE),
+                                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_DESCRIPTION),
                                 StructuredData.create().add("type", "manually"))
                         , banDuration)
         )));
     }
 
     @Override
+    public void scheduleBanPeerNoAssign(@NotNull PeerAddress addr) {
+        String mockTorrentHash = "00000000000000000000";
+        Torrent torrent = new TorrentImpl(mockTorrentHash, "User Operation", mockTorrentHash, 0, 0, 0.0d, 0, 0, false);
+        Peer peer = new PeerImpl(addr,
+                "-USROPS-".getBytes(StandardCharsets.ISO_8859_1),
+                "User Operation",
+                0, 0, 0, 0, 0, null, false);
+        long yearPlus100 = 100L * 365 * 24 * 60 * 60 * 1000;
+        scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
+                downloaderManager.getDownloaders().getFirst(),
+                new BanDetail(torrent,
+                        peer,
+                        new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_TITLE),
+                                new TranslationComponent(Lang.PEER_BAN_USER_OPERATE_DESCRIPTION, addr),
+                                StructuredData.create().add("type", "manually").add("ip", addr))
+                        , yearPlus100)
+        )));
+    }
+
+    @Override
     public void scheduleUnBanPeer(@NotNull PeerAddress peer) {
-        unbanPeer(peer);
+        unbanPeer(peer.getAddress());
         scheduledBanListOperations.add(new ScheduledBanListOperation(false, peer));
+    }
+
+    @Override
+    public void scheduleUnBanPeer(@NotNull IPAddress peer) {
+        unbanPeer(peer);
+        scheduledBanListOperations.add(new ScheduledBanListOperation(false, new PeerAddress(peer.toNormalizedString(), 0, peer.toNormalizedString())));
     }
 
 
@@ -663,13 +718,12 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
      * @param address 对等体 IP 地址
      * @return 此对等体的封禁元数据；返回 null 代表此对等体没有被封禁
      */
-    @Nullable
-    private BanMetadata unbanPeer(@NotNull PeerAddress address) {
-        BanMetadata metadata = BAN_LIST.remove(address);
+    private AssociativeAddressTrie.@Nullable AssociativeTrieNode<? extends IPAddress, BanMetadata> unbanPeer(@NotNull IPAddress address) {
+        var metadata = banList.remove(address);
         if (metadata != null) {
-            metrics.recordPeerUnban(address, metadata);
+            metrics.recordPeerUnban(address, metadata.getValue());
+            Main.getEventBus().post(new PeerUnbanEvent(address, metadata.getValue()));
         }
-        Main.getEventBus().post(new PeerUnbanEvent(address, metadata));
         return metadata;
     }
 
@@ -702,6 +756,10 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
     }
 
+    @Override
+    public @NotNull BanList getBanList() {
+        return banList;
+    }
 
     private void watchDogHungry() {
         StringBuilder threadDump = new StringBuilder(System.lineSeparator());
@@ -712,13 +770,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         threadDump.append("\n\n");
         var deadLockedThreads = threadMXBean.findDeadlockedThreads();
         var monitorDeadlockedThreads = threadMXBean.findMonitorDeadlockedThreads();
-        if(deadLockedThreads != null){
+        if (deadLockedThreads != null) {
             threadDump.append("Deadlocked Threads:\n");
             for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(deadLockedThreads)) {
                 threadDump.append(MsgUtil.threadInfoToString(threadInfo));
             }
         }
-        if(monitorDeadlockedThreads != null){
+        if (monitorDeadlockedThreads != null) {
             threadDump.append("Monitor Deadlocked Threads:\n");
             for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(monitorDeadlockedThreads)) {
                 threadDump.append(MsgUtil.threadInfoToString(threadInfo));

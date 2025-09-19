@@ -34,7 +34,7 @@
           <template #suffix> ms </template>
         </a-input-number>
       </a-form-item>
-      <a-form-item field="accessToken" label="Access Token:" validate-trigger="input">
+      <a-form-item field="accessToken" label="Github Access Token:" validate-trigger="input">
         <template #extra>
           <i18n-t keypath="settings.modal.accessTokenTips">
             <template #here>

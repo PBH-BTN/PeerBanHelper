@@ -1,5 +1,10 @@
 <template>
-  <slot v-if="plusStatus?.activated"></slot>
+  <slot
+    v-if="
+      endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
+      endpointStore.plusStatus?.enabledFeatures?.includes('paid')
+    "
+  ></slot>
   <a-card v-else hoverable :title="title">
     <a-result class="overlay" status="warning" :title="t('page.charts.locked')">
       <template #icon>
@@ -17,13 +22,12 @@
 </template>
 <script setup lang="ts">
 import { useEndpointStore } from '@/stores/endpoint'
+import { defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { computed, defineAsyncComponent } from 'vue'
 const dummyChart = defineAsyncComponent(() => import('./dummyChart.vue'))
 const { t } = useI18n()
 const endpointStore = useEndpointStore()
 
-const plusStatus = computed(() => endpointStore.plusStatus)
 const { title } = defineProps<{
   title: string
 }>()

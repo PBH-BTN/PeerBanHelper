@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>8.0.12</version>
+    <version>9.0.0</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -17,7 +17,7 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <install4j.home>/opt/install4j</install4j.home>
-        <flatlafVersion>3.6</flatlafVersion>
+        <flatlafVersion>3.6.1</flatlafVersion>
         <ormlite.version>6.1</ormlite.version>
     </properties>
 
@@ -56,7 +56,7 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
-                        <version>11.0.4</version>
+                        <version>11.0.5</version>
                         <executions>
                             <execution>
                                 <id>compile-installers</id>
@@ -85,7 +85,7 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
-                        <version>11.0.4</version>
+                        <version>11.0.5</version>
                         <executions>
                             <execution>
                                 <id>compile-installers</id>
@@ -127,7 +127,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.38</version>
+                            <version>1.18.42</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -288,19 +288,19 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.2.8</version>
+            <version>6.2.11</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
+            <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>26.0.2</version>
+            <version>26.0.2-1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -333,7 +333,7 @@
         <dependency>
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
-            <version>4.3.1</version>
+            <version>4.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.aviator</groupId>
@@ -375,7 +375,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-dom</artifactId>
-            <version>0.8.12</version>
+            <version>0.8.13</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -386,7 +386,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-core</artifactId>
-            <version>0.8.12</version>
+            <version>0.8.13</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -397,7 +397,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-storage</artifactId>
-            <version>0.8.12</version>
+            <version>0.8.13</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -424,7 +424,7 @@
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark</artifactId>
-            <version>0.25.0</version>
+            <version>0.26.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.tukaani/xz -->
         <dependency>
@@ -440,7 +440,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
-            <version>3.6</version>
+            <version>3.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -450,7 +450,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>3.6</version>
+            <version>3.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.ghostchu</groupId>
@@ -460,12 +460,12 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.13.1</version>
+            <version>2.13.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.8-jre</version>
+            <version>33.5.0-jre</version>
         </dependency>
         <dependency>
             <groupId>com.github.seancfoley</groupId>
@@ -476,11 +476,6 @@
             <groupId>org.bspfsystems</groupId>
             <artifactId>yamlconfiguration</artifactId>
             <version>3.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.simplejavamail</groupId>
-            <artifactId>simple-java-mail</artifactId>
-            <version>8.12.6</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -544,11 +539,35 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
-            <version>5.10.0</version> </dependency>
+            <version>5.17.0</version> </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
-            <version>5.10.0</version>
+            <version>5.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bitlet</groupId>
+            <artifactId>weupnp</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.12.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.2.6.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.swt</groupId>
+            <artifactId>swt-classpath</artifactId>
+            <version>4.37-M2</version>
+            <scope>system</scope> <!-- 由于 SWT 不同平台包类结构相同，因此必须按照平台将对应的 swt 二进制引入 classpath，此处的仅用于解决Maven依赖，实际由 install4j 或者构建脚本负责拷贝 SWT 二进制文件，调试时需要手动引入类路径 -->
+            <systemPath>${project.basedir}/platform-natives/windows-x86_64/libraries/swt.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

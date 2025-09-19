@@ -1,10 +1,10 @@
+version: "3.9"
 services:
   peerbanhelper:
-    image: "ghostchu/peerbanhelper:<填写版本号>"
+    image: @IMAGE@
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
       - ./:/app/data
-    ports:
-      - "9898:9898"
+    network_mode: host
     stop_grace_period: 30s

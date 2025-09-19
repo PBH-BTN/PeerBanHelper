@@ -141,5 +141,24 @@ export default {
   'page.settings.tab.profile.module.ptrBlackList.reserveName': '封禁域名',
   'page.settings.tab.profile.module.ptrBlackList.placeholder': '反向解析域名',
   'page.settings.tab.profile.module.ptrBlackList.tooltip':
-    '此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作'
+    '此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作',
+
+  'page.settings.tab.profile.module.idleConnectionDosProtection.title': '拒绝服务攻击保护',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime':
+    '使用全局封禁时间',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime':
+    '允许的最长闲置连接时间',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime.tips':
+    '当一个 Peer 长时间没有任何数据传输或状态更新，且速度持续低于闲置速度阈值时，将被视为闲置连接',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold': '闲置速度阈值',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.idleSpeedThreshold.tips':
+    '持续低于此速度将被视为闲置连接',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage':
+    '状态更新最小变化百分比',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.minStatusChangePercentage.tips':
+    '状态更新时，变化百分比低于此值时仍视为闲置',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
+    '状态更新时重置计时器',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
+    '当状态更新时视为连接活动，重置计时器（如任务进度）'
 }

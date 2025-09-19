@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
@@ -12,8 +11,10 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DownloaderWrapperDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.DownloaderDiscovery;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
@@ -53,6 +54,10 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     private DownloaderManagerImpl downloaderManager;
     @Autowired
     private DownloaderServer downloaderServer;
+    @Autowired
+    private DownloaderDiscovery downloaderDiscovery;
+    @Autowired
+    private IPDBManager iPDBManager;
 
     @Override
     public boolean isConfigurable() {
@@ -73,6 +78,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
+                .get("/api/downloaders/scan", this::handleDownloaderScan, Role.USER_READ)
                 .put("/api/downloaders", this::handleDownloaderPut, Role.USER_WRITE)
                 .patch("/api/downloaders/{downloaderId}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderId")), Role.USER_WRITE)
                 .post("/api/downloaders/test", this::handleDownloaderTest, Role.USER_WRITE)
@@ -80,6 +86,11 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
                 .get("/api/downloaders/{downloaderId}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderId")), Role.USER_READ)
                 .get("/api/downloaders/{downloaderId}/torrents", ctx -> handleDownloaderTorrents(ctx, ctx.pathParam("downloaderId")), Role.USER_READ)
                 .get("/api/downloaders/{downloaderId}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderId"), ctx.pathParam("torrentId")), Role.USER_READ);
+    }
+
+    private void handleDownloaderScan(@NotNull Context ctx) {
+        var downloaders = downloaderDiscovery.scan().join();
+        ctx.json(new StdResp(true, null, downloaders));
     }
 
     private void handleDownloaderPut(Context ctx) {
@@ -212,7 +223,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private PopulatedPeerDTO populatePeerDTO(PeerMetadata p, boolean resolvePTR) {
         PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
-        PeerBanHelper.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
+        IPDBManager.IPDBResponse response = iPDBManager.queryIPDB(p.getPeer().toPeerAddress().getAddress().toInetAddress());
         IPGeoData geoData = response.geoData().get();
         if (geoData != null) {
             dto.setGeo(geoData);

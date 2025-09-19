@@ -1,0 +1,39 @@
+package com.ghostchu.peerbanhelper.util.traversal.forwarder.iohandler;
+
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.ForwarderIOHandlerType;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.IoHandlerFactory;
+import io.netty.channel.ServerChannel;
+import io.netty.channel.uring.IoUringChannelOption;
+import io.netty.channel.uring.IoUringIoHandler;
+import io.netty.channel.uring.IoUringServerSocketChannel;
+import io.netty.channel.uring.IoUringSocketChannel;
+
+public class IOUringHandler implements ForwarderIOHandler {
+    @Override
+    public ServerBootstrap apply(ServerBootstrap bootstrap) {
+        return bootstrap
+                .option(IoUringChannelOption.SO_REUSEPORT, true);
+    }
+
+    @Override
+    public ForwarderIOHandlerType ioHandlerType() {
+        return ForwarderIOHandlerType.IO_URING;
+    }
+
+    @Override
+    public IoHandlerFactory ioHandlerFactory() {
+        return IoUringIoHandler.newFactory();
+    }
+
+    @Override
+    public Class<? extends ServerChannel> serverSocketChannelClass() {
+        return IoUringServerSocketChannel.class;
+    }
+
+    @Override
+    public Class<? extends Channel> clientSocketChannelClass() {
+        return IoUringSocketChannel.class;
+    }
+}

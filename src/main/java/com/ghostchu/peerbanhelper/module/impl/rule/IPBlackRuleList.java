@@ -72,6 +72,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
     private long banDuration;
     @Autowired
     private HTTPUtil httpUtil;
+    private boolean preloadBanList;
 
     public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, ModuleMatchCache moduleMatchCache) {
         super();
@@ -153,6 +154,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         getCache().invalidateAll();
         try {
             this.banDuration = getConfig().getLong("ban-duration", 0);
+            this.preloadBanList = getConfig().getBoolean("preload-banlist", false);
             if (null == ipBanMatchers) {
                 ipBanMatchers = new ArrayList<>();
             }
@@ -510,6 +512,10 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         getConfig().set("check-interval", checkInterval);
         saveConfig();
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+    }
+
+    private void preloadBanList(){
+
     }
 }
 

@@ -25,3 +25,4 @@ runatlogin.option.no=不启动
 runatlogin.option.yes=显式窗口启动
 runatlogin.option.silent=静默启动到系统托盘
 installing.edgewebview2=正在安装 Microsoft Edge WebView 2...
+windows.x86_64.native=Windows x86_64 Native

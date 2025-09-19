@@ -31,7 +31,7 @@ public final class BuildMeta {
     }
 
     public boolean isSnapshotOrBeta() {
-        return "master".equals(branch) || "dev".equals(branch);
+        return "master".equals(branch) || "dev".equals(branch) || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"));
     }
 
     public String toString() {

@@ -80,4 +80,8 @@ public interface Torrent {
         return InfoHashUtil.getHashedIdentifier(getHash());
     }
 
+    default boolean isSeeding(){
+        return getProgress() >= 1.0d;
+    }
+
 }
