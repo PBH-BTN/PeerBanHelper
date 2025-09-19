@@ -287,9 +287,11 @@ public final class BitComet extends AbstractDownloader {
     @Override
     public @NotNull List<Torrent> getTorrents() {
         Map<String, String> requirements = new HashMap<>();
-        requirements.put("group_state", "ACTIVE");
+        requirements.put("state_group", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
+        requirements.put("tag_filter", "ALL");
+        requirements.put("task_type", "ALL");
         return fetchTorrents(requirements, !config.isIgnorePrivate());
     }
 
@@ -299,6 +301,8 @@ public final class BitComet extends AbstractDownloader {
         requirements.put("group_state", "ALL");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
+        requirements.put("tag_filter", "ALL");
+        requirements.put("task_type", "ALL");
         return fetchTorrents(requirements, true);
     }
 

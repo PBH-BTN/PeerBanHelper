@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
+import com.maxmind.db.Reader;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
@@ -25,9 +26,7 @@ import okhttp3.Response;
 import okio.Okio;
 import org.tukaani.xz.XZInputStream;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,17 +72,17 @@ public final class IPDB implements AutoCloseable {
         this.httpUtil = httpUtil;
 //        this.userAgent = userAgent;
         this.httpClient = httpUtil.addProgressTracker(httpUtil.newBuilder()
-                .connectTimeout(Duration.ofSeconds(15))
-                .readTimeout(Duration.ofMinutes(1))
-                .callTimeout(Duration.ofMinutes(2))
-                .followRedirects(true)
-                .authenticator((route, response) -> {
-                    if (response.request().header("Authorization") != null) {
-                        return null; // 已经尝试过认证，不再重试
-                    }
-                    String credential = Credentials.basic(accountId, licenseKey);
-                    return response.request().newBuilder().header("Authorization", credential).build();
-                }))
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .readTimeout(Duration.ofMinutes(1))
+                        .callTimeout(Duration.ofMinutes(2))
+                        .followRedirects(true)
+                        .authenticator((route, response) -> {
+                            if (response.request().header("Authorization") != null) {
+                                return null; // 已经尝试过认证，不再重试
+                            }
+                            String credential = Credentials.basic(accountId, licenseKey);
+                            return response.request().newBuilder().header("Authorization", credential).build();
+                        }))
                 .build();
         if (needUpdateMMDB(mmdbCityFile)) {
             updateMMDB(databaseCity, mmdbCityFile);
@@ -318,11 +317,12 @@ public final class IPDB implements AutoCloseable {
                     .build();
 
             try (Response response = httpClient.newCall(request).execute()) {
+                var body = response.body();
                 if (response.code() == 200) {
                     if (mirror.supportXzip()) {
                         try {
                             File tmp = File.createTempFile(databaseName, ".tmp");
-                            try (XZInputStream gzipInputStream = new XZInputStream(response.body().byteStream());
+                            try (XZInputStream gzipInputStream = new XZInputStream(body.byteStream());
                                  FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
                                 byte[] buffer = new byte[1024];
                                 int len;
@@ -332,16 +332,15 @@ public final class IPDB implements AutoCloseable {
                             }
                             // validate mmdb
                             validateMMDB(tmp);
-                            Files.copy(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                            Files.deleteIfExists(tmp.toPath());
+                            Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         } catch (IOException e) {
-                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED, databaseName));
+                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED, databaseName), e);
                         }
                     } else {
                         // 直接保存文件
-                        try (var source = response.body().source();
+                        try (var source = body.source();
                              var sink = Okio.buffer(Okio.sink(path))) {
                             sink.writeAll(source);
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
@@ -368,9 +367,10 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void validateMMDB(File tmp) throws IOException {
-       try(var reader = new Reader(tmp, Reader.FileMode.MEMORY_MAPPED, NoCache.getInstance())){
-          log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().getDatabaseType());
-       }
+        try (InputStream is = new FileInputStream(tmp);
+             var reader = new Reader(is, NoCache.getInstance())) {
+            log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().getDatabaseType());
+        }
     }
 
     @Override

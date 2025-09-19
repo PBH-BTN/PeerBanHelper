@@ -593,8 +593,7 @@ const isClientIpLocal = computed(() => {
 
 const pbhPlusActivited = computed(
   () =>
-    endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
-    endpointStore.plusStatus?.enabledFeatures?.includes('paid')
+    endpointStore.plusStatus?.enabledFeatures?.includes('basic')
 )
 
 const osLogo = {

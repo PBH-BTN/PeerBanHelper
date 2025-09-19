@@ -189,8 +189,7 @@ const accessHistoryModal = ref<InstanceType<typeof AccessHistoryModal>>()
 const banHistoryModal = ref<InstanceType<typeof BanHistoryModal>>()
 const pbhPlusActivited = computed(
   () =>
-    endpointStore.plusStatus?.enabledFeatures?.includes('basic') &&
-    endpointStore.plusStatus?.enabledFeatures?.includes('paid')
+    endpointStore.plusStatus?.enabledFeatures?.includes('basic')
 )
 
 const handleSearch = debounce((value: string) => {
