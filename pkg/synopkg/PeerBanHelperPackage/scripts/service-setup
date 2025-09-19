@@ -24,6 +24,6 @@ SHARE_PATH=$(realpath "/var/packages/${SYNOPKG_PKGNAME}/shares/peerbanhelper" 2>
 
 service_postinst ()
 {
-    echo -e "安装/升级成功！您可以从 DSM 主菜单 -> PeerBanHelper 进入 WebUI 进行后续配置。<br><span style='color:#ff0000;font-weight:bold'>请注意从 v9.0.0 版本开始，默认使用 host 网络模式启动。请旧版本升级的用户进入控制台检查运行状态。</span>" | tee -a $SYNOPKG_TEMP_LOGFILE
+    echo -e "安装/升级成功！您可以从 DSM 主菜单 -> PeerBanHelper 进入 WebUI 进行后续配置。<br><span style="color:#ff0000;font-weight:bold">请注意从 8.1.0 版本开始，默认使用 host 网络模式启动。从旧版本升级的用户可能需要更新下载器的 IP 地址。</span>" | tee -a $SYNOPKG_TEMP_LOGFILE
 
 }
