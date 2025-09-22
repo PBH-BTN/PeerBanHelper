@@ -49,7 +49,7 @@
             <a-space style="display: flex; justify-content: center; align-items: center">
               <a-typography-text type="secondary">{{ t('plus.or') }}</a-typography-text>
               &nbsp;
-              <a-tooltip v-if="canGenerateTry">
+              <a-tooltip v-if="!canGenerateTry">
                 <template #content>
                   <i18n-t keypath="plus.try.unavailable.desc">
                     <template #detail>
