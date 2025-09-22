@@ -23,6 +23,12 @@ export default {
 
   'plus.or': '或者',
   'plus.try': '我不想捐赠',
+  'plus.try.unavailable': '本地许可证不可用',
+  'plus.try.unavailable.desc':
+    '由于浏览器限制，您不能在当前窗口（非安全上下文）中生成本地许可证，点击{detail}',
+  'plus.try.unavailable.desc.detail': '查看详情',
+  'plus.try.unavailable.desc.detail.url':
+    'https://developer.mozilla.org/zh-CN/docs/Web/API/Crypto/subtle',
 
   'plus.tryModal.title': '免费激活 Plus 订阅',
   'plus.tryModal.content1':

@@ -49,7 +49,24 @@
             <a-space style="display: flex; justify-content: center; align-items: center">
               <a-typography-text type="secondary">{{ t('plus.or') }}</a-typography-text>
               &nbsp;
-              <a-button :loading="loading" @click="handleTry">
+              <a-tooltip v-if="canGenerateTry">
+                <template #content>
+                  <i18n-t keypath="plus.try.unavailable.desc">
+                    <template #detail>
+                      <a-link
+                        :href="t('plus.try.unavailable.desc.detail.url')"
+                        target="_blank"
+                        style="text-decoration: underline"
+                        >{{ t('plus.try.unavailable.desc.detail') }}</a-link
+                      >
+                    </template>
+                  </i18n-t>
+                </template>
+                <a-button disabled>
+                  <template #icon><icon-close /></template>{{ t('plus.try.unavailable') }}
+                </a-button>
+              </a-tooltip>
+              <a-button v-else :loading="loading" @click="handleTry">
                 <template #icon><icon-face-frown-fill /></template>{{ t('plus.try') }}
               </a-button>
             </a-space>
@@ -137,6 +154,7 @@ defineExpose({
     showModal.value = true
   }
 })
+const canGenerateTry = window.isSecureContext
 
 const loading = ref(false)
 const submitKey = async (key: string) => {

@@ -1,9 +1,5 @@
 <template>
-  <slot
-    v-if="
-      endpointStore.plusStatus?.enabledFeatures?.includes('basic')
-    "
-  ></slot>
+  <slot v-if="endpointStore.plusStatus?.enabledFeatures?.includes('basic')"></slot>
   <a-card v-else hoverable :title="title">
     <a-result class="overlay" status="warning" :title="t('page.charts.locked')">
       <template #icon>
