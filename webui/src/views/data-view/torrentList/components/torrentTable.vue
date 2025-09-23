@@ -187,9 +187,8 @@ const columns = [
 const list = computed(() => data.value?.data.results)
 const accessHistoryModal = ref<InstanceType<typeof AccessHistoryModal>>()
 const banHistoryModal = ref<InstanceType<typeof BanHistoryModal>>()
-const pbhPlusActivited = computed(
-  () =>
-    endpointStore.plusStatus?.enabledFeatures?.includes('basic')
+const pbhPlusActivited = computed(() =>
+  endpointStore.plusStatus?.enabledFeatures?.includes('basic')
 )
 
 const handleSearch = debounce((value: string) => {

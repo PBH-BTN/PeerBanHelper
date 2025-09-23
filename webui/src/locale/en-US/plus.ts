@@ -23,6 +23,12 @@ export default {
 
   'plus.or': 'Or',
   'plus.try': "I don't want to donate",
+  'plus.try.unavailable': 'Local license unavailable',
+  'plus.try.unavailable.desc':
+    'Due to browser restrictions, you cannot generate a local license in the current window (non-secure context). Click to see {detail}.',
+  'plus.try.unavailable.desc.detail': 'details',
+  'plus.try.unavailable.desc.detail.url':
+    'https://developer.mozilla.org/en-US/docs/Web/API/Crypto/subtle',
 
   'plus.tryModal.title': 'Get Plus subscription for free',
   'plus.tryModal.content1':
