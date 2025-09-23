@@ -211,11 +211,11 @@ public final class PeerFlag {
 
     public void parseLibTorrent(String flags) {
         boolean interesting = false;
-        boolean remoteChoked = false;
+        boolean remoteChoked = true;
         boolean remoteInterested = false;
         boolean choked = false;
         boolean optimisticUnchoke = false;
-        boolean snubbed = true;
+        boolean snubbed = false;
         boolean localConnection = true;
         boolean fromDHT = false;
         boolean fromPEX = false;
@@ -253,7 +253,7 @@ public final class PeerFlag {
                     remoteInterested = false;
                 }
                 case 'O' -> optimisticUnchoke = true;
-                case 'S' -> snubbed = false;
+                case 'S' -> snubbed = true;
                 case 'I' -> localConnection = false;
                 case 'H' -> fromDHT = true;
                 case 'X' -> fromPEX = true;
