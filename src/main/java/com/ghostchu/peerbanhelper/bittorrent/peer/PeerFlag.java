@@ -213,7 +213,7 @@ public final class PeerFlag {
         boolean interesting = false;
         boolean remoteChoked = true;
         boolean remoteInterested = false;
-        boolean choked = false;
+        boolean choked = true;
         boolean optimisticUnchoke = false;
         boolean snubbed = false;
         boolean localConnection = true;
