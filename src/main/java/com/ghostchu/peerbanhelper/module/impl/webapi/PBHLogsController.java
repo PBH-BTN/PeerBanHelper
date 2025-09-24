@@ -70,13 +70,14 @@ public final class PBHLogsController extends AbstractWebSocketFeatureModule {
     }
 
     private void sendHistoryLogs(WsContext ctx, long offset) {
-if (offset > JListAppender.getSeq().longValue()) {// PBH 重启，但是 WebUI 没有刷新，或者为未传递 seq 参数
-    offset = 0;
-    var peekedRecord = JListAppender.ringDeque.peek();
-    if (peekedRecord != null) {
-        offset = peekedRecord.seq() - 1;
-    }
-}
+        if (offset > JListAppender.getSeq().longValue()) {// PBH 重启，但是 WebUI 没有刷新，或者为未传递 seq 参数
+            offset = 0;
+            var peekedRecord = JListAppender.ringDeque.peek();
+            if (peekedRecord != null) {
+                var headSeq = peekedRecord.seq();
+                offset = headSeq - 1;
+            }
+        }
         for (LogEntry logEntry : JListAppender.ringDeque) {
             if (logEntry.seq() > offset) {
                 ctx.send(new StdResp(true, null,
