@@ -34,6 +34,10 @@ export default {
     'PBH has obtained a local IP address, which usually does not expected and indicates that your reverse proxy configuration is incorrect. Please check it.',
   'page.settings.tab.info.network.yes': 'Yes',
   'page.settings.tab.info.network.no': 'No',
+  'page.settings.tab.info.network.internet.no': 'No Internet Access (NAT Type: {nat})',
+  'page.settings.tab.info.network.internet.cnOnly': 'China Internet Access (NAT Type: {nat})',
+  'page.settings.tab.info.network.internet.globalOnly': 'Global Internet Access (NAT Type: {nat})',
+  'page.settings.tab.info.network.internet.full': 'Full Internet Access (NAT Type: {nat})',
 
   'page.settings.tab.info.runtime': 'Runtime Info',
   'page.settings.tab.info.runtime.version': 'JVM Version',

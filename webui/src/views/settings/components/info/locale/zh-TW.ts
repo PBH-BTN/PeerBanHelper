@@ -34,6 +34,10 @@ export default {
     'PBH 獲取到了一個本機的 IP 位址，這通常是非預期的並意味著您的反向代理配置有誤，請檢查您的反向代理配置',
   'page.settings.tab.info.network.yes': '是',
   'page.settings.tab.info.network.no': '否',
+  'page.settings.tab.info.network.internet.no': '無 Internet 存取 (NAT 類型: {nat})',
+  'page.settings.tab.info.network.internet.cnOnly': 'China Internet 存取 (NAT 類型: {nat})',
+  'page.settings.tab.info.network.internet.globalOnly': 'Global Internet 存取 (NAT 類型: {nat})',
+  'page.settings.tab.info.network.internet.full': 'Full Internet 存取 (NAT 類型: {nat})',
 
   'page.settings.tab.info.runtime': '執行階段資訊',
   'page.settings.tab.info.runtime.version': 'JVM 版本',

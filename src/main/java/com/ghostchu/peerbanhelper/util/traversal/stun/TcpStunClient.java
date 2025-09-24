@@ -43,7 +43,7 @@ public class TcpStunClient {
         while (true) {
             try {
                 return getMappingFromServer();
-            } catch (ServerUnavailable e) {
+            } catch (Exception e) {
                 // 轮换到下一个服务器
                 currentServerIndex = (currentServerIndex + 1) % stunServerList.size();
                 // 如果回到第一个服务器，说明所有服务器都试过了

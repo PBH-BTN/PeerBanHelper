@@ -204,11 +204,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     private List<Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
         List<QBittorrentTorrent> allTorrents = new ArrayList<>();
+        Set<String> seenHashes = new HashSet<>(); // 用于检测重复
         int pageSize = 100; // 每页大小
         int offset = 0;
-        boolean hasMore = true;
 
-        while (hasMore) {
+        while (true) {
             try {
                 String url = apiEndpoint + "/torrents/info";
                 if (onlyActive) {
@@ -228,16 +228,20 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     String responseBody = response.body().string();
                     List<QBittorrentTorrent> pageTorrents = JsonUtil.getGson().fromJson(responseBody, new TypeToken<List<QBittorrentTorrent>>() {
                     }.getType());
-                    if (pageTorrents == null || pageTorrents.isEmpty()) {
-                        hasMore = false;
-                    } else {
-                        allTorrents.addAll(pageTorrents);
-                        offset += pageSize;
-                        // 如果返回的数量小于页大小，说明已经到达最后一页
-                        if (pageTorrents.size() < pageSize) {
-                            hasMore = false;
+
+                    if (pageTorrents == null || pageTorrents.isEmpty()) break;
+
+                    boolean hasNew = false;
+                    for (QBittorrentTorrent t : pageTorrents) {
+                        if (seenHashes.add(t.getHash())) {
+                            allTorrents.add(t);
+                            hasNew = true;
                         }
                     }
+                    // 全部重复 或者 小于分页大小
+                    if (!hasNew || pageTorrents.size() < pageSize) break;
+
+                    offset += pageSize;
                 }
             } catch (Exception e) {
                 throw new IllegalStateException(e);

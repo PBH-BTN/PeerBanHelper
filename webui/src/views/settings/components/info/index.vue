@@ -306,12 +306,7 @@
           :align="{ label: 'right' }"
         >
           <a-descriptions-item :label="t('page.settings.tab.info.network.internet')">
-            Unknown
-            <!-- {{
-          data?.data.system.network.internet_access
-            ? t('page.settings.tab.info.network.yes')
-            : t('page.settings.tab.info.network.no')
-        }} -->
+            {{ networkAccess(data?.data) }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.network.proxy')">
             {{
@@ -499,7 +494,7 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import { OSType } from '@/api/model/status'
+import { OSType, type RunningInfo } from '@/api/model/status'
 import { genIconComponent } from '@/components/iconFont'
 import multiClick from '@/components/multiClick.vue'
 import {
@@ -591,9 +586,8 @@ const isClientIpLocal = computed(() => {
   return false
 })
 
-const pbhPlusActivited = computed(
-  () =>
-    endpointStore.plusStatus?.enabledFeatures?.includes('basic')
+const pbhPlusActivited = computed(() =>
+  endpointStore.plusStatus?.enabledFeatures?.includes('basic')
 )
 
 const osLogo = {
@@ -617,6 +611,25 @@ const downloadHeap = () => {
     a.download = 'heapdump.hprof.gz'
     a.click()
   }, 1000)
+}
+
+const networkAccess = (runningInfo: RunningInfo | undefined) => {
+  if (runningInfo === undefined) return 'N/A'
+  const network = runningInfo.system.network
+  const internetAccess = network.internet_access
+  let i18nString = '???'
+
+  if (!internetAccess.accessToChinaNetwork && !internetAccess.accessToGlobalNetwork) {
+    i18nString = 'page.settings.tab.info.network.internet.no'
+  } else if (internetAccess.accessToChinaNetwork && !internetAccess.accessToGlobalNetwork) {
+    i18nString = 'page.settings.tab.info.network.internet.cnOnly'
+  } else if (!internetAccess.accessToChinaNetwork && internetAccess.accessToGlobalNetwork) {
+    i18nString = 'page.settings.tab.info.network.internet.globalOnly'
+  } else if (internetAccess.accessToChinaNetwork && internetAccess.accessToGlobalNetwork) {
+    i18nString = 'page.settings.tab.info.network.internet.full'
+  }
+
+  return t(i18nString, { nat: network.nat_type })
 }
 </script>
 

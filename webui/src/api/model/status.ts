@@ -35,7 +35,11 @@ export type RunningInfo = {
     }
     load: number
     network: {
-      internet_access: boolean
+      internet_access: {
+        accessToChinaNetwork: boolean
+        accessToGlobalNetwork: boolean
+      }
+      nat_type: string
       use_proxy: boolean
       reverse_proxy: boolean
       client_ip: string

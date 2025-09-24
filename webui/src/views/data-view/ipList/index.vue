@@ -256,9 +256,8 @@ onMounted(() => {
   }
 })
 
-const pbhPlusActivited = computed(
-  () =>
-    endpointStore.plusStatus?.enabledFeatures?.includes('basic')
+const pbhPlusActivited = computed(() =>
+  endpointStore.plusStatus?.enabledFeatures?.includes('basic')
 )
 </script>
 <style>

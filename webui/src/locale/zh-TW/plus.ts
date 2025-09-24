@@ -23,6 +23,12 @@ export default {
 
   'plus.or': '或者',
   'plus.try': '我不想捐贈',
+  'plus.try.unavailable': '本地許可證不可用',
+  'plus.try.unavailable.desc':
+    '由於瀏覽器限制，您不能在當前視窗（非安全上下文）中生成本地許可證，點擊{detail}',
+  'plus.try.unavailable.desc.detail': '查看詳情',
+  'plus.try.unavailable.desc.detail.url':
+    'https://developer.mozilla.org/zh-CN/docs/Web/API/Crypto/subtle',
 
   'plus.tryModal.title': '免費啟用 Plus 訂閱',
   'plus.tryModal.content1':

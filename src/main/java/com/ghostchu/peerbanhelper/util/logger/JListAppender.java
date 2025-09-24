@@ -8,28 +8,27 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
 import com.google.common.collect.EvictingQueue;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.event.Level;
 
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class JListAppender extends AppenderBase<ILoggingEvent> {
 
     public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200));
     public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(true);
     public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100));
-    private static final AtomicInteger seq = new AtomicInteger(0);
+    @Getter
+    private static final AtomicLong seq = new AtomicLong(0);
     private PatternLayout layout;
     private static final ThrowableProxyConverter converter = new ThrowableProxyConverter();
 
     public JListAppender() {
         converter.start();
-    }
-
-    public static AtomicInteger getSeq() {
-        return seq;
     }
 
     @Override

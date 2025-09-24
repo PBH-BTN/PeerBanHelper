@@ -34,6 +34,10 @@ export default {
     'PBH 获取到了一个本地的 IP 地址，这通常是非预期的并意味着您的反向代理配置有误，请检查您的反向代理配置',
   'page.settings.tab.info.network.yes': '是',
   'page.settings.tab.info.network.no': '否',
+  'page.settings.tab.info.network.internet.no': '无 Internet 访问 (NAT 类型: {nat})',
+  'page.settings.tab.info.network.internet.cnOnly': 'China Internet 访问 (NAT 类型: {nat})',
+  'page.settings.tab.info.network.internet.globalOnly': 'Global Internet 访问 (NAT 类型: {nat})',
+  'page.settings.tab.info.network.internet.full': 'Full Internet 访问 (NAT 类型: {nat})',
 
   'page.settings.tab.info.runtime': '运行时信息',
   'page.settings.tab.info.runtime.version': 'JVM 版本',
