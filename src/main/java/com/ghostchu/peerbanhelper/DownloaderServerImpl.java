@@ -106,7 +106,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
         loadBanListToMemory();
-        load();
     }
 
     @Override
