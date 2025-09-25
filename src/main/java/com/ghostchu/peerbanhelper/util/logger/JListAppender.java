@@ -51,13 +51,14 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
         } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.OFF) {
             return;
         }
+        long seqNumber = seq.incrementAndGet();
         if (allowWriteLogEntryDeque.get()) {
             var postAccessLog = new LogEntry(
                     eventObject.getTimeStamp(),
                     eventObject.getThreadName(),
                     slf4jLevel,
                     formattedMessage.trim(),
-                    seq.incrementAndGet());
+                    seqNumber);
             logEntryDeque.add(postAccessLog);
         }
         var rawLog = new LogEntry(
@@ -65,7 +66,7 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
                 eventObject.getThreadName(),
                 slf4jLevel,
                 formattedMessage.startsWith("[") ? StringUtils.substringAfter(formattedMessage.trim(), ": ") : formattedMessage.trim(),
-                seq.incrementAndGet());
+                seqNumber);
         ringDeque.add(rawLog);
         Main.getEventBus().post(new NewLogEntryCreatedEvent(rawLog));
     }
