@@ -310,7 +310,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public int getMaxConcurrentPeerRequestSlots() {
-        return ExternalSwitch.parseInt("pbh.downloader.qBittorrent.maxConcurrentPeerRequestSlots", 128);
+        return ExternalSwitch.parseInt("pbh.downloader.BiglyBT.maxConcurrentPeerRequestSlots", 128);
     }
 
     @Override
