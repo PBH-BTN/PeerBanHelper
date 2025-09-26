@@ -457,7 +457,7 @@ module:
     # 规则从上到下执行
     ptr-rules:
       - '{"method":"EQUALS","content":"example.com"}'
-  peers-local-track:
+  swarm-tracking:
     enabled: true
   # 拒绝服务攻击保护模块 - DoS Protection Module
   # 此模块保护与 PeerBanHelper 关联的下载器的拒绝服务攻击
