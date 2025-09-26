@@ -84,6 +84,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     @Override
     public int getMaxConcurrentPeerRequestSlots() {
+        // qBittorrent Http Server 的 Connection Limit 是 500
+        // https://github.com/qbittorrent/qBittorrent/blob/3de2a9f486a77a911fab986daabbe50ce7c85b04/src/base/http/server.cpp#L57
         return ExternalSwitch.parseInt("pbh.downloader.qBittorrent.maxConcurrentPeerRequestSlots", 128);
     }
 
