@@ -77,7 +77,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
         YamlConfiguration profileConfig = Main.getProfileConfig();
         this.torrentPropertiesCache = CacheBuilder.newBuilder()
-                .maximumSize(2000)
+                //.maximumSize(2000)
                 .expireAfterAccess(
                         profileConfig.getLong("check-interval", 5000) + (1000 * 60),
                         TimeUnit.MILLISECONDS
