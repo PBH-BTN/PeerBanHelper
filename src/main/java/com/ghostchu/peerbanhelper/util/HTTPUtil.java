@@ -154,6 +154,7 @@ public final class HTTPUtil implements Reloadable {
                 .dispatcher(new Dispatcher(Executors.newVirtualThreadPerTaskExecutor()))
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .followRedirects(true)
+                .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES))
                 .followSslRedirects(true)
                 .fastFallback(true)
                 .retryOnConnectionFailure(true)
