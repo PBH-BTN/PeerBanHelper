@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -80,6 +81,12 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 )
                 .build();
     }
+
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return ExternalSwitch.parseInt("pbh.downloader.qBittorrent.maxConcurrentPeerRequestSlots", 128);
+    }
+
 
     @Override
     public @NotNull String getName() {

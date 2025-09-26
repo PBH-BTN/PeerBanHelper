@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -26,7 +27,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -306,6 +306,11 @@ public final class BiglyBT extends AbstractDownloader {
         } catch (IOException e) {
             throw new DownloaderRequestException(e);
         }
+    }
+
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return ExternalSwitch.parseInt("pbh.downloader.qBittorrent.maxConcurrentPeerRequestSlots", 128);
     }
 
     @Override
