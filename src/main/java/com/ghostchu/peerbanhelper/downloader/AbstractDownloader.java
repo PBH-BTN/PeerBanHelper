@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -128,7 +129,7 @@ public abstract class AbstractDownloader implements Downloader {
 
     @Override
     public int getMaxConcurrentPeerRequestSlots() {
-        return 16;
+        return ExternalSwitch.parseInt("pbh.downloader.AbstractDownloader.maxConcurrentPeerRequestSlots", 16);
     }
 
     @Override
