@@ -36,7 +36,10 @@ import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -434,10 +437,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     protected void fillTorrentProperties(List<QBittorrentTorrent> qbTorrent) {
-        Semaphore torrentPropertiesLimit = new Semaphore(5);
         for (CompletableFuture<Void> future : qbTorrent.stream().map(detail -> CompletableFuture.runAsync(() -> {
             try {
-                torrentPropertiesLimit.acquire();
                 TorrentProperties properties = getTorrentProperties(detail);
                 if (properties == null) {
                     log.warn("Failed to retrieve properties for torrent: {}", detail.getHash());
@@ -463,8 +464,6 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 }
             } catch (Exception e) {
                 log.debug("Failed to load properties cache", e);
-            } finally {
-                torrentPropertiesLimit.release();
             }
         }, parallelService)).toList()) {
             future.join();
