@@ -41,7 +41,9 @@ public final class IPAddressUtil {
             return ipAddress;
         } catch (AddressStringException e) {
             log.error("Unable to get ipaddress from ip {}", ipFinal, e);
-            assert false;
+            return INVALID_ADDRESS_MISSINGNO;
+        } catch (Exception e) {
+            log.error("Unable to get ipaddress from ip {} because an unknown error, returning default.", ipFinal, e);
             return INVALID_ADDRESS_MISSINGNO;
         }
     }
