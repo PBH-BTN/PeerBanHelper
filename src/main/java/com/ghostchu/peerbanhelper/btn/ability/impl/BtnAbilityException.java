@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -162,60 +161,52 @@ public final class BtnAbilityException extends AbstractBtnAbility {
     }
 
     private int unbanIps(List<Rule> rules) {
-        AtomicInteger ct = new AtomicInteger(0);
         List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, addr.toNormalizedString());
             if (matchResult.hit()) {
                 list.add(addr);
-                ct.incrementAndGet();
             }
         });
         list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
-        return ct.get();
+        return list.size();
     }
 
     private int unbanClientName(List<Rule> rules) {
-        AtomicInteger ct = new AtomicInteger(0);
         List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, meta.getPeer().getClientName());
             if (matchResult.hit()) {
                 list.add(addr);
-                ct.incrementAndGet();
             }
         });
         list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
 
-        return ct.get();
+        return list.size();
     }
 
     private int unbanPeerId(List<Rule> rules) {
-        AtomicInteger ct = new AtomicInteger(0);
         List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, meta.getPeer().getId());
             if (matchResult.hit()) {
                 list.add(addr);
-                ct.incrementAndGet();
             }
         });
         list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
-        return ct.get();
+        return list.size();
     }
 
     private int unbanPort(List<Rule> rules) {
-        AtomicInteger ct = new AtomicInteger(0);
         List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, Integer.toString(meta.getPeer().getAddress().getPort()));
             if (matchResult.hit()) {
                 list.add(addr);
-                ct.incrementAndGet();
             }
         });
         list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
-        return ct.get();
+        return list.size();
     }
 
     @Override
