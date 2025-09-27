@@ -105,7 +105,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.alertManager = alertManager;
         this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
-        loadBanListToMemory();
     }
 
     @Override
@@ -147,7 +146,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         );
     }
 
-    private void loadBanListToMemory() {
+    public void loadBanListToMemory() {
         if (!Main.getMainConfig().getBoolean("persist.banlist")) {
             return;
         }

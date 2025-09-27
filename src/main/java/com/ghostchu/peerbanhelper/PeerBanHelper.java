@@ -16,7 +16,6 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -82,6 +81,7 @@ public class PeerBanHelper implements Reloadable {
         registerModules();
         sendSnapshotAlert();
         downloaderServer.load();
+        downloaderServer.loadBanListToMemory();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
         Main.getEventBus().post(new PBHServerStartedEvent());
