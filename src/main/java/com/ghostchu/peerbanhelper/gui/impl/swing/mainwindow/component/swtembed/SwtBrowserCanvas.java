@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed;
 
 import com.ghostchu.peerbanhelper.Main;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -14,6 +15,7 @@ import java.awt.event.ComponentEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
+@Slf4j
 public final class SwtBrowserCanvas extends Canvas {
     private final Thread swtEventLoop;
     private Display display;
@@ -47,7 +49,7 @@ public final class SwtBrowserCanvas extends Canvas {
         // SWT Hi-DPI 支持
         System.setProperty("swt.autoScale", "exact");
         System.setProperty("swt.autoScale.method", "nearest");
-        // Edge 浏览器 Hi-DPI 支持
+        // Edge 浏览器，别用 IE
         System.setProperty("org.eclipse.swt.browser.DefaultType", "edge");
     }
 
@@ -65,12 +67,15 @@ public final class SwtBrowserCanvas extends Canvas {
                     if (input != null) {
                         this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    log.debug("Cannot load placeholder.html", e);
                 }
                 this.browserInitialized = true;
                 // 应用正确的大小
                 updateBrowserSize();
-            } catch (SWTError ignored) {
+            } catch (SWTError e) {
+                this.browserInitialized = false;
+                log.debug("Cannot init SWT Browser", e);
             }
         });
     }
