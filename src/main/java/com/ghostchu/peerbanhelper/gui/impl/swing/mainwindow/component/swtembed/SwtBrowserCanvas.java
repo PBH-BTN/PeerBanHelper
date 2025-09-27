@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed;
 
 import com.ghostchu.peerbanhelper.Main;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Display;
@@ -57,17 +58,20 @@ public final class SwtBrowserCanvas extends Canvas {
             // 计算 DPI 缩放比例
             calculateDPIScaleFactor();
             this.shell = SWT_AWT.new_Shell(display, this);
-            this.browser = new Browser(this.shell, SWT.NONE);
-            this.browser.setVisible(true);
-            try (var input = Main.class.getResourceAsStream("/placeholder.html")) {
-                if (input != null) {
-                    this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
+            try {
+                this.browser = new Browser(this.shell, SWT.NONE);
+                this.browser.setVisible(true);
+                try (var input = Main.class.getResourceAsStream("/placeholder.html")) {
+                    if (input != null) {
+                        this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
+                    }
+                } catch (Exception ignored) {
                 }
-            } catch (Exception ignored) {
+                this.browserInitialized = true;
+                // 应用正确的大小
+                updateBrowserSize();
+            } catch (SWTError ignored) {
             }
-            this.browserInitialized = true;
-            // 应用正确的大小
-            updateBrowserSize();
         });
     }
 
