@@ -103,7 +103,7 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
 
                     firePluginStateEvent(new PluginStateEvent(this, pluginWrapper, pluginState));
                 } catch (Throwable e) {
-                    log.error(e.getMessage(), e);
+                    log.error("Unable to stop plugin '{}'", getPluginLabel(pluginWrapper.getDescriptor()), e);
                 }
             } else {
                 // do nothing
