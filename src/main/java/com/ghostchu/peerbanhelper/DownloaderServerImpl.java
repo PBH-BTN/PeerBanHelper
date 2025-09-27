@@ -137,13 +137,15 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     private void unbanWhitelistedPeers() {
+        List<IPAddress> list = new ArrayList<>();
         banList.forEach((addr, meta) -> {
                     var node = ignoreAddresses.elementsContaining(addr);
                     if (node != null) {
-                        scheduleUnBanPeer(addr);
+                        list.add(addr);
                     }
                 }
         );
+        list.forEach(this::scheduleUnBanPeer);
     }
 
     public void loadBanListToMemory() {

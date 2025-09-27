@@ -13,16 +13,19 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
-import okhttp3.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -160,50 +163,58 @@ public final class BtnAbilityException extends AbstractBtnAbility {
 
     private int unbanIps(List<Rule> rules) {
         AtomicInteger ct = new AtomicInteger(0);
+        List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, addr.toNormalizedString());
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                list.add(addr);
                 ct.incrementAndGet();
             }
         });
+        list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
         return ct.get();
     }
 
     private int unbanClientName(List<Rule> rules) {
         AtomicInteger ct = new AtomicInteger(0);
+        List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, meta.getPeer().getClientName());
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                list.add(addr);
                 ct.incrementAndGet();
             }
         });
+        list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
 
         return ct.get();
     }
 
     private int unbanPeerId(List<Rule> rules) {
         AtomicInteger ct = new AtomicInteger(0);
+        List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, meta.getPeer().getId());
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                list.add(addr);
                 ct.incrementAndGet();
             }
         });
+        list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
         return ct.get();
     }
 
     private int unbanPort(List<Rule> rules) {
         AtomicInteger ct = new AtomicInteger(0);
+        List<IPAddress> list = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((addr, meta) -> {
             RuleMatchResult matchResult = RuleParser.matchRule(rules, Integer.toString(meta.getPeer().getAddress().getPort()));
             if (matchResult.hit()) {
-                btnNetwork.getServer().scheduleUnBanPeer(addr);
+                list.add(addr);
                 ct.incrementAndGet();
             }
         });
+        list.forEach(addr -> btnNetwork.getServer().scheduleUnBanPeer(addr));
         return ct.get();
     }
 
