@@ -105,7 +105,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.alertManager = alertManager;
         this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
-        loadBanListToMemory();
     }
 
     @Override
@@ -138,16 +137,18 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     private void unbanWhitelistedPeers() {
+        List<IPAddress> list = new ArrayList<>();
         banList.forEach((addr, meta) -> {
                     var node = ignoreAddresses.elementsContaining(addr);
                     if (node != null) {
-                        scheduleUnBanPeer(addr);
+                        list.add(addr);
                     }
                 }
         );
+        list.forEach(this::scheduleUnBanPeer);
     }
 
-    private void loadBanListToMemory() {
+    public void loadBanListToMemory() {
         if (!Main.getMainConfig().getBoolean("persist.banlist")) {
             return;
         }
