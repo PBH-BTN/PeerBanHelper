@@ -136,7 +136,7 @@ WATCH_DOG_HUNGRY: "[Warning] WatchDog Service {} not reset within the specified 
 WATCH_DOG_CALLBACK_BLOCKED: "[Error] WatchDog Service callback thread unresponsive, forced exit from callback"
 PBH_BAN_WAVE_STARTED: "PeerBanHelper BanWave Daemon started"
 BAN_WAVE_WATCH_DOG_TITLE: "PeerBanHelper attempting to recover from an exception"
-BAN_WAVE_WATCH_DOG_DESCRIPTION: "Detected ban thread stopped responding for unknown reasons, PeerBanHelper is attempting to restart the problematic thread. Please check the program logs and send the relevant information to the developers to help fix this error."
+BAN_WAVE_WATCH_DOG_DESCRIPTION: "Detected ban thread stopped responding , PeerBanHelper is attempting to restart the problematic thread. Please check the program logs for details."
 INTERNAL_ERROR: "An internal error occurred, please check the console logs"
 PART_TASKS_TIMED_OUT: "[Warning] Maximum time limit exceeded while waiting for partial tasks, ignoring unfinished tasks... Current execution: {}"
 TOO_WEAK_TOKEN: "Web Auth Token not initialized or does not meet minimum strength requirements (length > 8), PeerBanHelper has regenerated a new Token meeting complexity requirements"

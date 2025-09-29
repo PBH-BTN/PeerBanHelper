@@ -135,7 +135,7 @@ WATCH_DOG_HUNGRY: "[警告] WatchDog Service {} 未在指定時間 {} 內得到�
 WATCH_DOG_CALLBACK_BLOCKED: "[錯誤] WatchDog Service 回調執行緒無響應，已強制離開回調"
 PBH_BAN_WAVE_STARTED: "PeerBanHelper BanWave Daemon 已啟動"
 BAN_WAVE_WATCH_DOG_TITLE: "PeerBanHelper 正嘗試從異常中復原"
-BAN_WAVE_WATCH_DOG_DESCRIPTION: "我們檢測到封禁執行緒因未知原因停止響應，因此 PeerBanHelper 已嘗試重啟問題執行緒。請查看程式日誌並將有關資訊發送給開發者以協助修復此錯誤。"
+BAN_WAVE_WATCH_DOG_DESCRIPTION: "我們檢測到封禁執行緒停止響應，因此 PeerBanHelper 已嘗試重啟問題執行緒。"
 INTERNAL_ERROR: "出現了一個內部錯誤，請檢查控制台日誌"
 PART_TASKS_TIMED_OUT: "[警告] 等待部分任務執行時超過最大時間限制，忽略未完成的任務…… 目前執行：{}"
 TOO_WEAK_TOKEN: "Web Auth Token 未初始化或不滿足最低強度要求（長度 > 8），PeerBanHelper 已重新生成了一個滿足複雜度的新 Token"
