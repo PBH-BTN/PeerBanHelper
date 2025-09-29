@@ -14,7 +14,6 @@ import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
-import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
@@ -33,7 +32,6 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -158,11 +156,11 @@ public final class PBHPeerController extends AbstractFeatureModule {
         }
         String ptrLookup = null;
         try {
-            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
-                ptrLookup = dnsLookup.ptr(ip).get(3, TimeUnit.SECONDS).orElse(null);
-            } else {
-                ptrLookup = CompletableFuture.supplyAsync(() -> ipAddress.toInetAddress().getCanonicalHostName()).get(3, TimeUnit.SECONDS);
-            }
+            //if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+            ptrLookup = dnsLookup.ptr(ip).get(3, TimeUnit.SECONDS).orElse(null);
+//            } else {
+//                ptrLookup = CompletableFuture.supplyAsync(() -> ipAddress.toInetAddress().getCanonicalHostName()).get(3, TimeUnit.SECONDS);
+//            }
         } catch (Exception ignored) {
         }
         var info = new PeerInfoDTO(
@@ -181,7 +179,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 .addMapping("torrent.size", "torrentSize")
                 .addMapping("module.name", "module")
                 .addMapping("rule.rule", "rule")
-                .apply(historyDao.queryBuilder()  .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                .apply(historyDao.queryBuilder().join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
                         .join(ruleDao.queryBuilder().setAlias("rule")
                                         .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
                                 , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
@@ -204,7 +202,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 .eq("address", new SelectArg(ip));
         builder.setWhere(where);
         var page = peerRecordDao.queryByPaging(builder, pageable);
-        ctx.json(new StdResp(true, null, Page.map(page, (entity)-> new PeerRecordEntityDTO(entity.getId(),
+        ctx.json(new StdResp(true, null, Page.map(page, (entity) -> new PeerRecordEntityDTO(entity.getId(),
                 entity.getAddress(),
                 TorrentEntityDTO.from(entity.getTorrent()),
                 downloaderManager.getDownloadInfo(entity.getDownloader()),
