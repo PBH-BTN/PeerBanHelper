@@ -27,7 +27,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import okhttp3.*;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
@@ -36,6 +35,9 @@ import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -167,9 +169,13 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 for (String ruleId : rules.getKeys(false)) {
                     ConfigurationSection rule = rules.getConfigurationSection(ruleId);
                     assert rule != null;
-                    updateRule(DEF_LOCALE, rule, IPBanRuleUpdateType.AUTO);
+                    try {
+                        updateRule(DEF_LOCALE, rule, IPBanRuleUpdateType.AUTO);
+                        log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
+                    } catch (Exception e) {
+                        log.warn(tlUI(Lang.IP_BAN_RULE_UPDATE_FAILED, rule.getString("name")), e);
+                    }
                 }
-                log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
             }
             getCache().invalidateAll();
         } catch (Throwable throwable) {
@@ -346,7 +352,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * 读取规则文本并转为IpList
      *
      * @param data 规则文本
-     * @param ips      ip列表
+     * @param ips  ip列表
      * @return 加载的行数
      */
     private int stringToIPList(String data, DualIPv4v6AssociativeTries<String> ips) {
@@ -514,7 +520,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
-    private void preloadBanList(){
+    private void preloadBanList() {
 
     }
 }
