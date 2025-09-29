@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
-import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
@@ -26,8 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,19 +102,19 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
         var reverseDnsLookupString = peer.getPeerAddress().getAddress().toReverseDNSLookupString();
         return getCache().readCache(this, reverseDnsLookupString, () -> {
             Optional<String> ptr;
-            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
-                try {
-                    ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
-                } catch (TimeoutException e) {
-                    ptr = Optional.empty();
-                }
-            } else {
-                try {
-                    ptr = Optional.ofNullable(InetAddress.getByName(peer.getPeerAddress().getIp()).getHostName());
-                } catch (UnknownHostException e) {
-                    ptr = Optional.empty();
-                }
+//            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+            try {
+                ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                ptr = Optional.empty();
             }
+//            } else {
+//                try {
+//                    ptr = Optional.ofNullable(InetAddress.getByName(peer.getPeerAddress().getIp()).getHostName());
+//                } catch (UnknownHostException e) {
+//                    ptr = Optional.empty();
+//                }
+//            }
             if (ptr.isPresent()) {
                 RuleMatchResult matchResult = RuleParser.matchRule(ptrRules, ptr.get());
                 if (matchResult.hit()) {

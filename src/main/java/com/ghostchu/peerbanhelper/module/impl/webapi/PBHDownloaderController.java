@@ -16,7 +16,6 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
-import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -33,8 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -229,15 +226,15 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
             dto.setGeo(geoData);
         }
         if (dto.getPtrRecord() == null && resolvePTR) {
-            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
-                dto.setPtrRecord(dnsLookup.ptr(IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp()).toReverseDNSLookupString()).join().orElse(null));
-            } else {
-                try {
-                    dto.setPtrRecord(InetAddress.getByName(p.getPeer().getAddress().getIp()).getCanonicalHostName());
-                } catch (UnknownHostException e) {
-                    dto.setPtrRecord(null);
-                }
-            }
+            //if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+            dto.setPtrRecord(dnsLookup.ptr(IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp()).toReverseDNSLookupString()).join().orElse(null));
+//            } else {
+//                try {
+//                    dto.setPtrRecord(InetAddress.getByName(p.getPeer().getAddress().getIp()).getCanonicalHostName());
+//                } catch (UnknownHostException e) {
+//                    dto.setPtrRecord(null);
+//                }
+//            }
         }
 
         return dto;

@@ -39,3 +39,5 @@ components.macos.x86_64.native=MacOS x86_64 Native
 components.macos.aarch64.native=MacOS aarch64 Native
 components.linux.x86_64.native=Linux x86_64 Native
 components.linux.aarch64.native=Linux aarch64 Native
+
+unsupported-os=Sorry, the operating system you are currently using is not supported. The installation program cannot proceed.
