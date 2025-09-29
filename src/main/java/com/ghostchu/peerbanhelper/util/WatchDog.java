@@ -59,11 +59,10 @@ public final class WatchDog implements AutoCloseable {
                 } else {
                     good();
                 }
-            }, executor).get(3, TimeUnit.SECONDS);
+            }, executor).get(10, TimeUnit.SECONDS);
         } catch (Throwable e) {
             log.error(tlUI(Lang.WATCH_DOG_CALLBACK_BLOCKED), e);
         }
-
     }
 
     private void good() {
@@ -73,7 +72,11 @@ public final class WatchDog implements AutoCloseable {
     }
 
     private void hungry() {
-        log.info(tlUI(Lang.WATCH_DOG_HUNGRY, name, timeout + "ms", lastOperation));
+        if (isDownloaderIO) {
+            log.warn(tlUI(Lang.WATCH_DOG_HUNGRY_IN_DOWNLOADER_IO, name, timeout + "ms", lastOperation));
+        } else {
+            log.warn(tlUI(Lang.WATCH_DOG_HUNGRY, name, timeout + "ms", lastOperation));
+        }
         if (hungry != null) {
             hungry.run();
         }

@@ -768,3 +768,5 @@ LAB_EXPERIMENT_ASYNC_BANLIST_APPLY: "启动时封禁列表异步应用"
 LAB_EXPERIMENT_ASYNC_BANLIST_APPLY_DESCRIPTION: "启动时，异步应用封禁列表以避免阻塞启动线程，从而提升启动速度。"
 LAB_EXPERIMENT_ASYNC_IPDB_LOADING: "异步加载 GeoIP 数据库"
 LAB_EXPERIMENT_ASYNC_IPDB_LOADING_DESCRIPTION: "启动时异步加载 GeoIP 数据库以提升启动速度，避免下载/更新阻塞启动线程"
+WATCH_DOG_HUNGRY_IN_DOWNLOADER_IO: "[警告] WatchDog Service {} 未在指定时间 {} 内得到重置，最后状态 {}，正在转储进程线程信息。这通常是由于下载器卡死导致请求导致的（特别是在 qBittorrent 上）。如果此问题频繁发生，请尝试重新启动下载器。"
+
