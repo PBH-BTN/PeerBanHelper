@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,9 +20,10 @@ public final class WatchDog implements AutoCloseable {
     private final Runnable hungry;
     private final Runnable good;
     private static final ExecutorService executor = Executors.newSingleThreadExecutor(); // Watch dog 使用平台线程
-    @Setter
     @Getter
     private String lastOperation = "N/A";
+    @Getter
+    private boolean isDownloaderIO;
 
     public WatchDog(String name, long timeout, @NotNull Runnable hungry, @Nullable Runnable good) {
         this.name = name;
@@ -77,5 +77,10 @@ public final class WatchDog implements AutoCloseable {
         if (hungry != null) {
             hungry.run();
         }
+    }
+
+    public void setLastOperation(String lastOperation, boolean isDownloaderIO) {
+        this.lastOperation = lastOperation;
+        this.isDownloaderIO = isDownloaderIO;
     }
 }
