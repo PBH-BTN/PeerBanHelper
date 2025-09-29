@@ -250,6 +250,51 @@ return console.askOkCancel(message, true);
               </formComponent>
             </formComponents>
           </screen>
+          <screen name="Unsupport platform check" id="338" beanClass="com.install4j.runtime.beans.screens.DefaultInfoScreen" rollbackBarrierExitCode="0" backButton="hidden" finishScreen="true">
+            <condition>List&lt;String&gt; unsupportedWindows = List.of("Windows 95","Windows 98","Windows 2000", "Windows ME", "Windows XP", "Windows Vista", "Windows 7", "Windows 8", "Windows 8.1");
+
+String osName = System.getProperty("os.name");
+
+for (String name : unsupportedWindows){
+    if(osName.equalsIgnoreCase(name)){
+        return true;
+    }
+}
+return false;</condition>
+            <formComponents>
+              <formComponent id="339" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">${i18n:InfoBeforeClickLabel}</property>
+                </serializedBean>
+                <visibilityScript>!context.isConsole()</visibilityScript>
+              </formComponent>
+              <formComponent id="340" beanClass="com.install4j.runtime.beans.formcomponents.HtmlDisplayFormComponent" useExternalParametrization="true" externalParametrizationName="HTML or text display" externalParametrizationMode="include">
+                <serializedBean>
+                  <property name="displayedText" type="string">Detected OS: ${os.name}
+${i18n:unsupported-os}</property>
+                  <property name="fillVertical" type="boolean" value="true" />
+                  <property name="textSource" type="enum" class="com.install4j.runtime.beans.screens.components.TextSource" value="DIRECT" />
+                </serializedBean>
+                <externalParametrizationPropertyNames>
+                  <propertyName>textSource</propertyName>
+                  <propertyName>displayedText</propertyName>
+                  <propertyName>displayedTextFile</propertyName>
+                  <propertyName>variableName</propertyName>
+                </externalParametrizationPropertyNames>
+              </formComponent>
+              <formComponent id="341" beanClass="com.install4j.runtime.beans.formcomponents.ConsoleHandlerFormComponent">
+                <serializedBean>
+                  <property name="consoleScript">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">console.waitForEnter();
+return true;
+</property>
+                    </object>
+                  </property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
           <screen id="8" beanClass="com.install4j.runtime.beans.screens.InstallationDirectoryScreen" rollbackBarrierExitCode="0">
             <condition>!context.getBooleanVariable("sys.confirmedUpdateInstallation")</condition>
             <actions>
