@@ -104,7 +104,10 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
+        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS,
+                DownloaderFeatureFlag.UNBAN_IP,
+                DownloaderFeatureFlag.TRAFFIC_STATS,
+                DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
     }
 
     @Override
