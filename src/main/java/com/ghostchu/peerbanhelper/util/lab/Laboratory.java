@@ -45,8 +45,8 @@ public class Laboratory {
     }
 
     private void checkConfigUpdate() {
-        if (getConfigVersion() >= LATEST_VERSION) return;
         int configVersion = getConfigVersion();
+        if (configVersion >= LATEST_VERSION) return;
         if (configVersion == 0) {
             setEnabled(true); // 修复默认值
             configVersion = 1;
