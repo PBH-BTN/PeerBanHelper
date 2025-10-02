@@ -20,6 +20,7 @@ public class Laboratory {
     private final int experimentalGroup;
     private final YamlConfiguration labConfig;
     private final File labConfigFile;
+    private static final int LATEST_VERSION = 1;
 
     public Laboratory() throws IOException {
         String installationId = Main.getMainConfig().getString("installation-id", "???");
@@ -35,10 +36,22 @@ public class Laboratory {
         this.labConfig = YamlConfiguration.loadConfiguration(labConfigFile);
         if (firstInstall) {
             setEnabled(true);
+            setConfigVersion(LATEST_VERSION);
         }
+        checkConfigUpdate();
         for (Experiments value : Experiments.values()) {
             isExperimentActivated(value.getExperiment()); // 生成配置文件
         }
+    }
+
+    private void checkConfigUpdate() {
+        if (getConfigVersion() == LATEST_VERSION) return;
+        int configVersion = getConfigVersion();
+        if (configVersion == 0) {
+            setEnabled(true); // 修复默认值
+            configVersion = 1;
+        }
+        setConfigVersion(configVersion);
     }
 
     public boolean isExperimentActivated(Experiment experiment) {
@@ -93,6 +106,15 @@ public class Laboratory {
     public void setEnabled(boolean enabled) {
         labConfig.set("enabled", enabled);
         saveLabConfig();
+    }
+
+    public void setConfigVersion(int version) {
+        labConfig.set("config-version", version);
+        saveLabConfig();
+    }
+
+    public int getConfigVersion() {
+        return labConfig.getInt("config-version", 0);
     }
 
     public boolean isEnabled() {
