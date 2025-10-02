@@ -27,10 +27,15 @@ public class Laboratory {
         // Generate a number from hashCode in range 0-4
         this.experimentalGroup = Math.abs(hashCode % 5);
         this.labConfigFile = new File(Main.getConfigDirectory(), "laboratory.yml");
+        boolean firstInstall = false;
         if (!labConfigFile.exists()) {
             labConfigFile.createNewFile();
+            firstInstall = true;
         }
         this.labConfig = YamlConfiguration.loadConfiguration(labConfigFile);
+        if (firstInstall) {
+            setEnabled(true);
+        }
         for (Experiments value : Experiments.values()) {
             isExperimentActivated(value.getExperiment()); // 生成配置文件
         }
