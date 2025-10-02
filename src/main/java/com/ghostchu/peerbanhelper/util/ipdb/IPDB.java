@@ -73,8 +73,8 @@ public final class IPDB implements AutoCloseable {
 //        this.userAgent = userAgent;
         this.httpClient = httpUtil.addProgressTracker(httpUtil.newBuilder()
                         .connectTimeout(Duration.ofSeconds(15))
-                        .readTimeout(Duration.ofMinutes(1))
-                        .callTimeout(Duration.ofMinutes(2))
+                        .readTimeout(Duration.ofMinutes(3))
+                        .callTimeout(Duration.ofMinutes(3))
                         .followRedirects(true)
                         .authenticator((route, response) -> {
                             if (response.request().header("Authorization") != null) {
