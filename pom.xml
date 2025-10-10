@@ -101,7 +101,7 @@
                                         <jarPath>${project.build.directory}/PeerBanHelper.jar</jarPath>
                                     </variables>
                                     <!--                                    <incremental>true</incremental>-->
-                                    <jvmArguments>-Xmx4G</jvmArguments>
+                                    <jvmArguments>-Xmx5G</jvmArguments>
                                 </configuration>
                             </execution>
                         </executions>
