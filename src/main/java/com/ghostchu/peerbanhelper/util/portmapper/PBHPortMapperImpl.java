@@ -60,7 +60,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 var currentNics = getAllNICs();
                 if (!currentNics.equals(lastCheckedNics)) {
                     updateNICsList();
-                    log.warn(tlUI(Lang.PORT_MAPPER_NIC_CHANGES_DETECTED));
+                    log.debug(tlUI(Lang.PORT_MAPPER_NIC_CHANGES_DETECTED));
                     Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
                 }
             } finally {
