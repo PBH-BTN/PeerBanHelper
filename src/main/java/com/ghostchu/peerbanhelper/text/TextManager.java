@@ -56,8 +56,8 @@ public final class TextManager implements Reloadable {
         this.reset();
 
         // 只加载默认语言(en_us)作为回退
-        languageFilesManager.deploy("en_us", fallbackConfig);
-        loadedLanguages.add("en_us");
+        //languageFilesManager.deploy("en_us", fallbackConfig);
+        //loadedLanguages.add("en_us");
 
         // 扫描并记录可用的语言，但不加载它们
         scanAvailableLanguages();
