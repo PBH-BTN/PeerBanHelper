@@ -580,6 +580,10 @@
                 </exclusion>
                 <exclusion>
                     <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-stomp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
                     <artifactId>netty-codec-protobuf</artifactId>
                 </exclusion>
                 <exclusion>
