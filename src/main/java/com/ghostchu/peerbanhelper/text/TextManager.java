@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
@@ -32,6 +33,7 @@ public final class TextManager implements Reloadable {
     private final Set<String> loadedLanguages = ConcurrentHashMap.newKeySet();
     private final File langDirectory;
     private final File overrideDirectory;
+    @Getter
     private final YamlConfiguration fallbackConfig;
 
     public TextManager() {
@@ -56,8 +58,8 @@ public final class TextManager implements Reloadable {
         this.reset();
 
         // 只加载默认语言(en_us)作为回退
-        languageFilesManager.deploy("en_us", fallbackConfig);
-        loadedLanguages.add("en_us");
+        //languageFilesManager.deploy("en_us", fallbackConfig);
+        //loadedLanguages.add("en_us");
 
         // 扫描并记录可用的语言，但不加载它们
         scanAvailableLanguages();
@@ -101,7 +103,7 @@ public final class TextManager implements Reloadable {
      * @param locale 要加载的语言代码
      * @return 是否成功加载
      */
-    
+
     public synchronized boolean loadLanguage(String locale) {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
 
@@ -204,7 +206,7 @@ public final class TextManager implements Reloadable {
         return file;
     }
 
-    
+
     public ReloadResult reloadModule() throws Exception {
         reset();
         initializeBasic();
@@ -215,7 +217,7 @@ public final class TextManager implements Reloadable {
      * 注册语言短语
      */
     @SneakyThrows(InvalidConfigurationException.class)
-    
+
     public void register(@NotNull String locale, @NotNull String path, @NotNull String text) {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
 
@@ -236,7 +238,7 @@ public final class TextManager implements Reloadable {
     /**
      * 返回可用语言列表
      */
-    
+
     public List<String> getAvailableLanguages() {
         return new ArrayList<>(availableLanguages);
     }
@@ -244,7 +246,7 @@ public final class TextManager implements Reloadable {
     /**
      * 获取已加载语言列表
      */
-    
+
     public List<String> getLoadedLanguages() {
         return new ArrayList<>(loadedLanguages);
     }
@@ -252,7 +254,7 @@ public final class TextManager implements Reloadable {
     /**
      * 强制加载所有可用语言
      */
-    
+
     public void loadAllLanguages() {
         for (String language : availableLanguages) {
             loadLanguage(language);
@@ -284,8 +286,11 @@ public final class TextManager implements Reloadable {
         if (yamlConfiguration == null) {
             yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
             if (yamlConfiguration == null) {
-                log.warn("The locale {} are not supported and fallback locale en_us load failed.", locale);
-                return "Unsupported locale " + locale;
+                yamlConfiguration = INSTANCE_HOLDER.getFallbackConfig();
+                if (yamlConfiguration == null) {
+                    log.warn("The locale {} are not supported and fallback locale en_us load failed.", locale);
+                    return "Unsupported locale " + locale;
+                }
             }
         }
         if (translationComponent == null) {

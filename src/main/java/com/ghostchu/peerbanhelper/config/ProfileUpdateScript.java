@@ -25,6 +25,11 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 32)
+    public void fixSwarmTracking(YamlConfiguration bundled) {
+        conf.set("module.swarm-tracking", bundled.get("module.swarm-tracking"));
+    }
+
     @UpdateScript(version = 31)
     public void idleConnectionDosProtectionUpdate(YamlConfiguration bundled) {
         conf.set("module.idle-connection-dos-protection", bundled.get("module.idle-connection-dos-protection"));

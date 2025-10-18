@@ -358,7 +358,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
                 case "IP 专网", "IP专网" -> networkType.contains("ipPrivateNetwork");
                 case "网吧" -> networkType.contains("internetCafe");
                 case "物联网" -> networkType.contains("iot");
-                case "数据中心" -> networkType.contains("dataCenter");
+                case "数据中心" -> networkType.contains("dataCenter") || networkType.contains("datacenter"); // fe workaround
                 default -> false;
             };
             if (hit) {

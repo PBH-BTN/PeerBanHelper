@@ -374,10 +374,6 @@ module:
         name: all-in-one
         # 规则文件订阅地址 - Subscription Address
         url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
-      tor-exit-nodes:
-        enabled: false
-        name: Tor Exit Nodes
-        url: https://cdn.jsdelivr.net/gh/7c/torfilter/lists/txt/torfilter-1d-flat.txt
   # 主动监测 - Active Monitoring
   # 此功能允许 PeerBanHelper 主动记录每次请求下载器时获取到的数据到本地 SQLite 数据库中
   # Allow PBH records all data that fetched from downloader and save them into SQLite database
@@ -457,7 +453,7 @@ module:
     # 规则从上到下执行
     ptr-rules:
       - '{"method":"EQUALS","content":"example.com"}'
-  peers-local-track:
+  swarm-tracking:
     enabled: true
   # 拒绝服务攻击保护模块 - DoS Protection Module
   # 此模块保护与 PeerBanHelper 关联的下载器的拒绝服务攻击

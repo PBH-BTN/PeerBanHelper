@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -35,7 +36,10 @@ import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -73,13 +77,21 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
         YamlConfiguration profileConfig = Main.getProfileConfig();
         this.torrentPropertiesCache = CacheBuilder.newBuilder()
-                .maximumSize(2000)
+                //.maximumSize(2000)
                 .expireAfterAccess(
                         profileConfig.getLong("check-interval", 5000) + (1000 * 60),
                         TimeUnit.MILLISECONDS
                 )
                 .build();
     }
+
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        // qBittorrent Http Server 的 Connection Limit 是 500
+        // https://github.com/qbittorrent/qBittorrent/blob/3de2a9f486a77a911fab986daabbe50ce7c85b04/src/base/http/server.cpp#L57
+        return ExternalSwitch.parseInt("pbh.downloader.qBittorrent.maxConcurrentPeerRequestSlots", 128);
+    }
+
 
     @Override
     public @NotNull String getName() {
@@ -204,11 +216,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     private List<Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
         List<QBittorrentTorrent> allTorrents = new ArrayList<>();
+        Set<String> seenHashes = new HashSet<>(); // 用于检测重复
         int pageSize = 100; // 每页大小
         int offset = 0;
-        boolean hasMore = true;
 
-        while (hasMore) {
+        while (true) {
             try {
                 String url = apiEndpoint + "/torrents/info";
                 if (onlyActive) {
@@ -228,16 +240,20 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     String responseBody = response.body().string();
                     List<QBittorrentTorrent> pageTorrents = JsonUtil.getGson().fromJson(responseBody, new TypeToken<List<QBittorrentTorrent>>() {
                     }.getType());
-                    if (pageTorrents == null || pageTorrents.isEmpty()) {
-                        hasMore = false;
-                    } else {
-                        allTorrents.addAll(pageTorrents);
-                        offset += pageSize;
-                        // 如果返回的数量小于页大小，说明已经到达最后一页
-                        if (pageTorrents.size() < pageSize) {
-                            hasMore = false;
+
+                    if (pageTorrents == null || pageTorrents.isEmpty()) break;
+
+                    boolean hasNew = false;
+                    for (QBittorrentTorrent t : pageTorrents) {
+                        if (seenHashes.add(t.getHash())) {
+                            allTorrents.add(t);
+                            hasNew = true;
                         }
                     }
+                    // 全部重复 或者 小于分页大小
+                    if (!hasNew || pageTorrents.size() < pageSize) break;
+
+                    offset += pageSize;
                 }
             } catch (Exception e) {
                 throw new IllegalStateException(e);
@@ -421,10 +437,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     protected void fillTorrentProperties(List<QBittorrentTorrent> qbTorrent) {
-        Semaphore torrentPropertiesLimit = new Semaphore(5);
         for (CompletableFuture<Void> future : qbTorrent.stream().map(detail -> CompletableFuture.runAsync(() -> {
             try {
-                torrentPropertiesLimit.acquire();
                 TorrentProperties properties = getTorrentProperties(detail);
                 if (properties == null) {
                     log.warn("Failed to retrieve properties for torrent: {}", detail.getHash());
@@ -450,8 +464,6 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 }
             } catch (Exception e) {
                 log.debug("Failed to load properties cache", e);
-            } finally {
-                torrentPropertiesLimit.release();
             }
         }, parallelService)).toList()) {
             future.join();

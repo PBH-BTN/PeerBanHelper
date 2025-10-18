@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed;
 
 import com.ghostchu.peerbanhelper.Main;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Display;
@@ -13,6 +15,7 @@ import java.awt.event.ComponentEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
+@Slf4j
 public final class SwtBrowserCanvas extends Canvas {
     private final Thread swtEventLoop;
     private Display display;
@@ -46,7 +49,7 @@ public final class SwtBrowserCanvas extends Canvas {
         // SWT Hi-DPI 支持
         System.setProperty("swt.autoScale", "exact");
         System.setProperty("swt.autoScale.method", "nearest");
-        // Edge 浏览器 Hi-DPI 支持
+        // Edge 浏览器，别用 IE
         System.setProperty("org.eclipse.swt.browser.DefaultType", "edge");
     }
 
@@ -57,17 +60,23 @@ public final class SwtBrowserCanvas extends Canvas {
             // 计算 DPI 缩放比例
             calculateDPIScaleFactor();
             this.shell = SWT_AWT.new_Shell(display, this);
-            this.browser = new Browser(this.shell, SWT.NONE);
-            this.browser.setVisible(true);
-            try (var input = Main.class.getResourceAsStream("/placeholder.html")) {
-                if (input != null) {
-                    this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
+            try {
+                this.browser = new Browser(this.shell, SWT.NONE);
+                this.browser.setVisible(true);
+                try (var input = Main.class.getResourceAsStream("/placeholder.html")) {
+                    if (input != null) {
+                        this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
+                    }
+                } catch (Exception e) {
+                    log.debug("Cannot load placeholder.html", e);
                 }
-            } catch (Exception ignored) {
+                this.browserInitialized = true;
+                // 应用正确的大小
+                updateBrowserSize();
+            } catch (SWTError e) {
+                this.browserInitialized = false;
+                log.debug("Cannot init SWT Browser", e);
             }
-            this.browserInitialized = true;
-            // 应用正确的大小
-            updateBrowserSize();
         });
     }
 

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.pbhplus.validator;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -15,11 +16,9 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,17 +30,14 @@ import java.util.concurrent.TimeUnit;
 public class ServerRevokeValidator implements LicenseRevokeValidator {
 
     private final HTTPUtil httpUtil;
-    private final Path cacheDirectory;
+    private final File cacheDirectory;
     private static final long CACHE_DURATION_HOURS = 24;
 
     public ServerRevokeValidator(HTTPUtil httpUtil) {
         this.httpUtil = httpUtil;
-        this.cacheDirectory = Paths.get("data", "cache", "license-revoke");
-        try {
-            Files.createDirectories(cacheDirectory);
-        } catch (IOException e) {
-            log.warn("Failed to create cache directory: {}", e.getMessage());
-        }
+        var rootCacheDirectory = new File(Main.getDataDirectory(),"cache");
+        this.cacheDirectory = new File(rootCacheDirectory, "license-revoke");
+        cacheDirectory.mkdirs();
     }
 
     @Override
@@ -125,13 +121,12 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
     }
 
     private CacheEntry getCachedResult(String licenseHash) {
-        Path cacheFile = cacheDirectory.resolve(licenseHash + ".json");
-        if (!Files.exists(cacheFile)) {
+        File cacheFile = new File(cacheDirectory, licenseHash + ".json");
+        if (!cacheFile.exists()) {
             return null;
         }
-
         try {
-            String content = Files.readString(cacheFile, StandardCharsets.UTF_8);
+            String content = Files.readString(cacheFile.toPath(), StandardCharsets.UTF_8);
             return JsonUtil.standard().fromJson(content, CacheEntry.class);
         } catch (Exception e) {
             log.debug("Failed to read cache file {}: {}", cacheFile, e.getMessage());
@@ -140,12 +135,11 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
     }
 
     private void cacheResult(String licenseHash, boolean revoked) {
-        Path cacheFile = cacheDirectory.resolve(licenseHash + ".json");
+        File cacheFile = new File(cacheDirectory, licenseHash + ".json");
         CacheEntry entry = new CacheEntry(revoked, Instant.now().toEpochMilli());
-
         try {
             String content = JsonUtil.standard().toJson(entry);
-            Files.writeString(cacheFile, content, StandardCharsets.UTF_8);
+            Files.writeString(cacheFile.toPath(), content, StandardCharsets.UTF_8);
             log.debug("Cached result for license hash {}: {}", licenseHash, revoked);
         } catch (Exception e) {
             log.debug("Failed to cache result for license hash {}: {}", licenseHash, e.getMessage());

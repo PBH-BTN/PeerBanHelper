@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
@@ -104,6 +105,11 @@ public final class Deluge extends AbstractDownloader {
     public void setPaused(boolean paused) {
         super.setPaused(paused);
         config.setPaused(paused);
+    }
+
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return ExternalSwitch.parseInt("pbh.downloader.Deluge.maxConcurrentPeerRequestSlots", 32);
     }
 
     @Override

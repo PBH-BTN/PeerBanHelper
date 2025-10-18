@@ -27,12 +27,13 @@ public class ConsoleGuiImpl implements GuiImpl {
     @Override
     public void setup() {
         System.setProperty("java.awt.headless", "true");
+        JListAppender.allowWriteLogEntryDeque.set(false);
+        JListAppender.logEntryDeque.clear();
     }
 
     @Override
     public void createMainWindow() {
-        JListAppender.allowWriteLogEntryDeque.set(false);
-        JListAppender.logEntryDeque.clear();
+
     }
 
     @SneakyThrows

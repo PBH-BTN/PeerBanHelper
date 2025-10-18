@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.ghostchu.peerbanhelper.configuration.Pf4jConfiguration
+  com.ghostchu.peerbanhelper.configuration.pf4j.Pf4jConfiguration
