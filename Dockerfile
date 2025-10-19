@@ -8,6 +8,7 @@ RUN pnpm run build
 FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS dependency-cache
 WORKDIR /app
 COPY pom.xml .
+COPY m2-local-repo .
 RUN mvn -B dependency:go-offline -T 1.5C
 
 FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS build
