@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.database.dao.impl.NicTrafficJournalDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
@@ -31,10 +32,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import oshi.SystemInfo;
+import oshi.hardware.NetworkIF;
 
 import java.sql.SQLException;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -67,6 +71,10 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private long maxTrafficAllowedInWindowPeriod;
     private long trafficSlidingCappingMaxSpeed;
     private long trafficSlidingCappingMinSpeed;
+    @Autowired
+    private NicTrafficJournalDao nicTrafficJournalDao;
+    @Autowired
+    private SystemInfo systemInfo;
 
     @Override
     public boolean isConfigurable() {
@@ -121,11 +129,35 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     trafficJournalDao.updateData(downloader.getId(), stats.totalDownloaded(), stats.totalUploaded(), 0, 0);
                 }
             } catch (Throwable e) {
-                log.error("Unable to write hourly traffic journal to database", e);
+                log.error("Unable to write traffic journal to database", e);
             }
         }
         updateTrafficMonitoringService();
         updateTrafficCappingService();
+        updateNicTrafficMonitoringService();
+    }
+
+    private void updateNicTrafficMonitoringService() {
+        var ifs = systemInfo.getHardware().getNetworkIFs();
+        for (NetworkIF anIf : ifs) {
+            try {
+                String nicName = Objects.requireNonNullElse(anIf.getIfAlias(), anIf.getName());
+                if (!anIf.isConnectorPresent() && !ExternalSwitch.parseBoolean("pbh.module.activeMonitoring.ignoreConnectorPresent", false)) {
+                    log.debug("{} not a physic NIC", nicName);
+                    continue;
+                }
+                nicTrafficJournalDao.updateData(
+                        nicName,
+                        anIf.getBytesRecv(),
+                        anIf.getBytesSent(),
+                        anIf.getPacketsRecv(),
+                        anIf.getPacketsSent()
+                );
+            } catch (Exception e) {
+                log.warn("Unable to update NIC traffic monitoring data for NIC {}", anIf, e);
+            }
+        }
+
     }
 
     private void updateTrafficCappingService() {
@@ -136,12 +168,12 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             try {
                 if (downloader.login().success()) {
                     var speedLimiter = downloader.getSpeedLimiter();
-                    if(speedLimiter == null) continue;
-                    if(!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
+                    if (speedLimiter == null) continue;
+                    if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
-                    DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
+                    DownloaderSpeedLimiter newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
-                    if(Main.getMeta().isSnapshotOrBeta()) {
+                    if (Main.getMeta().isSnapshotOrBeta()) {
                         log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload()) + "/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload()) + "/s", calculatedData));
                     }
                 }
@@ -198,16 +230,36 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                 return;
             }
             log.info(tlUI(Lang.AMM_CLEANING_TABLES));
+            long totalDeleted = 0;
+            long truncateAt = System.currentTimeMillis() - dataRetentionTime;
+            // peer records
             try {
                 var deleteBuilder = peerRecordDao.deleteBuilder();
-                var where = deleteBuilder.where()
-                        .lt("lastTimeSeen", dataRetentionTime);
+                var where = deleteBuilder.where().lt("lastTimeSeen", truncateAt);
                 deleteBuilder.setWhere(where);
-                int deleted = deleteBuilder.delete();
-                log.info(tlUI(Lang.AMM_CLEANED_UP, deleted));
+                totalDeleted += deleteBuilder.delete();
             } catch (SQLException e) {
                 log.warn("Unable to clean up AMM tables", e);
             }
+            // traffic journal
+            try {
+                var deleteBuilder = trafficJournalDao.deleteBuilder();
+                var where = deleteBuilder.where().lt("timestamp", truncateAt);
+                deleteBuilder.setWhere(where);
+                totalDeleted += deleteBuilder.delete();
+            } catch (SQLException e) {
+                log.warn("Unable to clean up TrafficJournal tables", e);
+            }
+            // nic traffic journal
+            try {
+                var deleteBuilder = nicTrafficJournalDao.deleteBuilder();
+                var where = deleteBuilder.where().lt("timestamp", truncateAt);
+                deleteBuilder.setWhere(where);
+                totalDeleted += deleteBuilder.delete();
+            } catch (SQLException e) {
+                log.warn("Unable to clean up NicTrafficJournal tables", e);
+            }
+            log.info(tlUI(Lang.AMM_CLEANED_UP, totalDeleted));
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         }

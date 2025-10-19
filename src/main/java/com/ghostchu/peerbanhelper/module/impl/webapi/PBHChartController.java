@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.NicTrafficJournalDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -49,6 +50,8 @@ public final class PBHChartController extends AbstractFeatureModule {
     private TrafficJournalDao trafficJournalDao;
     @Autowired
     private IPDBManager iPDBManager;
+    @Autowired
+    private NicTrafficJournalDao nicTrafficJournalDao;
 
     @Override
     public boolean isConfigurable() {
@@ -71,7 +74,13 @@ public final class PBHChartController extends AbstractFeatureModule {
                 .get("/api/chart/geoIpInfo", this::handleGeoIP, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/nicList", this::handleNicList, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/nicTraffic", this::handleNicTrafficClassic, Role.USER_READ, Role.PBH_PLUS)
         ;
+    }
+
+    private void handleNicList(@NotNull Context ctx) throws Exception {
+        ctx.json(new StdResp(true, null, nicTrafficJournalDao.listNics()));
     }
 
     private void handleTraffic(Context ctx) throws Exception {
@@ -131,6 +140,55 @@ public final class PBHChartController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, mergedRecords));
     }
 
+    private void handleNicTrafficClassic(Context ctx) throws Exception {
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        String nicAlias = ctx.queryParam("nic");
+        var records = nicTrafficJournalDao.getDayOffsetData(nicAlias,
+                timeQueryModel.startAt(),
+                timeQueryModel.endAt());
+
+        // 将相同天的记录合并
+        Map<Long, NicTrafficJournalDao.TrafficDataComputed> mergedData = new java.util.HashMap<>();
+
+        for (NicTrafficJournalDao.TrafficDataComputed record : records) {
+            // 获取当天的开始时间戳
+            Timestamp ts = record.getTimestamp();
+            long dayStart = MiscUtil.getStartOfToday(ts.getTime());
+
+            // 合并相同日期的数据
+            mergedData.compute(dayStart, (key, existing) -> {
+                if (existing == null) {
+                    return new NicTrafficJournalDao.TrafficDataComputed(
+                            new Timestamp(key),
+                            record.getBytesReceived(),
+                            record.getBytesSent(),
+                            record.getPacketsReceived(),
+                            record.getPacketsSent()
+                    );
+                } else {
+                    existing.setBytesReceived(existing.getBytesReceived() + record.getBytesReceived());
+                    existing.setBytesSent(existing.getBytesSent() + record.getBytesSent());
+                    existing.setPacketsReceived(existing.getPacketsReceived() + record.getPacketsReceived());
+                    existing.setPacketsSent(existing.getPacketsSent() + record.getPacketsSent());
+                    return existing;
+                }
+            });
+        }
+
+        // 转换回列表并排序
+        List<NicTrafficJournalDao.TrafficDataComputed> mergedRecords = new ArrayList<>(mergedData.values());
+        mergedRecords.sort(Comparator.comparing(data -> data.getTimestamp().getTime()));
+
+        ctx.json(new StdResp(true, null, mergedRecords));
+    }
+
+    private NicTrafficJournalDao.TrafficDataComputed fixTimezone(Context ctx, NicTrafficJournalDao.TrafficDataComputed data) {
+        Timestamp ts = data.getTimestamp();
+        var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
+                .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
+        data.setTimestamp(new Timestamp(epochSecond * 1000));
+        return data;
+    }
 
     private TrafficJournalDao.TrafficDataComputed fixTimezone(Context ctx, TrafficJournalDao.TrafficDataComputed data) {
         Timestamp ts = data.getTimestamp();
