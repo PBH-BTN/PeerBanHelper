@@ -7,9 +7,9 @@ RUN pnpm run build
 
 FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS dependency-cache
 WORKDIR /app
-COPY pom_docker.xml /app/pom.xml
+COPY pom.xml .
 COPY m2-local-repo /app/m2-local-repo
-RUN mvn -B dependency:go-offline -DexcludeArtifactIds=swt-classpath
+RUN mvn -B dependency:go-offline
 
 FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS build
 RUN apk add git
