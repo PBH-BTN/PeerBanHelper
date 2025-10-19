@@ -22,15 +22,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v5
+      - name: Use Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: 21.x
+          node-version: latest
+          cache: 'pnpm'
+          cache-dependency-path: 'webui/pnpm-lock.yaml'
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
-          version: 10.17.0
+          version: latest
           run_install: false
 
       - name: Get pnpm store directory

@@ -19,7 +19,7 @@ export default defineConfig({
   base: '',
   plugins: [
     vue(),
-    VueDevTools(),
+    ...(isProduction ? [] : [VueDevTools()]),
     vitePluginForArco({
       style: 'css'
     }),
