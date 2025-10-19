@@ -600,12 +600,5 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.swt</groupId>
-            <artifactId>swt-classpath</artifactId>
-            <version>local</version>
-            <scope>system</scope> <!-- 由于 SWT 不同平台包类结构相同，因此必须按照平台将对应的 swt 二进制引入 classpath，此处的仅用于解决Maven依赖，实际由 install4j 或者构建脚本负责拷贝 SWT 二进制文件，调试时需要手动引入类路径 -->
-            <systemPath>${project.basedir}/platform-natives/windows-x86_64/libraries/swt.jar</systemPath>
-        </dependency>
     </dependencies>
 </project>
