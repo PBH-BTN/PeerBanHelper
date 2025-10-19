@@ -26,8 +26,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: latest
-          cache: 'pnpm'
-          cache-dependency-path: 'webui/pnpm-lock.yaml'
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
