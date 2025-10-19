@@ -548,7 +548,7 @@
         <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
-            <version>RELEASE</version>
+            <version>0.1.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
         <dependency>
