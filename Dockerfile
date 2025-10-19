@@ -1,8 +1,9 @@
-FROM --platform=$BUILDPLATFORM node:current-alpine as build_web
+FROM --platform=$BUILDPLATFORM node:current-alpine AS build_web
 ARG GIT_HASH
 COPY webui /webui
 WORKDIR /webui
-RUN corepack enable pnpm && CI=1 pnpm i && pnpm run build
+RUN npm i -g pnpm && CI=1 pnpm i
+RUN pnpm run build
 
 FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS build
 COPY . /build
