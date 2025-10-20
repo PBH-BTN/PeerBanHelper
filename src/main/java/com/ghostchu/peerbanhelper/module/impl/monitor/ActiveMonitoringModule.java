@@ -75,6 +75,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private NicTrafficJournalDao nicTrafficJournalDao;
     @Autowired
     private SystemInfo systemInfo;
+    private boolean nicTrafficMonitoring;
 
     @Override
     public boolean isConfigurable() {
@@ -119,6 +120,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         this.maxTrafficAllowedInWindowPeriod = getConfig().getLong("traffic-sliding-capping.daily-max-allowed-upload-traffic");
         this.trafficSlidingCappingMaxSpeed = getConfig().getLong("traffic-sliding-capping.max-speed");
         this.trafficSlidingCappingMinSpeed = getConfig().getLong("traffic-sliding-capping.min-speed");
+        this.nicTrafficMonitoring = getConfig().getBoolean("nic-traffic-monitoring");
     }
 
     private void updateTrafficStatus() {
@@ -138,6 +140,9 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
     private void updateNicTrafficMonitoringService() {
+        if(!nicTrafficMonitoring){
+            return;
+        }
         var ifs = systemInfo.getHardware().getNetworkIFs();
         for (NetworkIF anIf : ifs) {
             try {

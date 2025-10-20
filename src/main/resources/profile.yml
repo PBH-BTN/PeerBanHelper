@@ -1,4 +1,4 @@
-config-version: 31
+config-version: 33
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -408,6 +408,10 @@ module:
       # 每日阈值 - 设置为 -1 以禁用，单位：bytes
       # Daily threshold, set to -1 to disable, Unit: bytes
       daily: -1
+    # 本地网络卡流量统计 - NIC Traffic Monitoring
+    # 启用此开关后，将记录网络接口的流量信息，可在 WebUI 中查看
+    # After enabled this option, NIC traffic metrics will be logged and able to check in WebUI.
+    nic-traffic-monitoring: false
     # 流量滑动窗口限制 - Traffic Capping by Sliding Window
     traffic-sliding-capping:
       # 是否启用 - Enable?

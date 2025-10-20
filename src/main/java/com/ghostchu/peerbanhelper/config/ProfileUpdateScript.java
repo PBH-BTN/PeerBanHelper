@@ -25,6 +25,11 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 33)
+    public void addNicTrafficSwitch(YamlConfiguration bundled) {
+        conf.set("module.active-monitoring.nic-traffic-monitoring", false);
+    }
+
     @UpdateScript(version = 32)
     public void fixSwarmTracking(YamlConfiguration bundled) {
         conf.set("module.swarm-tracking", bundled.get("module.swarm-tracking"));
