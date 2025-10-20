@@ -17,7 +17,7 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <install4j.home>/opt/install4j</install4j.home>
-        <flatlafVersion>3.6.1</flatlafVersion>
+        <flatlafVersion>3.6.2</flatlafVersion>
         <ormlite.version>6.1</ormlite.version>
     </properties>
 
@@ -288,7 +288,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.2.11</version>
+            <version>6.2.12</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -440,7 +440,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
-            <version>3.6.1</version>
+            <version>3.6.2</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -450,7 +450,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>3.6.1</version>
+            <version>3.6.2</version>
         </dependency>
         <dependency>
             <groupId>com.ghostchu</groupId>
@@ -475,7 +475,7 @@
         <dependency>
             <groupId>org.bspfsystems</groupId>
             <artifactId>yamlconfiguration</artifactId>
-            <version>3.0.3</version>
+            <version>3.0.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -517,7 +517,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.18</version>
+            <version>1.5.20</version>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
@@ -560,7 +560,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.2.6.Final</version>
+            <version>4.2.7.Final</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
