@@ -48,31 +48,31 @@ jobs:
       - id: java_info
         uses: YunaBraska/java-info-action@main
       # download artifacts
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: maven-dist
           path: target/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: installer-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: spk-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: deb-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: portable-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-13.4-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-14.1-dist
           path: target/media
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/download-artifact@v5
+    - uses: actions/download-artifact@v6
       with:
         name: maven-dist
         path: target
