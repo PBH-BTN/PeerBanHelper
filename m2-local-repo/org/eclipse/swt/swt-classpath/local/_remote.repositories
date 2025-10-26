@@ -1,0 +1,4 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Sun Oct 19 15:38:49 CST 2025
+swt-classpath-local.jar>=
+swt-classpath-local.pom>=

@@ -1,15 +1,23 @@
-FROM --platform=$BUILDPLATFORM node:current-alpine as build_web
+FROM --platform=$BUILDPLATFORM node:current-alpine AS build_web
 ARG GIT_HASH
 COPY webui /webui
 WORKDIR /webui
-RUN corepack enable pnpm && CI=1 pnpm i && pnpm run build
+RUN npm i -g pnpm && CI=1 pnpm i
+RUN pnpm run build
+
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS dependency-cache
+WORKDIR /app
+COPY pom.xml .
+COPY m2-local-repo /app/m2-local-repo
+RUN mvn -B dependency:go-offline
 
 FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.11-eclipse-temurin-21-alpine AS build
+RUN apk add git
+COPY --from=dependency-cache /root/.m2 /root/.m2
 COPY . /build
 WORKDIR /build
 COPY --from=build_web webui/dist src/main/resources/static
-RUN apk add git  && \
-    mvn -B clean package --file pom.xml -T 1.5C -P thin-sqlite-packaging
+RUN mvn -B clean package --file pom.xml -T 1.5C -P thin-sqlite-packaging
 
 FROM docker.io/bellsoft/liberica-runtime-container:jre-21-slim-musl
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"

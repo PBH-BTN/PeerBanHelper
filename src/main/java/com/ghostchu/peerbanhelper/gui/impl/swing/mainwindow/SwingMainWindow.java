@@ -80,7 +80,8 @@ public final class SwingMainWindow extends JFrame {
 
     private void registerTabs() {
         tabs.add(new LogsTab(this));
-        if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT") && ExternalSwitch.parseBoolean("pbh.swingui.webuiTab", true)) {
+        if (MiscUtil.isClassAvailable("org.eclipse.swt.SWT")
+                && ExternalSwitch.parseBoolean("pbh.swingui.webuiTab", true)) {
             try { // SWT possible be null here on unsupported platform
                 tabs.add(new WebUITab(this));
             } catch (Exception e) {

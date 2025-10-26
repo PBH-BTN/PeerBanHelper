@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>9.0.9</version>
+    <version>9.0.10</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -481,7 +481,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.18.0</version>
+            <version>3.19.0</version>
         </dependency>
         <dependency>
             <groupId>org.pf4j</groupId>
@@ -548,7 +548,7 @@
         <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
-            <version>RELEASE</version>
+            <version>0.1.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
         <dependency>
@@ -561,13 +561,50 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.2.6.Final</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-memcache</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-redis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-smtp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-mqtt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-stomp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-protobuf</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-sctp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-udt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-rxtx</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.swt</groupId>
             <artifactId>swt-classpath</artifactId>
-            <version>4.37-M2</version>
-            <scope>system</scope> <!-- 由于 SWT 不同平台包类结构相同，因此必须按照平台将对应的 swt 二进制引入 classpath，此处的仅用于解决Maven依赖，实际由 install4j 或者构建脚本负责拷贝 SWT 二进制文件，调试时需要手动引入类路径 -->
-            <systemPath>${project.basedir}/platform-natives/windows-x86_64/libraries/swt.jar</systemPath>
+            <version>local</version>
+            <scope>provided</scope> <!-- 由于 SWT 不同平台包类结构相同，因此必须按照平台将对应的 swt 二进制引入 classpath，此处的仅用于解决Maven依赖，实际由 install4j 或者构建脚本负责拷贝 SWT 二进制文件，调试时需要手动引入类路径 -->
         </dependency>
     </dependencies>
 </project>
