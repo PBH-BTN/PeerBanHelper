@@ -125,13 +125,13 @@
   <a-back-top target-container="#top" :style="{ position: 'absolute' }" />
 </template>
 <script setup lang="ts">
-import {type Profile} from '@/api/model/profile'
-import {GetProfile, SaveProfile} from '@/service/settings'
-import {formatMilliseconds} from '@/utils/time'
-import {Message} from '@arco-design/web-vue'
-import {reactive, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {useRequest} from 'vue-request'
+import { type Profile } from '@/api/model/profile'
+import { GetProfile, SaveProfile } from '@/service/settings'
+import { formatMilliseconds } from '@/utils/time'
+import { Message } from '@arco-design/web-vue'
+import { reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 import activeMonitoring from './components/activeMonitoring.vue'
 import autoRangeBan from './components/autoRangeBan.vue'
 import btn from './components/btn.vue'

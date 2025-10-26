@@ -223,7 +223,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
           cache-from: type=gha
-          cache-to: type=gha,mode=min
+          cache-to: type=gha,mode=max
           build-args: |
             GIT_HASH=${{ github.sha }}
       - name: Log in to Aliyun ACR
