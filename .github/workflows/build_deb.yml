@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v5
       - id: java_info
         uses: YunaBraska/java-info-action@main
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: maven-dist
           path: target/
@@ -27,7 +27,7 @@ jobs:
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: deb-dist
           path: |

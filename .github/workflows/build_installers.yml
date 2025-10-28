@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
       - id: java_info
         uses: YunaBraska/java-info-action@main
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: maven-dist
           path: target/
@@ -29,7 +29,7 @@ jobs:
           rm -rf target/media/debug*
       # jarPath=$(pwd) 是必须的，install4jc 不知道什么毛病，不支持相对路径，这太诡异了
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: installer-dist
           path: |
