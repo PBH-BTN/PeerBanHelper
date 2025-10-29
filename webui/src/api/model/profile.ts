@@ -19,7 +19,6 @@ export interface Module {
   expression_engine: ExpressionEngine
   ip_address_blocker_rules: IpAddressBlockerRules
   active_monitoring: ActiveMonitoring
-  ptr_blacklist: PtrBlacklist
   idle_connection_dos_protection: IdleConnectionDosProtection
 }
 
@@ -142,12 +141,6 @@ export interface ActiveMonitoring {
     max_speed: number
     min_speed: number
   }
-}
-
-export interface PtrBlacklist {
-  enabled: boolean
-  ban_duration: BanDuration
-  ptr_rules: PeerRule[]
 }
 
 export interface IdleConnectionDosProtection {
