@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { getBanListPaginated, unbanIP } from '@/service/banList'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -81,7 +81,7 @@ const { total, data, current, pageSize, loading, changeCurrent, changePageSize, 
         totalKey: 'data.total'
       }
     },
-    [useAutoUpdatePlugin]
+    [useFirstPageOnlyAutoUpdatePlugin]
   )
 
 const handleUnban = async (address: string) => {
