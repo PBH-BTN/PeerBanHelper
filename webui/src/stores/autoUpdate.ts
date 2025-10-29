@@ -165,7 +165,7 @@ export const useFirstPageOnlyAutoUpdatePlugin = <R, P extends unknown[]>(
   callbackRef.value = autoupdateStore.polling(() => {
     // Only refresh when on the first page
     const params = queryInstance.params.value?.[0] as { page?: number } | undefined
-    if (params?.page === 1) {
+    if ((params?.page ?? 1) === 1) {
       queryInstance.context.refresh()
     }
   })
