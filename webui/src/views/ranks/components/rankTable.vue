@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getRanks } from '@/service/ranks'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import type { TableColumnData } from '@arco-design/web-vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
@@ -87,7 +87,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
         totalKey: 'data.total'
       }
     },
-    [useAutoUpdatePlugin]
+    [useFirstPageOnlyAutoUpdatePlugin]
   )
 
 const handleSearch = (filter: string) => {
