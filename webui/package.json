@@ -21,7 +21,7 @@
     "@guolao/vue-monaco-editor": "^1.5.5",
     "@octokit/core": "^7.0.5",
     "@octokit/request-error": "^7.0.1",
-    "@vueuse/core": "^13.9.0",
+    "@vueuse/core": "^14.0.0",
     "antlr4": "^4.13.2",
     "compare-versions": "^6.1.1",
     "copy-to-clipboard": "^3.3.3",
