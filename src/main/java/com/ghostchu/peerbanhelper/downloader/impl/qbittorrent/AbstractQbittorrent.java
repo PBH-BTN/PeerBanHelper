@@ -136,14 +136,14 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     public void updatePreferences() {
+        FormBody.Builder formBody = new FormBody.Builder();
         try {
-            FormBody formBody = new FormBody.Builder()
-                    .add("json", JsonUtil.getGson().toJson(Map.of("enable_multi_connections_from_same_ip", false)))
-                    .build();
-
+            if (ExternalSwitch.parseBoolean("pbh.downloader.qbittorrent.disableSameIpMultiConnection", true)) {
+                formBody.add("json", JsonUtil.getGson().toJson(Map.of("enable_multi_connections_from_same_ip", false)));
+            }
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/app/setPreferences")
-                    .post(formBody)
+                    .post(formBody.build())
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .build();
 
@@ -612,7 +612,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     joiner.add(ipv6.toNormalizedString());
                 }
             }
-            if(ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
+            if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
                 Address ipv4 = ipAddr.toIPv4();
                 if (ipv4 != null) {
                     joiner.add(ipv4.toNormalizedString());
