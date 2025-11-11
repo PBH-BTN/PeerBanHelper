@@ -103,25 +103,32 @@ watch(
   (error) => {
     if (error instanceof RequestError) {
       if (error?.message.includes('limit')) {
-        Notification.error({
-          title: t('settings.accessToken.error'),
-          content: t('settings.accessToken.error.limit'),
-          footer: () =>
-            h(
-              Button,
-              {
-                type: 'primary',
-                onClick: () => endpointStore.emitter.emit('open-settings-modal')
-              },
-              () => t('settings.open')
-            )
-        })
+
+        console.log(t('settings.accessToken.error'))
+        console.log(t('settings.accessToken.error.limit'))
+
+        // Notification.error({
+        //   title: t('settings.accessToken.error'),
+        //   content: t('settings.accessToken.error.limit'),
+        //   footer: () =>
+        //     h(
+        //       Button,
+        //       {
+        //         type: 'primary',
+        //         onClick: () => endpointStore.emitter.emit('open-settings-modal')
+        //       },
+        //       () => t('settings.open')
+        //     )
+        // })
       }
-    } else
-      Notification.error({
-        title: t('settings.accessToken.error'),
-        content: error?.message ?? ''
-      })
+    } else {
+       Notification.error({
+         title: t('settings.accessToken.error'),
+         content: error?.message ?? ''
+       })
+      console.log(t('settings.accessToken.error'))
+      console.log(error?.message ?? '')
+    }
   }
 )
 
