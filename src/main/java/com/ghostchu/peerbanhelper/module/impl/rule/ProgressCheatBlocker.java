@@ -115,6 +115,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
         }
         try {
+            cache.asMap().keySet().removeIf(key ->
+                    key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
+                            key.peerAddressIp().equals(peerIp.toString())
+            );
             int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
             int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
         } catch (SQLException e) {
