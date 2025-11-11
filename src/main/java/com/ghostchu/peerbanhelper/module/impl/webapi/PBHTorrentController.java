@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.google.common.net.HostAndPort;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
@@ -176,13 +177,12 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         }
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
-        var queryBuilder = new Orderable(Map.of("lastTimeSeen", false), ctx)
+        var queryBuilder = new Orderable(Map.of("lastTimeSeen", false, "address", true, "port", true), ctx)
                 .apply(peerRecordDao.queryBuilder().join(torrentDao.queryBuilder(), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
-        var queryWhere = queryBuilder.where().eq("torrent_id", t);
-        queryBuilder.setWhere(queryWhere);
+        queryBuilder.where().eq("torrent_id", t);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
         ctx.json(new StdResp(true, null,  Page.map(page, (entity)-> new PeerRecordEntityDTO(entity.getId(),
-                entity.getAddress(),
+                HostAndPort.fromParts(entity.getAddress(), entity.getPort()).toString(),
                 TorrentEntityDTO.from(entity.getTorrent()),
                 downloaderManager.getDownloadInfo(entity.getDownloader()),
                 entity.getPeerId(),

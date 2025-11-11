@@ -196,14 +196,14 @@ public final class PBHPeerController extends AbstractFeatureModule {
         activeMonitoringModule.flush();
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
-        var builder = new Orderable(Map.of("lastTimeSeen", false), ctx).apply(peerRecordDao.queryBuilder());
+        var builder = new Orderable(Map.of("lastTimeSeen", false, "address", false, "port", true), ctx).apply(peerRecordDao.queryBuilder());
         var where = builder
                 .where()
                 .eq("address", new SelectArg(ip));
         builder.setWhere(where);
         var page = peerRecordDao.queryByPaging(builder, pageable);
         ctx.json(new StdResp(true, null, Page.map(page, (entity) -> new PeerRecordEntityDTO(entity.getId(),
-                entity.getAddress(),
+                HostAndPort.fromParts(entity.getAddress(), entity.getPort()).toString(),
                 TorrentEntityDTO.from(entity.getTorrent()),
                 downloaderManager.getDownloadInfo(entity.getDownloader()),
                 entity.getPeerId(),
