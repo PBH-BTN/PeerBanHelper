@@ -184,6 +184,15 @@ const columns = [
     }
   },
   {
+    title: () => t('page.banlog.banlogTable.column.peerPort'),
+    dataIndex: 'port',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
+    width: 80
+  },
+  {
     title: 'Peer ID',
     slotName: 'peerId',
     dataIndex: 'peerId',
