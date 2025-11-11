@@ -146,7 +146,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             // 使用 orderByRaw 添加子查询排序
             // 注意：使用实际表名 'torrents' 而不是别名 'torrent'
             qb.orderByRaw("(SELECT COUNT(*) FROM " + subQueryTable +
-                    " WHERE " + subQueryTable + ".torrent_id = torrents.id) " + sortDirection);
+                    " WHERE " + subQueryTable + ".torrent_id = " + torrentDao.getTableName() + ".id) " + sortDirection);
         } else {
             // 普通排序（按数据库字段）
             new Orderable(Map.of("id", false), ctx).apply(qb);
