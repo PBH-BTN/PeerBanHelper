@@ -27,6 +27,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
 import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -39,20 +40,30 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
-    private Cache<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
-            .maximumSize(1024)
-            .expireAfterAccess(30, TimeUnit.MINUTES)
+    private final Map<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>> unloadDeque = Collections.synchronizedMap(new LinkedHashMap<>());
+    private final Cache<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
+            .maximumSize(512)
+            .expireAfterAccess(3, TimeUnit.MINUTES)
             .softValues()
             .recordStats()
+            .removalListener((RemovalListener<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
+                var pair = notification.getValue();
+                if(pair == null) return;
+                try {
+                    flushBackDatabase(pair.getLeft(), pair.getRight());
+                } catch (SQLException e) {
+                    log.error("Unable flush back to database for pair {}", pair, e);
+                }
+            })
             .build();
     private long torrentMinimumSize;
     private boolean blockExcessiveClients;
@@ -88,39 +99,11 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     public void onEnable() {
         reloadConfig();
         webContainer.javalin()
-                .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
-                .get("/api/modules/" + getConfigName() + "/debug", this::debug, Role.USER_READ);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flushDatabase, 0, 1, TimeUnit.MINUTES);
+                .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
     }
 
-    private void flushDatabase() {
-        var it = cache.asMap().entrySet().iterator();
-        while (it.hasNext()) {
-            var entry = it.next();
-            try {
-                flushBackDatabase(entry.getValue().getLeft(), entry.getValue().getRight());
-                it.remove();
-            } catch (SQLException e) {
-                log.error("Unable to flush PCB data back to database for downloader {}, torrent {}, ipPrefix {}, ip {}",
-                        entry.getKey().downloader,
-                        entry.getKey().torrentId,
-                        entry.getKey().peerAddressPrefix,
-                        entry.getKey().peerAddressIp, e);
-            }
-        }
-    }
-
-    private void debug(@NotNull Context context) {
-        StringJoiner joiner = new StringJoiner("\n");
-        joiner.add("Cache Stats: " + cache.stats());
-        joiner.add("Cache Data: ");
-        cache.asMap().forEach((key, value) -> {
-            joiner.add("Key: " + key.toString() + " => Value: " + value.toString());
-        });
-        context.result(joiner.toString());
-    }
 
     @Subscribe
     public void onPeerUnBan(PeerUnbanEvent event) {
@@ -178,7 +161,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     @Override
     public void onDisable() {
         Main.getReloadManager().unregister(this);
-        flushDatabase();
+        cache.invalidateAll();
     }
 
     private void reloadConfig() {
