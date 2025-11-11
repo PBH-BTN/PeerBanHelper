@@ -93,8 +93,26 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/debug", this::debug, Role.USER_READ);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flushDatabase, 0, 1, TimeUnit.MINUTES);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
+    }
+
+    private void flushDatabase() {
+        var it = cache.asMap().entrySet().iterator();
+        while (it.hasNext()) {
+            var entry = it.next();
+            try {
+                flushBackDatabase(entry.getValue().getLeft(), entry.getValue().getRight());
+                it.remove();
+            } catch (SQLException e) {
+                log.error("Unable to flush PCB data back to database for downloader {}, torrent {}, ipPrefix {}, ip {}",
+                        entry.getKey().downloader,
+                        entry.getKey().torrentId,
+                        entry.getKey().peerAddressPrefix,
+                        entry.getKey().peerAddressIp, e);
+            }
+        }
     }
 
     private void debug(@NotNull Context context) {
@@ -163,6 +181,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     @Override
     public void onDisable() {
         Main.getReloadManager().unregister(this);
+        flushDatabase();
     }
 
     private void reloadConfig() {
@@ -275,7 +294,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             rangeEntity.setLastReportProgress(peer.getProgress());
             rangeEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), rangeEntity.getLastTorrentCompletedSize()));
             rangeEntity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
-            flushBackDatabase(rangeEntity, addressEntity);
         }
     }
 
