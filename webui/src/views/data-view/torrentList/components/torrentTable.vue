@@ -8,7 +8,7 @@
         search-button
         @search="handleSearch"
         @change="handleSearch"
-        @clear="() => { keyword = ''; run({ page: current, pageSize: pageSize, keyword: '', sorter: sorterParam }) }"
+        @clear="() => { keyword = ''; run({ page: 1, pageSize: pageSize, keyword: '', sorter: sorterParam }) }"
       />
     </a-space>
     <a-table
