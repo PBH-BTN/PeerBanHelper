@@ -29,12 +29,14 @@ public final class PCBAddressDao extends AbstractPBHDao<PCBAddressEntity, Long> 
                 .query();
     }
 
-    public PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String ip, @NotNull String downloader) throws SQLException {
+    public PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String ip, int port, @NotNull String downloader) throws SQLException {
         return queryBuilder()
                 .where()
                 .eq("torrentId", new SelectArg(torrentId))
                 .and()
                 .eq("ip", new SelectArg(ip))
+                .and()
+                .eq("port", port)
                 .and()
                 .eq("downloader", new SelectArg(downloader))
                 .queryForFirst();

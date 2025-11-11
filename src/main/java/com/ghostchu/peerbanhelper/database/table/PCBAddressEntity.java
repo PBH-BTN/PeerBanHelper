@@ -18,6 +18,8 @@ public final class PCBAddressEntity {
     private Long id;
     @DatabaseField(canBeNull = false, uniqueCombo = true, index = true)
     private String ip;
+    @DatabaseField(canBeNull = false, uniqueCombo = true)
+    private int port;
     @DatabaseField(canBeNull = false, uniqueCombo = true, index = true)
     private String torrentId;
     @DatabaseField(canBeNull = false)

@@ -201,7 +201,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         }
         String peerPrefixString = peerPrefix.toString();
         String peerIpString = peerIp.toString();
-        var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIpString);
+        var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIpString, peer.getPeerAddress().getPort());
         PCBRangeEntity rangeEntity = pair.getLeft();
         PCBAddressEntity addressEntity = pair.getRight();
         long computedUploadedIncremental; // 上传增量
@@ -428,17 +428,17 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     @NotNull
-    private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, String peerAddressIp) {
+    private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, String peerAddressIp, int port) {
         CacheKey cacheKey = new CacheKey(downloader, torrentId, peerAddressPrefix, peerAddressIp);
         try {
             return cache.get(cacheKey, () -> {
                 PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
-                PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, downloader);
+                PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                 if (rangeEntity == null) {
                     rangeEntity = pcbRangeDao.createIfNotExists(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
                 }
                 if (pcbAddressEntity == null) {
-                    pcbAddressEntity = pcbAddressDao.createIfNotExists(new PCBAddressEntity(null, peerAddressIp, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
+                    pcbAddressEntity = pcbAddressDao.createIfNotExists(new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
                 }
                 return Pair.of(rangeEntity, pcbAddressEntity);
             });
