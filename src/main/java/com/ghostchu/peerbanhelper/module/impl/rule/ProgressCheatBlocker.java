@@ -102,6 +102,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
+        Main.getEventBus().register(this);
     }
 
 
@@ -164,6 +165,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @Override
     public void onDisable() {
+        Main.getEventBus().unregister(this);
         Main.getReloadManager().unregister(this);
         cache.invalidateAll();
     }
