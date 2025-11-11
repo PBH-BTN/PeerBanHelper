@@ -27,6 +27,7 @@
       column-resizable
       size="medium"
       class="banlog-table"
+      @sorter-change="sorterChange"
       @page-change="changeCurrent"
       @page-size-change="changePageSize"
     >
@@ -110,19 +111,25 @@
   <BanHistoryModal ref="banHistoryModal" />
 </template>
 <script lang="ts" setup>
-import { GetTorrentInfoList } from '@/service/data'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import { useEndpointStore } from '@/stores/endpoint'
-import { formatFileSize } from '@/utils/file'
-import { debounce } from 'lodash'
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { usePagination } from 'vue-request'
+import {useSorter} from '@/composables/useSorter'
+import {GetTorrentInfoList} from '@/service/data'
+import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
+import {useEndpointStore} from '@/stores/endpoint'
+import {formatFileSize} from '@/utils/file'
+import {debounce} from 'lodash'
+import {computed, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {usePagination} from 'vue-request'
 import AccessHistoryModal from './accessHistoryModal.vue'
 import BanHistoryModal from './banHistoryModal.vue'
+
 const forceLoading = ref(true)
-const endpointState = useEndpointStore()
+const endpointStore = useEndpointStore()
 const { t } = useI18n()
+
+// 使用可复用的排序功能
+const { sorterParam, handleSorterChange } = useSorter({ multiSort: true, maxSortColumns: 3 })
+
 const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh, run } =
   usePagination(
     GetTorrentInfoList,
@@ -139,7 +146,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
         totalKey: 'data.total'
       },
       cacheKey: (params) =>
-        `${endpointState.endpoint}-torrentInfoList-${params?.[0].page || 1}-${params?.[0].pageSize || 10}`,
+        `${endpointStore.endpoint}-torrentInfoList-${params?.[0].page || 1}-${params?.[0].pageSize || 10}-${params?.[0].sorter || 'default'}`,
       onAfter: () => {
         forceLoading.value = false
       }
@@ -151,7 +158,7 @@ watch([pageSize, current], () => {
   forceLoading.value = true
 })
 
-watch(() => endpointState.endpoint, refresh)
+watch(() => endpointStore.endpoint, refresh)
 
 const tableLoading = computed(() => {
   return forceLoading.value || loading.value || !list.value
@@ -163,27 +170,48 @@ const columns = [
     dataIndex: 'name',
     ellipsis: true,
     tooltip: true,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 500
   },
   {
     title: 'Hash',
     slotName: 'hash',
+    dataIndex: 'infoHash',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 340
   },
   {
     title: () => t('page.torrentList.column.size'),
     slotName: 'size',
+    dataIndex: 'size',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 120
   },
   {
     title: () => t('page.torrentList.column.count'),
-    slotName: 'count'
+    slotName: 'count',
+    dataIndex: 'peerBanCount',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
+    width: 120
   },
   {
     title: () => t('page.torrentList.column.actions'),
     slotName: 'action'
   }
 ]
+
 const list = computed(() => data.value?.data.results)
 const accessHistoryModal = ref<InstanceType<typeof AccessHistoryModal>>()
 const banHistoryModal = ref<InstanceType<typeof BanHistoryModal>>()
@@ -191,11 +219,20 @@ const pbhPlusActivited = computed(() =>
   endpointStore.plusStatus?.enabledFeatures?.includes('basic')
 )
 
+const sorterChange = (dataIndex: string, direction: string) => {
+  handleSorterChange(dataIndex, direction as 'ascend' | 'descend' | '')
+  forceLoading.value = true
+  run({
+    page: current.value,
+    pageSize: pageSize.value,
+    sorter: sorterParam.value
+  })
+}
+
 const handleSearch = debounce((value: string) => {
   changeCurrent(1)
-  run({ page: 1, pageSize: pageSize.value, keyword: value })
+  run({ page: 1, pageSize: pageSize.value, keyword: value, sorter: sorterParam.value })
 }, 300)
-const endpointStore = useEndpointStore()
 </script>
 <style scoped>
 .edit-btn {

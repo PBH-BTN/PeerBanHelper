@@ -87,17 +87,24 @@
 </template>
 <script setup lang="ts">
 import queryIpLink from '@/components/queryIpLink.vue'
-import { getBanlogs } from '@/service/banLogs'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import { useEndpointStore } from '@/stores/endpoint'
-import { formatFileSize } from '@/utils/file'
-import { formatIPAddressPort } from '@/utils/string'
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { usePagination } from 'vue-request'
+import {useSorter} from '@/composables/useSorter'
+import {getBanlogs} from '@/service/banLogs'
+import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
+import {useEndpointStore} from '@/stores/endpoint'
+import {formatFileSize} from '@/utils/file'
+import {formatIPAddressPort} from '@/utils/string'
+import {computed, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {usePagination} from 'vue-request'
+
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
+
+// 使用可复用的排序功能
+// Use reusable sorting feature
+const { sorterParam, handleSorterChange } = useSorter({ multiSort: true, maxSortColumns: 3 })
+
 const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh, run } =
   usePagination(
     getBanlogs,
@@ -114,7 +121,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
         totalKey: 'data.total'
       },
       cacheKey: (params) =>
-        `${endpointState.endpoint}-banlogs-${params?.[0].page || 1}-${params?.[0].pageSize || 10}`,
+        `${endpointState.endpoint}-banlogs-${params?.[0].page || 1}-${params?.[0].pageSize || 10}-${params?.[0].sorter || 'default'}`,
       onAfter: () => {
         forceLoading.value = false
       }
@@ -141,7 +148,7 @@ const columns = [
     slotName: 'banAt',
     dataIndex: 'banAt',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as const,
       sorter: true
     },
     width: 210
@@ -149,11 +156,21 @@ const columns = [
   {
     title: () => t('page.banlog.banlogTable.column.peerAddress'),
     slotName: 'peerAddress',
+    dataIndex: 'peerIp',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 230
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerId'),
     slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 120
   },
   {
@@ -161,7 +178,7 @@ const columns = [
     slotName: 'peerStatus',
     dataIndex: 'peerUploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as const,
       sorter: true
     },
     width: 150
@@ -171,14 +188,18 @@ const columns = [
     dataIndex: 'torrentName',
     slotName: 'torrentName',
     ellipsis: true,
-    tooltip: true
+    tooltip: true,
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    }
   },
   {
     title: () => t('page.banlog.banlogTable.column.torrentSize'),
     slotName: 'torrentSize',
     dataIndex: 'torrentSize',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as const,
       sorter: true
     },
     width: 120
@@ -190,19 +211,17 @@ const columns = [
     tooltip: true
   }
 ]
+
 const list = computed(() => data.value?.data.results)
+
 const sorterChange = (dataIndex: string, direction: string) => {
-  if (!direction)
-    run({
-      page: current.value,
-      pageSize: pageSize.value
-    })
-  else
-    run({
-      page: current.value,
-      pageSize: pageSize.value,
-      sorter: `${dataIndex}|${direction}`
-    })
+  handleSorterChange(dataIndex, direction as 'ascend' | 'descend' | '')
+  forceLoading.value = true
+  run({
+    page: current.value,
+    pageSize: pageSize.value,
+    sorter: sorterParam.value
+  })
 }
 </script>
 

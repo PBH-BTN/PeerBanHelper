@@ -17,6 +17,7 @@
     size="medium"
     :bordered="false"
     class="banlog-table"
+    @sorter-change="sorterChange"
     @page-change="changeCurrent"
     @page-size-change="changePageSize"
   >
@@ -106,16 +107,21 @@
   </a-empty>
 </template>
 <script lang="ts" setup>
-import { GetIPAccessHistoryList } from '@/service/data'
-import { useEndpointStore } from '@/stores/endpoint'
-import { getColor } from '@/utils/color'
-import { formatFileSize } from '@/utils/file'
-import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
-import { watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { usePagination } from 'vue-request'
+import {useSorter} from '@/composables/useSorter'
+import {GetIPAccessHistoryList} from '@/service/data'
+import {useEndpointStore} from '@/stores/endpoint'
+import {getColor} from '@/utils/color'
+import {formatFileSize} from '@/utils/file'
+import {IconInfoCircle} from '@arco-design/web-vue/es/icon'
+import {watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {usePagination} from 'vue-request'
+
 const { t, d } = useI18n()
 const endpointState = useEndpointStore()
+// 使用可复用的排序功能
+const { sorterParam, handleSorterChange } = useSorter({ multiSort: true, maxSortColumns: 3 })
+
 
 const { ip } = defineProps<{
   ip: string
@@ -143,7 +149,7 @@ const {
     totalKey: 'data.total'
   },
   cacheKey: (params) =>
-    `${endpointState.endpoint}-ipAccessHistory-${params?.[0].ip}-${params?.[0].page || 1}-${params?.[0].pageSize || 10}`
+    `${endpointState.endpoint}-ipAccessHistory-${params?.[0].ip}-${params?.[0].page || 1}-${params?.[0].pageSize || 10}-${params?.[0].sorter || 'default'}`
 })
 
 const columns = [
@@ -152,36 +158,81 @@ const columns = [
     slotName: 'downloader'
   },
   {
+    title: () => t('page.banlog.banlogTable.column.peerPort'),
+    dataIndex: 'port',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
+    width: 80
+  },
+  {
     title: 'Peer ID',
-    slotName: 'peerId'
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
+    slotName: 'peerId',
+    width: 120
   },
   {
     title: () => t('page.torrentList.accessHistory.column.traffic'),
     slotName: 'traffic',
+    dataIndex: 'uploaded',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 120
   },
   {
     titleSlotName: 'offsetTitle',
     slotName: 'offset',
+    dataIndex: 'uploadedOffset',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 120
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
     slotName: 'flags',
+    dataIndex: 'lastFlags',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 120
   },
   {
     title: () => t('page.torrentList.accessHistory.column.timeseen'),
     slotName: 'time',
+    dataIndex: 'lastTimeSeen',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 260
   },
   {
     title: () => t('page.ipList.accessHistory.column.torrent'),
     dataIndex: 'torrent.name',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     ellipsis: true,
     tooltip: true
   }
 ]
+
+const sorterChange = (dataIndex: string, direction: string) => {
+  handleSorterChange(dataIndex, direction as 'ascend' | 'descend' | '')
+  run({ ip, page: current.value, pageSize: pageSize.value, sorter: sorterParam.value })
+}
+
 watch(
   () => ip,
   (newIp) => {

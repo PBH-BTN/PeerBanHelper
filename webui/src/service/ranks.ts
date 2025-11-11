@@ -1,13 +1,14 @@
-import type { rankItem } from '@/api/model/topban'
-import { useEndpointStore } from '@/stores/endpoint'
+import type {rankItem} from '@/api/model/topban'
+import {useEndpointStore} from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
-import type { CommonResponseWithPage } from '@/api/model/common'
+import {appendSorterToUrl, getCommonHeader} from './utils'
+import type {CommonResponseWithPage} from '@/api/model/common'
 
 export async function getRanks(params: {
   page: number
   pageSize?: number
   filter?: string
+  sorter?: string
 }): Promise<CommonResponseWithPage<rankItem[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -19,6 +20,9 @@ export async function getRanks(params: {
   }
   if (params.filter) {
     url.searchParams.set('filter', params.filter)
+  }
+  if (params.sorter) {
+    appendSorterToUrl(url, params.sorter)
   }
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)

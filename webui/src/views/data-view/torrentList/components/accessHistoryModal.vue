@@ -121,18 +121,22 @@
 </template>
 <script lang="ts" setup>
 import queryIpLink from '@/components/queryIpLink.vue'
-import { GetTorrentAccessHistoryList } from '@/service/data'
-import { useEndpointStore } from '@/stores/endpoint'
-import { getColor } from '@/utils/color'
-import { formatFileSize } from '@/utils/file'
-import { Popover, Space } from '@arco-design/web-vue'
-import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
-import { h, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { usePagination } from 'vue-request'
+import {useSorter} from '@/composables/useSorter'
+import {GetTorrentAccessHistoryList} from '@/service/data'
+import {useEndpointStore} from '@/stores/endpoint'
+import {getColor} from '@/utils/color'
+import {formatFileSize} from '@/utils/file'
+import {Popover, Space} from '@arco-design/web-vue'
+import {IconInfoCircle} from '@arco-design/web-vue/es/icon'
+import {h, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {usePagination} from 'vue-request'
 
 const { t, d } = useI18n()
 const endpointState = useEndpointStore()
+
+// 使用可复用的排序功能
+const { sorterParam, handleSorterChange } = useSorter({ multiSort: true, maxSortColumns: 3 })
 
 const visible = ref(false)
 const currentInfoHash = ref('')
@@ -162,7 +166,7 @@ const {
   },
   manual: true,
   cacheKey: (params) =>
-    `${endpointState.endpoint}-torrentAccessHistory-${params?.[0].infoHash}-${params?.[0].page || 1}-${params?.[0].pageSize || 10}`
+    `${endpointState.endpoint}-torrentAccessHistory-${params?.[0].infoHash}-${params?.[0].page || 1}-${params?.[0].pageSize || 10}-${params?.[0].sorter || 'default'}`
 })
 
 const columns = [
@@ -172,18 +176,28 @@ const columns = [
   },
   {
     title: () => t('page.torrentList.accessHistory.column.address'),
-    slotName: 'address'
+    slotName: 'address',
+    dataIndex: 'address',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    }
   },
   {
     title: 'Peer ID',
-    slotName: 'peerId'
+    slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    }
   },
   {
     title: () => t('page.torrentList.accessHistory.column.traffic'),
     slotName: 'traffic',
     dataIndex: 'uploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as const,
       sorter: true
     }
   },
@@ -199,13 +213,31 @@ const columns = [
           () => h(IconInfoCircle)
         )
       ]),
-    slotName: 'offset'
+    slotName: 'offset',
+    dataIndex: 'uploadedOffset',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    }
   },
   {
     title: 'Flags',
-    slotName: 'flags'
+    slotName: 'flags',
+    dataIndex: 'lastFlags',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    }
   },
-  { title: () => t('page.torrentList.accessHistory.column.timeseen'), slotName: 'time' }
+  {
+    title: () => t('page.torrentList.accessHistory.column.timeseen'),
+    slotName: 'time',
+    dataIndex: 'lastTimeSeen',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    }
+  }
 ]
 const parseFlags = (flags: string) =>
   flags
@@ -213,19 +245,13 @@ const parseFlags = (flags: string) =>
     .map((flag) => flag + ' - ' + t('page.dashboard.peerList.column.flags.' + flag.trim()))
 
 const sorterChange = (dataIndex: string, direction: string) => {
-  if (!direction)
-    runAsync({
-      page: current.value,
-      pageSize: pageSize.value,
-      infoHash: currentInfoHash.value
-    })
-  else
-    runAsync({
-      page: current.value,
-      pageSize: pageSize.value,
-      infoHash: currentInfoHash.value,
-      sorter: `${dataIndex}|${direction}`
-    })
+  handleSorterChange(dataIndex, direction as 'ascend' | 'descend' | '')
+  runAsync({
+    page: current.value,
+    pageSize: pageSize.value,
+    infoHash: currentInfoHash.value,
+    sorter: sorterParam.value
+  })
 }
 </script>
 <style scoped>

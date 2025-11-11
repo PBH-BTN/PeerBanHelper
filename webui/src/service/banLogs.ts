@@ -1,8 +1,8 @@
-import type { BanLog } from '@/api/model/banlogs'
-import type { CommonResponseWithPage } from '@/api/model/common'
-import { useEndpointStore } from '@/stores/endpoint'
+import type {BanLog} from '@/api/model/banlogs'
+import type {CommonResponseWithPage} from '@/api/model/common'
+import {useEndpointStore} from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
+import {appendSorterToUrl, getCommonHeader} from './utils'
 
 export async function getBanlogs(params: {
   page: number
@@ -18,7 +18,7 @@ export async function getBanlogs(params: {
     url.searchParams.set('pageSize', String(params.pageSize))
   }
   if (params.sorter) {
-    url.searchParams.set('orderBy', params.sorter)
+    appendSorterToUrl(url, params.sorter)
   }
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {

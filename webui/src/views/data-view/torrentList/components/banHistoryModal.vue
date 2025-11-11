@@ -87,17 +87,22 @@
 </template>
 <script setup lang="ts">
 import queryIpLink from '@/components/queryIpLink.vue'
-import { GetTorrentBanHistoryList } from '@/service/data'
-import { useEndpointStore } from '@/stores/endpoint'
-import { formatFileSize } from '@/utils/file'
-import { formatIPAddressPort } from '@/utils/string'
-import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {useSorter} from '@/composables/useSorter'
+import {GetTorrentBanHistoryList} from '@/service/data'
+import {useEndpointStore} from '@/stores/endpoint'
+import {formatFileSize} from '@/utils/file'
+import {formatIPAddressPort} from '@/utils/string'
+import {computed, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 
-import { usePagination } from 'vue-request'
+import {usePagination} from 'vue-request'
 
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
+
+// 使用可复用的排序功能
+const { sorterParam, handleSorterChange } = useSorter({ multiSort: true, maxSortColumns: 3 })
+
 const visible = ref(false)
 const name = ref('')
 const currentInfoHash = ref('')
@@ -120,7 +125,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
       totalKey: 'data.total'
     },
     cacheKey: (params) =>
-      `${endpointState.endpoint}-torrentBanHistory-${params?.[0].infoHash}-${params?.[0].page || 1}-${params?.[0].pageSize || 10}`
+      `${endpointState.endpoint}-torrentBanHistory-${params?.[0].infoHash}-${params?.[0].page || 1}-${params?.[0].pageSize || 10}-${params?.[0].sorter || 'default'}`
   })
 
 const columns = [
@@ -130,16 +135,31 @@ const columns = [
       '/' +
       t('page.banlog.banlogTable.column.unbanTime'),
     slotName: 'banAt',
+    dataIndex: 'banAt',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 210
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerAddress'),
     slotName: 'peerAddress',
+    dataIndex: 'peerIp',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 200
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerId'),
     slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as const,
+      sorter: true
+    },
     width: 120
   },
   {
@@ -147,7 +167,7 @@ const columns = [
     slotName: 'peerStatus',
     dataIndex: 'peerUploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as const,
       sorter: true
     },
     width: 150
@@ -159,20 +179,15 @@ const columns = [
     tooltip: true
   }
 ]
+
 const sorterChange = (dataIndex: string, direction: string) => {
-  if (!direction)
-    runAsync({
-      page: current.value,
-      pageSize: pageSize.value,
-      infoHash: currentInfoHash.value
-    })
-  else
-    runAsync({
-      page: current.value,
-      pageSize: pageSize.value,
-      infoHash: currentInfoHash.value,
-      sorter: `${dataIndex}|${direction}`
-    })
+  handleSorterChange(dataIndex, direction as 'ascend' | 'descend' | '')
+  runAsync({
+    page: current.value,
+    pageSize: pageSize.value,
+    infoHash: currentInfoHash.value,
+    sorter: sorterParam.value
+  })
 }
 const list = computed(() => data.value?.data.results)
 </script>
