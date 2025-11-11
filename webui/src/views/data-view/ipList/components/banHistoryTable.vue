@@ -72,7 +72,7 @@ import { useSorter } from '@/composables/useSorter'
 import { GetIPBanHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
-import { computed, watch } from 'vue'
+import { computed, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 
@@ -82,14 +82,15 @@ const { t, d } = useI18n()
 // 使用可复用的排序功能
 const { sorterParam, handleSorterChange } = useSorter({ multiSort: true, maxSortColumns: 3 })
 
-const { ip } = defineProps<{
+const props = defineProps<{
   ip: string
 }>()
+const ipRef = toRef(props, 'ip')
 const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh, run } =
   usePagination(GetIPBanHistoryList, {
     defaultParams: [
       {
-        ip: ip,
+        ip: ipRef.value,
         page: 1,
         pageSize: 10
       }
@@ -105,7 +106,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
 
 watch(() => endpointState.endpoint, refresh)
 watch(
-  () => ip,
+  ipRef,
   (newIp) => {
     if (newIp) {
       run({ ip: newIp, page: 1, pageSize: 10 })
@@ -188,7 +189,7 @@ const list = computed(() => data.value?.data.results)
 
 const sorterChange = (dataIndex: string, direction: string) => {
   handleSorterChange(dataIndex, direction as 'ascend' | 'descend' | '')
-  run({ ip, page: current.value, pageSize: pageSize.value, sorter: sorterParam.value })
+  run({ ip: ipRef.value, page: current.value, pageSize: pageSize.value, sorter: sorterParam.value })
 }
 </script>
 
