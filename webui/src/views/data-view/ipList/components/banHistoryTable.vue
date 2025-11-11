@@ -67,7 +67,6 @@
     </template>
   </a-table>
 </template>
-import { useSorter } from '@/composables/useSorter'
 <script setup lang="ts">
 import { useSorter } from '@/composables/useSorter'
 import { GetIPBanHistoryList } from '@/service/data'
