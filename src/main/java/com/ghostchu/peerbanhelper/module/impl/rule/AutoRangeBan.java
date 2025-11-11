@@ -122,11 +122,11 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             String addressType = "UNKNOWN";
             if (bannedAddr.isIPv4()) {
                 addressType = "IPv4/" + ipv4Prefix;
-                bannedAddr = IPAddressUtil.toPrefixBlock(bannedAddr, ipv4Prefix);
+                bannedAddr = IPAddressUtil.toPrefixBlockAndZeroHost(bannedAddr, ipv4Prefix);
             }
             if (bannedAddr.isIPv6()) {
                 addressType = "IPv6/" + ipv6Prefix;
-                bannedAddr = IPAddressUtil.toPrefixBlock(bannedAddr, ipv6Prefix);
+                bannedAddr = IPAddressUtil.toPrefixBlockAndZeroHost(bannedAddr, ipv6Prefix);
             }
             if (bannedAddr.contains(finalPeerAddress)) {
                 reference.set(new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, finalPeerAddress.toString(),
