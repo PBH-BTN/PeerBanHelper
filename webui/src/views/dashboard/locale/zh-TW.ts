@@ -27,6 +27,7 @@ export default {
   'page.dashboard.statics.currentBanIps': '正處於封禁的 IP 數量',
   'page.dashboard.statics.peerBlockRate': '惡意:正常 連接比例',
   'page.dashboard.statics.trackingPeers': '追蹤中的 Peers',
+  'page.dashboard.statics.weeklySessions': '近7天會話唯一IP數量',
   'page.dashboard.statics.number': '個',
   'page.dashboard.statics.percentage': '%',
   'page.dashboard.torrentList.title': '活動種子',

@@ -9,6 +9,7 @@ export interface Statistic {
   wastedTraffic: number
   trackedSwarmCount: number
   peersBlockRate: number
+  weeklySessions: number
 }
 
 export interface AnalysisField {

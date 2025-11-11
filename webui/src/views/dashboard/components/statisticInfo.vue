@@ -84,6 +84,19 @@
             </template>
           </a-statistic>
         </a-grid-item>
+        <a-grid-item class="panel-col" :span="{ xs: 12, sm: 12, md: 6 }">
+          <a-statistic
+              :title="t('page.dashboard.statics.weeklySessions')"
+              :value="current?.weeklySessions"
+              :value-from="previous.weeklySessions"
+              animation
+              show-group-separator
+          >
+            <template #suffix>
+              <a-typography-text>{{ t('page.dashboard.statics.number') }} </a-typography-text>
+            </template>
+          </a-statistic>
+        </a-grid-item>
       </a-grid>
     </a-card>
   </a-space>
@@ -107,7 +120,8 @@ const previous = ref<Statistic>({
   bannedIpCounter: 0,
   trackedSwarmCount: 0,
   peersBlockRate: 0,
-  wastedTraffic: 0
+  wastedTraffic: 0,
+  weeklySessions: 0
 })
 const current = ref<Statistic>(previous.value)
 const { refresh } = useRequest(

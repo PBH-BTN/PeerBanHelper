@@ -27,6 +27,7 @@ export default {
   'page.dashboard.statics.currentBanIps': '正处于封禁的IP数量',
   'page.dashboard.statics.peerBlockRate': '恶意:正常 连接比例',
   'page.dashboard.statics.trackingPeers': 'Peer 会话跟踪数量',
+  'page.dashboard.statics.weeklySessions': '近7天会话唯一IP数量',
   'page.dashboard.statics.number': '个',
   'page.dashboard.statics.percentage': '%',
   'page.dashboard.torrentList.title': '活动种子',
