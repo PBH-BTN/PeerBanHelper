@@ -29,5 +29,6 @@ public final class Peers {
     private Long rateToPeer;
     private Long bytes_to_client;
     private Long bytes_to_peer;
+    private String peer_id;
 
 }

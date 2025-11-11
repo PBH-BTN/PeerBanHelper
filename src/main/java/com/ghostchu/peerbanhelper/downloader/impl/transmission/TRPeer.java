@@ -25,7 +25,7 @@ public final class TRPeer implements Peer {
 
     @Override
     public String getPeerId() {
-        return "";
+        return backend.getPeer_id() == null ? "" : backend.getPeer_id();
     }
 
     @Override
