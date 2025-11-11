@@ -40,13 +40,13 @@ public final class PCBRangeDao extends AbstractPBHDao<PCBRangeEntity, Long> {
                 .queryForFirst();
     }
 
-    public int deleteEntry(@NotNull String torrentId, @NotNull String ip) throws SQLException {
+    public int deleteEntry(@NotNull String torrentId, @NotNull String range) throws SQLException {
         var deleteBuilder = deleteBuilder();
         var where = deleteBuilder
                 .where()
                 .eq("torrentId", new SelectArg(torrentId))
                 .and()
-                .eq("range", new SelectArg(ip));
+                .eq("range", new SelectArg(range));
         deleteBuilder.setWhere(where);
         return deleteBuilder.delete();
     }
