@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PCBRangeDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -12,13 +12,13 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "pcb_persist_records", daoClass = ProgressCheatBlockerPersistDao.class)
-public final class ProgressCheatBlockerPersistEntity {
+@DatabaseTable(tableName = "pcb_range", daoClass = PCBRangeDao.class)
+public final class PCBRangeEntity {
     @DatabaseField(generatedId = true)
     private Long id;
-    @DatabaseField(canBeNull = false, uniqueCombo = true, indexName = "pcb_persist_address_torrentid")
-    private String address;
-    @DatabaseField(canBeNull = false, uniqueCombo = true, indexName = "pcb_persist_address_torrentid")
+    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
+    private String range;
+    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
     private String torrentId;
     @DatabaseField(canBeNull = false)
     private double lastReportProgress;
@@ -34,12 +34,12 @@ public final class ProgressCheatBlockerPersistEntity {
     private Timestamp firstTimeSeen;
     @DatabaseField(canBeNull = false, index = true)
     private Timestamp lastTimeSeen;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
     private String downloader;
     @DatabaseField(canBeNull = false)
     private Timestamp banDelayWindowEndAt;
     @DatabaseField(canBeNull = false)
     private long fastPcbTestExecuteAt;
     @DatabaseField(canBeNull = false)
-    private long lastLastTorrentCompletedProgress;
+    private long lastTorrentCompletedSize;
 }

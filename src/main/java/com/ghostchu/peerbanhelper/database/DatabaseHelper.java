@@ -43,7 +43,8 @@ public final class DatabaseHelper {
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), PCBAddressEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), PCBRangeEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrackedSwarmEntity.class, true);
@@ -64,18 +65,15 @@ public final class DatabaseHelper {
             v = 3;
         }
         if (v == 3) {
-            TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
-            TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            // dropped
             v = 4;
         }
         if (v == 4) {
-            TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
-            TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            // dropped
             v = 5;
         }
         if (v == 5) {
-            TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
-            TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            // dropped
             v = 6;
         }
         if (v == 6) {
@@ -132,11 +130,6 @@ public final class DatabaseHelper {
                     var downloaderName = historyEntity.getDownloader();
                     historyEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
                 }));
-                var progressCheatBlockerPersistDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
-                recordBatchUpdate("DownloaderName Converting (ProgressCheatBlockerPersist)", progressCheatBlockerPersistDao, (progressCheatBlockerPersistEntity -> {
-                    var downloaderName = progressCheatBlockerPersistEntity.getDownloader();
-                    progressCheatBlockerPersistEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
-                }));
                 var trafficJournalDao = DaoManager.createDao(getDataSource(), TrafficJournalEntity.class);
                 recordBatchUpdate("DownloaderName Converting (TrafficJournal)", trafficJournalDao, (trafficJournalEntity -> {
                     var downloaderName = trafficJournalEntity.getDownloader();
@@ -149,17 +142,7 @@ public final class DatabaseHelper {
             v = 16;
         }
         if (v == 16) {
-            try {
-                var pcbDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
-                database.getDataSource().getReadWriteConnection(pcbDao.getTableName()).executeStatement("ALTER TABLE " + pcbDao.getTableName() + " ADD COLUMN lastLastTorrentCompletedProgress BIGINT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
-                var peerRecordDao = DaoManager.createDao(getDataSource(), PeerRecordEntity.class);
-                recordBatchUpdate("DownloaderName Converting (PeerRecord)", peerRecordDao, (peerRecordEntity -> {
-                    var downloaderName = peerRecordEntity.getDownloader();
-                    peerRecordEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
-                }));
-            } catch (Exception err) {
-                log.error("Unable to upgrade database schema", err);
-            }
+            // dropped
             v = 17;
         }
         if (v <= 18) {
@@ -179,7 +162,6 @@ public final class DatabaseHelper {
 
     private <T> void recordBatchUpdate(String processName, Dao<T, ?> dao, Consumer<T> consumer) throws Exception {
         long total = dao.countOf();
-
         dao.callBatchTasks(() -> {
             long processing = 0;
             for (T entity : dao.getWrappedIterable()) {

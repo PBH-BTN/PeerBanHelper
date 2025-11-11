@@ -65,7 +65,7 @@ public final class IPAddressUtil {
     }
 
     @NotNull
-    public static IPAddress toPrefixBlock(IPAddress ipAddress, int length) {
+    public static IPAddress toPrefixBlockAndZeroHost(IPAddress ipAddress, int length) {
         return ipAddress.withoutPrefixLength().toPrefixBlock(length).toZeroHost();
     }
 

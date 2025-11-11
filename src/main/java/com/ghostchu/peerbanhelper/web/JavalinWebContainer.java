@@ -281,9 +281,9 @@ public final class JavalinWebContainer {
             ipAddr = ipAddr.toIPv4();
         }
         if (ipAddr.isIPv4()) {
-            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 24);
+            ipAddr = IPAddressUtil.toPrefixBlockAndZeroHost(ipAddr, 24);
         } else {
-            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 50);
+            ipAddr = IPAddressUtil.toPrefixBlockAndZeroHost(ipAddr, 50);
         }
         return ipAddr;
     }
