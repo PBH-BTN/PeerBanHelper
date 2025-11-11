@@ -74,9 +74,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
     private double fastPcbTestPercentage;
-    @Autowired
-    private PCBRangeDao pCBRangeDao;
-
     @Override
     public @NotNull String getName() {
         return "Progress Cheat Blocker";
@@ -422,7 +419,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         CacheKey cacheKey = new CacheKey(downloader, torrentId, peerAddressPrefix, peerAddressIp);
         try {
             return cache.get(cacheKey, () -> {
-                PCBRangeEntity rangeEntity = pCBRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
+                PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
                 PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, downloader);
                 if (rangeEntity == null) {
                     rangeEntity = pcbRangeDao.createIfNotExists(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
