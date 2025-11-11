@@ -29,14 +29,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import {
-  type MonacoEditor,
-  VueMonacoEditor,
-  type VueMonacoEditorEmitsOptions,
-  loader
-} from '@guolao/vue-monaco-editor'
-import { shallowRef } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {loader, type MonacoEditor, VueMonacoEditor, type VueMonacoEditorEmitsOptions} from '@guolao/vue-monaco-editor'
+import {shallowRef} from 'vue'
+import {useI18n} from 'vue-i18n'
 import GrammarParser from './aviatorscript/grammar/GrammarParser'
 import monarch from './aviatorscript/monarch'
 import getSuggestion from './aviatorscript/suggestions'

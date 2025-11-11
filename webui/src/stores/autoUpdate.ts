@@ -1,7 +1,8 @@
-import { useStorage } from '@vueuse/core'
-import { defineStore } from 'pinia'
-import { onUnmounted, readonly, ref, watch } from 'vue'
-import { type PluginImplementType } from 'vue-request'
+import {useStorage} from '@vueuse/core'
+import {defineStore} from 'pinia'
+import {onUnmounted, readonly, ref, watch} from 'vue'
+import {type PluginImplementType} from 'vue-request'
+
 type MapValue<T> = T extends Map<unknown, infer V> ? V : never
 type status = 'idle' | 'loading'
 class AutoUpdateMessageChannel extends MessageChannel {

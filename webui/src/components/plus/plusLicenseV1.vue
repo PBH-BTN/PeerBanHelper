@@ -84,8 +84,8 @@
   </a-split>
 </template>
 <script lang="ts" setup>
-import { LicenseStatus, LicenseType, type LicenseV1 } from '@/api/model/plus'
-import { useI18n } from 'vue-i18n'
+import {LicenseStatus, LicenseType, type LicenseV1} from '@/api/model/plus'
+import {useI18n} from 'vue-i18n'
 import medal from './plusMedal.vue'
 
 const { t, d } = useI18n()

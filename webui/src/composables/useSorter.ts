@@ -50,9 +50,7 @@ export function useSorter(options: SorterOptions = {}) {
     if (sortStates.value.length === 0) {
       return undefined
     }
-    return sortStates.value
-      .map((state) => `${state.dataIndex}|${state.direction}`)
-      .join('&')
+    return sortStates.value.map((state) => `${state.dataIndex}|${state.direction}`).join('&')
   })
 
   /**
@@ -133,4 +131,3 @@ export function useSorter(options: SorterOptions = {}) {
     getSortPriority
   }
 }
-

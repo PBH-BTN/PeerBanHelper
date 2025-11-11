@@ -54,11 +54,12 @@
 </template>
 <script setup lang="ts">
 import queryIpLink from '@/components/queryIpLink.vue'
-import { getRanks } from '@/service/ranks'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import type { TableColumnData } from '@arco-design/web-vue'
-import { useI18n } from 'vue-i18n'
-import { usePagination } from 'vue-request'
+import {getRanks} from '@/service/ranks'
+import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
+import type {TableColumnData} from '@arco-design/web-vue'
+import {useI18n} from 'vue-i18n'
+import {usePagination} from 'vue-request'
+
 const { t } = useI18n()
 const columns: TableColumnData[] = [
   {

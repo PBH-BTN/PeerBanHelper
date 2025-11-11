@@ -122,7 +122,6 @@ const endpointState = useEndpointStore()
 // 使用可复用的排序功能
 const { sorterParam, handleSorterChange } = useSorter({ multiSort: true, maxSortColumns: 3 })
 
-
 const { ip } = defineProps<{
   ip: string
 }>()

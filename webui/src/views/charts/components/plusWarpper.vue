@@ -18,9 +18,10 @@
   </a-card>
 </template>
 <script setup lang="ts">
-import { useEndpointStore } from '@/stores/endpoint'
-import { defineAsyncComponent } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {useEndpointStore} from '@/stores/endpoint'
+import {defineAsyncComponent} from 'vue'
+import {useI18n} from 'vue-i18n'
+
 const dummyChart = defineAsyncComponent(() => import('./dummyChart.vue'))
 const { t } = useI18n()
 const endpointStore = useEndpointStore()

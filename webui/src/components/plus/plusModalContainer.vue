@@ -133,15 +133,16 @@
   </a-modal>
 </template>
 <script lang="ts" setup>
-import { deletePHBPlusKey } from '@/service/plus'
-import { useEndpointStore } from '@/stores/endpoint'
-import { Message } from '@arco-design/web-vue'
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {deletePHBPlusKey} from '@/service/plus'
+import {useEndpointStore} from '@/stores/endpoint'
+import {Message} from '@arco-design/web-vue'
+import {ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import mbd from './mbdBadge.vue'
 import LicenseV1 from './plusLicenseV1.vue'
 import LicenseV2 from './plusLicenseV2.vue'
 import tryModal from './plusTryModal.vue'
+
 const endpointStore = useEndpointStore()
 
 const { t } = useI18n()

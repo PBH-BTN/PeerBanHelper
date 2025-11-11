@@ -494,29 +494,24 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import { OSType, type RunningInfo } from '@/api/model/status'
-import { genIconComponent } from '@/components/iconFont'
+import {OSType, type RunningInfo} from '@/api/model/status'
+import {genIconComponent} from '@/components/iconFont'
 import multiClick from '@/components/multiClick.vue'
-import {
-  CheckModuleEnable,
-  GetBtnStatus,
-  GetHeapDumpFile,
-  GetRunningInfo
-} from '@/service/settings'
-import { useEndpointStore } from '@/stores/endpoint'
-import { getColor } from '@/utils/color'
-import { formatFileSize } from '@/utils/file'
-import { compare } from 'compare-versions'
+import {CheckModuleEnable, GetBtnStatus, GetHeapDumpFile, GetRunningInfo} from '@/service/settings'
+import {useEndpointStore} from '@/stores/endpoint'
+import {getColor} from '@/utils/color'
+import {formatFileSize} from '@/utils/file'
+import {compare} from 'compare-versions'
 import dayjs from 'dayjs'
 import Duration from 'dayjs/plugin/duration'
 import RelativeTime from 'dayjs/plugin/relativeTime'
-import { isInSubnet } from 'is-in-subnet'
-import { isIP } from 'is-ip'
-import { computed, defineAsyncComponent, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRequest } from 'vue-request'
+import {isInSubnet} from 'is-in-subnet'
+import {isIP} from 'is-ip'
+import {computed, defineAsyncComponent, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {useRequest} from 'vue-request'
 
-import { Message } from '@arco-design/web-vue'
+import {Message} from '@arco-design/web-vue'
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
 
 dayjs.extend(RelativeTime)
