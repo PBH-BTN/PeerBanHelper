@@ -73,6 +73,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
     private double fastPcbTestPercentage;
+
     @Override
     public @NotNull String getName() {
         return "Progress Cheat Blocker";
@@ -323,6 +324,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             if (rewind > rewindMaximumDifference && isUploadingToPeer(peer)) { // 进度回退且在上传
                 if (rangeEntity.getBanDelayWindowEndAt().getTime() <= 0 || addressEntity.getBanDelayWindowEndAt().getTime() <= 0) {
                     rangeEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration)); // 计划延迟封禁
+                    addressEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration)); // 计划延迟封禁
                     return null;
                 }
 
