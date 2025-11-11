@@ -298,18 +298,25 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         double difference = Math.abs(computedProgress - clientReportedProgress);
         structuredData.add("difference", difference);
         if (difference > maximumDifference && !fileTooSmall(torrentSize) && isUploadingToPeer(peer)) {
-            rangeEntity.setProgressDifferenceCounter(rangeEntity.getProgressDifferenceCounter() + 1);
-            addressEntity.setProgressDifferenceCounter(addressEntity.getProgressDifferenceCounter() + 1);
-            resetBanDelayWindow(rangeEntity, addressEntity);
-            return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
-                    new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS,
-                            percent(clientReportedProgress),
-                            percent(computedProgress),
-                            percent(difference)),
-                    structuredData.add("type", "deSyncDifference"));
+            if (!isBanDelayWindowScheduled(rangeEntity, addressEntity)) {
+                scheduleBanDelayWindow(rangeEntity, addressEntity);
+                return null;
+            }
+            if (isBanDelayWindowExpired(rangeEntity, addressEntity)) {
+                rangeEntity.setProgressDifferenceCounter(rangeEntity.getProgressDifferenceCounter() + 1);
+                addressEntity.setProgressDifferenceCounter(addressEntity.getProgressDifferenceCounter() + 1);
+                resetBanDelayWindow(rangeEntity, addressEntity);
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
+                        new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS,
+                                percent(clientReportedProgress),
+                                percent(computedProgress),
+                                percent(difference)),
+                        structuredData.add("type", "deSyncDifference"));
+            }
         }
         return null;
     }
+
 
     private @Nullable CheckResult progressRewind(@NotNull Peer peer, @NotNull StructuredData<String, Object> structuredData, @NotNull PCBRangeEntity rangeEntity, @NotNull PCBAddressEntity addressEntity, double clientReportedProgress, double computedProgress, long torrentSize) {
         if (rewindMaximumDifference > 0 && !fileTooSmall(torrentSize)) {
@@ -322,36 +329,27 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             structuredData.add("rewindMaximumDifference", rewindMaximumDifference);
             // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
             if (rewind > rewindMaximumDifference && isUploadingToPeer(peer)) { // 进度回退且在上传
-                if (rangeEntity.getBanDelayWindowEndAt().getTime() <= 0 || addressEntity.getBanDelayWindowEndAt().getTime() <= 0) {
-                    rangeEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration)); // 计划延迟封禁
-                    addressEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration)); // 计划延迟封禁
+                if (!isBanDelayWindowScheduled(rangeEntity, addressEntity)) {
+                    scheduleBanDelayWindow(rangeEntity, addressEntity);
                     return null;
                 }
-
-                if (rangeEntity.getBanDelayWindowEndAt().before(new Timestamp(System.currentTimeMillis())) || peer.getProgress() > 0.0d) { // 满足等待时间或者 Peer 进度大于 0% (Peer 已更新 BIT_FIELD)
-                    addressEntity.setRewindCounter(addressEntity.getRewindCounter() + 1);
-                    rangeEntity.setRewindCounter(rangeEntity.getRewindCounter() + 1);
-                    resetBanDelayWindow(rangeEntity, addressEntity);
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
-                            new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
-                                    percent(clientReportedProgress),
-                                    percent(computedProgress),
-                                    percent(lastReportProgress),
-                                    percent(rewind),
-                                    percent(rewindMaximumDifference)), structuredData.add("type", "rewindProgress"));
+                if (isBanDelayWindowExpired(rangeEntity, addressEntity)) {
+                    if (peer.getProgress() > 0.0d) { // 满足等待时间或者 Peer 进度大于 0% (Peer 已更新 BIT_FIELD)
+                        addressEntity.setRewindCounter(addressEntity.getRewindCounter() + 1);
+                        rangeEntity.setRewindCounter(rangeEntity.getRewindCounter() + 1);
+                        resetBanDelayWindow(rangeEntity, addressEntity);
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                                new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
+                                        percent(clientReportedProgress),
+                                        percent(computedProgress),
+                                        percent(lastReportProgress),
+                                        percent(rewind),
+                                        percent(rewindMaximumDifference)), structuredData.add("type", "rewindProgress"));
+                    }
                 }
             }
         }
         return null;
-    }
-
-    private void resetBanDelayWindow(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
-        if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() > 0) {
-            rangeEntity.setBanDelayWindowEndAt(new Timestamp(0));
-        }
-        if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() > 0) {
-            addressEntity.setBanDelayWindowEndAt(new Timestamp(0));
-        }
     }
 
     private @Nullable CheckResult excessiveClient(long computedUploaded, long torrentSize, StructuredData<String, Object> structuredData, PCBRangeEntity rangeEntity, PCBAddressEntity addressEntity, long completedSize, long computedCompletedSize) {
@@ -405,6 +403,33 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             }
         }
         return null;
+    }
+
+    private void scheduleBanDelayWindow(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
+        if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() <= 0) {
+            rangeEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration));
+        }
+        if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() <= 0) {
+            addressEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration));
+        }
+    }
+
+    private boolean isBanDelayWindowScheduled(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
+        return rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() > 0 || addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() > 0;
+    }
+
+    private boolean isBanDelayWindowExpired(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
+        return (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() > 0 && rangeEntity.getBanDelayWindowEndAt().before(new Timestamp(System.currentTimeMillis())))
+                || (addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() > 0 && addressEntity.getBanDelayWindowEndAt().before(new Timestamp(System.currentTimeMillis())));
+    }
+
+    private void resetBanDelayWindow(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
+        if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() > 0) {
+            rangeEntity.setBanDelayWindowEndAt(new Timestamp(0));
+        }
+        if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() > 0) {
+            addressEntity.setBanDelayWindowEndAt(new Timestamp(0));
+        }
     }
 
     private boolean isUploadingToPeer(Peer peer) {
