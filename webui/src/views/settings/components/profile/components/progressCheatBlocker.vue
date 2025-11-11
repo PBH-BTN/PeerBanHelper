@@ -112,18 +112,6 @@
       </template>
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.progressCheatBlocker.enablePersist')"
-      field="model.enable_persist"
-    >
-      <a-switch v-model="model.enable_persist"></a-switch>
-      <template v-if="model.enable_persist" #extra>
-        <a-typography-text type="danger">{{
-          t('page.settings.tab.profile.module.progressCheatBlocker.enablePersist.tips')
-        }}</a-typography-text></template
-      >
-    </a-form-item>
-    <a-form-item
-      v-if="model.enable_persist"
       :label="t('page.settings.tab.profile.module.progressCheatBlocker.persistDuration')"
       field="model.persist_duration"
     >
@@ -168,11 +156,11 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import type { ProgressCheatBlocker } from '@/api/model/profile'
-import { formatFileSize } from '@/utils/file'
-import { formatMilliseconds } from '@/utils/time'
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import type {ProgressCheatBlocker} from '@/api/model/profile'
+import {formatFileSize} from '@/utils/file'
+import {formatMilliseconds} from '@/utils/time'
+import {computed} from 'vue'
+import {useI18n} from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<ProgressCheatBlocker>({ required: true })

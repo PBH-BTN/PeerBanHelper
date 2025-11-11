@@ -79,7 +79,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private PCBRangeDao pcbRangeDao;
     @Autowired
     private PCBAddressDao pcbAddressDao;
-    private boolean enablePersist;
     private long persistDuration;
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
@@ -179,7 +178,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         this.rewindMaximumDifference = getConfig().getDouble("rewind-maximum-difference");
         this.ipv4PrefixLength = getConfig().getInt("ipv4-prefix-length");
         this.ipv6PrefixLength = getConfig().getInt("ipv6-prefix-length");
-        this.enablePersist = getConfig().getBoolean("enable-persist");
         this.persistDuration = getConfig().getLong("persist-duration");
         this.maxWaitDuration = getConfig().getLong("max-wait-duration");
         this.fastPcbTestPercentage = getConfig().getDouble("fast-pcb-test-percentage");
