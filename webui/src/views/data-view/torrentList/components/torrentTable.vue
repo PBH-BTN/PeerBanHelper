@@ -8,7 +8,7 @@
         search-button
         @search="handleSearch"
         @change="handleSearch"
-        @clear="run({ page: current, pageSize: pageSize })"
+        @clear="() => { keyword.value = ''; run({ page: current.value, pageSize: pageSize.value, sorter: sorterParam.value }) }"
       />
     </a-space>
     <a-table
@@ -125,6 +125,7 @@ import BanHistoryModal from './banHistoryModal.vue'
 
 const forceLoading = ref(true)
 const endpointStore = useEndpointStore()
+const keyword = ref('')
 const { t } = useI18n()
 
 // 使用可复用的排序功能
@@ -225,13 +226,15 @@ const sorterChange = (dataIndex: string, direction: string) => {
   run({
     page: current.value,
     pageSize: pageSize.value,
+    keyword: keyword.value,
     sorter: sorterParam.value
   })
 }
 
 const handleSearch = debounce((value: string) => {
+  keyword.value = value
   changeCurrent(1)
-  run({ page: 1, pageSize: pageSize.value, keyword: value, sorter: sorterParam.value })
+  run({ page: 1, pageSize: pageSize.value, keyword: keyword.value, sorter: sorterParam.value })
 }, 300)
 </script>
 <style scoped>
