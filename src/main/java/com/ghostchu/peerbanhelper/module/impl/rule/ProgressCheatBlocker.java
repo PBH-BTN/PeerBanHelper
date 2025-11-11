@@ -41,7 +41,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -447,17 +446,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
 
     record CacheKey(String downloader, String torrentId, String peerAddressPrefix, String peerAddressIp) {
-        @Override
-        public boolean equals(Object object) {
-            if (object == null || getClass() != object.getClass()) return false;
-            CacheKey cacheKey = (CacheKey) object;
-            return Objects.equals(torrentId, cacheKey.torrentId) && Objects.equals(downloader, cacheKey.downloader) && Objects.equals(peerAddressIp, cacheKey.peerAddressIp) && Objects.equals(peerAddressPrefix, cacheKey.peerAddressPrefix);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(downloader, torrentId, peerAddressPrefix, peerAddressIp);
-        }
     }
 }
 
