@@ -40,17 +40,17 @@ public final class TRPeer implements Peer {
 
     @Override
     public long getDownloaded() {
-        return -1; // Unsupported
+        return backend.getBytes_to_client();
     }
 
     @Override
     public long getUploadSpeed() {
-        return backend.getRateToPeer();
+        return backend.getRateToPeer() == null ? -1 : backend.getRateToPeer();
     }
 
     @Override
     public long getUploaded() {
-        return -1; // Unsupported
+        return backend.getBytes_to_peer() == null ? -1 : backend.getBytes_to_peer();
     }
 
     @Override

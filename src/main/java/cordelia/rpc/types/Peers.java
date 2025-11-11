@@ -27,5 +27,7 @@ public final class Peers {
     private Double progress;
     private Long rateToClient;
     private Long rateToPeer;
+    private Long bytes_to_client;
+    private Long bytes_to_peer;
 
 }
