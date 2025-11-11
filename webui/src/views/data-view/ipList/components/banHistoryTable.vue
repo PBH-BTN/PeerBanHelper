@@ -109,7 +109,7 @@ watch(
   ipRef,
   (newIp) => {
     if (newIp) {
-      run({ ip: newIp, page: 1, pageSize: 10 })
+      run({ ip: newIp, page: 1, pageSize: 10, sorter: sorterParam.value })
     }
   },
   { immediate: true }
