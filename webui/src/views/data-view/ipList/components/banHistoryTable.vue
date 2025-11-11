@@ -69,13 +69,13 @@
 </template>
 import { useSorter } from '@/composables/useSorter'
 <script setup lang="ts">
-import {useSorter} from '@/composables/useSorter'
-import {GetIPBanHistoryList} from '@/service/data'
-import {useEndpointStore} from '@/stores/endpoint'
-import {formatFileSize} from '@/utils/file'
-import {computed, watch} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {usePagination} from 'vue-request'
+import { useSorter } from '@/composables/useSorter'
+import { GetIPBanHistoryList } from '@/service/data'
+import { useEndpointStore } from '@/stores/endpoint'
+import { formatFileSize } from '@/utils/file'
+import { computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePagination } from 'vue-request'
 
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
@@ -124,7 +124,7 @@ const columns = [
     slotName: 'banAt',
     dataIndex: 'banAt',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 220
@@ -133,7 +133,7 @@ const columns = [
     title: () => t('page.banlog.banlogTable.column.peerPort'),
     dataIndex: 'peerPort',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 80
@@ -143,7 +143,7 @@ const columns = [
     slotName: 'peerId',
     dataIndex: 'peerId',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 120
@@ -153,7 +153,7 @@ const columns = [
     slotName: 'peerStatus',
     dataIndex: 'peerUploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 150
@@ -162,7 +162,7 @@ const columns = [
     title: () => t('page.banlog.banlogTable.column.torrentName'),
     dataIndex: 'torrentName',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     ellipsis: true,
@@ -173,7 +173,7 @@ const columns = [
     slotName: 'torrentSize',
     dataIndex: 'torrentSize',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 120

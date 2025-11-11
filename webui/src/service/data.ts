@@ -1,9 +1,9 @@
-import type {BanLog} from '@/api/model/banlogs'
-import type {CommonResponse, CommonResponseWithPage} from '@/api/model/common'
-import type {AccessHistory, IPBasicInfo, TorrentInfo} from '@/api/model/data'
-import {useEndpointStore} from '@/stores/endpoint'
+import type { BanLog } from '@/api/model/banlogs'
+import type { CommonResponse, CommonResponseWithPage } from '@/api/model/common'
+import type { AccessHistory, IPBasicInfo, TorrentInfo } from '@/api/model/data'
+import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import {appendSorterToUrl, getCommonHeader} from './utils'
+import { appendSorterToUrl, getCommonHeader } from './utils'
 
 export async function GetTorrentInfoList(params: {
   page: number

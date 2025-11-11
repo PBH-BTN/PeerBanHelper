@@ -6,7 +6,7 @@
  * Based on backend Orderable class design, supports multi-column sorting
  */
 
-import {computed, ref, type Ref} from 'vue'
+import { computed, ref, type Ref } from 'vue'
 
 /**
  * 排序状态接口
@@ -72,7 +72,10 @@ export function useSorter(options: SorterOptions = {}) {
     if (existingIndex >= 0) {
       // 更新现有排序条件
       // Update existing sort condition
-      sortStates.value[existingIndex].direction = direction
+      const existingState = sortStates.value[existingIndex]
+      if (existingState) {
+        existingState.direction = direction
+      }
     } else {
       if (multiSort) {
         // 多条件排序模式：添加新的排序条件

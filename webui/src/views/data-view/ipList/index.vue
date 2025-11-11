@@ -210,14 +210,14 @@
 
 <script setup lang="ts">
 import CountryFlag from '@/components/countryFlag.vue'
-import {GetIPBasicData} from '@/service/data'
-import {useEndpointStore} from '@/stores/endpoint'
-import {getColor} from '@/utils/color'
-import {formatFileSize} from '@/utils/file'
-import {computed, onMounted, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {useRequest} from 'vue-request'
-import {useRoute} from 'vue-router'
+import { GetIPBasicData } from '@/service/data'
+import { useEndpointStore } from '@/stores/endpoint'
+import { getColor } from '@/utils/color'
+import { formatFileSize } from '@/utils/file'
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
+import { useRoute } from 'vue-router'
 import accessHistoryTable from './components/accessHistoryTable.vue'
 import banHistoryTable from './components/banHistoryTable.vue'
 

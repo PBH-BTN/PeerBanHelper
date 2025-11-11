@@ -121,16 +121,16 @@
 </template>
 <script lang="ts" setup>
 import queryIpLink from '@/components/queryIpLink.vue'
-import {useSorter} from '@/composables/useSorter'
-import {GetTorrentAccessHistoryList} from '@/service/data'
-import {useEndpointStore} from '@/stores/endpoint'
-import {getColor} from '@/utils/color'
-import {formatFileSize} from '@/utils/file'
-import {Popover, Space} from '@arco-design/web-vue'
-import {IconInfoCircle} from '@arco-design/web-vue/es/icon'
-import {h, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {usePagination} from 'vue-request'
+import { useSorter } from '@/composables/useSorter'
+import { GetTorrentAccessHistoryList } from '@/service/data'
+import { useEndpointStore } from '@/stores/endpoint'
+import { getColor } from '@/utils/color'
+import { formatFileSize } from '@/utils/file'
+import { Popover, Space } from '@arco-design/web-vue'
+import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
+import { h, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePagination } from 'vue-request'
 
 const { t, d } = useI18n()
 const endpointState = useEndpointStore()
@@ -179,7 +179,7 @@ const columns = [
     slotName: 'address',
     dataIndex: 'address',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     }
   },
@@ -188,7 +188,7 @@ const columns = [
     slotName: 'peerId',
     dataIndex: 'peerId',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     }
   },
@@ -197,7 +197,7 @@ const columns = [
     slotName: 'traffic',
     dataIndex: 'uploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     }
   },
@@ -216,7 +216,7 @@ const columns = [
     slotName: 'offset',
     dataIndex: 'uploadedOffset',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     }
   },
@@ -225,7 +225,7 @@ const columns = [
     slotName: 'flags',
     dataIndex: 'lastFlags',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     }
   },
@@ -234,7 +234,7 @@ const columns = [
     slotName: 'time',
     dataIndex: 'lastTimeSeen',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     }
   }

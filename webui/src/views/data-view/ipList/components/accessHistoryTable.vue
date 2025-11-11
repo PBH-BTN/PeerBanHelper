@@ -107,15 +107,15 @@
   </a-empty>
 </template>
 <script lang="ts" setup>
-import {useSorter} from '@/composables/useSorter'
-import {GetIPAccessHistoryList} from '@/service/data'
-import {useEndpointStore} from '@/stores/endpoint'
-import {getColor} from '@/utils/color'
-import {formatFileSize} from '@/utils/file'
-import {IconInfoCircle} from '@arco-design/web-vue/es/icon'
-import {watch} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {usePagination} from 'vue-request'
+import { useSorter } from '@/composables/useSorter'
+import { GetIPAccessHistoryList } from '@/service/data'
+import { useEndpointStore } from '@/stores/endpoint'
+import { getColor } from '@/utils/color'
+import { formatFileSize } from '@/utils/file'
+import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
+import { watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePagination } from 'vue-request'
 
 const { t, d } = useI18n()
 const endpointState = useEndpointStore()
@@ -160,7 +160,7 @@ const columns = [
     title: () => t('page.banlog.banlogTable.column.peerPort'),
     dataIndex: 'port',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 80
@@ -169,7 +169,7 @@ const columns = [
     title: 'Peer ID',
     dataIndex: 'peerId',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     slotName: 'peerId',
@@ -180,7 +180,7 @@ const columns = [
     slotName: 'traffic',
     dataIndex: 'uploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 120
@@ -190,7 +190,7 @@ const columns = [
     slotName: 'offset',
     dataIndex: 'uploadedOffset',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 120
@@ -200,7 +200,7 @@ const columns = [
     slotName: 'flags',
     dataIndex: 'lastFlags',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 120
@@ -210,7 +210,7 @@ const columns = [
     slotName: 'time',
     dataIndex: 'lastTimeSeen',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 260
@@ -219,7 +219,7 @@ const columns = [
     title: () => t('page.ipList.accessHistory.column.torrent'),
     dataIndex: 'torrent.name',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     ellipsis: true,

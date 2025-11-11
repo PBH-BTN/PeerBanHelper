@@ -111,15 +111,15 @@
   <BanHistoryModal ref="banHistoryModal" />
 </template>
 <script lang="ts" setup>
-import {useSorter} from '@/composables/useSorter'
-import {GetTorrentInfoList} from '@/service/data'
-import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
-import {useEndpointStore} from '@/stores/endpoint'
-import {formatFileSize} from '@/utils/file'
-import {debounce} from 'lodash'
-import {computed, ref, watch} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {usePagination} from 'vue-request'
+import { useSorter } from '@/composables/useSorter'
+import { GetTorrentInfoList } from '@/service/data'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useEndpointStore } from '@/stores/endpoint'
+import { formatFileSize } from '@/utils/file'
+import { debounce } from 'lodash'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePagination } from 'vue-request'
 import AccessHistoryModal from './accessHistoryModal.vue'
 import BanHistoryModal from './banHistoryModal.vue'
 
@@ -171,7 +171,7 @@ const columns = [
     ellipsis: true,
     tooltip: true,
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 500
@@ -181,7 +181,7 @@ const columns = [
     slotName: 'hash',
     dataIndex: 'infoHash',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 340
@@ -191,7 +191,7 @@ const columns = [
     slotName: 'size',
     dataIndex: 'size',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 120
@@ -201,7 +201,7 @@ const columns = [
     slotName: 'count',
     dataIndex: 'peerBanCount',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as const,
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
       sorter: true
     },
     width: 120
