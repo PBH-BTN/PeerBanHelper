@@ -456,7 +456,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 return Pair.of(rangeEntity, pcbAddressEntity);
             });
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getCause());
         }
     }
 
