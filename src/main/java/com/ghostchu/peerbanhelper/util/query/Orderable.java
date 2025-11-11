@@ -11,13 +11,13 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
     // databaseName -> dtoName
     private final Map<String, String> dto2DatabaseNames = new HashMap<>();
     public Orderable(Map<String, Boolean> def, Context ctx) {
+        appendOrders(def);
         if (ctx != null) {
             if (!ctx.queryParams("orderBy").isEmpty()) {
                 appendOrders(ctx);
                 return;
             }
         }
-        appendOrders(def);
     }
 
     private Orderable appendOrders(String field, boolean asc) {
