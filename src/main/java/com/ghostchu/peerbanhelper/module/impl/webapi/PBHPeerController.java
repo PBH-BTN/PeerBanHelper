@@ -197,9 +197,9 @@ public final class PBHPeerController extends AbstractFeatureModule {
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
         var builder = new Orderable(Map.of("lastTimeSeen", false, "address", false, "port", true), ctx)
-                .addMapping("torrent.name", "torrent.name")
-                .addMapping("torrent.infoHash", "torrent.infoHash")
-                .addMapping("torrent.size", "torrent.size")
+                .addMapping("torrent.name", "torrentName")
+                .addMapping("torrent.infoHash", "torrentInfoHash")
+                .addMapping("torrent.size", "torrentSize")
                 .apply(peerRecordDao.queryBuilder()
                         .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
         var where = builder
