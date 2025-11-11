@@ -42,19 +42,13 @@ public final class PCBAddressDao extends AbstractPBHDao<PCBAddressEntity, Long> 
 
     public int deleteEntry(@NotNull String torrentId, @NotNull String ip) throws SQLException {
         var deleteBuilder = deleteBuilder();
-        var where = deleteBuilder
-                .where()
-                .eq("torrentId", new SelectArg(torrentId))
-                .and()
-                .eq("ip", new SelectArg(ip));
-        deleteBuilder.setWhere(where);
+        deleteBuilder.where().eq("torrentId", new SelectArg(torrentId)).and().eq("ip", new SelectArg(ip));
         return deleteBuilder.delete();
     }
 
     public int cleanupDatabase(Timestamp timestamp) throws SQLException {
         var builder = deleteBuilder();
-        var where = builder.where().lt("lastTimeSeen", timestamp);
-        builder.setWhere(where);
+        builder.where().lt("lastTimeSeen", timestamp);
         return builder.delete();
     }
 }

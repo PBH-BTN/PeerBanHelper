@@ -42,19 +42,13 @@ public final class PCBRangeDao extends AbstractPBHDao<PCBRangeEntity, Long> {
 
     public int deleteEntry(@NotNull String torrentId, @NotNull String range) throws SQLException {
         var deleteBuilder = deleteBuilder();
-        var where = deleteBuilder
-                .where()
-                .eq("torrentId", new SelectArg(torrentId))
-                .and()
-                .eq("range", new SelectArg(range));
-        deleteBuilder.setWhere(where);
+        deleteBuilder.where().eq("torrentId", new SelectArg(torrentId)).and().eq("range", new SelectArg(range));
         return deleteBuilder.delete();
     }
 
     public int cleanupDatabase(Timestamp timestamp) throws SQLException {
         var builder = deleteBuilder();
-        var where = builder.where().lt("lastTimeSeen", timestamp);
-        builder.setWhere(where);
+        builder.where().lt("lastTimeSeen", timestamp);
         return builder.delete();
     }
 }
