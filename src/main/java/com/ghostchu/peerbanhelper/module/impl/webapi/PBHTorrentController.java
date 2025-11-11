@@ -131,46 +131,27 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         }
 
         Page<TorrentEntity> torrentEntityPage;
-
-        if (needsCountSort) {
-            // 使用 SQL 子查询进行排序
-            QueryBuilder<TorrentEntity, Long> qb = torrentDao.queryBuilder();
-
-            // 添加搜索条件
-            if (ctx.queryParam("keyword") != null) {
-                qb.where()
+        QueryBuilder<TorrentEntity, Long> qb = torrentDao.queryBuilder();
+        // 添加搜索条件
+        if (ctx.queryParam("keyword") != null) {
+            qb.where()
                     .like("name", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
                     .or()
                     .like("infoHash", new SelectArg("%" + ctx.queryParam("keyword") + "%"));
-            }
-
-            // 构建排序的 SQL 子查询
+        }
+        if (needsCountSort) {
+            // 使用 SQL 子查询进行排序
             String subQueryTable = "peerBanCount".equals(countSortField) ? "history" : "peer_record";
             String sortDirection = countSortAscending ? "ASC" : "DESC";
-
             // 使用 orderByRaw 添加子查询排序
             // 注意：使用实际表名 'torrents' 而不是别名 'torrent'
             qb.orderByRaw("(SELECT COUNT(*) FROM " + subQueryTable +
-                         " WHERE " + subQueryTable + ".torrent_id = torrents.id) " + sortDirection);
-
-            torrentEntityPage = torrentDao.queryByPaging(qb, pageable);
+                    " WHERE " + subQueryTable + ".torrent_id = torrents.id) " + sortDirection);
         } else {
             // 普通排序（按数据库字段）
-            if (ctx.queryParam("keyword") == null) {
-                torrentEntityPage = torrentDao.queryByPaging(
-                        new Orderable(Map.of("id", false), ctx).apply(torrentDao.queryBuilder()),
-                        pageable);
-            } else {
-                torrentEntityPage = torrentDao.queryByPaging(
-                        new Orderable(Map.of("id", false), ctx).apply(torrentDao.queryBuilder()
-                                .where()
-                                .like("name", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
-                                .or()
-                                .like("infoHash", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
-                                .queryBuilder())
-                        , pageable);
-            }
+            new Orderable(Map.of("id", false), ctx).apply(qb);
         }
+        torrentEntityPage = torrentDao.queryByPaging(qb, pageable);
 
         // 构建结果列表（始终需要查询计数）
         List<TorrentInfoDTO> infoList = new ArrayList<>();
