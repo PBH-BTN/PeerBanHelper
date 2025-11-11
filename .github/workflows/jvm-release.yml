@@ -62,7 +62,7 @@ jobs:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: installer-dist
           path: target/media
@@ -98,31 +98,31 @@ jobs:
       statuses: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: maven-dist
           path: target/
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: installer-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: spk-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: deb-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: portable-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-13.4-dist
           path: target/media
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-14.1-dist
           path: target/media
@@ -154,7 +154,7 @@ jobs:
           -w "https://github.com/${{ github.repository }}/releases/download/${{ steps.set_version.outputs.version }}/PeerBanHelper_Installers.tar.gz" \
           -o peerbanhelper.torrent \
           "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: torrent-dist
           path: |
@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: maven-dist
           path: target
@@ -198,7 +198,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.9.0
         with:
           images: ghostchu/peerbanhelper
           tags: |
@@ -234,7 +234,7 @@ jobs:
           password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
       - name: Extract metadata (tags, labels) for Aliyun ACR
         id: meta-acr
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.9.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper
           tags: |

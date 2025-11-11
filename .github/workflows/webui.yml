@@ -62,7 +62,7 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: webui-dist
           path: ./dist

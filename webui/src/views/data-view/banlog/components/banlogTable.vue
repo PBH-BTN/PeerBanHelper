@@ -89,7 +89,7 @@
 import queryIpLink from '@/components/queryIpLink.vue'
 import { useSorter } from '@/composables/useSorter'
 import { getBanlogs } from '@/service/banLogs'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
@@ -126,7 +126,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
         forceLoading.value = false
       }
     },
-    [useAutoUpdatePlugin]
+    [useFirstPageOnlyAutoUpdatePlugin]
   )
 
 watch([pageSize, current], () => {

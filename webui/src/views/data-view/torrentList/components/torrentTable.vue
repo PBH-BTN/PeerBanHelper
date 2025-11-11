@@ -113,7 +113,7 @@
 <script lang="ts" setup>
 import { useSorter } from '@/composables/useSorter'
 import { GetTorrentInfoList } from '@/service/data'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
 import { debounce } from 'lodash'
@@ -152,7 +152,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
         forceLoading.value = false
       }
     },
-    [useAutoUpdatePlugin]
+    [useFirstPageOnlyAutoUpdatePlugin]
   )
 
 watch([pageSize, current], () => {
