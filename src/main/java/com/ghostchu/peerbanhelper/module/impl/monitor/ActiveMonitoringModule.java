@@ -183,6 +183,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     public void flush() {
         try {
             try {
+                diskWriteCache.asMap().forEach((k,v)->dataBuffer.offer(k));
                 peerRecordDao.syncPendingTasks(dataBuffer, torrentDao);
             } catch (SQLException e) {
                 log.warn("Unable sync peers data to database", e);

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
@@ -41,6 +42,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private DownloaderServer downloaderServer;
     @Autowired
     private TrackedSwarmDao trackedSwarmDao;
+    @Autowired
+    private PeerRecordDao peerRecordDao;
 
     @Override
     public boolean isConfigurable() {
@@ -222,14 +225,26 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         try {
             long trackedPeers = trackedSwarmDao.countOf();
             map.put("trackedSwarmCount", trackedPeers);
-            if(trackedPeers > 0) {
+            if (trackedPeers > 0) {
                 map.put("peersBlockRate", (double) metrics.getPeerBanCounter() / trackedPeers);
-            }else{
+            } else {
                 map.put("peersBlockRate", 0.0d);
             }
         } catch (SQLException e) {
             map.put("peersBlockRate", 0.0d);
             log.error("Unable to query tracked swarm count", e);
+        }
+        try {
+            var queryBuilder = peerRecordDao.queryBuilder();
+            var where = queryBuilder.selectColumns("address").distinct().where();
+            Timestamp weekAgo = new Timestamp(System.currentTimeMillis() - 7L * 24 * 3600 * 1000);
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            where.or(where.between("firstTimeSeen", weekAgo, now),
+                    where.between("lastTimeSeen", weekAgo, now));
+            map.put("weeklySessions", queryBuilder.countOf());
+        } catch (SQLException e) {
+            map.put("weeklySessions", 0);
+            log.error("Unable to query weekly sessions", e);
         }
         ctx.json(new StdResp(true, null, map));
     }
