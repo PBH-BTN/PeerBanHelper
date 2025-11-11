@@ -97,13 +97,6 @@
                 <activeMonitoring v-model="form.module.active_monitoring" />
               </a-collapse-item>
               <a-collapse-item
-                v-if="false"
-                key="11"
-                :header="t('page.settings.tab.profile.module.ptrBlackList.title')"
-              >
-                <ptrBlocker v-model="form.module.ptr_blacklist" />
-              </a-collapse-item>
-              <a-collapse-item
                 key="12"
                 :header="t('page.settings.tab.profile.module.idleConnectionDosProtection.title')"
               >
