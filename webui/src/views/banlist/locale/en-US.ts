@@ -18,6 +18,7 @@ export default {
   'page.banlist.banlist.bottomReached': 'No more data!',
   'page.banlist.banlist.listItem.unban': 'Unban',
   'page.banlist.banlist.listItem.unbanall': 'Unban all',
+  'page.banlist.banlist.listItem.unbanallConfirm': 'Are you sure to unban All IP addresses?',
   'page.banlist.banlist.listItem.unbanUnexcepted': 'No IP address(s) unbanned',
   'page.banlist.banlist.listItem.unbanSuccess': 'Unbanned {count} IP address',
   'page.banlist.banlist.listItem.threatAnalyse': 'Threat Analyse'

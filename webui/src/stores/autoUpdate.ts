@@ -155,3 +155,34 @@ export const useAutoUpdatePlugin = <R, P extends unknown[]>(
     }
   }
 }
+
+export const useFirstPageOnlyAutoUpdatePlugin = <R, P extends unknown[]>(
+  queryInstance: Parameters<PluginImplementType<R, P>>[0]
+): ReturnType<PluginImplementType<R, P>> => {
+  const autoupdateStore = useAutoUpdate()
+  const callbackRef = ref<ReturnType<AutoUpdateMessageChannel['polling']>>()
+
+  callbackRef.value = autoupdateStore.polling(() => {
+    // Only refresh when on the first page
+    const params = queryInstance.params.value?.[0] as { page?: number } | undefined
+    if ((params?.page ?? 1) === 1) {
+      queryInstance.context.refresh()
+    }
+  })
+
+  onUnmounted(() => {
+    callbackRef.value?.('unmount')
+  })
+
+  return {
+    onBefore() {
+      callbackRef.value?.('loading')
+    },
+    onCancel() {
+      callbackRef.value?.('idle')
+    },
+    onAfter() {
+      callbackRef.value?.('idle')
+    }
+  }
+}
