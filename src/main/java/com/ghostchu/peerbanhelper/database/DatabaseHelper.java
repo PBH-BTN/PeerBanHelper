@@ -28,31 +28,33 @@ public final class DatabaseHelper {
     public DatabaseHelper(@Autowired Database database) throws SQLException {
         this.database = database;
         Logger.setGlobalLogLevel(Level.WARNING);
-        createTables();
+        createTables(true);
         performUpgrade();
+        createTables(false);
     }
 
 
-    private void createTables() throws SQLException {
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), MetadataEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TorrentEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), ModuleEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), HistoryEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), PCBAddressEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), PCBRangeEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrackedSwarmEntity.class, true);
+    private void createTables(boolean ignoreError) {
+        Class<?>[] clazz = new Class[]{
+                MetadataEntity.class, TorrentEntity.class, ModuleEntity.class, RuleEntity.class, HistoryEntity.class,
+                BanListEntity.class, RuleSubInfoEntity.class, RuleSubLogEntity.class, PeerRecordEntity.class,
+                PCBAddressEntity.class, PCBRangeEntity.class, TrafficJournalEntity.class, AlertEntity.class,
+                TrackedSwarmEntity.class
+        };
+        for (Class<?> aClass : clazz) {
+            try {
+                PBHTableUtils.createTableIfNotExists(database.getDataSource(), aClass, false, ignoreError);
+            } catch (Exception err) {
+                if (!ignoreError) {
+                    log.error("Unable to create table for class: " + aClass.getSimpleName(), err);
+                }
+            }
+        }
     }
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "19"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "20"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -155,7 +157,15 @@ public final class DatabaseHelper {
             }
             v = 19;
         }
-
+        if (v <= 19) {
+            try {
+                log.info("Adding port field to peer_records");
+                database.getDataSource().getReadWriteConnection("peer_records").executeStatement("ALTER TABLE peer_records ADD COLUMN port INT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 20;
+        }
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }

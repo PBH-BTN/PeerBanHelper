@@ -52,6 +52,7 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         PeerRecordEntity currentSnapshot = new PeerRecordEntity(
                 null,
                 peer.toPeerAddress().getAddress().toNormalizedString(),
+                peer.toPeerAddress().getPort(),
                 torrentEntity,
                 downloader,
                 peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
