@@ -179,6 +179,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 .addMapping("torrent.size", "torrentSize")
                 .addMapping("module.name", "module")
                 .addMapping("rule.rule", "rule")
+                .addMapping("port", "peerPort")
                 .apply(historyDao.queryBuilder().join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
                         .join(ruleDao.queryBuilder().setAlias("rule")
                                         .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
