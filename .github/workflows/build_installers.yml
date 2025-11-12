@@ -19,7 +19,7 @@ jobs:
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
-          version: 11.0.5
+          version: 12.0
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Make installers
         run: |
