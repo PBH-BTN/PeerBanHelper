@@ -11,12 +11,21 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
     // databaseName -> dtoName
     private final Map<String, String> dto2DatabaseNames = new HashMap<>();
     public Orderable(Map<String, Boolean> def, Context ctx) {
-        appendOrders(def);
-        if (ctx != null) {
-            if (!ctx.queryParams("orderBy").isEmpty()) {
-                appendOrders(ctx);
-                return;
+        // 如果用户指定了排序参数，优先使用用户排序
+        // If user specified sort parameters, prioritize user sorting
+        if (ctx != null && !ctx.queryParams("orderBy").isEmpty()) {
+            // 先添加用户排序（作为主排序）
+            // Add user sorting first (as primary sort)
+            appendOrders(ctx);
+            // 然后添加用户未指定的默认排序字段（作为次要排序，保证结果稳定性）
+            // Then add default sort fields not specified by user (as secondary sort for stability)
+            for (Map.Entry<String, Boolean> entry : def.entrySet()) {
+                putIfAbsent(entry.getKey(), entry.getValue());
             }
+        } else {
+            // 用户未指定排序时，使用默认排序
+            // Use default sorting when user did not specify any
+            appendOrders(def);
         }
     }
 
