@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
@@ -129,7 +130,7 @@ public final class JavalinWebContainer {
                 .exception(BlockScannerException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.NOT_FOUND);
                     ctx.header("Server", "nginx");
-                    ctx.result( "404 not found");
+                    ctx.result("404 not found");
                     ctx.attribute("skipAfter", true);
                 })
                 .beforeMatched(ctx -> {
@@ -163,7 +164,8 @@ public final class JavalinWebContainer {
                     }
                     TokenAuthResult tokenAuthResult = isContextAuthorized(ctx);
                     if (tokenAuthResult == TokenAuthResult.SUCCESS) {
-                        markLoginSuccess(WebUtil.userIp(ctx), ctx.userAgent());
+                        var silentLoginSecret = ctx.queryParam("silentLogin");
+                        markLoginSuccess(WebUtil.userIp(ctx), ctx.userAgent(), SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI.equals(silentLoginSecret));
                         return;
                     }
                     if (tokenAuthResult == TokenAuthResult.FAILED) {
@@ -175,7 +177,7 @@ public final class JavalinWebContainer {
                 })
                 .options("/*", ctx -> ctx.status(200))
                 .after(ctx -> {
-                    if(ctx.attribute("skipAfter") != null) return;
+                    if (ctx.attribute("skipAfter") != null) return;
                     ctx.header("Server", Main.getUserAgent());
                 });
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
@@ -289,16 +291,18 @@ public final class JavalinWebContainer {
     }
 
     @SneakyThrows
-    public synchronized void markLoginSuccess(String ip, String userAgent) {
+    public synchronized void markLoginSuccess(String ip, String userAgent, boolean silent) {
         var ipBlock = getPrefixedIPAddr(ip);
         var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
         counter.set(0);
         if (LOGIN_SESSION_TIMETABLE.getIfPresent(ipBlock) == null) {
             LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
-            Main.getGuiManager().createNotification(Level.INFO,
-                    tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
-                    tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
+            if(!silent) {
+                Main.getGuiManager().createNotification(Level.INFO,
+                        tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
+                        tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
+            }
         }
     }
 
