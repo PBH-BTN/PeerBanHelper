@@ -86,11 +86,11 @@
         </a-grid-item>
         <a-grid-item class="panel-col" :span="{ xs: 12, sm: 12, md: 6 }">
           <a-statistic
-              :title="t('page.dashboard.statics.weeklySessions')"
-              :value="current?.weeklySessions"
-              :value-from="previous.weeklySessions"
-              animation
-              show-group-separator
+            :title="t('page.dashboard.statics.weeklySessions')"
+            :value="current?.weeklySessions"
+            :value-from="previous.weeklySessions"
+            animation
+            show-group-separator
           >
             <template #suffix>
               <a-typography-text>{{ t('page.dashboard.statics.number') }} </a-typography-text>

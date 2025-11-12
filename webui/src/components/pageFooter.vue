@@ -103,7 +103,6 @@ watch(
   (error) => {
     if (error instanceof RequestError) {
       if (error?.message.includes('limit')) {
-
         console.log(t('settings.accessToken.error'))
         console.log(t('settings.accessToken.error.limit'))
 
@@ -122,10 +121,10 @@ watch(
         // })
       }
     } else {
-       Notification.error({
-         title: t('settings.accessToken.error'),
-         content: error?.message ?? ''
-       })
+      Notification.error({
+        title: t('settings.accessToken.error'),
+        content: error?.message ?? ''
+      })
       console.log(t('settings.accessToken.error'))
       console.log(error?.message ?? '')
     }
