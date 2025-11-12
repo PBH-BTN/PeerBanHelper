@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -49,15 +48,14 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
-    private final Map<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>> unloadDeque = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Cache<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
-            .maximumSize(512)
+            .maximumSize(1024)
             .expireAfterAccess(3, TimeUnit.MINUTES)
             .softValues()
             .recordStats()
             .removalListener((RemovalListener<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
                 var pair = notification.getValue();
-                if(pair == null) return;
+                if (pair == null) return;
                 try {
                     flushBackDatabase(pair.getLeft(), pair.getRight());
                 } catch (SQLException e) {
@@ -121,8 +119,9 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             );
             int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
             int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
+            log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
         } catch (SQLException e) {
-            log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp.toString(), e);
+            log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp, e);
         }
     }
 
