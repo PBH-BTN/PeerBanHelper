@@ -109,7 +109,7 @@
                 </plugins>
             </build>
             <properties>
-                <install4j.home>C:\Users\ghost\AppData\Local\Programs\install4j12</install4j.home>
+                <install4j.home>C:\Program Files\install4j11</install4j.home>
             </properties>
         </profile>
     </profiles>
