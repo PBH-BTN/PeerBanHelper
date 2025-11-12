@@ -30,7 +30,7 @@ public final class PCBRangeEntity {
     private int rewindCounter;
     @DatabaseField(canBeNull = false)
     private int progressDifferenceCounter;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Timestamp firstTimeSeen;
     @DatabaseField(canBeNull = false, index = true)
     private Timestamp lastTimeSeen;

@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.j256.ormlite.dao.RawRowMapper;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -100,34 +101,82 @@ public final class PBHChartController extends AbstractFeatureModule {
     private void handleSessionDayBucket(@NotNull Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
-        if (downloader == null || downloader.isBlank()) {
-            downloader = "%";
-        }
-        // 从 startAt 到 endAt，每天的开始时间戳
-        var queryBuilder = peerRecordDao.queryBuilder();
-        // 按天划分，每天的会话数量
-        var where = queryBuilder
-                .selectColumns("address", "firstTimeSeen", "lastTimeSeen")
-                .distinct()
-                .where();
-        where.and(where.like("downloader", downloader), where.or(where.between("firstTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt()),
-                where.between("lastTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt())));
+        String downloaderParam = (downloader == null || downloader.isBlank()) ? null : downloader;
+        long startAtTs = timeQueryModel.startAt().getTime();
+        long endAtTs = timeQueryModel.endAt().getTime();
         Map<Long, AtomicInteger> sessionDayBucket = new LinkedHashMap<>();
-        try (var it = queryBuilder.iterator()) {
-            while (it.hasNext()) {
-                var record = it.next();
-                long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().getTime());
-                long lastDay = MiscUtil.getStartOfToday(record.getLastTimeSeen().getTime());
+        long startMs = System.currentTimeMillis();
+        String sql = """
+        SELECT firstTimeSeen, lastTimeSeen FROM peer_records
+        WHERE (? IS NULL OR downloader = ?) AND firstTimeSeen BETWEEN ? AND ?
+        UNION
+        SELECT firstTimeSeen, lastTimeSeen FROM peer_records
+        WHERE (? IS NULL OR downloader = ?) AND lastTimeSeen BETWEEN ? AND ?
+        """;
+        String[] args = {
+                downloaderParam, downloaderParam, String.valueOf(startAtTs), String.valueOf(endAtTs),
+                downloaderParam, downloaderParam, String.valueOf(startAtTs), String.valueOf(endAtTs)
+        };
+        try (var results = peerRecordDao.queryRaw(sql, timeRangeMapper, args)) {
+            for (SessionTimeRange row : results) {
+                long firstDay = MiscUtil.getStartOfToday(row.firstTimeSeen);
+                long lastDay = MiscUtil.getStartOfToday(row.lastTimeSeen);
+
                 for (long day = firstDay; day <= lastDay; day += 86400000L) {
                     sessionDayBucket.computeIfAbsent(day, k -> new AtomicInteger()).incrementAndGet();
                 }
             }
-            ctx.json(new StdResp(true, null, sessionDayBucket.entrySet().stream()
-                    .map(e -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
-                    .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
-                    .toList()));
         }
+        ctx.json(new StdResp(true, null, sessionDayBucket.entrySet().stream()
+                .map(e -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+                .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
+                .toList()));
     }
+
+    private static class SessionTimeRange {
+        long firstTimeSeen;
+        long lastTimeSeen;
+    }
+
+    private final RawRowMapper<SessionTimeRange> timeRangeMapper =
+            (columnNames, resultColumns) -> {
+                SessionTimeRange range = new SessionTimeRange();
+                range.firstTimeSeen = Long.parseLong(resultColumns[0]);
+                range.lastTimeSeen = Long.parseLong(resultColumns[1]);
+                return range;
+            };
+
+//    private void handleSessionDayBucket(@NotNull Context ctx) throws Exception {
+//        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+//        String downloader = ctx.queryParam("downloader");
+//        // 从 startAt 到 endAt，每天的开始时间戳
+//        var queryBuilder = peerRecordDao.queryBuilder();
+//        // 按天划分，每天的会话数量
+//        var where = queryBuilder
+//                .selectColumns("address", "firstTimeSeen", "lastTimeSeen")
+//                .distinct()
+//                .where();
+//        var subwhere = downloader == null || downloader.isBlank() ? where.raw("1=1") : where.like("downloader", downloader);
+//        where.and(subwhere, where.or(where.between("firstTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt()),
+//                where.between("lastTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt())));
+//        Map<Long, AtomicInteger> sessionDayBucket = new LinkedHashMap<>();
+//        long startAt = System.currentTimeMillis();
+//        try (var it = queryBuilder.iterator()) {
+//            while (it.hasNext()) {
+//                var record = it.next();
+//                long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().getTime());
+//                long lastDay = MiscUtil.getStartOfToday(record.getLastTimeSeen().getTime());
+//                for (long day = firstDay; day <= lastDay; day += 86400000L) {
+//                    sessionDayBucket.computeIfAbsent(day, k -> new AtomicInteger()).incrementAndGet();
+//                }
+//            }
+//            System.out.println("Iterator cost: "+ (System.currentTimeMillis() - startAt)+"ms");
+//            ctx.json(new StdResp(true, null, sessionDayBucket.entrySet().stream()
+//                    .map(e -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+//                    .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
+//                    .toList()));
+//        }
+//    }
 
     private void handleTraffic(Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);

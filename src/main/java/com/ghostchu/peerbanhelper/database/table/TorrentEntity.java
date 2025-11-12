@@ -17,7 +17,7 @@ public final class TorrentEntity {
     private Long id;
     @DatabaseField(canBeNull = false, uniqueIndex = true)
     private String infoHash;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private String name;
     @DatabaseField(canBeNull = false)
     private Long size;

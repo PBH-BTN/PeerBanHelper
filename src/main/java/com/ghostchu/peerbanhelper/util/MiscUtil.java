@@ -77,11 +77,15 @@ public final class MiscUtil {
     }
 
     public static long getStartOfToday(long time) {
-        Instant instant = Instant.now();
+//        Instant instant = Instant.now();
+//        ZoneId systemZone = ZoneId.systemDefault();
+//        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
+//        LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
+//        return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
         ZoneId systemZone = ZoneId.systemDefault();
-        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
-        LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
-        return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
+        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.ofEpochMilli(time));
+        LocalDate date = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
+        return date.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
     }
 
     public static long getEndOfToday(long time) {
