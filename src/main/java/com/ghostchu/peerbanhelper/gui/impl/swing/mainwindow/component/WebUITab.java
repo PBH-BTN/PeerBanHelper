@@ -88,7 +88,7 @@ public class WebUITab implements WindowTab {
 
     private void navigateToIndex() {
         if (webBrowser != null) {
-            bridge.getWebUiUrl().ifPresent(uri -> webBrowser.setUrl(uri +"?silentLogin="+ SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI));
+            bridge.getWebUiUrl().ifPresent(uri -> webBrowser.setUrl(uri +"&silentLogin="+ SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI));
         }
     }
 }
