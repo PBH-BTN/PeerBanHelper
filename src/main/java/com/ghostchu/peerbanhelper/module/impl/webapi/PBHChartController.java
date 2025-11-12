@@ -105,7 +105,6 @@ public final class PBHChartController extends AbstractFeatureModule {
         long startAtTs = timeQueryModel.startAt().getTime();
         long endAtTs = timeQueryModel.endAt().getTime();
         Map<Long, AtomicInteger> sessionDayBucket = new LinkedHashMap<>();
-        long startMs = System.currentTimeMillis();
         String sql = """
         SELECT firstTimeSeen, lastTimeSeen FROM peer_records
         WHERE (? IS NULL OR downloader = ?) AND firstTimeSeen BETWEEN ? AND ?
