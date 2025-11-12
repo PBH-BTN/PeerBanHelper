@@ -1,4 +1,4 @@
-FROM docker.io/bellsoft/liberica-runtime-container:jre-21-slim-musl
+FROM docker.io/bellsoft/liberica-runtime-container:jre-25-slim-musl
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 COPY target/libraries /app/libraries
 COPY target/PeerBanHelper.jar /app/PeerBanHelper.jar
