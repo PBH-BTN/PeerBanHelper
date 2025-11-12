@@ -36,7 +36,7 @@ public abstract class AbstractWebSocketFeatureModule extends AbstractFeatureModu
                 javalinWebContainer.markLoginFailed(userIp(ctx.getUpgradeCtx$javalin()), ctx.getUpgradeCtx$javalin().userAgent());
                 return;
             }
-            javalinWebContainer.markLoginSuccess(userIp(ctx.getUpgradeCtx$javalin()), ctx.getUpgradeCtx$javalin().userAgent());
+            javalinWebContainer.markLoginSuccess(userIp(ctx.getUpgradeCtx$javalin()), ctx.getUpgradeCtx$javalin().userAgent(), false);
             ctx.enableAutomaticPings(15, TimeUnit.SECONDS);
             this.wsSessions.add(ctx);
 
