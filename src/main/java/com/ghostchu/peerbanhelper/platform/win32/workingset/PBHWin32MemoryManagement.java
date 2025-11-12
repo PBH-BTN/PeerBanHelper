@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 public class PBHWin32MemoryManagement {
     private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
     private final Pattern gcKeyword = Pattern.compile(".*(Full|Old|MarkSweep|Tenured|CMS|G1|ZGC|Shenandoah).*");
+    private long lastRun = 0;
 
     public PBHWin32MemoryManagement(Laboratory laboratory) {
         try {
@@ -68,8 +69,10 @@ public class PBHWin32MemoryManagement {
     }
 
     private void releaseMemory() {
+        if (System.currentTimeMillis() - lastRun > 60 * 1000) return;
         log.debug("Releasing memory by emptying working set.");
         WorkingSetManagerFactory.trimMemory();
+        lastRun = System.currentTimeMillis();
     }
 
 
