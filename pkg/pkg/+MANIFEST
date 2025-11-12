@@ -7,9 +7,9 @@
     "maintainer": "ghostchu@111.com",
     "www": "https://github.com/PBH-BTN/PeerBanHelper",
     "deps": {
-        "openjdk21": {
-            "origin": "java/openjdk21",
-            "version": "21.0"
+        "openjdk25": {
+            "origin": "java/openjdk25",
+            "version": "25.0"
         }
     },
     "arch": "all",

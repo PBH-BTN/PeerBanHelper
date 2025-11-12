@@ -21,8 +21,8 @@ jobs:
           cp target/PeerBanHelper.jar pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
           mkdir -p jbr
-          wget https://cache-redirector.jetbrains.com/intellij-jbr/jbr-21.0.8-windows-x64-b1038.68.zip -O jbr/jbr-21.0.8-windows-x64-b1038.68.zip
-          (cd jbr && unzip jbr-21.0.8-windows-x64-b1038.68.zip && mv jbr-21.0.8-windows-x64-b1038.68 jre)
+          wget https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk-25-windows-x64-b176.4.zip -O jbr/jbrsdk-25-windows-x64-b176.4.zip
+          (cd jbr && unzip jbrsdk-25-windows-x64-b176.4.zip && mv jbrsdk-25-windows-x64-b176.4 jre)
           mv jbr/jre pkg/portable/PeerBanHelper/
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)
