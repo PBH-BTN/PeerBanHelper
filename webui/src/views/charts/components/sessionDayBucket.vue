@@ -1,45 +1,33 @@
 <template>
   <a-card hoverable :title="t('page.charts.title.sessionDayBucket')">
     <template #extra>
-      <a-popover>
-        <a-link>{{ t('page.charts.options.more') }}</a-link>
-        <template #content>
-          <a-form :model="option">
-            <a-form-item
-              field="range"
-              :label="t('page.charts.options.days')"
-              label-col-flex="100px"
-            >
-              <a-range-picker
-                v-model="option.range"
-                show-time
-                value-format="Date"
-                :shortcuts="[
-                  {
-                    label: t('page.charts.options.shortcut.7days'),
-                    value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
-                  },
-                  {
-                    label: t('page.charts.options.shortcut.14days'),
-                    value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
-                  }
-                ]"
-                :disabled-date="
-                  (current: Date) => {
-                    const maxRange = 14 * 24 * 60 * 60 * 1000
-                    if (!option.range || !option.range[0]) return false
-                    const diff = Math.abs(current.getTime() - option.range[0].getTime())
-                    return diff > maxRange
-                  }
-                "
-              />
-            </a-form-item>
-          </a-form>
-        </template>
-        <a-tooltip :content="t('page.charts.tooltip.sessionDayBucket')">
-          <icon-question-circle />
-        </a-tooltip>
-      </a-popover>
+      <a-form :model="option" auto-label-width>
+        <a-form-item field="range" style="margin-bottom: 0">
+          <template #label>
+            {{ t('page.charts.options.days') }}
+            <a-tooltip :content="t('page.charts.tooltip.sessionDayBucket')">
+              <icon-question-circle />
+            </a-tooltip>
+          </template>
+          <a-range-picker
+            v-model="option.range"
+            value-format="Date"
+            style="width: 275px"
+            :shortcuts="[
+              {
+                label: t('page.charts.options.shortcut.7days'),
+                value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+              },
+              {
+                label: t('page.charts.options.shortcut.14days'),
+                value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
+              }
+            ]"
+          />
+          <a-tooltip :content="t('page.charts.tooltip.sessionDayBucket')">
+            <icon-question-circle />
+          </a-tooltip> </a-form-item
+      ></a-form>
     </template>
     <a-result
       v-if="err"
@@ -165,6 +153,8 @@ const chartOptions = ref({
     {
       name: t('page.charts.sessionDayBucket.options.total'),
       type: 'line',
+      stack: 'total',
+      areaStyle: {},
       emphasis: {
         focus: 'series'
       },
@@ -173,6 +163,8 @@ const chartOptions = ref({
     {
       name: t('page.charts.sessionDayBucket.options.incoming'),
       type: 'line',
+      stack: 'total',
+      areaStyle: {},
       emphasis: {
         focus: 'series'
       },
@@ -185,23 +177,9 @@ const props = defineProps<{
   downloader?: string
 }>()
 
-watch(
-  option,
-  () => {
-    // Validate time range
-    if (option.range[0] && option.range[1]) {
-      const diffMs = option.range[1].getTime() - option.range[0].getTime()
-      const diffDays = diffMs / (1000 * 60 * 60 * 24)
-
-      if (diffDays > 14) {
-        // If range exceeds 14 days, adjust it
-        option.range[1] = new Date(option.range[0].getTime() + 14 * 24 * 60 * 60 * 1000)
-      }
-    }
-    run(option.range[0]!, option.range[1]!, props.downloader)
-  },
-  { deep: true }
-)
+watch(option, (v) => {
+  run(v.range[0]!, v.range[1]!, props.downloader)
+})
 
 const { loading, run, refresh, data } = useRequest(getSessionDayBucket, {
   defaultParams: [option.range[0]!, option.range[1]!, props.downloader],

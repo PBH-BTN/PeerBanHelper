@@ -44,9 +44,9 @@ export default {
   'page.charts.error.refresh': '重試',
   'page.charts.all': '全部下載器',
   'page.charts.title.fieldPie': '維度分析',
-  'page.charts.title.sessionDayBucket': '唯一 IP 會話統計',
-  'page.charts.sessionDayBucket.options.total': '總唯一 IP 數',
-  'page.charts.sessionDayBucket.options.incoming': '傳入連接唯一 IP 數',
+  'page.charts.title.sessionDayBucket': 'IP 統計',
+  'page.charts.sessionDayBucket.options.total': 'IP 總數',
+  'page.charts.sessionDayBucket.options.incoming': '傳入 IP 數',
   'page.charts.tooltip.sessionDayBucket':
-    '按日分桶統計唯一 IP 會話資料。由於效能原因,時間範圍限制在最多14天內。'
+    '按日統計唯一 IP 資料。為保證效能,建議時間範圍不要超過14天。'
 }

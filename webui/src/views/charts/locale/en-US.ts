@@ -44,9 +44,9 @@ export default {
   'page.charts.error.refresh': 'Retry',
   'page.charts.all': 'All',
   'page.charts.title.fieldPie': 'Field Analysis',
-  'page.charts.title.sessionDayBucket': 'Unique IP Sessions',
-  'page.charts.sessionDayBucket.options.total': 'Total Unique IPs',
-  'page.charts.sessionDayBucket.options.incoming': 'Incoming Unique IPs',
+  'page.charts.title.sessionDayBucket': 'IP Statistics',
+  'page.charts.sessionDayBucket.options.total': 'Total IPs',
+  'page.charts.sessionDayBucket.options.incoming': 'Incoming IPs',
   'page.charts.tooltip.sessionDayBucket':
-    'Daily bucketed unique IP session statistics. Time range is limited to 14 days maximum for performance reasons.'
+    'Daily unique IP statistics. For better performance, it is recommended to keep the time range within 14 days.'
 }
