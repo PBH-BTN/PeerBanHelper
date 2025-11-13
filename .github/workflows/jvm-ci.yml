@@ -55,30 +55,30 @@ jobs:
       - uses: actions/download-artifact@v6
         with:
           name: installer-dist
-          path: target/media
+          path: build/media
       - uses: actions/download-artifact@v6
         with:
           name: spk-dist
-          path: target/media
+          path: build/media
       - uses: actions/download-artifact@v6
         with:
           name: deb-dist
-          path: target/media
+          path: build/media
       - uses: actions/download-artifact@v6
         with:
           name: portable-dist
-          path: target/media
+          path: build/media
       - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-13.4-dist
-          path: target/media
+          path: build/media
       - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-14.1-dist
-          path: target/media
-      # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
+          path: build/media
+      # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside build/media/
       - name: Zip medias for create torrent
-        run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
+        run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/
       # prepare mktorrent util
       - name: Install mktorrent
         run: sudo apt-get install -y mktorrent
