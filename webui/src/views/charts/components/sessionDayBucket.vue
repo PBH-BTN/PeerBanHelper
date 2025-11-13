@@ -50,7 +50,7 @@
       </template>
     </a-result>
     <a-empty
-      v-else-if="!data?.data && !loading"
+      v-else-if="!loading && (!data?.data || data.data.length === 0)"
       class="chart"
       style="align-items: center; display: flex; justify-content: center; flex-direction: column"
     />
