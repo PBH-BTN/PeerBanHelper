@@ -64,7 +64,7 @@ configurations.all {
 
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:6.2.12")
+    implementation("org.springframework:spring-context:6.2.13")
 
     // Lombok
     compileOnly("org.projectlombok:lombok:1.18.42")
