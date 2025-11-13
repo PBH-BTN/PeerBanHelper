@@ -48,5 +48,5 @@ export default {
   'page.charts.sessionDayBucket.options.total': 'IP 總數',
   'page.charts.sessionDayBucket.options.incoming': '傳入 IP 數',
   'page.charts.tooltip.sessionDayBucket':
-    '按日統計唯一 IP 資料。為保證效能,建議時間範圍不要超過14天。'
+    '按日統計唯一 IP 資料。僅展示被 PeerBanHelper 記錄下的會話資料，相比真實資料可能有較大誤差，僅供參考。為保證效能，建議選取時間範圍不要超過14天。'
 }

@@ -48,5 +48,5 @@ export default {
   'page.charts.sessionDayBucket.options.total': 'Total IPs',
   'page.charts.sessionDayBucket.options.incoming': 'Incoming IPs',
   'page.charts.tooltip.sessionDayBucket':
-    'Daily unique IP statistics. For better performance, it is recommended to keep the time range within 14 days.'
+    'Statistics of unique IPs per day. Only shows session data recorded by PeerBanHelper, which may have significant deviation from actual data and is for reference only. For performance reasons, it is recommended to select a time range not exceeding 14 days.'
 }
