@@ -43,5 +43,10 @@ export default {
   'page.charts.error.title': '图表加载失败',
   'page.charts.error.refresh': '重试',
   'page.charts.all': '全部下载器',
-  'page.charts.title.fieldPie': '维度分析'
+  'page.charts.title.fieldPie': '维度分析',
+  'page.charts.title.sessionDayBucket': 'IP 统计',
+  'page.charts.sessionDayBucket.options.total': 'IP 总数',
+  'page.charts.sessionDayBucket.options.incoming': '传入 IP 数',
+  'page.charts.tooltip.sessionDayBucket':
+    '按日统计唯一 IP 数据。为保证性能,建议时间范围不要超过14天。'
 }

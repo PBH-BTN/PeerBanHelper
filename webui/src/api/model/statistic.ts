@@ -42,3 +42,9 @@ export interface GeoIP {
   province: KV<string, number>[]
   region: KV<string, number>[]
 }
+
+export interface SessionDayBucket {
+  key: number
+  total: number
+  incoming: number
+}

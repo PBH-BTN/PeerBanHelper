@@ -43,5 +43,10 @@ export default {
   'page.charts.error.title': 'Failed to load chart',
   'page.charts.error.refresh': 'Retry',
   'page.charts.all': 'All',
-  'page.charts.title.fieldPie': 'Field Analysis'
+  'page.charts.title.fieldPie': 'Field Analysis',
+  'page.charts.title.sessionDayBucket': 'IP Statistics',
+  'page.charts.sessionDayBucket.options.total': 'Total IPs',
+  'page.charts.sessionDayBucket.options.incoming': 'Incoming IPs',
+  'page.charts.tooltip.sessionDayBucket':
+    'Daily unique IP statistics. For better performance, it is recommended to keep the time range within 14 days.'
 }
