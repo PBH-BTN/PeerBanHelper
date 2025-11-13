@@ -274,6 +274,8 @@ tasks.register<Exec>("compileInstall4jCI") {
     commandLine(
         "$install4jHome/bin/install4jc",
         "--release=${project.version}",
+        "-g",
+        "-d", layout.buildDirectory.dir("media").get().asFile.absolutePath,
         "--var-file=${project.projectDir}/install4j/project.install4j.vmoptions",
         "-D", "librariesPath=${layout.buildDirectory.dir("libraries").get().asFile.absolutePath}",
         "-D", "jarPath=${layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath}",
@@ -302,6 +304,8 @@ tasks.register<Exec>("compileInstall4jDev") {
     commandLine(
         "$install4jHome/bin/install4jc",
         "--release=${project.version}",
+        "-g",
+        "-d", layout.buildDirectory.dir("media").get().asFile.absolutePath,
         "-D", "librariesPath=${layout.buildDirectory.dir("libraries").get().asFile.absolutePath}",
         "-D", "jarPath=${layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath}",
         "install4j/project.install4j"
