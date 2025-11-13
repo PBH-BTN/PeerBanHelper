@@ -11,14 +11,14 @@ jobs:
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v6
         with:
-          name: maven-dist
-          path: target/
+          name: gradle-dist
+          path: build/
       - name: Build Portable package
         id: build-portable
         run: |
           mkdir -p pkg/portable/PeerBanHelper
-          mv target/libraries pkg/portable/PeerBanHelper/
-          cp target/PeerBanHelper.jar pkg/portable/PeerBanHelper/
+          mv build/libraries pkg/portable/PeerBanHelper/
+          cp build/libs/PeerBanHelper.jar pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
           mkdir -p jbr
           wget https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk-25-windows-x64-b176.4.zip -O jbr/jbrsdk-25-windows-x64-b176.4.zip

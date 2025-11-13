@@ -1,0 +1,24 @@
+安装 SQLite-JDBC 到本地仓库
+注意: 这个依赖已经在 build.gradle.kts 中通过 dependencySubstitution 处理，不需要手动安装
+
+安装 SWT 到本地仓库
+注意: SWT 作为 compileOnly 依赖，已在 build.gradle.kts 中配置使用本地仓库
+
+清洁打包
+./gradlew clean build
+
+并行构建
+./gradlew clean build --parallel
+
+编译 install4j 安装包 (CI)
+./gradlew compileInstall4jCI -Pinstall4j.home=/path/to/install4j
+
+编译 install4j 安装包 (Dev)
+./gradlew compileInstall4jDev -Pinstall4j.home=/path/to/install4j
+
+或使用环境变量:
+export INSTALL4J_HOME=/path/to/install4j
+./gradlew compileInstall4jCI
+
+完整构建流程 (包含 install4j)
+./gradlew clean build compileInstall4jCI -Pinstall4j.home=/path/to/install4j
