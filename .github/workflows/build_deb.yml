@@ -25,7 +25,7 @@ jobs:
           cd pkg && dpkg -b deb peerbanhelper_${{ env.PBH_VERSION }}_all.deb
         # 上面那个文件名需要符合收集条件
         env:
-          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+          PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
