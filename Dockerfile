@@ -7,10 +7,17 @@ RUN pnpm run build
 
 FROM --platform=$BUILDPLATFORM eclipse-temurin:25-jdk-alpine AS build
 RUN apk add git
-COPY . /build
 WORKDIR /build
+# Copy only build-related files
+COPY gradlew gradlew.bat settings.gradle.kts build.gradle.kts gradle.properties ./
+COPY gradle ./gradle
+# Download dependencies to create a cacheable layer
+RUN chmod +x ./gradlew && ./gradlew classes --no-daemon
+# Copy the rest of the source code
+COPY . .
+# Now build the application
 COPY --from=build_web webui/dist src/main/resources/static
-RUN chmod +x ./gradlew && ./gradlew clean build --no-daemon
+RUN ./gradlew clean build --no-daemon
 
 FROM docker.io/bellsoft/liberica-runtime-container:jre-25-slim-musl
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
