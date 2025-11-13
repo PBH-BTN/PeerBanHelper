@@ -31,7 +31,7 @@
     </a-col>
     <a-col v-if="showCharts.sessionDayBucket" :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
       <plusWarpper :title="t('page.charts.title.sessionDayBucket')">
-        <sessionDayBucket />
+        <sessionDayBucket :downloader="downloader" />
       </plusWarpper>
     </a-col>
   </a-row>

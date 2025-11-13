@@ -139,10 +139,24 @@ export async function getTraffic(
   })
 }
 
-export async function getSessionDayBucket(): Promise<CommonResponse<SessionDayBucket[]>> {
+export async function getSessionDayBucket(
+  startAt: Date,
+  endAt: Date,
+  downloader?: string
+): Promise<CommonResponse<SessionDayBucket[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/chart/sessionDayBucket`), location.href)
+  const query = new URLSearchParams({
+    startAt: startAt.getTime().toString(),
+    endAt: endAt.getTime().toString()
+  })
+  if (downloader) {
+    query.append('downloader', downloader)
+  }
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `api/chart/sessionDayBucket?` + query.toString()),
+    location.href
+  )
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)

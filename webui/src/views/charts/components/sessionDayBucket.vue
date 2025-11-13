@@ -181,6 +181,10 @@ const chartOptions = ref({
   ]
 })
 
+const props = defineProps<{
+  downloader?: string
+}>()
+
 watch(
   option,
   () => {
@@ -194,25 +198,17 @@ watch(
         option.range[1] = new Date(option.range[0].getTime() + 14 * 24 * 60 * 60 * 1000)
       }
     }
-    refresh()
+    run(option.range[0]!, option.range[1]!, props.downloader)
   },
   { deep: true }
 )
 
-const { loading, refresh, data } = useRequest(getSessionDayBucket, {
+const { loading, run, refresh, data } = useRequest(getSessionDayBucket, {
+  defaultParams: [option.range[0]!, option.range[1]!, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
-      // Filter data based on selected time range
-      const startTime = option.range[0]!.getTime()
-      const endTime = option.range[1]!.getTime()
-
-      const filteredData = data.data.filter((v) => {
-        const itemTime = v.key
-        return itemTime >= startTime && itemTime <= endTime
-      })
-
-      chartOptions.value.series![0]!.data = filteredData.map((v) => [new Date(v.key), v.total])
-      chartOptions.value.series![1]!.data = filteredData.map((v) => [new Date(v.key), v.incoming])
+      chartOptions.value.series![0]!.data = data.data.map((v) => [new Date(v.key), v.total])
+      chartOptions.value.series![1]!.data = data.data.map((v) => [new Date(v.key), v.incoming])
     }
   },
   onError: (e) => {
