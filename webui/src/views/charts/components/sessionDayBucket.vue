@@ -153,7 +153,6 @@ const chartOptions = ref({
     {
       name: t('page.charts.sessionDayBucket.options.total'),
       type: 'line',
-      stack: 'total',
       areaStyle: {},
       emphasis: {
         focus: 'series'
@@ -163,7 +162,6 @@ const chartOptions = ref({
     {
       name: t('page.charts.sessionDayBucket.options.incoming'),
       type: 'line',
-      stack: 'total',
       areaStyle: {},
       emphasis: {
         focus: 'series'
