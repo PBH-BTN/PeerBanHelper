@@ -1,5 +1,12 @@
 import type { CommonResponse } from '@/api/model/common'
-import type { AnalysisField, BanTrends, GeoIP, Traffic, Trends } from '@/api/model/statistic'
+import type {
+  AnalysisField,
+  BanTrends,
+  GeoIP,
+  SessionDayBucket,
+  Traffic,
+  Trends
+} from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -125,6 +132,17 @@ export async function getTraffic(
     urlJoin(endpointStore.endpoint, `api/chart/traffic?` + query.toString()),
     location.href
   )
+
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
+  })
+}
+
+export async function getSessionDayBucket(): Promise<CommonResponse<SessionDayBucket[]>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+  const url = new URL(urlJoin(endpointStore.endpoint, `api/chart/sessionDayBucket`), location.href)
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)

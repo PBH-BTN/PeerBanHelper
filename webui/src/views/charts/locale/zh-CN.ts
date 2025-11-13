@@ -43,5 +43,10 @@ export default {
   'page.charts.error.title': '图表加载失败',
   'page.charts.error.refresh': '重试',
   'page.charts.all': '全部下载器',
-  'page.charts.title.fieldPie': '维度分析'
+  'page.charts.title.fieldPie': '维度分析',
+  'page.charts.title.sessionDayBucket': '唯一 IP 会话统计',
+  'page.charts.sessionDayBucket.options.total': '总唯一 IP 数',
+  'page.charts.sessionDayBucket.options.incoming': '传入连接唯一 IP 数',
+  'page.charts.tooltip.sessionDayBucket':
+    '按日分桶统计唯一 IP 会话数据。由于性能原因,时间范围限制在最多14天内。'
 }

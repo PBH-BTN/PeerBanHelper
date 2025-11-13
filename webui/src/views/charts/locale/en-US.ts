@@ -43,5 +43,10 @@ export default {
   'page.charts.error.title': 'Failed to load chart',
   'page.charts.error.refresh': 'Retry',
   'page.charts.all': 'All',
-  'page.charts.title.fieldPie': 'Field Analysis'
+  'page.charts.title.fieldPie': 'Field Analysis',
+  'page.charts.title.sessionDayBucket': 'Unique IP Sessions',
+  'page.charts.sessionDayBucket.options.total': 'Total Unique IPs',
+  'page.charts.sessionDayBucket.options.incoming': 'Incoming Unique IPs',
+  'page.charts.tooltip.sessionDayBucket':
+    'Daily bucketed unique IP session statistics. Time range is limited to 14 days maximum for performance reasons.'
 }
