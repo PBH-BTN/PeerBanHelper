@@ -24,10 +24,8 @@
               }
             ]"
           />
-          <a-tooltip :content="t('page.charts.tooltip.sessionDayBucket')">
-            <icon-question-circle />
-          </a-tooltip> </a-form-item
-      ></a-form>
+        </a-form-item>
+      </a-form>
     </template>
     <a-result
       v-if="err"
