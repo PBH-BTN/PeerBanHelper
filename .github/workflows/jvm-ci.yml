@@ -14,7 +14,7 @@ on:
 jobs:
   Build_Executable:
     name: Build JAR Files
-    uses: ./.github/workflows/build_maven.yml
+    uses: ./.github/workflows/build_gradle.yml
     secrets: inherit
   Build_Installers:
     name: Generate Installers
@@ -50,8 +50,8 @@ jobs:
       # download artifacts
       - uses: actions/download-artifact@v6
         with:
-          name: maven-dist
-          path: target/
+          name: gradle-dist
+          path: build/
       - uses: actions/download-artifact@v6
         with:
           name: installer-dist
@@ -115,8 +115,8 @@ jobs:
     - uses: actions/checkout@v5
     - uses: actions/download-artifact@v6
       with:
-        name: maven-dist
-        path: target
+        name: gradle-dist
+        path: build
     - name: Set Up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set Up Buildx
