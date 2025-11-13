@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.3"
-    id("com.install4j.gradle") version "10.0.8" apply false
+    id("com.install4j.gradle") version "12.0" apply false
 }
 
 group = "com.ghostchu.peerbanhelper"
