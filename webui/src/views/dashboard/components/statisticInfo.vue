@@ -68,6 +68,9 @@
           >
             <template #suffix>
               <a-typography-text>{{ t('page.dashboard.statics.percentage') }} </a-typography-text>
+              <a-tooltip :content="t('page.dashboard.statics.peerBlockRate.tips')">
+                <icon-question-circle />
+              </a-tooltip>
             </template>
           </a-statistic>
         </a-grid-item>
@@ -94,6 +97,9 @@
           >
             <template #suffix>
               <a-typography-text>{{ t('page.dashboard.statics.number') }} </a-typography-text>
+              <a-tooltip :content="t('page.dashboard.statics.weeklySessions.tips')">
+                <icon-question-circle />
+              </a-tooltip>
             </template>
           </a-statistic>
         </a-grid-item>
