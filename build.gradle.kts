@@ -260,76 +260,59 @@ gitProperties {
 // To build installers with install4j:
 // - For CI: ./gradlew compileInstall4jCI -Pinstall4j.home=/path/to/install4j
 // - For Dev: ./gradlew compileInstall4jDev -Pinstall4j.home=/path/to/install4j
-if (project.hasProperty("install4j.home") || System.getenv("INSTALL4J_HOME") != null) {
-    apply(plugin = "com.install4j.gradle")
 
-    configure<com.install4j.gradle.Install4jPluginExtension> {
-        installDir = project.findProperty("install4j.home") as String?
-            ?: System.getenv("INSTALL4J_HOME")
-            ?: "/opt/install4j"
-    }
+// Install4j CI task (equivalent to install4j-ci profile)
+tasks.register<Exec>("compileInstall4jCI") {
+    group = "build"
+    description = "Compile install4j installers for CI"
+    dependsOn("jar")
 
-    // Install4j CI task (equivalent to install4j-ci profile)
-    tasks.register("compileInstall4jCI") {
-        group = "build"
-        description = "Compile install4j installers for CI"
-        dependsOn("jar")
+    val install4jHome = project.findProperty("install4j.home") as String?
+        ?: System.getenv("INSTALL4J_HOME")
+        ?: "/opt/install4j"
 
-        doLast {
-            val install4jExt = project.extensions.getByType(com.install4j.gradle.Install4jPluginExtension::class.java)
+    commandLine(
+        "$install4jHome/bin/install4jc",
+        "--release=${project.version}",
+        "--var-file=${project.projectDir}/install4j/project.install4j.vmoptions",
+        "-D", "librariesPath=${layout.buildDirectory.dir("libraries").get().asFile.absolutePath}",
+        "-D", "jarPath=${layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath}",
+        "install4j/project.install4j"
+    )
 
-            install4jExt.apply {
-                projectFile = file("install4j/project.install4j")
-                variables = mapOf(
-                    "librariesPath" to layout.buildDirectory.dir("libraries").get().asFile.absolutePath,
-                    "jarPath" to layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath
-                )
-                release = project.version.toString()
-            }
+    isIgnoreExitValue = true
 
-            // Execute install4j compilation
-            project.exec {
-                commandLine(
-                    "${install4jExt.installDir}/bin/install4jc",
-                    "--release=${project.version}",
-                    "--var-file=${project.projectDir}/install4j/project.install4j.vmoptions",
-                    "-D", "librariesPath=${layout.buildDirectory.dir("libraries").get().asFile.absolutePath}",
-                    "-D", "jarPath=${layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath}",
-                    "install4j/project.install4j"
-                )
-            }
+    doFirst {
+        if (!file(install4jHome).exists()) {
+            throw GradleException("Install4j not found at: $install4jHome. Please set install4j.home property or INSTALL4J_HOME environment variable.")
         }
     }
+}
 
-    // Install4j Dev task (equivalent to install4j-dev profile)
-    tasks.register("compileInstall4jDev") {
-        group = "build"
-        description = "Compile install4j installers for development"
-        dependsOn("jar")
+// Install4j Dev task (equivalent to install4j-dev profile)
+tasks.register<Exec>("compileInstall4jDev") {
+    group = "build"
+    description = "Compile install4j installers for development"
+    dependsOn("jar")
 
-        doLast {
-            val install4jExt = project.extensions.getByType(com.install4j.gradle.Install4jPluginExtension::class.java)
+    val install4jHome = project.findProperty("install4j.home") as String?
+        ?: System.getenv("INSTALL4J_HOME")
+        ?: "/opt/install4j"
 
-            install4jExt.apply {
-                projectFile = file("install4j/project.install4j")
-                variables = mapOf(
-                    "librariesPath" to layout.buildDirectory.dir("libraries").get().asFile.absolutePath,
-                    "jarPath" to layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath
-                )
-                release = project.version.toString()
-            }
+    commandLine(
+        "$install4jHome/bin/install4jc",
+        "--release=${project.version}",
+        "-D", "librariesPath=${layout.buildDirectory.dir("libraries").get().asFile.absolutePath}",
+        "-D", "jarPath=${layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath}",
+        "install4j/project.install4j"
+    )
 
-            // Execute install4j compilation with dev settings
-            project.exec {
-                commandLine(
-                    "${install4jExt.installDir}/bin/install4jc",
-                    "--release=${project.version}",
-                    "-D", "librariesPath=${layout.buildDirectory.dir("libraries").get().asFile.absolutePath}",
-                    "-D", "jarPath=${layout.buildDirectory.file("libs/PeerBanHelper.jar").get().asFile.absolutePath}",
-                    "install4j/project.install4j"
-                )
-                environment("INSTALL4J_JVM_ARGS", "-Xmx5G")
-            }
+    environment("INSTALL4J_JVM_ARGS", "-Xmx5G")
+    isIgnoreExitValue = true
+
+    doFirst {
+        if (!file(install4jHome).exists()) {
+            throw GradleException("Install4j not found at: $install4jHome. Please set install4j.home property or INSTALL4J_HOME environment variable.")
         }
     }
 }
