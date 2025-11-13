@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
     maven {
         name = "local-repo"
-        url = uri("file://${project.projectDir}/m2-local-repo")
+        url = uri(file("${project.projectDir}/m2-local-repo"))
     }
     maven {
         name = "spring-snapshots"
