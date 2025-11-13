@@ -199,9 +199,9 @@ tasks.processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     // Don't expand all files, only specific ones if needed
-    // filesMatching(listOf("**/*.properties")) {
-    //     expand(project.properties)
-    // }
+    filesMatching(listOf("**/*.properties")) {
+        expand(project.properties)
+    }
 
     from("src/main/resources") {
         exclude("assets/", "static/", "native/", "lang/")
@@ -251,6 +251,6 @@ tasks.jar {
 }
 
 // Git properties configuration - disabled temporarily
-// gitProperties {
-//     dotGitDirectory.set(file("${project.rootDir}/.git"))
-// }
+gitProperties {
+    dotGitDirectory.set(file("${project.rootDir}/.git"))
+}
