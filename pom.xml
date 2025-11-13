@@ -288,7 +288,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.2.12</version>
+            <version>6.2.13</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -517,7 +517,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.20</version>
+            <version>1.5.21</version>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
