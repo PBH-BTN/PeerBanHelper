@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM node:current-alpine AS build_web
+FROM --platform=$BUILDPLATFORM node:24-alpine AS build_web
 ARG GIT_HASH
 COPY webui /webui
 WORKDIR /webui
