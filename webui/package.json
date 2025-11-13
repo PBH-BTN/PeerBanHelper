@@ -54,7 +54,7 @@
     "@typescript-eslint/parser": "^8.46.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
-    "eslint": "9.38.0",
+    "eslint": "9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.5.1",
     "husky": "^9.1.7",
