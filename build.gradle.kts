@@ -151,7 +151,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.20")
+    implementation("ch.qos.logback:logback-classic:1.5.21")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
