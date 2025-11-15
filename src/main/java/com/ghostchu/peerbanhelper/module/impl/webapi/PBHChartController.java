@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
@@ -57,6 +58,8 @@ public final class PBHChartController extends AbstractFeatureModule {
     private IPDBManager iPDBManager;
     @Autowired
     private ActiveMonitoringModule activeMonitoringModule;
+    @Autowired
+    private PeerConnectionMetricDao peerConnectionMetricDao;
 
     @Override
     public boolean isConfigurable() {
@@ -81,7 +84,15 @@ public final class PBHChartController extends AbstractFeatureModule {
                 .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/sessionBetween", this::handleSessionBetween, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/sessionDayBucket", this::handleSessionDayBucket, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/sessionAnalyse", this::handleSessionAnalyse, Role.USER_READ, Role.PBH_PLUS)
         ;
+    }
+
+    private void handleSessionAnalyse(@NotNull Context ctx) {
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        var downloader = ctx.queryParam("downloader");
+        var data = peerConnectionMetricDao.getMetricsSince(timeQueryModel.startAt(), timeQueryModel.endAt(), downloader);
+        ctx.json(new StdResp(true, null, data));
     }
 
     private void handleSessionBetween(@NotNull Context ctx) throws SQLException {
@@ -91,14 +102,7 @@ public final class PBHChartController extends AbstractFeatureModule {
             downloader = "%";
         }
         // 从 startAt 到 endAt，每天的开始时间戳
-        var queryBuilder = peerRecordDao.queryBuilder();
-        var where = queryBuilder
-                .selectColumns("address")
-                .distinct()
-                .where();
-        where.and(where.like("downloader", downloader), where.or(where.between("firstTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt()),
-                where.between("lastTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt())));
-        ctx.json(new StdResp(true, null, queryBuilder.countOf()));
+        ctx.json(new StdResp(true, null, peerRecordDao.sessionBetween(downloader, timeQueryModel.startAt(), timeQueryModel.endAt())));
     }
 
     private void handleSessionDayBucket(@NotNull Context ctx) throws Exception {
@@ -110,7 +114,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         var where = peerRecordDao.queryBuilder().where();
         if (downloader != null) {
             where.and(where.eq("downloader", downloader), where.between("firstTimeSeen", startAtTs, endAtTs).or().between("lastTimeSeen", startAtTs, endAtTs));
-        }else{
+        } else {
             where.between("firstTimeSeen", startAtTs, endAtTs).or().between("lastTimeSeen", startAtTs, endAtTs);
         }
         Set<PeerRecordEntity> peerRecords = new LinkedHashSet<>(where.query());
@@ -129,8 +133,6 @@ public final class PBHChartController extends AbstractFeatureModule {
                 }
             }
         }
-
-
         ctx.json(new StdResp(true, null, sessionDayBucket.entrySet().stream()
                 .map(e -> new SessionDayBucketDTO(e.getKey(), e.getValue().total.intValue(), e.getValue().incoming.intValue()))
                 .sorted(Comparator.comparingLong(SessionDayBucketDTO::key))

@@ -1,4 +1,4 @@
-config-version: 31
+config-version: 32
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -476,3 +476,12 @@ module:
     # 模式1 - 仅保护做种任务 - Mode 1 - Protect seeding tasks only
     # 模式2 - 保护下载任务和做种任务，无论 Peer Flags 支持与否，可能引发误判 - Mode 2 - Protect both downloading and seeding tasks, no matter Peer Flags supported or not, may lead to false positive
     protect-mode: 0
+  # Peer 统计与分析服务
+  peer-analyse-service:
+    # 会话统计与分析服务
+    # Session Analyse Service
+    session-analyse:
+      enabled: true
+      data-flush-interval: 3600000
+      cleanup-interval: 3600000
+      data-retention-time: 15552000000
