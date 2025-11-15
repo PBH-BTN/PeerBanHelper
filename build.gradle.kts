@@ -185,6 +185,9 @@ dependencies {
 
     // SWT (provided scope - for compilation only)
     compileOnly("org.eclipse.swt:swt-classpath:local")
+
+    // install4j stuff
+    compileOnly("com.install4j:install4j-runtime:12.0")
 }
 
 application {
