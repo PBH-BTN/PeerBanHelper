@@ -17,6 +17,9 @@ import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -85,7 +88,65 @@ public final class PBHChartController extends AbstractFeatureModule {
                 .get("/api/chart/sessionBetween", this::handleSessionBetween, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/sessionDayBucket", this::handleSessionDayBucket, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/sessionAnalyse", this::handleSessionAnalyse, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/clientAnalyse", this::handleClientAnalyse, Role.USER_READ, Role.PBH_PLUS)
         ;
+    }
+
+    private void handleClientAnalyse(@NotNull Context ctx) throws Exception {
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        var downloader = ctx.queryParam("downloader");
+        Pageable pageable = new Pageable(ctx);
+        Orderable orderable = new Orderable(Map.of("uploaded", false), ctx);
+        String generatedOrderBy = "ORDER BY "+orderable.generateOrderBy();
+        try (
+                var r = peerRecordDao.queryRaw("""
+                        SELECT peerId, clientName, SUM(uploaded) AS uploaded, SUM(downloaded) AS downloaded, COUNT(*) AS count
+                        FROM peer_records
+                        WHERE firstTimeSeen >= ? AND lastTimeSeen <= ? AND uploaded != 0 AND downloaded != 0
+                          AND (? IS NULL OR ? = '' OR downloader = ?)
+                        GROUP BY peerId, clientName
+                        %s
+                        LIMIT %s OFFSET %s
+                        """.formatted(generatedOrderBy,pageable.getSize(), pageable.getZeroBasedPage() * pageable.getSize()), String.valueOf(timeQueryModel.startAt().getTime()), String.valueOf(timeQueryModel.endAt()), downloader, downloader, downloader);
+                var ct = peerRecordDao.queryRaw("""
+                        SELECT COUNT(*)
+                        FROM (
+                            SELECT 1
+                            FROM peer_records
+                            WHERE firstTimeSeen >= ? AND lastTimeSeen <= ? AND uploaded != 0 AND downloaded != 0
+                              AND (? IS NULL OR ? = '' OR downloader = ?)
+                            GROUP BY peerId, clientName
+                        ) AS grouped_records
+                        """, String.valueOf(timeQueryModel.startAt().getTime()), String.valueOf(timeQueryModel.endAt()), downloader, downloader, downloader);
+        ) {
+            List<ClientAnalyseDTO> rList = new ArrayList<>();
+            for (var row : r.getResults()) {
+                String peerId = row[0];
+                String clientName = row[1];
+                long uploaded = Long.parseLong(row[2]);
+                long downloaded = Long.parseLong(row[3]);
+                long count = Long.parseLong(row[4]);
+                rList.add(new ClientAnalyseDTO(peerId, clientName, uploaded, downloaded, count));
+            }
+            var ctr = Long.parseLong(ct.getFirstResult()[0]);
+            ctx.json(new StdResp(true, null, new Page<>(pageable, ctr, rList)));
+        }
+    }
+
+    static class ClientAnalyseDTO {
+        public String peerId;
+        public String clientName;
+        public long uploaded;
+        public long downloaded;
+        public long count;
+
+        public ClientAnalyseDTO(String peerId, String clientName, long uploaded, long downloaded, long count) {
+            this.peerId = peerId;
+            this.clientName = clientName;
+            this.uploaded = uploaded;
+            this.downloaded = downloaded;
+            this.count = count;
+        }
     }
 
     private void handleSessionAnalyse(@NotNull Context ctx) {
@@ -113,9 +174,9 @@ public final class PBHChartController extends AbstractFeatureModule {
         Map<Long, SessionTimeRangeCounter> sessionDayBucket = new LinkedHashMap<>();
         var where = peerRecordDao.queryBuilder().where();
         if (downloader != null) {
-            where.and(where.eq("downloader", downloader), where.between("firstTimeSeen", startAtTs, endAtTs).or().between("lastTimeSeen", startAtTs, endAtTs));
+            where.eq("downloader", downloader).and().ge("firstTimeSeen", startAtTs).and().le("lastTimeSeen", endAtTs);
         } else {
-            where.between("firstTimeSeen", startAtTs, endAtTs).or().between("lastTimeSeen", startAtTs, endAtTs);
+            where.ge("firstTimeSeen", startAtTs).and().le("lastTimeSeen", endAtTs);
         }
         Set<PeerRecordEntity> peerRecords = new LinkedHashSet<>(where.query());
         // 生成按日时间戳的桶，并填充数据

@@ -66,4 +66,17 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
         }
         return queryBuilder;
     }
+
+    public String generateOrderBy(){
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Boolean> entry : entrySet()) {
+            if(!sb.isEmpty()){
+                sb.append(", ");
+            }
+            sb.append(dto2DatabaseNames.getOrDefault(entry.getKey(), entry.getKey()))
+              .append(" ")
+              .append(entry.getValue() ? "ASC" : "DESC");
+        }
+        return sb.toString();
+    }
 }
