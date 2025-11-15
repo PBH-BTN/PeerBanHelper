@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -82,9 +83,10 @@ public class SessionAnalyseService extends AbstractFeatureModule implements Relo
 
     private void flushData() {
         try {
+            long startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
             var list = connectionMetricsTrackDao.queryForAll();
             connectionMetricDao.aggregating(list);
-            connectionMetricsTrackDao.delete(list);
+            connectionMetricsTrackDao.delete(list.stream().filter(e->e.getTimeframeAt().getTime() < startOfToday).toList());
         } catch (SQLException e) {
             log.warn("Failed to flush session analyse data", e);
         }
