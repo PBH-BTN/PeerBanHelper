@@ -61,7 +61,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
      */
     @Override
     public @NotNull String getConfigName() {
-        return "swarm-tracking";
+        return "peer-analyse-service.swarm-tracking";
     }
 
     /**

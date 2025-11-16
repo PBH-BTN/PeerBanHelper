@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class SessionAnalyseService extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
+public class SessionAnalyseServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
     private PeerConnectionMetricsTrackDao connectionMetricsTrackDao;
     @Autowired
