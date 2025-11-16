@@ -138,7 +138,7 @@ dependencies {
     implementation("com.google.guava:guava:33.5.0-jre")
     implementation("com.github.seancfoley:ipaddress:5.5.1")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
-    implementation("org.apache.commons:commons-lang3:3.19.0")
+    implementation("org.apache.commons:commons-lang3:3.20.0")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
