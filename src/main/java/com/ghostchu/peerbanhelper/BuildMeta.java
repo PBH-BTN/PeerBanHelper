@@ -20,11 +20,11 @@ public final class BuildMeta {
     private String compileUser;
 
     public void loadBuildMeta(Properties configuration) {
-        this.version = ExternalSwitch.parse("pbh.buildmeta.maven.version", configuration.getProperty("git.build.version"));
-        this.branch = ExternalSwitch.parse("pbh.buildmeta.git.branch", configuration.getProperty("git.branch"));
-        this.commit = configuration.getProperty("git.commit.id.full");
-        this.abbrev = configuration.getProperty("git.commit.id.abbrev");
-        this.os = System.getProperty("os.name");
+        this.version = ExternalSwitch.parse("pbh.buildmeta.maven.version", configuration.getProperty("git.build.version", "0.0.0-undefined"));
+        this.branch = ExternalSwitch.parse("pbh.buildmeta.git.branch", configuration.getProperty("git.branch", "Unknown"));
+        this.commit = configuration.getProperty("git.commit.id.full", "Unknown");
+        this.abbrev = configuration.getProperty("git.commit.id.abbrev", "Unknown");
+        this.os = System.getProperty("os.name", "Unknown");
         this.compileTime = configuration.getProperty("git.build.time", "Unknown");
         this.compileHost = configuration.getProperty("git.build.host", "Unknown");
         this.compileUser = configuration.getProperty("git.build.user.name", "Unknown");
