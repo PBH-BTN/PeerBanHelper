@@ -336,6 +336,9 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                     yamlConfiguration.set("client", null);
                     yamlConfiguration.set("btn.app-id","REDACTED_IN_DEMO_MODE");
                     yamlConfiguration.set("btn.app-secret","REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("pbh-plus-key", "REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("server.token", "REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("installation-id", "Not Available In Demo Mode");
                     yamlConfiguration.set("proxy", null);
                 }
                 sectionToList(yamlConfiguration, "push-notification", "push-notification-name");
