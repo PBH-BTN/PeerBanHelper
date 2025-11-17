@@ -10,27 +10,6 @@
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.activeMonitor.dataRetentionTime')"
-      :tooltip="t('page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips')"
-      field="model.data_retention_time"
-    >
-      <a-input-number v-model="model.data_retention_time" style="width: 200px">
-        <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
-      </a-input-number>
-      <template #extra> ={{ formatMilliseconds(model.data_retention_time) }} </template>
-    </a-form-item>
-    <a-form-item
-      v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.activeMonitor.dataCleanupInterval')"
-      field="model.data_cleanup_interval"
-    >
-      <a-input-number v-model="model.data_cleanup_interval" style="width: 200px">
-        <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
-      </a-input-number>
-      <template #extra> ={{ formatMilliseconds(model.data_cleanup_interval) }} </template>
-    </a-form-item>
-    <a-form-item
-      v-if="model.enabled"
       :label="t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable')"
       :tooltip="t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips')"
       field="model.traffic_monitoring.daily"

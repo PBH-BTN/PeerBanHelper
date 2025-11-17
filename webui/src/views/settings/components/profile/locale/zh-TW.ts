@@ -160,5 +160,40 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
     '狀態更新時重置計時器',
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
-    '當狀態更新時視為連線活動，重置計時器（如任務進度）'
+    '當狀態更新時視為連線活動，重置計時器（如任務進度）',
+
+  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer 統計與分析服務',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title': '會話統計與分析服務',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
+    '記錄在統計週期內的 Peer 狀態資料，生成統計資料報表',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval':
+    '資料刷寫間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips':
+    '記錄在統計週期內的 Peer 狀態資料到資料庫的時間間隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval':
+    '資料匯總和清理間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips':
+    '匯總統計資料和清理過期資料的時間間隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime':
+    '舊資料輪轉刪除時間',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
+    '超過此時間的歷史會話資料將被自動刪除',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': '使用者群追蹤服務',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
+    '為 BTN 種群追蹤和其它類似所需該資料的功能提供資料支援，並追蹤本次運作會話期間的對等體資料，在重啟後資料將自動刪除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': '對等體追蹤記錄服務',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
+    '持續追蹤和記錄 Peer 的狀態、會話、傳輸、偏移量等資料，為按 IP、Torrent 聚合資料分析和圖表生成、BTN 跨使用者 Peer 追蹤能力提供資料支援',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval':
+    '資料刷寫間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips':
+    '將 Peer 狀態、會話、傳輸、偏移量等資料寫入資料庫的時間間隔',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime':
+    '資料保留時間',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips':
+    '持續追蹤記錄的 Peer 資料保留時長，超過此時間的資料將被刪除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
+    '資料清理間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
+    '執行資料清理任務的時間間隔，建議不要設定得太頻繁以避免影響效能'
 }

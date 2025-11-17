@@ -174,5 +174,42 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
     'Reset timer on status change',
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
-    'Consider connection active when status update (e.g progress), reset the timer'
+    'Consider connection active when status update (e.g progress), reset the timer',
+
+  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer Analyse Service',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title':
+    'Session Analyse Service',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
+    'Record the peer status data in the analyse interval, generate statistical report',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval':
+    'Data flush interval',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips':
+    'Time interval to flush peer status data to database during the analyse period',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval':
+    'Cleanup interval',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips':
+    'Time interval to aggregate statistics and cleanup expired data',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime':
+    'Data retention time',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
+    'Historical session data older than this time will be automatically deleted',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': 'Swarm Tracking Service',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
+    'Provide data support for BTN swarm tracking and other functions that require this data, and track peer data during this running session, data will be automatically deleted after restart',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title':
+    'Peer Recording Service',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
+    'Continuously track and record the status, session, transfer, offset and other data of Peers, provide data support for IP and Torrent aggregated data analysis and chart generation, BTN cross-user Peer tracking capabilities',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval':
+    'Data flush interval',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips':
+    'Time interval to write peer status, session, transfer, offset and other data to database',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime':
+    'Data retention time',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips':
+    'Retention time for continuously tracked peer data, data older than this time will be deleted',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
+    'Data cleanup interval',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
+    'Time interval to execute data cleanup tasks, do not set it too frequently to avoid performance impact'
 }

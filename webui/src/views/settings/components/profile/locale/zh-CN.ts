@@ -160,5 +160,40 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
     '状态更新时重置计时器',
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
-    '当状态更新时视为连接活动，重置计时器（如任务进度）'
+    '当状态更新时视为连接活动，重置计时器（如任务进度）',
+
+  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer 统计与分析服务',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title': '会话统计与分析服务',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
+    '记录在统计周期内的 Peer 状态数据，生成统计数据报表',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval':
+    '数据刷写间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips':
+    '记录在统计周期内的 Peer 状态数据到数据库的时间间隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval':
+    '数据汇总和清理间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips':
+    '汇总统计数据和清理过期数据的时间间隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime':
+    '旧数据轮转删除时间',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
+    '超过此时间的历史会话数据将被自动删除',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': '用户群跟踪服务',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
+    '为 BTN 种群跟踪和其它类似所需该数据的功能提供数据支持，并跟踪本次运行会话期间的对等体数据，在重启后数据将自动删除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': '对等体跟踪记录服务',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
+    '持续跟踪和记录 Peer 的状态、会话、传输、偏移量等数据，为按 IP、Torrent 聚合数据分析和图表生成、BTN 跨用户 Peer 跟踪能力提供数据支持',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval':
+    '数据刷写间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips':
+    '将 Peer 状态、会话、传输、偏移量等数据写入数据库的时间间隔',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime':
+    '数据保留时间',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips':
+    '持续跟踪记录的 Peer 数据保留时长，超过此时间的数据将被删除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
+    '数据清理间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
+    '执行数据清理任务的时间间隔，建议不要设置的太频繁以避免影响性能'
 }
