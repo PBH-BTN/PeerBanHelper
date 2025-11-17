@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.0.11-25w40b"
+version = "9.0.11-25w41a"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
