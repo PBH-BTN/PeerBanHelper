@@ -203,6 +203,10 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
         var queryBuilder = new Orderable(Map.of("lastTimeSeen", false, "address", true, "port", true), ctx)
+                .addMapping("torrent.name", "torrentName")
+                .addMapping("torrent.infoHash", "torrentInfoHash")
+                .addMapping("torrent.size", "torrentSize")
+                .addMapping("ip", "peerIp")
                 .apply(peerRecordDao.queryBuilder().join(torrentDao.queryBuilder(), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
         queryBuilder.where().eq("torrent_id", t);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
