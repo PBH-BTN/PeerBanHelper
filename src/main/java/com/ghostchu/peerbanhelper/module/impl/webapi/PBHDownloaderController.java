@@ -310,7 +310,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private void handleDownloaderList(@NotNull Context ctx) {
         List<DownloaderWrapperDTO> downloaders = downloaderManager
-                .stream().map(d -> new DownloaderWrapperDTO(d.getId(), d.getName(), d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))
+                .stream().map(d -> new DownloaderWrapperDTO(d.getId(), d.getName(), ExternalSwitch.parseBoolean("pbh.demoMode") ? "REDACTED_IN_DEMO_MODE" : d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))
                 .toList();
         ctx.json(new StdResp(true, null, downloaders));
     }
