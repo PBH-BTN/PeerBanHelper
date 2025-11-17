@@ -25,7 +25,7 @@
               <icon-heart-fill />
               &nbsp;PBH Plus
             </a-button>
-            <div>
+            <div v-if="serverVersion?.commit">
               (<a-link
                 :href="`https://github.com/Ghost-chu/PeerBanHelper/commit/${serverVersion?.commit}`"
                 >{{ serverVersion?.commit.substring(0, 8) }} </a-link

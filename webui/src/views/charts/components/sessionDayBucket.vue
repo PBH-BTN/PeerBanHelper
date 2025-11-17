@@ -131,7 +131,22 @@ const chartOptions = ref({
   legend: {
     data: [
       t('page.charts.sessionDayBucket.options.total'),
-      t('page.charts.sessionDayBucket.options.incoming')
+      t('page.charts.sessionDayBucket.options.incoming'),
+      t('page.charts.sessionDayBucket.options.remoteRefuseTransferToClient'),
+      t('page.charts.sessionDayBucket.options.remoteAcceptTransferToClient'),
+      t('page.charts.sessionDayBucket.options.localRefuseTransferToPeer'),
+      t('page.charts.sessionDayBucket.options.localAcceptTransferToPeer'),
+      t('page.charts.sessionDayBucket.options.localNotInterested'),
+      t('page.charts.sessionDayBucket.options.questionStatus'),
+      t('page.charts.sessionDayBucket.options.optimisticUnchoke'),
+      t('page.charts.sessionDayBucket.options.fromDHT'),
+      t('page.charts.sessionDayBucket.options.fromPEX'),
+      t('page.charts.sessionDayBucket.options.fromLSD'),
+      t('page.charts.sessionDayBucket.options.fromTrackerOrOther'),
+      t('page.charts.sessionDayBucket.options.rc4Encrypted'),
+      t('page.charts.sessionDayBucket.options.plainTextEncrypted'),
+      t('page.charts.sessionDayBucket.options.utpSocket'),
+      t('page.charts.sessionDayBucket.options.tcpSocket')
     ]
   },
 
@@ -151,6 +166,7 @@ const chartOptions = ref({
     {
       name: t('page.charts.sessionDayBucket.options.total'),
       type: 'line',
+      stack: 'Total',
       areaStyle: {},
       emphasis: {
         focus: 'series'
@@ -160,6 +176,157 @@ const chartOptions = ref({
     {
       name: t('page.charts.sessionDayBucket.options.incoming'),
       type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.remoteRefuseTransferToClient'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.remoteAcceptTransferToClient'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.localRefuseTransferToPeer'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.localAcceptTransferToPeer'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.localNotInterested'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.questionStatus'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.optimisticUnchoke'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.fromDHT'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.fromPEX'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.fromLSD'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.fromTrackerOrOther'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.rc4Encrypted'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.plainTextEncrypted'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.utpSocket'),
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [] as [Date, number][]
+    },
+    {
+      name: t('page.charts.sessionDayBucket.options.tcpSocket'),
+      type: 'line',
+      stack: 'Total',
       areaStyle: {},
       emphasis: {
         focus: 'series'
@@ -181,8 +348,23 @@ const { loading, run, refresh, data } = useRequest(getSessionDayBucket, {
   defaultParams: [option.range[0]!, option.range[1]!, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.series![0]!.data = data.data.map((v) => [new Date(v.key), v.total])
-      chartOptions.value.series![1]!.data = data.data.map((v) => [new Date(v.key), v.incoming])
+      chartOptions.value.series![0]!.data = data.data.map((v) => [new Date(v.key), v.totalConnections])
+      chartOptions.value.series![1]!.data = data.data.map((v) => [new Date(v.key), v.incomingConnections])
+      chartOptions.value.series![2]!.data = data.data.map((v) => [new Date(v.key), v.remoteRefuseTransferToClient])
+      chartOptions.value.series![3]!.data = data.data.map((v) => [new Date(v.key), v.remoteAcceptTransferToClient])
+      chartOptions.value.series![4]!.data = data.data.map((v) => [new Date(v.key), v.localRefuseTransferToPeer])
+      chartOptions.value.series![5]!.data = data.data.map((v) => [new Date(v.key), v.localAcceptTransferToPeer])
+      chartOptions.value.series![6]!.data = data.data.map((v) => [new Date(v.key), v.localNotInterested])
+      chartOptions.value.series![7]!.data = data.data.map((v) => [new Date(v.key), v.questionStatus])
+      chartOptions.value.series![8]!.data = data.data.map((v) => [new Date(v.key), v.optimisticUnchoke])
+      chartOptions.value.series![9]!.data = data.data.map((v) => [new Date(v.key), v.fromDHT])
+      chartOptions.value.series![10]!.data = data.data.map((v) => [new Date(v.key), v.fromPEX])
+      chartOptions.value.series![11]!.data = data.data.map((v) => [new Date(v.key), v.fromLSD])
+      chartOptions.value.series![12]!.data = data.data.map((v) => [new Date(v.key), v.fromTrackerOrOther])
+      chartOptions.value.series![13]!.data = data.data.map((v) => [new Date(v.key), v.rc4Encrypted])
+      chartOptions.value.series![14]!.data = data.data.map((v) => [new Date(v.key), v.plainTextEncrypted])
+      chartOptions.value.series![15]!.data = data.data.map((v) => [new Date(v.key), v.utpSocket])
+      chartOptions.value.series![16]!.data = data.data.map((v) => [new Date(v.key), v.tcpSocket])
     }
   },
   onError: (e) => {

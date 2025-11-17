@@ -154,7 +154,7 @@ export async function getSessionDayBucket(
     query.append('downloader', downloader)
   }
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/chart/sessionDayBucket?` + query.toString()),
+    urlJoin(endpointStore.endpoint, `api/chart/sessionAnalyse?` + query.toString()),
     location.href
   )
 
