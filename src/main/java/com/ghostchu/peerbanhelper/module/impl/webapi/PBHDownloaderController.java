@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -293,6 +294,17 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
                 .count();
 
         JsonObject config = downloader.saveDownloaderJson();
+        if (ExternalSwitch.parseBoolean("pbh.demoMode")) {
+            config.addProperty("endpoint", "REDACTED_IN_DEMO_MODE");
+            config.addProperty("username", "REDACTED_IN_DEMO_MODE");
+            config.addProperty("password", "REDACTED_IN_DEMO_MODE");
+            var bAuth = config.getAsJsonObject("basicAuth");
+            if(bAuth != null) {
+                bAuth.addProperty("user", "REDACTED_IN_DEMO_MODE");
+                bAuth.addProperty("pass", "REDACTED_IN_DEMO_MODE");
+                config.add("basicAuth", bAuth);
+            }
+        }
         ctx.json(new StdResp(true, null, new DownloaderStatusDTO(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config, downloader.isPaused())));
     }
 
