@@ -375,14 +375,8 @@ module:
         # 规则文件订阅地址 - Subscription Address
         url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
   # 主动监测 - Active Monitoring
-  # 此功能允许 PeerBanHelper 主动记录每次请求下载器时获取到的数据到本地 SQLite 数据库中
-  # Allow PBH records all data that fetched from downloader and save them into SQLite database
-  # 其产生的数据可被其它模块调用（如：生成图表报表等）
-  # The data produced by this module can be re-used by other modules
-  # 注意：使用 SD 卡或者 eMMC 的设备【不建议】开启此功能，此功能对于存储设备的读写压力较高，可能加快 Flash 存储芯片磨损或导致存储设备过热
-  # NOTE: It is not recommended to enable this module if PBH running on SDCard or eMMC Flash chip.
-  # 另请注意：此功能可能还会导致本地数据库文件大小快速变大，不建议在存储空间不充足的存储设备上使用此功能
-  # NOTE: This may lead database size increase quickly
+  # 此功能允许 PeerBanHelper 监视下载器的网络传输活动，自动调整其传输速率设置，并在达到阈值时发送告警信息
+  # This feature allows PeerBanHelper to monitor the network traffic activity of downloader, automatically adjust its transfer rate settings, and send alert messages when the threshold is reached.
   active-monitoring:
     # 是否启用此功能
     enabled: true

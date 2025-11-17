@@ -1,6 +1,10 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-form-item :label="t('page.settings.tab.profile.module.enable')" field="model.enabled">
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.enable')"
+      :tooltip="t('page.settings.tab.profile.module.activeMonitor.enable.tips')"
+      field="model.enabled"
+    >
       <a-switch v-model="model.enabled" />
       <template v-if="!model.enabled" #extra>
         <a-typography-text type="warning">{{
@@ -33,6 +37,9 @@
       :label="
         t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable')
       "
+      :tooltip="
+        t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips')
+      "
       field="model.traffic_sliding_capping.enabled"
     >
       <a-switch v-model="model.traffic_sliding_capping.enabled" />
@@ -42,6 +49,11 @@
       :label="
         t(
           'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic'
+        )
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic.tips'
         )
       "
       field="model.traffic_sliding_capping.daily_max_allowed_upload_traffic"
@@ -61,6 +73,11 @@
       :label="
         t(
           'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed'
+        )
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.tips'
         )
       "
       field="model.traffic_sliding_capping.min_speed"
@@ -89,6 +106,11 @@
       :label="
         t(
           'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed'
+        )
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips'
         )
       "
       field="model.traffic_sliding_capping.max_speed"

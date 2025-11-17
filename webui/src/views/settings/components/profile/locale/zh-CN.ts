@@ -91,6 +91,9 @@ export default {
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 前缀长度',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度',
 
+  'page.settings.tab.profile.module.btn.enable.tips':
+    '启用来自 BTN 网络的规则，仅在 config.yml 中配置了 BTN 服务器时生效',
+
   'page.settings.tab.profile.module.multiDialingBlocker.title': '多拨封禁',
   'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime': '使用全局封禁时间',
 
@@ -111,11 +114,15 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全局封禁时间',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '规则订阅',
+  'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
+    '启用来自 BTN 网络的规则，仅在 config.yml 中配置了 BTN 服务器时生效',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置请前往{link}页面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '规则订阅',
 
   'page.settings.tab.profile.module.activeMonitor.title': '主动监控',
+  'page.settings.tab.profile.module.activeMonitor.enable.tips':
+    '此功能允许 PeerBanHelper 监视下载器的网络传输活动，自动调整其传输速率设置，并在达到阈值时发送告警信息',
   'page.settings.tab.profile.module.activeMonitor.disable.tips': '关闭后部分图表功能不可用',
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': '数据记录周期',
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
@@ -127,15 +134,23 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
     '每日流量告警阈值',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable':
-    '开启流量限制',
+    '开启流量滑动窗口限制',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips':
+    '启用此功能后，将接管所有下载器的上传速率控制设置项',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic':
-    '每日最大允许上传流量',
+    '滑动窗口最大上传流量',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic.tips':
+    '滑动窗口区域内，最多允许上传的流量',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed':
     '最小速度',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.tips':
+    '调整上传速率时，最小允许的下载速率',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.warning':
     '如果设置了最小速度，上述每日最大允许上传流量可能不被遵守',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed':
     '最大速度',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips':
+    '调整上传速率时，最大允许的下载速率',
   'page.settings.tab.profile.module.ptrBlackList.title': 'DNS 反向解析封禁',
   'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.ptrBlackList.reserveName': '封禁域名',
@@ -144,6 +159,8 @@ export default {
     '此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作',
 
   'page.settings.tab.profile.module.idleConnectionDosProtection.title': '拒绝服务攻击保护',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.enable.tips':
+    '此模块保护与 PeerBanHelper 关联的下载器免受拒绝服务攻击',
   'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime':
     '使用全局封禁时间',
   'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime':
