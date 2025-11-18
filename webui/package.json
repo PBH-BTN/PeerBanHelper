@@ -12,7 +12,8 @@
     "type-check": "vue-tsc --build --force",
     "lint": "prettier -c src/ && eslint . --ignore-pattern 'dist/*'",
     "fix-lint": "eslint . --ignore-pattern 'dist/*' --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "prepare": "cd .. && husky webui/.husky"
   },
   "dependencies": {
     "@arco-design/web-vue": "2.56.3",
