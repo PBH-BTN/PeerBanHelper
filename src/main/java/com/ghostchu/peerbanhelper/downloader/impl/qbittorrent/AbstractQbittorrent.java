@@ -21,7 +21,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -573,7 +572,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         Map<String, StringJoiner> banTasks = new HashMap<>();
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
-            joiner.add(p.getPeer().getRawIp());
+            joiner.add(remapBanListAddress(p.getPeer().getAddress().getAddress()).toNormalizedString());
             banTasks.put(p.getTorrent().getHash(), joiner);
         });
         banTasks.forEach((hash, peers) -> {
@@ -603,25 +602,12 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     protected void setBanListFull(Collection<IPAddress> bannedAddresses) {
-        StringJoiner joiner = new StringJoiner("\n");
-        bannedAddresses.stream().distinct().forEach(ipAddr -> {
-            joiner.add(ipAddr.toNormalizedString());
-            if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
-                Address ipv6 = ipAddr.toIPv6();
-                if (ipv6 != null) {
-                    joiner.add(ipv6.toNormalizedString());
-                }
-            }
-            if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
-                Address ipv4 = ipAddr.toIPv4();
-                if (ipv4 != null) {
-                    joiner.add(ipv4.toNormalizedString());
-                }
-            }
-        });
-
+        String banStr = bannedAddresses.stream()
+                .map(ipAddr -> remapBanListAddress(ipAddr).toNormalizedString())
+                .distinct()
+                .collect(Collectors.joining("\n"));
         FormBody formBody = new FormBody.Builder()
-                .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))
+                .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", banStr)))
                 .build();
 
         try {
