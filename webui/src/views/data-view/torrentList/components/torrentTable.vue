@@ -27,6 +27,7 @@
       column-resizable
       size="medium"
       class="banlog-table"
+      @sorter-change="sorterChange"
       @page-change="changeCurrent"
       @page-size-change="changePageSize"
     >
@@ -161,6 +162,10 @@ const columns = [
   {
     title: () => t('page.torrentList.column.name'),
     dataIndex: 'name',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     ellipsis: true,
     tooltip: true,
     width: 500
@@ -168,11 +173,21 @@ const columns = [
   {
     title: 'Hash',
     slotName: 'hash',
+    dataIndex: 'infoHash',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     width: 340
   },
   {
     title: () => t('page.torrentList.column.size'),
     slotName: 'size',
+    dataIndex: 'size',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     width: 120
   },
   {
@@ -196,6 +211,19 @@ const handleSearch = debounce((value: string) => {
   run({ page: 1, pageSize: pageSize.value, keyword: value })
 }, 300)
 const endpointStore = useEndpointStore()
+const sorterChange = (dataIndex: string, direction: string) => {
+  if (!direction)
+    run({
+      page: current.value,
+      pageSize: pageSize.value
+    })
+  else
+    run({
+      page: current.value,
+      pageSize: pageSize.value,
+      sorter: `${dataIndex}|${direction}`
+    })
+}
 </script>
 <style scoped>
 .edit-btn {
