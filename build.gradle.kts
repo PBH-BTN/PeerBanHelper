@@ -238,7 +238,8 @@ tasks.jar {
     manifest {
         attributes(
             "Main-Class" to "com.ghostchu.peerbanhelper.MainJumpLoader",
-            "Class-Path" to configurations.runtimeClasspath.get().files.joinToString(" ") { "libraries/${it.name}" }
+            "Class-Path" to configurations.runtimeClasspath.get().files.joinToString(" ") { "libraries/${it.name}" },
+            "Enable-Native-Access" to "ALL-UNNAMED"
         )
     }
 }
