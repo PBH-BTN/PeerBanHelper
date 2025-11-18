@@ -1,1 +1,1 @@
-cd webui && pnpm lint
+cd webui && pnpm pre-commmit-check

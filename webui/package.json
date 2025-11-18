@@ -10,10 +10,11 @@
     "build-only": "vite build",
     "analyze": "ANALYZE=true vite build",
     "type-check": "vue-tsc --build --force",
-    "lint": "prettier -c src/ && eslint . --ignore-pattern 'dist/*'",
+    "lint": "prettier -c src/ && eslint . --ignore-pattern \"dist/*\"",
     "fix-lint": "eslint . --ignore-pattern 'dist/*' --fix",
     "format": "prettier --write src/",
-    "prepare": "cd .. && husky webui/.husky"
+    "prepare": "cd .. && husky webui/.husky",
+    "pre-commmit-check": "lint-staged"
   },
   "dependencies": {
     "@arco-design/web-vue": "2.56.3",
@@ -59,6 +60,7 @@
     "eslint-plugin-vue": "^10.5.1",
     "husky": "^9.1.7",
     "less": "^4.4.2",
+    "lint-staged": "^16.2.6",
     "monaco-editor": "^0.54.0",
     "npm-run-all2": "^8.0.4",
     "prettier": "^3.6.2",
@@ -86,6 +88,12 @@
     ],
     "onlyBuiltDependencies": [
       "esbuild"
+    ]
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,vue}": [
+      "prettier -c  src/",
+      "eslint . --ignore-pattern \"dist/*\""
     ]
   }
 }
