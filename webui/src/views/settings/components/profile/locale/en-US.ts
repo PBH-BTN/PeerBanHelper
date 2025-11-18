@@ -210,7 +210,8 @@ export default {
     'Data retention time',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
     'Historical session data older than this time will be automatically deleted',
-  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': 'Swarm Tracking Service',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title':
+    'Swarm Tracking Service',
   'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
     'Provide data support for BTN swarm tracking and other functions that require this data, and track peer data during this running session, data will be automatically deleted after restart',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title':

@@ -38,7 +38,9 @@
         t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable')
       "
       :tooltip="
-        t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips')
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips'
+        )
       "
       field="model.traffic_sliding_capping.enabled"
     >

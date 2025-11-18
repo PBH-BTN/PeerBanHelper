@@ -9,8 +9,14 @@
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval')"
-      :tooltip="t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips')"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips'
+        )
+      "
       field="model.data_flush_interval"
     >
       <a-input-number v-model="model.data_flush_interval" style="width: 200px">
@@ -20,8 +26,14 @@
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime')"
-      :tooltip="t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips')"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips'
+        )
+      "
       field="model.data_retention_time"
     >
       <a-input-number v-model="model.data_retention_time" style="width: 200px">
@@ -31,8 +43,14 @@
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval')"
-      :tooltip="t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips')"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips'
+        )
+      "
       field="model.data_cleanup_interval"
     >
       <a-input-number v-model="model.data_cleanup_interval" style="width: 200px">

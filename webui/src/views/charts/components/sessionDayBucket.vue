@@ -348,21 +348,54 @@ const { loading, run, refresh, data } = useRequest(getSessionDayBucket, {
   defaultParams: [option.range[0]!, option.range[1]!, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.series![0]!.data = data.data.map((v) => [new Date(v.key), v.totalConnections])
-      chartOptions.value.series![1]!.data = data.data.map((v) => [new Date(v.key), v.incomingConnections])
-      chartOptions.value.series![2]!.data = data.data.map((v) => [new Date(v.key), v.remoteRefuseTransferToClient])
-      chartOptions.value.series![3]!.data = data.data.map((v) => [new Date(v.key), v.remoteAcceptTransferToClient])
-      chartOptions.value.series![4]!.data = data.data.map((v) => [new Date(v.key), v.localRefuseTransferToPeer])
-      chartOptions.value.series![5]!.data = data.data.map((v) => [new Date(v.key), v.localAcceptTransferToPeer])
-      chartOptions.value.series![6]!.data = data.data.map((v) => [new Date(v.key), v.localNotInterested])
-      chartOptions.value.series![7]!.data = data.data.map((v) => [new Date(v.key), v.questionStatus])
-      chartOptions.value.series![8]!.data = data.data.map((v) => [new Date(v.key), v.optimisticUnchoke])
+      chartOptions.value.series![0]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.totalConnections
+      ])
+      chartOptions.value.series![1]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.incomingConnections
+      ])
+      chartOptions.value.series![2]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.remoteRefuseTransferToClient
+      ])
+      chartOptions.value.series![3]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.remoteAcceptTransferToClient
+      ])
+      chartOptions.value.series![4]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.localRefuseTransferToPeer
+      ])
+      chartOptions.value.series![5]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.localAcceptTransferToPeer
+      ])
+      chartOptions.value.series![6]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.localNotInterested
+      ])
+      chartOptions.value.series![7]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.questionStatus
+      ])
+      chartOptions.value.series![8]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.optimisticUnchoke
+      ])
       chartOptions.value.series![9]!.data = data.data.map((v) => [new Date(v.key), v.fromDHT])
       chartOptions.value.series![10]!.data = data.data.map((v) => [new Date(v.key), v.fromPEX])
       chartOptions.value.series![11]!.data = data.data.map((v) => [new Date(v.key), v.fromLSD])
-      chartOptions.value.series![12]!.data = data.data.map((v) => [new Date(v.key), v.fromTrackerOrOther])
+      chartOptions.value.series![12]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.fromTrackerOrOther
+      ])
       chartOptions.value.series![13]!.data = data.data.map((v) => [new Date(v.key), v.rc4Encrypted])
-      chartOptions.value.series![14]!.data = data.data.map((v) => [new Date(v.key), v.plainTextEncrypted])
+      chartOptions.value.series![14]!.data = data.data.map((v) => [
+        new Date(v.key),
+        v.plainTextEncrypted
+      ])
       chartOptions.value.series![15]!.data = data.data.map((v) => [new Date(v.key), v.utpSocket])
       chartOptions.value.series![16]!.data = data.data.map((v) => [new Date(v.key), v.tcpSocket])
     }

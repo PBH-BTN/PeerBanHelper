@@ -9,8 +9,14 @@
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval')"
-      :tooltip="t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips')"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips'
+        )
+      "
       field="model.data_flush_interval"
     >
       <a-input-number v-model="model.data_flush_interval" style="width: 200px">
@@ -20,8 +26,12 @@
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval')"
-      :tooltip="t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips')"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval')
+      "
+      :tooltip="
+        t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips')
+      "
       field="model.cleanup_interval"
     >
       <a-input-number v-model="model.cleanup_interval" style="width: 200px">
@@ -31,8 +41,14 @@
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime')"
-      :tooltip="t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips')"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips'
+        )
+      "
       field="model.data_retention_time"
     >
       <a-input-number v-model="model.data_retention_time" style="width: 200px">

@@ -47,19 +47,19 @@ export interface SessionDayBucket {
   key: number
   totalConnections: number
   incomingConnections: number
-  remoteRefuseTransferToClient: number;
-  remoteAcceptTransferToClient: number;
-  localRefuseTransferToPeer: number;
-  localAcceptTransferToPeer: number;
-  localNotInterested: number;
-  questionStatus: number;
-  optimisticUnchoke: number;
-  fromDHT: number;
-  fromPEX: number;
-  fromLSD: number;
-  fromTrackerOrOther: number;
-  rc4Encrypted: number;
-  plainTextEncrypted: number;
-  utpSocket: number;
-  tcpSocket: number;
+  remoteRefuseTransferToClient: number
+  remoteAcceptTransferToClient: number
+  localRefuseTransferToPeer: number
+  localAcceptTransferToPeer: number
+  localNotInterested: number
+  questionStatus: number
+  optimisticUnchoke: number
+  fromDHT: number
+  fromPEX: number
+  fromLSD: number
+  fromTrackerOrOther: number
+  rc4Encrypted: number
+  plainTextEncrypted: number
+  utpSocket: number
+  tcpSocket: number
 }
