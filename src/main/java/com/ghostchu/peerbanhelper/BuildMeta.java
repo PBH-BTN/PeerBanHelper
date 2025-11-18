@@ -18,16 +18,18 @@ public final class BuildMeta {
     private String compileTime = "Unknown";
     private String compileHost;
     private String compileUser;
+    private String compileEmail;
 
     public void loadBuildMeta(Properties configuration) {
         this.version = ExternalSwitch.parse("pbh.buildmeta.maven.version", configuration.getProperty("git.build.version", "0.0.0-undefined"));
         this.branch = ExternalSwitch.parse("pbh.buildmeta.git.branch", configuration.getProperty("git.branch", "Unknown"));
-        this.commit = configuration.getProperty("git.commit.id.full", "Unknown");
+        this.commit = configuration.getProperty("git.commit.id", "Unknown");
         this.abbrev = configuration.getProperty("git.commit.id.abbrev", "Unknown");
         this.os = System.getProperty("os.name", "Unknown");
-        this.compileTime = configuration.getProperty("git.build.time", "Unknown");
+        this.compileTime = configuration.getProperty("git.commit.time", "Unknown");
         this.compileHost = configuration.getProperty("git.build.host", "Unknown");
-        this.compileUser = configuration.getProperty("git.build.user.name", "Unknown");
+        this.compileUser = configuration.getProperty("git.commit.user.name", "Unknown");
+        this.compileEmail = configuration.getProperty("git.commit.user.email", "Unknown");
     }
 
     public boolean isSnapshotOrBeta() {

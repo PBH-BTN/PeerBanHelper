@@ -22,5 +22,5 @@ WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/build/libraries /app/libraries
 COPY --from=build build/build/libs/PeerBanHelper.jar /app/PeerBanHelper.jar
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
-ENTRYPOINT ["sh", "-c", "${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar"]
+ENV PATH="/usr/lib/jvm/liberica25-container-jre/bin:${PATH}"
+ENTRYPOINT ["sh", "-c", "/usr/lib/jvm/liberica25-container-jre/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar"]
