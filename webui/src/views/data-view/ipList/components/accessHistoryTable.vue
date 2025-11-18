@@ -111,6 +111,7 @@ import { GetIPAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
+import type { TableSortable } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -153,7 +154,7 @@ const columns = [
     slotName: 'downloader',
     dataIndex: 'downloader',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     }
   },
@@ -162,7 +163,7 @@ const columns = [
     slotName: 'peerId',
     dataIndex: 'peerId',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     }
   },
@@ -171,7 +172,7 @@ const columns = [
     slotName: 'traffic',
     dataIndex: 'uploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 120
@@ -181,7 +182,7 @@ const columns = [
     slotName: 'offset',
     dataIndex: 'uploadedOffset',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 120
@@ -191,7 +192,7 @@ const columns = [
     slotName: 'flags',
     dataIndex: 'lastFlags',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 120
@@ -201,7 +202,7 @@ const columns = [
     slotName: 'time',
     dataIndex: 'firstTimeSeen',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 260
@@ -210,7 +211,7 @@ const columns = [
     title: () => t('page.ipList.accessHistory.column.torrent'),
     dataIndex: 'torrentName',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     ellipsis: true,

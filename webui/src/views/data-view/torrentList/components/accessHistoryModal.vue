@@ -125,7 +125,7 @@ import { GetTorrentAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
-import { Popover, Space } from '@arco-design/web-vue'
+import { Popover, Space, type TableSortable } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
 import { h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -183,7 +183,7 @@ const columns = [
     slotName: 'traffic',
     dataIndex: 'uploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     }
   },

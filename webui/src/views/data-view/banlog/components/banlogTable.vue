@@ -92,6 +92,7 @@ import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
+import type { TableSortable } from '@arco-design/web-vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
@@ -141,7 +142,7 @@ const columns = [
     slotName: 'banAt',
     dataIndex: 'banAt',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 210
@@ -161,7 +162,7 @@ const columns = [
     slotName: 'peerStatus',
     dataIndex: 'peerUploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 150
@@ -178,7 +179,7 @@ const columns = [
     slotName: 'torrentSize',
     dataIndex: 'torrentSize',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 120

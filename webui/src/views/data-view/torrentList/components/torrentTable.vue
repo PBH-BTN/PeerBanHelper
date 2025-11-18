@@ -115,6 +115,7 @@ import { GetTorrentInfoList } from '@/service/data'
 import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
+import type { TableSortable } from '@arco-design/web-vue'
 import { debounce } from 'lodash'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -163,7 +164,7 @@ const columns = [
     title: () => t('page.torrentList.column.name'),
     dataIndex: 'name',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     ellipsis: true,
@@ -175,7 +176,7 @@ const columns = [
     slotName: 'hash',
     dataIndex: 'infoHash',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 340
@@ -185,7 +186,7 @@ const columns = [
     slotName: 'size',
     dataIndex: 'size',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 120

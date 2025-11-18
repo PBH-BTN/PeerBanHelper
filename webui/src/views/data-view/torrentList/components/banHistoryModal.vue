@@ -91,6 +91,7 @@ import { GetTorrentBanHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
+import type { TableSortable } from '@arco-design/web-vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -147,7 +148,7 @@ const columns = [
     slotName: 'peerStatus',
     dataIndex: 'peerUploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 150
