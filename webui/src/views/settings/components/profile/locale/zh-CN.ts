@@ -124,10 +124,6 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.enable.tips':
     '此功能允许 PeerBanHelper 监视下载器的网络传输活动，自动调整其传输速率设置，并在达到阈值时发送告警信息',
   'page.settings.tab.profile.module.activeMonitor.disable.tips': '关闭后部分图表功能不可用',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': '数据记录周期',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
-    'SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间',
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': '清理周期',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable': '开启流量告警',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
     '设置流量告警阈值，当超出阈值后将发送告警信息提醒您检查下载器状态',
@@ -151,13 +147,6 @@ export default {
     '最大速度',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips':
     '调整上传速率时，最大允许的下载速率',
-  'page.settings.tab.profile.module.ptrBlackList.title': 'DNS 反向解析封禁',
-  'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': '使用全局封禁时间',
-  'page.settings.tab.profile.module.ptrBlackList.reserveName': '封禁域名',
-  'page.settings.tab.profile.module.ptrBlackList.placeholder': '反向解析域名',
-  'page.settings.tab.profile.module.ptrBlackList.tooltip':
-    '此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作',
-
   'page.settings.tab.profile.module.idleConnectionDosProtection.title': '拒绝服务攻击保护',
   'page.settings.tab.profile.module.idleConnectionDosProtection.enable.tips':
     '此模块保护与 PeerBanHelper 关联的下载器免受拒绝服务攻击',

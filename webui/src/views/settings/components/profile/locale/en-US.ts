@@ -136,10 +136,6 @@ export default {
     'This feature allows PeerBanHelper to monitor the network traffic activity of downloader, automatically adjust its transfer rate settings, and send alert messages when the threshold is reached',
   'page.settings.tab.profile.module.activeMonitor.disable.tips':
     'This function is required by some charts.',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': 'Retention time',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
-    "Deleted records won't free the disk space, but new data will reuse those parts of space due SQLite internal design",
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': 'Cleanup interval',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable':
     'Enable daily traffic alert',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
@@ -164,13 +160,6 @@ export default {
     'Maximum speed',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips':
     'The maximum allowed download rate when adjusting upload rate',
-  'page.settings.tab.profile.module.ptrBlackList.title': 'DNS Reserve Lookup blocker',
-  'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': 'Use global ban duration',
-  'page.settings.tab.profile.module.ptrBlackList.reserveName': 'Banned name',
-  'page.settings.tab.profile.module.ptrBlackList.placeholder': 'Domain name',
-  'page.settings.tab.profile.module.ptrBlackList.tooltip':
-    'This module will force to do PTR query on Peer IP, and try to resolve the hostname that bind with IP address. If the IP address bind with a hostname and the hostname match the rules below, then do the action',
-
   'page.settings.tab.profile.module.idleConnectionDosProtection.title': 'DoS Protection Module',
   'page.settings.tab.profile.module.idleConnectionDosProtection.enable.tips':
     'This module protects the downloader that associated with PBH from DoS attack',
