@@ -91,6 +91,9 @@ export default {
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 前綴長度',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 前綴長度',
 
+  'page.settings.tab.profile.module.btn.enable.tips':
+    '啟用來自 BTN 網路的規則，僅在 config.yml 中配置了 BTN 服務器時生效',
+
   'page.settings.tab.profile.module.multiDialingBlocker.title': '多撥封禁',
   'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime': '使用全域封禁時間',
 
@@ -111,39 +114,42 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全域封禁時間',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '規則訂閱',
+  'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
+    '啟用來自 BTN 網路的規則，僅在 config.yml 中配置了 BTN 服務器時生效',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全域封禁時間',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置請前往{link}頁面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '規則訂閱',
 
   'page.settings.tab.profile.module.activeMonitor.title': '主動監控',
+  'page.settings.tab.profile.module.activeMonitor.enable.tips':
+    '此功能允許 PeerBanHelper 監視下載器的網路傳輸活動，自動調整其傳輸速率設定，並在達到閾值時發送告警訊息',
   'page.settings.tab.profile.module.activeMonitor.disable.tips': '關閉後部分圖表功能不可用',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': '資料記錄週期',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
-    'SQLite 的特性，記錄被刪除後不會釋放磁碟空間，但後續新資料記錄會重新利用此部分空間',
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': '清理週期',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable': '開啟流量告警',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
     '設定流量告警閾值，當超出閾值後將發送告警資訊提醒您檢查下載器狀態',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
     '每日流量告警閾值',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable':
-    '開啟流量限制',
+    '開啟流量滑動視窗限制',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips':
+    '啟用此功能後，將接管所有下載器的上傳速率控制設定項',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic':
-    '每日最大允許上傳流量',
+    '滑動視窗最大上傳流量',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic.tips':
+    '滑動視窗區域內，最多允許上傳的流量',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed':
     '最小速度',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.tips':
+    '調整上傳速率時，最小允許的下載速率',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.warning':
     '如果設定了最小速度，上述每日最大允許上傳流量可能不會被遵守',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed':
     '最大速度',
-  'page.settings.tab.profile.module.ptrBlackList.title': 'DNS 反向解析封禁',
-  'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': '使用全域封禁時間',
-  'page.settings.tab.profile.module.ptrBlackList.reserveName': '封禁域名',
-  'page.settings.tab.profile.module.ptrBlackList.placeholder': '反向解析域名',
-  'page.settings.tab.profile.module.ptrBlackList.tooltip':
-    '此模組將強制對 Peer IP 進行 PTR 查詢，並試圖解析其 IP 位址綁定的主機名稱。如果 IP 位址綁定了一個主機名稱且主機名稱匹配下列規則，則執行操作',
-
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips':
+    '調整上傳速率時，最大允許的下載速率',
   'page.settings.tab.profile.module.idleConnectionDosProtection.title': '拒絕服務攻擊保護',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.enable.tips':
+    '此模塊保護與 PeerBanHelper 關聯的下載器免受拒絕服務攻擊',
   'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime':
     '使用全域封禁時間',
   'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime':
@@ -160,5 +166,40 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
     '狀態更新時重置計時器',
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
-    '當狀態更新時視為連線活動，重置計時器（如任務進度）'
+    '當狀態更新時視為連線活動，重置計時器（如任務進度）',
+
+  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer 統計與分析服務',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title': '會話統計與分析服務',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
+    '記錄在統計週期內的 Peer 狀態資料，生成統計資料報表',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval':
+    '資料刷寫間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips':
+    '記錄在統計週期內的 Peer 狀態資料到資料庫的時間間隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval':
+    '資料匯總和清理間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips':
+    '匯總統計資料和清理過期資料的時間間隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime':
+    '舊資料輪轉刪除時間',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
+    '超過此時間的歷史會話資料將被自動刪除',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': '使用者群追蹤服務',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
+    '為 BTN 種群追蹤和其它類似所需該資料的功能提供資料支援，並追蹤本次運作會話期間的對等體資料，在重啟後資料將自動刪除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': '對等體追蹤記錄服務',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
+    '持續追蹤和記錄 Peer 的狀態、會話、傳輸、偏移量等資料，為按 IP、Torrent 聚合資料分析和圖表生成、BTN 跨使用者 Peer 追蹤能力提供資料支援',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval':
+    '資料刷寫間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips':
+    '將 Peer 狀態、會話、傳輸、偏移量等資料寫入資料庫的時間間隔',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime':
+    '資料保留時間',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips':
+    '持續追蹤記錄的 Peer 資料保留時長，超過此時間的資料將被刪除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
+    '資料清理間隔時間',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
+    '執行資料清理任務的時間間隔，建議不要設定得太頻繁以避免影響效能'
 }

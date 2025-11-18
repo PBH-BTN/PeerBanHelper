@@ -91,6 +91,9 @@ export default {
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 前缀长度',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度',
 
+  'page.settings.tab.profile.module.btn.enable.tips':
+    '启用来自 BTN 网络的规则，仅在 config.yml 中配置了 BTN 服务器时生效',
+
   'page.settings.tab.profile.module.multiDialingBlocker.title': '多拨封禁',
   'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime': '使用全局封禁时间',
 
@@ -111,39 +114,42 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全局封禁时间',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '规则订阅',
+  'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
+    '启用来自 BTN 网络的规则，仅在 config.yml 中配置了 BTN 服务器时生效',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置请前往{link}页面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '规则订阅',
 
   'page.settings.tab.profile.module.activeMonitor.title': '主动监控',
+  'page.settings.tab.profile.module.activeMonitor.enable.tips':
+    '此功能允许 PeerBanHelper 监视下载器的网络传输活动，自动调整其传输速率设置，并在达到阈值时发送告警信息',
   'page.settings.tab.profile.module.activeMonitor.disable.tips': '关闭后部分图表功能不可用',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': '数据记录周期',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
-    'SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间',
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': '清理周期',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable': '开启流量告警',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
     '设置流量告警阈值，当超出阈值后将发送告警信息提醒您检查下载器状态',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
     '每日流量告警阈值',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable':
-    '开启流量限制',
+    '开启流量滑动窗口限制',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips':
+    '启用此功能后，将接管所有下载器的上传速率控制设置项',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic':
-    '每日最大允许上传流量',
+    '滑动窗口最大上传流量',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic.tips':
+    '滑动窗口区域内，最多允许上传的流量',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed':
     '最小速度',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.tips':
+    '调整上传速率时，最小允许的下载速率',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.warning':
     '如果设置了最小速度，上述每日最大允许上传流量可能不被遵守',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed':
     '最大速度',
-  'page.settings.tab.profile.module.ptrBlackList.title': 'DNS 反向解析封禁',
-  'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': '使用全局封禁时间',
-  'page.settings.tab.profile.module.ptrBlackList.reserveName': '封禁域名',
-  'page.settings.tab.profile.module.ptrBlackList.placeholder': '反向解析域名',
-  'page.settings.tab.profile.module.ptrBlackList.tooltip':
-    '此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作',
-
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips':
+    '调整上传速率时，最大允许的下载速率',
   'page.settings.tab.profile.module.idleConnectionDosProtection.title': '拒绝服务攻击保护',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.enable.tips':
+    '此模块保护与 PeerBanHelper 关联的下载器免受拒绝服务攻击',
   'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime':
     '使用全局封禁时间',
   'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime':
@@ -160,5 +166,40 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
     '状态更新时重置计时器',
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
-    '当状态更新时视为连接活动，重置计时器（如任务进度）'
+    '当状态更新时视为连接活动，重置计时器（如任务进度）',
+
+  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer 统计与分析服务',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title': '会话统计与分析服务',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
+    '记录在统计周期内的 Peer 状态数据，生成统计数据报表',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval':
+    '数据刷写间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips':
+    '记录在统计周期内的 Peer 状态数据到数据库的时间间隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval':
+    '数据汇总和清理间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips':
+    '汇总统计数据和清理过期数据的时间间隔',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime':
+    '旧数据轮转删除时间',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
+    '超过此时间的历史会话数据将被自动删除',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': '用户群跟踪服务',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
+    '为 BTN 种群跟踪和其它类似所需该数据的功能提供数据支持，并跟踪本次运行会话期间的对等体数据，在重启后数据将自动删除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': '对等体跟踪记录服务',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
+    '持续跟踪和记录 Peer 的状态、会话、传输、偏移量等数据，为按 IP、Torrent 聚合数据分析和图表生成、BTN 跨用户 Peer 跟踪能力提供数据支持',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval':
+    '数据刷写间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips':
+    '将 Peer 状态、会话、传输、偏移量等数据写入数据库的时间间隔',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime':
+    '数据保留时间',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips':
+    '持续跟踪记录的 Peer 数据保留时长，超过此时间的数据将被删除',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
+    '数据清理间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
+    '执行数据清理任务的时间间隔，建议不要设置的太频繁以避免影响性能'
 }

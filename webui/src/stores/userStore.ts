@@ -9,7 +9,8 @@ export const useUserStore = defineStore('userStore', () => {
     fieldPie: true,
     ispPie: true,
     traffic: true,
-    trends: true
+    trends: true,
+    sessionDayBucket: true
   })
   const confirmScriptWarning = () => {
     scriptWarningConfirmed.value = true
@@ -20,6 +21,7 @@ export const useUserStore = defineStore('userStore', () => {
     ispPie: boolean
     traffic: boolean
     trends: boolean
+    sessionDayBucket: boolean
   }) => {
     showCharts.value = v
   }

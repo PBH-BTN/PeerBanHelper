@@ -105,6 +105,7 @@ export async function GetIPAccessHistoryList(params: {
   ip: string
   page: number
   pageSize?: number
+  sorter?: string
 }): Promise<CommonResponseWithPage<AccessHistory[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -117,6 +118,9 @@ export async function GetIPAccessHistoryList(params: {
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
   }
+  if (params.sorter) {
+    url.searchParams.set('orderBy', params.sorter)
+  }
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
@@ -128,6 +132,7 @@ export async function GetIPBanHistoryList(params: {
   ip: string
   page: number
   pageSize?: number
+  sorter?: string
 }): Promise<CommonResponseWithPage<BanLog[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -139,6 +144,9 @@ export async function GetIPBanHistoryList(params: {
   url.searchParams.set('page', String(params.page))
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
+  }
+  if (params.sorter) {
+    url.searchParams.set('orderBy', params.sorter)
   }
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {

@@ -91,6 +91,7 @@ import { GetTorrentBanHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
+import type { TableSortable } from '@arco-design/web-vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -130,16 +131,31 @@ const columns = [
       '/' +
       t('page.banlog.banlogTable.column.unbanTime'),
     slotName: 'banAt',
+    dataIndex: 'banAt',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 210
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerAddress'),
     slotName: 'peerAddress',
+    dataIndex: 'peerIp',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 200
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerId'),
     slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 120
   },
   {
@@ -147,7 +163,7 @@ const columns = [
     slotName: 'peerStatus',
     dataIndex: 'peerUploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     },
     width: 150

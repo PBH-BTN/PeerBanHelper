@@ -100,6 +100,9 @@ export default {
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 prefix length',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 prefix length',
 
+  'page.settings.tab.profile.module.btn.enable.tips':
+    'Enable the network rules from BTN server, only works when you configured BTN server in config.yml',
+
   'page.settings.tab.profile.module.multiDialingBlocker.title': 'Multi-dialing blocker',
   'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime':
     'Use global ban duration',
@@ -121,18 +124,18 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': 'Use global ban duration',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': 'Rule subscribe',
+  'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
+    'Enable the network rules from BTN server, only works when you configured BTN server in config.yml',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe':
     'For other configurations, please go to the {link} page',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': 'Rule Subscribe',
 
   'page.settings.tab.profile.module.activeMonitor.title': 'Active monitoring',
+  'page.settings.tab.profile.module.activeMonitor.enable.tips':
+    'This feature allows PeerBanHelper to monitor the network traffic activity of downloader, automatically adjust its transfer rate settings, and send alert messages when the threshold is reached',
   'page.settings.tab.profile.module.activeMonitor.disable.tips':
     'This function is required by some charts.',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': 'Retention time',
-  'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
-    "Deleted records won't free the disk space, but new data will reuse those parts of space due SQLite internal design",
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': 'Cleanup interval',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable':
     'Enable daily traffic alert',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
@@ -140,23 +143,26 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
     'Daily traffic alert threshold',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable':
-    'Enable traffic limit',
+    'Enable Traffic Capping by Sliding Window',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips':
+    'If enabled, this module will take over all upload rate control settings in downloader',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic':
-    'Daily maximum allowed upload traffic',
+    'Max allowed upload traffic in sliding window',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic.tips':
+    'The maximum allowed upload traffic in sliding window',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed':
     'Minimum speed',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.tips':
+    'The minimum allowed download rate when adjusting upload rate',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.warning':
     'If minimum speed is set, the above daily maximum allowed upload traffic may not be obeyed',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed':
     'Maximum speed',
-  'page.settings.tab.profile.module.ptrBlackList.title': 'DNS Reserve Lookup blocker',
-  'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': 'Use global ban duration',
-  'page.settings.tab.profile.module.ptrBlackList.reserveName': 'Banned name',
-  'page.settings.tab.profile.module.ptrBlackList.placeholder': 'Domain name',
-  'page.settings.tab.profile.module.ptrBlackList.tooltip':
-    'This module will force to do PTR query on Peer IP, and try to resolve the hostname that bind with IP address. If the IP address bind with a hostname and the hostname match the rules below, then do the action',
-
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips':
+    'The maximum allowed download rate when adjusting upload rate',
   'page.settings.tab.profile.module.idleConnectionDosProtection.title': 'DoS Protection Module',
+  'page.settings.tab.profile.module.idleConnectionDosProtection.enable.tips':
+    'This module protects the downloader that associated with PBH from DoS attack',
   'page.settings.tab.profile.module.idleConnectionDosProtection.useGlobalBanTime':
     'Use global ban duration',
   'page.settings.tab.profile.module.idleConnectionDosProtection.maxAllowedIdleTime':
@@ -174,5 +180,43 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange':
     'Reset timer on status change',
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
-    'Consider connection active when status update (e.g progress), reset the timer'
+    'Consider connection active when status update (e.g progress), reset the timer',
+
+  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer Analyse Service',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title':
+    'Session Analyse Service',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
+    'Record the peer status data in the analyse interval, generate statistical report',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval':
+    'Data flush interval',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataFlushInterval.tips':
+    'Time interval to flush peer status data to database during the analyse period',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval':
+    'Cleanup interval',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.cleanupInterval.tips':
+    'Time interval to aggregate statistics and cleanup expired data',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime':
+    'Data retention time',
+  'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
+    'Historical session data older than this time will be automatically deleted',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title':
+    'Swarm Tracking Service',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
+    'Provide data support for BTN swarm tracking and other functions that require this data, and track peer data during this running session, data will be automatically deleted after restart',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title':
+    'Peer Recording Service',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
+    'Continuously track and record the status, session, transfer, offset and other data of Peers, provide data support for IP and Torrent aggregated data analysis and chart generation, BTN cross-user Peer tracking capabilities',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval':
+    'Data flush interval',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval.tips':
+    'Time interval to write peer status, session, transfer, offset and other data to database',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime':
+    'Data retention time',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataRetentionTime.tips':
+    'Retention time for continuously tracked peer data, data older than this time will be deleted',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
+    'Data cleanup interval',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
+    'Time interval to execute data cleanup tasks, do not set it too frequently to avoid performance impact'
 }

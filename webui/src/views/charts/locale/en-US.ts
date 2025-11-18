@@ -43,5 +43,25 @@ export default {
   'page.charts.error.title': 'Failed to load chart',
   'page.charts.error.refresh': 'Retry',
   'page.charts.all': 'All',
-  'page.charts.title.fieldPie': 'Field Analysis'
+  'page.charts.title.fieldPie': 'Field Analysis',
+  'page.charts.title.sessionDayBucket': 'IP Statistics',
+  'page.charts.sessionDayBucket.options.total': 'Total IPs',
+  'page.charts.sessionDayBucket.options.incoming': 'Incoming IPs',
+  'page.charts.sessionDayBucket.options.remoteRefuseTransferToClient': 'Peer Refuse Upload',
+  'page.charts.sessionDayBucket.options.remoteAcceptTransferToClient': 'Peer Accept Upload',
+  'page.charts.sessionDayBucket.options.localRefuseTransferToPeer': 'Local Refuse Upload',
+  'page.charts.sessionDayBucket.options.localAcceptTransferToPeer': 'Local Accept Upload',
+  'page.charts.sessionDayBucket.options.localNotInterested': 'Local Not Interested',
+  'page.charts.sessionDayBucket.options.questionStatus': 'Unknown Status',
+  'page.charts.sessionDayBucket.options.optimisticUnchoke': 'Optimistic Unchoke',
+  'page.charts.sessionDayBucket.options.fromDHT': 'From DHT',
+  'page.charts.sessionDayBucket.options.fromPEX': 'From PeX',
+  'page.charts.sessionDayBucket.options.fromLSD': 'From LSD',
+  'page.charts.sessionDayBucket.options.fromTrackerOrOther': 'From Tracker',
+  'page.charts.sessionDayBucket.options.rc4Encrypted': 'RC4 Encrypted',
+  'page.charts.sessionDayBucket.options.plainTextEncrypted': 'Plain Text',
+  'page.charts.sessionDayBucket.options.utpSocket': 'uTP Protocol',
+  'page.charts.sessionDayBucket.options.tcpSocket': 'TCP Protocol',
+  'page.charts.tooltip.sessionDayBucket':
+    'Statistics of unique IPs per day. Only shows session data recorded by PeerBanHelper, which may have significant deviation from actual data and is for reference only. For performance reasons, it is recommended to select a time range not exceeding 14 days.'
 }

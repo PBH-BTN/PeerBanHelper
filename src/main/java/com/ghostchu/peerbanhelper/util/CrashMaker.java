@@ -4,6 +4,7 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
+@SuppressWarnings("removal")
 public class CrashMaker {
     public void crash() {
         getUnsafeInstance().putAddress(0, 0);

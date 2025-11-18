@@ -158,10 +158,11 @@
         >
           <a-descriptions-item :label="t('page.settings.tab.info.version.current')">
             {{ data?.data.peerbanhelper.version }} (<a-link
+              v-if="data?.data.peerbanhelper.commit_id"
               :href="`https://github.com/Ghost-chu/PeerBanHelper/commit/${data?.data.peerbanhelper.commit_id}`"
             >
-              {{ data?.data.peerbanhelper.commit_id.substring(0, 8) }} </a-link
-            >)
+              {{ data.data.peerbanhelper.commit_id.substring(0, 8) }} </a-link
+            ><span v-else>N/A</span>)
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.version.webui')">
             {{ webuiVersion }} (<a-link

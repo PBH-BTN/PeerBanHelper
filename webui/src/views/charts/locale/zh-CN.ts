@@ -43,5 +43,25 @@ export default {
   'page.charts.error.title': '图表加载失败',
   'page.charts.error.refresh': '重试',
   'page.charts.all': '全部下载器',
-  'page.charts.title.fieldPie': '维度分析'
+  'page.charts.title.fieldPie': '维度分析',
+  'page.charts.title.sessionDayBucket': 'IP 统计',
+  'page.charts.sessionDayBucket.options.total': 'IP 总数',
+  'page.charts.sessionDayBucket.options.incoming': '传入 IP 数',
+  'page.charts.sessionDayBucket.options.remoteRefuseTransferToClient': 'Peer 拒绝上传',
+  'page.charts.sessionDayBucket.options.remoteAcceptTransferToClient': 'Peer 接受上传',
+  'page.charts.sessionDayBucket.options.localRefuseTransferToPeer': '下载器拒绝上传',
+  'page.charts.sessionDayBucket.options.localAcceptTransferToPeer': '下载器接受上传',
+  'page.charts.sessionDayBucket.options.localNotInterested': '下载器不感兴趣',
+  'page.charts.sessionDayBucket.options.questionStatus': '未知状态',
+  'page.charts.sessionDayBucket.options.optimisticUnchoke': '乐观解锁',
+  'page.charts.sessionDayBucket.options.fromDHT': '来自 DHT',
+  'page.charts.sessionDayBucket.options.fromPEX': '来自 PeX',
+  'page.charts.sessionDayBucket.options.fromLSD': '来自 LSD',
+  'page.charts.sessionDayBucket.options.fromTrackerOrOther': '来自 Tracker',
+  'page.charts.sessionDayBucket.options.rc4Encrypted': 'RC4 加密',
+  'page.charts.sessionDayBucket.options.plainTextEncrypted': '明文加密',
+  'page.charts.sessionDayBucket.options.utpSocket': 'uTP 协议',
+  'page.charts.sessionDayBucket.options.tcpSocket': 'TCP 协议',
+  'page.charts.tooltip.sessionDayBucket':
+    '按日统计唯一 IP 数据。仅展示被 PeerBanHelper 记录下的会话数据，相比真实数据可能有较大误差，仅供参考。为保证性能，建议选取时间范围不要超过14天。'
 }

@@ -20,6 +20,7 @@ export interface Module {
   ip_address_blocker_rules: IpAddressBlockerRules
   active_monitoring: ActiveMonitoring
   idle_connection_dos_protection: IdleConnectionDosProtection
+  peer_analyse_service: PeerAnalyseService
 }
 
 export interface PeerIdBlacklist {
@@ -130,8 +131,6 @@ export interface AllInOne {
 
 export interface ActiveMonitoring {
   enabled: boolean
-  data_retention_time: number
-  data_cleanup_interval: number
   traffic_monitoring: {
     daily: number
   }
@@ -141,6 +140,30 @@ export interface ActiveMonitoring {
     max_speed: number
     min_speed: number
   }
+}
+
+export interface PeerAnalyseService {
+  session_analyse: SessionAnalyse
+  swarm_tracking: SwarmTracking
+  peer_recording: PeerRecording
+}
+
+export interface SessionAnalyse {
+  enabled: boolean
+  data_flush_interval: number
+  cleanup_interval: number
+  data_retention_time: number
+}
+
+export interface SwarmTracking {
+  enabled: boolean
+}
+
+export interface PeerRecording {
+  enabled: boolean
+  data_flush_interval: number
+  data_retention_time: number
+  data_cleanup_interval: number
 }
 
 export interface IdleConnectionDosProtection {

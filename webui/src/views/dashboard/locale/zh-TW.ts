@@ -26,8 +26,12 @@ export default {
   'page.dashboard.statics.currentBan': '目前處於封禁狀態 Peer',
   'page.dashboard.statics.currentBanIps': '正處於封禁的 IP 數量',
   'page.dashboard.statics.peerBlockRate': '惡意:正常 連接比例',
+  'page.dashboard.statics.peerBlockRate.tips':
+    '小於 100% 代表惡意連接比正常連接少,反之超過 100% 代表惡意連接較正常連接多。100% 代表惡意連接和正常連接的比率是 1:1',
   'page.dashboard.statics.trackingPeers': '追蹤中的 Peers',
   'page.dashboard.statics.weeklySessions': '近7天會話唯一IP數量',
+  'page.dashboard.statics.weeklySessions.tips':
+    '按日統計唯一 IP 資料。僅展示被 PeerBanHelper 記錄下的連線資料,相比真實資料可能有較大誤差,僅供參考。',
   'page.dashboard.statics.number': '個',
   'page.dashboard.statics.percentage': '%',
   'page.dashboard.torrentList.title': '活動種子',

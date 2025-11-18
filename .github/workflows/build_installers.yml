@@ -14,8 +14,8 @@ jobs:
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v6
         with:
-          name: maven-dist
-          path: target/
+          name: gradle-dist
+          path: build/
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
@@ -23,15 +23,15 @@ jobs:
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Make installers
         run: |
-          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -g -d target/media -D librariesPath=$(pwd)/target/libraries install4j/project.install4j
+          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -g -d build/media -D librariesPath=$(pwd)/build/libraries install4j/project.install4j
       - name: Delete garbages
         run: |
-          rm -rf target/media/debug*
+          rm -rf build/media/debug*
       # jarPath=$(pwd) 是必须的，install4jc 不知道什么毛病，不支持相对路径，这太诡异了
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
           name: installer-dist
           path: |
-            target/media/*
+            build/media/*
         id: project

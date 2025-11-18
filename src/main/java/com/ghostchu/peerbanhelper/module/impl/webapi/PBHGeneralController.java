@@ -102,7 +102,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .post("/api/general/triggerCrash", this::handleTriggerCrash, Role.USER_WRITE)
                 .get("/api/general/global", this::handleGlobalConfigRead, Role.USER_READ)
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
-                .get("/api/general/{configName}", this::handleConfigGet, Role.USER_WRITE)
+                .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
     }
 
@@ -332,6 +332,15 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         switch (context.pathParam("configName")) {
             case "config" -> {
                 yamlConfiguration.load(Main.getMainConfigFile());
+                if(ExternalSwitch.parseBoolean("pbh.demoMode")){
+                    yamlConfiguration.set("client", null);
+                    yamlConfiguration.set("btn.app-id","REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("btn.app-secret","REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("pbh-plus-key", "REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("server.token", "REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("installation-id", "Not Available In Demo Mode");
+                    yamlConfiguration.set("proxy", null);
+                }
                 sectionToList(yamlConfiguration, "push-notification", "push-notification-name");
             }
             case "profile" -> {
@@ -442,60 +451,60 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     private static void mergeYaml(ConfigurationSection cfg, Map<String, Object> newMap, String target, String replacement) {
         String path = cfg.getCurrentPath();
-        newMap.forEach((key, value) -> {
+        newMap.forEach((key, val) -> {
             final String originalKey = cfg.contains(key) ? key : key.replace(target, replacement);
             switch (originalKey) {
                 // 推送服务转回字典
                 case "push-notification" -> {
                     if ("".equals(path)) {
-                        Map<String, Object> pushMap = ((List<?>) value).stream()
+                        Map<String, Object> pushMap = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(Map.class::cast)
                                 .collect(LinkedHashMap::new, (map, entry) -> {
                                     String name = (String) entry.remove("push_notification_name");
                                     map.put(name, entry);
                                 }, LinkedHashMap::putAll);
-                        value = pushMap;
+                        val = pushMap;
                     }
                 }
                 // 对象列表转为字符串列表
                 case "banned-peer-id" -> {
                     if ("module.peer-id-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) value).stream()
+                        List<String> bannedList = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        value = bannedList;
+                        val = bannedList;
                     }
                 }
                 case "banned-client-name" -> {
                     if ("module.client-name-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) value).stream()
+                        List<String> bannedList = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        value = bannedList;
+                        val = bannedList;
                     }
                 }
                 case "ptr-rules" -> {
                     if ("module.ptr-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) value).stream()
+                        List<String> bannedList = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        value = bannedList;
+                        val = bannedList;
                     }
                 }
             }
             // 如果值是 Map，递归替换子 cfg 中的键
-            if (value instanceof Map<?, ?> map) {
+            if (val instanceof Map<?, ?> map) {
                 ConfigurationSection section = Optional.ofNullable(cfg.getConfigurationSection(originalKey))
                         .orElseGet(() -> cfg.createSection(originalKey));
                 mergeYaml(section, (Map<String, Object>) map, target, replacement);
                 cfg.set(originalKey, section);
             }
             // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
-            else if (value instanceof List<?> list) {
+            else if (val instanceof List<?> list) {
                 List<Object> updatedList = list.stream()
                         .map(item -> item instanceof Map<?, ?> ? replaceKeys((Map<String, Object>) item, target, replacement) : item)
                         .toList();
@@ -503,7 +512,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             }
             // 直接添加非 Map 和非 List 的值
             else {
-                cfg.set(originalKey, value); // 直接添加
+                cfg.set(originalKey, val); // 直接添加
             }
         });
     }

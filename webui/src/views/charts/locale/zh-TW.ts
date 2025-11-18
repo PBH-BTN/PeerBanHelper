@@ -43,5 +43,25 @@ export default {
   'page.charts.error.title': '圖表載入失敗',
   'page.charts.error.refresh': '重試',
   'page.charts.all': '全部下載器',
-  'page.charts.title.fieldPie': '維度分析'
+  'page.charts.title.fieldPie': '維度分析',
+  'page.charts.title.sessionDayBucket': 'IP 統計',
+  'page.charts.sessionDayBucket.options.total': 'IP 總數',
+  'page.charts.sessionDayBucket.options.incoming': '傳入 IP 數',
+  'page.charts.sessionDayBucket.options.remoteRefuseTransferToClient': 'Peer 拒絕上傳',
+  'page.charts.sessionDayBucket.options.remoteAcceptTransferToClient': 'Peer 接受上傳',
+  'page.charts.sessionDayBucket.options.localRefuseTransferToPeer': '下載器拒絕上傳',
+  'page.charts.sessionDayBucket.options.localAcceptTransferToPeer': '下載器接受上傳',
+  'page.charts.sessionDayBucket.options.localNotInterested': '下載器不感興趣',
+  'page.charts.sessionDayBucket.options.questionStatus': '未知狀態',
+  'page.charts.sessionDayBucket.options.optimisticUnchoke': '樂觀解鎖',
+  'page.charts.sessionDayBucket.options.fromDHT': '來自 DHT',
+  'page.charts.sessionDayBucket.options.fromPEX': '來自 PeX',
+  'page.charts.sessionDayBucket.options.fromLSD': '來自 LSD',
+  'page.charts.sessionDayBucket.options.fromTrackerOrOther': '來自 Tracker',
+  'page.charts.sessionDayBucket.options.rc4Encrypted': 'RC4 加密',
+  'page.charts.sessionDayBucket.options.plainTextEncrypted': '明文加密',
+  'page.charts.sessionDayBucket.options.utpSocket': 'uTP 協定',
+  'page.charts.sessionDayBucket.options.tcpSocket': 'TCP 協定',
+  'page.charts.tooltip.sessionDayBucket':
+    '按日統計唯一 IP 資料。僅展示被 PeerBanHelper 記錄下的會話資料，相比真實資料可能有較大誤差，僅供參考。為保證效能，建議選取時間範圍不要超過14天。'
 }

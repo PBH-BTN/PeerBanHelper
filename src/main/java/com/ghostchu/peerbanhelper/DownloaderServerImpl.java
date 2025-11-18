@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -34,7 +33,6 @@ import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.j256.ormlite.misc.TransactionManager;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.AssociativeAddressTrie;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
@@ -281,56 +279,46 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist", false);
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_ADD_BANS)))) {
-                Callable<Object> callable = () -> {
-                    var banlistClone = banList.copyKeySet();
-                    downloaderBanDetailMap.forEach((downloader, details) -> {
-                        try {
-                            details.forEach(detail -> protect.getService().submit(() -> {
-                                try {
-                                    if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
-                                        long actualBanDuration = banDuration;
-                                        if (detail.banDuration() > 0) {
-                                            actualBanDuration = detail.banDuration();
-                                        }
-                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
-                                                UUID.randomUUID().toString().replace("-", "")
-                                                , downloaderManager.getDownloadInfo(downloader.getId()),
-                                                System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
-                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
-                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
-                                                detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
-                                                detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(), detail.result().structuredData());
-                                        bannedPeers.add(banMetadata);
-                                        banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
-                                        if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
-                                            log.info(tlUI(Lang.BAN_PEER,
-                                                    detail.peer().getPeerAddress(),
-                                                    detail.peer().getPeerId(),
-                                                    detail.peer().getClientName(),
-                                                    detail.peer().getProgress(),
-                                                    detail.peer().getUploaded(),
-                                                    detail.peer().getDownloaded(),
-                                                    detail.torrent().getName(),
-                                                    tlUI(detail.result().reason())));
-                                        }
+                var banlistClone = banList.copyKeySet();
+                downloaderBanDetailMap.forEach((downloader, details) -> {
+                    try {
+                        details.forEach(detail -> protect.getService().submit(() -> {
+                            try {
+                                if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
+                                    long actualBanDuration = banDuration;
+                                    if (detail.banDuration() > 0) {
+                                        actualBanDuration = detail.banDuration();
                                     }
-                                } catch (Exception e) {
-                                    log.error(tlUI(Lang.BAN_PEER_EXCEPTION), e);
+                                    BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
+                                            UUID.randomUUID().toString().replace("-", "")
+                                            , downloaderManager.getDownloadInfo(downloader.getId()),
+                                            System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
+                                            detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                            detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                            detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                            detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(), detail.result().structuredData());
+                                    bannedPeers.add(banMetadata);
+                                    banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
+                                    if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
+                                        log.info(tlUI(Lang.BAN_PEER,
+                                                detail.peer().getPeerAddress(),
+                                                detail.peer().getPeerId(),
+                                                detail.peer().getClientName(),
+                                                detail.peer().getProgress(),
+                                                detail.peer().getUploaded(),
+                                                detail.peer().getDownloaded(),
+                                                detail.torrent().getName(),
+                                                tlUI(detail.result().reason())));
+                                    }
                                 }
-                            }));
-                        } catch (Exception e) {
-                            log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
-                        }
-                    });
-                    return null;
-                };
-                if (laboratory.isExperimentActivated(Experiments.TRANSACTION_BATCH_BAN_HISTORY_WRITE.getExperiment())) {
-                    synchronized (AbstractPBHDao.class) {
-                        TransactionManager.callInTransaction(databaseManager.getDataSource(), callable);
+                            } catch (Exception e) {
+                                log.error(tlUI(Lang.BAN_PEER_EXCEPTION), e);
+                            }
+                        }));
+                    } catch (Exception e) {
+                        log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
                     }
-                } else {
-                    callable.call();
-                }
+                });
             }
             Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_HANDLE_BAN_ENTRIES));
             Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_APPLY_BAN_LIST));
@@ -457,10 +445,10 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     public Collection<BanMetadata> removeExpiredBans() {
         List<IPAddress> removeBan = new ArrayList<>();
         List<BanMetadata> metadata = new ArrayList<>();
-        banList.forEach((key, value) -> {
-            if (System.currentTimeMillis() >= value.getUnbanAt()) {
+        banList.forEach((key, v) -> {
+            if (System.currentTimeMillis() >= v.getUnbanAt()) {
                 removeBan.add(key);
-                metadata.add(value);
+                metadata.add(v);
             }
         });
         removeBan.forEach(this::unbanPeer);

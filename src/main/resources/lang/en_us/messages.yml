@@ -763,3 +763,4 @@ LAB_EXPERIMENT_ASYNC_BANLIST_APPLY_DESCRIPTION: "At startup, apply the banlist a
 LAB_EXPERIMENT_ASYNC_IPDB_LOADING: "Async IPDB loading at startup"
 LAB_EXPERIMENT_ASYNC_IPDB_LOADING_DESCRIPTION: "Loading the IP database asynchronously at startup to avoid blocking the startup thread and improve startup speed."
 WATCH_DOG_HUNGRY_IN_DOWNLOADER_IO: "[Warning] WatchDog Service {} has not been reset within the specified time {}, last status {}, dumping process thread information. This is usually caused by the downloader being stuck (especially on qBittorrent). If this problem occurs frequently, try restarting the downloader."
+DEMO_MODE_OPERATION_NOT_PERMITTED: "This instance is running in demo mode, this operation is not permitted."

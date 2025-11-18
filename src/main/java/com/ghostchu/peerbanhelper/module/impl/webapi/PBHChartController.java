@@ -2,8 +2,10 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
+import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
@@ -15,14 +17,17 @@ import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.j256.ormlite.dao.RawRowMapper;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,6 +61,8 @@ public final class PBHChartController extends AbstractFeatureModule {
     private IPDBManager iPDBManager;
     @Autowired
     private ActiveMonitoringModule activeMonitoringModule;
+    @Autowired
+    private PeerConnectionMetricDao peerConnectionMetricDao;
 
     @Override
     public boolean isConfigurable() {
@@ -79,8 +86,74 @@ public final class PBHChartController extends AbstractFeatureModule {
                 .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/sessionBetween", this::handleSessionBetween, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/chart/sessionDayBucket", this::handleSessionDayBucket, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/sessionDayBucket", this::handleSessionAnalyse, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/sessionAnalyse", this::handleSessionAnalyse, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/clientAnalyse", this::handleClientAnalyse, Role.USER_READ, Role.PBH_PLUS)
         ;
+    }
+
+    private void handleClientAnalyse(@NotNull Context ctx) throws Exception {
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        var downloader = ctx.queryParam("downloader");
+        Pageable pageable = new Pageable(ctx);
+        Orderable orderable = new Orderable(Map.of("uploaded", false), ctx);
+        String generatedOrderBy = "ORDER BY "+orderable.generateOrderBy();
+        try (
+                var r = peerRecordDao.queryRaw("""
+                        SELECT peerId, clientName, SUM(uploaded) AS uploaded, SUM(downloaded) AS downloaded, COUNT(*) AS count
+                        FROM peer_records
+                        WHERE firstTimeSeen >= ? AND lastTimeSeen <= ? AND uploaded != 0 AND downloaded != 0
+                          AND (? IS NULL OR ? = '' OR downloader = ?)
+                        GROUP BY peerId, clientName
+                        %s
+                        LIMIT %s OFFSET %s
+                        """.formatted(generatedOrderBy,pageable.getSize(), pageable.getZeroBasedPage() * pageable.getSize()), String.valueOf(timeQueryModel.startAt().getTime()), String.valueOf(timeQueryModel.endAt()), downloader, downloader, downloader);
+                var ct = peerRecordDao.queryRaw("""
+                        SELECT COUNT(*)
+                        FROM (
+                            SELECT 1
+                            FROM peer_records
+                            WHERE firstTimeSeen >= ? AND lastTimeSeen <= ? AND uploaded != 0 AND downloaded != 0
+                              AND (? IS NULL OR ? = '' OR downloader = ?)
+                            GROUP BY peerId, clientName
+                        ) AS grouped_records
+                        """, String.valueOf(timeQueryModel.startAt().getTime()), String.valueOf(timeQueryModel.endAt()), downloader, downloader, downloader);
+        ) {
+            List<ClientAnalyseDTO> rList = new ArrayList<>();
+            for (var row : r.getResults()) {
+                String peerId = row[0];
+                String clientName = row[1];
+                long uploaded = Long.parseLong(row[2]);
+                long downloaded = Long.parseLong(row[3]);
+                long count = Long.parseLong(row[4]);
+                rList.add(new ClientAnalyseDTO(peerId, clientName, uploaded, downloaded, count));
+            }
+            var ctr = Long.parseLong(ct.getFirstResult()[0]);
+            ctx.json(new StdResp(true, null, new Page<>(pageable, ctr, rList)));
+        }
+    }
+
+    static class ClientAnalyseDTO {
+        public String peerId;
+        public String clientName;
+        public long uploaded;
+        public long downloaded;
+        public long count;
+
+        public ClientAnalyseDTO(String peerId, String clientName, long uploaded, long downloaded, long count) {
+            this.peerId = peerId;
+            this.clientName = clientName;
+            this.uploaded = uploaded;
+            this.downloaded = downloaded;
+            this.count = count;
+        }
+    }
+
+    private void handleSessionAnalyse(@NotNull Context ctx) {
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        var downloader = ctx.queryParam("downloader");
+        var data = peerConnectionMetricDao.getMetricsSince(timeQueryModel.startAt(), timeQueryModel.endAt(), downloader);
+        ctx.json(new StdResp(true, null, data));
     }
 
     private void handleSessionBetween(@NotNull Context ctx) throws SQLException {
@@ -90,45 +163,34 @@ public final class PBHChartController extends AbstractFeatureModule {
             downloader = "%";
         }
         // 从 startAt 到 endAt，每天的开始时间戳
-        var queryBuilder = peerRecordDao.queryBuilder();
-        var where = queryBuilder
-                .selectColumns("address")
-                .distinct()
-                .where();
-        where.and(where.like("downloader", downloader), where.or(where.between("firstTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt()),
-                where.between("lastTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt())));
-        ctx.json(new StdResp(true, null, queryBuilder.countOf()));
+        ctx.json(new StdResp(true, null, peerRecordDao.sessionBetween(downloader, timeQueryModel.startAt(), timeQueryModel.endAt())));
     }
 
     private void handleSessionDayBucket(@NotNull Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
-        String downloaderParam = (downloader == null || downloader.isBlank()) ? null : downloader;
         long startAtTs = timeQueryModel.startAt().getTime();
         long endAtTs = timeQueryModel.endAt().getTime();
         Map<Long, SessionTimeRangeCounter> sessionDayBucket = new LinkedHashMap<>();
-        String sql = """
-                SELECT address, firstTimeSeen, lastTimeSeen, lastFlags FROM peer_records
-                WHERE (? IS NULL OR downloader = ?) AND firstTimeSeen BETWEEN ? AND ?
-                UNION
-                SELECT address, firstTimeSeen, lastTimeSeen, lastFlags FROM peer_records
-                WHERE (? IS NULL OR downloader = ?) AND lastTimeSeen BETWEEN ? AND ?
-                """;
-        String[] args = {
-                downloaderParam, downloaderParam, String.valueOf(startAtTs), String.valueOf(endAtTs),
-                downloaderParam, downloaderParam, String.valueOf(startAtTs), String.valueOf(endAtTs)
-        };
-        try (var results = peerRecordDao.queryRaw(sql, timeRangeMapper, args)) {
-            for (SessionTimeRange row : results) {
-                long firstDay = MiscUtil.getStartOfToday(row.firstTimeSeen);
-                long lastDay = MiscUtil.getStartOfToday(row.lastTimeSeen);
-
-                for (long day = firstDay; day <= lastDay; day += 86400000L) {
-                    var counter = sessionDayBucket.computeIfAbsent(day, k -> new SessionTimeRangeCounter());
-                    counter.total.incrementAndGet();
-                    if (row.lastFlags != null && !row.lastFlags.isBlank() && !(new PeerFlag(row.lastFlags).isLocalConnection())) {
-                        counter.incoming.incrementAndGet();
-                    }
+        var where = peerRecordDao.queryBuilder().where();
+        if (downloader != null) {
+            where.eq("downloader", downloader).and().ge("firstTimeSeen", startAtTs).and().le("lastTimeSeen", endAtTs);
+        } else {
+            where.ge("firstTimeSeen", startAtTs).and().le("lastTimeSeen", endAtTs);
+        }
+        Set<PeerRecordEntity> peerRecords = new LinkedHashSet<>(where.query());
+        // 生成按日时间戳的桶，并填充数据
+        for (PeerRecordEntity record : peerRecords) {
+            long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().getTime());
+            long lastDay = MiscUtil.getStartOfToday(record.getLastTimeSeen().getTime());
+            for (long day = firstDay; day <= lastDay; day += 86400000L) {
+                if (day < startAtTs || day > endAtTs) {
+                    continue;
+                }
+                SessionTimeRangeCounter counter = sessionDayBucket.computeIfAbsent(day, k -> new SessionTimeRangeCounter());
+                counter.getTotal().incrementAndGet();
+                if (StringUtils.isNotBlank(record.getLastFlags()) && !new PeerFlag(record.getLastFlags()).isLocalConnection()) {
+                    counter.getIncoming().incrementAndGet();
                 }
             }
         }
@@ -149,23 +211,6 @@ public final class PBHChartController extends AbstractFeatureModule {
         @Getter
         private final AtomicInteger incoming = new AtomicInteger(0);
     }
-
-    private static class SessionTimeRange {
-        private String address; // 虽然 Java 循环中不用，但 Mapper 需要接收
-        private long firstTimeSeen;
-        private long lastTimeSeen;
-        private String lastFlags;
-    }
-
-    private final RawRowMapper<SessionTimeRange> timeRangeMapper =
-            (columnNames, resultColumns) -> {
-                SessionTimeRange range = new SessionTimeRange();
-                range.address = resultColumns[0];
-                range.firstTimeSeen = Long.parseLong(resultColumns[1]);
-                range.lastTimeSeen = Long.parseLong(resultColumns[2]);
-                range.lastFlags = resultColumns[3];
-                return range;
-            };
 
 //    private void handleSessionDayBucket(@NotNull Context ctx) throws Exception {
 //        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);

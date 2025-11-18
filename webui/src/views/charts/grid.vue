@@ -29,15 +29,21 @@
         <trends :downloader="downloader" />
       </plusWarpper>
     </a-col>
+    <a-col v-if="showCharts.sessionDayBucket" :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
+      <plusWarpper :title="t('page.charts.title.sessionDayBucket')">
+        <sessionDayBucket :downloader="downloader" />
+      </plusWarpper>
+    </a-col>
   </a-row>
 </template>
 <script setup lang="ts">
-import ispPie from '@/views/charts/components/ispPie.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banTrends from './components/banTrends.vue'
 import fieldPie from './components/fieldPie.vue'
+import ispPie from './components/ispPie.vue'
 import plusWarpper from './components/plusWarpper.vue'
+import sessionDayBucket from './components/sessionDayBucket.vue'
 import traffic from './components/traffic.vue'
 import trends from './components/trends.vue'
 const { t } = useI18n()
@@ -49,6 +55,7 @@ const props = defineProps<{
     ispPie: boolean
     traffic: boolean
     trends: boolean
+    sessionDayBucket: boolean
   }
 }>()
 const downloader = computed((): string | undefined =>

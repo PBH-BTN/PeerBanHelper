@@ -122,16 +122,20 @@ public final class JavalinWebContainer {
                     ctx.status(HttpStatus.PAYMENT_REQUIRED);
                     ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
                 })
-                .exception(Exception.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
-                    log.error("500 Internal Server Error", e);
-                })
                 .exception(BlockScannerException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.NOT_FOUND);
                     ctx.header("Server", "nginx");
                     ctx.result("404 not found");
                     ctx.attribute("skipAfter", true);
+                })
+                .exception(DemoModeException.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.BAD_REQUEST);
+                    ctx.json(new StdResp(false,  tl(reqLocale(ctx), Lang.DEMO_MODE_OPERATION_NOT_PERMITTED), null));
+                })
+                .exception(Exception.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
+                    log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
                     if (!securityCheck(ctx)) {
@@ -146,6 +150,11 @@ public final class JavalinWebContainer {
                     if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
                         if (!licenseManager.isFeatureEnabled("basic")) {
                             throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
+                        }
+                    }
+                    if (ctx.routeRoles().contains(Role.USER_WRITE)){
+                        if(ExternalSwitch.parseBoolean("pbh.demoMode")){
+                            throw new DemoModeException();
                         }
                     }
                     if (ctx.path().startsWith("/init")) {

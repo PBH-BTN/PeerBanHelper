@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.config.ConfigTransfer;
 import com.ghostchu.peerbanhelper.database.table.*;
+import com.ghostchu.peerbanhelper.database.table.tmp.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.dao.Dao;
@@ -32,18 +33,24 @@ public final class DatabaseHelper {
         performUpgrade();
         createTables(false);
     }
-
-
     private void createTables(boolean ignoreError) {
-        Class<?>[] clazz = new Class[]{
+        Class<?>[] persistTable = new Class[]{
                 MetadataEntity.class, TorrentEntity.class, ModuleEntity.class, RuleEntity.class, HistoryEntity.class,
                 BanListEntity.class, RuleSubInfoEntity.class, RuleSubLogEntity.class, PeerRecordEntity.class,
                 PCBAddressEntity.class, PCBRangeEntity.class, TrafficJournalEntity.class, AlertEntity.class,
-                TrackedSwarmEntity.class
+                PeerConnectionMetricsEntity.class
         };
-        for (Class<?> aClass : clazz) {
+        Class<?>[] tempTable = new Class[]{
+                TrackedSwarmEntity.class, PeerConnectionMetricsTrackEntity.class
+        };
+        performCreateTables(persistTable, ignoreError, false);
+        performCreateTables(tempTable, ignoreError, true);
+    }
+
+    private void performCreateTables(Class<?>[] table, boolean ignoreError, boolean tempTable) {
+        for (Class<?> aClass : table) {
             try {
-                PBHTableUtils.createTableIfNotExists(database.getDataSource(), aClass, false, ignoreError);
+                PBHTableUtils.createTableIfNotExists(database.getDataSource(), aClass, tempTable, ignoreError);
             } catch (Exception err) {
                 if (!ignoreError) {
                     log.error("Unable to create table for class: " + aClass.getSimpleName(), err);

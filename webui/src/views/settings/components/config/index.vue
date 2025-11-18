@@ -107,7 +107,7 @@ const submitConfig = () => {
   saving.value = true
   SaveConfig(form)
     .then((data) => {
-      Message.success(data.message)
+      ;(data.success ? Message.success : Message.error)(data.message)
     })
     .catch((err) => {
       Message.error(err.message)

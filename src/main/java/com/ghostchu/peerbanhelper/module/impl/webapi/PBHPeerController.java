@@ -94,7 +94,6 @@ public final class PBHPeerController extends AbstractFeatureModule {
 
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
-        activeMonitoringModule.flush();
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
         var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
         String ip = ipAddress.toNormalizedString();
@@ -194,7 +193,6 @@ public final class PBHPeerController extends AbstractFeatureModule {
     }
 
     private void handleAccessHistory(Context ctx) throws SQLException {
-        activeMonitoringModule.flush();
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
         var builder = new Orderable(Map.of("lastTimeSeen", false, "address", false, "port", true), ctx)
