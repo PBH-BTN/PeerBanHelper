@@ -138,7 +138,7 @@ dependencies {
     implementation("com.google.guava:guava:33.5.0-jre")
     implementation("com.github.seancfoley:ipaddress:5.5.1")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
-    implementation("org.apache.commons:commons-lang3:3.19.0")
+    implementation("org.apache.commons:commons-lang3:3.20.0")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
@@ -157,8 +157,8 @@ dependencies {
     implementation("com.spotify:completable-futures:0.3.6")
 
     // HTTP client
-    implementation("com.squareup.okhttp3:okhttp:5.3.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.1")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.1")
 
     // JNA
     implementation("net.java.dev.jna:jna:5.18.1")
