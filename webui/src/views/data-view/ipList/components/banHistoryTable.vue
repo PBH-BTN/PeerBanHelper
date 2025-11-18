@@ -127,7 +127,7 @@ const columns = [
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerPort'),
-    dataIndex: 'port',
+    dataIndex: 'peerPort',
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true

@@ -150,11 +150,21 @@ const columns = [
   {
     title: () => t('page.banlog.banlogTable.column.peerAddress'),
     slotName: 'peerAddress',
+    dataIndex: 'peerIp',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 230
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerId'),
     slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 120
   },
   {
@@ -171,6 +181,10 @@ const columns = [
     title: () => t('page.banlog.banlogTable.column.torrentName'),
     dataIndex: 'torrentName',
     slotName: 'torrentName',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     ellipsis: true,
     tooltip: true
   },

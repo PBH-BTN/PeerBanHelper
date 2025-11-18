@@ -168,15 +168,30 @@ const {
 const columns = [
   {
     title: () => t('page.torrentList.accessHistory.column.downloader'),
-    slotName: 'downloader'
+    slotName: 'downloader',
+    dataIndex: 'downloader',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: () => t('page.torrentList.accessHistory.column.address'),
-    slotName: 'address'
+    slotName: 'address',
+    dataIndex: 'address',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: 'Peer ID',
-    slotName: 'peerId'
+    slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: () => t('page.torrentList.accessHistory.column.traffic'),
@@ -203,9 +218,22 @@ const columns = [
   },
   {
     title: 'Flags',
-    slotName: 'flags'
+    slotName: 'flags',
+    dataIndex: 'lastFlags',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
-  { title: () => t('page.torrentList.accessHistory.column.timeseen'), slotName: 'time' }
+  {
+    title: () => t('page.torrentList.accessHistory.column.timeseen'),
+    slotName: 'time',
+    dataIndex: 'firstTimeSeen',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
+  }
 ]
 const parseFlags = (flags: string) =>
   flags

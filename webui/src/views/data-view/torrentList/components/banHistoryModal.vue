@@ -131,16 +131,31 @@ const columns = [
       '/' +
       t('page.banlog.banlogTable.column.unbanTime'),
     slotName: 'banAt',
+    dataIndex: 'banAt',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 210
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerAddress'),
     slotName: 'peerAddress',
+    dataIndex: 'peerIp',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 200
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerId'),
     slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 120
   },
   {

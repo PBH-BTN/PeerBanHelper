@@ -179,13 +179,7 @@ const columns = [
   },
   {
     titleSlotName: 'offsetTitle',
-    slotName: 'offset',
-    dataIndex: 'uploadedOffset',
-    sortable: {
-      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
-      sorter: true
-    },
-    width: 120
+    slotName: 'offset'
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
@@ -209,7 +203,7 @@ const columns = [
   },
   {
     title: () => t('page.ipList.accessHistory.column.torrent'),
-    dataIndex: 'torrentName',
+    dataIndex: 'torrent.name',
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
