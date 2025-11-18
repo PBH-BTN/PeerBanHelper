@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsEntity;
-import com.ghostchu.peerbanhelper.database.table.tmp.PeerConnectionMetricsTrackEntity;
+import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDTO;
 import com.j256.ormlite.support.ConnectionSource;
 import lombok.extern.slf4j.Slf4j;

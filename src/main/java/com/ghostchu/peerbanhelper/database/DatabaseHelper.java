@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.config.ConfigTransfer;
 import com.ghostchu.peerbanhelper.database.table.*;
-import com.ghostchu.peerbanhelper.database.table.tmp.PeerConnectionMetricsTrackEntity;
+import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.dao.Dao;
@@ -38,10 +38,10 @@ public final class DatabaseHelper {
                 MetadataEntity.class, TorrentEntity.class, ModuleEntity.class, RuleEntity.class, HistoryEntity.class,
                 BanListEntity.class, RuleSubInfoEntity.class, RuleSubLogEntity.class, PeerRecordEntity.class,
                 PCBAddressEntity.class, PCBRangeEntity.class, TrafficJournalEntity.class, AlertEntity.class,
-                PeerConnectionMetricsEntity.class
+                PeerConnectionMetricsEntity.class, PeerConnectionMetricsTrackEntity.class
         };
         Class<?>[] tempTable = new Class[]{
-                TrackedSwarmEntity.class, PeerConnectionMetricsTrackEntity.class
+                TrackedSwarmEntity.class
         };
         performCreateTables(persistTable, ignoreError, false);
         performCreateTables(tempTable, ignoreError, true);
