@@ -1,1 +1,1 @@
-cd webui && pnpm pre-commmit-check
+cd webui && pnpm pre-commit-check

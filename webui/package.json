@@ -14,7 +14,7 @@
     "fix-lint": "eslint . --ignore-pattern 'dist/*' --fix",
     "format": "prettier --write src/",
     "prepare": "cd .. && husky webui/.husky",
-    "pre-commmit-check": "lint-staged"
+    "pre-commit-check": "lint-staged"
   },
   "dependencies": {
     "@arco-design/web-vue": "2.56.3",
@@ -92,8 +92,8 @@
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,vue}": [
-      "prettier -c  src/",
-      "eslint . --ignore-pattern \"dist/*\""
+      "prettier --write src/",
+      "eslint --fix . --ignore-pattern \"dist/*\""
     ]
   }
 }
