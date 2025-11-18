@@ -31,7 +31,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
         try {
             var where = queryBuilder().where();
             where.between("timeframeAt", sinceAt, untilAt);
-            if(downloader != null && !downloader.isBlank())
+            if (downloader != null && !downloader.isBlank())
                 where.and().eq("downloader", downloader);
             var entities = where.query();
 
@@ -52,7 +52,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
             }
             // 将合并后的结果按时间排序
             result = new ArrayList<>(mergedMap.values());
-            result.sort((a, b) -> Long.compare(b.getKey(),a.getKey()));
+            result.sort((a, b) -> Long.compare(b.getKey(), a.getKey()));
 
         } catch (SQLException e) {
             log.error("Failed to query peer connection metrics since {}", sinceAt, e);
@@ -81,7 +81,31 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
         target.setTcpSocket(target.getTcpSocket() + source.getTcpSocket());
     }
 
-    public synchronized void aggregating(@NotNull List<PeerConnectionMetricsTrackEntity> fullPeerSessions) {
+    public synchronized void saveAggregating(List<PeerConnectionMetricsEntity> buffer, boolean overwrite){
+        for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
+            try {
+                var entityInDb = queryBuilder().where()
+                        .eq("timeframeAt", peerConnectionMetricsEntity.getTimeframeAt())
+                        .and()
+                        .eq("downloader", peerConnectionMetricsEntity.getDownloader())
+                        .queryForFirst();
+                if (entityInDb != null) {
+                    if (overwrite) {
+                        peerConnectionMetricsEntity.setId(entityInDb.getId());
+                    } else {
+                        entityInDb.merge(peerConnectionMetricsEntity);
+                    }
+                } else {
+                    entityInDb = peerConnectionMetricsEntity;
+                }
+                createOrUpdate(entityInDb);
+            } catch (SQLException e) {
+                log.error("Updating peer connection metrics failed for downloader {} at {}", peerConnectionMetricsEntity.getDownloader(), peerConnectionMetricsEntity.getTimeframeAt(), e);
+            }
+        }
+    }
+
+    public synchronized List<PeerConnectionMetricsEntity> aggregating(@NotNull List<PeerConnectionMetricsTrackEntity> fullPeerSessions) {
         List<PeerConnectionMetricsEntity> buffer = new ArrayList<>();
         for (PeerConnectionMetricsTrackEntity peerSessionEntity : fullPeerSessions) {
             var entity = findOrCreateBuffer(buffer, peerSessionEntity.getTimeframeAt(), peerSessionEntity.getDownloader());
@@ -92,7 +116,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
                 if (!f.isLocalConnection())
                     entity.setIncomingConnections(entity.getIncomingConnections() + 1);
                 if (f.isInteresting() && f.isRemoteChoked())
-                    entity.setRemoteRefuseTransferToClient(entity.getRemoteAcceptTransferToClient() + 1);
+                    entity.setRemoteRefuseTransferToClient(entity.getRemoteRefuseTransferToClient() + 1);
                 if (f.isInteresting() && !f.isRemoteChoked())
                     entity.setRemoteAcceptTransferToClient(entity.getRemoteAcceptTransferToClient() + 1);
                 if (f.isRemoteInterested() && f.isChoked())
@@ -123,23 +147,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
                     entity.setTcpSocket(entity.getTcpSocket() + 1);
             }
         }
-        for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
-            try {
-                var entityInDb = queryBuilder().where()
-                        .eq("timeframeAt", peerConnectionMetricsEntity.getTimeframeAt())
-                        .and()
-                        .eq("downloader", peerConnectionMetricsEntity.getDownloader())
-                        .queryForFirst();
-                if (entityInDb != null) {
-                    entityInDb.merge(peerConnectionMetricsEntity);
-                } else {
-                    entityInDb = peerConnectionMetricsEntity;
-                }
-                createOrUpdate(entityInDb);
-            }catch (SQLException e){
-                log.error("Updating peer connection metrics failed for downloader {} at {}", peerConnectionMetricsEntity.getDownloader(), peerConnectionMetricsEntity.getTimeframeAt(), e);
-            }
-        }
+        return buffer;
     }
 
     @NotNull

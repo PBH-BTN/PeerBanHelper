@@ -47,18 +47,18 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
 
     @Override
     public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
-      try {
-          TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
-                  null,
-                  torrent.getHash(),
-                  torrent.getName(),
-                  torrent.getSize(),
-                  torrent.isPrivate()
-          ));
-          connectionMetricsTrackDao.upsertPeerSession(downloader, torrentEntity, peers);
-      }catch (SQLException e){
+        try {
+            TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
+                    null,
+                    torrent.getHash(),
+                    torrent.getName(),
+                    torrent.getSize(),
+                    torrent.isPrivate()
+            ));
+            connectionMetricsTrackDao.upsertPeerSession(downloader, torrentEntity, peers);
+        } catch (SQLException e) {
             log.warn("Failed to record torrent peers for session analyse", e);
-      }
+        }
     }
 
     @Override
@@ -84,9 +84,13 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     private void flushData() {
         try {
             long startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
-            var list = connectionMetricsTrackDao.queryForAll();
-            connectionMetricDao.aggregating(list);
-            connectionMetricsTrackDao.delete(list.stream().filter(e->e.getTimeframeAt().getTime() < startOfToday).toList());
+            var listNotInTheDay = connectionMetricsTrackDao.queryBuilder().where().ne("timeframeAt", new Timestamp(startOfToday)).query();
+            var aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
+            connectionMetricDao.saveAggregating(aggNotInTheDayList, true);
+            connectionMetricsTrackDao.delete(listNotInTheDay);
+            var listInTheDay = connectionMetricsTrackDao.queryBuilder().where().eq("timeframeAt", new Timestamp(startOfToday)).query();
+            var aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
+            connectionMetricDao.saveAggregating(aggInTheDayList, true);
         } catch (SQLException e) {
             log.warn("Failed to flush session analyse data", e);
         }
