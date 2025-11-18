@@ -157,8 +157,8 @@ dependencies {
     implementation("com.spotify:completable-futures:0.3.6")
 
     // HTTP client
-    implementation("com.squareup.okhttp3:okhttp:5.3.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.1")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.1")
 
     // JNA
     implementation("net.java.dev.jna:jna:5.18.1")
