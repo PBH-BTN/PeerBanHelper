@@ -120,7 +120,7 @@ dependencies {
     implementation("org.commonmark:commonmark:0.27.0")
 
     // Compression
-    implementation("org.tukaani:xz:1.10")
+    implementation("org.tukaani:xz:1.11")
 
     // DNS
     implementation("dnsjava:dnsjava:3.6.3")
