@@ -99,7 +99,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .get("/api/general/stacktrace", this::handleDumpStackTrace, Role.USER_READ)
                 .get("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
                 .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
-                .post("/api/general/triggerCrash", this::handleTriggerCrash, Role.USER_WRITE)
                 .get("/api/general/global", this::handleGlobalConfigRead, Role.USER_READ)
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
@@ -111,10 +110,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, "Refreshing NAT Status", null));
     }
 
-    private void handleTriggerCrash(@NotNull Context context) {
-        context.json(new StdResp(true, "Unsafe putAddress called, triggering crash...", null));
-        new CrashMaker().crash();
-    }
 
     private void handleDumpStackTrace(Context context) {
         StringBuilder threadDump = new StringBuilder();
