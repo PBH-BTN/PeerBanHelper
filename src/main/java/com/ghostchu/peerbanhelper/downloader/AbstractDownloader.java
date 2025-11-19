@@ -1,13 +1,16 @@
 package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetSocketAddress;
@@ -130,6 +133,11 @@ public abstract class AbstractDownloader implements Downloader {
     @Override
     public int getMaxConcurrentPeerRequestSlots() {
         return ExternalSwitch.parseInt("pbh.downloader.AbstractDownloader.maxConcurrentPeerRequestSlots", 16);
+    }
+
+    @NotNull
+    public IPAddress remapBanListAddress(@NotNull IPAddress banAddress) {
+        return IPAddressUtil.remapBanListAddress(banAddress);
     }
 
     @Override

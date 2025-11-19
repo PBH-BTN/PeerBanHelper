@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.1.0-alpha3"
+version = "9.1.0-alpha5"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -238,7 +238,8 @@ tasks.jar {
     manifest {
         attributes(
             "Main-Class" to "com.ghostchu.peerbanhelper.MainJumpLoader",
-            "Class-Path" to configurations.runtimeClasspath.get().files.joinToString(" ") { "libraries/${it.name}" }
+            "Class-Path" to configurations.runtimeClasspath.get().files.joinToString(" ") { "libraries/${it.name}" },
+            "Enable-Native-Access" to "ALL-UNNAMED"
         )
     }
 }

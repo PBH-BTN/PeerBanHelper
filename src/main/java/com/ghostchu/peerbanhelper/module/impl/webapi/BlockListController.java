@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import inet.ipaddr.IPAddress;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -33,9 +36,16 @@ public final class BlockListController extends AbstractFeatureModule {
     }
 
     private void blocklistDatEmule(@NotNull Context ctx) {
-        StringBuilder builder = new StringBuilder();
+        // Deduplicate remapped IPs using LinkedHashSet to maintain insertion order
+        Set<IPAddress> remappedIps = new LinkedHashSet<>();
         for (IPAddress ipAddress : banList.copyKeySet()) {
             if (ipAddress == null) continue;
+            ipAddress = IPAddressUtil.remapBanListAddress(ipAddress);
+            remappedIps.add(ipAddress);
+        }
+        
+        StringBuilder builder = new StringBuilder();
+        for (IPAddress ipAddress : remappedIps) {
             String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
             String end = ipAddress.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
             builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toNormalizedString()).append("\n");
@@ -44,8 +54,14 @@ public final class BlockListController extends AbstractFeatureModule {
     }
 
     private void blocklistP2pPlain(@NotNull Context ctx) {
-        StringBuilder builder = new StringBuilder();
+        Set<IPAddress> remappedIps = new LinkedHashSet<>();
         for (IPAddress addr : banList.copyKeySet()) {
+            addr = IPAddressUtil.remapBanListAddress(addr);
+            remappedIps.add(addr);
+        }
+        
+        StringBuilder builder = new StringBuilder();
+        for (IPAddress addr : remappedIps) {
             String ruleName = UUID.randomUUID().toString().replace("-", "");
             String start = addr.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
             String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
@@ -55,8 +71,15 @@ public final class BlockListController extends AbstractFeatureModule {
     }
 
     private void blocklistIp(@NotNull Context ctx) {
-        StringBuilder builder = new StringBuilder();
+        // Deduplicate remapped IPs using LinkedHashSet to maintain insertion order
+        Set<IPAddress> remappedIps = new LinkedHashSet<>();
         for (IPAddress ipAddress : banList.copyKeySet()) {
+            ipAddress = IPAddressUtil.remapBanListAddress(ipAddress);
+            remappedIps.add(ipAddress);
+        }
+        
+        StringBuilder builder = new StringBuilder();
+        for (IPAddress ipAddress : remappedIps) {
             builder.append(ipAddress.toPrefixBlock().toNormalizedString()).append("\n");
         }
         ctx.result(builder.toString());
@@ -66,6 +89,8 @@ public final class BlockListController extends AbstractFeatureModule {
     public void onDisable() {
 
     }
+
+
 
     @Override
     public @NotNull String getName() {

@@ -92,7 +92,7 @@ public final class PBHBanController extends AbstractFeatureModule {
     }
 
     private void handleBanAdd(@NotNull Context context) {
-        List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
+        String[] request = context.bodyAsClass(String[].class);
         int size = 0;
         for (String s : request) {
             downloaderServer.scheduleBanPeerNoAssign(new PeerAddress(s, 0, s));

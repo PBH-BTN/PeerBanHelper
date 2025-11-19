@@ -40,6 +40,22 @@ export default {
   'page.settings.tab.config.persist.banlist': '持久化封禁列表',
   'page.settings.tab.config.persist.ban_logs_keep_days': '封禁日志保留天数',
 
+  'page.settings.tab.config.banlistRemapping.title': '封禁列表重映射',
+  'page.settings.tab.config.banlistRemapping.description':
+    '在向下载器更新封禁列表时，将封禁的单个 IP 地址映射到一个更大的范围，以便提高下载器对 IP 地址的封禁效能。错误的配置可能封禁更多的无关 Peers。',
+  'page.settings.tab.config.banlistRemapping.ipv4.title': 'IPv4 设置',
+  'page.settings.tab.config.banlistRemapping.ipv4.enabled': '启用 IPv4 重映射',
+  'page.settings.tab.config.banlistRemapping.ipv4.enabled.tips': '启用 IPv4 地址重映射功能',
+  'page.settings.tab.config.banlistRemapping.ipv4.remap_range': '前缀长度',
+  'page.settings.tab.config.banlistRemapping.ipv4.remap_range.tips':
+    '将会使用该长度将主机地址置为0，并生成对应的 CIDR 表达式（范围 0-32）',
+  'page.settings.tab.config.banlistRemapping.ipv6.title': 'IPv6 设置',
+  'page.settings.tab.config.banlistRemapping.ipv6.enabled': '启用 IPv6 重映射',
+  'page.settings.tab.config.banlistRemapping.ipv6.enabled.tips': '启用 IPv6 地址重映射功能',
+  'page.settings.tab.config.banlistRemapping.ipv6.remap_range': '前缀长度',
+  'page.settings.tab.config.banlistRemapping.ipv6.remap_range.tips':
+    '将会使用该长度将主机地址置为0，并生成对应的 CIDR 表达式（范围 0-128）',
+
   'page.settings.tab.config.btn.enable': '启用 BTN 模块',
   'page.settings.tab.config.btn.doc': '使用前请阅读文档：',
   'page.settings.tab.config.btn.enableSubmit': '启用提交',

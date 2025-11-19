@@ -574,6 +574,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
             joiner.add(p.getPeer().getRawIp());
+            // todo change this with compatibility check after qbiitorrent merge it
+            // joiner.add(remapBanListAddress(p.getPeer().getAddress().getAddress()).toNormalizedString());
             banTasks.put(p.getTorrent().getHash(), joiner);
         });
         banTasks.forEach((hash, peers) -> {
@@ -603,11 +605,17 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     protected void setBanListFull(Collection<IPAddress> bannedAddresses) {
+        // todo change this with compatibility check after qbiitorrent merge it
+//        String banStr = bannedAddresses.stream()
+//                .map(ipAddr -> remapBanListAddress(ipAddr).toNormalizedString())
+//                .distinct()
+//                .collect(Collectors.joining("\n"));
+
         StringJoiner joiner = new StringJoiner("\n");
         bannedAddresses.stream().distinct().forEach(ipAddr -> {
             joiner.add(ipAddr.toNormalizedString());
             if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
-                Address ipv6 = ipAddr.toIPv6();
+                inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
                 if (ipv6 != null) {
                     joiner.add(ipv6.toNormalizedString());
                 }
@@ -619,6 +627,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 }
             }
         });
+
 
         FormBody formBody = new FormBody.Builder()
                 .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))
