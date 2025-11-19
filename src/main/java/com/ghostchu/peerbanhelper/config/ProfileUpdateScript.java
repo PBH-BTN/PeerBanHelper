@@ -25,6 +25,16 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 35)
+    public void removeXunleiRules() {
+        var peerIdList = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
+        peerIdList.removeIf(s -> s.equals("{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}"));
+        conf.set("module.peer-id-blacklist.banned-peer-id", peerIdList);
+        var clientNameList = conf.getStringList("module.client-name-blacklist.banned-client-name");
+        clientNameList.removeIf(s -> s.equals("{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}"));
+        conf.set("module.client-name-blacklist.banned-client-name", clientNameList);
+    }
+
     @UpdateScript(version = 34)
     public void analyseServiceSection(YamlConfiguration bundled) {
         conf.set("module.peer-analyse-service", bundled.get("module.peer-analyse-service"));

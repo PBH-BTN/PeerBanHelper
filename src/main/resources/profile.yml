@@ -1,4 +1,4 @@
-config-version: 34
+config-version: 35
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -48,7 +48,6 @@ module:
     # miss = 匹配失败返回的行为代码（与上相同） # the behavior if match failed, same as above
     # 规则从上到下执行
     banned-peer-id:
-      - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"-hp"}'
       - '{"method":"STARTS_WITH","content":"-xm"}'
       - '{"method":"STARTS_WITH","content":"-dt"}'
@@ -70,8 +69,6 @@ module:
     enabled: true
     ban-duration: 259200000
     banned-client-name:
-      - '{"method":"CONTAINS","content":"xunlei"}'
-      - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"hp/torrent"}'
       - '{"method":"STARTS_WITH","content":"hp "}'
       - '{"method":"STARTS_WITH","content":"dt/torrent"}'
@@ -92,6 +89,7 @@ module:
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ޭ__"}' # 0xde-0xad-0xbe-0xef
       - '{"method":"STARTS_WITH","content":"-XL"}'
+
   # 进度作弊检查器：Progress Cheat Blocker
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
   # Note: Sometimes it may incorrect ban some clients if they enabled "Super Seeding", but in most cases, it can accurately detect the cheat/bad peers.
