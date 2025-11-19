@@ -218,5 +218,15 @@ export default {
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
     'Data cleanup interval',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
-    'Time interval to execute data cleanup tasks, do not set it too frequently to avoid performance impact'
+    'Time interval to execute data cleanup tasks, do not set it too frequently to avoid performance impact',
+
+  'page.settings.tab.profile.module.antiVampire.title': 'Anti-Vampire',
+  'page.settings.tab.profile.module.antiVampire.enable.tips':
+    'By monitoring the transfer situation between you and the Peer, make behavior judgments, and ban the leeching clients',
+  'page.settings.tab.profile.module.antiVampire.useGlobalBanTime': 'Use global ban time',
+  'page.settings.tab.profile.module.antiVampire.presets.title': 'Detection Presets',
+  'page.settings.tab.profile.module.antiVampire.presets.xunlei.title': 'Xunlei',
+  'page.settings.tab.profile.module.antiVampire.presets.xunlei.enabled': 'Enable',
+  'page.settings.tab.profile.module.antiVampire.presets.xunlei.enabled.tips':
+    'Strategy: A) In seeding state, block all versions of Xunlei clients as no version of Xunlei will seed; B) In downloading state, only allow Xunlei 0.0.1.9 clients as they normally participate in Swarm data sharing during task download'
 }

@@ -25,6 +25,11 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 36)
+    public void antiVampire(YamlConfiguration bundled) {
+        conf.set("module.anti-vampire", bundled.get("module.anti-vampire"));
+    }
+
     @UpdateScript(version = 35)
     public void removeXunleiRules() {
         var peerIdList = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
@@ -32,6 +37,7 @@ public final class ProfileUpdateScript {
         conf.set("module.peer-id-blacklist.banned-peer-id", peerIdList);
         var clientNameList = conf.getStringList("module.client-name-blacklist.banned-client-name");
         clientNameList.removeIf(s -> s.equals("{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}"));
+        clientNameList.removeIf(s -> s.equals("{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}"));
         conf.set("module.client-name-blacklist.banned-client-name", clientNameList);
     }
 

@@ -1,4 +1,4 @@
-config-version: 35
+config-version: 36
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -88,7 +88,6 @@ module:
       - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ޭ__"}' # 0xde-0xad-0xbe-0xef
-      - '{"method":"STARTS_WITH","content":"-XL"}'
 
   # 进度作弊检查器：Progress Cheat Blocker
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
@@ -477,3 +476,19 @@ module:
       data-flush-interval: 20000
       data-retention-time: 5184000000
       data-cleanup-interval: 604800000
+  # 任务反吸血 - Anti-Vampire Module
+  # 通过监控您与 Peer 之间的传输情况，进行行为判断，并对吸血客户端进行封禁
+  # By monitoring the transfer situation between you and the Peer, make behavior judgments, and ban
+  anti-vampire:
+    enabled: true
+    ban-duration: 14400000
+    # 检测预设 - Detection Presets
+    # 对于已知存在不良行为的客户端，启用预设逻辑，以更加准确和快速的进行识别
+    # For clients with known bad behaviors, enable preset logic for more accurate and faster identification
+    presets:
+      # 迅雷 - Xunlei (Thunder)
+      # 策略描述：
+      # A) 做种状态下，禁止所有版本迅雷客户端，因为任何版本的迅雷客户端都不会做种
+      # B) 下载状态下，仅放行迅雷 0.0.1.9 客户端，因为此类客户端在任务下载过程中正常参与 Swarm 分享数据
+      xunlei:
+        enabled: true

@@ -21,6 +21,7 @@ export interface Module {
   active_monitoring: ActiveMonitoring
   idle_connection_dos_protection: IdleConnectionDosProtection
   peer_analyse_service: PeerAnalyseService
+  anti_vampire: AntiVampire
 }
 
 export interface PeerIdBlacklist {
@@ -173,4 +174,18 @@ export interface IdleConnectionDosProtection {
   idle_speed_threshold: number
   min_status_change_percentage: number
   reset_on_status_change: boolean
+}
+
+export interface AntiVampire {
+  enabled: boolean
+  ban_duration: BanDuration
+  presets: AntiVampirePresets
+}
+
+export interface AntiVampirePresets {
+  xunlei: XunleiPreset
+}
+
+export interface XunleiPreset {
+  enabled: boolean
 }

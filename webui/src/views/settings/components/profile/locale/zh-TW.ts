@@ -201,5 +201,15 @@ export default {
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval':
     '資料清理間隔時間',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataCleanupInterval.tips':
-    '執行資料清理任務的時間間隔，建議不要設定得太頻繁以避免影響效能'
+    '執行資料清理任務的時間間隔，建議不要設定得太頻繁以避免影響效能',
+
+  'page.settings.tab.profile.module.antiVampire.title': '任務反吸血',
+  'page.settings.tab.profile.module.antiVampire.enable.tips':
+    '通過監控您與 Peer 之間的傳輸情況，進行行為判斷，並對吸血客戶端進行封禁',
+  'page.settings.tab.profile.module.antiVampire.useGlobalBanTime': '使用全域封禁時間',
+  'page.settings.tab.profile.module.antiVampire.presets.title': '檢測預設',
+  'page.settings.tab.profile.module.antiVampire.presets.xunlei.title': '迅雷',
+  'page.settings.tab.profile.module.antiVampire.presets.xunlei.enabled': '啟用',
+  'page.settings.tab.profile.module.antiVampire.presets.xunlei.enabled.tips':
+    '策略：A) 做種狀態下，禁止所有版本迅雷客戶端，因為任何版本的迅雷客戶端都不會做種；B) 下載狀態下，僅放行迅雷 0.0.1.9 客戶端，因為此類客戶端在任務下載過程中正常參與 Swarm 分享資料'
 }

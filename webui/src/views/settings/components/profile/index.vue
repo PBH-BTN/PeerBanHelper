@@ -52,6 +52,12 @@
                 <clientNameBlackList v-model="form.module.client_name_blacklist" />
               </a-collapse-item>
               <a-collapse-item
+                key="13"
+                :header="t('page.settings.tab.profile.module.antiVampire.title')"
+              >
+                <antiVampire v-model="form.module.anti_vampire" />
+              </a-collapse-item>
+              <a-collapse-item
                 key="3"
                 :header="t('page.settings.tab.profile.module.progressCheatBlocker')"
               >
@@ -132,6 +138,7 @@ import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import activeMonitoring from './components/activeMonitoring.vue'
+import antiVampire from './components/antiVampire.vue'
 import autoRangeBan from './components/autoRangeBan.vue'
 import btn from './components/btn.vue'
 import clientNameBlackList from './components/clientNameBlackList.vue'
@@ -169,6 +176,9 @@ const form = reactive({
       session_analyse: {},
       swarm_tracking: {},
       peer_recording: {}
+    },
+    anti_vampire: {
+      presets: {}
     }
   }
 } as Profile)
