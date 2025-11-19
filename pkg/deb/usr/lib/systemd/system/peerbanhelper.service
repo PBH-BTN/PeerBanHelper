@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=peerbanhelper
 WorkingDirectory=/usr/lib/peerbanhelper
-ExecStart=/usr/bin/java --enable-native-access=ALL-UNNAMED -Dpbh.release=debian -Dpbh.datadir=/var/lib/peerbanhelper -Dpbh.configdir=/etc/peerbanhelper -Dpbh.logsdir=/var/log/peerbanhelper -Dpbh.log.level=WARN -Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -XX:+ZGenerational -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -jar PeerBanHelper.jar
+ExecStart=/usr/bin/java --enable-native-access=ALL-UNNAMED -XX:+UseCompactObjectHeaders -Dpbh.release=debian -Dpbh.datadir=/var/lib/peerbanhelper -Dpbh.configdir=/etc/peerbanhelper -Dpbh.logsdir=/var/log/peerbanhelper -Dpbh.log.level=WARN -Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -XX:+ZGenerational -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -jar PeerBanHelper.jar
 SuccessExitStatus=143
 AmbientCapabilities=CAP_NET_ADMIN
 Restart=on-failure
