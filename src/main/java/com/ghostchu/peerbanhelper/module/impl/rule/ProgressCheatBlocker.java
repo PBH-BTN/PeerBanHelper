@@ -55,6 +55,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             .recordStats()
             .removalListener((RemovalListener<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
                 var pair = notification.getValue();
+                if (pair == null) return;
                 try {
                     flushBackDatabase(pair.getLeft(), pair.getRight());
                 } catch (SQLException e) {
@@ -305,7 +306,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     private @Nullable CheckResult progressRewind(@NotNull Peer peer, @NotNull StructuredData<String, Object> structuredData, @NotNull PCBRangeEntity rangeEntity, @NotNull PCBAddressEntity addressEntity, double clientReportedProgress, double computedProgress, long torrentSize) {
         if (rewindMaximumDifference > 0 && !fileTooSmall(torrentSize)) {
-            double lastReportProgress = Math.max(computedProgress, Math.max(addressEntity.getLastReportProgress(), rangeEntity.getLastReportProgress()));
+            double lastReportProgress = Math.max(addressEntity.getLastReportProgress(), rangeEntity.getLastReportProgress());
             double rewind = lastReportProgress - peer.getProgress();
             structuredData.add("peerLastReportProgress", addressEntity.getLastReportProgress());
             structuredData.add("rangeLastRecordProgress", rangeEntity.getLastReportProgress());
