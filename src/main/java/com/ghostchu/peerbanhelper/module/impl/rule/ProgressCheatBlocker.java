@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.database.table.PCBAddressEntity;
 import com.ghostchu.peerbanhelper.database.table.PCBRangeEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
+import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -27,6 +28,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
+import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -99,28 +101,31 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         Main.getEventBus().register(this);
     }
 
-//
-//    @Subscribe
-//    public void onPeerUnBan(PeerUnbanEvent event) {
-//        IPAddress peerPrefix;
-//        IPAddress peerIp = event.getAddress();
-//        if (peerIp.isIPv4()) {
-//            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv4PrefixLength);
-//        } else {
-//            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
-//        }
-//        try {
-//            cache.asMap().keySet().removeIf(key ->
-//                    key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
-//                            key.peerAddressIp().equals(peerIp.toString())
-//            );
-//            int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
-//            int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
-//            log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
-//        } catch (SQLException e) {
-//            log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp, e);
-//        }
-//    }
+
+    @Subscribe
+    public void onPeerUnBan(PeerUnbanEvent event) {
+        if(event.getBanMetadata().isBanForDisconnect()){
+            return;
+        }
+        IPAddress peerPrefix;
+        IPAddress peerIp = event.getAddress();
+        if (peerIp.isIPv4()) {
+            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv4PrefixLength);
+        } else {
+            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
+        }
+        try {
+            cache.asMap().keySet().removeIf(key ->
+                    key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
+                            key.peerAddressIp().equals(peerIp.toString())
+            );
+            int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
+            int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
+            log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
+        } catch (SQLException e) {
+            log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp, e);
+        }
+    }
 
     private void cleanDatabase() {
         try {
