@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.database.dao.impl.tmp;
+package com.ghostchu.peerbanhelper.database.dao.impl;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;

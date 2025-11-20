@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.PeerConnectionMetricsTrackDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricsTrackDao;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;

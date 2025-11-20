@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.PeerConnectionMetricsTrackDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricsTrackDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;

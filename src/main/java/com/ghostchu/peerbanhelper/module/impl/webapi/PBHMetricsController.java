@@ -2,11 +2,13 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
@@ -44,6 +46,9 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private TrackedSwarmDao trackedSwarmDao;
     @Autowired
     private PeerRecordDao peerRecordDao;
+    @Autowired
+    private SessionAnalyseServiceModule sessionAnalyseServiceModule;
+    private PeerConnectionMetricDao peerConnectionMetricDao;
 
     @Override
     public boolean isConfigurable() {
@@ -235,15 +240,24 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             log.error("Unable to query tracked swarm count", e);
         }
         try {
-            var queryBuilder = peerRecordDao.queryBuilder();
-            var where = queryBuilder.selectColumns("address").distinct().where();
-            Timestamp weekAgo = new Timestamp(System.currentTimeMillis() - 7L * 24 * 3600 * 1000);
+            var queryBuilder = peerConnectionMetricDao.queryBuilder();
+            var where = queryBuilder.selectRaw("SUM(totalConnections) as ct").distinct().where();
+            Timestamp weekAgo = new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis() - 7L * 24 * 3600 * 1000));
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            where.or(where.between("firstTimeSeen", weekAgo, now),
-                    where.between("lastTimeSeen", weekAgo, now));
-            map.put("weeklySessions", queryBuilder.countOf());
+            where.between("timeframeAt", weekAgo, now);
+            long weeklySessions = -1;
+            try (var results = queryBuilder.queryRaw()) {
+                var firstResults = results.getFirstResult();
+                if (firstResults != null) {
+                    weeklySessions = Long.parseLong(firstResults[0]);
+                }
+            } catch (Exception e) {
+                log.error("Unable to query weekly sessions due unknown error", e);
+                weeklySessions = -1;
+            }
+            map.put("weeklySessions", weeklySessions);
         } catch (SQLException e) {
-            map.put("weeklySessions", 0);
+            map.put("weeklySessions", -1);
             log.error("Unable to query weekly sessions", e);
         }
         ctx.json(new StdResp(true, null, map));
