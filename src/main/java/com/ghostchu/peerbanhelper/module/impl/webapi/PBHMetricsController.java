@@ -236,27 +236,10 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             map.put("peersBlockRate", 0.0d);
             log.error("Unable to query tracked swarm count", e);
         }
-        try {
-            var queryBuilder = peerConnectionMetricDao.queryBuilder();
-            var where = queryBuilder.selectRaw("SUM(totalConnections) as ct").distinct().where();
-            Timestamp weekAgo = new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis() - 7L * 24 * 3600 * 1000));
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            where.between("timeframeAt", weekAgo, now);
-            long weeklySessions = -1;
-            try (var results = queryBuilder.queryRaw()) {
-                var firstResults = results.getFirstResult();
-                if (firstResults != null) {
-                    weeklySessions = Long.parseLong(firstResults[0]);
-                }
-            } catch (Exception e) {
-                log.error("Unable to query weekly sessions due unknown error", e);
-                weeklySessions = -1;
-            }
-            map.put("weeklySessions", weeklySessions);
-        } catch (SQLException e) {
-            map.put("weeklySessions", -1);
-            log.error("Unable to query weekly sessions", e);
-        }
+        map.put("weeklySessions", peerConnectionMetricDao.getGlobalTotalConnectionsCount(
+                new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000)),
+                new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis())
+        )));
         ctx.json(new StdResp(true, null, map));
     }
 
