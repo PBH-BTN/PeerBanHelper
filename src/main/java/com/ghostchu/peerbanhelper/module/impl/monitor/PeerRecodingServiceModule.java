@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.*;
@@ -124,7 +125,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
             log.debug("Cleaning PeerRecording table...");
             try {
                 var deleteBuilder = peerRecordDao.deleteBuilder();
-                var where = deleteBuilder.where().lt("lastTimeSeen", System.currentTimeMillis() - dataRetentionTime);
+                var where = deleteBuilder.where().lt("lastTimeSeen", new Timestamp(System.currentTimeMillis() - dataRetentionTime));
                 deleteBuilder.setWhere(where);
                 int deleted = deleteBuilder.delete();
                 log.debug("Cleaned {} old records from peer_records tables", deleted);
