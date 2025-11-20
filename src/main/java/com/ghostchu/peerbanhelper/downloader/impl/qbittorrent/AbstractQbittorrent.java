@@ -457,7 +457,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     log.debug("Field is_private is not present, querying from properties API, hash: {}", detail.getHash());
                     detail.setPrivateTorrent(properties.isPrivate);
                 }
-                if (detail.getPieceSize() <= 0 || detail.getPiecesHave() <= 0) {
+                if (detail.getPieceSize() == null || detail.getPiecesHave() == null) {
                     log.debug("Field piece_size or pieces_have is not present, querying from properties API, hash: {}", detail.getHash());
                     detail.setPieceSize(properties.pieceSize);
                     detail.setPiecesHave(properties.piecesHave);
