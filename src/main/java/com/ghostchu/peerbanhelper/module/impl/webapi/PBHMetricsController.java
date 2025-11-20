@@ -45,9 +45,6 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     @Autowired
     private TrackedSwarmDao trackedSwarmDao;
     @Autowired
-    private PeerRecordDao peerRecordDao;
-    @Autowired
-    private SessionAnalyseServiceModule sessionAnalyseServiceModule;
     private PeerConnectionMetricDao peerConnectionMetricDao;
 
     @Override
