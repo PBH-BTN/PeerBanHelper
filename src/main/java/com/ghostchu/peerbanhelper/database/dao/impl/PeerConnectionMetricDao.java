@@ -29,13 +29,11 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
     public long getGlobalTotalConnectionsCount(@NotNull Timestamp startAt, @NotNull Timestamp endAt) {
         long total = 0;
         try {
-            var where = queryBuilder().selectRaw("SUM(totalConnections) as total").where();
+            var where = queryBuilder().where();
             where.between("timeframeAt", startAt, endAt);
-            try (var query = where.queryRaw()) {
-                var result = query.getFirstResult();
-                if (result != null && result.length > 0 && result[0] != null) {
-                    total = Long.parseLong(result[0]);
-                }
+            var entities = where.query();
+            for (PeerConnectionMetricsEntity entity : entities) {
+                total += entity.getTotalConnections();
             }
         } catch (Exception e) {
             log.error("Failed to query global total connections count between {} and {}", startAt, endAt, e);
