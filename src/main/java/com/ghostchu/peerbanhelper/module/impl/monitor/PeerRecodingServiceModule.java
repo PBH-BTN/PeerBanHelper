@@ -124,8 +124,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
             log.debug("Cleaning PeerRecording table...");
             try {
                 var deleteBuilder = peerRecordDao.deleteBuilder();
-                var where = deleteBuilder.where()
-                        .lt("lastTimeSeen", dataRetentionTime);
+                var where = deleteBuilder.where().lt("lastTimeSeen", System.currentTimeMillis() - dataRetentionTime);
                 deleteBuilder.setWhere(where);
                 int deleted = deleteBuilder.delete();
                 log.debug("Cleaned {} old records from peer_records tables", deleted);
