@@ -245,14 +245,19 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             Timestamp weekAgo = new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis() - 7L * 24 * 3600 * 1000));
             Timestamp now = new Timestamp(System.currentTimeMillis());
             where.between("timeframeAt", weekAgo, now);
-            long weeklySessions = 0;
-            var results = queryBuilder.queryRaw().getFirstResult();
-            if (results != null) {
-                weeklySessions = Long.parseLong(results[0]);
+            long weeklySessions = -1;
+            try (var results = queryBuilder.queryRaw()) {
+                var firstResults = results.getFirstResult();
+                if (firstResults != null) {
+                    weeklySessions = Long.parseLong(firstResults[0]);
+                }
+            } catch (Exception e) {
+                log.error("Unable to query weekly sessions due unknown error", e);
+                weeklySessions = -1;
             }
             map.put("weeklySessions", weeklySessions);
         } catch (SQLException e) {
-            map.put("weeklySessions", 0);
+            map.put("weeklySessions", -1);
             log.error("Unable to query weekly sessions", e);
         }
         ctx.json(new StdResp(true, null, map));
