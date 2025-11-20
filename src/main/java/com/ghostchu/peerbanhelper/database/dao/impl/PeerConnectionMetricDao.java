@@ -26,6 +26,21 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
         super(database, PeerConnectionMetricsEntity.class);
     }
 
+    public long getGlobalTotalConnectionsCount(@NotNull Timestamp startAt, @NotNull Timestamp endAt) {
+        long total = 0;
+        try {
+            var where = queryBuilder().where();
+            where.between("timeframeAt", startAt, endAt);
+            var entities = where.query();
+            for (PeerConnectionMetricsEntity entity : entities) {
+                total += entity.getTotalConnections();
+            }
+        } catch (Exception e) {
+            log.error("Failed to query global total connections count between {} and {}", startAt, endAt, e);
+        }
+        return total;
+    }
+
     public List<PeerConnectionMetricsDTO> getMetricsSince(@NotNull Timestamp sinceAt, @NotNull Timestamp untilAt, @Nullable String downloader) {
         List<PeerConnectionMetricsDTO> result = new ArrayList<>();
         try {
@@ -81,7 +96,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
         target.setTcpSocket(target.getTcpSocket() + source.getTcpSocket());
     }
 
-    public synchronized void saveAggregating(List<PeerConnectionMetricsEntity> buffer, boolean overwrite){
+    public synchronized void saveAggregating(List<PeerConnectionMetricsEntity> buffer, boolean overwrite) {
         for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
             try {
                 var entityInDb = queryBuilder().where()

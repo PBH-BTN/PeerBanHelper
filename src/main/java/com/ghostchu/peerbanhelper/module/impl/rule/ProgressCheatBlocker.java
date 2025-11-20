@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.database.table.PCBAddressEntity;
 import com.ghostchu.peerbanhelper.database.table.PCBRangeEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
-import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -28,7 +27,6 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
-import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -48,14 +46,13 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
-    private final Cache<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
+    private final Cache<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
             .maximumSize(1024)
-            .expireAfterAccess(3, TimeUnit.MINUTES)
+            .expireAfterAccess(10, TimeUnit.SECONDS)
             .softValues()
             .recordStats()
-            .removalListener((RemovalListener<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
+            .removalListener((RemovalListener<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
                 var pair = notification.getValue();
-                if (pair == null) return;
                 try {
                     flushBackDatabase(pair.getLeft(), pair.getRight());
                 } catch (SQLException e) {
@@ -102,28 +99,28 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         Main.getEventBus().register(this);
     }
 
-
-    @Subscribe
-    public void onPeerUnBan(PeerUnbanEvent event) {
-        IPAddress peerPrefix;
-        IPAddress peerIp = event.getAddress();
-        if (peerIp.isIPv4()) {
-            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv4PrefixLength);
-        } else {
-            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
-        }
-        try {
-            cache.asMap().keySet().removeIf(key ->
-                    key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
-                            key.peerAddressIp().equals(peerIp.toString())
-            );
-            int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
-            int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
-            log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
-        } catch (SQLException e) {
-            log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp, e);
-        }
-    }
+//
+//    @Subscribe
+//    public void onPeerUnBan(PeerUnbanEvent event) {
+//        IPAddress peerPrefix;
+//        IPAddress peerIp = event.getAddress();
+//        if (peerIp.isIPv4()) {
+//            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv4PrefixLength);
+//        } else {
+//            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
+//        }
+//        try {
+//            cache.asMap().keySet().removeIf(key ->
+//                    key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
+//                            key.peerAddressIp().equals(peerIp.toString())
+//            );
+//            int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
+//            int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
+//            log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
+//        } catch (SQLException e) {
+//            log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp, e);
+//        }
+//    }
 
     private void cleanDatabase() {
         try {
@@ -222,6 +219,9 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             if (torrentSize <= 0) {
                 return pass();
             }
+            if (!isUploadingToPeer(peer)) {
+                return pass();
+            }
             var structuredData = StructuredData.create()
                     .add("torrentSize", torrentSize)
                     .add("completedSize", completedSize)
@@ -270,11 +270,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         } finally {
             // 无论如何都写入缓存，同步更改
             addressEntity.setLastReportUploaded(peer.getUploaded());
-            addressEntity.setLastReportProgress(peer.getProgress());
+            if (peer.getProgress() != 0.0d) { // 不要保存 0.0d 的，避免覆盖库中数据，导致触发 PCB 立刻封禁
+                addressEntity.setLastReportProgress(peer.getProgress());
+                rangeEntity.setLastReportProgress(peer.getProgress());
+            }
             addressEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), addressEntity.getLastTorrentCompletedSize()));
             addressEntity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
             rangeEntity.setLastReportUploaded(peer.getUploaded());
-            rangeEntity.setLastReportProgress(peer.getProgress());
             rangeEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), rangeEntity.getLastTorrentCompletedSize()));
             rangeEntity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
         }
@@ -313,25 +315,26 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             structuredData.add("lastReportProgress", lastReportProgress);
             structuredData.add("rewind", rewind);
             structuredData.add("rewindMaximumDifference", rewindMaximumDifference);
-            // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
-            if (rewind > rewindMaximumDifference && isUploadingToPeer(peer)) { // 进度回退且在上传
-                if (!isBanDelayWindowScheduled(rangeEntity, addressEntity)) {
-                    scheduleBanDelayWindow(rangeEntity, addressEntity);
-                    return null;
-                }
-                if (isBanDelayWindowExpired(rangeEntity, addressEntity)) {
-                    if (peer.getProgress() > 0.0d) { // 满足等待时间或者 Peer 进度大于 0% (Peer 已更新 BIT_FIELD)
-                        addressEntity.setRewindCounter(addressEntity.getRewindCounter() + 1);
-                        rangeEntity.setRewindCounter(rangeEntity.getRewindCounter() + 1);
-                        resetBanDelayWindow(rangeEntity, addressEntity);
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
-                                new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
-                                        percent(clientReportedProgress),
-                                        percent(computedProgress),
-                                        percent(lastReportProgress),
-                                        percent(rewind),
-                                        percent(rewindMaximumDifference)), structuredData.add("type", "rewindProgress"));
-                    }
+            log.debug("Debug: Peer {} rewind check: lastReportProgress={}, currentProgress={}, rewind={}, rewindMaximumDifference={}",
+                    peer.getPeerAddress(),
+                    percent(lastReportProgress),
+                    percent(peer.getProgress()),
+                    percent(rewind),
+                    percent(rewindMaximumDifference)
+            );
+
+            if ((rewind > rewindMaximumDifference && isUploadingToPeer(peer))) {
+                if (peer.getProgress() > 0.0d) { // 满足等待时间或者 Peer 进度大于 0% (Peer 已更新 BIT_FIELD)
+                    addressEntity.setRewindCounter(addressEntity.getRewindCounter() + 1);
+                    rangeEntity.setRewindCounter(rangeEntity.getRewindCounter() + 1);
+                    resetBanDelayWindow(rangeEntity, addressEntity);
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                            new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
+                                    percent(clientReportedProgress),
+                                    percent(computedProgress),
+                                    percent(lastReportProgress),
+                                    percent(rewind),
+                                    percent(rewindMaximumDifference)), structuredData.add("type", "rewindProgress"));
                 }
             }
         }
@@ -434,9 +437,11 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
                 PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                 if (rangeEntity == null) {
+                    log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
                     rangeEntity = pcbRangeDao.createIfNotExists(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
                 }
                 if (pcbAddressEntity == null) {
+                    log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
                     pcbAddressEntity = pcbAddressDao.createIfNotExists(new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
                 }
                 return Pair.of(rangeEntity, pcbAddressEntity);
@@ -448,6 +453,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) throws SQLException {
+        log.debug("Flushing back to database for pair PCBRangeEntity id={} and PCBAddressEntity id={}", pcbRangeEntity.getId(), pcbAddressEntity.getId());
         pcbRangeDao.update(pcbRangeEntity);
         pcbAddressDao.update(pcbAddressEntity);
         return Pair.of(pcbRangeEntity, pcbAddressEntity);
