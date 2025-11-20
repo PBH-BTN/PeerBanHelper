@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.background.SQLiteOptimizerModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
+import com.ghostchu.peerbanhelper.module.impl.monitor.PeerRecodingServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
@@ -236,6 +237,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHAutoStunController.class);
         moduleManager.register(IdleConnectionDosProtection.class);
         moduleManager.register(SessionAnalyseServiceModule.class);
+        moduleManager.register(PeerRecodingServiceModule.class);
         moduleManager.register(AntiVampire.class);
     }
 
