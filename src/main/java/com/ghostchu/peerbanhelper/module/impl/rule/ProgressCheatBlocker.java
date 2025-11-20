@@ -315,6 +315,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
             if (rewind > rewindMaximumDifference && isUploadingToPeer(peer)) { // 进度回退且在上传
                 if (!isBanDelayWindowScheduled(rangeEntity, addressEntity)) {
+                    // 计划封禁延迟
                     scheduleBanDelayWindow(rangeEntity, addressEntity);
                     return null;
                 }
