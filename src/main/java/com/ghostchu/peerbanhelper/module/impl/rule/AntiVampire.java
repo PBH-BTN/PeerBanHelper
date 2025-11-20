@@ -32,12 +32,10 @@ public final class AntiVampire extends AbstractRuleFeatureModule implements Relo
         return "anti-vampire";
     }
 
-
     @Override
     public boolean isConfigurable() {
         return true;
     }
-
 
     @Override
     public void onEnable() {
@@ -82,7 +80,7 @@ public final class AntiVampire extends AbstractRuleFeatureModule implements Relo
             var peerId = peer.getPeerId().toLowerCase(Locale.ROOT);
             if (peerId.startsWith("-xl")) {
                 isXunlei = true;
-                if (peer.getPeerId().toLowerCase(Locale.ROOT).startsWith("-xl0019")) {
+                if (peerId.startsWith("-xl0019")) {
                     isXunlei0019 = true;
                 }
             }

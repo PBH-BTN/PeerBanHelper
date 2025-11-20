@@ -236,6 +236,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHAutoStunController.class);
         moduleManager.register(IdleConnectionDosProtection.class);
         moduleManager.register(SessionAnalyseServiceModule.class);
+        moduleManager.register(AntiVampire.class);
     }
 
     @Deprecated(forRemoval = true)
