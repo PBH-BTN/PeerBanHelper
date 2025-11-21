@@ -108,6 +108,30 @@
               >
                 <idleConnectionDosProtection v-model="form.module.idle_connection_dos_protection" />
               </a-collapse-item>
+              <a-collapse-item
+                key="12"
+                :header="
+                  t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title')
+                "
+              >
+                <sessionAnalyse v-model="form.module.peer_analyse_service.session_analyse" />
+              </a-collapse-item>
+              <a-collapse-item
+                key="14"
+                :header="
+                  t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title')
+                "
+              >
+                <swarmTracking v-model="form.module.peer_analyse_service.swarm_tracking" />
+              </a-collapse-item>
+              <a-collapse-item
+                key="15"
+                :header="
+                  t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.title')
+                "
+              >
+                <peerRecording v-model="form.module.peer_analyse_service.peer_recording" />
+              </a-collapse-item>
             </a-collapse>
           </a-space>
           <br />
@@ -142,8 +166,11 @@ import idleConnectionDosProtection from './components/idleConnectionDosProtectio
 import ipAddressBlocker from './components/ipAddressBlocker.vue'
 import multiDialingBlocker from './components/multiDialingBlocker.vue'
 import peerIdBlackList from './components/peerIdBlackList.vue'
+import peerRecording from './components/peerRecording.vue'
 import progressCheatBlocker from './components/progressCheatBlocker.vue'
 import ruleSubscribe from './components/ruleSubscribe.vue'
+import sessionAnalyse from './components/sessionAnalyse.vue'
+import swarmTracking from './components/swarmTracking.vue'
 
 const { t } = useI18n()
 const form = reactive({

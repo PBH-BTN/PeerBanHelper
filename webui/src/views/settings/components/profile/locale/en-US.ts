@@ -182,7 +182,6 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
     'Consider connection active when status update (e.g progress), reset the timer',
 
-  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer Analyse Service',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title':
     'Session Analyse Service',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':

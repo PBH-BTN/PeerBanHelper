@@ -168,7 +168,6 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
     '当状态更新时视为连接活动，重置计时器（如任务进度）',
 
-  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer 统计与分析服务',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title': '会话统计与分析服务',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
     '记录在统计周期内的 Peer 状态数据，生成统计数据报表',
@@ -187,7 +186,7 @@ export default {
   'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': '用户群跟踪服务',
   'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
     '为 BTN 种群跟踪和其它类似所需该数据的功能提供数据支持，并跟踪本次运行会话期间的对等体数据，在重启后数据将自动删除',
-  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': '对等体跟踪记录服务',
+  'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': 'Peer 跟踪记录服务',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
     '持续跟踪和记录 Peer 的状态、会话、传输、偏移量等数据，为按 IP、Torrent 聚合数据分析和图表生成、BTN 跨用户 Peer 跟踪能力提供数据支持',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.dataFlushInterval':

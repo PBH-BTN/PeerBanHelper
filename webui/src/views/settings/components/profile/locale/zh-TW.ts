@@ -168,7 +168,6 @@ export default {
   'page.settings.tab.profile.module.idleConnectionDosProtection.resetOnStatusChange.tips':
     '當狀態更新時視為連線活動，重置計時器（如任務進度）',
 
-  'page.settings.tab.profile.module.peerAnalyseService.title': 'Peer 統計與分析服務',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title': '會話統計與分析服務',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.enable.tips':
     '記錄在統計週期內的 Peer 狀態資料，生成統計資料報表',
