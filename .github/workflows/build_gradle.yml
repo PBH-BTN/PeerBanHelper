@@ -1,0 +1,39 @@
+name: Gradle Build
+
+on:
+  workflow_call:
+    secrets:
+      INSTALL4J_LICENSE:
+        required: true
+jobs:
+  WebUI:
+    uses: ./.github/workflows/build_fe.yml
+  Gradle:
+    needs: [WebUI]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v6
+        name: Download WebUI Files
+        with:
+          name: webui-dist
+          path: src/main/resources/static
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "25"
+          cache: 'gradle'
+          cache-dependency-path: |
+            gradle/wrapper/gradle-wrapper.properties
+            build.gradle.kts
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      - name: Build with Gradle
+        run: ./gradlew clean build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: gradle-dist
+          path: |
+            build/libraries
+            build/libs/*.jar

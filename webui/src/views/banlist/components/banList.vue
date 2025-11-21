@@ -3,20 +3,15 @@
     <a-space class="list-header" wrap>
       <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
       <a-space class="list-header-right-group" wrap>
-        <AsyncMethod
-          v-slot="{ run: unban, loading: unbaning }"
-          once
-          :async-fn="() => handleUnban('*')"
+        <a-popconfirm
+          type="warning"
+          :content="t('page.banlist.banlist.listItem.unbanallConfirm')"
+          @before-ok="handleUnban('*')"
         >
-          <a-button
-            type="secondary"
-            :disabled="(list?.length ?? 0) === 0"
-            :loading="unbaning"
-            @click="unban"
-          >
+          <a-button type="secondary" :disabled="(list?.length ?? 0) === 0">
             {{ t('page.banlist.banlist.listItem.unbanall') }}
           </a-button>
-        </AsyncMethod>
+        </a-popconfirm>
         <a-input-search
           :style="{ width: '250px' }"
           :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
@@ -56,9 +51,8 @@
 </template>
 
 <script setup lang="ts">
-import AsyncMethod from '@/components/asyncMethod.vue'
 import { getBanListPaginated, unbanIP } from '@/service/banList'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -87,7 +81,7 @@ const { total, data, current, pageSize, loading, changeCurrent, changePageSize, 
         totalKey: 'data.total'
       }
     },
-    [useAutoUpdatePlugin]
+    [useFirstPageOnlyAutoUpdatePlugin]
   )
 
 const handleUnban = async (address: string) => {

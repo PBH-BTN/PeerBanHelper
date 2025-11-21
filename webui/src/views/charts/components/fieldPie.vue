@@ -20,6 +20,11 @@
         >
       </template>
     </a-result>
+    <a-empty
+      v-else-if="!loading && (!data?.data || data.data.length === 0)"
+      class="chart"
+      style="align-items: center; display: flex; justify-content: center; flex-direction: column"
+    />
     <v-chart
       v-else
       class="chart"
@@ -155,7 +160,7 @@ const props = defineProps<{
   downloader?: string
 }>()
 
-const { loading, run, refresh } = useRequest(getAnalysisDataByField, {
+const { loading, run, refresh, data } = useRequest(getAnalysisDataByField, {
   defaultParams: ['peerId', true, props.downloader],
   onSuccess: (data) => {
     if (data.data) {

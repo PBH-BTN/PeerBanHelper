@@ -25,6 +25,34 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 36)
+    public void antiVampire(YamlConfiguration bundled) {
+        conf.set("module.anti-vampire", bundled.get("module.anti-vampire"));
+    }
+
+    @UpdateScript(version = 35)
+    public void removeXunleiRules() {
+        var peerIdList = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
+        peerIdList.removeIf(s -> s.equals("{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}"));
+        conf.set("module.peer-id-blacklist.banned-peer-id", peerIdList);
+        var clientNameList = conf.getStringList("module.client-name-blacklist.banned-client-name");
+        clientNameList.removeIf(s -> s.equals("{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}"));
+        clientNameList.removeIf(s -> s.equals("{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}"));
+        conf.set("module.client-name-blacklist.banned-client-name", clientNameList);
+    }
+
+    @UpdateScript(version = 34)
+    public void analyseServiceSection(YamlConfiguration bundled) {
+        conf.set("module.peer-analyse-service", bundled.get("module.peer-analyse-service"));
+        // 迁移 AMM 数据
+        conf.set("module.peer-analyse-service.peer-recording.data-retention-time", conf.get("module.active-monitoring.data-retention-time"));
+        conf.set("module.peer-analyse-service.peer-recording.data-cleanup-interval", conf.get("module.active-monitoring.data-cleanup-interval"));
+        conf.set("module.active-monitoring.data-retention-time", null);
+        conf.set("module.active-monitoring.data-cleanup-interval", null);
+        conf.set("module.peer-analyse-service.swarm-tracking.enabled", conf.get("module.swarm-tracking.enabled"));
+        conf.set("module.swarm-tracking", null);
+    }
+
     @UpdateScript(version = 32)
     public void fixSwarmTracking(YamlConfiguration bundled) {
         conf.set("module.swarm-tracking", bundled.get("module.swarm-tracking"));

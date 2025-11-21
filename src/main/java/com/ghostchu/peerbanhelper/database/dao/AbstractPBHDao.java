@@ -8,11 +8,13 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
+@Slf4j
 public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
     private static final Object transactionLock = new Object();
 
@@ -29,7 +31,12 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
 
     public Page<T> queryByPaging(QueryBuilder<T, ID> qb, Pageable pageable) throws SQLException {
         var r = query(qb.offset(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).prepare());
-        var ct = qb.offset(null).limit(null).countOf();
+        long ct = 0;
+        try {
+            ct = qb.offset(null).limit(null).countOf();
+        } catch (SQLException e) {
+            log.debug("Unable to count total records for paging query", e);
+        }
         return new Page<>(
                 pageable,
                 ct,

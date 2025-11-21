@@ -1,4 +1,4 @@
-config-version: 31
+config-version: 36
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -48,7 +48,6 @@ module:
     # miss = 匹配失败返回的行为代码（与上相同） # the behavior if match failed, same as above
     # 规则从上到下执行
     banned-peer-id:
-      - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"-hp"}'
       - '{"method":"STARTS_WITH","content":"-xm"}'
       - '{"method":"STARTS_WITH","content":"-dt"}'
@@ -70,8 +69,6 @@ module:
     enabled: true
     ban-duration: 259200000
     banned-client-name:
-      - '{"method":"CONTAINS","content":"xunlei"}'
-      - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"hp/torrent"}'
       - '{"method":"STARTS_WITH","content":"hp "}'
       - '{"method":"STARTS_WITH","content":"dt/torrent"}'
@@ -91,7 +88,7 @@ module:
       - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ޭ__"}' # 0xde-0xad-0xbe-0xef
-      - '{"method":"STARTS_WITH","content":"-XL"}'
+
   # 进度作弊检查器：Progress Cheat Blocker
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
   # Note: Sometimes it may incorrect ban some clients if they enabled "Super Seeding", but in most cases, it can accurately detect the cheat/bad peers.
@@ -375,32 +372,11 @@ module:
         # 规则文件订阅地址 - Subscription Address
         url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
   # 主动监测 - Active Monitoring
-  # 此功能允许 PeerBanHelper 主动记录每次请求下载器时获取到的数据到本地 SQLite 数据库中
-  # Allow PBH records all data that fetched from downloader and save them into SQLite database
-  # 其产生的数据可被其它模块调用（如：生成图表报表等）
-  # The data produced by this module can be re-used by other modules
-  # 注意：使用 SD 卡或者 eMMC 的设备【不建议】开启此功能，此功能对于存储设备的读写压力较高，可能加快 Flash 存储芯片磨损或导致存储设备过热
-  # NOTE: It is not recommended to enable this module if PBH running on SDCard or eMMC Flash chip.
-  # 另请注意：此功能可能还会导致本地数据库文件大小快速变大，不建议在存储空间不充足的存储设备上使用此功能
-  # NOTE: This may lead database size increase quickly
+  # 此功能允许 PeerBanHelper 监视下载器的网络传输活动，自动调整其传输速率设置，并在达到阈值时发送告警信息
+  # This feature allows PeerBanHelper to monitor the network traffic activity of downloader, automatically adjust its transfer rate settings, and send alert messages when the threshold is reached.
   active-monitoring:
     # 是否启用此功能
     enabled: true
-    # 清理周期
-    # Retention time
-    # 请注意：由于 SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间
-    # Note: Deleted records won't free the disk space, but new data will reuse those parts of space due SQLite internal design
-    # 因此请选择一个合理的记录周期
-    # 时间单位：ms；默认值：5184000000 (60 天) ; default: (60 days)
-    data-retention-time: 5184000000
-    # 清理检查周期
-    # Cleanup check interval
-    # 每 interval 毫秒后，将进行一次数据清理任务
-    # Period of cleanup task will be run
-    # 建议不要设置的太频繁，SQLite 是单线程数据库，无法同时执行多个 SQL 查询，慢查询可能导致 PBH 数据写入延迟/耗尽运行 RAM
-    # Do not set it run too frequently
-    # 时间单位：ms；默认值：604800000 (7 天); default: (7 days)
-    data-cleanup-interval: 604800000
     # 流量监控 - Traffic Monitoring
     # 设置流量封顶阈值，当超出阈值后将发送告警信息提醒您检查下载器状态
     # Set the traffic capping threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.
@@ -453,8 +429,6 @@ module:
     # 规则从上到下执行
     ptr-rules:
       - '{"method":"EQUALS","content":"example.com"}'
-  swarm-tracking:
-    enabled: true
   # 拒绝服务攻击保护模块 - DoS Protection Module
   # 此模块保护与 PeerBanHelper 关联的下载器的拒绝服务攻击
   # This module protects the downloader that associated with PBH from DoS attack
@@ -476,3 +450,45 @@ module:
     # 模式1 - 仅保护做种任务 - Mode 1 - Protect seeding tasks only
     # 模式2 - 保护下载任务和做种任务，无论 Peer Flags 支持与否，可能引发误判 - Mode 2 - Protect both downloading and seeding tasks, no matter Peer Flags supported or not, may lead to false positive
     protect-mode: 0
+  # Peer 统计与分析服务
+  peer-analyse-service:
+    # 会话统计与分析服务 - Session Analyse Service
+    # 记录在统计周期内的 Peer 状态数据，生成统计数据报表
+    # Record the peer status data in the analyse interval, generate statistical report
+    session-analyse:
+      enabled: true
+      # 数据刷写间隔时间
+      data-flush-interval: 3600000
+      # 数据汇总和清理间隔时间
+      cleanup-interval: 3600000
+      # 旧数据轮转删除时间
+      data-retention-time: 15552000000
+    # 用户群跟踪服务 - Swarm Tracking Service
+    # 为 BTN 种群跟踪和其它类似所需该数据的功能提供数据支持，并跟踪本次运行会话期间的对等体数据，在重启后数据将自动删除
+    # Provide data support for BTN swarm tracking and other functions that require this data, and track peer data during this running session, data will be automatically deleted after restart
+    swarm-tracking:
+      enabled: true
+    # 对等体跟踪记录服务 - Peer Recording Service
+    # 持续跟踪和记录 Peer 的状态、会话、传输、偏移量等数据，为按 IP、Torrent 聚合数据分析和图表生成、BTN 跨用户 Peer 跟踪能力提供数据支持
+    # Continuously track and record the status, session, transfer, offset and other data of Peers, provide data support for IP and Torrent aggregated data analysis and chart generation, BTN cross-user Peer tracking capabilities
+    peer-recording:
+      enabled: true
+      data-flush-interval: 20000
+      data-retention-time: 5184000000
+      data-cleanup-interval: 604800000
+  # 任务反吸血 - Anti-Vampire Module
+  # 通过监控您与 Peer 之间的传输情况，进行行为判断，并对吸血客户端进行封禁
+  # By monitoring the transfer situation between you and the Peer, make behavior judgments, and ban
+  anti-vampire:
+    enabled: true
+    ban-duration: 14400000
+    # 检测预设 - Detection Presets
+    # 对于已知存在不良行为的客户端，启用预设逻辑，以更加准确和快速的进行识别
+    # For clients with known bad behaviors, enable preset logic for more accurate and faster identification
+    presets:
+      # 迅雷 - Xunlei (Thunder)
+      # 策略描述：
+      # A) 做种状态下，禁止所有版本迅雷客户端，因为任何版本的迅雷客户端都不会做种
+      # B) 下载状态下，仅放行迅雷 0.0.1.9 客户端，因为此类客户端在任务下载过程中正常参与 Swarm 分享数据
+      xunlei:
+        enabled: true

@@ -1,4 +1,4 @@
-config-version: 35
+config-version: 38
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -21,7 +21,7 @@ gui: auto
 # so your support is vital to us.
 # If you don't want to donate PeerBanHelper, please create a local free license via WebUI,
 # which is functionally identical to the donation key obtained via donation.
-pbh-plus-key: ""
+pbh-plus-key: [ ]
 # Http 服务器设置
 # Http Server Settings
 server:
@@ -119,7 +119,7 @@ proxy:
   # 0 = 不使用代理 - No proxy
   # 1 = 使用系统代理 - Use system proxy
   # 2 = 使用 HTTP(s) 代理 - Use HTTP(s) proxy
-  setting: 1
+  setting: 0
   # 代理服务器地址 - Proxy server host
   host: "127.0.0.1"
   # 代理服务器端口号 - Proxy server port
@@ -132,6 +132,41 @@ performance:
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
-  # 启用 Windows 平台上的工作集内存管理，周期性或在 PeerBanHelper 进行内存回收时将不使用或者不活跃的内存释放或者转移到分页文件
-  # Enable Windows Platform working set memory management, periodically or when PeerBanHelper do memory reclaim, it will release or swap out unused or inactive memory to page file
-  windows-empty-working-set: false
+
+# STUN 服务器配置
+stun:
+  # 支持 TCP 协议的 STUN 服务器列表
+  # TCP protocol supported STUN servers
+  tcp-servers:
+    - "turn.cloudflare.com:3478"
+    - "stun.nextcloud.com:3478"
+    - "stun.sipnet.com:3478"
+  # 支持 UDP 协议的 STUN 服务器列表
+  # UDP protocol supported STUN servers
+  udp-servers:
+    - "stun.cdnbye.com:3478"
+    - "stun.nextcloud.com:3478"
+    - "stun.miwifi.com:3478"
+    - "stun.syncthing.net:3478"
+    - "stun.l.google.com:3478"
+  # 启用可用性测试
+  # Enable available test
+  availableTest: true
+
+# 自动 STUN 打洞
+auto-stun:
+  # 是否启用自动 STUN 打洞
+  enabled: false
+  # 是否使用友好格式的回环地址 IP 映射
+  # Enable friendly loopback IP mapping
+  # 在连接上游下载器时将本地套接字绑定到 127.x.y.z 上（其中 x.y.z 是下游 IP 的相同部分），并尽可能使用相同端口号
+  # When connecting to upstream downloader, bind local socket to 127.x.y.z (where x.y.z is the same part of downstream IP)
+  # 即：原始 IP 为 123.222.333.444:55555。则 PeerBanHelper 优先使用 127.222.333.444:55555 作为发起地址，提高 IP 在下载器中的可读性
+  # E.g : Original IP is 123.222.333.444:55555, then PeerBanHelper will use 127.222.333.444:55555 as the source address to improve readability in downloader
+  # 这也有助于在禁用 “允许来自同一地址的多重连接” 选项时，避免下载器将 PBH 回源连接视为同一 IP 的多个连接
+  # This also helps avoid downloader treat PBH as multiple connections from same IP when "Allow multiple connections from same address" option is disabled
+  # 仅对使用回环地址的本机上的下载器有效，其它设备上的下载器将使用默认行为
+  # Only effective for downloader on the same device using loopback address, other devices will use default behavior
+  use-friendly-loopback-mapping: true
+  # 启用该功能的下载器列表
+  downloaders: [ ]

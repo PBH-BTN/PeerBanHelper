@@ -19,7 +19,7 @@ jobs:
       repository-projects: read
       statuses: read
     secrets: inherit
-    uses: ./.github/workflows/build_maven.yml
+    uses: ./.github/workflows/build_gradle.yml
 
   Build_Installers:
     name: Generate Installers
@@ -62,17 +62,17 @@ jobs:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: installer-dist
-          path: target/media
+          path: build/media
       - uses: shallwefootball/s3-upload-action@master
         with:
           aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
           aws_secret_access_key: ${{ secrets.S3_SECRET_KEY }}
           aws_bucket: ${{ secrets.S3_BUCKET }}
           endpoint: ${{ secrets.S3_ENDPOINT }}
-          source_dir: 'target/media'
+          source_dir: 'build/media'
           destination_dir: 'updates/latest'
 
   Clear_CloudFlare_Updates:
@@ -98,36 +98,36 @@ jobs:
       statuses: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
-          name: maven-dist
-          path: target/
-      - uses: actions/download-artifact@v5
+          name: gradle-dist
+          path: build/
+      - uses: actions/download-artifact@v6
         with:
           name: installer-dist
-          path: target/media
-      - uses: actions/download-artifact@v5
+          path: build/media
+      - uses: actions/download-artifact@v6
         with:
           name: spk-dist
-          path: target/media
-      - uses: actions/download-artifact@v5
+          path: build/media
+      - uses: actions/download-artifact@v6
         with:
           name: deb-dist
-          path: target/media
-      - uses: actions/download-artifact@v5
+          path: build/media
+      - uses: actions/download-artifact@v6
         with:
           name: portable-dist
-          path: target/media
-      - uses: actions/download-artifact@v5
+          path: build/media
+      - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-13.4-dist
-          path: target/media
-      - uses: actions/download-artifact@v5
+          path: build/media
+      - uses: actions/download-artifact@v6
         with:
           name: freebsd-pkg-14.1-dist
-          path: target/media
+          path: build/media
       - name: Zip medias for create torrent
-        run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
+        run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/
       - name: Install mktorrent
         run: sudo apt-get install -y mktorrent
       - name: Determine version
@@ -154,7 +154,7 @@ jobs:
           -w "https://github.com/${{ github.repository }}/releases/download/${{ steps.set_version.outputs.version }}/PeerBanHelper_Installers.tar.gz" \
           -o peerbanhelper.torrent \
           "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: torrent-dist
           path: |
@@ -165,7 +165,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*", "target/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
+          asset_paths: '["build/media/PeerBanHelper_*", "build/media/peerbanhelper_*", "build/media/peerbanhelper-*", "build/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
 
   Build_Docker:
     name: Build Docker Image
@@ -183,10 +183,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
-          name: maven-dist
-          path: target
+          name: gradle-dist
+          path: build
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
@@ -198,7 +198,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.9.0
         with:
           images: ghostchu/peerbanhelper
           tags: |
@@ -234,7 +234,7 @@ jobs:
           password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
       - name: Extract metadata (tags, labels) for Aliyun ACR
         id: meta-acr
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.9.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper
           tags: |

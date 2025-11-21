@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed.SwtBrowserCanvas;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.google.common.eventbus.Subscribe;
 import lombok.SneakyThrows;
 
@@ -87,7 +88,7 @@ public class WebUITab implements WindowTab {
 
     private void navigateToIndex() {
         if (webBrowser != null) {
-            bridge.getWebUiUrl().ifPresent(uri -> webBrowser.setUrl(uri.toString()));
+            bridge.getWebUiUrl().ifPresent(uri -> webBrowser.setUrl(uri +"&silentLogin="+ SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI));
         }
     }
 }

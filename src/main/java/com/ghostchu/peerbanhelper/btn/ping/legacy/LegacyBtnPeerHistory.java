@@ -15,6 +15,8 @@ import java.sql.Timestamp;
 public final class LegacyBtnPeerHistory {
     @SerializedName("ip_address")
     private String ipAddress;
+    @SerializedName("port")
+    private int port;
     @SerializedName("peer_id")
     private String peerId;
     @SerializedName("client_name")

@@ -26,13 +26,13 @@ public final class TrackedSwarmEntity { // 需要创建为临时表
     private Boolean torrentIsPrivate;
     @DatabaseField(canBeNull = false, index = true)
     private long torrentSize;
-    @DatabaseField(canBeNull = false, uniqueCombo = true)
+    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
     private String downloader;
     @DatabaseField(canBeNull = false)
     private double downloaderProgress;
-    @DatabaseField
+    @DatabaseField(index = true)
     private String peerId;
-    @DatabaseField
+    @DatabaseField(index = true)
     private String clientName;
     @DatabaseField(canBeNull = false)
     private double peerProgress;
@@ -50,8 +50,8 @@ public final class TrackedSwarmEntity { // 需要创建为临时表
     private long downloadSpeed;
     @DatabaseField
     private String lastFlags;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Timestamp firstTimeSeen;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Timestamp lastTimeSeen;
 }

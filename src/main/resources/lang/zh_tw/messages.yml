@@ -762,3 +762,7 @@ LAB_EXPERIMENT_ASYNC_BANLIST_APPLY_DESCRIPTION: "啟動時，異步應用封禁�
 LAB_EXPERIMENT_ASYNC_IPDB_LOADING: "啟動時異步加載 GeoIP 資料庫"
 LAB_EXPERIMENT_ASYNC_IPDB_LOADING_DESCRIPTION: "啟動時，異步加載 GeoIP 資料庫以避免阻塞啟動執行緒，從而提升啟動速度。"
 WATCH_DOG_HUNGRY_IN_DOWNLOADER_IO: "[警告] WatchDog Service {} 未在指定時間 {} 內得到重置，最後狀態 {}，正在傾印進程線程資訊。這通常是由於下載器卡死導致請求導致的（特別是在 qBittorrent 上）。如果此問題頻繁發生，請嘗試重新啟動下載器。"
+DEMO_MODE_OPERATION_NOT_PERMITTED: "此執行個體處於示範模式下，不允許執行此操作"
+MODULE_ANTI_VAMPIRE_TITLE: "任務反吸血"
+MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_NON_0019: "[禁止] 已識別的拒絕上傳的不良客戶端（迅雷，非 0019 版本）：禁止連接到任何任務"
+MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_0019_SEEDING: "[對等反制] 已識別的拒絕做種的不良客戶端（迅雷，0019 版本）：禁止連接到做種任務"

@@ -18,6 +18,9 @@
               t('page.charts.title.traffic')
             }}</a-checkbox>
             <a-checkbox v-model="showCharts.trends">{{ t('page.charts.title.trends') }}</a-checkbox>
+            <a-checkbox v-model="showCharts.sessionDayBucket">{{
+              t('page.charts.title.sessionDayBucket')
+            }}</a-checkbox>
           </a-space>
         </template>
       </a-popover>

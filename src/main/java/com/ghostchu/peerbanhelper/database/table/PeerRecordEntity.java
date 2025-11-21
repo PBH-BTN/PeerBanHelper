@@ -18,13 +18,15 @@ public final class PeerRecordEntity {
     private Long id;
     @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
     private String address;
+    @DatabaseField(canBeNull = false, uniqueCombo = true, defaultValue = "0")
+    private int port;
     @DatabaseField(canBeNull = false, index = true, foreign = true, foreignAutoCreate = true, uniqueCombo = true, foreignAutoRefresh = true)
     private TorrentEntity torrent;
-    @DatabaseField(canBeNull = false, uniqueCombo = true)
+    @DatabaseField(canBeNull = false, uniqueCombo = true, index = true)
     private String downloader;
-    @DatabaseField
+    @DatabaseField(index = true)
     private String peerId;
-    @DatabaseField
+    @DatabaseField(index = true)
     private String clientName;
     @DatabaseField(canBeNull = false)
     private long uploaded;
@@ -40,8 +42,8 @@ public final class PeerRecordEntity {
     private long downloadSpeed;
     @DatabaseField
     private String lastFlags;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Timestamp firstTimeSeen;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Timestamp lastTimeSeen;
 }

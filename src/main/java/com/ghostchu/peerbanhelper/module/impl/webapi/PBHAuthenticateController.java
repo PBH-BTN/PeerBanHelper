@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.LoginRequestBody;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.SharedObject;
+import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
@@ -64,7 +66,7 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
             throw new IPAddressBannedException();
         }
         if (!ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)) {
-            webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
+            webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent(), false);
             ctx.sessionAttribute("authenticated", webContainer.getToken());
             ctx.json(new StdResp(true, "DEBUG: Skipping WebUI login", null));
             return;
@@ -86,7 +88,8 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
             webContainer.markLoginFailed(userIp(ctx), ctx.userAgent());
             return;
         }
-        webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
+        var silentLoginSecret = ctx.queryParam("silentLogin");
+        webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent(), SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI.equals(silentLoginSecret));
         ctx.sessionAttribute("authenticated", webContainer.getToken());
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }

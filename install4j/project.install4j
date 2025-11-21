@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0.5" transformSequenceNumber="11">
   <directoryPresets config="../native/qt6" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="21" javaMaxVersion="25">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="25" javaMaxVersion="25">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
@@ -11,13 +11,13 @@
       </additionalLanguages>
     </languages>
     <variables>
-      <variable name="jarPath" value="../target/PeerBanHelper.jar" />
-      <variable name="librariesPath" value="../target/libraries" />
-      <variable name="startupFlagPlatform" value="-Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatform}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" />
-      <variable name="startupFlagPlatformNoGUI" value="-Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
+      <variable name="jarPath" value="../build/libs/PeerBanHelper.jar" />
+      <variable name="librariesPath" value="../build/libraries" />
+      <variable name="startupFlagPlatform" value="-XX:+UseCompactObjectHeaders -Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatform}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" />
+      <variable name="startupFlagPlatformNoGUI" value="-XX:+UseCompactObjectHeaders -Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:SoftMaxHeapSize=386M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
       <variable name="jvmOptionsFile" value="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideWindows="true" valueWindows="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideMacos="true" valueMacos="${user.home}/Library/Application Support/PeerBanHelper" overrideUnix="true" valueUnix="${user.home}/.config/PeerBanHelper" />
     </variables>
-    <jreBundles jdkProviderId="JBR" release="21/21.0.8-b1038.68" />
+    <jreBundles jdkProviderId="JBR" release="25/25-b176.4" />
   </application>
   <files keepModificationTimes="true">
     <filesets>
@@ -92,11 +92,6 @@
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
-        <vmOptions>
-          <options version="-23" line="-XX:+ZGenerational" />
-          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
-          <options version="25-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
-        </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
         <content>-include-options ${compiler:jvmOptionsFile}</content>
@@ -114,11 +109,6 @@
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
-        <vmOptions>
-          <options version="-23" line="-XX:+ZGenerational" />
-          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
-          <options version="25-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
-        </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
         <content>-include-options ${compiler:jvmOptionsFile}</content>
@@ -136,11 +126,6 @@
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
-        <vmOptions>
-          <options version="-23" line="-XX:+ZGenerational" />
-          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
-          <options version="25-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
-        </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
         <content>-include-options ${compiler:jvmOptionsFile}</content>
@@ -158,10 +143,6 @@
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
-        <vmOptions>
-          <options version="-23" line="-XX:+ZGenerational" />
-          <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
-        </vmOptions>
       </java>
       <iconImageFiles>
         <file path="./updater.png" />
@@ -176,11 +157,6 @@
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
-        <vmOptions>
-          <options version="-23" line="-XX:+ZGenerational" />
-          <options version="24" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
-          <options version="25" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -XX:+UseCompactObjectHeaders" />
-        </vmOptions>
       </java>
       <vmOptionsFile mode="content" overwriteMode="2">
         <content>-include-options ${compiler:jvmOptionsFile}</content>
@@ -829,7 +805,7 @@ return console.askYesNo(message, true);
 Path dir = context.getInstallationDirectory().toPath();
 File disableFile = new File(context.getInstallationDirectory(), "disable-checking-updates.txt");
 // quit if the current installation is on a read only file system, for example a disk image on macOS
-// or if the directory is not writeable on Linux/Unix. 
+// or if the directory is not writeable on Linux/Unix.
 // If there is no "Request privileges" action in the installer, the condition should also
 // check Files.isWritable(dir)
 return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;&amp; !Util.isArchive()) || Util.isMacOS() || (Util.isLinux() &amp;&amp; !Util.isArchive())) &amp;&amp; !disableFile.exists();
@@ -1492,7 +1468,7 @@ if (context.isUnattended()) {
 }
  args.add("-dir");
  args.add(installationDirectory);
- 
+
  return args.toArray(new String[args.size()]);
 </property>
                                 </object>

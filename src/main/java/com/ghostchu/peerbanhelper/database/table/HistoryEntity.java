@@ -24,11 +24,11 @@ public final class HistoryEntity {
     private Timestamp unbanAt;
     @DatabaseField(canBeNull = false, index = true)
     private String ip;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Integer port;
-    @DatabaseField
+    @DatabaseField(index = true)
     private String peerId;
-    @DatabaseField
+    @DatabaseField(index = true)
     private String peerClientName;
     @DatabaseField
     private Long peerUploaded;
@@ -38,15 +38,15 @@ public final class HistoryEntity {
     private Double peerProgress;
     @DatabaseField(canBeNull = false)
     private Double downloaderProgress;
-    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
+    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true, index = true)
     private TorrentEntity torrent;
-    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
+    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true, index = true)
     private RuleEntity rule;
     @DatabaseField(canBeNull = false, persisterClass = TranslationComponentPersistener.class)
     private TranslationComponent description;
     @DatabaseField
     private String flags;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private String downloader;
     @DatabaseField(canBeNull = false, defaultValue = "{}")
     private String structuredData;

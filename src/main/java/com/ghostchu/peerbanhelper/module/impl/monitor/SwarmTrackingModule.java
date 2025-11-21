@@ -61,7 +61,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
      */
     @Override
     public @NotNull String getConfigName() {
-        return "swarm-tracking";
+        return "peer-analyse-service.swarm-tracking";
     }
 
     /**
@@ -71,9 +71,9 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     public void onEnable() {
         Main.getEventBus().register(this);
         javalinWebContainer.javalin()
-                .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
+                .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
         javalinWebContainer.javalin()
-                .get("/api/modules/" + getConfigName() + "/details", this::handleDetails, Role.USER_READ);
+                .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
     }
 
     private void handleDetails(@NotNull Context context) {

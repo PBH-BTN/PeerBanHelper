@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 public record PeerRecordEntityDTO(
         Long id,
         String address,
+        Integer port,
         TorrentEntityDTO torrent,
         DownloaderBasicInfo downloader,
         String peerId,

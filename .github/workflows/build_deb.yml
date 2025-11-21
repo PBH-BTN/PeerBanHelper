@@ -9,10 +9,10 @@ jobs:
       - uses: actions/checkout@v5
       - id: java_info
         uses: YunaBraska/java-info-action@main
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
-          name: maven-dist
-          path: target/
+          name: gradle-dist
+          path: build/
       - name: Build Deb package
         id: build-deb
         run: |
@@ -20,14 +20,14 @@ jobs:
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
           sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/deb/DEBIAN/control
           mkdir -p pkg/deb/usr/lib/peerbanhelper
-          mv target/libraries pkg/deb/usr/lib/peerbanhelper/
-          cp target/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper/
+          mv build/libraries pkg/deb/usr/lib/peerbanhelper/
+          cp build/libs/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper/
           cd pkg && dpkg -b deb peerbanhelper_${{ env.PBH_VERSION }}_all.deb
         # 上面那个文件名需要符合收集条件
         env:
-          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+          PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: deb-dist
           path: |

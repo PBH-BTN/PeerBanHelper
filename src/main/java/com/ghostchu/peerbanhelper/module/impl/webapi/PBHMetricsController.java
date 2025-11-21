@@ -2,10 +2,13 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
@@ -41,6 +44,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private DownloaderServer downloaderServer;
     @Autowired
     private TrackedSwarmDao trackedSwarmDao;
+    @Autowired
+    private PeerConnectionMetricDao peerConnectionMetricDao;
 
     @Override
     public boolean isConfigurable() {
@@ -222,15 +227,19 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         try {
             long trackedPeers = trackedSwarmDao.countOf();
             map.put("trackedSwarmCount", trackedPeers);
-            if(trackedPeers > 0) {
+            if (trackedPeers > 0) {
                 map.put("peersBlockRate", (double) metrics.getPeerBanCounter() / trackedPeers);
-            }else{
+            } else {
                 map.put("peersBlockRate", 0.0d);
             }
         } catch (SQLException e) {
             map.put("peersBlockRate", 0.0d);
             log.error("Unable to query tracked swarm count", e);
         }
+        map.put("weeklySessions", peerConnectionMetricDao.getGlobalTotalConnectionsCount(
+                new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000)),
+                new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis())
+        )));
         ctx.json(new StdResp(true, null, map));
     }
 

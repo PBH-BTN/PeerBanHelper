@@ -73,7 +73,7 @@ public final class BiglyBT extends AbstractDownloader {
 
         var builder = httpUtil.newBuilder()
                 .proxy(Proxy.NO_PROXY)
-                .connectionPool(new ConnectionPool(getMaxConcurrentPeerRequestSlots()+10, 5, TimeUnit.MINUTES))
+                .connectionPool(new ConnectionPool(getMaxConcurrentPeerRequestSlots() + 10, 5, TimeUnit.MINUTES))
                 .addInterceptor(chain -> {
                     Request originalRequest = chain.request();
                     Request newRequest = originalRequest.newBuilder()
@@ -408,7 +408,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
         BanBean bean = new BanBean(added.stream()
-                .map(b ->b.getPeer().getAddress().getAddress().toPrefixBlock().toNormalizedString())
+                .map(b -> remapBanListAddress(b.getPeer().getAddress().getAddress()).toNormalizedString())
                 .distinct().toList());
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()
@@ -428,8 +428,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     private void setBanListFull(Collection<IPAddress> peerAddresses) {
         BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream()
-                .map(IPAddress::toPrefixBlock)
-                .map(IPAddress::toNormalizedString)
+                .map(ipaddr -> remapBanListAddress(ipaddr).toNormalizedString())
                 .distinct().toList(), false);
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
         Request request = new Request.Builder()

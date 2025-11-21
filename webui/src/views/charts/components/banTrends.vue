@@ -54,6 +54,11 @@
         >
       </template>
     </a-result>
+    <a-empty
+      v-else-if="!loading && (!data?.data || data.data.length === 0)"
+      class="chart"
+      style="align-items: center; display: flex; justify-content: center; flex-direction: column"
+    />
     <v-chart
       v-else
       class="chart"
@@ -136,7 +141,7 @@ watch(option, (v) => {
   run(v.range[0]!, v.range[1]!, props.downloader)
 })
 
-const { loading, run, refresh } = useRequest(getBanTrends, {
+const { loading, run, refresh, data } = useRequest(getBanTrends, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), props.downloader],
   onSuccess: (data) => {
     if (data.data) {

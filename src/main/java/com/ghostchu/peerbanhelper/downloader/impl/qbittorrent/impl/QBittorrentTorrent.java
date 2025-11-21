@@ -56,10 +56,10 @@ public final class QBittorrentTorrent implements Torrent {
 //    private Boolean fLPiecePrio;
 
     @SerializedName("piece_size")
-    private long pieceSize;
+    private Long pieceSize;
 
     @SerializedName("pieces_have")
-    private long piecesHave;
+    private Long piecesHave;
 
     @SerializedName("force_start")
     private boolean forceStart;

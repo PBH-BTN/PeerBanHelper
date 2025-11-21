@@ -45,9 +45,9 @@ public final class PBHTableUtils {
      *            The class for which a table will be created.
      * @return The number of statements executed to do so.
      */
-    public static <T> int createTable(ConnectionSource connectionSource, Class<T> dataClass, boolean tempTable) throws SQLException {
+    public static <T> int createTable(ConnectionSource connectionSource, Class<T> dataClass, boolean tempTable, boolean ignoreErrors) throws SQLException {
         Dao<T, ?> dao = DaoManager.createDao(connectionSource, dataClass);
-        return doCreateTable(dao, false, tempTable);
+        return doCreateTable(dao, false, tempTable, ignoreErrors);
     }
 
     /**
@@ -57,8 +57,16 @@ public final class PBHTableUtils {
      *            Associated dao.
      * @return The number of statements executed to do so.
      */
-    public static int createTable(Dao<?, ?> dao, boolean tempTable) throws SQLException {
-        return doCreateTable(dao, false, tempTable);
+    public static int createTable(Dao<?, ?> dao, boolean tempTable, boolean ignoreErrors) throws SQLException {
+        return doCreateTable(dao, false, tempTable, ignoreErrors);
+    }
+
+    /**
+     * Create a table if it does not already exist. This is not supported by all databases.
+     */
+    public static <T> int createTableIfNotExists(ConnectionSource connectionSource, Class<T> dataClass, boolean tempTable, boolean ignoreErrors) throws SQLException {
+        Dao<T, ?> dao = DaoManager.createDao(connectionSource, dataClass);
+        return doCreateTable(dao, true, tempTable, ignoreErrors);
     }
 
     /**
@@ -66,7 +74,7 @@ public final class PBHTableUtils {
      */
     public static <T> int createTableIfNotExists(ConnectionSource connectionSource, Class<T> dataClass, boolean tempTable) throws SQLException {
         Dao<T, ?> dao = DaoManager.createDao(connectionSource, dataClass);
-        return doCreateTable(dao, true, tempTable);
+        return doCreateTable(dao, true, tempTable, true);
     }
 
     /**
@@ -79,19 +87,19 @@ public final class PBHTableUtils {
      *            annotations.
      * @return The number of statements executed to do so.
      */
-    public static <T> int createTable(ConnectionSource connectionSource, DatabaseTableConfig<T> tableConfig, boolean tempTable)
+    public static <T> int createTable(ConnectionSource connectionSource, DatabaseTableConfig<T> tableConfig, boolean tempTable, boolean ignoreErrors)
             throws SQLException {
         Dao<T, ?> dao = DaoManager.createDao(connectionSource, tableConfig);
-        return doCreateTable(dao, false, tempTable);
+        return doCreateTable(dao, false, tempTable, ignoreErrors);
     }
 
     /**
      * Create a table if it does not already exist. This is not supported by all databases.
      */
-    public static <T> int createTableIfNotExists(ConnectionSource connectionSource, DatabaseTableConfig<T> tableConfig, boolean tempTable)
+    public static <T> int createTableIfNotExists(ConnectionSource connectionSource, DatabaseTableConfig<T> tableConfig, boolean tempTable, boolean ignoreErrors)
             throws SQLException {
         Dao<T, ?> dao = DaoManager.createDao(connectionSource, tableConfig);
-        return doCreateTable(dao, true, tempTable);
+        return doCreateTable(dao, true, tempTable, ignoreErrors);
     }
 
     /**
@@ -344,26 +352,26 @@ public final class PBHTableUtils {
         statements.addAll(statementsAfter);
     }
 
-    private static <T, ID> int doCreateTable(Dao<T, ID> dao, boolean createIfNotExists, boolean tempTable) throws SQLException {
+    private static <T, ID> int doCreateTable(Dao<T, ID> dao, boolean createIfNotExists, boolean tempTable, boolean ignoreErrors) throws SQLException {
         ConnectionSource connectionSource = dao.getConnectionSource();
         DatabaseType databaseType = connectionSource.getDatabaseType();
         if (dao instanceof BaseDaoImpl<?, ?>) {
-            return doCreateTable(connectionSource, ((BaseDaoImpl<?, ?>) dao).getTableInfo(), createIfNotExists, tempTable);
+            return doCreateTable(connectionSource, ((BaseDaoImpl<?, ?>) dao).getTableInfo(), createIfNotExists, tempTable, false);
         } else {
             TableInfo<T, ID> tableInfo = new TableInfo<>(databaseType, dao.getDataClass());
-            return doCreateTable(connectionSource, tableInfo, createIfNotExists, tempTable);
+            return doCreateTable(connectionSource, tableInfo, createIfNotExists, tempTable, ignoreErrors);
         }
     }
 
     private static <T, ID> int doCreateTable(ConnectionSource connectionSource, TableInfo<T, ID> tableInfo,
-                                             boolean createIfNotExists, boolean tempTable) throws SQLException {
+                                             boolean createIfNotExists, boolean tempTable, boolean ignoreErrors) throws SQLException {
         DatabaseType databaseType = connectionSource.getDatabaseType();
         List<String> statements = new ArrayList<>();
         List<String> queriesAfter = new ArrayList<>();
         addCreateTableStatements(databaseType, tableInfo, statements, queriesAfter, createIfNotExists, true, tempTable);
         DatabaseConnection connection = connectionSource.getReadWriteConnection(tableInfo.getTableName());
         try {
-            int stmtC = doStatements(connection, "create", statements, false,
+            int stmtC = doStatements(connection, "create", statements, ignoreErrors,
                     databaseType.isCreateTableReturnsNegative(), databaseType.isCreateTableReturnsZero());
             stmtC += doCreateTestQueries(connection, databaseType, queriesAfter);
             return stmtC;

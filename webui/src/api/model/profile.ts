@@ -19,8 +19,9 @@ export interface Module {
   expression_engine: ExpressionEngine
   ip_address_blocker_rules: IpAddressBlockerRules
   active_monitoring: ActiveMonitoring
-  ptr_blacklist: PtrBlacklist
   idle_connection_dos_protection: IdleConnectionDosProtection
+  peer_analyse_service: PeerAnalyseService
+  anti_vampire: AntiVampire
 }
 
 export interface PeerIdBlacklist {
@@ -131,8 +132,6 @@ export interface AllInOne {
 
 export interface ActiveMonitoring {
   enabled: boolean
-  data_retention_time: number
-  data_cleanup_interval: number
   traffic_monitoring: {
     daily: number
   }
@@ -144,10 +143,28 @@ export interface ActiveMonitoring {
   }
 }
 
-export interface PtrBlacklist {
+export interface PeerAnalyseService {
+  session_analyse: SessionAnalyse
+  swarm_tracking: SwarmTracking
+  peer_recording: PeerRecording
+}
+
+export interface SessionAnalyse {
   enabled: boolean
-  ban_duration: BanDuration
-  ptr_rules: PeerRule[]
+  data_flush_interval: number
+  cleanup_interval: number
+  data_retention_time: number
+}
+
+export interface SwarmTracking {
+  enabled: boolean
+}
+
+export interface PeerRecording {
+  enabled: boolean
+  data_flush_interval: number
+  data_retention_time: number
+  data_cleanup_interval: number
 }
 
 export interface IdleConnectionDosProtection {
@@ -157,4 +174,18 @@ export interface IdleConnectionDosProtection {
   idle_speed_threshold: number
   min_status_change_percentage: number
   reset_on_status_change: boolean
+}
+
+export interface AntiVampire {
+  enabled: boolean
+  ban_duration: BanDuration
+  presets: AntiVampirePresets
+}
+
+export interface AntiVampirePresets {
+  xunlei: XunleiPreset
+}
+
+export interface XunleiPreset {
+  enabled: boolean
 }

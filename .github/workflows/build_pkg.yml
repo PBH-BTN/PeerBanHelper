@@ -12,17 +12,17 @@ jobs:
       - uses: actions/checkout@v5
       - id: java_info
         uses: YunaBraska/java-info-action@main
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
-          name: maven-dist
-          path: target/
+          name: gradle-dist
+          path: build/
       - name: Replace pkg version
         run: |
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
           sed -i "s/<version>/v${{ env.PBH_VERSION }}/g" pkg/pkg/+MANIFEST
         env:
-          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+          PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
       - name: Build FreeBSD pkg
         uses: vmactions/freebsd-vm@v1
         with:
@@ -31,16 +31,16 @@ jobs:
           run: |
             mkdir -p pkg/pkg/work-dir/usr/local/lib/peerbanhelper
             mkdir -p pkg/pkg/work-dir/usr/local/var/db/peerbanhelper/
-            mv target/libraries pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
-            cp target/PeerBanHelper.jar pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
+            mv build/libraries pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
+            cp build/libs/PeerBanHelper.jar pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
             (cd pkg/pkg/work-dir/ && find -d * \! -type d) | sort | sed -e "s/.*/\/&/" >> pkg/pkg/pkg-plist
             pkg create -m pkg/pkg/ -r pkg/pkg/work-dir -p pkg/pkg/pkg-plist -o pkg/ 
             pkg info -F pkg/peerbanhelper-v${{ env.PBH_VERSION }}.pkg
             mv pkg/peerbanhelper-v${{ env.PBH_VERSION }}.pkg pkg/peerbanhelper-v${{ env.PBH_VERSION }}-$(uname -o)-$(uname -r).pkg
         env:
-          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+          PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: freebsd-pkg-${{ matrix.version }}-dist
           path: |

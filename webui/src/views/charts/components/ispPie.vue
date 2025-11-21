@@ -25,6 +25,13 @@
         >
       </template>
     </a-result>
+    <a-empty
+      v-else-if="
+        !loading && (!data?.data || Object.values(data.data).every((arr) => arr.length === 0))
+      "
+      class="chart"
+      style="align-items: center; display: flex; justify-content: center; flex-direction: column"
+    />
     <v-chart
       v-else
       class="chart"
@@ -187,7 +194,7 @@ const props = defineProps<{
   downloader?: string
 }>()
 
-const { loading, run, refresh } = useRequest(getGeoIPData, {
+const { loading, run, refresh, data } = useRequest(getGeoIPData, {
   defaultParams: [option.range[0]!, option.range[1]!, option.bannedOnly, props.downloader],
   onSuccess: (data) => {
     if (data.data) {

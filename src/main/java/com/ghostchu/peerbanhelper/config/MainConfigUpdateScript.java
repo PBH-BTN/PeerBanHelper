@@ -11,7 +11,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +35,11 @@ public final class MainConfigUpdateScript {
 //            conf.set("server.token", UUID.randomUUID().toString());
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
+    }
+
+    @UpdateScript(version = 40)
+    public void banlistRemapping(YamlConfiguration bundle) {
+        conf.set("banlist-remapping", bundle.get("banlist-remapping"));
     }
 
     @UpdateScript(version = 38)

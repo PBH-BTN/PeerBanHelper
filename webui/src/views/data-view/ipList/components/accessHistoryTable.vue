@@ -17,6 +17,7 @@
     size="medium"
     :bordered="false"
     class="banlog-table"
+    @sorter-change="sorterChange"
     @page-change="changeCurrent"
     @page-size-change="changePageSize"
   >
@@ -110,6 +111,7 @@ import { GetIPAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
+import type { TableSortable } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -149,35 +151,63 @@ const {
 const columns = [
   {
     title: () => t('page.torrentList.accessHistory.column.downloader'),
-    slotName: 'downloader'
+    slotName: 'downloader',
+    dataIndex: 'downloader',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: 'Peer ID',
-    slotName: 'peerId'
+    slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: () => t('page.torrentList.accessHistory.column.traffic'),
     slotName: 'traffic',
+    dataIndex: 'uploaded',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 120
   },
   {
     titleSlotName: 'offsetTitle',
-    slotName: 'offset',
-    width: 120
+    slotName: 'offset'
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
     slotName: 'flags',
+    dataIndex: 'lastFlags',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 120
   },
   {
     title: () => t('page.torrentList.accessHistory.column.timeseen'),
     slotName: 'time',
+    dataIndex: 'firstTimeSeen',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 260
   },
   {
     title: () => t('page.ipList.accessHistory.column.torrent'),
     dataIndex: 'torrent.name',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     ellipsis: true,
     tooltip: true
   }
@@ -195,6 +225,21 @@ const parseFlags = (flags: string) =>
   flags
     .split(' ')
     .map((flag) => flag + ' - ' + t('page.dashboard.peerList.column.flags.' + flag.trim()))
+const sorterChange = (dataIndex: string, direction: string) => {
+  if (!direction)
+    run({
+      ip: ip,
+      page: current.value,
+      pageSize: pageSize.value
+    })
+  else
+    run({
+      ip: ip,
+      page: current.value,
+      pageSize: pageSize.value,
+      sorter: `${dataIndex}|${direction}`
+    })
+}
 </script>
 <style scoped>
 .red {

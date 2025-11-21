@@ -105,7 +105,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         HostAndPort hostAndPort = HostAndPort.fromParts(peer.getPeerAddress().getIp(), peer.getPeerAddress().getPort());
         // 如果速度够快，那么认为不是空闲连接
         if (peer.getUploadSpeed() > idleSpeedThreshold || peer.getDownloadSpeed() > idleSpeedThreshold) {
-            log.debug("Peer {} speed is above threshold, not idle", hostAndPort);
+            //log.debug("Peer {} speed is above threshold, not idle", hostAndPort);
             idleConnections.remove(hostAndPort);
             return pass();
         }
@@ -115,19 +115,19 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         long computedAvgDownloadSpeed = (peer.getDownloaded() - info.getDownloaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
         double percentageChange = Math.abs(peer.getProgress() * 100.0d - info.getPercentage());
         if (computedAvgUploadSpeed > idleSpeedThreshold || computedAvgDownloadSpeed > idleSpeedThreshold) {
-            log.debug("Peer {} computed avg speed is above threshold, not idle", hostAndPort);
+            //log.debug("Peer {} computed avg speed is above threshold, not idle", hostAndPort);
             idleConnections.remove(hostAndPort);
             return pass();
         }
         if (resetOnStatusChange && percentageChange >= minStatusChangePercentage) {
-            log.debug("Peer {} status changed by {}% in computing window, resetting idle timer", hostAndPort, percentageChange);
+            //log.debug("Peer {} status changed by {}% in computing window, resetting idle timer", hostAndPort, percentageChange);
             idleConnections.remove(hostAndPort);
             return pass();
         }
         long alreadyIdled = System.currentTimeMillis() - info.getIdleStartTime();
         // 如果已经空闲时间超过最大允许时间，则封禁
         if (alreadyIdled > maxAllowedIdleTime) {
-            log.debug("Peer {} idle timed out", hostAndPort);
+            //log.debug("Peer {} idle timed out", hostAndPort);
             idleConnections.remove(hostAndPort);
             return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                     new TranslationComponent(Lang.MODULE_ICDP_RULE_TITLE),
@@ -146,7 +146,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
                             .add("download_speed", peer.getDownloadSpeed())
             );
         }
-        log.debug("Updating idle info for peer {}, already idled {} ms, percentage change {}%, uploaded {}, downloaded {}", hostAndPort, alreadyIdled, percentageChange, peer.getUploaded(), peer.getDownloaded());
+        //log.debug("Updating idle info for peer {}, already idled {} ms, percentage change {}%, uploaded {}, downloaded {}", hostAndPort, alreadyIdled, percentageChange, peer.getUploaded(), peer.getDownloaded());
         idleConnections.put(hostAndPort, info);
         return pass();
     }
@@ -164,13 +164,10 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
             if (!allPeers.contains(hostAndPort)) {
                 entry.getValue().setNotHitCounter(entry.getValue().getNotHitCounter() + 1);
             }
-            if (entry.getValue().getNotHitCounter() > 5) {
-                log.debug("Removing idle connection {} due to not being seen for 5 checks", hostAndPort);
-                return true;
-            }
-            return false;
+            //log.debug("Removing idle connection {} due to not being seen for 5 checks", hostAndPort);
+            return entry.getValue().getNotHitCounter() > 5;
         });
-        log.debug("Removed {} disconnected connections.", count - idleConnections.size());
+        //log.debug("Removed {} disconnected connections.", count - idleConnections.size());
     }
 
     @Data

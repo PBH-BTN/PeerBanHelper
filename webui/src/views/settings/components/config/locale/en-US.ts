@@ -39,6 +39,24 @@ export default {
   'page.settings.tab.config.persist.banlist': 'Persist banlist',
   'page.settings.tab.config.persist.ban_logs_keep_days': 'Ban logs retention days',
 
+  'page.settings.tab.config.banlistRemapping.title': 'Banlist Remapping',
+  'page.settings.tab.config.banlistRemapping.description':
+    'When updating the banlist to downloaders, map a single banned IP address to a larger range to improve the efficiency of IP banning. Incorrect configuration may ban more unrelated peers.',
+  'page.settings.tab.config.banlistRemapping.ipv4.title': 'IPv4 Settings',
+  'page.settings.tab.config.banlistRemapping.ipv4.enabled': 'Enable IPv4 remapping',
+  'page.settings.tab.config.banlistRemapping.ipv4.enabled.tips':
+    'Enable remapping for IPv4 addresses',
+  'page.settings.tab.config.banlistRemapping.ipv4.remap_range': 'Prefix length',
+  'page.settings.tab.config.banlistRemapping.ipv4.remap_range.tips':
+    'The host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression (0-32)',
+  'page.settings.tab.config.banlistRemapping.ipv6.title': 'IPv6 Settings',
+  'page.settings.tab.config.banlistRemapping.ipv6.enabled': 'Enable IPv6 remapping',
+  'page.settings.tab.config.banlistRemapping.ipv6.enabled.tips':
+    'Enable remapping for IPv6 addresses',
+  'page.settings.tab.config.banlistRemapping.ipv6.remap_range': 'Prefix length',
+  'page.settings.tab.config.banlistRemapping.ipv6.remap_range.tips':
+    'The host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression (0-128)',
+
   'page.settings.tab.config.btn.enable': 'Enable BTN',
   'page.settings.tab.config.btn.doc': 'Read the document first(Chinese only):',
   'page.settings.tab.config.btn.enableSubmit': 'Enable submit',

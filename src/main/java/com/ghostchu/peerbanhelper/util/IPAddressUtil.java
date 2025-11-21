@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.Main;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
@@ -65,7 +66,7 @@ public final class IPAddressUtil {
     }
 
     @NotNull
-    public static IPAddress toPrefixBlock(IPAddress ipAddress, int length) {
+    public static IPAddress toPrefixBlockAndZeroHost(IPAddress ipAddress, int length) {
         return ipAddress.withoutPrefixLength().toPrefixBlock(length).toZeroHost();
     }
 
@@ -107,5 +108,22 @@ public final class IPAddressUtil {
         } else {
             throw new IllegalArgumentException("Invalid address length: " + localAddress.length);
         }
+    }
+
+    @NotNull
+    public static IPAddress remapBanListAddress(@NotNull IPAddress banAddress) {
+        boolean ipv4RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
+        boolean ipv6RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
+        if (banAddress.isIPv4() && ipv4RemappingEnabled) {
+            int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange) return banAddress.toPrefixBlock();
+            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, remapRange);
+        }
+        if (banAddress.isIPv6() && ipv6RemappingEnabled) {
+            int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange) return banAddress.toPrefixBlock();
+            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, remapRange);
+        }
+        return banAddress.toPrefixBlock();
     }
 }

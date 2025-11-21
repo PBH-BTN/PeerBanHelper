@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.support.ConnectionSource;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,17 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         });
     }
 
-
+    public long sessionBetween(@NotNull String downloader, @NotNull Timestamp startAt, @NotNull Timestamp endAt) throws SQLException {
+        // 从 startAt 到 endAt，每天的开始时间戳
+        var queryBuilder = queryBuilder();
+        var where = queryBuilder
+                .selectColumns("address")
+                .distinct()
+                .where();
+        where.and(where.like("downloader", downloader), where.or(where.between("firstTimeSeen", startAt, endAt),
+                where.between("lastTimeSeen", startAt, endAt)));
+        return queryBuilder.countOf();
+    }
 
     private int writeToDatabase(TorrentDao torrentDao, long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
@@ -52,6 +63,7 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         PeerRecordEntity currentSnapshot = new PeerRecordEntity(
                 null,
                 peer.toPeerAddress().getAddress().toNormalizedString(),
+                peer.toPeerAddress().getPort(),
                 torrentEntity,
                 downloader,
                 peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),

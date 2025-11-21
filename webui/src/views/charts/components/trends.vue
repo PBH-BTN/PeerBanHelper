@@ -45,6 +45,15 @@
         >
       </template>
     </a-result>
+    <a-empty
+      v-else-if="
+        !loading &&
+        (!data?.data ||
+          (data.data.connectedPeersTrend.length === 0 && data.data.bannedPeersTrend.length === 0))
+      "
+      class="chart"
+      style="align-items: center; display: flex; justify-content: center; flex-direction: column"
+    />
     <v-chart
       v-else
       class="chart"
@@ -138,7 +147,7 @@ watch(option, (v) => {
 const props = defineProps<{
   downloader?: string
 }>()
-const { loading, run, refresh } = useRequest(getTrends, {
+const { loading, run, refresh, data } = useRequest(getTrends, {
   defaultParams: [option.range[0]!, option.range[1]!, props.downloader],
   onSuccess: (data) => {
     if (data.data) {

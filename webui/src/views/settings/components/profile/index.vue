@@ -52,6 +52,12 @@
                 <clientNameBlackList v-model="form.module.client_name_blacklist" />
               </a-collapse-item>
               <a-collapse-item
+                key="13"
+                :header="t('page.settings.tab.profile.module.antiVampire.title')"
+              >
+                <antiVampire v-model="form.module.anti_vampire" />
+              </a-collapse-item>
+              <a-collapse-item
                 key="3"
                 :header="t('page.settings.tab.profile.module.progressCheatBlocker')"
               >
@@ -98,16 +104,33 @@
               </a-collapse-item>
               <a-collapse-item
                 key="11"
-                :header="t('page.settings.tab.profile.module.ptrBlackList.title')"
-                v-if="false"
-              >
-                <ptrBlocker v-model="form.module.ptr_blacklist" />
-              </a-collapse-item>
-              <a-collapse-item
-                key="12"
                 :header="t('page.settings.tab.profile.module.idleConnectionDosProtection.title')"
               >
                 <idleConnectionDosProtection v-model="form.module.idle_connection_dos_protection" />
+              </a-collapse-item>
+              <a-collapse-item
+                key="12"
+                :header="
+                  t('page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.title')
+                "
+              >
+                <sessionAnalyse v-model="form.module.peer_analyse_service.session_analyse" />
+              </a-collapse-item>
+              <a-collapse-item
+                key="14"
+                :header="
+                  t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title')
+                "
+              >
+                <swarmTracking v-model="form.module.peer_analyse_service.swarm_tracking" />
+              </a-collapse-item>
+              <a-collapse-item
+                key="15"
+                :header="
+                  t('page.settings.tab.profile.module.peerAnalyseService.peerRecording.title')
+                "
+              >
+                <peerRecording v-model="form.module.peer_analyse_service.peer_recording" />
               </a-collapse-item>
             </a-collapse>
           </a-space>
@@ -133,18 +156,21 @@ import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import activeMonitoring from './components/activeMonitoring.vue'
+import antiVampire from './components/antiVampire.vue'
 import autoRangeBan from './components/autoRangeBan.vue'
 import btn from './components/btn.vue'
 import clientNameBlackList from './components/clientNameBlackList.vue'
 import expressionEngine from './components/expressionEngine.vue'
 import formArray from './components/formArray.vue'
+import idleConnectionDosProtection from './components/idleConnectionDosProtection.vue'
 import ipAddressBlocker from './components/ipAddressBlocker.vue'
 import multiDialingBlocker from './components/multiDialingBlocker.vue'
 import peerIdBlackList from './components/peerIdBlackList.vue'
+import peerRecording from './components/peerRecording.vue'
 import progressCheatBlocker from './components/progressCheatBlocker.vue'
 import ruleSubscribe from './components/ruleSubscribe.vue'
-import ptrBlocker from './components/ptrBlocker.vue'
-import idleConnectionDosProtection from './components/idleConnectionDosProtection.vue'
+import sessionAnalyse from './components/sessionAnalyse.vue'
+import swarmTracking from './components/swarmTracking.vue'
 
 const { t } = useI18n()
 const form = reactive({
@@ -165,8 +191,15 @@ const form = reactive({
     active_monitoring: {
       traffic_monitoring: {}
     },
-    ptr_blacklist: {},
-    idle_connection_dos_protection: {}
+    idle_connection_dos_protection: {},
+    peer_analyse_service: {
+      session_analyse: {},
+      swarm_tracking: {},
+      peer_recording: {}
+    },
+    anti_vampire: {
+      presets: {}
+    }
   }
 } as Profile)
 const { loading } = useRequest(GetProfile, {

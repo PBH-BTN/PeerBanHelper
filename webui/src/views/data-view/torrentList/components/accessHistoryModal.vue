@@ -125,7 +125,7 @@ import { GetTorrentAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
-import { Popover, Space } from '@arco-design/web-vue'
+import { Popover, Space, type TableSortable } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
 import { h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -168,22 +168,37 @@ const {
 const columns = [
   {
     title: () => t('page.torrentList.accessHistory.column.downloader'),
-    slotName: 'downloader'
+    slotName: 'downloader',
+    dataIndex: 'downloader',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: () => t('page.torrentList.accessHistory.column.address'),
-    slotName: 'address'
+    slotName: 'address',
+    dataIndex: 'address',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: 'Peer ID',
-    slotName: 'peerId'
+    slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
   {
     title: () => t('page.torrentList.accessHistory.column.traffic'),
     slotName: 'traffic',
     dataIndex: 'uploaded',
     sortable: {
-      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: true
     }
   },
@@ -203,9 +218,22 @@ const columns = [
   },
   {
     title: 'Flags',
-    slotName: 'flags'
+    slotName: 'flags',
+    dataIndex: 'lastFlags',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
   },
-  { title: () => t('page.torrentList.accessHistory.column.timeseen'), slotName: 'time' }
+  {
+    title: () => t('page.torrentList.accessHistory.column.timeseen'),
+    slotName: 'time',
+    dataIndex: 'firstTimeSeen',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    }
+  }
 ]
 const parseFlags = (flags: string) =>
   flags

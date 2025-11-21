@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.config.ConfigTransfer;
 import com.ghostchu.peerbanhelper.database.table.*;
+import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.dao.Dao;
@@ -28,30 +29,39 @@ public final class DatabaseHelper {
     public DatabaseHelper(@Autowired Database database) throws SQLException {
         this.database = database;
         Logger.setGlobalLogLevel(Level.WARNING);
-        createTables();
+        createTables(true);
         performUpgrade();
+        createTables(false);
+    }
+    private void createTables(boolean ignoreError) {
+        Class<?>[] persistTable = new Class[]{
+                MetadataEntity.class, TorrentEntity.class, ModuleEntity.class, RuleEntity.class, HistoryEntity.class,
+                BanListEntity.class, RuleSubInfoEntity.class, RuleSubLogEntity.class, PeerRecordEntity.class,
+                PCBAddressEntity.class, PCBRangeEntity.class, TrafficJournalEntity.class, AlertEntity.class,
+                PeerConnectionMetricsEntity.class, PeerConnectionMetricsTrackEntity.class
+        };
+        Class<?>[] tempTable = new Class[]{
+                TrackedSwarmEntity.class
+        };
+        performCreateTables(persistTable, ignoreError, false);
+        performCreateTables(tempTable, ignoreError, true);
     }
 
-
-    private void createTables() throws SQLException {
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), MetadataEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TorrentEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), ModuleEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), HistoryEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrackedSwarmEntity.class, true);
+    private void performCreateTables(Class<?>[] table, boolean ignoreError, boolean tempTable) {
+        for (Class<?> aClass : table) {
+            try {
+                PBHTableUtils.createTableIfNotExists(database.getDataSource(), aClass, tempTable, ignoreError);
+            } catch (Exception err) {
+                if (!ignoreError) {
+                    log.error("Unable to create table for class: " + aClass.getSimpleName(), err);
+                }
+            }
+        }
     }
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "19"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "20"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -64,18 +74,15 @@ public final class DatabaseHelper {
             v = 3;
         }
         if (v == 3) {
-            TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
-            TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            // dropped
             v = 4;
         }
         if (v == 4) {
-            TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
-            TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            // dropped
             v = 5;
         }
         if (v == 5) {
-            TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
-            TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            // dropped
             v = 6;
         }
         if (v == 6) {
@@ -132,11 +139,6 @@ public final class DatabaseHelper {
                     var downloaderName = historyEntity.getDownloader();
                     historyEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
                 }));
-                var progressCheatBlockerPersistDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
-                recordBatchUpdate("DownloaderName Converting (ProgressCheatBlockerPersist)", progressCheatBlockerPersistDao, (progressCheatBlockerPersistEntity -> {
-                    var downloaderName = progressCheatBlockerPersistEntity.getDownloader();
-                    progressCheatBlockerPersistEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
-                }));
                 var trafficJournalDao = DaoManager.createDao(getDataSource(), TrafficJournalEntity.class);
                 recordBatchUpdate("DownloaderName Converting (TrafficJournal)", trafficJournalDao, (trafficJournalEntity -> {
                     var downloaderName = trafficJournalEntity.getDownloader();
@@ -149,17 +151,7 @@ public final class DatabaseHelper {
             v = 16;
         }
         if (v == 16) {
-            try {
-                var pcbDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
-                database.getDataSource().getReadWriteConnection(pcbDao.getTableName()).executeStatement("ALTER TABLE " + pcbDao.getTableName() + " ADD COLUMN lastLastTorrentCompletedProgress BIGINT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
-                var peerRecordDao = DaoManager.createDao(getDataSource(), PeerRecordEntity.class);
-                recordBatchUpdate("DownloaderName Converting (PeerRecord)", peerRecordDao, (peerRecordEntity -> {
-                    var downloaderName = peerRecordEntity.getDownloader();
-                    peerRecordEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
-                }));
-            } catch (Exception err) {
-                log.error("Unable to upgrade database schema", err);
-            }
+            // dropped
             v = 17;
         }
         if (v <= 18) {
@@ -172,14 +164,21 @@ public final class DatabaseHelper {
             }
             v = 19;
         }
-
+        if (v <= 19) {
+            try {
+                log.info("Adding port field to peer_records");
+                database.getDataSource().getReadWriteConnection("peer_records").executeStatement("ALTER TABLE peer_records ADD COLUMN port INT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 20;
+        }
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }
 
     private <T> void recordBatchUpdate(String processName, Dao<T, ?> dao, Consumer<T> consumer) throws Exception {
         long total = dao.countOf();
-
         dao.callBatchTasks(() -> {
             long processing = 0;
             for (T entity : dao.getWrappedIterable()) {

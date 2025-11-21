@@ -15,11 +15,14 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component
 public class PBHWin32MemoryManagement {
     private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+    private final Pattern gcKeyword = Pattern.compile(".*(Full|Old|MarkSweep|Tenured|CMS|G1|ZGC|Shenandoah).*");
+    private long lastRun = 0;
 
     public PBHWin32MemoryManagement(Laboratory laboratory) {
         try {
@@ -49,7 +52,7 @@ public class PBHWin32MemoryManagement {
                                         .from((CompositeData) notification.getUserData());
                                 boolean isFullGc =
                                         "end of major GC".equals(info.getGcAction())
-                                                || info.getGcName().matches(".*(Full|Old|MarkSweep|Tenured|CMS|G1|ZGC|Shenandoah).*")
+                                                || gcKeyword.matcher(info.getGcName()).matches()
                                                 || "end of cycle".equals(info.getGcAction()); // 适配更多GC类型
                                 if (isFullGc) {
                                     releaseMemory();
@@ -66,8 +69,10 @@ public class PBHWin32MemoryManagement {
     }
 
     private void releaseMemory() {
+        if (System.currentTimeMillis() - lastRun > 60 * 1000) return;
         log.debug("Releasing memory by emptying working set.");
         WorkingSetManagerFactory.trimMemory();
+        lastRun = System.currentTimeMillis();
     }
 
 

@@ -129,7 +129,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
 
     private void keepAliveNATTunnel(String keepAliveHost, int keepAlivePort) {
         try {
-            log.debug("Sending NAT Keep-Alive request from {}:{}", keepAliveHost, keepAlivePort);
+            //log.debug("Sending NAT Keep-Alive request from {}:{}", keepAliveHost, keepAlivePort);
             Socket socket = getKeepAliveSocket(keepAliveHost, keepAlivePort);
             socket.getOutputStream().write(("HEAD / HTTP/1.1\r\nHost: " + testHost + "\r\nUser-Agent: PeerBanHelper-NAT-Keeper/1.0\r\nConnection: keep-alive\r\n\r\n").getBytes());
             socket.getOutputStream().flush();
@@ -137,7 +137,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
             int bytesRead = socket.getInputStream().read(buffer);
             if (bytesRead > 0) {
                 String statusLine = new String(buffer, 0, bytesRead);
-                log.debug("NAT Keep-Alive request result: {}", statusLine);
+                //log.debug("NAT Keep-Alive request result: {}", statusLine);
             }
             lastSuccessHeartbeatAt = System.currentTimeMillis();
             keepAliveConsecutiveFailures = 0;

@@ -1,6 +1,10 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-form-item :label="t('page.settings.tab.profile.module.enable')" field="model.enabled">
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.enable')"
+      :tooltip="t('page.settings.tab.profile.module.idleConnectionDosProtection.enable.tips')"
+      field="model.enabled"
+    >
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item

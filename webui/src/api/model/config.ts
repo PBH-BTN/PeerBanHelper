@@ -8,6 +8,7 @@ export interface Config {
   persist: Persist
   btn: Btn
   banlist_invoker: BanlistInvoker
+  banlist_remapping: BanlistRemapping
   ip_database: IpDatabase
   proxy: Proxy
   privacy: Privacy
@@ -59,6 +60,21 @@ export interface CommandExec {
   reset: string[]
   ban: string[]
   unban: string[]
+}
+
+export interface BanlistRemapping {
+  ipv4: BanlistRemappingIpv4
+  ipv6: BanlistRemappingIpv6
+}
+
+export interface BanlistRemappingIpv4 {
+  enabled: boolean
+  remap_range: number
+}
+
+export interface BanlistRemappingIpv6 {
+  enabled: boolean
+  remap_range: number
 }
 
 export interface IpDatabase {

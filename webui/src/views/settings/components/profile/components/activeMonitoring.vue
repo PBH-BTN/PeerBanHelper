@@ -1,33 +1,16 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-form-item :label="t('page.settings.tab.profile.module.enable')" field="model.enabled">
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.enable')"
+      :tooltip="t('page.settings.tab.profile.module.activeMonitor.enable.tips')"
+      field="model.enabled"
+    >
       <a-switch v-model="model.enabled" />
       <template v-if="!model.enabled" #extra>
         <a-typography-text type="warning">{{
           t('page.settings.tab.profile.module.activeMonitor.disable.tips')
         }}</a-typography-text>
       </template>
-    </a-form-item>
-    <a-form-item
-      v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.activeMonitor.dataRetentionTime')"
-      :tooltip="t('page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips')"
-      field="model.data_retention_time"
-    >
-      <a-input-number v-model="model.data_retention_time" style="width: 200px">
-        <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
-      </a-input-number>
-      <template #extra> ={{ formatMilliseconds(model.data_retention_time) }} </template>
-    </a-form-item>
-    <a-form-item
-      v-if="model.enabled"
-      :label="t('page.settings.tab.profile.module.activeMonitor.dataCleanupInterval')"
-      field="model.data_cleanup_interval"
-    >
-      <a-input-number v-model="model.data_cleanup_interval" style="width: 200px">
-        <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
-      </a-input-number>
-      <template #extra> ={{ formatMilliseconds(model.data_cleanup_interval) }} </template>
     </a-form-item>
     <a-form-item
       v-if="model.enabled"
@@ -54,6 +37,11 @@
       :label="
         t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable')
       "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable.tips'
+        )
+      "
       field="model.traffic_sliding_capping.enabled"
     >
       <a-switch v-model="model.traffic_sliding_capping.enabled" />
@@ -63,6 +51,11 @@
       :label="
         t(
           'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic'
+        )
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic.tips'
         )
       "
       field="model.traffic_sliding_capping.daily_max_allowed_upload_traffic"
@@ -82,6 +75,11 @@
       :label="
         t(
           'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed'
+        )
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.tips'
         )
       "
       field="model.traffic_sliding_capping.min_speed"
@@ -112,6 +110,11 @@
           'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed'
         )
       "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed.tips'
+        )
+      "
       field="model.traffic_sliding_capping.max_speed"
     >
       <a-input-number v-model="maxSpeed" style="width: 200px" :precision="0">
@@ -132,7 +135,6 @@
 <script setup lang="ts">
 import type { ActiveMonitoring } from '@/api/model/profile'
 import { formatFileSize } from '@/utils/file'
-import { formatMilliseconds } from '@/utils/time'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()

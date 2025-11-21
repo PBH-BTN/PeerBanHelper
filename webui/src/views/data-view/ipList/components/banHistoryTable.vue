@@ -16,6 +16,7 @@
     column-resizable
     size="medium"
     class="banlog-table"
+    @sorter-change="sorterChange"
     @page-change="changeCurrent"
     @page-size-change="changePageSize"
   >
@@ -70,6 +71,7 @@
 import { GetIPBanHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
+import type { TableSortable } from '@arco-design/web-vue'
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
@@ -116,32 +118,60 @@ const columns = [
       '/' +
       t('page.banlog.banlogTable.column.unbanTime'),
     slotName: 'banAt',
+    dataIndex: 'banAt',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 220
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerPort'),
     dataIndex: 'peerPort',
-    width: 80
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
+    width: 90
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerId'),
     slotName: 'peerId',
+    dataIndex: 'peerId',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 120
   },
   {
     title: () => t('page.banlog.banlogTable.column.trafficSnapshot'),
     slotName: 'peerStatus',
+    dataIndex: 'peerUploaded',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 150
   },
   {
     title: () => t('page.banlog.banlogTable.column.torrentName'),
     dataIndex: 'torrentName',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     ellipsis: true,
     tooltip: true
   },
   {
     title: () => t('page.banlog.banlogTable.column.torrentSize'),
     slotName: 'torrentSize',
+    dataIndex: 'torrentSize',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: true
+    },
     width: 120
   },
   {
@@ -152,6 +182,21 @@ const columns = [
   }
 ]
 const list = computed(() => data.value?.data.results)
+const sorterChange = (dataIndex: string, direction: string) => {
+  if (!direction)
+    run({
+      ip: ip,
+      page: current.value,
+      pageSize: pageSize.value
+    })
+  else
+    run({
+      ip: ip,
+      page: current.value,
+      pageSize: pageSize.value,
+      sorter: `${dataIndex}|${direction}`
+    })
+}
 </script>
 
 <style scoped>

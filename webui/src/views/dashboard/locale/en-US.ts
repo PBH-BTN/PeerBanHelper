@@ -23,7 +23,12 @@ export default {
   'page.dashboard.statics.currentBan': 'Currently banned Peers',
   'page.dashboard.statics.currentBanIps': 'Currently banned IP(s)',
   'page.dashboard.statics.peerBlockRate': 'Malice:Normal Connection Ratio',
+  'page.dashboard.statics.peerBlockRate.tips':
+    'Less than 100% means there are fewer malicious connections than normal connections. Conversely, over 100% means there are more malicious connections than normal connections. 100% means the ratio of malicious to normal connections is 1:1',
   'page.dashboard.statics.trackingPeers': 'Tracking Peers',
+  'page.dashboard.statics.weeklySessions': 'Unique IPs in last 7 days',
+  'page.dashboard.statics.weeklySessions.tips':
+    'Unique IP statistics by day. Only session data recorded by PeerBanHelper is displayed. There may be significant discrepancies compared to actual data, for reference only.',
   'page.dashboard.statics.number': '',
   'page.dashboard.statics.percentage': '%',
 

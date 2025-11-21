@@ -51,7 +51,7 @@ public class Database {
     }
 
     @Bean
-    public ConnectionSource connectionSource(){
+    public ConnectionSource connectionSource() {
         return dataSource;
     }
 
@@ -84,7 +84,7 @@ public class Database {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
                 stmt.executeUpdate("PRAGMA journal_mode = WAL");
                 stmt.executeUpdate("PRAGMA mmap_size = 0");
-                stmt.executeUpdate("PRAGMA soft_heap_limit = 16777216");
+                stmt.executeUpdate("PRAGMA soft_heap_limit = " + ExternalSwitch.parseLong("pbh.database.sqliteSoftHeapLimitBytes", 33554432L));
                 stmt.executeUpdate("PRAGMA OPTIMIZE");
                 try {
                     if (System.currentTimeMillis() - getLastMaintenanceTime() >= Duration.ofDays(Main.getMainConfig().getInt("persist.vacuum-interval-days")).toMillis()) {

@@ -17,10 +17,10 @@ jobs:
       - name: Run build script
         run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
-          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+          PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
           IMAGE: ${{ inputs.image }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: spk-dist
           path: |

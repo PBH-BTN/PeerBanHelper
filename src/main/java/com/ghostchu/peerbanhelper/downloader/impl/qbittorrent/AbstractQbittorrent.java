@@ -136,14 +136,14 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     public void updatePreferences() {
+        FormBody.Builder formBody = new FormBody.Builder();
         try {
-            FormBody formBody = new FormBody.Builder()
-                    .add("json", JsonUtil.getGson().toJson(Map.of("enable_multi_connections_from_same_ip", false)))
-                    .build();
-
+            if (ExternalSwitch.parseBoolean("pbh.downloader.qbittorrent.disableSameIpMultiConnection", true)) {
+                formBody.add("json", JsonUtil.getGson().toJson(Map.of("enable_multi_connections_from_same_ip", false)));
+            }
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/app/setPreferences")
-                    .post(formBody)
+                    .post(formBody.build())
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .build();
 
@@ -457,7 +457,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     log.debug("Field is_private is not present, querying from properties API, hash: {}", detail.getHash());
                     detail.setPrivateTorrent(properties.isPrivate);
                 }
-                if (detail.getPieceSize() <= 0 || detail.getPiecesHave() <= 0) {
+                if (detail.getPieceSize() == null || detail.getPiecesHave() == null) {
                     log.debug("Field piece_size or pieces_have is not present, querying from properties API, hash: {}", detail.getHash());
                     detail.setPieceSize(properties.pieceSize);
                     detail.setPiecesHave(properties.piecesHave);
@@ -574,6 +574,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
             joiner.add(p.getPeer().getRawIp());
+            // todo change this with compatibility check after qbiitorrent merge it
+            // joiner.add(remapBanListAddress(p.getPeer().getAddress().getAddress()).toNormalizedString());
             banTasks.put(p.getTorrent().getHash(), joiner);
         });
         banTasks.forEach((hash, peers) -> {
@@ -603,22 +605,29 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     protected void setBanListFull(Collection<IPAddress> bannedAddresses) {
+        // todo change this with compatibility check after qbiitorrent merge it
+//        String banStr = bannedAddresses.stream()
+//                .map(ipAddr -> remapBanListAddress(ipAddr).toNormalizedString())
+//                .distinct()
+//                .collect(Collectors.joining("\n"));
+
         StringJoiner joiner = new StringJoiner("\n");
         bannedAddresses.stream().distinct().forEach(ipAddr -> {
             joiner.add(ipAddr.toNormalizedString());
             if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
-                Address ipv6 = ipAddr.toIPv6();
+                inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
                 if (ipv6 != null) {
                     joiner.add(ipv6.toNormalizedString());
                 }
             }
-            if(ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
+            if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
                 Address ipv4 = ipAddr.toIPv4();
                 if (ipv4 != null) {
                     joiner.add(ipv4.toNormalizedString());
                 }
             }
         });
+
 
         FormBody formBody = new FormBody.Builder()
                 .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))
