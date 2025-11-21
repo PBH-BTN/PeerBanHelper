@@ -68,13 +68,17 @@ PeerBanHelper Credit
     cxzlw
     david082321
     DDSRem
+    Kaffu-Chino
     mahoshojoHCG
     MirrorCY
+    nlsdt
     Rbqwow
     SaikiCode
     tbc0309
     TioaChan
     WordlessEcho
+    XiaoXice
+
 
 
 本地化 - Internalization:
