@@ -4,6 +4,9 @@
 Automatically ban unwelcome, leeching, and abnormal BT clients with support for custom rules.
 
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
+
+**Try PeerBanHelper before install to your device:** [Demo Site](https://pbh-demo.pbh-btn.com)
+
 ## Features
 
 PeerBanHelper consists of the following core modules:
