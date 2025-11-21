@@ -270,15 +270,13 @@ public final class PBHChartController extends AbstractFeatureModule {
                 timeQueryModel.startAt(),
                 timeQueryModel.endAt());
 
-        // 将相同天的记录合并
+        // 按天分组,取每天的最大累计值(最后一条记录)
         Map<Long, TrafficJournalDao.TrafficDataComputed> mergedData = new java.util.HashMap<>();
 
         for (TrafficJournalDao.TrafficDataComputed record : records) {
-            // 获取当天的开始时间戳
             Timestamp ts = record.getTimestamp();
             long dayStart = MiscUtil.getStartOfToday(ts.getTime());
 
-            // 合并相同日期的数据
             mergedData.compute(dayStart, (key, existing) -> {
                 if (existing == null) {
                     return new TrafficJournalDao.TrafficDataComputed(
@@ -287,19 +285,24 @@ public final class PBHChartController extends AbstractFeatureModule {
                             record.getDataOverallDownloaded()
                     );
                 } else {
-                    existing.setDataOverallUploaded(existing.getDataOverallUploaded() + record.getDataOverallUploaded());
-                    existing.setDataOverallDownloaded(existing.getDataOverallDownloaded() + record.getDataOverallDownloaded());
+                    // 取较大的累计值(即较新的记录)
+                    if (record.getDataOverallUploaded() > existing.getDataOverallUploaded()) {
+                        existing.setDataOverallUploaded(record.getDataOverallUploaded());
+                    }
+                    if (record.getDataOverallDownloaded() > existing.getDataOverallDownloaded()) {
+                        existing.setDataOverallDownloaded(record.getDataOverallDownloaded());
+                    }
                     return existing;
                 }
             });
         }
 
-        // 转换回列表并排序
         List<TrafficJournalDao.TrafficDataComputed> mergedRecords = new ArrayList<>(mergedData.values());
         mergedRecords.sort(Comparator.comparing(data -> data.getTimestamp().getTime()));
 
         ctx.json(new StdResp(true, null, mergedRecords));
     }
+
 
 
     private TrafficJournalDao.TrafficDataComputed fixTimezone(Context ctx, TrafficJournalDao.TrafficDataComputed data) {
