@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ping.legacy;
 
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,5 +21,5 @@ public final class LegacyBtnBan {
     @SerializedName("peer")
     private LegacyBtnPeer peer;
     @SerializedName("structured_data")
-    private String structuredData;
+    private StructuredData<String,Object> structuredData;
 }
