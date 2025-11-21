@@ -37,7 +37,7 @@ Additionally, PeerBanHelper downloads the GeoIP database on startup. Once loaded
 - BiglyBT (requires [plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT))
 - Deluge (requires [plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge))
 - Transmission **(v4.1.0-beta2 or newer required)**
-- BitComet **v2.10 Beta6 [20240928] or newer** (LTSeed anti-leech unsupported due to BitComet's limitation)
+- BitComet **v2.18** (LTSeed anti-leech unsupported due to BitComet's limitation)
 
 PeerBanHelper only supports traditional IPv4/IPv6 anti-leech. I2P/Tor connections are ignored.
 
