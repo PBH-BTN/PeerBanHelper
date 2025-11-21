@@ -135,6 +135,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
             btnBan.setModule(e.getValue().getContext());
             btnBan.setRule(tl(Main.DEF_LOCALE, e.getValue().getDescription()));
             btnBan.setBanUniqueId(Hashing.sha256().hashString(e.getValue().toString(), StandardCharsets.UTF_8).toString());
+            btnBan.setStructuredData(JsonUtil.getGson().toJson(e.getValue().getStructuredData()));
             list.add(btnBan);
         }
         return list;
