@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import ch.qos.logback.core.util.TimeUtil;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -48,6 +49,8 @@ import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -198,11 +201,17 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             release = "unknown";
         }
         try {
-            Instant instant = Instant.parse(Main.getMeta().getCompileTime());
-            compile_time = instant.toEpochMilli();
+            var meta = Main.getMeta().getCompileTime();
+            OffsetDateTime offsetDateTime;
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+                offsetDateTime = OffsetDateTime.parse(meta, formatter);
+            } catch (Exception e) {
+                offsetDateTime = OffsetDateTime.parse(meta, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            }
+            compile_time = offsetDateTime.toInstant().toEpochMilli();
         } catch (Exception ignore) {
         }
-
         Map<String, Object> pbh = new LinkedHashMap<>();
         pbh.put("version", Main.getMeta().getVersion());
         pbh.put("commit_id", Main.getMeta().getCommit());
