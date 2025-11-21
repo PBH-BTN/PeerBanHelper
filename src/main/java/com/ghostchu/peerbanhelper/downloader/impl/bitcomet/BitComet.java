@@ -412,7 +412,7 @@ public final class BitComet extends AbstractDownloader {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_STATISTICS_LIST, response.code(), respBody));
             }
-            var valueList = JsonUtil.standard().fromJson(response.body().string(), BCStatisticsValueListResponse.class);
+            var valueList = JsonUtil.standard().fromJson(respBody, BCStatisticsValueListResponse.class);
             for (BCStatisticsValueListResponse.ValueListDTO valueListDTO : valueList.getValueList()) {
                 switch (valueListDTO.getToken()) {
                     case "${G_TOTAL_DOWNLOAD_AUTO}" -> totalDownloaded = readHumanReadableValue(valueListDTO.getValue());
@@ -420,7 +420,9 @@ public final class BitComet extends AbstractDownloader {
                 }
             }
         } catch (Exception e) {
+            log.warn("Failed to fetch BitComet statistics", e);
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_STATISTICS_LIST, "N/A", "N/A", e));
+
         }
         return new DownloaderStatistics(totalUploaded, totalDownloaded);
     }
