@@ -270,7 +270,7 @@ public final class PBHChartController extends AbstractFeatureModule {
                 timeQueryModel.startAt(),
                 timeQueryModel.endAt());
 
-        // 按天分组,取每天的最大累计值(最后一条记录)
+        // 按天分组,累加每天的流量数据（TrafficDataComputed中的值已经是增量，需要求和）
         Map<Long, TrafficJournalDao.TrafficDataComputed> mergedData = new java.util.HashMap<>();
 
         for (TrafficJournalDao.TrafficDataComputed record : records) {
@@ -285,13 +285,9 @@ public final class PBHChartController extends AbstractFeatureModule {
                             record.getDataOverallDownloaded()
                     );
                 } else {
-                    // 取较大的累计值(即较新的记录)
-                    if (record.getDataOverallUploaded() > existing.getDataOverallUploaded()) {
-                        existing.setDataOverallUploaded(record.getDataOverallUploaded());
-                    }
-                    if (record.getDataOverallDownloaded() > existing.getDataOverallDownloaded()) {
-                        existing.setDataOverallDownloaded(record.getDataOverallDownloaded());
-                    }
+                    // 累加每小时的流量增量
+                    existing.setDataOverallUploaded(existing.getDataOverallUploaded() + record.getDataOverallUploaded());
+                    existing.setDataOverallDownloaded(existing.getDataOverallDownloaded() + record.getDataOverallDownloaded());
                     return existing;
                 }
             });
