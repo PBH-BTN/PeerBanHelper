@@ -104,11 +104,9 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
-        List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
-        if (is211Newer()) {
-            flags.add(DownloaderFeatureFlag.UNBAN_IP);
-            flags.add(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
-        }
+        List<DownloaderFeatureFlag> flags = new ArrayList<>(2);
+        flags.add(DownloaderFeatureFlag.UNBAN_IP);
+        flags.add(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
         return flags;
     }
 
@@ -157,7 +155,7 @@ public final class BitComet extends AbstractDownloader {
                 bcVerAcceptable = true;
             } else {
                 if (bcSemver.getMajor() == 2) {
-                    if (bcSemver.getMinor() >= 10) {
+                    if (bcSemver.getMinor() >= 18) {
                         bcVerAcceptable = true;
                     }
                 }
@@ -242,10 +240,7 @@ public final class BitComet extends AbstractDownloader {
             }
             var resp = JsonUtil.standard().fromJson(response.body().string(), BCIpFilterResponse.class);
             boolean isBlacklistMode = false;
-            if (resp.getIpFilterConfig().getEnableWhitelistMode() != null) { // 2.10
-                isBlacklistMode = !resp.getIpFilterConfig().getEnableWhitelistMode();
-            }
-            if (resp.getIpFilterConfig().getFilterMode() != null) { // 2.11
+            if (resp.getIpFilterConfig().getFilterMode() != null) {
                 isBlacklistMode = "blacklist".equals(resp.getIpFilterConfig().getFilterMode());
             }
             return !resp.getIpFilterConfig().getEnableIpFilter() || !isBlacklistMode;
@@ -256,9 +251,7 @@ public final class BitComet extends AbstractDownloader {
         Map<String, Object> settings = new HashMap<>() {{
             put("ip_filter_config", new HashMap<>() {{
                 put("enable_ipfilter", true);
-                put("enable_ip_filter", true);
-                put("enable_whitelist_mode", false); // 2.10
-                put("ipfilter_mode", "blacklist"); // 2.11
+                put("ipfilter_mode", "blacklist");
             }});
         }};
 
@@ -287,7 +280,6 @@ public final class BitComet extends AbstractDownloader {
     public @NotNull List<Torrent> getTorrents() {
         Map<String, String> requirements = new HashMap<>();
         requirements.put("state_group", "ACTIVE");
-        requirements.put("group_state", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
@@ -299,7 +291,6 @@ public final class BitComet extends AbstractDownloader {
     public @NotNull List<Torrent> getAllTorrents() {
         Map<String, String> requirements = new HashMap<>();
         requirements.put("state_group", "ALL");
-        requirements.put("group_state", "ALL");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
@@ -330,7 +321,6 @@ public final class BitComet extends AbstractDownloader {
                             semaphore.acquire();
                             Map<String, String> taskIds = new HashMap<>();
                             taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
-
                             RequestBody taskRequestBody = RequestBody.create(JsonUtil.standard().toJson(taskIds), MediaType.get("application/json"));
                             Request taskRequest = new Request.Builder()
                                     .url(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint())
@@ -407,7 +397,60 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public @NotNull DownloaderStatistics getStatistics() {
-        return new DownloaderStatistics(0L, 0L);
+        long totalUploaded = 0;
+        long totalDownloaded = 0;
+        Map<String, Object> body = new HashMap<>();
+        body.put("token_list", List.of("${G_TOTAL_DOWNLOAD_AUTO}", "${G_TOTAL_UPLOAD_AUTO}", "${G_SESSION_DOWNLOAD_AUTO}", "${G_SESSION_UPLOAD_AUTO}"));
+        RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(body), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + BCEndpoint.GET_STATISTICS_LIST.getEndpoint())
+                .post(requestBody)
+                .header("Authorization", "Bearer " + this.deviceToken)
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            var respBody = response.body().string();
+            if (!response.isSuccessful()) {
+                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_STATISTICS_LIST, response.code(), respBody));
+            }
+            var valueList = JsonUtil.standard().fromJson(response.body().string(), BCStatisticsValueListResponse.class);
+            for (BCStatisticsValueListResponse.ValueListDTO valueListDTO : valueList.getValueList()) {
+                switch (valueListDTO.getToken()) {
+                    case "${G_TOTAL_DOWNLOAD_AUTO}" -> totalDownloaded = readHumanReadableValue(valueListDTO.getValue());
+                    case "${G_TOTAL_UPLOAD_AUTO}" -> totalUploaded = readHumanReadableValue(valueListDTO.getValue());
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_STATISTICS_LIST, "N/A", "N/A", e));
+        }
+        return new DownloaderStatistics(totalUploaded, totalDownloaded);
+    }
+
+    private long readHumanReadableValue(String value) {
+        // value = 2.33 GB etc.
+        // return bytes
+        String[] parts = value.split(" ");
+        if (parts.length != 2) {
+            return 0;
+        }
+        double number;
+        try {
+            number = Double.parseDouble(parts[0]);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+        String unit = parts[1].toUpperCase();
+        return switch (unit) {
+            case "B" -> (long) number;
+            case "KB" -> (long) (number * 1024);
+            case "MB" -> (long) (number * 1024 * 1024);
+            case "GB" -> (long) (number * 1024 * 1024 * 1024);
+            case "TB" -> (long) (number * 1024L * 1024L * 1024L * 1024L);
+            case "PB" -> (long) (number * 1024L * 1024L * 1024L * 1024L * 1024L);
+            case "EB" -> (long) (number * 1024L * 1024L * 1024L * 1024L * 1024L * 1024L);
+            case "ZB" -> (long) (number * 1024L * 1024L * 1024L * 1024L * 1024L * 1024L * 1024L);
+            default -> 0;
+        };
+
     }
 
     @Override
@@ -459,21 +502,10 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
-        if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList && !is211Newer()) {
-            setBanListIncrement(added);
-        } else {
-            if (removed != null && !removed.isEmpty()) {
-                unbanPeers(removed.stream().map(meta -> meta.getPeer().getAddress().toString()).toList());
-            }
-            setBanListFull(fullList);
+        if (removed != null && !removed.isEmpty()) {
+            unbanPeers(removed.stream().map(meta -> meta.getPeer().getAddress().toString()).toList());
         }
-    }
-
-    private void setBanListIncrement(Collection<BanMetadata> added) {
-        String banStr = added.stream()
-                .map(meta -> remapBanListAddress(meta.getPeer().getAddress().getAddress()).toNormalizedString())
-                .distinct().collect(Collectors.joining("\n"));
-        operateBanListLegacy("merge", banStr);
+        setBanListFull(fullList);
     }
 
     private void setBanListFull(Collection<IPAddress> peerAddresses) {
@@ -483,9 +515,6 @@ public final class BitComet extends AbstractDownloader {
         operateBanListLegacy("replace", banStr);
     }
 
-    private boolean is211Newer() {
-        return serverVersion.getMajor() >= 2 && serverVersion.getMinor() != null && serverVersion.getMinor() >= 11;
-    }
 
     private void unbanPeers(List<String> peerAddresses) {
         Map<String, Object> banListSettings = new HashMap<>();
@@ -586,7 +615,6 @@ public final class BitComet extends AbstractDownloader {
      */
     @Override
     public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
-        //{"connection_config":{"max_download_speed":25395200,"max_upload_speed":524288,"enable_listen_tcp":true,"listen_port_tcp":27675}}
         try {
             Map<String, Object> map = new HashMap<>();
             Map<String, Long> connectionConfig = new HashMap<>();
