@@ -183,7 +183,7 @@ export default {
     '旧数据轮转删除时间',
   'page.settings.tab.profile.module.peerAnalyseService.sessionAnalyse.dataRetentionTime.tips':
     '超过此时间的历史会话数据将被自动删除',
-  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': '用户群跟踪服务',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': 'Peer Swarm 记录服务',
   'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
     '为 BTN 种群跟踪和其它类似所需该数据的功能提供数据支持，并跟踪本次运行会话期间的对等体数据，在重启后数据将自动删除',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': 'Peer 跟踪记录服务',
