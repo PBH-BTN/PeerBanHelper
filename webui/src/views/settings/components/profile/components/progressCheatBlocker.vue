@@ -20,14 +20,14 @@
     >
       <a-space>
         <a-slider
-          v-model="maximum_difference"
+          v-model="maximumDifference"
           style="width: 250px"
           :step="1"
           :min="0"
           :max="100"
           :format-tooltip="(value: number) => `${value}%`"
         />
-        <br />{{ maximum_difference }}%
+        <br />{{ maximumDifference }}%
       </a-space>
     </a-form-item>
     <a-form-item
@@ -43,14 +43,14 @@
     >
       <a-space>
         <a-slider
-          v-model="rewind_maximum_difference"
+          v-model="rewindMaximumDifference"
           style="width: 250px"
           :step="1"
           :min="0"
           :max="100"
           :format-tooltip="(value: number) => `${value}%`"
         />
-        <br />{{ rewind_maximum_difference }}%
+        <br />{{ rewindMaximumDifference }}%
       </a-space>
     </a-form-item>
     <a-form-item
@@ -143,14 +143,14 @@
     >
       <a-space>
         <a-slider
-          v-model="fast_pcb_test_percentage"
+          v-model="fastPCBTestPercentage"
           style="width: 250px"
           :step="1"
           :min="0"
           :max="100"
           :format-tooltip="(value: number) => `${value}%`"
         />
-        <br />{{ fast_pcb_test_percentage }}%
+        <br />{{ fastPCBTestPercentage }}%
       </a-space>
     </a-form-item>
   </a-space>
@@ -174,7 +174,7 @@ const useGlobalBanTime = computed({
 const fastPCBTestEnabled = computed({
   get: () => model.value.fast_pcb_test_percentage !== -1,
   set: (value) => {
-    model.value.fast_pcb_test_percentage = value ? 10 : -1
+    model.value.fast_pcb_test_percentage = value ? 0.1 : -1
   }
 })
 const rewindDetectionEnabled = computed({
@@ -184,19 +184,19 @@ const rewindDetectionEnabled = computed({
   }
 })
 
-const maximum_difference = computed({
+const maximumDifference = computed({
   get: () => Math.round(model.value.maximum_difference * 100),
   set: (value) => {
     model.value.maximum_difference = value / 100
   }
 })
-const rewind_maximum_difference = computed({
+const rewindMaximumDifference = computed({
   get: () => Math.round(model.value.rewind_maximum_difference * 100),
   set: (value) => {
     model.value.rewind_maximum_difference = value / 100
   }
 })
-const fast_pcb_test_percentage = computed({
+const fastPCBTestPercentage = computed({
   get: () => Math.round(model.value.fast_pcb_test_percentage * 100),
   set: (value) => {
     model.value.fast_pcb_test_percentage = value / 100

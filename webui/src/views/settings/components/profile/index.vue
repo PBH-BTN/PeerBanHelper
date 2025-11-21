@@ -108,12 +108,6 @@
               >
                 <idleConnectionDosProtection v-model="form.module.idle_connection_dos_protection" />
               </a-collapse-item>
-              <a-collapse-item
-                key="12"
-                :header="t('page.settings.tab.profile.module.peerAnalyseService.title')"
-              >
-                <peerAnalyseService v-model="form.module.peer_analyse_service" />
-              </a-collapse-item>
             </a-collapse>
           </a-space>
           <br />
@@ -147,7 +141,6 @@ import formArray from './components/formArray.vue'
 import idleConnectionDosProtection from './components/idleConnectionDosProtection.vue'
 import ipAddressBlocker from './components/ipAddressBlocker.vue'
 import multiDialingBlocker from './components/multiDialingBlocker.vue'
-import peerAnalyseService from './components/peerAnalyseService.vue'
 import peerIdBlackList from './components/peerIdBlackList.vue'
 import progressCheatBlocker from './components/progressCheatBlocker.vue'
 import ruleSubscribe from './components/ruleSubscribe.vue'
