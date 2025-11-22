@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Component
@@ -98,7 +99,7 @@ public final class DNSLookupImpl implements Reloadable, DNSLookup {
             } catch (TextParseException ignored) {
                 return Optional.empty();
             }
-        });
+        }, Executors.newVirtualThreadPerTaskExecutor());
     }
 
 }

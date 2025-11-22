@@ -150,7 +150,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 }
                 return anySuccess.get();
             }
-        });
+        }, Executors.newVirtualThreadPerTaskExecutor());
     }
 
     @Override
@@ -177,7 +177,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 }
                 return anySuccess.get();
             }
-        });
+        }, Executors.newVirtualThreadPerTaskExecutor());
     }
 
 
