@@ -143,10 +143,10 @@ public final class BitComet extends AbstractDownloader {
             }
             var loginResponse = JsonUtil.standard().fromJson(response.body().string(), BCLoginResponse.class);
             if (loginResponse.getErrorCode().equalsIgnoreCase("PASSWORD_ERROR")) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, response.body().string()));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
             }
             if (!loginResponse.getErrorCode().equalsIgnoreCase("ok")) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, response.body().string()));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
             }
             // 进行版本检查
             boolean bcVerAcceptable = false;
@@ -161,7 +161,7 @@ public final class BitComet extends AbstractDownloader {
                 }
             }
             if (!bcVerAcceptable) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.MISSING_COMPONENTS, new TranslationComponent(Lang.DOWNLOADER_BC_VERSION_UNACCEPTABLE, response.body().string()));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.MISSING_COMPONENTS, new TranslationComponent(Lang.DOWNLOADER_BC_VERSION_UNACCEPTABLE, "2.18"));
             }
             // 版本检查结束
             Map<String, String> inviteTokenRetrievePayload = new HashMap<>();

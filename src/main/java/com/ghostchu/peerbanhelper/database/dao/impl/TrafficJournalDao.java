@@ -187,8 +187,8 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                         e.getDataOverallDownloadedAtStart(),
                         e.getDataOverallDownloaded()))
                 .map(data -> new TrafficDataComputed(data.getTimestamp(),
-                        data.getDataOverallUploaded() - data.getDataOverallUploadedAtStart(),
-                        data.getDataOverallDownloaded() - data.getDataOverallDownloadedAtStart()))
+                        Math.max(0, data.getDataOverallUploaded() - data.getDataOverallUploadedAtStart()),
+                        Math.max(0, data.getDataOverallDownloaded() - data.getDataOverallDownloadedAtStart())))
                 .toList();
     }
 

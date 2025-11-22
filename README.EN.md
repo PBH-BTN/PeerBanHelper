@@ -4,6 +4,9 @@
 Automatically ban unwelcome, leeching, and abnormal BT clients with support for custom rules.
 
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
+
+**Try PeerBanHelper before install to your device:** [Demo Site](https://pbh-demo.pbh-btn.com)
+
 ## Features
 
 PeerBanHelper consists of the following core modules:
@@ -37,7 +40,7 @@ Additionally, PeerBanHelper downloads the GeoIP database on startup. Once loaded
 - BiglyBT (requires [plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT))
 - Deluge (requires [plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge))
 - Transmission **(v4.1.0-beta2 or newer required)**
-- BitComet **v2.10 Beta6 [20240928] or newer** (LTSeed anti-leech unsupported due to BitComet's limitation)
+- BitComet **v2.18 or newer** (LTSeed anti-leech unsupported due to BitComet's limitation)
 
 PeerBanHelper only supports traditional IPv4/IPv6 anti-leech. I2P/Tor connections are ignored.
 

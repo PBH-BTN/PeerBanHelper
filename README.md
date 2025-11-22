@@ -5,6 +5,8 @@
 
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
 
+**在安装前试用 PeerBanHelper：**[前往演示站](https://pbh-demo.pbh-btn.com)
+
 PeerBanHelper 是一个开放源代码的个人网络防火墙安全软件。通过连接支持的应用程序（如：BitTorrent 客户端软件）的 Web API 接口获取受保护应用的连接信息，识别其中可能包含潜在安全威胁的连接并通知对应的应用程序主动断开其连接。  
 
 ## 功能介绍
@@ -41,7 +43,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 - BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
 - Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
 - Transmission **(4.1.0-beta2 或更高版本)**
-- BitComet **v2.10 Beta6 [20240928] 或更高版本** (不支持 P2SP LTSeed 长效种子反吸血，因为 BitComet 暂时无法封禁长效连接)
+- BitComet **v2.18 或更高版本** (不支持 P2SP LTSeed 长效种子反吸血，因为 BitComet 暂时无法封禁长效连接)
 
 PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P 或者 Tor 连接将主动忽略。
 

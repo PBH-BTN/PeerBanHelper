@@ -382,7 +382,7 @@ DOWNLOADER_BC_FAILED_SAVE_BANLIST: "無法儲存 {} ({}) 的 Banlist！{} - {}\n
 DOWNLOADER_BC_CONFIG_IP_FILTER: "檢測到 BitComet IpFilter 配置不正確，正在自動修正……"
 DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter 配置自動修正成功"
 DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter 配置自動修正失敗"
-DOWNLOADER_BC_VERSION_UNACCEPTABLE: "目前使用的 BitComet 版本不受支援，請升級到 2.10 或者更高版本"
+DOWNLOADER_BC_VERSION_UNACCEPTABLE: "目前使用的 BitComet 版本不受支援，請升級到 {} 或者更高版本"
 DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "下載連接到 BitComet 所需的 BouncyCastle 加解密套件時出錯，操作無法繼續，請檢查網路連接。有關更多資訊，請檢查控制台日誌。"
 
 JAVALIN_PORT_IN_USE: "埠監聽失敗，埠 {} 已被其它行程占用。這可能是因為：(1)有兩個 PeerBanHelper 正在執行（特別是您可能選擇了安裝為系統服務，這種情況下將會自動啟動）(2)其它程式正在使用此埠（如 Uplay/Ubisoft Connect）；請跟隨故障排除指南解決此問題。https://docs.pbh-btn.com/docs/faq"
