@@ -41,7 +41,7 @@ public final class TimeoutProtect implements AutoCloseable {
     public TimeoutProtect(String name, long timeRestrict, Consumer<TimeoutProtect> timeoutCallback) {
         this.name = name;
         this.timeRestrict = timeRestrict;
-        this.service = Executors.newSingleThreadExecutor();
+        this.service = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors()));
         this.timeoutCallback = timeoutCallback;
     }
 
