@@ -12,7 +12,7 @@ WORKDIR /build
 COPY --from=build_web webui/dist src/main/resources/static
 RUN chmod +x ./gradlew && ./gradlew clean build --no-daemon
 
-FROM docker.io/bellsoft/liberica-runtime-container:jre-25-slim-musl
+FROM docker.io/bellsoft/liberica-runtime-container:jdk-all-25-musl
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 EXPOSE 9898
