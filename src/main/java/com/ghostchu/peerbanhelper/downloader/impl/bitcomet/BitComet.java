@@ -161,7 +161,7 @@ public final class BitComet extends AbstractDownloader {
                 }
             }
             if (!bcVerAcceptable) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.MISSING_COMPONENTS, new TranslationComponent(Lang.DOWNLOADER_BC_VERSION_UNACCEPTABLE, loginResponse));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.MISSING_COMPONENTS, new TranslationComponent(Lang.DOWNLOADER_BC_VERSION_UNACCEPTABLE, "2.18"));
             }
             // 版本检查结束
             Map<String, String> inviteTokenRetrievePayload = new HashMap<>();
