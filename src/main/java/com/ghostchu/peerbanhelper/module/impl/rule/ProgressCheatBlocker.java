@@ -80,6 +80,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
     private double fastPcbTestPercentage;
+    private final Object cacheDBLoadingLock = new Object();
 
     @Override
     public @NotNull String getName() {
@@ -439,17 +440,19 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         CacheKey cacheKey = new CacheKey(downloader, torrentId, peerAddressPrefix, peerAddressIp);
         try {
             return cache.get(cacheKey, () -> {
-                PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
-                PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
-                if (rangeEntity == null) {
-                    log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
-                    rangeEntity = pcbRangeDao.createIfNotExists(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
+                synchronized (cacheDBLoadingLock) {
+                    PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
+                    PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
+                    if (rangeEntity == null) {
+                        log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
+                        rangeEntity = pcbRangeDao.createIfNotExists(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
+                    }
+                    if (pcbAddressEntity == null) {
+                        log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
+                        pcbAddressEntity = pcbAddressDao.createIfNotExists(new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
+                    }
+                    return Pair.of(rangeEntity, pcbAddressEntity);
                 }
-                if (pcbAddressEntity == null) {
-                    log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
-                    pcbAddressEntity = pcbAddressDao.createIfNotExists(new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
-                }
-                return Pair.of(rangeEntity, pcbAddressEntity);
             });
         } catch (ExecutionException e) {
             throw new RuntimeException(e.getCause());
