@@ -14,6 +14,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class TimeoutProtect implements AutoCloseable {
     @Getter
+    private final String name;
+    @Getter
     private final ExecutorService service;
     @Getter
     private final long timeRestrict;
@@ -23,18 +25,21 @@ public final class TimeoutProtect implements AutoCloseable {
     private List<Runnable> unfinishedTasks;
     private Consumer<TimeoutProtect> timeoutCallback;
 
-    public TimeoutProtect(long timeRestrict, ExecutorService service) {
+    public TimeoutProtect(String name, long timeRestrict, ExecutorService service) {
+        this.name = name;
         this.timeRestrict = timeRestrict;
         this.service = service;
     }
 
-    public TimeoutProtect(long timeRestrict, ExecutorService service, Consumer<TimeoutProtect> timeoutCallback) {
+    public TimeoutProtect(String name, long timeRestrict, ExecutorService service, Consumer<TimeoutProtect> timeoutCallback) {
+        this.name = name;
         this.timeRestrict = timeRestrict;
         this.service = service;
         this.timeoutCallback = timeoutCallback;
     }
 
-    public TimeoutProtect(long timeRestrict, Consumer<TimeoutProtect> timeoutCallback) {
+    public TimeoutProtect(String name, long timeRestrict, Consumer<TimeoutProtect> timeoutCallback) {
+        this.name = name;
         this.timeRestrict = timeRestrict;
         this.service = Executors.newSingleThreadExecutor();
         this.timeoutCallback = timeoutCallback;
@@ -60,7 +65,7 @@ public final class TimeoutProtect implements AutoCloseable {
 
     @Override
     public void close() {
-        RestrictedExecResult<?> result = RestrictedExecutor.execute(this.timeRestrict, () -> {
+        RestrictedExecResult<?> result = RestrictedExecutor.execute(this.name, this.timeRestrict, () -> {
             this.service.close();
             return null;
         });
