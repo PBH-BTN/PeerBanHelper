@@ -3,18 +3,15 @@ package com.ghostchu.peerbanhelper.util.time;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class RestrictedExecutor {
-    public static <T> RestrictedExecResult<T> execute(long timeout, Supplier<T> target) {
-        CompletableFuture<T> sandbox = CompletableFuture.supplyAsync(target);
+    public static <T> RestrictedExecResult<T> execute(String name, long timeout, Supplier<T> target) {
+        CompletableFuture<T> sandbox = CompletableFuture.supplyAsync(target, Executors.newThreadPerTaskExecutor(Thread.ofPlatform().name("Restricted Executor [" + name + "]").factory()));
         try {
             return new RestrictedExecResult<>(false, sandbox.get(timeout, TimeUnit.MILLISECONDS));
         } catch (TimeoutException e) {

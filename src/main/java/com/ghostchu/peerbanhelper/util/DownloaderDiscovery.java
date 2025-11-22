@@ -70,7 +70,7 @@ public class DownloaderDiscovery {
                 }
             }
             return found.stream().distinct().toList();
-        });
+        }, Executors.newVirtualThreadPerTaskExecutor());
     }
 
 
