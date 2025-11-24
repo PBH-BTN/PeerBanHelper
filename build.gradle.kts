@@ -1,7 +1,7 @@
 plugins {
     java
     application
-    id("com.gorylenko.gradle-git-properties") version "2.5.3"
+    id("com.gorylenko.gradle-git-properties") version "2.5.4"
     id("com.install4j.gradle") version "12.0" apply false
 }
 
@@ -64,7 +64,7 @@ configurations.all {
 
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.0")
+    implementation("org.springframework:spring-context:7.0.1")
 
     // Lombok
     compileOnly("org.projectlombok:lombok:1.18.42")
@@ -157,8 +157,8 @@ dependencies {
     implementation("com.spotify:completable-futures:0.3.6")
 
     // HTTP client
-    implementation("com.squareup.okhttp3:okhttp:5.3.1")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.1")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
 
     // JNA
     implementation("net.java.dev.jna:jna:5.18.1")
