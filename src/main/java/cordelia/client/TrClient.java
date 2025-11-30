@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 import java.io.IOException;
-import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
@@ -56,9 +55,8 @@ public final class TrClient {
     public TrClient(HTTPUtil httpUtil, String url, String user, String password, boolean verifySSL) {
         this.url = url;
         // Note: For simplicity, we're not implementing cookie handling for now
-        
-        OkHttpClient.Builder builder = httpUtil.newBuilder()
-                .proxy(Proxy.NO_PROXY)
+
+        OkHttpClient.Builder builder = httpUtil.newBuilderForDownloader()
                 .connectionPool(new ConnectionPool(24, 5, TimeUnit.MINUTES))
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
