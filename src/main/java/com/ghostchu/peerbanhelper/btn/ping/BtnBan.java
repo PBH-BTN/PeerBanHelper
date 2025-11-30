@@ -15,36 +15,36 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @AllArgsConstructor
 @NoArgsConstructor
 public final class BtnBan {
-    @SerializedName("module")
-    private String module;
-    @SerializedName("rule")
-    private String rule;
-    @SerializedName("ip_address")
-    private String ipAddress;
-    @SerializedName("port")
+    @SerializedName("ban_at")
+    private Timestamp banAt;
+    @SerializedName("peer_ip")
+    private String peerIp;
+    @SerializedName("peer_port")
     private int peerPort;
     @SerializedName("peer_id")
     private String peerId;
-    @SerializedName("client_name")
-    private String clientName;
+    @SerializedName("peer_client_name")
+    private String peerClientName;
+    @SerializedName("peer_progress")
+    private double peerProgress;
+    @SerializedName("peer_flag")
+    private String peerFlag;
     @SerializedName("torrent_identifier")
     private String torrentIdentifier;
     @SerializedName("torrent_is_private")
     private boolean torrentIsPrivate;
     @SerializedName("torrent_size")
     private long torrentSize;
-    @SerializedName("downloaded")
-    private long downloaded;
-    @SerializedName("uploaded")
-    private long uploaded;
-    @SerializedName("progress")
-    private double peerProgress;
+    @SerializedName("from_peer_traffic")
+    private long fromPeerTraffic;
+    @SerializedName("to_peer_traffic")
+    private long toPeerTraffic;
     @SerializedName("downloader_progress")
     private double downloaderProgress;
-    @SerializedName("peer_flag")
-    private String peerFlag;
-    @SerializedName("ban_at")
-    private Timestamp banAt;
+    @SerializedName("module")
+    private String module;
+    @SerializedName("rule")
+    private String rule;
     @SerializedName("structured_data")
     private String structuredData;
 
@@ -52,15 +52,15 @@ public final class BtnBan {
         BtnBan btnBan = new BtnBan();
         btnBan.setModule(historyEntity.getRule().getModule().getName());
         btnBan.setRule(tlUI(historyEntity.getRule().getRule()));
-        btnBan.setIpAddress(historyEntity.getIp());
+        btnBan.setPeerIp(historyEntity.getIp());
         btnBan.setPeerPort(historyEntity.getPort());
         btnBan.setPeerId(historyEntity.getPeerId());
-        btnBan.setClientName(historyEntity.getPeerClientName());
+        btnBan.setPeerClientName(historyEntity.getPeerClientName());
         btnBan.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(historyEntity.getTorrent().getInfoHash()));
         btnBan.setTorrentIsPrivate(Boolean.TRUE.equals(historyEntity.getTorrent().getPrivateTorrent()));
         btnBan.setTorrentSize(historyEntity.getTorrent().getSize());
-        btnBan.setDownloaded(historyEntity.getPeerDownloaded());
-        btnBan.setUploaded(historyEntity.getPeerUploaded());
+        btnBan.setFromPeerTraffic(historyEntity.getPeerDownloaded());
+        btnBan.setToPeerTraffic(historyEntity.getPeerUploaded());
         btnBan.setPeerProgress(historyEntity.getPeerProgress());
         btnBan.setDownloaderProgress(historyEntity.getDownloaderProgress());
         btnBan.setPeerFlag(historyEntity.getFlags() == null ? null : historyEntity.getFlags());
