@@ -149,14 +149,6 @@ public final class HTTPUtil implements Reloadable {
         return result;
     }
 
-    public OkHttpClient.Builder newBuilderForDownloader() {
-        var okHttpBuilder = newBuilder();
-        if (ExternalSwitch.parseBoolean("pbh.downloader.bypassproxy", true)) {
-            okHttpBuilder.proxy(Proxy.NO_PROXY);
-        }
-        return okHttpBuilder;
-    }
-
     public OkHttpClient.Builder newBuilder() {
         var okHttpBuilder = new OkHttpClient.Builder()
                 .dispatcher(new Dispatcher(Executors.newVirtualThreadPerTaskExecutor()))

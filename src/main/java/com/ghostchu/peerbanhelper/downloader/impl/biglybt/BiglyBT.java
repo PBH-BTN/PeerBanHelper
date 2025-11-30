@@ -47,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,7 +71,8 @@ public final class BiglyBT extends AbstractDownloader {
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
-        var builder = httpUtil.newBuilderForDownloader()
+        var builder = httpUtil.newBuilder()
+                .proxy(Proxy.NO_PROXY)
                 .connectionPool(new ConnectionPool(getMaxConcurrentPeerRequestSlots() + 10, 5, TimeUnit.MINUTES))
                 .addInterceptor(chain -> {
                     Request originalRequest = chain.request();
