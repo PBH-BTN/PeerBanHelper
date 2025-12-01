@@ -11,7 +11,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class RestrictedExecutor {
     public static <T> RestrictedExecResult<T> execute(String name, long timeout, Supplier<T> target) {
-        CompletableFuture<T> sandbox = CompletableFuture.supplyAsync(target, Executors.newSingleThreadExecutor(Thread.ofPlatform().name("Restricted Executor [" + name + "]").factory()));
+        CompletableFuture<T> sandbox = CompletableFuture.supplyAsync(target, Executors.newThreadPerTaskExecutor(Thread.ofPlatform().name("Restricted Executor [" + name + "]").factory()));
         try {
             return new RestrictedExecResult<>(false, sandbox.get(timeout, TimeUnit.MILLISECONDS));
         } catch (TimeoutException e) {
