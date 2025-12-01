@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -20,10 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -33,6 +35,9 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     private TrackedSwarmDao trackedSwarmDao;
     @Autowired
     private JavalinWebContainer javalinWebContainer;
+
+
+
 
     /**
      * 如果返回 false，则不初始化任何配置文件相关对象
@@ -74,13 +79,13 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
                 .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
         javalinWebContainer.javalin()
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
     }
 
     private void handleDetails(@NotNull Context context) {
         Pageable pageable = new Pageable(context);
         try {
-            var page = trackedSwarmDao.queryByPaging(new Orderable(Map.of(), context)
-                    .apply(trackedSwarmDao.queryBuilder()), pageable);
+            var page = trackedSwarmDao.queryByPaging(new Orderable(Map.of(), context).apply(trackedSwarmDao.queryBuilder()), pageable);
             context.json(new StdResp(true, null, page));
         } catch (SQLException e) {
             log.error("Unable to retrieve tracked swarm data", e);
@@ -105,42 +110,25 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
+        trackedSwarmDao.flushAll();
+    }
+
+
+    private void flushBackDatabase(TrackedSwarmEntity v) throws SQLException {
+        trackedSwarmDao.createOrUpdate(v);
     }
 
     @Override
     public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
         try {
-            trackedSwarmDao.callBatchTasks(() -> {
-                for (Peer peer : peers) {
-                    if(peer.isHandshaking()) continue;
-                    trackedSwarmDao.upsert(new TrackedSwarmEntity(
-                            null,
-                            peer.getPeerAddress().getAddress().toNormalizedString(),
-                            peer.getPeerAddress().getPort(),
-                            torrent.getHash(),
-                            torrent.isPrivate(),
-                            torrent.getSize(),
-                            downloader.getId(),
-                            torrent.getProgress(),
-                            peer.getPeerId(),
-                            peer.getClientName(),
-                            peer.getProgress(),
-                            -1L,
-                            peer.getUploaded(),
-                            peer.getUploadSpeed(),
-                            -1L,
-                            peer.getDownloaded(),
-                            peer.getDownloadSpeed(),
-                            peer.getFlags() == null ? "" : peer.getFlags().getLtStdString(),
-                            new Timestamp(System.currentTimeMillis()),
-                            new Timestamp(System.currentTimeMillis())
-                    ));
-                }
-                return null;
-            });
-        } catch (SQLException e) {
+            for (Peer peer : peers) {
+                if (peer.isHandshaking()) continue;
+                trackedSwarmDao.syncPeers(downloader, torrent, peer);
+            }
+        } catch (ExecutionException e) {
             log.error("Unable update tracked peers in SQLite temporary table", e);
         }
-
     }
+
+
 }

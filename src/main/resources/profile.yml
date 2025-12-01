@@ -1,4 +1,4 @@
-config-version: 36
+config-version: 37
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -468,12 +468,13 @@ module:
     # Provide data support for BTN swarm tracking and other functions that require this data, and track peer data during this running session, data will be automatically deleted after restart
     swarm-tracking:
       enabled: true
+      data-flush-interval: 3600000
     # 对等体跟踪记录服务 - Peer Recording Service
     # 持续跟踪和记录 Peer 的状态、会话、传输、偏移量等数据，为按 IP、Torrent 聚合数据分析和图表生成、BTN 跨用户 Peer 跟踪能力提供数据支持
     # Continuously track and record the status, session, transfer, offset and other data of Peers, provide data support for IP and Torrent aggregated data analysis and chart generation, BTN cross-user Peer tracking capabilities
     peer-recording:
       enabled: true
-      data-flush-interval: 20000
+      data-flush-interval: 900000
       data-retention-time: 5184000000
       data-cleanup-interval: 604800000
   # 任务反吸血 - Anti-Vampire Module

@@ -4,15 +4,13 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricsTrackDao;
-import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
-import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -36,8 +35,6 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     private long dataRetentionTime;
     private long dataFlushInterval;
     @Autowired
-    private JavalinWebContainer javalinWebContainer;
-    @Autowired
     private TorrentDao torrentDao;
 
     @Override
@@ -48,15 +45,8 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     @Override
     public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
         try {
-            TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
-                    null,
-                    torrent.getHash(),
-                    torrent.getName(),
-                    torrent.getSize(),
-                    torrent.isPrivate()
-            ));
-            connectionMetricsTrackDao.upsertPeerSession(downloader, torrentEntity, peers);
-        } catch (SQLException e) {
+            connectionMetricsTrackDao.syncPeers(downloader, torrent, peers, torrentDao);
+        } catch (SQLException | ExecutionException e) {
             log.warn("Failed to record torrent peers for session analyse", e);
         }
     }
@@ -83,6 +73,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
 
     private void flushData() {
         try {
+            connectionMetricsTrackDao.flushAll();
             long startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
             var listNotInTheDay = connectionMetricsTrackDao.queryBuilder().where().ne("timeframeAt", new Timestamp(startOfToday)).query();
             var aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
@@ -114,4 +105,6 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     public void onDisable() {
         flushData();
     }
+
+
 }

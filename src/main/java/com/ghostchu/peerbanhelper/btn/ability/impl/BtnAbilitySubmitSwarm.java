@@ -89,6 +89,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     private void submit() {
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
+            swarmDao.flushAll();
             int size = 0;
             int requests = 0;
             List<TrackedSwarmEntity> trackedSwarmEntities = new ArrayList<>(500);
