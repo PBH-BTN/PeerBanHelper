@@ -324,29 +324,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @return 加载的行数
      */
     private int fileToIPList(File ruleFile, DualIPv4v6AssociativeTries<String> ips) throws IOException {
-        AtomicInteger count = new AtomicInteger();
-        StringJoiner sj = new StringJoiner("\n");
-        var lines = Files.readLines(ruleFile, StandardCharsets.UTF_8);
-        for (String ele : lines) {
-            if (ele.isBlank()) continue;
-            if (ele.startsWith("#")) {
-                // add into sj but without hashtag prefix
-                sj.add(ele.substring(1));
-                continue;
-            }
-            try {
-                var parsedIp = parseRuleLine(ele, sj.toString());
-                if (parsedIp != null) {
-                    count.getAndIncrement();
-                    ips.put(parsedIp.getKey(), parsedIp.getValue());
-                }
-            } catch (Exception e) {
-                log.error("Unable parse rule: {}", ele, e);
-            } finally {
-                sj = new StringJoiner("\n");
-            }
-        }
-        return count.get();
+        return stringToIPList(new String(Files.toByteArray(ruleFile), StandardCharsets.UTF_8), ips);
     }
 
     /**
