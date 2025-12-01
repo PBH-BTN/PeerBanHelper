@@ -158,6 +158,7 @@ export interface SessionAnalyse {
 
 export interface SwarmTracking {
   enabled: boolean
+    data_flush_interval: number
 }
 
 export interface PeerRecording {
