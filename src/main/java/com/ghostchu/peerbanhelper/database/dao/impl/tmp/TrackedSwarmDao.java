@@ -57,6 +57,8 @@ public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Lo
             lastData.setLastTimeSeen(newData.getLastTimeSeen());
             return update(lastData);
         } else {
+            newData.setUploaded(newData.getUploaded());
+            newData.setDownloaded(newData.getDownloaded());
             return create(newData);
         }
     }
