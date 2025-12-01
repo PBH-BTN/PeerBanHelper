@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -13,6 +14,9 @@ import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +28,8 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -33,6 +39,21 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     private TrackedSwarmDao trackedSwarmDao;
     @Autowired
     private JavalinWebContainer javalinWebContainer;
+
+    private final Cache<@NotNull CacheKey, @NotNull TrackedSwarmEntity> cache = CacheBuilder.newBuilder()
+            .maximumSize(ExternalSwitch.parseInt("pbh.module.swarm-tracking-module.cache-size", 1000))
+            .expireAfterAccess(3, TimeUnit.MINUTES)
+            .removalListener((RemovalListener<@NotNull CacheKey, @NotNull TrackedSwarmEntity>) notification -> {
+                var v = notification.getValue();
+                try {
+                    flushBackDatabase(v);
+                } catch (SQLException e) {
+                    log.error("Unable flush back to database for swarm tracking {}", v, e);
+                }
+            })
+            .softValues()
+            .build();
+
 
     /**
      * 如果返回 false，则不初始化任何配置文件相关对象
@@ -105,6 +126,12 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
+        cache.invalidateAll();
+    }
+
+
+    private void flushBackDatabase(TrackedSwarmEntity v) throws SQLException {
+        trackedSwarmDao.createOrUpdate(v);
     }
 
     @Override
@@ -113,34 +140,72 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
             trackedSwarmDao.callBatchTasks(() -> {
                 for (Peer peer : peers) {
                     if(peer.isHandshaking()) continue;
-                    trackedSwarmDao.upsert(new TrackedSwarmEntity(
-                            null,
+                    CacheKey cacheKey = new CacheKey(
                             peer.getPeerAddress().getAddress().toNormalizedString(),
                             peer.getPeerAddress().getPort(),
                             torrent.getHash(),
-                            torrent.isPrivate(),
-                            torrent.getSize(),
-                            downloader.getId(),
-                            torrent.getProgress(),
-                            peer.getPeerId(),
-                            peer.getClientName(),
-                            peer.getProgress(),
-                            -1L,
-                            peer.getUploaded(),
-                            peer.getUploadSpeed(),
-                            -1L,
-                            peer.getDownloaded(),
-                            peer.getDownloadSpeed(),
-                            peer.getFlags() == null ? "" : peer.getFlags().getLtStdString(),
-                            new Timestamp(System.currentTimeMillis()),
-                            new Timestamp(System.currentTimeMillis())
-                    ));
+                            downloader.getId()
+                    );
+                    TrackedSwarmEntity cachedEntity = cache.get(cacheKey, () -> {
+                        TrackedSwarmEntity lastData = trackedSwarmDao.queryBuilder()
+                                .where()
+                                .eq("ip", cacheKey.ip)
+                                .and()
+                                .eq("port", cacheKey.port)
+                                .and()
+                                .eq("infoHash", cacheKey.infoHash)
+                                .and()
+                                .eq("downloader", cacheKey.downloader).queryForFirst();
+                        return Objects.requireNonNullElseGet(lastData, () -> new TrackedSwarmEntity(
+                                null,
+                                peer.getPeerAddress().getAddress().toNormalizedString(),
+                                peer.getPeerAddress().getPort(),
+                                torrent.getHash(),
+                                torrent.isPrivate(),
+                                torrent.getSize(),
+                                downloader.getId(),
+                                torrent.getProgress(),
+                                peer.getPeerId(),
+                                peer.getClientName(),
+                                peer.getProgress(),
+                                0,
+                                0,
+                                peer.getUploadSpeed(),
+                                0,
+                                0,
+                                peer.getDownloadSpeed(),
+                                peer.getFlags() == null ? "" : peer.getFlags().getLtStdString(),
+                                new Timestamp(System.currentTimeMillis()),
+                                new Timestamp(System.currentTimeMillis())
+                        ));
+                    });
+                    long newDownloaded;
+                    long newUploaded;
+                    if (peer.getDownloaded() < cachedEntity.getDownloadedOffset()
+                            || peer.getUploaded() < cachedEntity.getUploadedOffset()) {
+                        newDownloaded = peer.getDownloaded() - cachedEntity.getDownloadedOffset();
+                        newUploaded = peer.getUploaded() - cachedEntity.getUploadedOffset();
+                    } else {
+                        newDownloaded = peer.getDownloaded();
+                        newUploaded = peer.getUploaded();
+                    }
+                    cachedEntity.setDownloaded(cachedEntity.getDownloaded() + newDownloaded);
+                    cachedEntity.setUploaded(cachedEntity.getUploaded() + newUploaded);
+                    cachedEntity.setDownloadedOffset(peer.getDownloaded());
+                    cachedEntity.setUploadedOffset(peer.getUploaded());
+                    cachedEntity.setClientName(peer.getClientName());
+                    cachedEntity.setPeerId(peer.getPeerId());
+                    cachedEntity.setLastFlags(peer.getFlags() == null ? "" : peer.getFlags().getLtStdString());
+                    cachedEntity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
                 }
                 return null;
             });
+
         } catch (SQLException e) {
             log.error("Unable update tracked peers in SQLite temporary table", e);
         }
+    }
 
+    record CacheKey(String ip, int port, String infoHash, String downloader) {
     }
 }

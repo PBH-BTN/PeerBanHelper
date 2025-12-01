@@ -25,39 +25,4 @@ public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Lo
                 .orderBy("id", true);
         return queryByPaging(queryBuilder, pageable);
     }
-
-    public int upsert(TrackedSwarmEntity newData) throws SQLException {
-        TrackedSwarmEntity lastData = queryBuilder()
-                .where()
-                .eq("ip", newData.getIp())
-                .and()
-                .eq("port", newData.getPort())
-                .and()
-                .eq("infoHash", newData.getInfoHash())
-                .and()
-                .eq("downloader", newData.getDownloader()).queryForFirst();
-        if (lastData != null) {
-            long newDownloaded;
-            long newUploaded;
-            if (newData.getDownloadedOffset() < lastData.getDownloadedOffset()
-                    || newData.getUploadedOffset() < lastData.getUploadedOffset()) {
-                newDownloaded = newData.getDownloadedOffset() - lastData.getDownloadedOffset();
-                newUploaded = newData.getUploadedOffset() - lastData.getUploadedOffset();
-            }else{
-                newDownloaded = newData.getDownloadedOffset();
-                newUploaded = newData.getUploadedOffset();
-            }
-            lastData.setDownloaded(lastData.getDownloaded() + newDownloaded);
-            lastData.setUploaded(lastData.getUploaded() + newUploaded);
-            lastData.setDownloadedOffset(newData.getDownloadedOffset());
-            lastData.setUploadedOffset(newData.getUploadedOffset());
-            lastData.setClientName(newData.getClientName());
-            lastData.setPeerId(newData.getPeerId());
-            lastData.setLastFlags(newData.getLastFlags());
-            lastData.setLastTimeSeen(newData.getLastTimeSeen());
-            return update(lastData);
-        } else {
-            return create(newData);
-        }
-    }
 }
