@@ -45,6 +45,8 @@ public final class BtnBan {
     private String module;
     @SerializedName("rule")
     private String rule;
+    @SerializedName("description")
+    private String description;
     @SerializedName("structured_data")
     private String structuredData;
 
@@ -52,6 +54,7 @@ public final class BtnBan {
         BtnBan btnBan = new BtnBan();
         btnBan.setModule(historyEntity.getRule().getModule().getName());
         btnBan.setRule(tlUI(historyEntity.getRule().getRule()));
+        btnBan.setDescription(tlUI(historyEntity.getDescription()));
         btnBan.setPeerIp(historyEntity.getIp());
         btnBan.setPeerPort(historyEntity.getPort());
         btnBan.setPeerId(historyEntity.getPeerId());
