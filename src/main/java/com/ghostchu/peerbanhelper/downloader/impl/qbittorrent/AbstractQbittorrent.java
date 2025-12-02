@@ -21,6 +21,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import com.vdurmont.semver4j.Semver;
 import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -57,8 +57,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
 
-        var builder = httpUtil.newBuilder()
-                .proxy(Proxy.NO_PROXY)
+        var builder = httpUtil.newBuilderForDownloader()
                 .connectionPool(new ConnectionPool(getMaxConcurrentPeerRequestSlots() + 10, 5, TimeUnit.MINUTES))
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
@@ -126,12 +125,37 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             try (Response response = httpClient.newCall(request).execute()) {
                 if (response.isSuccessful() && isLoggedIn()) {
                     updatePreferences();
-                    return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+                    Semver semver = getDownloaderVersion();
+                    if (semver.isGreaterThanOrEqualTo(new Semver("4.5.0")) || ExternalSwitch.parseBoolean("pbh.downloader.qBittorrent.bypassVersionCheck", false)) {
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+                    } else {
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_VERSION_INCOMPATIBLE, semver.toString(), ">= 4.5.0"));
+                    }
                 }
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, response.body().string()));
             }
         } catch (Exception e) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+        }
+    }
+
+    @NotNull
+    private Semver getDownloaderVersion() {
+        try (Response response = httpClient.newCall(new Request.Builder()
+                .url(apiEndpoint + "/app/version")
+                .get()
+                .build()).execute()) {
+            if (response.isSuccessful()) {
+                String versionStr = response.body().string().trim();
+                if (versionStr.startsWith("v")) {
+                    versionStr = versionStr.substring(1);
+                }
+                return new Semver(versionStr);
+            } else {
+                throw new IllegalStateException("Failed to get qBittorrent version: statusCode=" + response.code());
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to get qBittorrent version", e);
         }
     }
 

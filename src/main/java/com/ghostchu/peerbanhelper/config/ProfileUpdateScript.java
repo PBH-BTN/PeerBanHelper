@@ -25,6 +25,14 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 37)
+    public void analyseModulesCacheStuff(YamlConfiguration bundled) {
+        conf.set("module.peer-analyse-service.swarm-tracking.data-flush-interval", bundled.get("module.peer-analyse-service.swarm-tracking.data-flush-interval"));
+        if (conf.getLong("module.peer-analyse-service.peer-recording.data-flush-interval") == 20000) {
+            conf.set("module.peer-analyse-service.peer-recording.data-flush-interval", bundled.get("module.peer-analyse-service.peer-recording.data-flush-interval"));
+        }
+    }
+
     @UpdateScript(version = 36)
     public void antiVampire(YamlConfiguration bundled) {
         conf.set("module.anti-vampire", bundled.get("module.anti-vampire"));

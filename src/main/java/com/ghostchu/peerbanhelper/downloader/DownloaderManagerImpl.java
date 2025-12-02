@@ -58,6 +58,7 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
 
     @Override
     public void loadDownloaders() {
+        closeDownloaders();
         this.clear();
         ConfigurationSection clientSection = Main.getMainConfig().getConfigurationSection("client");
         if (clientSection == null) {
@@ -182,6 +183,10 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
 
     @Override
     public void close() {
+        closeDownloaders();
+    }
+
+    private void closeDownloaders() {
         for (Downloader d : this) {
             try {
                 d.close();

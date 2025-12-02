@@ -66,7 +66,7 @@ public final class RuleSubController extends AbstractFeatureModule {
                     // 新增订阅规则
                     .put("/api/sub/rule", ctx -> save(ctx, null, true), Role.USER_WRITE)
                     // 更新订阅规则
-                    .post("/api/sub/rule/{ruleId}/update", ctx -> ctx.json(update(locale(ctx), ctx.pathParam("ruleId"))), Role.USER_READ)
+                    .post("/api/sub/rule/{ruleId}/update", ctx -> ctx.json(update(locale(ctx), ctx.pathParam("ruleId"))), Role.USER_WRITE)
                     // 查询订阅规则
                     .get("/api/sub/rule/{ruleId}", ctx -> ctx.json(get(locale(ctx), ctx.pathParam("ruleId"))), Role.USER_READ)
                     // 修改订阅规则
