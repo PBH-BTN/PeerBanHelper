@@ -32,8 +32,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +58,7 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
+    @Getter
     private ScheduledExecutorService scheduler = null;
     @Getter
     private String configUrl;
@@ -67,7 +68,9 @@ public final class BtnNetwork implements Reloadable {
     private String appId;
     @Getter
     private String appSecret;
+    @Getter
     private OkHttpClient httpClient;
+    @Getter
     private final DownloaderServer server;
     @Getter
     private final PeerRecordDao peerRecordDao;
@@ -77,7 +80,9 @@ public final class BtnNetwork implements Reloadable {
     private final MetadataDao metadataDao;
     @Getter
     private final HistoryDao historyDao;
+    @Getter
     private final HTTPUtil httpUtil;
+    @Getter
     private final ModuleMatchCache moduleMatchCache;
     private boolean enabled;
     private String powCaptchaEndpoint;
@@ -246,11 +251,13 @@ public final class BtnNetwork implements Reloadable {
             long startTime = System.currentTimeMillis();
             PoWClient poWClient = new PoWClient();
             log.info(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTING));
-            poWClient.solve(
-                    powCaptchaData.getChallenge().getBytes(StandardCharsets.ISO_8859_1),
+            byte[] nonce = poWClient.solve(
+                    Base64.getDecoder().decode(powCaptchaData.getChallengeBase64()),
                     powCaptchaData.getDifficultyBits(),
                     powCaptchaData.getAlgorithm()
             );
+            requestBuilder.header("X-BTN-PowID", powCaptchaData.getId())
+                    .header("X-BTN-PowSolution", Base64.getEncoder().encodeToString(nonce));
             long costTime = System.currentTimeMillis() - startTime;
             log.info(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTE_COMPLETED), costTime);
         } catch (Throwable e) {
@@ -263,7 +270,7 @@ public final class BtnNetwork implements Reloadable {
     @Data
     public static class PowCaptchaData {
         private String id;
-        private String challenge;
+        private String challengeBase64;
         private int difficultyBits;
         private String algorithm;
         private long expireAt;
@@ -307,26 +314,6 @@ public final class BtnNetwork implements Reloadable {
                 .authenticator((route, response) -> response.request().newBuilder().header("Authorization", "Bearer " + appId + "@" + appSecret).build())
                 .callTimeout(Duration.ofMinutes(1))
                 .build();
-    }
-
-    public OkHttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    public ModuleMatchCache getModuleMatchCache() {
-        return moduleMatchCache;
-    }
-
-    public DownloaderServer getServer() {
-        return server;
-    }
-
-    public ScheduledExecutorService getScheduler() {
-        return scheduler;
-    }
-
-    public HTTPUtil getHttpUtil() {
-        return httpUtil;
     }
 
     public void close() {
