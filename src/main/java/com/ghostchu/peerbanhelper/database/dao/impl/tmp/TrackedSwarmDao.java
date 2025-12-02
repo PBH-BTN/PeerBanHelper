@@ -92,16 +92,12 @@ public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Lo
                     new Timestamp(System.currentTimeMillis())
             ));
         });
-        long newDownloaded;
-        long newUploaded;
-        if (peer.getDownloaded() < cachedEntity.getDownloadedOffset()
-                || peer.getUploaded() < cachedEntity.getUploadedOffset()) {
-            newDownloaded = peer.getDownloaded() - cachedEntity.getDownloadedOffset();
-            newUploaded = peer.getUploaded() - cachedEntity.getUploadedOffset();
-        } else {
-            newDownloaded = peer.getDownloaded();
-            newUploaded = peer.getUploaded();
-        }
+        long newDownloaded = peer.getDownloaded() >= cachedEntity.getDownloadedOffset()
+                ? peer.getDownloaded() - cachedEntity.getDownloadedOffset()
+                : peer.getDownloaded();
+        long newUploaded = peer.getUploaded() >= cachedEntity.getUploadedOffset()
+                ? peer.getUploaded() - cachedEntity.getUploadedOffset()
+                : peer.getUploaded();
         cachedEntity.setDownloaded(cachedEntity.getDownloaded() + newDownloaded);
         cachedEntity.setUploaded(cachedEntity.getUploaded() + newUploaded);
         cachedEntity.setDownloadedOffset(peer.getDownloaded());
