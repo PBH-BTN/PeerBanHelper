@@ -35,6 +35,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final IPMatcher ipMatcher = new IPMatcher("btn-ip-denylist", "Empty IP Denylist", List.of(new DualIPv4v6AssociativeTries<>()));
     private final MetadataDao metadataDao;
+    private final boolean powCaptcha;
     private String ruleVersion = "initial";
 
     public BtnAbilityIPDenyList(BtnNetwork btnNetwork, MetadataDao metadataDao, JsonObject ability) {
@@ -43,6 +44,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        this.powCaptcha = ability.get("pow_captcha").getAsBoolean();
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
     }
 
@@ -92,12 +94,11 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
         String version = Objects.requireNonNullElse(ruleVersion, "initial");
 
         String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
-        Request request = new Request.Builder()
+        Request.Builder request = new Request.Builder()
                 .url(url)
-                .get()
-                .build();
-
-        try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
+                .get();
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request);
+        try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
             if (response.code() == 204) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ruleVersion));
                 return;

@@ -31,6 +31,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final String endpoint;
     private final boolean multiIf;
+    private final boolean powCaptcha;
     private String lastResult = "No information";
 
     public BtnAbilityHeartBeat(BtnNetwork btnNetwork, JsonObject ability) {
@@ -39,6 +40,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         this.endpoint = ability.get("endpoint").getAsString();
         this.multiIf = ability.get("multi_if").getAsBoolean();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        this.powCaptcha = ability.get("pow_captcha").getAsBoolean();
     }
 
     @Override
@@ -73,6 +75,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     private void sendHeartBeatDefaultIf() {
         var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", "default")), MediaType.parse("application/json"));
         Request.Builder request = new Request.Builder().url(endpoint).post(body);
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request);
         try (Response resp = btnNetwork.getHttpUtil().newBuilder().build().newCall(request.build()).execute()) {
             if (!resp.isSuccessful()) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_FAILED));

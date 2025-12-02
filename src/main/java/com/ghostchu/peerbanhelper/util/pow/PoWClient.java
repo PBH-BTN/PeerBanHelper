@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class PoWClient {
     private final int threadCount = Runtime.getRuntime().availableProcessors();
-    private final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+    private final ExecutorService executor = Executors.newWorkStealingPool(threadCount);
 
     public byte[] solve(byte[] challenge, int difficultyBits, String algorithm) throws Exception {
         AtomicBoolean found = new AtomicBoolean(false);

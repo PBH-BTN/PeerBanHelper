@@ -12,20 +12,27 @@ import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.pow.PoWClient;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,6 +80,7 @@ public final class BtnNetwork implements Reloadable {
     private final HTTPUtil httpUtil;
     private final ModuleMatchCache moduleMatchCache;
     private boolean enabled;
+    private String powCaptchaEndpoint;
 
     public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
                       MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
@@ -165,6 +173,10 @@ public final class BtnNetwork implements Reloadable {
             resetScheduler();
             abilities.values().forEach(BtnAbility::unload);
             abilities.clear();
+            if (json.has("proof_of_work_captcha")) {
+                JsonObject powCaptcha = json.get("proof_of_work_captcha").getAsJsonObject();
+                this.powCaptchaEndpoint = powCaptcha.get("endpoint").getAsString();
+            }
             JsonObject ability = json.get("ability").getAsJsonObject();
             if (useLegacyAbilities) {
                 if (ability.has("submit_peers") && submit) {
@@ -216,6 +228,45 @@ public final class BtnNetwork implements Reloadable {
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
             configSuccess.set(false);
         }
+    }
+
+    public void gatherAndSolveCaptchaBlocking(@NotNull Request.Builder requestBuilder) {
+        if (powCaptchaEndpoint == null) return;
+        Request request = new Request.Builder()
+                .url(powCaptchaEndpoint)
+                .get()
+                .build();
+        try (Response resp = httpClient.newCall(request).execute()) {
+            String respContent = resp.body().string();
+            if (!resp.isSuccessful()) {
+                log.error(tlUI(Lang.BTN_POW_CAPTCHA_LOAD_FROM_REMOTE, resp.code(), respContent));
+                return;
+            }
+            PowCaptchaData powCaptchaData = JsonUtil.standard().fromJson(respContent, PowCaptchaData.class);
+            long startTime = System.currentTimeMillis();
+            PoWClient poWClient = new PoWClient();
+            log.info(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTING));
+            poWClient.solve(
+                    powCaptchaData.getChallenge().getBytes(StandardCharsets.ISO_8859_1),
+                    powCaptchaData.getDifficultyBits(),
+                    powCaptchaData.getAlgorithm()
+            );
+            long costTime = System.currentTimeMillis() - startTime;
+            log.info(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTE_COMPLETED), costTime);
+        } catch (Throwable e) {
+            log.error("Unable to gather or solve PoW Captcha", e);
+        }
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class PowCaptchaData {
+        private String id;
+        private String challenge;
+        private int difficultyBits;
+        private String algorithm;
+        private long expireAt;
     }
 
     private void checkIfNeedRetryConfig() {
