@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.btn.ability.impl;
+package com.ghostchu.peerbanhelper.btn.ability.impl.legacy;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnExceptionRule;
