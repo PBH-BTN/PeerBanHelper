@@ -24,6 +24,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.stereotype.Component;
+import oshi.SystemInfo;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -46,6 +47,7 @@ public final class BtnNetwork implements Reloadable {
     private final ScriptEngine scriptEngine;
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
+    private final SystemInfo systemInfo;
     @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
@@ -73,7 +75,7 @@ public final class BtnNetwork implements Reloadable {
     private boolean enabled;
 
     public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao) {
+                      MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
         this.server = downloaderServer;
         this.scriptEngine = scriptEngine;
         this.moduleMatchCache = moduleMatchCache;
@@ -86,6 +88,7 @@ public final class BtnNetwork implements Reloadable {
             Main.getReloadManager().register(this);
             reloadConfig();
         }).start();
+        this.systemInfo = systemInfo;
     }
 
     @Override
@@ -237,11 +240,17 @@ public final class BtnNetwork implements Reloadable {
                     Request.Builder requestBuilder = original.newBuilder()
                             .header("User-Agent", Main.getUserAgent())
                             .header("Content-Type", "application/json")
-                            .header("BTN-AppID", appId)
-                            .header("BTN-AppSecret", appSecret)
+                            .header("BTN-AppID", appId) // Legacy Protocol
+                            .header("BTN-AppSecret", appSecret) // Legacy Protocol
                             .header("X-BTN-AppID", appId)
                             .header("X-BTN-AppSecret", appSecret)
-                            .header("Authentication", "Bearer " + appId + "@" + appSecret);
+                            .header("Authentication", "Bearer " + appId + "@" + appSecret); // For anonymous account
+                    if ((appId == null || appId.isBlank() || appId.equals("example-app-id"))
+                            || (appSecret == null || appSecret.isBlank() || appSecret.equals("example-app-secret"))) {
+                        requestBuilder.header("X-BTN-HardwareID", systemInfo.getHardware().getComputerSystem().getHardwareUUID()) // For anonymous account
+                                .header("X-BTN-InstalltionID", Main.getMainConfig().getString("installation-id", ""));
+
+                    }
                     return chain.proceed(requestBuilder.build());
                 })
                 .authenticator((route, response) -> response.request().newBuilder().header("Authorization", "Bearer " + appId + "@" + appSecret).build())
