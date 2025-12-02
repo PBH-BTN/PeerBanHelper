@@ -779,3 +779,23 @@ MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_NON_0019: "[禁止] 已识别的拒绝上
 MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_0019_SEEDING: "[对等反制] 已识别的拒绝做种的不良客户端（迅雷，0019 版本）：禁止连接到做种任务"
 DOWNLOADER_BC_FAILED_REQUEST_STATISTICS_LIST: "获取下载器 {} 的统计信息失败: {} - {}"
 DOWNLOADER_VERSION_INCOMPATIBLE: "此下载器的版本不受支持，当前版本 {}，需要版本 {}"
+BTN_ABILITY_IP_DENYLIST_TITLE: "IP 拒绝列表"
+BTN_ABILITY_IP_DENYLIST_DESCRIPTION: |
+  IP 拒绝列表能力允许远程服务器下发需要拦截的 IP/CIDR 地址列表。位于此列表内的连接将立刻被 PeerBanHelper 封禁。  
+  
+  **规则版本:** {}  
+  **当前已加载:** {} 条规则
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_CACHE: "已从本地缓存加载 IP 拒绝列表，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_DENYLIST_LOAD_FAILED_FROM_CACHE: "从本地缓存加载 IP 拒绝列表失败"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 拒绝列表当前已是最新版本，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE: "已从远程服务器加载 IP 拒绝列表，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_ALLOWLIST_TITLE: "IP 允许列表"
+BTN_ABILITY_IP_ALLOWLIST_DESCRIPTION: |
+  IP 允许列表能力允许远程服务器下发跳过监测的 IP/CIDR 地址列表。位于此列表内的连接不会被 PeerBanHelper 封禁。  
+  
+  **规则版本:** {}  
+  **当前已加载:** {} 条规则
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_CACHE: "已从本地缓存加载 IP 允许列表，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_ALLOWLIST_LOAD_FAILED_FROM_CACHE: "从本地缓存加载 IP 允许列表失败"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 允许列表当前已是最新版本，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE: "已从远程服务器加载 IP 允许列表，规则版本: {}，共 {} 条规则"

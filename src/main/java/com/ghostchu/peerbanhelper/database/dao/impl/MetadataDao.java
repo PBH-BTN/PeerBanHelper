@@ -16,6 +16,7 @@ public final class MetadataDao extends AbstractPBHDao<MetadataEntity, String> {
         super(database, MetadataEntity.class);
     }
 
+    @Nullable
     public String get(String key) {
         return getOrDefault(key, null);
     }

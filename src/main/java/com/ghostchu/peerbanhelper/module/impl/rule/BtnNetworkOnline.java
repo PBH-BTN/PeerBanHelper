@@ -7,8 +7,8 @@ import com.ghostchu.peerbanhelper.btn.BtnExceptionRuleParsed;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
-import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityException;
-import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityRules;
+import com.ghostchu.peerbanhelper.btn.ability.impl.LegacyBtnAbilityException;
+import com.ghostchu.peerbanhelper.btn.ability.impl.LegacyBtnAbilityRules;
 import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
@@ -38,7 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -181,11 +183,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
-        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
+        var abilityObject = btnNetwork.getAbilities().get(LegacyBtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
         }
-        BtnAbilityRules exception = (BtnAbilityRules) abilityObject;
+        LegacyBtnAbilityRules exception = (LegacyBtnAbilityRules) abilityObject;
         BtnRulesetParsed rule = exception.getBtnRule();
         if (rule == null) {
             return pass();
@@ -252,11 +254,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader) {
-        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityException.class);
+        var abilityObject = btnNetwork.getAbilities().get(LegacyBtnAbilityException.class);
         if (abilityObject == null) {
             return pass();
         }
-        BtnAbilityException exception = (BtnAbilityException) abilityObject;
+        LegacyBtnAbilityException exception = (LegacyBtnAbilityException) abilityObject;
         BtnExceptionRuleParsed rule = exception.getBtnExceptionRule();
         if (rule == null) {
             return pass();
@@ -286,11 +288,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     private @NotNull CheckResult checkShouldBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
-        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
+        var abilityObject = btnNetwork.getAbilities().get(LegacyBtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
         }
-        BtnAbilityRules ruleAbility = (BtnAbilityRules) abilityObject;
+        LegacyBtnAbilityRules ruleAbility = (LegacyBtnAbilityRules) abilityObject;
         BtnRulesetParsed rule = ruleAbility.getBtnRule();
         if (rule == null) {
             return pass();

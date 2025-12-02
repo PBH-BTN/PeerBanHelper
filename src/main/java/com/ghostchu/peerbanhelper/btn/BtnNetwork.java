@@ -175,6 +175,12 @@ public final class BtnNetwork implements Reloadable {
                 if (ability.has("submit_histories") && submit) {
                     abilities.put(LegacyBtnAbilitySubmitHistory.class, new LegacyBtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject()));
                 }
+                if (ability.has("rules")) {
+                    abilities.put(LegacyBtnAbilityRules.class, new LegacyBtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
+                }
+                if (ability.has("exception")) {
+                    abilities.put(LegacyBtnAbilityException.class, new BtnAbilityReconfigure(this, ability.get("exception").getAsJsonObject()));
+                }
             } else {
                 if (ability.has("submit_bans") && submit) {
                     abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
@@ -182,15 +188,15 @@ public final class BtnNetwork implements Reloadable {
                 if (ability.has("submit_swarm") && submit) {
                     abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
                 }
-            }
-            if (ability.has("rules")) {
-                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
+                if (ability.has("ip_denylist")) {
+                    abilities.put(BtnAbilityIPDenyList.class, new BtnAbilityIPDenyList(this, metadataDao, ability.get("ip_denylist").getAsJsonObject()));
+                }
+                if (ability.has("ip_allowlist")) {
+                    abilities.put(BtnAbilityIPAllowList.class, new BtnAbilityIPAllowList(this, metadataDao, ability.get("ip_denylist").getAsJsonObject()));
+                }
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));
-            }
-            if (ability.has("exception")) {
-                abilities.put(BtnAbilityException.class, new BtnAbilityReconfigure(this, ability.get("exception").getAsJsonObject()));
             }
             if (ability.has("heartbeat")) {
                 abilities.put(BtnAbilityHeartBeat.class, new BtnAbilityHeartBeat(this, ability.get("heartbeat").getAsJsonObject()));

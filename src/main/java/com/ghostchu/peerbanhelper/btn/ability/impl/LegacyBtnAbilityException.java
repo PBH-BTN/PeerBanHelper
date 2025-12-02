@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public final class BtnAbilityException extends AbstractBtnAbility {
+public final class LegacyBtnAbilityException extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
@@ -45,7 +45,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
     private BtnExceptionRuleParsed btnExceptionRule;
 
 
-    public BtnAbilityException(BtnNetwork btnNetwork, JsonObject ability) {
+    public LegacyBtnAbilityException(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
@@ -70,7 +70,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
 
     @Override
     public String getName() {
-        return "BtnAbilityException";
+        return "BtnAbilityException (Legacy)";
     }
 
     @Override

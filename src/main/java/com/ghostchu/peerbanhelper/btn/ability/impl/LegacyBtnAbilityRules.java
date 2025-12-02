@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public final class BtnAbilityRules extends AbstractBtnAbility {
+public final class LegacyBtnAbilityRules extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
@@ -43,7 +43,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     private BtnRulesetParsed btnRule;
 
 
-    public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
+    public LegacyBtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
         this.btnNetwork = btnNetwork;
         this.scriptEngine = scriptEngine;
         this.interval = ability.get("interval").getAsLong();
@@ -70,7 +70,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public String getName() {
-        return "BtnAbilityRuleset";
+        return "BtnAbilityRuleset (Legacy)";
     }
 
     @Override
