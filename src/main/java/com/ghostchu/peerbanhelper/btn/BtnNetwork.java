@@ -158,7 +158,7 @@ public final class BtnNetwork implements Reloadable {
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, max_protocol_version);
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
-            boolean useLegacyAbilities = min_protocol_version <= 10;
+            boolean useLegacyAbilities = min_protocol_version < 20;
             resetScheduler();
             abilities.values().forEach(BtnAbility::unload);
             abilities.clear();
