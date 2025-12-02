@@ -173,7 +173,7 @@ public final class BtnNetwork implements Reloadable {
             resetScheduler();
             abilities.values().forEach(BtnAbility::unload);
             abilities.clear();
-            if (json.has("proof_of_work_captcha")) {
+            if (json.has("proof_of_work_captcha") && !json.isJsonNull()) {
                 JsonObject powCaptcha = json.get("proof_of_work_captcha").getAsJsonObject();
                 this.powCaptchaEndpoint = powCaptcha.get("endpoint").getAsString();
             }
