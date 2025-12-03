@@ -45,7 +45,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
-        this.powCaptcha = ability.get("pow_captcha").getAsBoolean();
+        this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
     }
 

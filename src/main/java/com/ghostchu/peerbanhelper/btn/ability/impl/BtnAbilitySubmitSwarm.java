@@ -50,7 +50,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
-        this.powCaptcha = ability.get("pow_captcha").getAsBoolean();
+        this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
     }
 
     @Override
@@ -141,7 +141,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
         if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request);
         try (Response resp = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
             if (resp.code() < 200 || resp.code() >= 400) {
-                String responseBody = resp.body() != null ? resp.body().string() : "";
+                String responseBody = resp.body().string();
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.code() + " - " + responseBody));
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody));
                 throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody)));

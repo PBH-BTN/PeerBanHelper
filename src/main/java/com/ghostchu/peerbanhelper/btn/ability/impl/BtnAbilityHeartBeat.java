@@ -40,7 +40,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         this.endpoint = ability.get("endpoint").getAsString();
         this.multiIf = ability.get("multi_if").getAsBoolean();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
-        this.powCaptcha = ability.get("pow_captcha").getAsBoolean();
+        this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
     }
 
     @Override
