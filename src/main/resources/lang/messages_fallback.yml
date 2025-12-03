@@ -806,3 +806,8 @@ BTN_ABILITY_IP_DENYLIST_HIT: "匹配拒绝列表: {}"
 BTN_POW_CAPTCHA_LOAD_FROM_REMOTE: "获取验证请求基本数据失败，可能是网络故障或者验证服务器错误，请稍后重试: {} - {}"
 BTN_POW_CAPTCHA_COMPUTING: "远程服务器要求完成工作量证明验证以识别您的请求是否为恶意请求，PeerBanHelper 正在完成验证计算，计算过程 CPU 使用量可能短暂升高。"
 BTN_POW_CAPTCHA_COMPUTE_COMPLETED: "证明计算完成，耗时: {}ms"
+BTN_ABILITY_IP_QUERY_TITLE: "BTN IP 查询服务"
+BTN_ABILITY_IP_QUERY_DESCRIPTION: |
+  BTN IP 查询服务允许 PeerBanHelper 查询 BTN 服务器以获取有关特定 IP 地址的更多信息。  
+  PeerBanHelper 功能模块可以使用此服务提供的能力获取有关特定 IP 地址在 BTN 上的活动概要。
+BTN_ABILITY_IP_QUERY_STATUS_OK: "查询成功处理: {}"

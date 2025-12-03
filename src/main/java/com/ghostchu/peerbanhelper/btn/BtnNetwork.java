@@ -217,6 +217,9 @@ public final class BtnNetwork implements Reloadable {
             if (ability.has("heartbeat")) {
                 abilities.put(BtnAbilityHeartBeat.class, new BtnAbilityHeartBeat(this, ability.get("heartbeat").getAsJsonObject()));
             }
+            if (ability.has("ip_query")) {
+                abilities.put(BtnAbilityIpQuery.class, new BtnAbilityIpQuery(this, ability.get("ip_query").getAsJsonObject()));
+            }
             abilities.values().forEach(a -> {
                 try {
                     a.load();
