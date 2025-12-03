@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.btn;
+package com.ghostchu.peerbanhelper.btn.legacy;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -15,14 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public final class BtnExceptionRuleParsed {
+public final class LegacyBtnExceptionRuleParsed {
     private String version;
     private Map<String, List<Rule>> peerIdRules;
     private Map<String, List<Rule>> clientNameRules;
     private Map<String, List<Rule>> ipRules;
     private Map<String, List<Rule>> portRules;
 
-    public BtnExceptionRuleParsed(BtnExceptionRule btnRule) {
+    public LegacyBtnExceptionRuleParsed(LegacyBtnExceptionRule btnRule) {
         this.version = btnRule.getVersion();
         this.ipRules = parseIPRule(btnRule.getIpRules());
         this.portRules = parsePortRule(btnRule.getPortRules());

@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.btn;
+package com.ghostchu.peerbanhelper.btn.legacy;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -21,7 +21,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Data
 @Slf4j
-public final class BtnRulesetParsed {
+public final class LegacyBtnRulesetParsed {
     private final ScriptEngine scriptEngine;
     private String version;
     private Map<String, List<Rule>> peerIdRules;
@@ -30,14 +30,14 @@ public final class BtnRulesetParsed {
     private Map<String, List<Rule>> portRules;
     private Map<String, CompiledScript> scriptRules;
 
-    public BtnRulesetParsed(ScriptEngine scriptEngine, BtnRuleset btnRuleset, boolean scriptExecute) {
+    public LegacyBtnRulesetParsed(ScriptEngine scriptEngine, LegacyBtnRuleset legacyBtnRuleset, boolean scriptExecute) {
         this.scriptEngine = scriptEngine;
-        this.version = btnRuleset.getVersion();
-        this.ipRules = parseIPRule(btnRuleset.getIpRules());
-        this.portRules = parsePortRule(btnRuleset.getPortRules());
-        this.peerIdRules = parseRule(btnRuleset.getPeerIdRules());
-        this.clientNameRules = parseRule(btnRuleset.getClientNameRules());
-        this.scriptRules = scriptExecute ? compileScripts(btnRuleset.getScriptRules()) : new HashMap<>();
+        this.version = legacyBtnRuleset.getVersion();
+        this.ipRules = parseIPRule(legacyBtnRuleset.getIpRules());
+        this.portRules = parsePortRule(legacyBtnRuleset.getPortRules());
+        this.peerIdRules = parseRule(legacyBtnRuleset.getPeerIdRules());
+        this.clientNameRules = parseRule(legacyBtnRuleset.getClientNameRules());
+        this.scriptRules = scriptExecute ? compileScripts(legacyBtnRuleset.getScriptRules()) : new HashMap<>();
     }
 
     private Map<String, CompiledScript> compileScripts(Map<String, String> scriptRules) {

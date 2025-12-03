@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.btn;
+package com.ghostchu.peerbanhelper.btn.legacy;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public final class BtnRuleset {
+public final class LegacyBtnRuleset {
     @SerializedName("version")
     private String version;
     @SerializedName("peer_id")

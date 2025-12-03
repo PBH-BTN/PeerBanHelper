@@ -3,12 +3,12 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.btn.BtnExceptionRuleParsed;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
-import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilityException;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilityRules;
+import com.ghostchu.peerbanhelper.btn.legacy.LegacyBtnExceptionRuleParsed;
+import com.ghostchu.peerbanhelper.btn.legacy.LegacyBtnRulesetParsed;
 import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
@@ -188,7 +188,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             return pass();
         }
         LegacyBtnAbilityRules exception = (LegacyBtnAbilityRules) abilityObject;
-        BtnRulesetParsed rule = exception.getBtnRule();
+        LegacyBtnRulesetParsed rule = exception.getBtnRule();
         if (rule == null) {
             return pass();
         }
@@ -259,7 +259,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             return pass();
         }
         LegacyBtnAbilityException exception = (LegacyBtnAbilityException) abilityObject;
-        BtnExceptionRuleParsed rule = exception.getBtnExceptionRule();
+        LegacyBtnExceptionRuleParsed rule = exception.getBtnExceptionRule();
         if (rule == null) {
             return pass();
         }
@@ -293,7 +293,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             return pass();
         }
         LegacyBtnAbilityRules ruleAbility = (LegacyBtnAbilityRules) abilityObject;
-        BtnRulesetParsed rule = ruleAbility.getBtnRule();
+        LegacyBtnRulesetParsed rule = ruleAbility.getBtnRule();
         if (rule == null) {
             return pass();
         }
@@ -328,7 +328,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }, true);
     }
 
-    private CheckResult checkPortRule(BtnRulesetParsed rule, Torrent torrent, Peer peer) {
+    private CheckResult checkPortRule(LegacyBtnRulesetParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPortRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), Integer.toString(peer.getPeerAddress().getPort()));
             if (matchResult.hit()) {
@@ -344,7 +344,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return null;
     }
 
-    private CheckResult checkPortRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
+    private CheckResult checkPortRuleException(LegacyBtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPortRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), Integer.toString(peer.getPeerAddress().getPort()));
             if (matchResult.hit()) {
@@ -361,7 +361,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkClientNameRule(BtnRulesetParsed rule, Torrent torrent, Peer peer) {
+    private CheckResult checkClientNameRule(LegacyBtnRulesetParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getClientNameRules().keySet()) {
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
@@ -379,7 +379,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkClientNameRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
+    private CheckResult checkClientNameRuleException(LegacyBtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getClientNameRules().keySet()) {
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
@@ -397,7 +397,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkPeerIdRule(BtnRulesetParsed rule, Torrent torrent, Peer peer) {
+    private CheckResult checkPeerIdRule(LegacyBtnRulesetParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPeerIdRules().keySet()) {
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getPeerId());
@@ -415,7 +415,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkPeerIdRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
+    private CheckResult checkPeerIdRuleException(LegacyBtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPeerIdRules().keySet()) {
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getPeerId());
@@ -433,7 +433,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkIpRule(BtnRulesetParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
+    private CheckResult checkIpRule(LegacyBtnRulesetParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
         IPAddress pa = peer.getPeerAddress().getAddress();
         if (pa == null) return null;
         if (pa.isIPv4Convertible()) {
@@ -455,7 +455,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkIpRuleException(BtnExceptionRuleParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
+    private CheckResult checkIpRuleException(LegacyBtnExceptionRuleParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
         IPAddress pa = peer.getPeerAddress().getAddress();
         if (pa == null) return null;
         if (pa.isIPv4Convertible()) {
