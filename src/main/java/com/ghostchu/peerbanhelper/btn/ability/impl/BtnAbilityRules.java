@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.btn.ability.impl.legacy;
+package com.ghostchu.peerbanhelper.btn.ability.impl;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public final class LegacyBtnAbilityRules extends AbstractBtnAbility {
+public final class BtnAbilityRules extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
@@ -43,7 +43,7 @@ public final class LegacyBtnAbilityRules extends AbstractBtnAbility {
     private BtnRulesetParsed btnRule;
 
 
-    public LegacyBtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
+    public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
         this.btnNetwork = btnNetwork;
         this.scriptEngine = scriptEngine;
         this.interval = ability.get("interval").getAsLong();

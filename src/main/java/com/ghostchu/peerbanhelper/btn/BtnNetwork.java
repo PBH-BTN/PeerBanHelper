@@ -4,7 +4,9 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.*;
-import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.*;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitHistory;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
@@ -193,12 +195,6 @@ public final class BtnNetwork implements Reloadable {
                 if (ability.has("submit_histories") && submit) {
                     abilities.put(LegacyBtnAbilitySubmitHistory.class, new LegacyBtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject()));
                 }
-                if (ability.has("rules")) {
-                    abilities.put(LegacyBtnAbilityRules.class, new LegacyBtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
-                }
-                if (ability.has("exception")) {
-                    abilities.put(LegacyBtnAbilityException.class, new BtnAbilityReconfigure(this, ability.get("exception").getAsJsonObject()));
-                }
             } else {
                 if (ability.has("submit_bans") && submit) {
                     abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
@@ -212,6 +208,9 @@ public final class BtnNetwork implements Reloadable {
                 if (ability.has("ip_allowlist")) {
                     abilities.put(BtnAbilityIPAllowList.class, new BtnAbilityIPAllowList(this, metadataDao, ability.get("ip_denylist").getAsJsonObject()));
                 }
+            }
+            if (ability.has("rules")) {
+                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));

@@ -14,12 +14,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +33,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
+    @Getter
     private final IPMatcher ipMatcher = new IPMatcher("btn-ip-denylist", "Empty IP Denylist", List.of(new DualIPv4v6AssociativeTries<>()));
     private final MetadataDao metadataDao;
     private final boolean powCaptcha;
@@ -48,7 +49,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
     }
 
-    private void loadCacheFile() throws IOException {
+    private void loadCacheFile() {
         String cacheVersion = metadataDao.get("btn.ability.ip_denylist.cache.version");
         String cacheValue = metadataDao.get("btn.ability.ip_denylist.cache.value");
         if (cacheValue != null) {
