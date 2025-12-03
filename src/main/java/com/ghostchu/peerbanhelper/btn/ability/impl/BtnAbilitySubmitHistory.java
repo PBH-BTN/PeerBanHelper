@@ -117,7 +117,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                         .url(endpoint)
                         .post(body)
                         .header("Content-Encoding", "gzip");
-                if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request);
+                if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "submit_history");
                 try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
                     if (!response.isSuccessful()) {
                         String responseBody = response.body().string();

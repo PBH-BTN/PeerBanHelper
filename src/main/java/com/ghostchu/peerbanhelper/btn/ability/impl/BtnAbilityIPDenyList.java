@@ -98,7 +98,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
         Request.Builder request = new Request.Builder()
                 .url(url)
                 .get();
-        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request);
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "ip_denylist");
         try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
             if (response.code() == 204) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ruleVersion));

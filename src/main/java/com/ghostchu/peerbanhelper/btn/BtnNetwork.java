@@ -233,10 +233,10 @@ public final class BtnNetwork implements Reloadable {
         }
     }
 
-    public void gatherAndSolveCaptchaBlocking(@NotNull Request.Builder requestBuilder) {
+    public void gatherAndSolveCaptchaBlocking(@NotNull Request.Builder requestBuilder, @NotNull String type) {
         if (powCaptchaEndpoint == null) return;
         Request request = new Request.Builder()
-                .url(powCaptchaEndpoint)
+                .url(powCaptchaEndpoint + "?type=" + type)
                 .get()
                 .build();
         try (Response resp = httpClient.newCall(request).execute()) {

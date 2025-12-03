@@ -138,7 +138,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                 .url(endpoint)
                 .post(body)
                 .header("Content-Encoding", "gzip");
-        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request);
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "submit_swarm");
         try (Response resp = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
             if (resp.code() < 200 || resp.code() >= 400) {
                 String responseBody = resp.body().string();

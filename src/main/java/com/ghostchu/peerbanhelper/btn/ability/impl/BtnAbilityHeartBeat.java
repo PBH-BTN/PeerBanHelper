@@ -75,7 +75,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     private void sendHeartBeatDefaultIf() {
         var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", "default")), MediaType.parse("application/json"));
         Request.Builder request = new Request.Builder().url(endpoint).post(body);
-        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request);
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
         try (Response resp = btnNetwork.getHttpUtil().newBuilder().build().newCall(request.build()).execute()) {
             if (!resp.isSuccessful()) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_FAILED));
