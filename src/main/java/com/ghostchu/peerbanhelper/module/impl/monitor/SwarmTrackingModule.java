@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
-import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
@@ -111,11 +110,6 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     public void onDisable() {
         Main.getEventBus().unregister(this);
         trackedSwarmDao.flushAll();
-    }
-
-
-    private void flushBackDatabase(TrackedSwarmEntity v) throws SQLException {
-        trackedSwarmDao.createOrUpdate(v);
     }
 
     @Override

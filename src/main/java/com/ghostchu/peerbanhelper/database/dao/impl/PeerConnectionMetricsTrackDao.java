@@ -63,15 +63,16 @@ public final class PeerConnectionMetricsTrackDao extends AbstractPBHDao<PeerConn
     }
 
     public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, TorrentDao torrentDao) throws SQLException, ExecutionException {
+        TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
+                null,
+                torrent.getHash(),
+                torrent.getName(),
+                torrent.getSize(),
+                torrent.isPrivate()
+        ));
         for (Peer peer : peers) {
             if (peer.isHandshaking()) continue;
-            TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
-                    null,
-                    torrent.getHash(),
-                    torrent.getName(),
-                    torrent.getSize(),
-                    torrent.isPrivate()
-            ));
+
             CacheKey cacheKey = new CacheKey(
                     new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis())),
                     downloader.getId(),

@@ -126,7 +126,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 if (response.isSuccessful() && isLoggedIn()) {
                     updatePreferences();
                     Semver semver = getDownloaderVersion();
-                    if (semver.isLowerThan(new Semver("4.5.0"))) {
+                    if (semver.isGreaterThanOrEqualTo(new Semver("4.5.0")) || ExternalSwitch.parseBoolean("pbh.downloader.qBittorrent.bypassVersionCheck", false)) {
                         return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
                     } else {
                         return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_VERSION_INCOMPATIBLE, semver.toString(), ">= 4.5.0"));
