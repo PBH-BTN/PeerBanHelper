@@ -179,7 +179,10 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                 return scriptResult;
             }
         }
-        checkShouldBanModern(torrent, peer, downloader);
+        var result = checkShouldBanModern(torrent, peer, downloader);
+        if (result.action() != PeerAction.NO_ACTION) {
+            return result;
+        }
         return checkShouldBanLegacy(torrent, peer, downloader);
     }
 
