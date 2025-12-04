@@ -191,6 +191,9 @@ public final class BtnNetwork implements Reloadable {
                 if (ability.has("submit_bans") && submit) {
                     abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
                 }
+                if (ability.has("rules")) {
+                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
+                }
             } else {
                 if (ability.has("submit_bans") && submit) {
                     abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
@@ -204,12 +207,12 @@ public final class BtnNetwork implements Reloadable {
                 if (ability.has("ip_allowlist")) {
                     abilities.put(BtnAbilityIPAllowList.class, new BtnAbilityIPAllowList(this, metadataDao, ability.get("ip_denylist").getAsJsonObject()));
                 }
+                if (ability.has("rule_peer_identity")) {
+                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
+                }
             }
             if (ability.has("submit_histories") && submit) {
                 abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, metadataDao, ability.get("submit_histories").getAsJsonObject()));
-            }
-            if (ability.has("rules")) {
-                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));
