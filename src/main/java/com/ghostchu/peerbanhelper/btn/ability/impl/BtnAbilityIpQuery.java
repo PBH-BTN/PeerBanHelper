@@ -97,6 +97,18 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         private IpQueryResultSwarms swarms;
         @SerializedName("traffic")
         private IpQueryTraffic traffic;
+        @SerializedName("torrents")
+        private IpQueryTorrents torrents;
+
+        @AllArgsConstructor
+        @NoArgsConstructor
+        @Data
+        public static class IpQueryTorrents {
+            @SerializedName("duration")
+            private long duration;
+            @SerializedName("count")
+            private long count;
+        }
 
         @AllArgsConstructor
         @NoArgsConstructor
