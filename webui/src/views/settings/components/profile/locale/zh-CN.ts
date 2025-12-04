@@ -186,10 +186,10 @@ export default {
   'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.title': 'Peer Swarm 记录服务',
   'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
     '为 BTN 种群跟踪和其它类似所需该数据的功能提供数据支持，并跟踪本次运行会话期间的对等体数据，在重启后数据将自动删除',
-    'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval':
-        '数据刷写间隔时间',
-    'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval.tips':
-        '将 Peer Swarm 数据写入磁盘临时数据库的时间间隔',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval':
+    '数据刷写间隔时间',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval.tips':
+    '将 Peer Swarm 数据写入磁盘临时数据库的时间间隔',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title': 'Peer 跟踪记录服务',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
     '持续跟踪和记录 Peer 的状态、会话、传输、偏移量等数据，为按 IP、Torrent 聚合数据分析和图表生成、BTN 跨用户 Peer 跟踪能力提供数据支持',

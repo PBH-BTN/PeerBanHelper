@@ -202,10 +202,10 @@ export default {
     'Peer Swarm Recording Service',
   'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.tips':
     'Provide data support for BTN swarm tracking and other functions that require this data, and track peer data during this running session, data will be automatically deleted after restart',
-    'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval':
-        'Data flush interval',
-    'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval.tips':
-        'Time interval to write Peer Swarm data to the temporary on-disk database',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval':
+    'Data flush interval',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval.tips':
+    'Time interval to write Peer Swarm data to the temporary on-disk database',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.title':
     'Peer Recording Service',
   'page.settings.tab.profile.module.peerAnalyseService.peerRecording.enable.tips':
