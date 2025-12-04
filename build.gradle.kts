@@ -83,7 +83,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.47.0.0")
 
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:4.4.0")
+    implementation("com.maxmind.geoip2:geoip2:5.0.1")
 
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
