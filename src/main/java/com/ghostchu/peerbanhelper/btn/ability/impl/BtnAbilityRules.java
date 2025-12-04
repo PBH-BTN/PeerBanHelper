@@ -55,7 +55,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
 
     private void loadCacheFile() {
         try {
-            var cache = metadataDao.get("btn.resultset.cache");
+            var cache = metadataDao.get("btn.ability.rules.cache");
             if (cache != null) {
                 BtnRuleset btnRuleset = JsonUtil.getGson().fromJson(cache, BtnRuleset.class);
                 this.btnRule = new BtnRulesetParsed(scriptEngine, btnRuleset, scriptExecute);
@@ -129,7 +129,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                     BtnRuleset btr = JsonUtil.getGson().fromJson(responseBody, BtnRuleset.class);
                     this.btnRule = new BtnRulesetParsed(scriptEngine, btr, scriptExecute);
                     Main.getEventBus().post(new BtnRuleUpdateEvent());
-                    metadataDao.set("btn.resultset.cache", JsonUtil.getGson().toJson(btr));
+                    metadataDao.set("btn.ability.rules.cache", JsonUtil.getGson().toJson(btr));
                     log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
                     setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
                     btnNetwork.getModuleMatchCache().invalidateAll();
