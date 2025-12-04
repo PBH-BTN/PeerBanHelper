@@ -95,6 +95,22 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         private IpQueryResultBans bans;
         @SerializedName("swarms")
         private IpQueryResultSwarms swarms;
+        @SerializedName("traffic")
+        private IpQueryTraffic traffic;
+
+        @AllArgsConstructor
+        @NoArgsConstructor
+        @Data
+        public static class IpQueryTraffic {
+            @SerializedName("duration")
+            private long duration;
+            @SerializedName("to_peer_traffic")
+            private long toPeerTraffic;
+            @SerializedName("from_peer_traffic")
+            private long fromPeerTraffic;
+            @SerializedName("share_ratio")
+            private double shareRatio;
+        }
 
         @AllArgsConstructor
         @NoArgsConstructor

@@ -188,6 +188,7 @@ dependencies {
 
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0")
+
 }
 
 application {
