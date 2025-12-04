@@ -128,7 +128,7 @@ dependencies {
     // UI - FlatLaf
     implementation("com.formdev:flatlaf-extras:3.6.2")
     implementation("com.formdev:flatlaf:$flatlafVersion")
-    implementation("com.formdev:flatlaf-intellij-themes:3.6.2")
+    implementation("com.formdev:flatlaf-intellij-themes:3.7")
 
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
