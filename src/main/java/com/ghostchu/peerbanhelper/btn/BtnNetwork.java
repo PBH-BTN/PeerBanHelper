@@ -89,6 +89,7 @@ public final class BtnNetwork implements Reloadable {
     private final ModuleMatchCache moduleMatchCache;
     private boolean enabled;
     private String powCaptchaEndpoint;
+    private long nextConfigAttemptTime = 0;
 
     public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
                       MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
@@ -123,6 +124,7 @@ public final class BtnNetwork implements Reloadable {
         this.scriptExecute = Main.getMainConfig().getBoolean("btn.allow-script-execute");
         configSuccess.set(false);
         configResult = null;
+        nextConfigAttemptTime = System.currentTimeMillis();
         resetAbilities();
         setupHttpClient();
         resetScheduler();
@@ -238,6 +240,7 @@ public final class BtnNetwork implements Reloadable {
             log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage()), e);
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
             configSuccess.set(false);
+            nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
         }
     }
 
@@ -285,7 +288,7 @@ public final class BtnNetwork implements Reloadable {
     private void checkIfNeedRetryConfig() {
         try {
             if (enabled) {
-                if (!configSuccess.get()) {
+                if (!configSuccess.get() && System.currentTimeMillis() > nextConfigAttemptTime) {
                     configBtnNetwork();
                 }
             } else {
