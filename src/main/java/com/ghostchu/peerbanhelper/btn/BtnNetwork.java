@@ -208,7 +208,7 @@ public final class BtnNetwork implements Reloadable {
                     abilities.put(BtnAbilityIPAllowList.class, new BtnAbilityIPAllowList(this, metadataDao, ability.get("ip_denylist").getAsJsonObject()));
                 }
                 if (ability.has("rule_peer_identity")) {
-                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
+                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rule_peer_identity").getAsJsonObject(), scriptExecute));
                 }
             }
             if (ability.has("submit_histories") && submit) {
