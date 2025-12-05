@@ -43,16 +43,16 @@ const init = () => {
 
   // 构建 BTN 配置
   const btnConfig =
-      config.value.btnConfig.mode === 'disabled'
-          ? {enabled: false, submit: false}
-          : config.value.btnConfig.mode === 'anonymous'
-              ? {enabled: true, submit: true, app_id: null, app_secret: null}
-              : {
-                enabled: true,
-                submit: true,
-                app_id: config.value.btnConfig.appId,
-                app_secret: config.value.btnConfig.appSecret
-              }
+    config.value.btnConfig.mode === 'disabled'
+      ? { enabled: false, submit: false }
+      : config.value.btnConfig.mode === 'anonymous'
+        ? { enabled: true, submit: true, app_id: null, app_secret: null }
+        : {
+            enabled: true,
+            submit: true,
+            app_id: config.value.btnConfig.appId,
+            app_secret: config.value.btnConfig.appSecret
+          }
 
   InitPBH({
     token: config.value.token,

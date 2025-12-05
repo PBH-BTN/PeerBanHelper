@@ -105,8 +105,8 @@ const canNext = () => {
     case 3:
       if (initConfig.value.btnConfig.mode === 'account') {
         return (
-            initConfig.value.btnConfig.appId.length > 0 &&
-            initConfig.value.btnConfig.appSecret.length > 0
+          initConfig.value.btnConfig.appId.length > 0 &&
+          initConfig.value.btnConfig.appSecret.length > 0
         )
       }
       return true

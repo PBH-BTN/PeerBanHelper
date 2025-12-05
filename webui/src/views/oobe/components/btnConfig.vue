@@ -14,12 +14,12 @@
           <a-radio value="disabled">
             <template #radio="{ checked }">
               <a-space
-                  align="start"
-                  class="custom-radio-card"
-                  :class="{ 'custom-radio-card-checked': checked }"
+                align="start"
+                class="custom-radio-card"
+                :class="{ 'custom-radio-card-checked': checked }"
               >
                 <div className="custom-radio-card-dot">
-                  <div className="custom-radio-card-dot-icon"/>
+                  <div className="custom-radio-card-dot-icon" />
                 </div>
                 <div>
                   <div class="custom-radio-card-title">
@@ -35,12 +35,12 @@
           <a-radio value="anonymous">
             <template #radio="{ checked }">
               <a-space
-                  align="start"
-                  class="custom-radio-card"
-                  :class="{ 'custom-radio-card-checked': checked }"
+                align="start"
+                class="custom-radio-card"
+                :class="{ 'custom-radio-card-checked': checked }"
               >
                 <div className="custom-radio-card-dot">
-                  <div className="custom-radio-card-dot-icon"/>
+                  <div className="custom-radio-card-dot-icon" />
                 </div>
                 <div>
                   <div class="custom-radio-card-title">
@@ -56,12 +56,12 @@
           <a-radio value="account">
             <template #radio="{ checked }">
               <a-space
-                  align="start"
-                  class="custom-radio-card"
-                  :class="{ 'custom-radio-card-checked': checked }"
+                align="start"
+                class="custom-radio-card"
+                :class="{ 'custom-radio-card-checked': checked }"
               >
                 <div className="custom-radio-card-dot">
-                  <div className="custom-radio-card-dot-icon"/>
+                  <div className="custom-radio-card-dot-icon" />
                 </div>
                 <div>
                   <div class="custom-radio-card-title">
@@ -79,22 +79,22 @@
 
       <a-form-item v-if="config.btnConfig.mode === 'account'" field="appId" label="App ID" required>
         <a-input
-            v-model="config.btnConfig.appId"
-            :placeholder="t('page.oobe.btnConfig.appId.placeholder')"
-            allow-clear
+          v-model="config.btnConfig.appId"
+          :placeholder="t('page.oobe.btnConfig.appId.placeholder')"
+          allow-clear
         />
       </a-form-item>
 
       <a-form-item
-          v-if="config.btnConfig.mode === 'account'"
-          field="appSecret"
-          label="App Secret"
-          required
+        v-if="config.btnConfig.mode === 'account'"
+        field="appSecret"
+        label="App Secret"
+        required
       >
         <a-input-password
-            v-model="config.btnConfig.appSecret"
-            :placeholder="t('page.oobe.btnConfig.appSecret.placeholder')"
-            allow-clear
+          v-model="config.btnConfig.appSecret"
+          :placeholder="t('page.oobe.btnConfig.appSecret.placeholder')"
+          allow-clear
         />
       </a-form-item>
     </a-form>
@@ -105,8 +105,8 @@
 import type {InitConfig} from '@/api/model/oobe'
 import {useI18n} from 'vue-i18n'
 
-const {t} = useI18n()
-const config = defineModel<InitConfig>({required: true})
+const { t } = useI18n()
+const config = defineModel<InitConfig>({ required: true })
 </script>
 
 <style scoped>

@@ -5,8 +5,8 @@ export default {
   'page.oobe.steps.welcome': '欢迎',
   'page.oobe.steps.setToken.title': '设置 Token',
   'page.oobe.steps.setToken.description': '信息安全非常重要',
-    'page.oobe.steps.btnConfig.title': 'BTN 威胁防护网络',
-    'page.oobe.steps.btnConfig.description': '选择 BTN 网络使用模式',
+  'page.oobe.steps.btnConfig.title': 'BTN 威胁防护网络',
+  'page.oobe.steps.btnConfig.description': '选择 BTN 网络使用模式',
   'page.oobe.steps.addDownloader.title': '添加下载器',
   'page.oobe.steps.success.title': '初始化完成',
   'page.oobe.steps.success.description': '开始使用！',
@@ -24,20 +24,20 @@ export default {
     '首先你需要设置一个 Token，这个 Token 可以保护你的 WebUI 不被恶意访问，并保护您的隐私。务必确保强度够高。一旦您成功登陆过一次 WebUI，后续浏览器就会记住 Token 并自动登录。',
   'page.oobe.setToken.generate': '随机生成',
 
-    'page.oobe.btnConfig.title': 'BTN 威胁防护网络',
-    'page.oobe.btnConfig.description':
-        'BTN（BT Network）是一个威胁情报共享网络。您可以选择使用模式，或者完全不使用该功能。',
-    'page.oobe.btnConfig.mode.disabled.title': '不使用',
-    'page.oobe.btnConfig.mode.disabled.description':
-        '使用单机模式，不使用 BTN 网络带来的威胁情报处理功能，也不接收 BTN 云端规则，并不向 BTN 网络提供数据。所有运行数据将在本地设备处理。',
-    'page.oobe.btnConfig.mode.anonymous.title': '使用匿名提交（推荐）',
-    'page.oobe.btnConfig.mode.anonymous.description':
-        '自动使用设备硬件 ID 和 MAC 地址注册匿名账号以接收 BTN 云端规则，并向 BTN 网络提供数据。您提交的数据将参与威胁情报处理，并帮助其它 BTN 用户免于恶意攻击。部分 BTN 服务提供者可能不支持匿名提交。',
-    'page.oobe.btnConfig.mode.account.title': '绑定 BTN 账号',
-    'page.oobe.btnConfig.mode.account.description':
-        '输入在 BTN 站点注册的 App ID 和 App Secret 来绑定这个安装，绑定者的账号将对此安装提交的数据具有控制权限，并可能从站点查看提交的信息和数据。您提交的数据将参与威胁情报处理，并帮助其它 BTN 用户免于恶意攻击。',
-    'page.oobe.btnConfig.appId.placeholder': '请输入 App ID',
-    'page.oobe.btnConfig.appSecret.placeholder': '请输入 App Secret',
+  'page.oobe.btnConfig.title': 'BTN 威胁防护网络',
+  'page.oobe.btnConfig.description':
+    'BTN（BT Network）是一个威胁情报共享网络。您可以选择使用模式，或者完全不使用该功能。',
+  'page.oobe.btnConfig.mode.disabled.title': '不使用',
+  'page.oobe.btnConfig.mode.disabled.description':
+    '使用单机模式，不使用 BTN 网络带来的威胁情报处理功能，也不接收 BTN 云端规则，并不向 BTN 网络提供数据。所有运行数据将在本地设备处理。',
+  'page.oobe.btnConfig.mode.anonymous.title': '使用匿名提交（推荐）',
+  'page.oobe.btnConfig.mode.anonymous.description':
+    '自动使用设备硬件 ID 和 MAC 地址注册匿名账号以接收 BTN 云端规则，并向 BTN 网络提供数据。您提交的数据将参与威胁情报处理，并帮助其它 BTN 用户免于恶意攻击。部分 BTN 服务提供者可能不支持匿名提交。',
+  'page.oobe.btnConfig.mode.account.title': '绑定 BTN 账号',
+  'page.oobe.btnConfig.mode.account.description':
+    '输入在 BTN 站点注册的 App ID 和 App Secret 来绑定这个安装，绑定者的账号将对此安装提交的数据具有控制权限，并可能从站点查看提交的信息和数据。您提交的数据将参与威胁情报处理，并帮助其它 BTN 用户免于恶意攻击。',
+  'page.oobe.btnConfig.appId.placeholder': '请输入 App ID',
+  'page.oobe.btnConfig.appSecret.placeholder': '请输入 App Secret',
 
   'page.oobe.addDownloader.title': '添加你的第一个下载器',
   'page.oobe.addDownloader.description':

@@ -6,15 +6,15 @@ interface initDownloaderConfig {
 }
 
 export interface BtnConfig {
-    mode: 'disabled' | 'anonymous' | 'account'
-    appId: string
-    appSecret: string
+  mode: 'disabled' | 'anonymous' | 'account'
+  appId: string
+  appSecret: string
 }
 
 export interface InitConfig {
   acceptPrivacy: boolean
   token: string
-    btnConfig: BtnConfig
+  btnConfig: BtnConfig
   downloaderConfig: initDownloaderConfig
   valid: boolean
 }

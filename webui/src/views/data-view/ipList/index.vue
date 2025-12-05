@@ -20,7 +20,7 @@
       <a-card
         v-show="data?.data || error"
         class="result-card"
-        :style="{ minWidth: data?.data.found ? '1150px' : '400px' }"
+        :style="{ minWidth: data?.data.found ? '1150px' : '1150px' }"
         hoverable
       >
         <a-space v-if="!error" direction="vertical" fill>
@@ -151,13 +151,9 @@
               </a-space>
             </a-descriptions-item>
           </a-descriptions>
-          <a-collapse
-            v-if="data?.data.found"
-            v-model:active-key="activatedTab"
-            :bordered="false"
-            destroy-on-hide
-          >
+          <a-collapse v-model:active-key="activatedTab" :bordered="false" destroy-on-hide>
             <a-collapse-item
+              v-if="data?.data.found"
               key="1"
               :header="t('page.ipList.label.accessHistory')"
               :disabled="!pbhPlusActivited"
@@ -176,6 +172,7 @@
               <accessHistoryTable :ip="data.data.address" />
             </a-collapse-item>
             <a-collapse-item
+              v-if="data?.data.found"
               key="2"
               :header="t('page.ipList.label.banHistory')"
               :disabled="!pbhPlusActivited"
@@ -194,22 +191,22 @@
               <banHistoryTable :ip="data.data.address" />
             </a-collapse-item>
             <a-collapse-item
-                key="3"
-                :header="t('page.ipList.label.btnQuery')"
-                :disabled="!pbhPlusActivited"
-                class="collapse-table"
+              key="3"
+              :header="t('page.ipList.label.btnQuery')"
+              :disabled="!pbhPlusActivited"
+              class="collapse-table"
             >
               <template #expand-icon="{ active }">
-                <icon-plus v-if="pbhPlusActivited && !active"/>
-                <icon-minus v-else-if="pbhPlusActivited && active"/>
-                <icon-lock v-else/>
+                <icon-plus v-if="pbhPlusActivited && !active" />
+                <icon-minus v-else-if="pbhPlusActivited && active" />
+                <icon-lock v-else />
               </template>
               <template v-if="!pbhPlusActivited" #extra>
                 <a-tooltip :content="t('page.ipList.plusLock')">
                   <a-tag size="small">Plus</a-tag>
                 </a-tooltip>
               </template>
-              <btnQueryInfo :ip="data.data.address"/>
+              <btnQueryInfo :ip="data.data.address" />
             </a-collapse-item>
           </a-collapse>
         </a-space>

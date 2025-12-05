@@ -26,16 +26,16 @@ export default {
 
   'page.oobe.btnConfig.title': 'BitTorrent Threat Network',
   'page.oobe.btnConfig.description':
-      'BTN (BitTorrent Threat Network) is a threat intelligence sharing network. You can choose the usage mode or disable it completely.',
+    'BTN (BitTorrent Threat Network) is a threat intelligence sharing network. You can choose the usage mode or disable it completely.',
   'page.oobe.btnConfig.mode.disabled.title': 'Disabled',
   'page.oobe.btnConfig.mode.disabled.description':
-      'Use standalone mode without BTN network threat intelligence processing, cloud rules, or data submission. All data will be processed locally on your device.',
+    'Use standalone mode without BTN network threat intelligence processing, cloud rules, or data submission. All data will be processed locally on your device.',
   'page.oobe.btnConfig.mode.anonymous.title': 'Use Anonymous Submission (Recommended)',
   'page.oobe.btnConfig.mode.anonymous.description':
-      'Automatically register an anonymous account using device hardware ID and MAC address to receive BTN cloud rules and submit data to the BTN network. Your submitted data will participate in threat intelligence processing and help other BTN users defend against malicious attacks. Some BTN service providers may not support anonymous submission.',
+    'Automatically register an anonymous account using device hardware ID and MAC address to receive BTN cloud rules and submit data to the BTN network. Your submitted data will participate in threat intelligence processing and help other BTN users defend against malicious attacks. Some BTN service providers may not support anonymous submission.',
   'page.oobe.btnConfig.mode.account.title': 'Bind BTN Account',
   'page.oobe.btnConfig.mode.account.description':
-      "Enter the App ID and App Secret registered on the BTN site to bind this installation. The binder's account will have control permissions over the data submitted by this installation and may view submitted information and data from the site. Your submitted data will participate in threat intelligence processing and help other BTN users defend against malicious attacks.",
+    "Enter the App ID and App Secret registered on the BTN site to bind this installation. The binder's account will have control permissions over the data submitted by this installation and may view submitted information and data from the site. Your submitted data will participate in threat intelligence processing and help other BTN users defend against malicious attacks.",
   'page.oobe.btnConfig.appId.placeholder': 'Enter App ID',
   'page.oobe.btnConfig.appSecret.placeholder': 'Enter App Secret',
 
