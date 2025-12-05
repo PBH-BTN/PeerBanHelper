@@ -1,5 +1,6 @@
-import type { IPGeoData } from './banlist'
-import type { DownloaderBasicInfo } from './downloader'
+import type {IPGeoData} from './banlist'
+import type {DownloaderBasicInfo} from './downloader'
+
 export interface TorrentInfo {
   id: number
   infoHash: string
@@ -74,4 +75,65 @@ export interface IPBasicInfo {
   lastTimeSeen: number
   torrentAccessCount: number
   uploadedToPeer: number
+}
+
+export interface BtnBanHistory {
+    populateTime: number
+    torrent: string
+    peerIp: string
+    peerPort: number
+    peerId: string
+    peerClientName: string
+    peerProgress: number
+    peerFlags: string
+    reporterProgress: number
+    toPeerTraffic: number
+    fromPeerTraffic: number
+    moduleName: string
+    rule: string
+    description: string
+    structuredData: Record<string, any>
+}
+
+export interface BtnSwarmTracker {
+    torrent: string
+    peerIp: string
+    peerPort: number
+    peerId: string
+    peerClientName: string
+    peerProgress: number
+    fromPeerTraffic: number
+    toPeerTraffic: number
+    fromPeerTrafficOffset: number
+    toPeerTrafficOffset: number
+    flags: string
+    firstTimeSeen: number
+    lastTimeSeen: number
+    userProgress: number
+}
+
+export interface BtnQueryResult {
+    color: 'red' | 'green' | 'orange' | 'gray'
+    labels: string[]
+    bans: {
+        duration: number
+        total: number
+        records: BtnBanHistory[]
+    }
+    swarms: {
+        duration: number
+        total: number
+        records: BtnSwarmTracker[]
+        concurrentDownloadTorrentsCount: number
+    }
+    traffic: {
+        duration: number
+        toPeerTraffic: number
+        fromPeerTraffic: number
+        shareRatio: number
+    }
+    torrents: {
+        duration: number
+        count: number
+    }
 }

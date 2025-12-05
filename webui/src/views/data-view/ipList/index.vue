@@ -193,6 +193,24 @@
               </template>
               <banHistoryTable :ip="data.data.address" />
             </a-collapse-item>
+            <a-collapse-item
+                key="3"
+                :header="t('page.ipList.label.btnQuery')"
+                :disabled="!pbhPlusActivited"
+                class="collapse-table"
+            >
+              <template #expand-icon="{ active }">
+                <icon-plus v-if="pbhPlusActivited && !active"/>
+                <icon-minus v-else-if="pbhPlusActivited && active"/>
+                <icon-lock v-else/>
+              </template>
+              <template v-if="!pbhPlusActivited" #extra>
+                <a-tooltip :content="t('page.ipList.plusLock')">
+                  <a-tag size="small">Plus</a-tag>
+                </a-tooltip>
+              </template>
+              <btnQueryInfo :ip="data.data.address"/>
+            </a-collapse-item>
           </a-collapse>
         </a-space>
         <a-result v-else status="500" :title="t('page.ipList.error')" :subtitle="error.message">
@@ -210,16 +228,17 @@
 
 <script setup lang="ts">
 import CountryFlag from '@/components/countryFlag.vue'
-import { GetIPBasicData } from '@/service/data'
-import { useEndpointStore } from '@/stores/endpoint'
-import { getColor } from '@/utils/color'
-import { formatFileSize } from '@/utils/file'
-import { computed, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRequest } from 'vue-request'
-import { useRoute } from 'vue-router'
+import {GetIPBasicData} from '@/service/data'
+import {useEndpointStore} from '@/stores/endpoint'
+import {getColor} from '@/utils/color'
+import {formatFileSize} from '@/utils/file'
+import {computed, onMounted, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {useRequest} from 'vue-request'
+import {useRoute} from 'vue-router'
 import accessHistoryTable from './components/accessHistoryTable.vue'
 import banHistoryTable from './components/banHistoryTable.vue'
+import btnQueryInfo from './components/btnQueryInfo.vue'
 
 const searchInput = ref('')
 const { t, d } = useI18n()
