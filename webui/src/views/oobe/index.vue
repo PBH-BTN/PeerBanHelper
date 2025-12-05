@@ -23,7 +23,7 @@
           <a-button v-if="current > 1" type="secondary" @click="onPrev">
             <IconLeft /> {{ t('page.oobe.action.back') }}
           </a-button>
-          <a-button v-if="current < 4" type="primary" :disabled="!canNext()" @click="onNext">
+          <a-button v-if="current < 5" type="primary" :disabled="!canNext()" @click="onNext">
             {{ t('page.oobe.action.next') }}
             <IconRight />
           </a-button>
@@ -34,10 +34,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, defineAsyncComponent } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { type InitConfig } from '@/api/model/oobe'
-import type { downloaderConfig } from '@/api/model/downloader'
+import {computed, defineAsyncComponent, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {type InitConfig} from '@/api/model/oobe'
+import type {downloaderConfig} from '@/api/model/downloader'
+
 const { t } = useI18n()
 const current = ref(1)
 const steps = computed(() => [
@@ -48,6 +49,10 @@ const steps = computed(() => [
   {
     title: t('page.oobe.steps.setToken.title'),
     description: t('page.oobe.steps.setToken.description')
+  },
+  {
+    title: t('page.oobe.steps.btnConfig.title'),
+    description: t('page.oobe.steps.btnConfig.description')
   },
   {
     title: t('page.oobe.steps.addDownloader.title'),
@@ -62,6 +67,11 @@ const steps = computed(() => [
 const initConfig = ref<InitConfig>({
   acceptPrivacy: false,
   token: '',
+  btnConfig: {
+    mode: 'anonymous',
+    appId: '',
+    appSecret: ''
+  },
   downloaderConfig: {
     id: '',
     config: {
@@ -77,6 +87,7 @@ const initConfig = ref<InitConfig>({
 const componentList = [
   defineAsyncComponent(() => import('./components/welcome.vue')),
   defineAsyncComponent(() => import('./components/setToken.vue')),
+  defineAsyncComponent(() => import('./components/btnConfig.vue')),
   defineAsyncComponent(() => import('./components/addDownloader.vue')),
   defineAsyncComponent(() => import('./components/result.vue'))
 ]
@@ -92,13 +103,21 @@ const canNext = () => {
     case 2:
       return initConfig.value.token.length > 0
     case 3:
-      return initConfig.value.valid
+      if (initConfig.value.btnConfig.mode === 'account') {
+        return (
+            initConfig.value.btnConfig.appId.length > 0 &&
+            initConfig.value.btnConfig.appSecret.length > 0
+        )
+      }
+      return true
     case 4:
+      return initConfig.value.valid
+    case 5:
       return false
   }
 }
 
 const onNext = () => {
-  current.value = Math.min(4, current.value + 1)
+  current.value = Math.min(5, current.value + 1)
 }
 </script>
