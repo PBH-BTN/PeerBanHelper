@@ -102,6 +102,20 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION), null));
         }
+        var btn = parser.getAsJsonObject("btn");
+        if (btn != null) {
+            if (btn.has("enabled"))
+                conf.set("btn.enabled", btn.get("enabled").getAsBoolean());
+            if (btn.has("submit"))
+                conf.set("btn.submit", btn.get("submit").getAsBoolean());
+            if (btn.has("app_id"))
+                conf.set("btn.app-id", btn.get("app_id").getAsString());
+            if (btn.has("app_secret"))
+                conf.set("btn.app-secret", btn.get("app_secret").getAsInt());
+            if (btn.has("config_url"))
+                conf.set("btn.config-url", btn.get("config_url").getAsString());
+            conf.save(Main.getMainConfigFile());
+        }
     }
 
     // 从 PBHDownloaderController 抄过来的，堪虑合并
