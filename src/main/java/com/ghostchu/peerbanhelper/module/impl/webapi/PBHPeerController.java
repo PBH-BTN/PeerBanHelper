@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.btn.BtnNetwork;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
 import com.ghostchu.peerbanhelper.database.dao.impl.*;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -27,8 +29,10 @@ import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
@@ -48,12 +52,14 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final RuleDao ruleDao;
     private final ModuleDao moduleDao;
     private final IPDBManager iPDBManager;
+    private final BtnNetwork btnNetwork;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
                              Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager,
-                             TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao, IPDBManager iPDBManager) {
+                             TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao, IPDBManager iPDBManager,
+                             @Autowired(required = false) BtnNetwork btnNetwork) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
@@ -66,6 +72,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         this.ruleDao = ruleDao;
         this.moduleDao = moduleDao;
         this.iPDBManager = iPDBManager;
+        this.btnNetwork = btnNetwork; // TODO: 测试禁用的情况下的依赖注入
     }
 
     @Override
@@ -88,8 +95,29 @@ public final class PBHPeerController extends AbstractFeatureModule {
         javalinWebContainer.javalin()
                 .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
                 .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS);
+                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ, Role.PBH_PLUS);
 
+    }
+
+    private void handleBtnQuery(@NotNull Context ctx) throws IOException {
+        // 转换 IP 格式到 PBH 统一内部格式
+        HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
+        var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
+        String ip = ipAddress.toNormalizedString();
+
+        if (btnNetwork == null) {
+            ctx.json(new StdResp(false, "BTN Network module is not enabled.", null));
+            return;
+        }
+        var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
+        if (ability == null) {
+            ctx.json(new StdResp(false, "BTN IP Query ability is not available, the BTN is not connected or network not provide this ability.", null));
+            return;
+        }
+        BtnAbilityIpQuery queryAbility = (BtnAbilityIpQuery) ability;
+        var query = queryAbility.query(ip);
+        ctx.json(new StdResp(true, null, query));
     }
 
     private void handleInfo(Context ctx) throws SQLException {

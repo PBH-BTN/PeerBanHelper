@@ -87,26 +87,26 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
     @NoArgsConstructor
     @Data
     public static class IpQueryResult {
-        @SerializedName("color")
+        @SerializedName("color") // 可以是 red, green, orange, gray，代表风险等级。red = 高危, orange = 中危, green = 低危, gray = 未知
         private String color;
-        @SerializedName("labels")
+        @SerializedName("labels") // IP 属性标签列表，字符串
         private List<String> labels = Collections.emptyList();
-        @SerializedName("bans")
+        @SerializedName("bans") // 封禁有关信息
         private IpQueryResultBans bans;
-        @SerializedName("swarms")
+        @SerializedName("swarms") // Swarm 有关信息
         private IpQueryResultSwarms swarms;
-        @SerializedName("traffic")
+        @SerializedName("traffic") // 流量有关信息
         private IpQueryTraffic traffic;
-        @SerializedName("torrents")
+        @SerializedName("torrents") // 种子有关信息
         private IpQueryTorrents torrents;
 
         @AllArgsConstructor
         @NoArgsConstructor
         @Data
         public static class IpQueryTorrents {
-            @SerializedName("duration")
+            @SerializedName("duration") // 提供的是最近 duration 时间内的数据，单位是毫秒
             private long duration;
-            @SerializedName("count")
+            @SerializedName("count") // 该 IP 访问的种子数量
             private long count;
         }
 
@@ -114,13 +114,13 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         @NoArgsConstructor
         @Data
         public static class IpQueryTraffic {
-            @SerializedName("duration")
+            @SerializedName("duration") // 提供的是最近 duration 时间内的数据，单位是毫秒
             private long duration;
-            @SerializedName("to_peer_traffic")
+            @SerializedName("to_peer_traffic") // BTN 网络用户上传给该 IP 的总流量，单位是字节，受时间范围约束
             private long toPeerTraffic;
-            @SerializedName("from_peer_traffic")
+            @SerializedName("from_peer_traffic") // BTN 网络用户从该 IP 下载的总流量，单位是字节，受时间范围约束
             private long fromPeerTraffic;
-            @SerializedName("share_ratio")
+            @SerializedName("share_ratio") // 该 IP 的分享率，计算方式为 to_peer_traffic / from_peer_traffic，受时间范围约束
             private double shareRatio;
         }
 
@@ -128,9 +128,11 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         @NoArgsConstructor
         @Data
         public static class IpQueryResultBans {
-            @SerializedName("total")
+            @SerializedName("duration") // 提供的是最近 duration 时间内的数据，单位是毫秒
+            private long duration;
+            @SerializedName("total") // 该 IP 的封禁记录总数
             private long total;
-            @SerializedName("records")
+            @SerializedName("records") // 封禁记录列表，可能很长，注意分页
             private List<BanHistoryDto> records;
         }
 
@@ -138,11 +140,13 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         @NoArgsConstructor
         @Data
         public static class IpQueryResultSwarms {
-            @SerializedName("total")
+            @SerializedName("duration") // 提供的是最近 duration 时间内的数据，单位是毫秒
+            private long duration;
+            @SerializedName("total")  // 该 IP 参与的 Swarm 记录总数
             private long total;
-            @SerializedName("records")
+            @SerializedName("records") // Swarm 记录列表，可能很长，注意分页
             private List<SwarmTrackerDto> records;
-            @SerializedName("concurrent_download_torrents_count")
+            @SerializedName("concurrent_download_torrents_count") // 该 IP 并发下载的种子数量
             private long concurrentDownloadTorrentsCount;
         }
     }
