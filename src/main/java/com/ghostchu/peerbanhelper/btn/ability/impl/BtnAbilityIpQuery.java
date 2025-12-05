@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
@@ -30,11 +31,14 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final String endpoint;
     private final boolean powCaptcha;
+    @Getter
+    private final String iframeEndpoint;
 
     public BtnAbilityIpQuery(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
         this.endpoint = ability.get("endpoint").getAsString();
         this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
+        this.iframeEndpoint = ability.has("iframe_endpoint") ? ability.get("iframe_endpoint").getAsString() : null;
     }
 
     @Override

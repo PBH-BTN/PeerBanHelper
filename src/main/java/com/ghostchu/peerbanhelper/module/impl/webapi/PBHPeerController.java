@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerRecordEntityDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
@@ -96,8 +97,34 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
                 .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ, Role.PBH_PLUS);
+                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/{ip}/btnQueryIframe", this::handleBtnQueryIFrame, Role.USER_READ);
 
+    }
+
+    private void handleBtnQueryIFrame(@NotNull Context ctx) {
+        HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
+        var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
+        String ip = ipAddress.toNormalizedString();
+        if (btnNetwork == null) {
+            ctx.json(new StdResp(false, "BTN Network module is not enabled.", null));
+            return;
+            /**/
+        }
+        var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
+        if (ability == null) {
+            ctx.json(new StdResp(false, "BTN IP Query ability is not available, the BTN is not connected or network not provide this ability.", null));
+            return;
+        }
+        BtnAbilityIpQuery queryAbility = (BtnAbilityIpQuery) ability;
+        var url = URLUtil.appendUrl(queryAbility.getIframeEndpoint(), Map.of(
+                "ip", ip,
+                "appId", btnNetwork.getAppId(),
+                "appSecret", btnNetwork.getAppSecret(),
+                "hardwareId", btnNetwork.getBtnHardwareId(),
+                "installationId", btnNetwork.getInstallationId()
+        ));
+        ctx.json(new StdResp(true, null, url));
     }
 
     private void handleBtnQuery(@NotNull Context ctx) throws IOException {

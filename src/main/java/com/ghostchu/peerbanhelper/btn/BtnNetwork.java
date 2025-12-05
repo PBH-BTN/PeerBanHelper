@@ -19,6 +19,7 @@ import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
@@ -309,8 +311,8 @@ public final class BtnNetwork implements Reloadable {
                             .header("Authentication", "Bearer " + appId + "@" + appSecret); // For anonymous account
                     if ((appId == null || appId.isBlank() || appId.equals("example-app-id"))
                             || (appSecret == null || appSecret.isBlank() || appSecret.equals("example-app-secret"))) {
-                        requestBuilder.header("X-BTN-HardwareID", systemInfo.getHardware().getComputerSystem().getHardwareUUID()) // For anonymous account
-                                .header("X-BTN-InstalltionID", Main.getMainConfig().getString("installation-id", ""));
+                        requestBuilder.header("X-BTN-HardwareID", getBtnHardwareId()) // For anonymous account
+                                .header("X-BTN-InstalltionID", getInstallationId());
 
                     }
                     return chain.proceed(requestBuilder.build());
@@ -318,6 +320,16 @@ public final class BtnNetwork implements Reloadable {
                 .authenticator((route, response) -> response.request().newBuilder().header("Authorization", "Bearer " + appId + "@" + appSecret).build())
                 .callTimeout(Duration.ofMinutes(1))
                 .build();
+    }
+
+    @NotNull
+    public String getInstallationId() {
+        return Main.getMainConfig().getString("installation-id", "");
+    }
+
+    @NotNull
+    public String getBtnHardwareId() {
+        return Hashing.sha256().hashString(systemInfo.getHardware().getComputerSystem().getHardwareUUID(), StandardCharsets.UTF_8).toString();
     }
 
     public void close() {
