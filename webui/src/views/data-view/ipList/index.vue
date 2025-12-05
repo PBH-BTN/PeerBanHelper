@@ -191,22 +191,16 @@
               <banHistoryTable :ip="data.data.address" />
             </a-collapse-item>
             <a-collapse-item
+              v-if="data?.data"
               key="3"
               :header="t('page.ipList.label.btnQuery')"
-              :disabled="!pbhPlusActivited"
               class="collapse-table"
             >
               <template #expand-icon="{ active }">
-                <icon-plus v-if="pbhPlusActivited && !active" />
-                <icon-minus v-else-if="pbhPlusActivited && active" />
-                <icon-lock v-else />
+                <icon-plus v-if="!active" />
+                <icon-minus v-else />
               </template>
-              <template v-if="!pbhPlusActivited" #extra>
-                <a-tooltip :content="t('page.ipList.plusLock')">
-                  <a-tag size="small">Plus</a-tag>
-                </a-tooltip>
-              </template>
-              <btnQueryInfo :ip="data.data.address" />
+              <btnQueryInfo v-if="data.data" :ip="data.data.address" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
