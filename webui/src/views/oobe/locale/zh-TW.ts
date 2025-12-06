@@ -26,13 +26,13 @@ export default {
 
   'page.oobe.btnConfig.title': 'BTN 威脅防護網路',
   'page.oobe.btnConfig.description':
-    'BTN（BT Network）是一個威脅情報共享網路。您可以選擇使用模式，或者完全不使用該功能。',
+    'BTN (BitTorrent Threat Network) 是一個 "人人為我，我為人人" 的 BitTorrent 威脅情報網路。通過連接到該網路，您將獲取由其它 BTN 使用者提交貢獻的資料分析得到的雲端規則。通過這種方式，BTN 能夠以相當快的速度發現干擾 BitTorrent 網路運行的 Peer，並提前通知 PeerBanHelper 處置這些 IP 位址。\n秉承自願原則，您可以自行選擇 BTN 網路的運行方式。相關更改在安裝嚮導結束後，可以在設定中隨時修改。',
   'page.oobe.btnConfig.mode.disabled.title': '不使用',
   'page.oobe.btnConfig.mode.disabled.description':
     '使用單機模式，不使用 BTN 網路帶來的威脅情報處理功能，也不接收 BTN 雲端規則，並不向 BTN 網路提供資料。所有執行資料將在本機裝置處理。',
-  'page.oobe.btnConfig.mode.anonymous.title': '使用匿名提交（推薦）',
+  'page.oobe.btnConfig.mode.anonymous.title': '使用自動註冊配置（推薦）',
   'page.oobe.btnConfig.mode.anonymous.description':
-    '自動使用裝置硬體 ID 和 MAC 位址註冊匿名帳號以接收 BTN 雲端規則，並向 BTN 網路提供資料。您提交的資料將參與威脅情報處理，並幫助其它 BTN 使用者免於惡意攻擊。部分 BTN 服務提供者可能不支援匿名提交。',
+    '使用裝置硬體 ID 生成的雜湊值和安裝 ID 自動註冊匿名帳號以接收 BTN 雲端規則，並向 BTN 網路提供資料，該方式不會將您的社交帳號與 BTN 系統綁定。您提交的資料將參與威脅情報處理，並幫助其它 BTN 使用者免於惡意攻擊。部分 BTN 服務提供者可能不支援匿名提交。如果您不希望提交資料，可稍後在設定中關閉。',
   'page.oobe.btnConfig.mode.account.title': '綁定 BTN 帳號',
   'page.oobe.btnConfig.mode.account.description':
     '輸入在 BTN 站點註冊的 App ID 和 App Secret 來綁定這個安裝，綁定者的帳號將對此安裝提交的資料具有控制權限，並可能從站點查看提交的資訊和資料。您提交的資料將參與威脅情報處理，並幫助其它 BTN 使用者免於惡意攻擊。',
