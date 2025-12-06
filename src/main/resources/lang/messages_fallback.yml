@@ -695,7 +695,7 @@ BTN_HEARTBEAT_DESCRIPTION: |
 BTN_HEARTBEAT_UPDATING: "[BTN 网络] 计划任务正在向 BTN 网络更新心跳信息，请稍等……"
 BTN_HEARTBEAT_UPDATED: "[BTN 网络] 已通过 {} 次请求向 BTN 网络更新心跳信息。"
 BTN_HEARTBEAT_SUCCESS: "已成功与服务器交换心跳信息"
-BTN_HEARTBEAT_FAILED: "没有任何网路接口可用来发送心跳信息，所有网络请求均已失败"
+BTN_HEARTBEAT_FAILED: "没有任何网络接口可用来发送心跳信息，所有网络请求均已失败"
 
 PORTMAPPER_SCANNING: "[PortMapper] 正在后台探测网络接口上可用的 UPnP-IGD/NAT-PMP/PCP 设备，可能需要一些时间……"
 PORTMAPPER_SCANNED: "[PortMapper] 共找到 {} 个 UPnP 设备，服务已启动"
