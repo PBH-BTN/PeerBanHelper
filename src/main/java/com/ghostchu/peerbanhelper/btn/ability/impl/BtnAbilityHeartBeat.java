@@ -62,7 +62,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     @Override
     public void load() {
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
-        btnNetwork.getScheduler().scheduleWithFixedDelay(this::sendHeartBeat, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getScheduler().scheduleWithFixedDelay(this::sendHeartBeat, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void sendHeartBeat() {

@@ -72,7 +72,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     public void load() {
         Main.getEventBus().register(this);
         setLastStatus(true, new TranslationComponent(Lang.BTN_NO_CONTENT_REPORTED_YET));
-        btnNetwork.getScheduler().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getScheduler().scheduleWithFixedDelay(this::submit, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     @Override
