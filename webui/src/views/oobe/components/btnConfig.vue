@@ -8,7 +8,7 @@
         {{ t('page.oobe.btnConfig.description') }}
       </a-typography-paragraph>
     </a-typography>
-    <a-form :model="config.btnConfig" style="margin-top: 10vh">
+    <a-form :model="config.btnConfig" style="margin-top: 5vh;">
       <a-form-item field="mode" required hide-label>
         <a-radio-group v-model="config.btnConfig.mode" direction="vertical">
           <a-radio value="disabled">

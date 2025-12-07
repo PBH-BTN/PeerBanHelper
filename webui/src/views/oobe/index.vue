@@ -19,7 +19,7 @@
             <component :is="componentList[current - 1]" v-model="initConfig" />
           </Suspense>
         </div>
-        <a-space size="large" style="display: flex; justify-content: center">
+        <a-space size="large" style="display: flex; justify-content: center; margin-top: 5vh; margin-bottom: 5vh">
           <a-button v-if="current > 1" type="secondary" @click="onPrev">
             <IconLeft /> {{ t('page.oobe.action.back') }}
           </a-button>
