@@ -217,9 +217,17 @@ public final class PBHPeerController extends AbstractFeatureModule {
 //            }
         } catch (Exception ignored) {
         }
+        boolean btnQueryAvailable = false;
+        if (btnNetwork != null) {
+            var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
+            if (ability != null) {
+                btnQueryAvailable = true;
+            }
+        }
         var info = new PeerInfoDTO(
                 upDownResult != null || banCount > 0 || torrentAccessCount > 0,
-                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP, ptrLookup);
+                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount,
+                uploadedToPeer, downloadedFromPeer, geoIP, ptrLookup, btnQueryAvailable);
         ctx.json(new StdResp(true, null, info));
     }
 
