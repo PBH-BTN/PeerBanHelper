@@ -324,8 +324,7 @@ const bansColumns = [
   {
     title: () => t('page.ipList.btn.bans.torrent'),
     dataIndex: 'torrent',
-    ellipsis: true,
-    tooltip: true
+    width: 100
   },
   {
     title: () => t('page.ipList.btn.bans.port'),
@@ -373,8 +372,7 @@ const swarmsColumns = [
   {
     title: () => t('page.ipList.btn.swarms.torrent'),
     dataIndex: 'torrent',
-    ellipsis: true,
-    tooltip: true
+    width: 100
   },
   {
     title: () => t('page.ipList.btn.swarms.port'),
