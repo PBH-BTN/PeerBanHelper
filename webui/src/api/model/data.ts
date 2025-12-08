@@ -67,6 +67,7 @@ export interface IPBasicInfo {
   banCount: number
   downloadedFromPeer: number
   firstTimeSeen: number
+  btnQueryAvailable: boolean
   /**
    * GeoIP 信息，可能为空
    */

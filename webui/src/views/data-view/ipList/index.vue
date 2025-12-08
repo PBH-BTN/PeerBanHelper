@@ -151,13 +151,9 @@
               </a-space>
             </a-descriptions-item>
           </a-descriptions>
-          <a-collapse
-            v-if="data?.data.found"
-            v-model:active-key="activatedTab"
-            :bordered="false"
-            destroy-on-hide
-          >
+          <a-collapse v-model:active-key="activatedTab" :bordered="false" destroy-on-hide>
             <a-collapse-item
+              v-if="data?.data.found"
               key="1"
               :header="t('page.ipList.label.accessHistory')"
               :disabled="!pbhPlusActivited"
@@ -176,6 +172,7 @@
               <accessHistoryTable :ip="data.data.address" />
             </a-collapse-item>
             <a-collapse-item
+              v-if="data?.data.found"
               key="2"
               :header="t('page.ipList.label.banHistory')"
               :disabled="!pbhPlusActivited"
@@ -192,6 +189,18 @@
                 </a-tooltip>
               </template>
               <banHistoryTable :ip="data.data.address" />
+            </a-collapse-item>
+            <a-collapse-item
+              v-if="data === undefined || data.data.btnQueryAvailable"
+              key="3"
+              :header="t('page.ipList.label.btnData')"
+              class="collapse-card"
+            >
+              <template #expand-icon="{ active }">
+                <icon-plus v-if="!active" />
+                <icon-minus v-else />
+              </template>
+              <btnDataPanel :ip="searchInput" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -220,6 +229,7 @@ import { useRequest } from 'vue-request'
 import { useRoute } from 'vue-router'
 import accessHistoryTable from './components/accessHistoryTable.vue'
 import banHistoryTable from './components/banHistoryTable.vue'
+import btnDataPanel from './components/btnDataPanel.vue'
 
 const searchInput = ref('')
 const { t, d } = useI18n()
@@ -266,6 +276,15 @@ const pbhPlusActivited = computed(() =>
     padding: 0;
     .arco-collapse-item-content-box {
       padding-top: 0px;
+    }
+  }
+}
+.collapse-card {
+  .arco-collapse-item-content-expend {
+    padding: 0;
+    .arco-collapse-item-content-box {
+      padding-top: 0px;
+      padding-bottom: 0;
     }
   }
 }
