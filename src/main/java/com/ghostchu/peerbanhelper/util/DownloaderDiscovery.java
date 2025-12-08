@@ -102,9 +102,6 @@ public class DownloaderDiscovery {
             if (body.contains("BitComet Remote Access") || body.contains("BitComet WebUI"))
                 return new DiscoveredDownloader(host, port, "BitComet", pid);
             if (body.contains("qBittorrent WebUI")) return new DiscoveredDownloader(host, port, "qBittorrent", pid);
-            if (port == 7607) {
-                log.debug("7607: {}\n{}", response.headers(), body);
-            }
             return null;
         } catch (Exception e) {
             log.debug("Failed to check downloader at {}:{} -> {}", host, port, e.getCause() + ":" + e.getMessage());
