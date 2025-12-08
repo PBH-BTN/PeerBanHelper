@@ -112,8 +112,6 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                 conf.set("btn.app-id", btn.get("app_id").getAsString());
             if (btn.has("app_secret") && !btn.get("app_secret").isJsonNull())
                 conf.set("btn.app-secret", btn.get("app_secret").getAsInt());
-            if (btn.has("submit") && !btn.get("submit").isJsonNull())
-                conf.set("btn.submit", btn.get("submit").getAsInt());
             conf.save(Main.getMainConfigFile());
         }
     }
