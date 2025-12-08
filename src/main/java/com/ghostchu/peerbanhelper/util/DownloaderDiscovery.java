@@ -47,6 +47,10 @@ public class DownloaderDiscovery {
             List<DiscoveredDownloader> found = Collections.synchronizedList(new ArrayList<>());
             var listenConnections = systemInfo.getOperatingSystem().getInternetProtocolStats().getConnections()
                     .stream()
+                    .filter(conn-> {
+                        var type = conn.getType();
+                        return type.startsWith("tcp");
+                    })
                     .filter(conn -> conn.getState() == InternetProtocolStats.TcpState.LISTEN)
                     .toList();
             log.debug("Found {} listen connections: {}", listenConnections.size(), listenConnections);
