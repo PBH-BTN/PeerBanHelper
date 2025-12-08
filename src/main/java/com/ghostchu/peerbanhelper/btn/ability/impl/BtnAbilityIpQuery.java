@@ -152,6 +152,8 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
             private List<SwarmTrackerDto> records;
             @SerializedName("concurrent_download_torrents_count") // 该 IP 并发下载的种子数量
             private long concurrentDownloadTorrentsCount;
+            @SerializedName("concurrent_seeding_torrents_count") // 该 IP 并发做种的种子数量
+            private long concurrentSeedingTorrentsCount;
         }
     }
 
