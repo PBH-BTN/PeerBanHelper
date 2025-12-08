@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
@@ -113,6 +114,17 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             if (btn.has("app_secret") && !btn.get("app_secret").isJsonNull())
                 conf.set("btn.app-secret", btn.get("app_secret").getAsInt());
             conf.save(Main.getMainConfigFile());
+        }
+        if(ExternalSwitch.parseBoolean("pbh.oobe.shutdown-on-init", false)){
+            Thread.ofPlatform().start(() -> {
+                try {
+                    Thread.sleep(5000);
+                    log.info("OOBE completed, shutting down as configured");
+                    System.exit(0);
+                } catch (InterruptedException e) {
+                    log.error("Shutdown after OOBE interrupted", e);
+                }
+            } );
         }
     }
 
