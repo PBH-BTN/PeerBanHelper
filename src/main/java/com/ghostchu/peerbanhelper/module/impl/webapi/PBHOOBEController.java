@@ -61,7 +61,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleOOBEScanDownloader(@NotNull Context ctx) {
-        if (isAlreadyInitialized()) {
+        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
             ctx.status(HttpStatus.FORBIDDEN);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return;
@@ -71,7 +71,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleOOBERequest(Context ctx) throws IOException {
-        if (isAlreadyInitialized()) {
+        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
             ctx.status(HttpStatus.FORBIDDEN);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return;
@@ -115,7 +115,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                 conf.set("btn.app-secret", btn.get("app_secret").getAsInt());
             conf.save(Main.getMainConfigFile());
         }
-        if (ExternalSwitch.parseBoolean("pbh.oobe.shutdown-on-init", false)) {
+        if(ExternalSwitch.parseBoolean("pbh.oobe.shutdown-on-init", false)){
             Thread.ofPlatform().start(() -> {
                 try {
                     Thread.sleep(5000);
@@ -124,13 +124,13 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                 } catch (InterruptedException e) {
                     log.error("Shutdown after OOBE interrupted", e);
                 }
-            });
+            } );
         }
     }
 
     // 从 PBHDownloaderController 抄过来的，堪虑合并
     public boolean validateDownloader(Context ctx, JsonObject draftDownloader) {
-        if (isAlreadyInitialized()) {
+        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
             ctx.status(HttpStatus.FORBIDDEN);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return false;
@@ -163,13 +163,6 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, e.getMessage(), null));
             return false;
         }
-    }
-
-    private boolean isAlreadyInitialized() {
-        if (ExternalSwitch.parseBoolean("pbh.oobe.test-mode", false)) {
-            return false;
-        }
-        return webContainer.getToken() != null && !webContainer.getToken().isBlank();
     }
 
 
