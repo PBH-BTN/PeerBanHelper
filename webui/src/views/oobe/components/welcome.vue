@@ -1,7 +1,7 @@
 <template>
   <a-space direction="vertical">
     <a-typography style="text-align: left">
-      <a-typography-title>
+      <a-typography-title style="margin-top: 0">
         {{ t('page.oobe.welcome.title') }}
       </a-typography-title>
       <a-typography-paragraph>
@@ -47,6 +47,7 @@
 <script lang="ts" setup>
 import type { InitConfig } from '@/api/model/oobe'
 import { useI18n } from 'vue-i18n'
+
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
 </script>

@@ -1,7 +1,7 @@
 <template>
   <a-space direction="vertical">
     <a-typography style="text-align: left">
-      <a-typography-title>
+      <a-typography-title style="margin-top: 0">
         {{ t('page.oobe.btnConfig.title') }}
       </a-typography-title>
       <a-typography-paragraph>
