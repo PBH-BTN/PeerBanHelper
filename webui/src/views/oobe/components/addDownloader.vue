@@ -1,7 +1,7 @@
 <template>
   <a-space direction="vertical" style="width: 70%">
     <a-typography style="text-align: left">
-      <a-typography-title>
+      <a-typography-title style="margin-top: 0">
         {{ t('page.oobe.addDownloader.title') }}
       </a-typography-title>
       <a-typography-paragraph>
@@ -51,9 +51,9 @@ import { ClientTypeEnum } from '@/api/model/downloader'
 import type { InitConfig } from '@/api/model/oobe'
 import { TestDownloaderConfig } from '@/service/init'
 import { Message } from '@arco-design/web-vue'
+import { v1 as uuid } from 'uuid'
 import { defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { v1 as uuid } from 'uuid'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
 const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
