@@ -1,77 +1,54 @@
 <template>
-  <a-row justify="center" style="margin: 2% auto 0; width: 100%">
-    <a-col :xl="16" :md="18" :sm="24">
-      <a-space direction="vertical" style="display: flex; justify-content: center">
-        <a-steps :current="current">
-          <a-step v-for="step of steps" :key="step.title" :description="step.description">{{
-            step.title
-          }}</a-step>
-        </a-steps>
-        <div
-          :style="{
-            width: '100%',
-            minHeight: '50vh',
-            textAlign: 'center',
-            position: 'relative'
-          }"
+  <div class="oobe-container">
+    <a-steps :current="current" direction="vertical" class="oobe-steps">
+      <a-step v-for="step of steps" :key="step.title" :description="step.description">{{
+        step.title
+      }}</a-step>
+    </a-steps>
+    <div class="oobe-main">
+      <div class="oobe-content">
+        <Suspense>
+          <component :is="componentList[current - 1]" v-model="initConfig" />
+        </Suspense>
+      </div>
+      <a-space size="large" class="oobe-footer">
+        <a-button v-if="current > 1" type="secondary" @click="onPrev">
+          <IconLeft /> {{ t('page.oobe.action.back') }}
+        </a-button>
+        <a-button
+          v-if="current < oobeSteps.length"
+          type="primary"
+          :disabled="!canNext"
+          @click="onNext"
         >
-          <Suspense>
-            <component :is="componentList[current - 1]" v-model="initConfig" />
-          </Suspense>
-        </div>
-        <a-space size="large" style="display: flex; justify-content: center; margin-top: 5vh; margin-bottom: 5vh">
-          <a-button v-if="current > 1" type="secondary" @click="onPrev">
-            <IconLeft /> {{ t('page.oobe.action.back') }}
-          </a-button>
-          <a-button v-if="current < 5" type="primary" :disabled="!canNext()" @click="onNext">
-            {{ t('page.oobe.action.next') }}
-            <IconRight />
-          </a-button>
-        </a-space>
+          {{ t('page.oobe.action.next') }}
+          <IconRight />
+        </a-button>
       </a-space>
-    </a-col>
-  </a-row>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, defineAsyncComponent, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {type InitConfig} from '@/api/model/oobe'
-import type {downloaderConfig} from '@/api/model/downloader'
+import type { downloaderConfig } from '@/api/model/downloader'
+import { type InitConfig } from '@/api/model/oobe'
+import { computed, defineAsyncComponent, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { oobeSteps } from './steps'
 
 const { t } = useI18n()
 const current = ref(1)
-const steps = computed(() => [
-  {
-    title: t('page.oobe.steps.welcome'),
-    description: ''
-  },
-  {
-    title: t('page.oobe.steps.setToken.title'),
-    description: t('page.oobe.steps.setToken.description')
-  },
-  {
-    title: t('page.oobe.steps.btnConfig.title'),
-    description: t('page.oobe.steps.btnConfig.description')
-  },
-  {
-    title: t('page.oobe.steps.addDownloader.title'),
-    description: ''
-  },
-  {
-    title: t('page.oobe.steps.success.title'),
-    description: t('page.oobe.steps.success.description')
-  }
-])
+
+const steps = computed(() =>
+  oobeSteps.map((step) => ({
+    title: t(step.titleKey),
+    description: step.descriptionKey ? t(step.descriptionKey) : ''
+  }))
+)
 
 const initConfig = ref<InitConfig>({
   acceptPrivacy: false,
   token: '',
-  btnConfig: {
-    mode: 'anonymous',
-    appId: '',
-    appSecret: ''
-  },
   downloaderConfig: {
     id: '',
     config: {
@@ -81,43 +58,71 @@ const initConfig = ref<InitConfig>({
       incrementBan: true
     } as downloaderConfig
   },
+  btn: {
+    enabled: false,
+    submit: false,
+    app_id: null,
+    app_secret: null
+  },
   valid: false
 })
 
-const componentList = [
-  defineAsyncComponent(() => import('./components/welcome.vue')),
-  defineAsyncComponent(() => import('./components/setToken.vue')),
-  defineAsyncComponent(() => import('./components/btnConfig.vue')),
-  defineAsyncComponent(() => import('./components/addDownloader.vue')),
-  defineAsyncComponent(() => import('./components/result.vue'))
-]
+const componentList = oobeSteps.map((step) =>
+  defineAsyncComponent(
+    step.component as () => Promise<{
+      default: ReturnType<(typeof import('vue'))['defineComponent']>
+    }>
+  )
+)
+
+const canNext = computed(() => {
+  const stepConfig = oobeSteps[current.value - 1]
+  if (stepConfig?.canNext) {
+    return stepConfig.canNext(initConfig.value)
+  }
+  return true
+})
 
 const onPrev = () => {
   current.value = Math.max(1, current.value - 1)
 }
 
-const canNext = () => {
-  switch (current.value) {
-    case 1:
-      return initConfig.value.acceptPrivacy
-    case 2:
-      return initConfig.value.token.length > 0
-    case 3:
-      if (initConfig.value.btnConfig.mode === 'account') {
-        return (
-          initConfig.value.btnConfig.appId.length > 0 &&
-          initConfig.value.btnConfig.appSecret.length > 0
-        )
-      }
-      return true
-    case 4:
-      return initConfig.value.valid
-    case 5:
-      return false
-  }
-}
-
 const onNext = () => {
-  current.value = Math.min(5, current.value + 1)
+  current.value = Math.min(oobeSteps.length, current.value + 1)
 }
 </script>
+
+<style scoped>
+.oobe-container {
+  position: relative;
+  min-height: calc(100vh - 220px);
+  width: 80%;
+  padding: 2% 0;
+}
+
+.oobe-steps {
+  position: absolute;
+  left: 0;
+  top: 2%;
+  width: 200px;
+}
+
+.oobe-main {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 220px);
+  margin-left: 220px;
+}
+
+.oobe-content {
+  flex: 1;
+  text-align: center;
+}
+
+.oobe-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  padding-top: 24px;
+}
+</style>

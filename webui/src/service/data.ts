@@ -1,9 +1,10 @@
-import type {BanLog} from '@/api/model/banlogs'
-import type {CommonResponse, CommonResponseWithPage} from '@/api/model/common'
-import type {AccessHistory, IPBasicInfo, TorrentInfo} from '@/api/model/data'
-import {useEndpointStore} from '@/stores/endpoint'
+import type { BanLog } from '@/api/model/banlogs'
+import type { BTNIPQuery } from '@/api/model/btn'
+import type { CommonResponse, CommonResponseWithPage } from '@/api/model/common'
+import type { AccessHistory, IPBasicInfo, TorrentInfo } from '@/api/model/data'
+import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import {getCommonHeader} from './utils'
+import { getCommonHeader } from './utils'
 
 export async function GetTorrentInfoList(params: {
   page: number
@@ -155,27 +156,12 @@ export async function GetIPBanHistoryList(params: {
   })
 }
 
-export async function GetIPBtnQuery(ip: string): Promise<CommonResponse<any>> {
+export async function GetBTNIPData(ip: string): Promise<CommonResponse<BTNIPQuery>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
   const url = new URL(
     urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(ip)}/btnQuery`),
-    location.href
-  )
-
-  return fetch(url, { headers: getCommonHeader() }).then((res) => {
-    endpointStore.assertResponseLogin(res)
-    return res.json()
-  })
-}
-
-export async function GetBtnQueryIframe(ip: string): Promise<CommonResponse<string>> {
-  const endpointStore = useEndpointStore()
-  await endpointStore.serverAvailable
-
-  const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(ip)}/btnQueryIframe`),
     location.href
   )
 

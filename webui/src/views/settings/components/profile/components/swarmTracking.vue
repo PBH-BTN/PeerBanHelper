@@ -25,9 +25,9 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import type {SwarmTracking} from '@/api/model/profile'
-import {useI18n} from 'vue-i18n'
-import {formatMilliseconds} from '@/utils/time.ts'
+import type { SwarmTracking } from '@/api/model/profile'
+import { useI18n } from 'vue-i18n'
+import { formatMilliseconds } from '@/utils/time.ts'
 
 const { t } = useI18n()
 const model = defineModel<SwarmTracking>({ required: true })

@@ -20,7 +20,7 @@
       <a-card
         v-show="data?.data || error"
         class="result-card"
-        :style="{ minWidth: data?.data.found ? '1150px' : '1150px' }"
+        :style="{ minWidth: data?.data.found ? '1150px' : '400px' }"
         hoverable
       >
         <a-space v-if="!error" direction="vertical" fill>
@@ -191,16 +191,16 @@
               <banHistoryTable :ip="data.data.address" />
             </a-collapse-item>
             <a-collapse-item
-              v-if="data?.data"
+              v-if="data === undefined || data.data.btnQueryAvailable"
               key="3"
-              :header="t('page.ipList.label.btnQuery')"
-              class="collapse-table"
+              :header="t('page.ipList.label.btnData')"
+              class="collapse-card"
             >
               <template #expand-icon="{ active }">
                 <icon-plus v-if="!active" />
                 <icon-minus v-else />
               </template>
-              <btnQueryInfo v-if="data.data" :ip="data.data.address" />
+              <btnDataPanel :ip="searchInput" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -219,17 +219,17 @@
 
 <script setup lang="ts">
 import CountryFlag from '@/components/countryFlag.vue'
-import {GetIPBasicData} from '@/service/data'
-import {useEndpointStore} from '@/stores/endpoint'
-import {getColor} from '@/utils/color'
-import {formatFileSize} from '@/utils/file'
-import {computed, onMounted, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {useRequest} from 'vue-request'
-import {useRoute} from 'vue-router'
+import { GetIPBasicData } from '@/service/data'
+import { useEndpointStore } from '@/stores/endpoint'
+import { getColor } from '@/utils/color'
+import { formatFileSize } from '@/utils/file'
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
+import { useRoute } from 'vue-router'
 import accessHistoryTable from './components/accessHistoryTable.vue'
 import banHistoryTable from './components/banHistoryTable.vue'
-import btnQueryInfo from './components/btnQueryInfo.vue'
+import btnDataPanel from './components/btnDataPanel.vue'
 
 const searchInput = ref('')
 const { t, d } = useI18n()
@@ -276,6 +276,15 @@ const pbhPlusActivited = computed(() =>
     padding: 0;
     .arco-collapse-item-content-box {
       padding-top: 0px;
+    }
+  }
+}
+.collapse-card {
+  .arco-collapse-item-content-expend {
+    padding: 0;
+    .arco-collapse-item-content-box {
+      padding-top: 0px;
+      padding-bottom: 0;
     }
   }
 }

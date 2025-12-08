@@ -11,4 +11,4 @@ cd ${current_wd}
 cp -r webui/dist ${static_dir}
 
 echo "Prepare to build jar.."
-mvn -B clean package --file pom.xml
+./gradlew clean build --no-daemon

@@ -17,4 +17,19 @@ export interface InitConfig {
   btnConfig: BtnConfig
   downloaderConfig: initDownloaderConfig
   valid: boolean
+  btn: BtnConfig
+}
+
+export interface BtnConfig {
+  app_id: null | string
+  app_secret: null | string
+  enabled: boolean
+  submit: boolean
+}
+
+export interface OobeStepConfig {
+  titleKey: string
+  descriptionKey?: string
+  canNext?: (config: InitConfig) => boolean
+  component: () => Promise<unknown>
 }
