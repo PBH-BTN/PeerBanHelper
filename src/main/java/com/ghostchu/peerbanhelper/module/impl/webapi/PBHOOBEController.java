@@ -76,6 +76,9 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return;
         }
+        if (ExternalSwitch.parseBoolean("pbh.oobe.test-mode", false)) {
+            return;
+        }
         JsonObject parser = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String token = parser.get("token").getAsString();
         JsonObject draftDownloader = parser.get("downloader").getAsJsonObject();
