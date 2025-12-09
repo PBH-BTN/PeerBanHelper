@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerInfoDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerRecordEntityDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
@@ -38,6 +39,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
@@ -107,13 +110,13 @@ public final class PBHPeerController extends AbstractFeatureModule {
         var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
         String ip = ipAddress.toNormalizedString();
         if (btnNetwork == null) {
-            ctx.json(new StdResp(false, "BTN Network module is not enabled.", null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_NETWORK_NOT_ENABLED), null));
             return;
             /**/
         }
         var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
         if (ability == null) {
-            ctx.json(new StdResp(false, "BTN IP Query ability is not available, the BTN is not connected or network not provide this ability.", null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_ABILITY_IP_QUERY_NOT_PROVIDED), null));
             return;
         }
         BtnAbilityIpQuery queryAbility = (BtnAbilityIpQuery) ability;
@@ -134,12 +137,12 @@ public final class PBHPeerController extends AbstractFeatureModule {
         String ip = ipAddress.toNormalizedString();
 
         if (btnNetwork == null) {
-            ctx.json(new StdResp(false, "BTN Network module is not enabled.", null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_NETWORK_NOT_ENABLED), null));
             return;
         }
         var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
         if (ability == null) {
-            ctx.json(new StdResp(false, "BTN IP Query ability is not available, the BTN is not connected or network not provide this ability.", null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_ABILITY_IP_QUERY_NOT_PROVIDED), null));
             return;
         }
         BtnAbilityIpQuery queryAbility = (BtnAbilityIpQuery) ability;

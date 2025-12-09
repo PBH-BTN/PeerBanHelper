@@ -811,3 +811,4 @@ BTN_ABILITY_IP_QUERY_DESCRIPTION: |
   BTN IP 查询服务允许 PeerBanHelper 查询 BTN 服务器以获取有关特定 IP 地址的更多信息。  
   PeerBanHelper 功能模块可以使用此服务提供的能力获取有关特定 IP 地址在 BTN 上的活动概要。
 BTN_ABILITY_IP_QUERY_STATUS_OK: "查询成功处理: {}"
+BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP 查询功能能力在此 BTN 实例上不可用"
