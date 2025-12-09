@@ -212,7 +212,9 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(BtnNetworkOnline.class);
         moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
-        moduleManager.register(PeerNameBlackRuleList.class);
+        if(ExternalSwitch.parseBoolean("pbh.modules.peerclientnameblackrulelist.testing", false)) {
+            moduleManager.register(PeerNameBlackRuleList.class);
+        }
         //moduleManager.register(PTRBlacklist.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);
