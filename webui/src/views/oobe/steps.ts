@@ -20,7 +20,7 @@ export const oobeSteps: OobeStepConfig[] = [
   {
     titleKey: 'page.oobe.steps.addDownloader.title',
     canNext: (config) => config.valid,
-    component: () => import('./components/addDownloader.vue')
+    component: () => import('./components/addDownloader/index.vue')
   },
   {
     titleKey: 'page.oobe.steps.success.title',

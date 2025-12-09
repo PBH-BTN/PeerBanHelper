@@ -25,6 +25,25 @@ export enum ClientTypeEnum {
   BitComet = 'bitcomet'
 }
 
+export interface ScanDownloaderInfo {
+  /**
+   * 主机名
+   */
+  host: string
+  /**
+   * 进程 PID
+   */
+  pid: number
+  /**
+   * 端口号
+   */
+  port: number
+  /**
+   * 下载器类型枚举
+   */
+  type: ClientTypeEnum
+}
+
 export interface Downloader {
   id: string
   name: string
@@ -211,6 +230,7 @@ export type downloaderConfig =
   | transmissionConfig
   | biglybtConfig
   | delugeConfig
+  | bitCometConfig
 
 export interface qBittorrentConfig {
   type: ClientTypeEnum.qBittorrent

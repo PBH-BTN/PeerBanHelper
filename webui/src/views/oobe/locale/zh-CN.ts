@@ -40,6 +40,14 @@ export default {
   'page.oobe.btnConfig.appSecret.placeholder': '请输入 App Secret',
 
   'page.oobe.addDownloader.title': '添加你的第一个下载器',
+  'page.oobe.addDownloader.scan': '扫描下载器',
+  'page.oobe.addDownloader.scan.tooltip': '这里是用户知情同意占位符',
+  'page.oobe.addDownloader.scan.noDownloader': '未发现可用的下载器',
+  'page.oobe.addDownloader.scan.type': '类型',
+  'page.oobe.addDownloader.scan.multi': '找到多个下载器，请手动选择',
+  'page.oobe.addDownloader.scan.one': '找到一个下载器，已自动填写相关信息',
+  'page.oobe.addDownloader.scan.cancel': '取消',
+  'page.oobe.addDownloader.scan.select': '选择',
   'page.oobe.addDownloader.description':
     '首先选择你的下载器类型，随后填写下载器的 WebUI 的相关认证信息。',
   'page.oobe.addDownloader.test': '测试下载器',
