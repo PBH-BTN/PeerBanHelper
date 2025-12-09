@@ -37,6 +37,7 @@ export default {
     'Enter the App ID and App Secret registered on the BTN site to bind this installation. The bound account will have control over data submitted by this installation and may view submitted information and data from the site. Your submitted data will participate in threat intelligence processing and help other BTN users avoid malicious attacks.',
   'page.oobe.btnConfig.appId.placeholder': 'Enter App ID',
   'page.oobe.btnConfig.appSecret.placeholder': 'Enter App Secret',
+  'page.oobe.btnConfig.enableSubmit.title': 'Enable Data Submission',
 
   'page.oobe.addDownloader.title': 'Add your first downloader',
   'page.oobe.addDownloader.scan': 'Scan Downloader',

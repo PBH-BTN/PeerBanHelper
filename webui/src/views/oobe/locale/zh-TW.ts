@@ -37,6 +37,7 @@ export default {
     '輸入在 BTN 站點註冊的 App ID 和 App Secret 來綁定這個安裝，綁定者的帳號將對此安裝提交的資料具有控制權限，並可能從站點查看提交的資訊和資料。您提交的資料將參與威脅情報處理，並幫助其它 BTN 使用者免於惡意攻擊。',
   'page.oobe.btnConfig.appId.placeholder': '請輸入 App ID',
   'page.oobe.btnConfig.appSecret.placeholder': '請輸入 App Secret',
+  'page.oobe.btnConfig.enableSubmit.title': '啟用提交資料功能',
 
   'page.oobe.addDownloader.title': '新增你的第一個下載器',
   'page.oobe.addDownloader.scan': '掃描下載器',
