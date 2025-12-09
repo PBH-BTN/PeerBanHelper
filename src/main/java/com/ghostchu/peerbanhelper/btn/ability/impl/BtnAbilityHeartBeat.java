@@ -116,30 +116,28 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
         lastResult = "Creating requests for interfaces: " + ifNets;
-        try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
-            ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
-                var client = createHttpClient(ip);
-                var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
-                Request.Builder request = new Request.Builder().url(endpoint).post(body);
-                if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
-                try (Response resp = client.newCall(request.build()).execute()) {
-                    var responseBody = resp.body().string();
-                    if (!resp.isSuccessful()) {
-                        result.put(ip, "Failed: " + resp.code() + ": " + responseBody);
+        ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
+            var client = createHttpClient(ip);
+            var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
+            Request.Builder request = new Request.Builder().url(endpoint).post(body);
+            if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
+            try (Response resp = client.newCall(request.build()).execute()) {
+                var responseBody = resp.body().string();
+                if (!resp.isSuccessful()) {
+                    result.put(ip, "Failed: " + resp.code() + ": " + responseBody);
+                } else {
+                    ServerResponse data = JsonUtil.standard().fromJson(responseBody, ServerResponse.class);
+                    if (data != null && data.getExternalIp() != null) {
+                        result.put(ip, data.getExternalIp());
+                        anySuccess.set(true);
                     } else {
-                        ServerResponse data = JsonUtil.standard().fromJson(responseBody, ServerResponse.class);
-                        if (data != null && data.getExternalIp() != null) {
-                            result.put(ip, data.getExternalIp());
-                            anySuccess.set(true);
-                        } else {
-                            result.put(ip, "Failed: No external IP returned");
-                        }
+                        result.put(ip, "Failed: No external IP returned");
                     }
-                } catch (final IOException | JSONException e) {
-                    result.put(ip, "Failed: " + e.getClass().getName() + ": " + e.getMessage());
                 }
-            }, executorService)));
-        }
+            } catch (final IOException | JSONException e) {
+                result.put(ip, "Failed: " + e.getClass().getName() + ": " + e.getMessage());
+            }
+        }, Executors.newVirtualThreadPerTaskExecutor())));
         lastResult = "Waiting for all heartbeat requests to complete";
         try {
             CompletableFutures.allAsList(futures).get(30, TimeUnit.SECONDS);
@@ -148,8 +146,8 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         } catch (InterruptedException | ExecutionException e) {
             log.warn("Heartbeat request failed", e);
         } finally {
-            futures.forEach(future ->{
-                if(!future.isDone() && !future.isCompletedExceptionally()){
+            futures.forEach(future -> {
+                if (!future.isDone() && !future.isCompletedExceptionally()) {
                     future.cancel(true);
                 }
             });
