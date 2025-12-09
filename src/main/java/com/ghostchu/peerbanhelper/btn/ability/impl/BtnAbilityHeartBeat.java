@@ -107,15 +107,16 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         List<CompletableFuture<Void>> futures = Collections.synchronizedList(new ArrayList<>());
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         List<String> ifNets = new ArrayList<>();
-        lastResult = "Iterating network interfaces";
+        lastResult = "Preparing to iterating network interfaces";
         for (NetworkIF networkIF : new SystemInfo().getHardware().getNetworkIFs()) {
+            lastResult = "Preparing interface: " + networkIF.getName();
             var ipv4 = networkIF.getIPv4addr();
             var ipv6 = networkIF.getIPv6addr();
             ifNets.addAll(Arrays.asList(ipv4));
             ifNets.addAll(Arrays.asList(ipv6));
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
-        lastResult = "Creating requests for interfaces: " + ifNets;
+        lastResult = "Creating requests for interfaces: " + ifNets.size();
         ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
             var client = createHttpClient(ip);
             var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
