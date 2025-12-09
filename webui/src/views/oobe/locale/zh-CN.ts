@@ -41,7 +41,8 @@ export default {
 
   'page.oobe.addDownloader.title': '添加你的第一个下载器',
   'page.oobe.addDownloader.scan': '扫描下载器',
-  'page.oobe.addDownloader.scan.tooltip': '继续将扫描本地网络中已启用 WebUI 功能的下载器，并自动填写表单。如果您还未启用下载器 WebUI 功能，请先查看文档启用。',
+  'page.oobe.addDownloader.scan.tooltip':
+    '继续将扫描本地网络中已启用 WebUI 功能的下载器，并自动填写表单。如果您还未启用下载器 WebUI 功能，请先查看文档启用。',
   'page.oobe.addDownloader.scan.noDownloader': '未发现可用的下载器',
   'page.oobe.addDownloader.scan.type': '类型',
   'page.oobe.addDownloader.scan.multi': '找到多个下载器，请手动选择',
