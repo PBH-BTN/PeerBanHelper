@@ -115,8 +115,8 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                     this.ipMatcher.setData("BTN DenyList (Remote)", List.of(associativeTries));
                     Main.getEventBus().post(new BtnRuleUpdateEvent());
                     var remoteVersion = response.header("X-BTN-ContentVersion", "unknown");
-                    metadataDao.set("btn.ability.ip_denylist.cache.version", remoteVersion);
-                    metadataDao.set("btn.ability.ip_denylist.cache.value", responseBody);
+                    metadataDao.set("btn.ability.ip_allowlist.cache.version", remoteVersion);
+                    metadataDao.set("btn.ability.ip_allowlist.cache.value", responseBody);
                     log.info(tlUI(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, remoteVersion, loaded));
                     setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, remoteVersion, loaded));
                     btnNetwork.getModuleMatchCache().invalidateAll();
