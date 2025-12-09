@@ -89,19 +89,19 @@ public class DownloaderDiscovery {
         try (Response response = httpClient.newCall(request).execute()) {
             var server = response.header("Server");
             if (server != null) { // check server
-                if (server.contains("Transmission")) return new DiscoveredDownloader(host, port, "Transmission", pid);
+                if (server.contains("Transmission")) return new DiscoveredDownloader(host, port, "transmission", pid);
                 if (server.contains("PeerBanHelper-BiglyBT-Adapter"))
-                    return new DiscoveredDownloader(host, port, "BiglyBT", pid);
+                    return new DiscoveredDownloader(host, port, "biglybt", pid);
             }
             var auth = response.header("WWW-Authenticate");
             if (auth != null) {
                 if (auth.contains("BitComet Remote Login"))
-                    return new DiscoveredDownloader(host, port, "BitComet", pid);
+                    return new DiscoveredDownloader(host, port, "bitcomet", pid);
             }
             var body = response.body().string();
             if (body.contains("BitComet Remote Access") || body.contains("BitComet WebUI"))
-                return new DiscoveredDownloader(host, port, "BitComet", pid);
-            if (body.contains("qBittorrent WebUI")) return new DiscoveredDownloader(host, port, "qBittorrent", pid);
+                return new DiscoveredDownloader(host, port, "bitcomet", pid);
+            if (body.contains("qBittorrent WebUI")) return new DiscoveredDownloader(host, port, "qbittorrent", pid);
             return null;
         } catch (Exception e) {
             log.debug("Failed to check downloader at {}:{} -> {}", host, port, e.getCause() + ":" + e.getMessage());
