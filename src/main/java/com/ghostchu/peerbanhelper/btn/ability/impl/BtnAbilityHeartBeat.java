@@ -102,23 +102,17 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     }
 
     private void sendHeartBeatMultiIf() {
-        log.debug("Attempt send heartbeat (multiif)");
-        lastResult = "Requesting as multi interface";
         List<CompletableFuture<Void>> futures = Collections.synchronizedList(new ArrayList<>());
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         List<String> ifNets = new ArrayList<>();
-        lastResult = "Preparing to iterating network interfaces";
         try {
             var interfaces = NetworkInterface.getNetworkInterfaces();
-            lastResult = "Iterating network interfaces";
             while (interfaces.hasMoreElements()) {
                 var netif = interfaces.nextElement();
-                lastResult = "Preparing interface: " + netif.getName();
                 var addrs = netif.getInetAddresses();
                 while (addrs.hasMoreElements()) {
                     var addr = addrs.nextElement();
                     String ip = addr.getHostAddress();
-                    lastResult = "Found address: " + ip + " on interface: " + netif.getName();
                     ifNets.add(ip);
                 }
             }
@@ -126,7 +120,6 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
             log.warn("No interfaces found", exception);
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
-        lastResult = "Creating requests for interfaces: " + ifNets.size();
         ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
             var client = createHttpClient(ip);
             var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
@@ -163,16 +156,14 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                 }
             });
         }
-
         if (anySuccess.get()) {
             setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_SUCCESS));
         } else {
             setLastStatus(false, new TranslationComponent(Lang.BTN_HEARTBEAT_FAILED));
         }
-        // {ip} -> {result}
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> pair : result.entrySet()) {
-            builder.append(pair.getKey()).append(" -> ").append(pair.getValue()).append("  \n");
+        for (String ip : new LinkedHashSet<>(result.values())) {
+            builder.append(ip).append("  \n");
         }
         lastResult = builder.toString();
     }
