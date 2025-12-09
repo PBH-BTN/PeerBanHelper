@@ -315,7 +315,7 @@ public final class BtnNetwork implements Reloadable {
                     if ((appId == null || appId.isBlank() || appId.equals("example-app-id"))
                             || (appSecret == null || appSecret.isBlank() || appSecret.equals("example-app-secret"))) {
                         requestBuilder.header("X-BTN-HardwareID", getBtnHardwareId()) // For anonymous account
-                                .header("X-BTN-InstalltionID", getInstallationId());
+                                .header("X-BTN-InstallationID", getInstallationId());
 
                     }
                     return chain.proceed(requestBuilder.build());
