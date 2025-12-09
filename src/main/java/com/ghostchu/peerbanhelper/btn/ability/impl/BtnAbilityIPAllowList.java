@@ -11,7 +11,6 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import lombok.Getter;
@@ -109,21 +108,16 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
             } else {
-                try {
-                    DualIPv4v6AssociativeTries<String> associativeTries = new DualIPv4v6AssociativeTries<>();
-                    var loaded = stringToIPList(responseBody, associativeTries);
-                    this.ipMatcher.setData("BTN AllowList (Remote)", List.of(associativeTries));
-                    Main.getEventBus().post(new BtnRuleUpdateEvent());
-                    var remoteVersion = response.header("X-BTN-ContentVersion", "unknown");
-                    metadataDao.set("btn.ability.ip_allowlist.cache.version", remoteVersion);
-                    metadataDao.set("btn.ability.ip_allowlist.cache.value", responseBody);
-                    log.info(tlUI(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, remoteVersion, loaded));
-                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, remoteVersion, loaded));
-                    btnNetwork.getModuleMatchCache().invalidateAll();
-                } catch (JsonSyntaxException e) {
-                    setLastStatus(false, new TranslationComponent("JsonSyntaxException: " + response.code() + " - " + responseBody));
-                    log.error("Unable to parse BtnRule as a valid Json object: {}-{}", response.code(), responseBody, e);
-                }
+                DualIPv4v6AssociativeTries<String> associativeTries = new DualIPv4v6AssociativeTries<>();
+                var loaded = stringToIPList(responseBody, associativeTries);
+                this.ipMatcher.setData("BTN AllowList (Remote)", List.of(associativeTries));
+                Main.getEventBus().post(new BtnRuleUpdateEvent());
+                var remoteVersion = response.header("X-BTN-ContentVersion", "unknown");
+                metadataDao.set("btn.ability.ip_allowlist.cache.version", remoteVersion);
+                metadataDao.set("btn.ability.ip_allowlist.cache.value", responseBody);
+                log.info(tlUI(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, remoteVersion, loaded));
+                setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, remoteVersion, loaded));
+                btnNetwork.getModuleMatchCache().invalidateAll();
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
