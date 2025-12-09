@@ -112,7 +112,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                 try {
                     DualIPv4v6AssociativeTries<String> associativeTries = new DualIPv4v6AssociativeTries<>();
                     var loaded = stringToIPList(responseBody, associativeTries);
-                    this.ipMatcher.setData("BTN DenyList (Remote)", List.of(associativeTries));
+                    this.ipMatcher.setData("BTN AllowList (Remote)", List.of(associativeTries));
                     Main.getEventBus().post(new BtnRuleUpdateEvent());
                     var remoteVersion = response.header("X-BTN-ContentVersion", "unknown");
                     metadataDao.set("btn.ability.ip_allowlist.cache.version", remoteVersion);

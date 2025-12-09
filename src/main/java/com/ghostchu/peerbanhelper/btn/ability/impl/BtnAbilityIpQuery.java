@@ -62,8 +62,11 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
     }
 
     @Nullable
+    import java.net.URLEncoder;
+    import java.nio.charset.StandardCharsets;
+    
     public IpQueryResult query(@NotNull String address) throws IOException {
-        String url = URLUtil.appendUrl(endpoint, Map.of("ip", address));
+        String url = URLUtil.appendUrl(endpoint, Map.of("ip", URLEncoder.encode(address, StandardCharsets.UTF_8)));
         Request.Builder request = new Request.Builder()
                 .url(url)
                 .get();
