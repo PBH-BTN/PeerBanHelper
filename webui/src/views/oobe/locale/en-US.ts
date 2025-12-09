@@ -31,7 +31,7 @@ export default {
     'Use standalone mode without BTN threat intelligence features, cloud rules, or data submission. All operational data will be processed locally.',
   'page.oobe.btnConfig.mode.anonymous.title': 'Auto Registration (Recommended)',
   'page.oobe.btnConfig.mode.anonymous.description':
-    'Automatically register an anonymous account using device hardware ID hash and installation ID to receive BTN cloud rules and submit data to BTN network. This method does not bind your social account to BTN system. Your submitted data will participate in threat intelligence processing and help other BTN users avoid malicious attacks. Some BTN service providers may not support anonymous submissions. You can disable data submission later in settings.',
+    'Automatically register an anonymous account using random generated installation ID to receive BTN cloud rules and submit data to BTN network. This method does not bind your social account to BTN system. Your submitted data will participate in threat intelligence processing and help other BTN users avoid malicious attacks. Some BTN service providers may not support anonymous submissions. You can disable data submission later in settings.',
   'page.oobe.btnConfig.mode.account.title': 'Existing BTN Account',
   'page.oobe.btnConfig.mode.account.description':
     'Enter the App ID and App Secret registered on the BTN site to bind this installation. The bound account will have control over data submitted by this installation and may view submitted information and data from the site. Your submitted data will participate in threat intelligence processing and help other BTN users avoid malicious attacks.',

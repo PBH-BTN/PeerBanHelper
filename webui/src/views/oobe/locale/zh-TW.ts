@@ -31,7 +31,7 @@ export default {
     '使用單機模式，不使用 BTN 網路帶來的威脅情報處理功能，也不接收 BTN 雲端規則，並不向 BTN 網路提供資料。所有運行資料將在本地裝置處理。',
   'page.oobe.btnConfig.mode.anonymous.title': '使用自動註冊配置（推薦）',
   'page.oobe.btnConfig.mode.anonymous.description':
-    '使用裝置硬體 ID 生成的雜湊值和安裝 ID 自動註冊匿名帳號以接收 BTN 雲端規則，並向 BTN 網路提供資料，該方式不會將您的社交帳號與 BTN 系統綁定。您提交的資料將參與威脅情報處理，並幫助其它 BTN 使用者免於惡意攻擊。部分 BTN 服務提供者可能不支援匿名提交。如果您不希望提交資料，可稍後在設定中關閉。',
+    '使用安裝 ID 自動註冊匿名帳號以接收 BTN 雲端規則，並向 BTN 網路提供資料，該方式不會將您的社交帳號與 BTN 系統綁定。您提交的資料將參與威脅情報處理，並幫助其它 BTN 使用者免於惡意攻擊。部分 BTN 服務提供者可能不支援匿名提交。如果您不希望提交資料，可稍後在設定中關閉。',
   'page.oobe.btnConfig.mode.account.title': '已有 BTN 帳號',
   'page.oobe.btnConfig.mode.account.description':
     '輸入在 BTN 站點註冊的 App ID 和 App Secret 來綁定這個安裝，綁定者的帳號將對此安裝提交的資料具有控制權限，並可能從站點查看提交的資訊和資料。您提交的資料將參與威脅情報處理，並幫助其它 BTN 使用者免於惡意攻擊。',
