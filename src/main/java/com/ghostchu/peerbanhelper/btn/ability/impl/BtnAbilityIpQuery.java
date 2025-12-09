@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -168,7 +167,7 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         @SerializedName("torrent")
         private String torrent;
         @SerializedName("peer_ip")
-        private InetAddress peerIp;
+        private String peerIp;
         @SerializedName("peer_port")
         private Integer peerPort;
         @SerializedName("peer_id")
@@ -202,7 +201,7 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         @SerializedName("torrent")
         private String torrent;
         @SerializedName("peer_ip")
-        private InetAddress peerIp;
+        private String peerIp;
         @SerializedName("peer_port")
         private Integer peerPort;
         @SerializedName("peer_id")
