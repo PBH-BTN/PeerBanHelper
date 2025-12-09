@@ -100,7 +100,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
                 .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ)
                 .get("/api/peer/{ip}/btnQueryIframe", this::handleBtnQueryIFrame, Role.USER_READ);
 
     }
