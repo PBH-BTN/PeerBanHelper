@@ -38,9 +38,9 @@ export default {
   'page.oobe.btnConfig.appId.placeholder': '請輸入 App ID',
   'page.oobe.btnConfig.appSecret.placeholder': '請輸入 App Secret',
 
-  'page.oobe.addDownloader.title': '添加你的第一個下載器',
+  'page.oobe.addDownloader.title': '新增你的第一個下載器',
   'page.oobe.addDownloader.scan': '掃描下載器',
-  'page.oobe.addDownloader.scan.tooltip': '這裡是使用者知情同意佔位符',
+  'page.oobe.addDownloader.scan.tooltip': '繼續將掃描本地網路中已啟用 WebUI 功能的下載器，並自動填寫表單。如果您還未啟用下載器 WebUI 功能，請先查看文件啟用。',
   'page.oobe.addDownloader.scan.noDownloader': '未發現可用的下載器',
   'page.oobe.addDownloader.scan.type': '類型',
   'page.oobe.addDownloader.scan.multi': '找到多個下載器，請手動選擇',

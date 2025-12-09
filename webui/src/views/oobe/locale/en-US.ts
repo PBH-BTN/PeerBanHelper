@@ -40,7 +40,7 @@ export default {
 
   'page.oobe.addDownloader.title': 'Add your first downloader',
   'page.oobe.addDownloader.scan': 'Scan Downloader',
-  'page.oobe.addDownloader.scan.tooltip': 'User consent placeholder',
+  'page.oobe.addDownloader.scan.tooltip': 'Continue to scan for downloaders with WebUI enabled on your local network and auto-fill the form. If you have not enabled the downloader WebUI feature, please refer to the documentation to enable it first.',
   'page.oobe.addDownloader.scan.noDownloader': 'No available downloader found',
   'page.oobe.addDownloader.scan.type': 'Type',
   'page.oobe.addDownloader.scan.multi': 'Multiple downloaders found, please select manually',
