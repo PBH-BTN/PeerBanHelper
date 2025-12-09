@@ -63,6 +63,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     public void load() {
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
         btnNetwork.getScheduler().scheduleWithFixedDelay(this::sendHeartBeat, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        lastResult = "Scheduled";
     }
 
     private void sendHeartBeat() {
@@ -74,6 +75,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     }
 
     private void sendHeartBeatDefaultIf() {
+        lastResult = "Requesting as default interface";
         var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", "default")), MediaType.parse("application/json"));
         Request.Builder request = new Request.Builder().url(endpoint).post(body);
         if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
@@ -99,6 +101,8 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     }
 
     private void sendHeartBeatMultiIf() {
+        log.debug("Attempt send heartbeat (multiif)");
+        lastResult = "Requesting as multi interface";
         List<CompletableFuture<Void>> futures = Collections.synchronizedList(new ArrayList<>());
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         List<String> ifNets = new ArrayList<>();
@@ -238,8 +242,8 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                         return defaultFactory.createSocket(address, port, clientAddress, clientPort);
                     }
                 });
-        var trustManager =  btnNetwork.getHttpClient().x509TrustManager();
-        if(trustManager!=null) {
+        var trustManager = btnNetwork.getHttpClient().x509TrustManager();
+        if (trustManager != null) {
             SSLSocketFactory originalSslFactory = btnNetwork.getHttpClient().sslSocketFactory();
             builder.sslSocketFactory(new SSLSocketFactory() {
                 @Override
