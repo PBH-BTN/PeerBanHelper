@@ -72,6 +72,8 @@ public class PeerBanHelper implements Reloadable {
     @Override
     public ReloadResult reloadModule() throws Exception {
         reloadConfig();
+        // 重新加载所有模块的启用状态
+        moduleManager.reloadModuleStates();
         return Reloadable.super.reloadModule();
     }
 

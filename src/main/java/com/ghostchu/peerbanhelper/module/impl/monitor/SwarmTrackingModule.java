@@ -78,7 +78,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
                 .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
         javalinWebContainer.javalin()
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
+        registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
     }
 
     private void handleDetails(@NotNull Context context) {

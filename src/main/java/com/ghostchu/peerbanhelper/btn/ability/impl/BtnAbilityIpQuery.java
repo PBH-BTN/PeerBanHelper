@@ -20,6 +20,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +64,6 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
     }
 
     @Nullable
-    import java.net.URLEncoder;
-    import java.nio.charset.StandardCharsets;
-    
     public IpQueryResult query(@NotNull String address) throws IOException {
         String url = URLUtil.appendUrl(endpoint, Map.of("ip", URLEncoder.encode(address, StandardCharsets.UTF_8)));
         Request.Builder request = new Request.Builder()

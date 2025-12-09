@@ -14,7 +14,6 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.module.impl.rule.dto.DataUpdateResultDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -48,6 +47,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,6 +69,7 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
     private List<PeerNameMatcher> peerNameMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private long banDuration;
+    private ScheduledFuture<?> reloadConfigTask; // 保留此字段用于 changeCheckInterval() 方法
     @Autowired
     private HTTPUtil httpUtil;
 
@@ -98,7 +99,7 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
         ConfigurationSection config = getConfig();
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        reloadConfigTask = registerScheduledTask(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
         Main.getReloadManager().register(this);
     }
 
@@ -511,9 +512,12 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
      * @throws IOException 保存异常
      */
     public void changeCheckInterval(long checkInterval) throws IOException {
+        // 取消旧的定时任务
+        cancelScheduledTask(reloadConfigTask);
         this.checkInterval = checkInterval;
         getConfig().set("check-interval", checkInterval);
         saveConfig();
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        // 重新注册新的定时任务
+        reloadConfigTask = registerScheduledTask(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 }

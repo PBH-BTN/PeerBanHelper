@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import io.javalin.http.Context;
@@ -15,8 +16,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -31,8 +36,11 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     private PeerBanHelper server;
     @Getter
     private boolean register;
+    @Getter
+    private boolean actuallyEnabled = false;  // 实际是否已启用（调用了 enable()）
     @Autowired
     JavalinWebContainer javalinWebContainer;
+    private final List<ScheduledFuture<?>> scheduledTasks = new ArrayList<>();
 
     @Override
     public boolean isModuleEnabled() {
@@ -72,19 +80,66 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public void disable() {
         if (register) {
+            actuallyEnabled = false;
             onDisable();
-            cleanupResources();
+            cancelAllScheduledTasks();
             log.info(tlUI(Lang.MODULE_UNREGISTER, getName()));
         }
     }
 
-    private void cleanupResources() {
 
+    /**
+     * 注册一个定时任务，在模块禁用时会自动取消
+     *
+     * @param task         要执行的任务
+     * @param initialDelay 初始延迟
+     * @param period       执行间隔
+     * @param unit         时间单位
+     * @return ScheduledFuture 对象
+     */
+    protected ScheduledFuture<?> registerScheduledTask(Runnable task, long initialDelay, long period, TimeUnit unit) {
+        ScheduledFuture<?> future = CommonUtil.getScheduler().scheduleWithFixedDelay(task, initialDelay, period, unit);
+        synchronized (scheduledTasks) {
+            scheduledTasks.add(future);
+        }
+        return future;
+    }
+
+    /**
+     * 手动取消一个已注册的定时任务
+     *
+     * @param future 要取消的任务
+     * @return 是否成功取消
+     */
+    protected boolean cancelScheduledTask(ScheduledFuture<?> future) {
+        if (future != null && !future.isCancelled()) {
+            boolean cancelled = future.cancel(false);
+            synchronized (scheduledTasks) {
+                scheduledTasks.remove(future);
+            }
+            return cancelled;
+        }
+        return false;
+    }
+
+    /**
+     * 取消所有已注册的定时任务
+     */
+    protected void cancelAllScheduledTasks() {
+        synchronized (scheduledTasks) {
+            for (ScheduledFuture<?> task : scheduledTasks) {
+                if (task != null && !task.isCancelled()) {
+                    task.cancel(false);
+                }
+            }
+            scheduledTasks.clear();
+        }
     }
 
     @Override
     public void enable() {
         register = true;
+        actuallyEnabled = true;
         onEnable();
         log.info(tlUI(Lang.MODULE_REGISTER, getName()));
     }
