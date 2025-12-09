@@ -83,6 +83,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
             actuallyEnabled = false;
             onDisable();
             cancelAllScheduledTasks();
+            Main.getEventBus().unregister(this);
             log.info(tlUI(Lang.MODULE_UNREGISTER, getName()));
         }
     }

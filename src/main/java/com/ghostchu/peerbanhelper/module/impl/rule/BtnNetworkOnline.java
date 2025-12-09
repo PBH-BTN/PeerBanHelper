@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -12,6 +13,7 @@ import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityRules;
 import com.ghostchu.peerbanhelper.btn.legacy.LegacyBtnExceptionRuleParsed;
 import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -28,6 +30,7 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.eventbus.Subscribe;
 import com.googlecode.aviator.exception.TimeoutException;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -63,6 +66,8 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     private boolean allowScript;
 
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
+    @Autowired
+    private BanList banList;
 
 
     @Override
@@ -86,6 +91,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         Main.getReloadManager().register(this);
         javalinWebContainer.javalin()
                 .get("/api/modules/btn", this::status, Role.USER_READ);
+        Main.getEventBus().register(this);
     }
 
     private void status(Context context) {
@@ -480,4 +486,20 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }
         return null;
     }
+
+    @Subscribe
+    public void onRuleUpdate(BtnRuleUpdateEvent event) {
+        var allowListAbilityModule = btnNetwork.getAbilities().get(BtnAbilityIPAllowList.class);
+        if (allowListAbilityModule == null) return;
+        BtnAbilityIPAllowList allowList = (BtnAbilityIPAllowList) allowListAbilityModule;
+        List<IPAddress> pendingUnban = new ArrayList<>();
+        banList.forEach((ipAddress, _) -> {
+            var result = allowList.getIpMatcher().match(ipAddress.toNormalizedString());
+            if (result.result() == MatchResultEnum.TRUE) {
+                pendingUnban.add(ipAddress);
+            }
+        });
+        pendingUnban.forEach(ip -> banList.remove(ip));
+    }
+
 }
