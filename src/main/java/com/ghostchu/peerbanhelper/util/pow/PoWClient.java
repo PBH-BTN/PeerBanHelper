@@ -53,9 +53,8 @@ public class PoWClient {
             });
         }
 
-        byte[] result = resultFuture.get(); // wait for one thread to finish
-        executor.shutdownNow();
-        return result;
+        // wait for one thread to finish
+        return resultFuture.get();
     }
 
     private boolean hasLeadingZeroBits(byte[] hash, int bits) {
