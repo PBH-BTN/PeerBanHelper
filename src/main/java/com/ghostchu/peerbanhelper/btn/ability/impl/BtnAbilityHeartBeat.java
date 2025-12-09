@@ -14,14 +14,14 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.json.JSONException;
-import oshi.SystemInfo;
-import oshi.hardware.NetworkIF;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -108,14 +108,22 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         List<String> ifNets = new ArrayList<>();
         lastResult = "Preparing to iterating network interfaces";
-        var ifs =  new SystemInfo().getHardware().getNetworkIFs();
-        lastResult = "Iterating network interfaces";
-        for (NetworkIF networkIF : ifs) {
-            lastResult = "Preparing interface: " + networkIF.getName();
-            var ipv4 = networkIF.getIPv4addr();
-            var ipv6 = networkIF.getIPv6addr();
-            ifNets.addAll(Arrays.asList(ipv4));
-            ifNets.addAll(Arrays.asList(ipv6));
+        try {
+            var interfaces = NetworkInterface.getNetworkInterfaces();
+            lastResult = "Iterating network interfaces";
+            while (interfaces.hasMoreElements()) {
+                var netif = interfaces.nextElement();
+                lastResult = "Preparing interface: " + netif.getName();
+                var addrs = netif.getInetAddresses();
+                while (addrs.hasMoreElements()) {
+                    var addr = addrs.nextElement();
+                    String ip = addr.getHostAddress();
+                    lastResult = "Found address: " + ip + " on interface: " + netif.getName();
+                    ifNets.add(ip);
+                }
+            }
+        } catch (SocketException exception) {
+            log.warn("No interfaces found", exception);
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
         lastResult = "Creating requests for interfaces: " + ifNets.size();
