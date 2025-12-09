@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.spotify.futures.CompletableFutures;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -138,15 +139,18 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
             }, executorService)));
         }
 
-        for (CompletableFuture<Void> future : futures) {
-            try {
-                future.get(30, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                log.warn("Heartbeat request timed out");
-                future.cancel(true);
-            } catch (InterruptedException | ExecutionException e) {
-                log.warn("Heartbeat request failed", e);
-            }
+        try {
+            CompletableFutures.allAsList(futures).get(30, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            log.warn("Heartbeat request timed out");
+        } catch (InterruptedException | ExecutionException e) {
+            log.warn("Heartbeat request failed", e);
+        } finally {
+            futures.forEach(future ->{
+                if(!future.isDone() && !future.isCompletedExceptionally()){
+                    future.cancel(true);
+                }
+            });
         }
 
         if (anySuccess.get()) {
