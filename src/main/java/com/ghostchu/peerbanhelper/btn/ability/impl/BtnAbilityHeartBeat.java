@@ -108,7 +108,9 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         List<String> ifNets = new ArrayList<>();
         lastResult = "Preparing to iterating network interfaces";
-        for (NetworkIF networkIF : new SystemInfo().getHardware().getNetworkIFs()) {
+        var ifs =  new SystemInfo().getHardware().getNetworkIFs();
+        lastResult = "Iterating network interfaces";
+        for (NetworkIF networkIF : ifs) {
             lastResult = "Preparing interface: " + networkIF.getName();
             var ipv4 = networkIF.getIPv4addr();
             var ipv6 = networkIF.getIPv6addr();
