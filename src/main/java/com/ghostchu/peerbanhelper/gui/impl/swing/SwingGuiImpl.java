@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -218,21 +217,19 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 }
             };
         }
-        FlatAnimatedLafChange.showSnapshot();
-        try {
-            if (isDark) {
-                pbhFlatLafTheme.applyDark();
-            } else {
-                pbhFlatLafTheme.applyLight();
-            }
-            Main.getEventBus().post(new PBHLookAndFeelNeedReloadEvent(isDark));
-            FlatLaf.updateUILater();
-        } finally {
-            FlatAnimatedLafChange.hideSnapshotWithAnimation();
+
+        if (isDark) {
+            pbhFlatLafTheme.applyDark();
+        } else {
+            pbhFlatLafTheme.applyLight();
         }
+        Main.getEventBus().post(new PBHLookAndFeelNeedReloadEvent(isDark));
+        FlatLaf.updateUILater();
     }
 
-    /** @noinspection ALL */
+    /**
+     * @noinspection ALL
+     */
     private Font getFont(String fontName, int style, int size, Font currentFont) {
         if (currentFont == null) return null;
         String resultName;
