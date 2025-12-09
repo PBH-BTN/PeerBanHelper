@@ -767,36 +767,36 @@ MODULE_ANTI_VAMPIRE_TITLE: "任務反吸血"
 MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_NON_0019: "[禁止] 已識別的拒絕上傳的不良客戶端（迅雷，非 0019 版本）：禁止連接到任何任務"
 MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_0019_SEEDING: "[對等反制] 已識別的拒絕做種的不良客戶端（迅雷，0019 版本）：禁止連接到做種任務"
 DOWNLOADER_VERSION_INCOMPATIBLE: "此下載器的版本不受支援，目前版本 {}，需要版本 {}"
-BTN_ABILITY_IP_DENYLIST_TITLE: "IP 拒绝列表"
+BTN_ABILITY_IP_DENYLIST_TITLE: "IP 拒絕列表"
 BTN_ABILITY_IP_DENYLIST_DESCRIPTION: |
-  IP 拒绝列表能力允许远程服务器下发需要拦截的 IP/CIDR 地址列表。位于此列表内的连接将立刻被 PeerBanHelper 封禁。  
+  IP 拒絕列表能力允許遠端伺服器下發需要攔截的 IP/CIDR 位址列表。位於此列表內的連接將立刻被 PeerBanHelper 封禁。  
   
-  **规则版本:** {}  
-  **当前已加载:** {} 条规则
-BTN_ABILITY_IP_DENYLIST_LOADED_FROM_CACHE: "已从本地缓存加载 IP 拒绝列表，规则版本: {}，共 {} 条规则"
-BTN_ABILITY_IP_DENYLIST_LOAD_FAILED_FROM_CACHE: "从本地缓存加载 IP 拒绝列表失败"
-BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 拒绝列表当前已是最新版本，规则版本: {}，共 {} 条规则"
-BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE: "已从远程服务器加载 IP 拒绝列表，规则版本: {}，共 {} 条规则"
-BTN_ABILITY_IP_ALLOWLIST_TITLE: "IP 允许列表"
+  **規則版本:** {}  
+  **目前已載入:** {} 條規則
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_CACHE: "已從本機快取載入 IP 拒絕列表，規則版本: {}，共 {} 條規則"
+BTN_ABILITY_IP_DENYLIST_LOAD_FAILED_FROM_CACHE: "從本機快取載入 IP 拒絕列表失敗"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 拒絕列表目前已是最新版本，規則版本: {}，共 {} 條規則"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE: "已從遠端伺服器載入 IP 拒絕列表，規則版本: {}，共 {} 條規則"
+BTN_ABILITY_IP_ALLOWLIST_TITLE: "IP 允許列表"
 BTN_ABILITY_IP_ALLOWLIST_DESCRIPTION: |
-  IP 允许列表能力允许远程服务器下发跳过监测的 IP/CIDR 地址列表。位于此列表内的连接不会被 PeerBanHelper 封禁。  
+  IP 允許列表能力允許遠端伺服器下發跳過監測的 IP/CIDR 位址列表。位於此列表內的連接不會被 PeerBanHelper 封禁。  
   
-  **规则版本:** {}  
-  **当前已加载:** {} 条规则
-BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_CACHE: "已从本地缓存加载 IP 允许列表，规则版本: {}，共 {} 条规则"
-BTN_ABILITY_IP_ALLOWLIST_LOAD_FAILED_FROM_CACHE: "从本地缓存加载 IP 允许列表失败"
-BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 允许列表当前已是最新版本，规则版本: {}，共 {} 条规则"
-BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE: "已从远程服务器加载 IP 允许列表，规则版本: {}，共 {} 条规则"
-BTN_ABILITY_IP_ALLOWLIST_RULE: "IP 允许列表"
-BTN_ABILITY_IP_ALLOWLIST_HIT: "匹配允许列表: {}"
-BTN_ABILITY_IP_DENYLIST_RULE: "IP 拒绝列表"
-BTN_ABILITY_IP_DENYLIST_HIT: "匹配拒绝列表: {}"
-BTN_POW_CAPTCHA_LOAD_FROM_REMOTE: "获取验证请求基本数据失败，可能是网络故障或者验证服务器错误，请稍后重试: {} - {}"
-BTN_POW_CAPTCHA_COMPUTING: "远程服务器要求完成工作量证明验证以识别您的请求是否为恶意请求，PeerBanHelper 正在完成验证计算，计算过程 CPU 使用量可能短暂升高。"
-BTN_POW_CAPTCHA_COMPUTE_COMPLETED: "证明计算完成，耗时: {}ms"
-BTN_ABILITY_IP_QUERY_TITLE: "BTN IP 查询服务"
+  **規則版本:** {}  
+  **目前已載入:** {} 條規則
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_CACHE: "已從本機快取載入 IP 允許列表，規則版本: {}，共 {} 條規則"
+BTN_ABILITY_IP_ALLOWLIST_LOAD_FAILED_FROM_CACHE: "從本機快取載入 IP 允許列表失敗"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 允許列表目前已是最新版本，規則版本: {}，共 {} 條規則"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE: "已從遠端伺服器載入 IP 允許列表，規則版本: {}，共 {} 條規則"
+BTN_ABILITY_IP_ALLOWLIST_RULE: "IP 允許列表"
+BTN_ABILITY_IP_ALLOWLIST_HIT: "匹配允許列表: {}"
+BTN_ABILITY_IP_DENYLIST_RULE: "IP 拒絕列表"
+BTN_ABILITY_IP_DENYLIST_HIT: "匹配拒絕列表: {}"
+BTN_POW_CAPTCHA_LOAD_FROM_REMOTE: "獲取驗證請求基本資料失敗，可能是網路故障或者驗證伺服器錯誤，請稍後重試: {} - {}"
+BTN_POW_CAPTCHA_COMPUTING: "遠端伺服器要求完成工作量證明驗證以識別您的請求是否為惡意請求，PeerBanHelper 正在完成驗證計算，計算過程 CPU 使用量可能短暫升高。"
+BTN_POW_CAPTCHA_COMPUTE_COMPLETED: "證明計算完成，耗時: {}ms"
+BTN_ABILITY_IP_QUERY_TITLE: "BTN IP 查詢服務"
 BTN_ABILITY_IP_QUERY_DESCRIPTION: |
-  BTN IP 查询服务允许 PeerBanHelper 查询 BTN 服务器以获取有关特定 IP 地址的更多信息。  
-  PeerBanHelper 功能模块可以使用此服务提供的能力获取有关特定 IP 地址在 BTN 上的活动概要。
-BTN_ABILITY_IP_QUERY_STATUS_OK: "查询成功处理: {}"
-BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP 查询功能能力在此 BTN 实例上不可用"
+  BTN IP 查詢服務允許 PeerBanHelper 查詢 BTN 伺服器以獲取有關特定 IP 位址的更多資訊。  
+  PeerBanHelper 功能模組可以使用此服務提供的能力獲取有關特定 IP 位址在 BTN 上的活動概要。
+BTN_ABILITY_IP_QUERY_STATUS_OK: "查詢成功處理: {}"
+BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP 查詢功能能力在此 BTN 實例上不可用"
