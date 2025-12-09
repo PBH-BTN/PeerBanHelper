@@ -1,18 +1,17 @@
+import { Message, Modal, Notification } from '@arco-design/web-vue'
 import 'normalize.css'
-import './assets/main.less'
-import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { Message } from '@arco-design/web-vue'
-import { Notification } from '@arco-design/web-vue'
-import App from './App.vue'
-import router from './router'
-import i18n from './locale'
+import { createApp } from 'vue'
 import { setGlobalOptions } from 'vue-request'
+import App from './App.vue'
+import './assets/main.less'
+import i18n from './locale'
+import router from './router'
 
 const app = createApp(App)
 Message._context = app._context
 Notification._context = app._context
-
+Modal._context = app._context
 setGlobalOptions({
   loadingDelay: 400,
   loadingKeep: 1000,

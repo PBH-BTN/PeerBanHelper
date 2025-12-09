@@ -39,6 +39,14 @@ export default {
   'page.oobe.btnConfig.appSecret.placeholder': 'Enter App Secret',
 
   'page.oobe.addDownloader.title': 'Add your first downloader',
+  'page.oobe.addDownloader.scan': 'Scan Downloader',
+  'page.oobe.addDownloader.scan.tooltip': 'User consent placeholder',
+  'page.oobe.addDownloader.scan.noDownloader': 'No available downloader found',
+  'page.oobe.addDownloader.scan.type': 'Type',
+  'page.oobe.addDownloader.scan.multi': 'Multiple downloaders found, please select manually',
+  'page.oobe.addDownloader.scan.one': 'One downloader found, information has been auto-filled',
+  'page.oobe.addDownloader.scan.cancel': 'Cancel',
+  'page.oobe.addDownloader.scan.select': 'Select',
   'page.oobe.addDownloader.description':
     "Choose your downloader type first, then fill in the downloader's WebUI related authentication information.",
   'page.oobe.addDownloader.test': 'Test downloader',

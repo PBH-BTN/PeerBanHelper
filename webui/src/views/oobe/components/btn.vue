@@ -65,7 +65,7 @@ type BtnMode = 'disabled' | 'anonymous' | 'account'
 
 const mode = computed<BtnMode>({
   get() {
-    if (!config.value.btn.enabled) {
+    if (!config.value.btn.enabled && !config.value.btn.submit) {
       return 'disabled'
     }
     if (config.value.btn.app_id === null && config.value.btn.app_secret === null) {

@@ -59,8 +59,8 @@ const initConfig = ref<InitConfig>({
     } as downloaderConfig
   },
   btn: {
-    enabled: false,
-    submit: false,
+    enabled: true,
+    submit: true,
     app_id: null,
     app_secret: null
   },
