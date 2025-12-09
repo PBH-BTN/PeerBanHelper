@@ -258,17 +258,18 @@ public final class BtnNetwork implements Reloadable {
             }
             PowCaptchaData powCaptchaData = JsonUtil.standard().fromJson(respContent, PowCaptchaData.class);
             long startTime = System.currentTimeMillis();
-            PoWClient poWClient = new PoWClient();
-            log.debug(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTING));
-            byte[] nonce = poWClient.solve(
-                    Base64.getDecoder().decode(powCaptchaData.getChallengeBase64()),
-                    powCaptchaData.getDifficultyBits(),
-                    powCaptchaData.getAlgorithm()
-            );
-            requestBuilder.header("X-BTN-PowID", powCaptchaData.getId())
-                    .header("X-BTN-PowSolution", Base64.getEncoder().encodeToString(nonce));
-            long costTime = System.currentTimeMillis() - startTime;
-            log.debug(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTE_COMPLETED, costTime));
+            try (PoWClient poWClient = new PoWClient()) {
+                log.debug(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTING));
+                byte[] nonce = poWClient.solve(
+                        Base64.getDecoder().decode(powCaptchaData.getChallengeBase64()),
+                        powCaptchaData.getDifficultyBits(),
+                        powCaptchaData.getAlgorithm()
+                );
+                requestBuilder.header("X-BTN-PowID", powCaptchaData.getId())
+                        .header("X-BTN-PowSolution", Base64.getEncoder().encodeToString(nonce));
+                long costTime = System.currentTimeMillis() - startTime;
+                log.debug(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTE_COMPLETED, costTime));
+            }
         } catch (Throwable e) {
             log.error("Unable to gather or solve PoW Captcha", e);
         }

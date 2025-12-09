@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * PoW 无交互验证码（客户端）
  *
  */
-public class PoWClient {
+public class PoWClient implements AutoCloseable {
     private final int threadCount = Runtime.getRuntime().availableProcessors();
     private final ExecutorService executor = Executors.newWorkStealingPool(threadCount);
 
@@ -68,5 +68,10 @@ public class PoWClient {
             return (hash[fullBytes] & mask) == 0;
         }
         return true;
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.executor.close();
     }
 }
