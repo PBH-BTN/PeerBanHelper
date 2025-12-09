@@ -107,6 +107,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         List<CompletableFuture<Void>> futures = Collections.synchronizedList(new ArrayList<>());
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         List<String> ifNets = new ArrayList<>();
+        lastResult = "Iterating network interfaces";
         for (NetworkIF networkIF : new SystemInfo().getHardware().getNetworkIFs()) {
             var ipv4 = networkIF.getIPv4addr();
             var ipv6 = networkIF.getIPv6addr();
@@ -114,6 +115,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
             ifNets.addAll(Arrays.asList(ipv6));
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
+        lastResult = "Creating requests for interfaces: " + ifNets;
         try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
             ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
                 var client = createHttpClient(ip);
@@ -138,7 +140,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                 }
             }, executorService)));
         }
-
+        lastResult = "Waiting for all heartbeat requests to complete";
         try {
             CompletableFutures.allAsList(futures).get(30, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
