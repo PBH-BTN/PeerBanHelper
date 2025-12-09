@@ -259,7 +259,7 @@ public final class BtnNetwork implements Reloadable {
             PowCaptchaData powCaptchaData = JsonUtil.standard().fromJson(respContent, PowCaptchaData.class);
             long startTime = System.currentTimeMillis();
             PoWClient poWClient = new PoWClient();
-            log.info(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTING));
+            log.debug(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTING));
             byte[] nonce = poWClient.solve(
                     Base64.getDecoder().decode(powCaptchaData.getChallengeBase64()),
                     powCaptchaData.getDifficultyBits(),
@@ -268,7 +268,7 @@ public final class BtnNetwork implements Reloadable {
             requestBuilder.header("X-BTN-PowID", powCaptchaData.getId())
                     .header("X-BTN-PowSolution", Base64.getEncoder().encodeToString(nonce));
             long costTime = System.currentTimeMillis() - startTime;
-            log.info(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTE_COMPLETED), costTime);
+            log.debug(tlUI(Lang.BTN_POW_CAPTCHA_COMPUTE_COMPLETED, costTime));
         } catch (Throwable e) {
             log.error("Unable to gather or solve PoW Captcha", e);
         }
