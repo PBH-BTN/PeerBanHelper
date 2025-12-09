@@ -111,7 +111,7 @@ dependencies {
     }
 
     // System monitoring
-    implementation("com.github.oshi:oshi-core:5.8.6") {
+    implementation("com.github.oshi:oshi-core:6.9.1") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
