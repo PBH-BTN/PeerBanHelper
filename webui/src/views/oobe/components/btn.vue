@@ -31,24 +31,25 @@
           </a-radio>
         </a-radio-group>
       </a-form-item>
-      <template v-if="mode === 'account'">
-        <a-form-item label="App ID" required>
-          <a-input
-            v-model="appId"
-            :style="{ width: '27em' }"
-            :placeholder="t('page.oobe.btnConfig.appId.placeholder')"
-            allow-clear
-          />
-        </a-form-item>
-        <a-form-item label="App Secret" required>
-          <a-input-password
-            v-model="appSecret"
-            :style="{ width: '27em' }"
-            :placeholder="t('page.oobe.btnConfig.appSecret.placeholder')"
-            allow-clear
-          />
-        </a-form-item>
-      </template>
+      <a-form-item v-if="mode === 'account'" label="App ID" required>
+        <a-input
+          v-model="appId"
+          :style="{ width: '27em' }"
+          :placeholder="t('page.oobe.btnConfig.appId.placeholder')"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item v-if="mode === 'account'" label="App Secret" required>
+        <a-input-password
+          v-model="appSecret"
+          :style="{ width: '27em' }"
+          :placeholder="t('page.oobe.btnConfig.appSecret.placeholder')"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item v-if="config.btn.enabled" :label="t('page.oobe.btnConfig.enableSubmit.title')">
+        <a-switch v-model="config.btn.submit" />
+      </a-form-item>
     </a-form>
   </a-space>
 </template>
@@ -65,7 +66,7 @@ type BtnMode = 'disabled' | 'anonymous' | 'account'
 
 const mode = computed<BtnMode>({
   get() {
-    if (!config.value.btn.enabled && !config.value.btn.submit) {
+    if (!config.value.btn.enabled) {
       return 'disabled'
     }
     if (config.value.btn.app_id === null && config.value.btn.app_secret === null) {
@@ -77,19 +78,16 @@ const mode = computed<BtnMode>({
     switch (value) {
       case 'disabled':
         config.value.btn.enabled = false
-        config.value.btn.submit = true
         config.value.btn.app_id = null
         config.value.btn.app_secret = null
         break
       case 'anonymous':
         config.value.btn.enabled = true
-        config.value.btn.submit = true
         config.value.btn.app_id = null
         config.value.btn.app_secret = null
         break
       case 'account':
         config.value.btn.enabled = true
-        config.value.btn.submit = true
         if (config.value.btn.app_id === null) {
           config.value.btn.app_id = ''
         }
