@@ -54,4 +54,9 @@ public interface FeatureModule {
      */
     void saveConfig() throws IOException;
 
+    /**
+     * 模块是否实际已启用（调用了 enable()）
+     */
+    boolean isActuallyEnabled();
+
 }

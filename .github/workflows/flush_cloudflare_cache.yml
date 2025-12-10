@@ -11,7 +11,7 @@ jobs:
   purge-cloudflare-cache:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Purge cache
         uses: jakejarvis/cloudflare-purge-action@master
         env:

@@ -15,7 +15,6 @@ import com.ghostchu.peerbanhelper.module.impl.rule.dto.DataUpdateResultDTO;
 import com.ghostchu.peerbanhelper.module.impl.rule.dto.IPBanResultDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.query.Page;
@@ -53,6 +52,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,6 +73,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private long banDuration;
+    private ScheduledFuture<?> reloadConfigTask; // 保留此字段用于 changeCheckInterval() 方法
     @Autowired
     private HTTPUtil httpUtil;
     private boolean preloadBanList;
@@ -103,7 +104,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         ConfigurationSection config = getConfig();
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        reloadConfigTask = registerScheduledTask(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
         Main.getReloadManager().register(this);
     }
 
@@ -324,29 +325,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @return 加载的行数
      */
     private int fileToIPList(File ruleFile, DualIPv4v6AssociativeTries<String> ips) throws IOException {
-        AtomicInteger count = new AtomicInteger();
-        StringJoiner sj = new StringJoiner("\n");
-        var lines = Files.readLines(ruleFile, StandardCharsets.UTF_8);
-        for (String ele : lines) {
-            if (ele.isBlank()) continue;
-            if (ele.startsWith("#")) {
-                // add into sj but without hashtag prefix
-                sj.add(ele.substring(1));
-                continue;
-            }
-            try {
-                var parsedIp = parseRuleLine(ele, sj.toString());
-                if (parsedIp != null) {
-                    count.getAndIncrement();
-                    ips.put(parsedIp.getKey(), parsedIp.getValue());
-                }
-            } catch (Exception e) {
-                log.error("Unable parse rule: {}", ele, e);
-            } finally {
-                sj = new StringJoiner("\n");
-            }
-        }
-        return count.get();
+        return stringToIPList(new String(Files.toByteArray(ruleFile), StandardCharsets.UTF_8), ips);
     }
 
     /**
@@ -515,10 +494,13 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @throws IOException 保存异常
      */
     public void changeCheckInterval(long checkInterval) throws IOException {
+        // 取消旧的定时任务
+        cancelScheduledTask(reloadConfigTask);
         this.checkInterval = checkInterval;
         getConfig().set("check-interval", checkInterval);
         saveConfig();
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        // 重新注册新的定时任务
+        reloadConfigTask = registerScheduledTask(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
     private void preloadBanList() {

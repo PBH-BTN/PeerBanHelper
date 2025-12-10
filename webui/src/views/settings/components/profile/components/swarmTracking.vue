@@ -8,14 +8,14 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-        v-if="model.enabled"
-        :label="
+      v-if="model.enabled"
+      :label="
         t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval')
       "
-        :tooltip="
+      :tooltip="
         t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval')
       "
-        field="model.data_flush_interval"
+      field="model.data_flush_interval"
     >
       <a-input-number v-model="model.data_flush_interval" style="width: 200px">
         <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }}</template>
@@ -25,9 +25,9 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import type {SwarmTracking} from '@/api/model/profile'
-import {useI18n} from 'vue-i18n'
-import {formatMilliseconds} from '@/utils/time.ts'
+import type { SwarmTracking } from '@/api/model/profile'
+import { useI18n } from 'vue-i18n'
+import { formatMilliseconds } from '@/utils/time.ts'
 
 const { t } = useI18n()
 const model = defineModel<SwarmTracking>({ required: true })

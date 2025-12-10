@@ -170,7 +170,7 @@ public final class IPDB implements AutoCloseable {
         try {
             IPGeoData.NetworkData networkData = new IPGeoData.NetworkData();
             AsnResponse asnResponse = mmdbASN.asn(address);
-            networkData.setIsp(asnResponse.getAutonomousSystemOrganization());
+            networkData.setIsp(asnResponse.autonomousSystemOrganization());
             networkData.setNetType(null);
             return networkData;
         } catch (Exception ignored) {
@@ -184,14 +184,14 @@ public final class IPDB implements AutoCloseable {
             IPGeoData.CityData cityData = new IPGeoData.CityData();
             IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
             CityResponse cityResponse = mmdbCity.city(address);
-            City city = cityResponse.getCity();
-            Location location = cityResponse.getLocation();
-            cityData.setName(city.getName());
-            cityData.setIso(city.getGeoNameId());
-            locationData.setTimeZone(location.getTimeZone());
-            locationData.setLongitude(location.getLongitude());
-            locationData.setLatitude(location.getLatitude());
-            locationData.setAccuracyRadius(location.getAccuracyRadius());
+            City city = cityResponse.city();
+            Location location = cityResponse.location();
+            cityData.setName(city.name());
+            cityData.setIso(city.geonameId());
+            locationData.setTimeZone(location.timeZone());
+            locationData.setLongitude(location.longitude());
+            locationData.setLatitude(location.latitude());
+            locationData.setAccuracyRadius(location.accuracyRadius());
             cityData.setLocation(locationData);
             return cityData;
         } catch (Exception e) {
@@ -203,15 +203,15 @@ public final class IPDB implements AutoCloseable {
         try {
             IPGeoData.CountryData countryData = new IPGeoData.CountryData();
             CountryResponse countryResponse = mmdbCity.country(address);
-            Country country = countryResponse.getCountry();
-            countryData.setIso(country.getIsoCode());
-            String countryRegionName = country.getName();
+            Country country = countryResponse.country();
+            countryData.setIso(country.isoCode());
+            String countryRegionName = country.name();
             // 对 TW,HK,MO 后处理，偷个懒
             var code = languageTag.getFirst();
             code = code.toLowerCase(Locale.ROOT).replace("-", "_");
             // 台湾、香港、澳门地区有一个独立 ISO 代码，需要手动处理一下保证符合所在地法律法规
             // 这坨代码已经改成一坨了，有时间得写个好点的 :(
-            if ((code.equals("zh_cn") || code.equals("zh_hk") || code.equals("zh_mo")) && (country.getIsoCode().equals("TW") || country.getIsoCode().equals("HK") || country.getIsoCode().equalsIgnoreCase("MO"))) {
+            if ((code.equals("zh_cn") || code.equals("zh_hk") || code.equals("zh_mo")) && (country.isoCode().equals("TW") || country.isoCode().equals("HK") || country.isoCode().equalsIgnoreCase("MO"))) {
                 countryRegionName = "中国" + countryRegionName;
             }
             countryData.setName(countryRegionName);
@@ -227,11 +227,11 @@ public final class IPDB implements AutoCloseable {
             IPGeoData.ASData asData = new IPGeoData.ASData();
             AsnResponse asnResponse = mmdbASN.asn(address);
             IPGeoData.ASData.ASNetwork network = new IPGeoData.ASData.ASNetwork();
-            network.setPrefixLength(asnResponse.getNetwork().getPrefixLength());
-            network.setIpAddress(asnResponse.getNetwork().getNetworkAddress().getHostAddress());
-            asData.setNumber(asnResponse.getAutonomousSystemNumber());
-            asData.setOrganization(asnResponse.getAutonomousSystemOrganization());
-            asData.setIpAddress(asnResponse.getIpAddress());
+            network.setPrefixLength(asnResponse.network().prefixLength());
+            network.setIpAddress(asnResponse.network().networkAddress().getHostAddress());
+            asData.setNumber(asnResponse.autonomousSystemNumber());
+            asData.setOrganization(asnResponse.autonomousSystemOrganization());
+            asData.setIpAddress(asnResponse.ipAddress().getHostAddress());
             asData.setNetwork(network);
             return asData;
         } catch (Exception ignored) {
@@ -369,7 +369,7 @@ public final class IPDB implements AutoCloseable {
     private void validateMMDB(File tmp) throws IOException {
         try (InputStream is = new FileInputStream(tmp);
              var reader = new Reader(is, NoCache.getInstance())) {
-            log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().getDatabaseType());
+            log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().databaseType());
         }
     }
 

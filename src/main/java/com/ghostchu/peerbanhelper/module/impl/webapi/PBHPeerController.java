@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.btn.BtnNetwork;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
 import com.ghostchu.peerbanhelper.database.dao.impl.*;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -8,8 +10,10 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerInfoDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerRecordEntityDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
@@ -27,12 +31,16 @@ import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
@@ -48,12 +56,14 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final RuleDao ruleDao;
     private final ModuleDao moduleDao;
     private final IPDBManager iPDBManager;
+    private final BtnNetwork btnNetwork;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
                              Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager,
-                             TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao, IPDBManager iPDBManager) {
+                             TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao, IPDBManager iPDBManager,
+                             @Autowired(required = false) BtnNetwork btnNetwork) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
@@ -66,6 +76,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         this.ruleDao = ruleDao;
         this.moduleDao = moduleDao;
         this.iPDBManager = iPDBManager;
+        this.btnNetwork = btnNetwork; // TODO: 测试禁用的情况下的依赖注入
     }
 
     @Override
@@ -88,8 +99,55 @@ public final class PBHPeerController extends AbstractFeatureModule {
         javalinWebContainer.javalin()
                 .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
                 .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS);
+                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ)
+                .get("/api/peer/{ip}/btnQueryIframe", this::handleBtnQueryIFrame, Role.USER_READ);
 
+    }
+
+    private void handleBtnQueryIFrame(@NotNull Context ctx) {
+        HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
+        var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
+        String ip = ipAddress.toNormalizedString();
+        if (btnNetwork == null) {
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_NETWORK_NOT_ENABLED), null));
+            return;
+            /**/
+        }
+        var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
+        if (ability == null) {
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_ABILITY_IP_QUERY_NOT_PROVIDED), null));
+            return;
+        }
+        BtnAbilityIpQuery queryAbility = (BtnAbilityIpQuery) ability;
+        var url = URLUtil.appendUrl(queryAbility.getIframeEndpoint(), Map.of(
+                "ip", ip,
+                "appId", btnNetwork.getAppId(),
+                "appSecret", btnNetwork.getAppSecret(),
+                "hardwareId", btnNetwork.getBtnHardwareId(),
+                "installationId", btnNetwork.getInstallationId()
+        ));
+        ctx.json(new StdResp(true, null, url));
+    }
+
+    private void handleBtnQuery(@NotNull Context ctx) throws IOException {
+        // 转换 IP 格式到 PBH 统一内部格式
+        HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
+        var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
+        String ip = ipAddress.toNormalizedString();
+
+        if (btnNetwork == null) {
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_NETWORK_NOT_ENABLED), null));
+            return;
+        }
+        var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
+        if (ability == null) {
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_ABILITY_IP_QUERY_NOT_PROVIDED), null));
+            return;
+        }
+        BtnAbilityIpQuery queryAbility = (BtnAbilityIpQuery) ability;
+        var query = queryAbility.query(ip);
+        ctx.json(new StdResp(true, null, query));
     }
 
     private void handleInfo(Context ctx) throws SQLException {
@@ -162,9 +220,17 @@ public final class PBHPeerController extends AbstractFeatureModule {
 //            }
         } catch (Exception ignored) {
         }
+        boolean btnQueryAvailable = false;
+        if (btnNetwork != null) {
+            var ability = btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
+            if (ability != null) {
+                btnQueryAvailable = true;
+            }
+        }
         var info = new PeerInfoDTO(
                 upDownResult != null || banCount > 0 || torrentAccessCount > 0,
-                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP, ptrLookup);
+                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount,
+                uploadedToPeer, downloadedFromPeer, geoIP, ptrLookup, btnQueryAvailable);
         ctx.json(new StdResp(true, null, info));
     }
 

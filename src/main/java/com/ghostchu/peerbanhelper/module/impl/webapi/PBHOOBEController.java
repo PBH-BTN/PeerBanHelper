@@ -55,7 +55,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .post("/api/oobe/init", this::handleOOBERequest, Role.ANYONE)
-                .get("/api/oobe/scanDownloader", this::handleOOBEScanDownloader, Role.ANYONE)
+                .post("/api/oobe/scanDownloader", this::handleOOBEScanDownloader, Role.ANYONE)
                 .post("/api/oobe/testDownloader", ctx -> validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject()), Role.ANYONE); // 指定 ANYONE，否则会被鉴权代码拉取鉴权
     }
 
@@ -101,6 +101,18 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             log.error("Internal server error, unable to create downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION), null));
+        }
+        var btn = parser.getAsJsonObject("btn");
+        if (btn != null) {
+            if (btn.has("enabled") && !btn.get("enabled").isJsonNull())
+                conf.set("btn.enabled", btn.get("enabled").getAsBoolean());
+            if (btn.has("submit") && !btn.get("submit").isJsonNull())
+                conf.set("btn.submit", btn.get("submit").getAsBoolean());
+            if (btn.has("app_id") && !btn.get("app_id").isJsonNull())
+                conf.set("btn.app-id", btn.get("app_id").getAsString());
+            if (btn.has("app_secret") && !btn.get("app_secret").isJsonNull())
+                conf.set("btn.app-secret", btn.get("app_secret").getAsString());
+            conf.save(Main.getMainConfigFile());
         }
     }
 

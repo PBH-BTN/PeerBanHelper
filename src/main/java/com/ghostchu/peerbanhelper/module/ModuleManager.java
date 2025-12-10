@@ -18,4 +18,10 @@ public interface ModuleManager {
     @NotNull List<FeatureModule> getModules();
 
     void loadPlugin();
+
+    /**
+     * 重新加载所有模块的启用状态
+     * 根据配置文件的 enabled 字段，自动启用或禁用模块
+     */
+    void reloadModuleStates();
 }

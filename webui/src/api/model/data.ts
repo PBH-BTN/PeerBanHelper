@@ -1,5 +1,6 @@
 import type { IPGeoData } from './banlist'
 import type { DownloaderBasicInfo } from './downloader'
+
 export interface TorrentInfo {
   id: number
   infoHash: string
@@ -67,6 +68,7 @@ export interface IPBasicInfo {
   banCount: number
   downloadedFromPeer: number
   firstTimeSeen: number
+  btnQueryAvailable: boolean
   /**
    * GeoIP 信息，可能为空
    */

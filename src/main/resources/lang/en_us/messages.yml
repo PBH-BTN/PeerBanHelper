@@ -768,3 +768,36 @@ ANTI_VAMPIRE_TITLE: "Anti-Leeching"
 MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_NON_0019: "[Blocked] Identified malicious client refusing to upload (Xunlei, non-0019 version): Blocked from connecting to any tasks"
 MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_0019_SEEDING: "[Countermeasure] Identified malicious client refusing to seed (Xunlei, 0019 version): Blocked from connecting to seeding tasks"
 DOWNLOADER_VERSION_INCOMPATIBLE: "Downloader version is incompatible: {}, required: {}"
+BTN_ABILITY_IP_DENYLIST_TITLE: "IP Denylist"
+BTN_ABILITY_IP_DENYLIST_DESCRIPTION: |
+  The IP Denylist capability allows the remote server to distribute a list of IP/CIDR addresses that need to be blocked. Connections in this list will be immediately banned by PeerBanHelper.
+  
+  **Rule Version:** {}
+  **Currently Loaded:** {} rules
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_CACHE: "Loaded IP denylist from local cache, rule version: {}, total {} rules"
+BTN_ABILITY_IP_DENYLIST_LOAD_FAILED_FROM_CACHE: "Failed to load IP denylist from local cache"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP denylist is already up-to-date, rule version: {}, total {} rules"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE: "Loaded IP denylist from remote server, rule version: {}, total {} rules"
+BTN_ABILITY_IP_ALLOWLIST_TITLE: "IP Allowlist"
+BTN_ABILITY_IP_ALLOWLIST_DESCRIPTION: |
+  The IP Allowlist capability allows the remote server to distribute a list of IP/CIDR addresses that should skip monitoring. Connections in this list will not be banned by PeerBanHelper.
+  
+  **Rule Version:** {}
+  **Currently Loaded:** {} rules
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_CACHE: "Loaded IP allowlist from local cache, rule version: {}, total {} rules"
+BTN_ABILITY_IP_ALLOWLIST_LOAD_FAILED_FROM_CACHE: "Failed to load IP allowlist from local cache"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP allowlist is already up-to-date, rule version: {}, total {} rules"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE: "Loaded IP allowlist from remote server, rule version: {}, total {} rules"
+BTN_ABILITY_IP_ALLOWLIST_RULE: "IP Allowlist"
+BTN_ABILITY_IP_ALLOWLIST_HIT: "Matched allowlist: {}"
+BTN_ABILITY_IP_DENYLIST_RULE: "IP Denylist"
+BTN_ABILITY_IP_DENYLIST_HIT: "Matched denylist: {}"
+BTN_POW_CAPTCHA_LOAD_FROM_REMOTE: "Failed to obtain verification request data, possibly due to network failure or verification server error, please try again later: {} - {}"
+BTN_POW_CAPTCHA_COMPUTING: "The remote server requires completing Proof of Work verification to identify whether your request is malicious. PeerBanHelper is completing the verification calculation, CPU usage may briefly increase during the calculation process."
+BTN_POW_CAPTCHA_COMPUTE_COMPLETED: "Proof calculation completed, time taken: {}ms"
+BTN_ABILITY_IP_QUERY_TITLE: "BTN IP Query Service"
+BTN_ABILITY_IP_QUERY_DESCRIPTION: |
+  The BTN IP Query Service allows PeerBanHelper to query the BTN server for more information about specific IP addresses.
+  PeerBanHelper functional modules can use this service's capabilities to obtain an activity summary for specific IP addresses on BTN.
+BTN_ABILITY_IP_QUERY_STATUS_OK: "Query processed successfully: {}"
+BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP Query capability is not available on this BTN instance"

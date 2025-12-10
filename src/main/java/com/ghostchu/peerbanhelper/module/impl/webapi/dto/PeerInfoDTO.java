@@ -12,6 +12,7 @@ public record PeerInfoDTO(
         long uploadedToPeer,
         long downloadedFromPeer,
         IPGeoData geo,
-        String ptrLookup
+        String ptrLookup,
+        boolean btnQueryAvailable
 ) {
 }

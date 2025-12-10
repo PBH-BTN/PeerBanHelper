@@ -43,15 +43,20 @@ public final class ModuleManagerImpl implements ModuleManager {
     }
 
     private void attemptRegister(FeatureModule module){
-        if (module.isModuleEnabled()) {
-            synchronized (modules) {
+        synchronized (modules) {
+            // 添加到模块列表（不管是否启用）
+            if (!modules.contains(module)) {
+                this.modules.add(module);
+            }
+
+            // 如果配置启用，则真正启用模块
+            if (module.isModuleEnabled()) {
                 var moduleRegisterEvent = new ModuleRegisterEvent(module);
                 Main.getEventBus().post(moduleRegisterEvent);
                 if (moduleRegisterEvent.isCancelled()) {
                     log.debug("Module {} registration cancelled: {}", module.getName(), moduleRegisterEvent.getCancelReason());
                     return;
                 }
-                this.modules.add(module);
                 module.enable();
             }
         }
@@ -114,7 +119,52 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public @NotNull List<FeatureModule> getModules() {
-        return List.copyOf(modules);
+        // 只返回实际已启用的模块
+        synchronized (modules) {
+            return modules.stream()
+                    .filter(FeatureModule::isActuallyEnabled)
+                    .toList();
+        }
+    }
+
+    /**
+     * 重新加载所有模块的启用状态
+     * 根据配置文件的 enabled 字段，自动启用或禁用模块
+     */
+    @Override
+    public void reloadModuleStates() {
+        log.info("Reloading module states based on configuration...");
+
+        // 直接遍历所有已知的模块
+        List<FeatureModule> modulesCopy;
+        synchronized (modules) {
+            modulesCopy = new ArrayList<>(modules);
+        }
+
+        for (FeatureModule module : modulesCopy) {
+            boolean shouldBeEnabled = module.isModuleEnabled();
+            boolean isCurrentlyEnabled = module.isActuallyEnabled();
+
+            if (shouldBeEnabled && !isCurrentlyEnabled) {
+                // 模块应该启用但当前未启用，启用它
+                log.info("Enabling module {} due to configuration change", module.getName());
+                var moduleRegisterEvent = new ModuleRegisterEvent(module);
+                Main.getEventBus().post(moduleRegisterEvent);
+                if (moduleRegisterEvent.isCancelled()) {
+                    log.debug("Module {} registration cancelled: {}", module.getName(), moduleRegisterEvent.getCancelReason());
+                    continue;
+                }
+                module.enable();
+            } else if (!shouldBeEnabled && isCurrentlyEnabled) {
+                // 模块不应该启用但当前已启用，禁用它
+                log.info("Disabling module {} due to configuration change", module.getName());
+                var moduleUnregisterEvent = new ModuleUnregisterEvent(module);
+                Main.getEventBus().post(moduleUnregisterEvent);
+                module.disable();
+            }
+        }
+
+        log.info("Module states reloaded successfully");
     }
 
     /**

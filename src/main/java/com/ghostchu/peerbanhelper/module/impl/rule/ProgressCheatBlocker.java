@@ -97,7 +97,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         reloadConfig();
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        registerScheduledTask(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
         Main.getEventBus().register(this);
     }

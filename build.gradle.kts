@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.1.5"
+version = "9.2.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -83,7 +83,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.47.0.0")
 
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:4.4.0")
+    implementation("com.maxmind.geoip2:geoip2:5.0.1")
 
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
@@ -111,7 +111,7 @@ dependencies {
     }
 
     // System monitoring
-    implementation("com.github.oshi:oshi-core:5.8.6") {
+    implementation("com.github.oshi:oshi-core:6.9.1") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
@@ -188,6 +188,7 @@ dependencies {
 
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0")
+
 }
 
 application {

@@ -8,18 +8,20 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.spotify.futures.CompletableFutures;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.json.JSONException;
-import oshi.SystemInfo;
-import oshi.hardware.NetworkIF;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,6 +33,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final String endpoint;
     private final boolean multiIf;
+    private final boolean powCaptcha;
     private String lastResult = "No information";
 
     public BtnAbilityHeartBeat(BtnNetwork btnNetwork, JsonObject ability) {
@@ -39,6 +42,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         this.endpoint = ability.get("endpoint").getAsString();
         this.multiIf = ability.get("multi_if").getAsBoolean();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
     }
 
     @Override
@@ -59,7 +63,8 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     @Override
     public void load() {
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
-        btnNetwork.getScheduler().scheduleWithFixedDelay(this::sendHeartBeat, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getScheduler().scheduleWithFixedDelay(this::sendHeartBeat, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        lastResult = "Scheduled";
     }
 
     private void sendHeartBeat() {
@@ -71,12 +76,15 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     }
 
     private void sendHeartBeatDefaultIf() {
+        lastResult = "Requesting as default interface";
         var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", "default")), MediaType.parse("application/json"));
         Request.Builder request = new Request.Builder().url(endpoint).post(body);
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
         try (Response resp = btnNetwork.getHttpUtil().newBuilder().build().newCall(request.build()).execute()) {
+            var responseBody = resp.body().string();
             if (!resp.isSuccessful()) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_FAILED));
-                lastResult = "default -> Failed: " + resp.code() + " - " + resp.body().string();
+                lastResult = "default -> Failed: " + resp.code() + " - " + responseBody;
             } else {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_SUCCESS));
                 ServerResponse data = JsonUtil.standard().fromJson(resp.body().charStream(), ServerResponse.class);
@@ -97,93 +105,213 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         List<CompletableFuture<Void>> futures = Collections.synchronizedList(new ArrayList<>());
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         List<String> ifNets = new ArrayList<>();
-        for (NetworkIF networkIF : new SystemInfo().getHardware().getNetworkIFs()) {
-            var ipv4 = networkIF.getIPv4addr();
-            var ipv6 = networkIF.getIPv6addr();
-            ifNets.addAll(Arrays.asList(ipv4));
-            ifNets.addAll(Arrays.asList(ipv6));
+        try {
+            var interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                var netif = interfaces.nextElement();
+                var addrs = netif.getInetAddresses();
+                while (addrs.hasMoreElements()) {
+                    var addr = addrs.nextElement();
+                    String ip = addr.getHostAddress();
+                    ifNets.add(ip);
+                }
+            }
+        } catch (SocketException exception) {
+            log.warn("No interfaces found", exception);
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
-        try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
-            ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
-                var client = createHttpClient(ip);
-                var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
-                Request.Builder request = new Request.Builder().url(endpoint).post(body);
-                try (Response resp = client.newCall(request.build()).execute()) {
-                    if (!resp.isSuccessful()) {
-                        result.put(ip, "Failed: " + resp.code() + ": " + resp.message());
+        ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
+            var client = createHttpClient(ip);
+            var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
+            Request.Builder request = new Request.Builder().url(endpoint).post(body);
+            if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
+            try (Response resp = client.newCall(request.build()).execute()) {
+                var responseBody = resp.body().string();
+                if (!resp.isSuccessful()) {
+                    result.put(ip, "Failed: " + resp.code() + ": " + responseBody);
+                } else {
+                    ServerResponse data = JsonUtil.standard().fromJson(responseBody, ServerResponse.class);
+                    if (data != null && data.getExternalIp() != null) {
+                        result.put(ip, data.getExternalIp());
+                        anySuccess.set(true);
                     } else {
-                        ServerResponse data = JsonUtil.standard().fromJson(resp.body().charStream(), ServerResponse.class);
-                        if (data != null && data.getExternalIp() != null) {
-                            result.put(ip, data.getExternalIp());
-                            anySuccess.set(true);
-                        } else {
-                            result.put(ip, "Failed: No external IP returned");
-                        }
+                        result.put(ip, "Failed: No external IP returned");
                     }
-                } catch (final IOException | JSONException e) {
-                    result.put(ip, "Failed: " + e.getClass().getName() + ": " + e.getMessage());
                 }
-            }, executorService)));
-        }
-
-        for (CompletableFuture<Void> future : futures) {
-            try {
-                future.get(30, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                log.warn("Heartbeat request timed out");
-                future.cancel(true);
-            } catch (InterruptedException | ExecutionException e) {
-                log.warn("Heartbeat request failed", e);
+            } catch (final IOException | JSONException e) {
+                result.put(ip, "Failed: " + e.getClass().getName() + ": " + e.getMessage());
             }
+        }, Executors.newVirtualThreadPerTaskExecutor())));
+        lastResult = "Waiting for all heartbeat requests to complete";
+        try {
+            CompletableFutures.allAsList(futures).get(30, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            log.warn("Heartbeat request timed out");
+        } catch (InterruptedException | ExecutionException e) {
+            log.warn("Heartbeat request failed", e);
+        } finally {
+            futures.forEach(future -> {
+                if (!future.isDone() && !future.isCompletedExceptionally()) {
+                    future.cancel(true);
+                }
+            });
         }
-
         if (anySuccess.get()) {
             setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_SUCCESS));
         } else {
             setLastStatus(false, new TranslationComponent(Lang.BTN_HEARTBEAT_FAILED));
         }
-        // {ip} -> {result}
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> pair : result.entrySet()) {
-            builder.append(pair.getKey()).append(" -> ").append(pair.getValue()).append("\n");
+        for (String ip : new LinkedHashSet<>(result.values())) {
+            builder.append(ip).append("  \n");
         }
         lastResult = builder.toString();
     }
 
     private OkHttpClient createHttpClient(String ifNet) {
-        return btnNetwork.getHttpUtil()
-                .newBuilder()
+        InetAddress localAddress;
+        try {
+            localAddress = InetAddresses.forString(ifNet);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid local IP address: " + ifNet, e);
+        }
+
+        boolean isIPv4 = localAddress instanceof java.net.Inet4Address;
+
+        OkHttpClient.Builder builder = btnNetwork.getHttpClient().newBuilder()
+                .dns(hostname -> {
+                    List<InetAddress> allAddresses = Dns.SYSTEM.lookup(hostname);
+                    List<InetAddress> filteredAddresses = new ArrayList<>();
+
+                    for (InetAddress address : allAddresses) {
+                        boolean targetIsIPv4 = address instanceof java.net.Inet4Address;
+                        if (isIPv4 == targetIsIPv4) {
+                            filteredAddresses.add(address);
+                        }
+                    }
+
+                    if (filteredAddresses.isEmpty()) {
+                        log.warn("No matching {} addresses found for {}", isIPv4 ? "IPv4" : "IPv6", hostname);
+                        return allAddresses;
+                    }
+
+                    return filteredAddresses;
+                })
                 .socketFactory(new SocketFactory() {
+                    private final javax.net.SocketFactory defaultFactory = javax.net.SocketFactory.getDefault();
+
+                    private Socket createAndBindSocket(InetAddress targetAddress) throws IOException {
+                        if ((localAddress instanceof java.net.Inet4Address) != (targetAddress instanceof java.net.Inet4Address)) {
+                            throw new IOException("Address family mismatch: cannot bind " +
+                                    (localAddress instanceof java.net.Inet4Address ? "IPv4" : "IPv6") +
+                                    " local address to " +
+                                    (targetAddress instanceof java.net.Inet4Address ? "IPv4" : "IPv6") +
+                                    " target");
+                        }
+
+                        Socket socket = new Socket();
+                        try {
+                            socket.bind(new java.net.InetSocketAddress(localAddress, 0));
+                        } catch (IOException e) {
+                            throw new IOException("Failed to bind to local IP address: " + ifNet, e);
+                        }
+                        return socket;
+                    }
+
+                    @Override
+                    public Socket createSocket() throws IOException {
+                        return defaultFactory.createSocket();
+                    }
+
                     @Override
                     public Socket createSocket(String host, int port) throws IOException {
-                        try {
-                            return new Socket(host, port, InetAddresses.forString(ifNet), 0);
-                        } catch (IllegalArgumentException e) {
-                            throw new IOException("Invalid local IP address: " + ifNet, e);
-                        }
+                        InetAddress address = InetAddress.getByName(host);
+                        Socket socket = createAndBindSocket(address);
+                        socket.connect(new java.net.InetSocketAddress(address, port));
+                        return socket;
                     }
 
                     @Override
                     public Socket createSocket(InetAddress address, int port) throws IOException {
-                        try {
-                            return new Socket(address, port, InetAddresses.forString(ifNet), 0);
-                        } catch (IllegalArgumentException e) {
-                            throw new IOException("Invalid local IP address: " + ifNet, e);
-                        }
+                        Socket socket = createAndBindSocket(address);
+                        socket.connect(new java.net.InetSocketAddress(address, port));
+                        return socket;
                     }
 
                     @Override
                     public Socket createSocket(String host, int port, InetAddress clientAddress, int clientPort) throws IOException {
-                        return new Socket(host, port, clientAddress, clientPort);
+                        return defaultFactory.createSocket(host, port, clientAddress, clientPort);
                     }
 
                     @Override
                     public Socket createSocket(InetAddress address, int port, InetAddress clientAddress, int clientPort) throws IOException {
-                        return new Socket(address, port, clientAddress, clientPort);
+                        return defaultFactory.createSocket(address, port, clientAddress, clientPort);
                     }
-                })
-                .build();
+                });
+        var trustManager = btnNetwork.getHttpClient().x509TrustManager();
+        if (trustManager != null) {
+            SSLSocketFactory originalSslFactory = btnNetwork.getHttpClient().sslSocketFactory();
+            builder.sslSocketFactory(new SSLSocketFactory() {
+                @Override
+                public String[] getDefaultCipherSuites() {
+                    return originalSslFactory.getDefaultCipherSuites();
+                }
+
+                @Override
+                public String[] getSupportedCipherSuites() {
+                    return originalSslFactory.getSupportedCipherSuites();
+                }
+
+                private Socket createAndBindSocket(InetAddress targetAddress) throws IOException {
+                    if ((localAddress instanceof java.net.Inet4Address) != (targetAddress instanceof java.net.Inet4Address)) {
+                        throw new IOException("SSL: Address family mismatch: cannot bind " +
+                                (localAddress instanceof java.net.Inet4Address ? "IPv4" : "IPv6") +
+                                " local address to " +
+                                (targetAddress instanceof java.net.Inet4Address ? "IPv4" : "IPv6") +
+                                " target");
+                    }
+
+                    Socket socket = new Socket();
+                    try {
+                        socket.bind(new java.net.InetSocketAddress(localAddress, 0));
+                    } catch (IOException e) {
+                        throw new IOException("SSL: Failed to bind to local IP address: " + ifNet, e);
+                    }
+                    return socket;
+                }
+
+                @Override
+                public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
+                    return originalSslFactory.createSocket(s, host, port, autoClose);
+                }
+
+                @Override
+                public Socket createSocket(String host, int port) throws IOException {
+                    InetAddress address = InetAddress.getByName(host);
+                    Socket socket = createAndBindSocket(address);
+                    socket.connect(new java.net.InetSocketAddress(address, port));
+                    return originalSslFactory.createSocket(socket, host, port, true);
+                }
+
+                @Override
+                public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+                    return originalSslFactory.createSocket(host, port, localHost, localPort);
+                }
+
+                @Override
+                public Socket createSocket(InetAddress address, int port) throws IOException {
+                    Socket socket = createAndBindSocket(address);
+                    socket.connect(new java.net.InetSocketAddress(address, port));
+                    return originalSslFactory.createSocket(socket, address.getHostAddress(), port, true);
+                }
+
+                @Override
+                public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+                    return originalSslFactory.createSocket(address, port, localAddress, localPort);
+                }
+            }, btnNetwork.getHttpClient().x509TrustManager());
+        }
+        return builder.build();
     }
 
     @Override

@@ -695,7 +695,7 @@ BTN_HEARTBEAT_DESCRIPTION: |
 BTN_HEARTBEAT_UPDATING: "[BTN 网络] 计划任务正在向 BTN 网络更新心跳信息，请稍等……"
 BTN_HEARTBEAT_UPDATED: "[BTN 网络] 已通过 {} 次请求向 BTN 网络更新心跳信息。"
 BTN_HEARTBEAT_SUCCESS: "已成功与服务器交换心跳信息"
-BTN_HEARTBEAT_FAILED: "没有任何网路接口可用来发送心跳信息，所有网络请求均已失败"
+BTN_HEARTBEAT_FAILED: "没有任何网络接口可用来发送心跳信息，所有网络请求均已失败"
 
 PORTMAPPER_SCANNING: "[PortMapper] 正在后台探测网络接口上可用的 UPnP-IGD/NAT-PMP/PCP 设备，可能需要一些时间……"
 PORTMAPPER_SCANNED: "[PortMapper] 共找到 {} 个 UPnP 设备，服务已启动"
@@ -779,3 +779,36 @@ MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_NON_0019: "[禁止] 已识别的拒绝上
 MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_0019_SEEDING: "[对等反制] 已识别的拒绝做种的不良客户端（迅雷，0019 版本）：禁止连接到做种任务"
 DOWNLOADER_BC_FAILED_REQUEST_STATISTICS_LIST: "获取下载器 {} 的统计信息失败: {} - {}"
 DOWNLOADER_VERSION_INCOMPATIBLE: "此下载器的版本不受支持，当前版本 {}，需要版本 {}"
+BTN_ABILITY_IP_DENYLIST_TITLE: "IP 拒绝列表"
+BTN_ABILITY_IP_DENYLIST_DESCRIPTION: |
+  IP 拒绝列表能力允许远程服务器下发需要拦截的 IP/CIDR 地址列表。位于此列表内的连接将立刻被 PeerBanHelper 封禁。  
+  
+  **规则版本:** {}  
+  **当前已加载:** {} 条规则
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_CACHE: "已从本地缓存加载 IP 拒绝列表，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_DENYLIST_LOAD_FAILED_FROM_CACHE: "从本地缓存加载 IP 拒绝列表失败"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 拒绝列表当前已是最新版本，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE: "已从远程服务器加载 IP 拒绝列表，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_ALLOWLIST_TITLE: "IP 允许列表"
+BTN_ABILITY_IP_ALLOWLIST_DESCRIPTION: |
+  IP 允许列表能力允许远程服务器下发跳过监测的 IP/CIDR 地址列表。位于此列表内的连接不会被 PeerBanHelper 封禁。  
+  
+  **规则版本:** {}  
+  **当前已加载:** {} 条规则
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_CACHE: "已从本地缓存加载 IP 允许列表，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_ALLOWLIST_LOAD_FAILED_FROM_CACHE: "从本地缓存加载 IP 允许列表失败"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES: "IP 允许列表当前已是最新版本，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE: "已从远程服务器加载 IP 允许列表，规则版本: {}，共 {} 条规则"
+BTN_ABILITY_IP_ALLOWLIST_RULE: "IP 允许列表"
+BTN_ABILITY_IP_ALLOWLIST_HIT: "匹配允许列表: {}"
+BTN_ABILITY_IP_DENYLIST_RULE: "IP 拒绝列表"
+BTN_ABILITY_IP_DENYLIST_HIT: "匹配拒绝列表: {}"
+BTN_POW_CAPTCHA_LOAD_FROM_REMOTE: "获取验证请求基本数据失败，可能是网络故障或者验证服务器错误，请稍后重试: {} - {}"
+BTN_POW_CAPTCHA_COMPUTING: "远程服务器要求完成工作量证明验证以识别您的请求是否为恶意请求，PeerBanHelper 正在完成验证计算，计算过程 CPU 使用量可能短暂升高。"
+BTN_POW_CAPTCHA_COMPUTE_COMPLETED: "证明计算完成，耗时: {}ms"
+BTN_ABILITY_IP_QUERY_TITLE: "BTN IP 查询服务"
+BTN_ABILITY_IP_QUERY_DESCRIPTION: |
+  BTN IP 查询服务允许 PeerBanHelper 查询 BTN 服务器以获取有关特定 IP 地址的更多信息。  
+  PeerBanHelper 功能模块可以使用此服务提供的能力获取有关特定 IP 地址在 BTN 上的活动概要。
+BTN_ABILITY_IP_QUERY_STATUS_OK: "查询成功处理: {}"
+BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP 查询功能能力在此 BTN 实例上不可用"

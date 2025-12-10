@@ -40,6 +40,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final MetadataDao metadataDao;
     private final HistoryDao historyDao;
+    private final boolean powCaptcha;
 
     public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataDao metadataDao, HistoryDao historyDao) {
         this.btnNetwork = btnNetwork;
@@ -48,6 +49,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
     }
 
     @Override
@@ -69,7 +71,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     public void load() {
         Main.getEventBus().register(this);
         setLastStatus(true, new TranslationComponent(Lang.BTN_NO_CONTENT_REPORTED_YET));
-        btnNetwork.getScheduler().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getScheduler().scheduleWithFixedDelay(this::submit, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -130,12 +132,12 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
         BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(BtnBan::from).toList());
         byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
         RequestBody body = createGzipRequestBody(jsonBytes);
-        Request request = new Request.Builder()
+        Request.Builder request = new Request.Builder()
                 .url(endpoint)
                 .post(body)
-                .header("Content-Encoding", "gzip")
-                .build();
-        try (Response resp = btnNetwork.getHttpClient().newCall(request).execute()) {
+                .header("Content-Encoding", "gzip");
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "submit_bans");
+        try (Response resp = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
             if (!resp.isSuccessful()) { // 检查2xx状态码
                 String responseBody = resp.body() != null ? resp.body().string() : "";
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.code() + " - " + responseBody));

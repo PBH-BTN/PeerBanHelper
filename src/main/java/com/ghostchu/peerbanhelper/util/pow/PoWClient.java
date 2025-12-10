@@ -12,9 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * PoW 无交互验证码（客户端）
  *
  */
-public class PoWClient {
+public class PoWClient implements AutoCloseable {
     private final int threadCount = Runtime.getRuntime().availableProcessors();
-    private final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+    private final ExecutorService executor = Executors.newWorkStealingPool(threadCount);
 
     public byte[] solve(byte[] challenge, int difficultyBits, String algorithm) throws Exception {
         AtomicBoolean found = new AtomicBoolean(false);
@@ -53,9 +53,8 @@ public class PoWClient {
             });
         }
 
-        byte[] result = resultFuture.get(); // wait for one thread to finish
-        executor.shutdownNow();
-        return result;
+        // wait for one thread to finish
+        return resultFuture.get();
     }
 
     private boolean hasLeadingZeroBits(byte[] hash, int bits) {
@@ -69,5 +68,10 @@ public class PoWClient {
             return (hash[fullBytes] & mask) == 0;
         }
         return true;
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.executor.close();
     }
 }

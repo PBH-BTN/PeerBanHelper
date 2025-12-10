@@ -1,4 +1,5 @@
 import type { BanLog } from '@/api/model/banlogs'
+import type { BTNIPQuery } from '@/api/model/btn'
 import type { CommonResponse, CommonResponseWithPage } from '@/api/model/common'
 import type { AccessHistory, IPBasicInfo, TorrentInfo } from '@/api/model/data'
 import { useEndpointStore } from '@/stores/endpoint'
@@ -148,6 +149,21 @@ export async function GetIPBanHistoryList(params: {
   if (params.sorter) {
     url.searchParams.set('orderBy', params.sorter)
   }
+
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
+  })
+}
+
+export async function GetBTNIPData(ip: string): Promise<CommonResponse<BTNIPQuery>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(ip)}/btnQuery`),
+    location.href
+  )
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)

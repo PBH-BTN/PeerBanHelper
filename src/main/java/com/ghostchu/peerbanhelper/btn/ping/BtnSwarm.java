@@ -14,56 +14,59 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class BtnSwarm {
     private transient long id;
-    @SerializedName("ip")
-    private String ip;
-    @SerializedName("port")
-    private int port;
     @SerializedName("torrent_identifier")
     private String torrentIdentifier;
     @SerializedName("torrent_is_private")
     private Boolean torrentIsPrivate;
+    @SerializedName("torrent_size")
+    private long torrentSize;
     @SerializedName("downloader")
     private String downloader;
     @SerializedName("downloader_progress")
     private double downloaderProgress;
+    @SerializedName("peer_ip")
+    private String peerIp;
+    @SerializedName("peer_port")
+    private int peerPort;
     @SerializedName("peer_id")
     private String peerId;
-    @SerializedName("client_name")
-    private String clientName;
+    @SerializedName("peer_client_name")
+    private String peerClientName;
     @SerializedName("peer_progress")
     private double peerProgress;
-    @SerializedName("uploaded")
-    private long uploaded;
-    @SerializedName("uploaded_offset")
-    private long uploadedOffset;
-    @SerializedName("downloaded")
-    private long downloaded;
-    @SerializedName("downloaded_offset")
-    private long downloadedOffset;
-    @SerializedName("last_flags")
-    private String lastFlags;
+    @SerializedName("to_peer_traffic")
+    private long toPeerTraffic;
+    @SerializedName("to_peer_traffic_offset")
+    private long toPeerTrafficOffset;
+    @SerializedName("from_peer_traffic")
+    private long fromPeerTraffic;
+    @SerializedName("from_peer_traffic_offset")
+    private long fromPeerTrafficOffset;
     @SerializedName("first_time_seen")
     private Timestamp firstTimeSeen;
     @SerializedName("last_time_seen")
     private Timestamp lastTimeSeen;
+    @SerializedName("peer_last_flags")
+    private String peerLastFlags;
 
     public static BtnSwarm from(TrackedSwarmEntity entity) {
         BtnSwarm btnSwarm = new BtnSwarm();
         btnSwarm.setId(entity.getId());
-        btnSwarm.setIp(entity.getIp());
-        btnSwarm.setPort(entity.getPort());
+        btnSwarm.setPeerIp(entity.getIp());
+        btnSwarm.setPeerPort(entity.getPort());
         btnSwarm.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(entity.getInfoHash()));
         btnSwarm.setTorrentIsPrivate(entity.getTorrentIsPrivate());
+        btnSwarm.setTorrentSize(entity.getTorrentSize());
         btnSwarm.setDownloader(entity.getDownloader());
         btnSwarm.setDownloaderProgress(entity.getDownloaderProgress());
         btnSwarm.setPeerId(entity.getPeerId());
         btnSwarm.setPeerProgress(entity.getPeerProgress());
-        btnSwarm.setClientName(entity.getClientName());
-        btnSwarm.setUploaded(entity.getUploaded());
-        btnSwarm.setUploadedOffset(entity.getUploadedOffset());
-        btnSwarm.setDownloaded(entity.getDownloaded());
-        btnSwarm.setDownloadedOffset(entity.getDownloadedOffset());
-        btnSwarm.setLastFlags(entity.getLastFlags());
+        btnSwarm.setPeerClientName(entity.getClientName());
+        btnSwarm.setToPeerTraffic(entity.getUploaded());
+        btnSwarm.setToPeerTrafficOffset(entity.getUploadedOffset());
+        btnSwarm.setFromPeerTraffic(entity.getDownloaded());
+        btnSwarm.setFromPeerTrafficOffset(entity.getDownloadedOffset());
+        btnSwarm.setPeerLastFlags(entity.getLastFlags());
         btnSwarm.setFirstTimeSeen(entity.getFirstTimeSeen());
         btnSwarm.setLastTimeSeen(entity.getLastTimeSeen());
         return btnSwarm;

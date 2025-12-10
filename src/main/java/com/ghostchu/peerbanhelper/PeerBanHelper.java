@@ -72,6 +72,8 @@ public class PeerBanHelper implements Reloadable {
     @Override
     public ReloadResult reloadModule() throws Exception {
         reloadConfig();
+        // 重新加载所有模块的启用状态
+        moduleManager.reloadModuleStates();
         return Reloadable.super.reloadModule();
     }
 
@@ -212,6 +214,9 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(BtnNetworkOnline.class);
         moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
+        if(ExternalSwitch.parseBoolean("pbh.modules.peerclientnameblackrulelist.testing", false)) {
+            moduleManager.register(PeerNameBlackRuleList.class);
+        }
         //moduleManager.register(PTRBlacklist.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);

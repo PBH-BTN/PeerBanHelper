@@ -76,7 +76,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
-                .get("/api/downloaders/scan", this::handleDownloaderScan, Role.USER_READ)
+                .post("/api/downloaders/scan", this::handleDownloaderScan, Role.USER_WRITE)
                 .put("/api/downloaders", this::handleDownloaderPut, Role.USER_WRITE)
                 .patch("/api/downloaders/{downloaderId}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderId")), Role.USER_WRITE)
                 .post("/api/downloaders/test", this::handleDownloaderTest, Role.USER_WRITE)
