@@ -1,15 +1,8 @@
-import type { downloaderConfig } from './downloader'
+import type { InitReq } from './init'
 
-interface initDownloaderConfig {
-  id: string
-  config: downloaderConfig
-}
-export interface InitConfig {
+export interface InitConfig extends InitReq {
   acceptPrivacy: boolean
-  token: string
-  downloaderConfig: initDownloaderConfig
   valid: boolean
-  btn: BtnConfig
 }
 
 export interface BtnConfig {

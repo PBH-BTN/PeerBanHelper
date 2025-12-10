@@ -49,7 +49,7 @@ const steps = computed(() =>
 const initConfig = ref<InitConfig>({
   acceptPrivacy: false,
   token: '',
-  downloaderConfig: {
+  downloader: {
     id: '',
     config: {
       basicAuth: {},
