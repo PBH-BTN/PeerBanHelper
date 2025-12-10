@@ -21,7 +21,34 @@ export default {
   'page.oobe.setToken.description':
     'First, you need to set a token, this token can prevent your WebUI from malicious access and protect your privacy. Once you login to your WebUI once, your browser will remember it and automaticlly login in future.',
   'page.oobe.setToken.generate': 'Generate',
+
+  'page.oobe.btnConfig.title': 'BTN',
+  'page.oobe.btnConfig.briefDescription': 'Threat Protection Network',
+  'page.oobe.btnConfig.description':
+    'BTN (BitTorrent Threat Network) is a "one for all, all for one" BitTorrent threat intelligence network. By connecting to this network, you will receive cloud rules derived from data analysis contributed by other BTN users. In this way, BTN can quickly identify peers that interfere with BitTorrent network operations and notify PeerBanHelper in advance to handle these IP addresses.\nBased on the principle of voluntariness, you can choose how the BTN network operates. Related changes can be modified at any time in settings after the setup wizard is completed.',
+  'page.oobe.btnConfig.mode.disabled.title': 'Disabled',
+  'page.oobe.btnConfig.mode.disabled.description':
+    'Use standalone mode without BTN threat intelligence features, cloud rules, or data submission. All operational data will be processed locally.',
+  'page.oobe.btnConfig.mode.anonymous.title': 'Auto Registration (Recommended)',
+  'page.oobe.btnConfig.mode.anonymous.description':
+    'Automatically register an anonymous account using random generated installation ID to receive BTN cloud rules and submit data to BTN network. This method does not bind your social account to BTN system. Your submitted data will participate in threat intelligence processing and help other BTN users avoid malicious attacks. Some BTN service providers may not support anonymous submissions. You can disable data submission later in settings.',
+  'page.oobe.btnConfig.mode.account.title': 'Existing BTN Account',
+  'page.oobe.btnConfig.mode.account.description':
+    'Enter the App ID and App Secret registered on the BTN site to bind this installation. The bound account will have control over data submitted by this installation and may view submitted information and data from the site. Your submitted data will participate in threat intelligence processing and help other BTN users avoid malicious attacks.',
+  'page.oobe.btnConfig.appId.placeholder': 'Enter App ID',
+  'page.oobe.btnConfig.appSecret.placeholder': 'Enter App Secret',
+  'page.oobe.btnConfig.enableSubmit.title': 'Enable Data Submission',
+
   'page.oobe.addDownloader.title': 'Add your first downloader',
+  'page.oobe.addDownloader.scan': 'Scan Downloader',
+  'page.oobe.addDownloader.scan.tooltip':
+    'Continue to scan for downloaders with WebUI enabled on your local network and auto-fill the form. If you have not enabled the downloader WebUI feature, please refer to the documentation to enable it first.',
+  'page.oobe.addDownloader.scan.noDownloader': 'No available downloader found',
+  'page.oobe.addDownloader.scan.type': 'Type',
+  'page.oobe.addDownloader.scan.multi': 'Multiple downloaders found, please select manually',
+  'page.oobe.addDownloader.scan.one': 'One downloader found, information has been auto-filled',
+  'page.oobe.addDownloader.scan.cancel': 'Cancel',
+  'page.oobe.addDownloader.scan.select': 'Select',
   'page.oobe.addDownloader.description':
     "Choose your downloader type first, then fill in the downloader's WebUI related authentication information.",
   'page.oobe.addDownloader.test': 'Test downloader',

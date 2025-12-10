@@ -1,10 +1,10 @@
-package com.ghostchu.peerbanhelper.btn.ability.impl.legacy;
+package com.ghostchu.peerbanhelper.btn.ability.impl;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistory;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistoryPing;
+import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -20,10 +20,8 @@ import okio.GzipSink;
 import okio.Okio;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,42 +34,35 @@ import java.util.stream.Collectors;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public final class LegacyBtnAbilitySubmitHistory extends AbstractBtnAbility {
+public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final File file;
     private final Lock lock = new ReentrantLock();
+    private final boolean powCaptcha;
+    private final MetadataDao metadataDao;
 
-    public LegacyBtnAbilitySubmitHistory(BtnNetwork btnNetwork, JsonObject ability) {
+    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, MetadataDao metadataDao, JsonObject ability) {
         this.btnNetwork = btnNetwork;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
+        this.metadataDao = metadataDao;
 
-        this.file = new File(Main.getDataDirectory(), "btn_submit_history_timestamp.dat");
-        if (!this.file.exists()) {
-            try {
-                this.file.createNewFile();
-                writeLastSubmitAtTimestamp(System.currentTimeMillis());
-            } catch (Exception e) {
-                log.error("Unable to create file for record btn submit_history_timestamp, default to current timestamp", e);
-            }
+        if (metadataDao.get("btn.submithistory.timestamp") == null) {
+            writeLastSubmitAtTimestamp(System.currentTimeMillis());
         }
     }
 
     private void writeLastSubmitAtTimestamp(long timestamp) {
-        try {
-            Files.writeString(file.toPath(), String.valueOf(timestamp));
-        } catch (IOException e) {
-            log.error("Unable to write timestamp to file", e);
-        }
+        metadataDao.set("btn.submithistory.timestamp", String.valueOf(timestamp));
     }
 
     private long getLastSubmitAtTimestamp() {
         try {
-            long time = Long.parseLong(Files.readString(file.toPath()));
+            long time = Long.parseLong(metadataDao.getOrDefault("btn.submithistory.timestamp", "0"));
             // check if timestamp more than past 30 days
             if (time < System.currentTimeMillis() - 30 * 24 * 60 * 60 * 1000L) {
                 // discard any outdated data and use current time
@@ -104,7 +95,7 @@ public final class LegacyBtnAbilitySubmitHistory extends AbstractBtnAbility {
     @Override
     public void load() {
         setLastStatus(true, new TranslationComponent(Lang.BTN_NO_CONTENT_REPORTED_YET));
-        btnNetwork.getScheduler().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getScheduler().scheduleWithFixedDelay(this::submit, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void submit() {
@@ -122,13 +113,12 @@ public final class LegacyBtnAbilitySubmitHistory extends AbstractBtnAbility {
                 );
                 byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
                 RequestBody body = createGzipRequestBody(jsonBytes);
-                Request request = new Request.Builder()
+                Request.Builder request = new Request.Builder()
                         .url(endpoint)
                         .post(body)
-                        .header("Content-Encoding", "gzip")
-                        .build();
-                
-                try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
+                        .header("Content-Encoding", "gzip");
+                if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "submit_history");
+                try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
                     if (!response.isSuccessful()) {
                         String responseBody = response.body().string();
                         log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));

@@ -6,7 +6,7 @@ jobs:
   dpkg:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: java_info
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v6

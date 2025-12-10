@@ -63,7 +63,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     @Override
     public void onEnable() {
         reloadConfig();
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateTrafficStatus, 0, 1, TimeUnit.MINUTES);
+        registerScheduledTask(this::updateTrafficStatus, 0, 1, TimeUnit.MINUTES);
         Main.getReloadManager().register(this);
     }
 

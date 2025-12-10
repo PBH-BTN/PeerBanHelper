@@ -86,8 +86,8 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
         this.taskWriteService = new ThreadPoolExecutor(1, 2, 60L, TimeUnit.SECONDS, taskWriteQueue);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
         long dataFlushInterval = getConfig().getLong("data-flush-interval", 20000);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 0, dataFlushInterval, TimeUnit.MILLISECONDS);
+        registerScheduledTask(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
+        registerScheduledTask(this::flush, 0, dataFlushInterval, TimeUnit.MILLISECONDS);
     }
 
     @Override

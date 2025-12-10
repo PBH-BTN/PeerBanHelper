@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRuleset;
 import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
+import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -19,10 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,41 +33,40 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final File btnCacheFile = new File(Main.getDataDirectory(), "btn.cache");
     private final ScriptEngine scriptEngine;
     private final boolean scriptExecute;
+    private final boolean powCaptcha;
+    private final MetadataDao metadataDao;
     @Getter
     private BtnRulesetParsed btnRule;
 
 
-    public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
+    public BtnAbilityRules(BtnNetwork btnNetwork, MetadataDao metadataDao, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
         this.btnNetwork = btnNetwork;
+        this.metadataDao = metadataDao;
         this.scriptEngine = scriptEngine;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
         this.scriptExecute = scriptExecute;
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
     }
 
-    private void loadCacheFile() throws IOException {
-        if (!btnCacheFile.exists()) {
-            if (!btnCacheFile.getParentFile().exists()) {
-                btnCacheFile.getParentFile().mkdirs();
-            }
-            btnCacheFile.createNewFile();
-        } else {
-            try {
-                BtnRuleset btnRuleset = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRuleset.class);
+    private void loadCacheFile() {
+        try {
+            var cache = metadataDao.get("btn.ability.rules.cache");
+            if (cache != null) {
+                BtnRuleset btnRuleset = JsonUtil.getGson().fromJson(cache, BtnRuleset.class);
                 this.btnRule = new BtnRulesetParsed(scriptEngine, btnRuleset, scriptExecute);
-            } catch (Throwable ignored) {
             }
+        } catch (Throwable ignored) {
         }
     }
 
     @Override
     public String getName() {
-        return "BtnAbilityRuleset";
+        return "BtnAbilityRuleset (Legacy)";
     }
 
     @Override
@@ -80,7 +76,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public TranslationComponent getDescription() {
-        if(btnRule == null){
+        if (btnRule == null) {
             return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION, "N/A", 0, 0, 0, 0, 0);
         }
         return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION,
@@ -112,14 +108,13 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
         } else {
             version = btnRule.getVersion();
         }
-        
+
         String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
-        Request request = new Request.Builder()
+        Request.Builder request = new Request.Builder()
                 .url(url)
-                .get()
-                .build();
-                
-        try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
+                .get();
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "rule_peer_identity");
+        try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
             if (response.code() == 204) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
                 return;
@@ -134,10 +129,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                     BtnRuleset btr = JsonUtil.getGson().fromJson(responseBody, BtnRuleset.class);
                     this.btnRule = new BtnRulesetParsed(scriptEngine, btr, scriptExecute);
                     Main.getEventBus().post(new BtnRuleUpdateEvent());
-                    try {
-                        Files.writeString(btnCacheFile.toPath(), responseBody, StandardCharsets.UTF_8);
-                    } catch (IOException ignored) {
-                    }
+                    metadataDao.set("btn.ability.rules.cache", JsonUtil.getGson().toJson(btr));
                     log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
                     setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
                     btnNetwork.getModuleMatchCache().invalidateAll();

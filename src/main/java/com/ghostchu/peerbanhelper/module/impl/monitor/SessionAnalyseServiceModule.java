@@ -66,8 +66,8 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
         reloadConfig();
         this.cleanupInterval = getConfig().getLong("cleanup-interval");
         this.dataFlushInterval = getConfig().getLong("data-flush-interval");
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, this.cleanupInterval, TimeUnit.MILLISECONDS);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flushData, 0, this.dataFlushInterval, TimeUnit.MILLISECONDS);
+        registerScheduledTask(this::cleanup, 0, this.cleanupInterval, TimeUnit.MILLISECONDS);
+        registerScheduledTask(this::flushData, 0, this.dataFlushInterval, TimeUnit.MILLISECONDS);
         Main.getReloadManager().register(this);
     }
 
