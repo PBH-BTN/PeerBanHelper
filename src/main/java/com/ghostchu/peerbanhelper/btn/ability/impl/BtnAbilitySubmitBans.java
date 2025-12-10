@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -129,7 +130,13 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     }
 
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {
-        BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(BtnBan::from).toList());
+        BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(historyEntity -> {
+            try {
+                return BtnBan.from(historyEntity); // 旧版本数据可能存在空值引发空指针错误，这里处理一下，这种数据就不提交了
+            } catch (Exception e) {
+                return null;
+            }
+        }).filter(Objects::nonNull).toList());
         byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
         RequestBody body = createGzipRequestBody(jsonBytes);
         Request.Builder request = new Request.Builder()

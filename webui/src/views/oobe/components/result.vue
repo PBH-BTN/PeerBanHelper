@@ -38,8 +38,9 @@ const init = () => {
     token: config.value.token,
     downloader: {
       id: uuid(),
-      config: config.value.downloaderConfig.config
-    }
+      config: config.value.downloader.config
+    },
+    btn: config.value.btn
   })
     .then((res) => {
       if (res.success) {
