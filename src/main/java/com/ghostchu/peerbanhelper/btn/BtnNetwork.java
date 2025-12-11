@@ -158,13 +158,12 @@ public final class BtnNetwork implements Reloadable {
                 .build();
         try (Response resp = httpClient.newCall(request).execute()) {
             statusCode = resp.code();
+            response = resp.body().string();
             if (!resp.isSuccessful()) {
-                response = resp.body().string();
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600));
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, statusCode, response);
                 return;
             }
-            response = resp.body().string();
             JsonObject json = JsonParser.parseString(response).getAsJsonObject();
             if (!json.has("min_protocol_version")) {
                 throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));

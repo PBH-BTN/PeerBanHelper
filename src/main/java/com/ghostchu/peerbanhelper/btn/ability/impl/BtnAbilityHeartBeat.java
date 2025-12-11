@@ -189,12 +189,9 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                             filteredAddresses.add(address);
                         }
                     }
-
                     if (filteredAddresses.isEmpty()) {
-                        log.warn("No matching {} addresses found for {}", isIPv4 ? "IPv4" : "IPv6", hostname);
                         return allAddresses;
                     }
-
                     return filteredAddresses;
                 })
                 .socketFactory(new SocketFactory() {

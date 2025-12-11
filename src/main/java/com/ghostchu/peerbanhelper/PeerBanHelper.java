@@ -161,8 +161,6 @@ public class PeerBanHelper implements Reloadable {
     }
 
 
-
-
     public void shutdown() {
         // place some clean code here
         downloaderServer.close();
@@ -214,7 +212,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(BtnNetworkOnline.class);
         moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
-        if(ExternalSwitch.parseBoolean("pbh.modules.peerclientnameblackrulelist.testing", false)) {
+        if (ExternalSwitch.parseBoolean("pbh.modules.peerclientnameblackrulelist.testing", false)) {
             moduleManager.register(PeerNameBlackRuleList.class);
         }
         //moduleManager.register(PTRBlacklist.class);
@@ -248,7 +246,7 @@ public class PeerBanHelper implements Reloadable {
 
     @Deprecated(forRemoval = true)
     public IPDBManager.IPDBResponse queryIPDB(InetAddress address) {
-      return iPDBManager.queryIPDB(address);
+        return iPDBManager.queryIPDB(address);
     }
 
     /**
