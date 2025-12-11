@@ -97,7 +97,7 @@
             <a-grid :cols="24" :row-gap="16">
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.upload')"
+                  :title="t('page.ipList.btn.traffic.uploadedToPeer')"
                   :value="getFileSizeValue(data.data.traffic.to_peer_traffic)"
                 >
                   <template #prefix>
@@ -110,7 +110,7 @@
               </a-grid-item>
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.download')"
+                  :title="t('page.ipList.btn.traffic.downloadedFromPeer')"
                   :value="getFileSizeValue(data.data.traffic.from_peer_traffic)"
                 >
                   <template #prefix>
