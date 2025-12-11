@@ -48,7 +48,7 @@ repositories {
     }
 }
 
-val flatlafVersion = "3.6.2"
+val flatlafVersion = "3.7"
 val ormliteVersion = "6.1"
 
 configurations.all {
