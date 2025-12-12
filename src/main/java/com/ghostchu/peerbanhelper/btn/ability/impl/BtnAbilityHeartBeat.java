@@ -18,10 +18,7 @@ import org.json.JSONException;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -120,28 +117,12 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
             log.warn("No interfaces found", exception);
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
-        ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
-            var client = createHttpClient(ip);
-            var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
-            Request.Builder request = new Request.Builder().url(endpoint).post(body);
-            if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
-            try (Response resp = client.newCall(request.build()).execute()) {
-                var responseBody = resp.body().string();
-                if (!resp.isSuccessful()) {
-                    result.put(ip, "Failed: " + resp.code() + ": " + responseBody);
-                } else {
-                    ServerResponse data = JsonUtil.standard().fromJson(responseBody, ServerResponse.class);
-                    if (data != null && data.getExternalIp() != null) {
-                        result.put(ip, data.getExternalIp());
-                        anySuccess.set(true);
-                    } else {
-                        result.put(ip, "Failed: No external IP returned");
-                    }
-                }
-            } catch (final IOException | JSONException e) {
-                result.put(ip, "Failed: " + e.getClass().getName() + ": " + e.getMessage());
-            }
-        }, Executors.newVirtualThreadPerTaskExecutor())));
+
+
+        ifNets.forEach(ip -> {
+            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, true, result, anySuccess), Executors.newVirtualThreadPerTaskExecutor()));
+            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, false, result, anySuccess), Executors.newVirtualThreadPerTaskExecutor()));
+        });
         lastResult = "Waiting for all heartbeat requests to complete";
         try {
             CompletableFutures.allAsList(futures).get(30, TimeUnit.SECONDS);
@@ -168,7 +149,30 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         lastResult = builder.toString();
     }
 
-    private OkHttpClient createHttpClient(String ifNet) {
+    private void requestHeartbeat(String ip, boolean useProxy, Map<String, String> result, AtomicBoolean anySuccess) {
+        var client = createHttpClient(ip, useProxy);
+        var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
+        Request.Builder request = new Request.Builder().url(endpoint).post(body);
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "heartbeat");
+        try (Response resp = client.newCall(request.build()).execute()) {
+            var responseBody = resp.body().string();
+            if (!resp.isSuccessful()) {
+                result.put(ip, "Failed: " + resp.code() + ": " + responseBody);
+            } else {
+                ServerResponse data = JsonUtil.standard().fromJson(responseBody, ServerResponse.class);
+                if (data != null && data.getExternalIp() != null) {
+                    result.put(ip, data.getExternalIp());
+                    anySuccess.set(true);
+                } else {
+                    result.put(ip, "Failed: No external IP returned");
+                }
+            }
+        } catch (final IOException | JSONException e) {
+            result.put(ip, "Failed: " + e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+
+    private OkHttpClient createHttpClient(String ifNet, boolean useProxy) {
         InetAddress localAddress;
         try {
             localAddress = InetAddresses.forString(ifNet);
@@ -245,6 +249,9 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                         return defaultFactory.createSocket(address, port, clientAddress, clientPort);
                     }
                 });
+        if (!useProxy) {
+            builder.proxy(Proxy.NO_PROXY);
+        }
         var trustManager = btnNetwork.getHttpClient().x509TrustManager();
         if (trustManager != null) {
             SSLSocketFactory originalSslFactory = btnNetwork.getHttpClient().sslSocketFactory();
