@@ -8,7 +8,7 @@
         {{ t('page.oobe.addDownloader.description') }}
       </a-typography-paragraph>
     </a-typography>
-    <a-form :model="config.downloaderConfig" auto-label-width>
+    <a-form :model="config.downloader" auto-label-width>
       <a-row :gutter="16" style="display: flex; justify-content: space-between">
         <a-col :span="8">
           <a-form-item
@@ -17,7 +17,7 @@
             required
           >
             <a-select
-              v-model="config.downloaderConfig.config.type"
+              v-model="config.downloader.config.type"
               style="width: 10em"
               :trigger-props="{ autoFitPopupMinWidth: true }"
             >
@@ -28,7 +28,7 @@
               <a-option :value="ClientTypeEnum.BitComet">BitComet</a-option>
               <a-option :value="ClientTypeEnum.Transmission">Transmission</a-option>
             </a-select>
-            <template v-if="config.downloaderConfig.config.type === ClientTypeEnum.BiglyBT" #extra>
+            <template v-if="config.downloader.config.type === ClientTypeEnum.BiglyBT" #extra>
               <i18n-t keypath="page.dashboard.editModal.biglybt">
                 <template #url>
                   <a href="https://github.com/PBH-BTN/PBH-Adapter-BiglyBT">{{
@@ -54,10 +54,10 @@
         </a-col>
       </a-row>
       <component
-        :is="formMap[config.downloaderConfig.config.type] as any"
-        v-model="config.downloaderConfig.config"
+        :is="formMap[config.downloader.config.type] as any"
+        v-model="config.downloader.config"
       />
-      <a-form-item v-if="config.downloaderConfig.config.type">
+      <a-form-item v-if="config.downloader.config.type">
         <a-button :loading="testing" @click="handleTest">{{
           t('page.oobe.addDownloader.test')
         }}</a-button>
@@ -96,11 +96,11 @@ const config = defineModel<InitConfig>({ required: true })
 const testing = ref(false)
 const handleTest = async () => {
   testing.value = true
-  config.value.downloaderConfig.config.endpoint.replace(/\/$/, '')
+  config.value.downloader.config.endpoint.replace(/\/$/, '')
   try {
     const testResult = await TestDownloaderConfig({
       id: uuid(),
-      config: config.value.downloaderConfig.config
+      config: config.value.downloader.config
     })
     if (!testResult.success) throw new Error(testResult.message)
   } catch (e: unknown) {
@@ -124,8 +124,8 @@ const handleScanDownloader = async () => {
     }
     if (downloader.data.length === 1) {
       const item = downloader.data[0]!
-      config.value.downloaderConfig.config.type = item.type
-      config.value.downloaderConfig.config.endpoint = `http://${item.host}:${item.port}`
+      config.value.downloader.config.type = item.type
+      config.value.downloader.config.endpoint = `http://${item.host}:${item.port}`
       Message.success({ content: t('page.oobe.addDownloader.scan.one'), resetOnHover: true })
       return true
     }
@@ -136,8 +136,8 @@ const handleScanDownloader = async () => {
         h(scanDownloaderModal, {
           downloaders: downloader.data,
           onSelect: (item) => {
-            config.value.downloaderConfig.config.type = item.type
-            config.value.downloaderConfig.config.endpoint = `http://${item.host}:${item.port}`
+            config.value.downloader.config.type = item.type
+            config.value.downloader.config.endpoint = `http://${item.host}:${item.port}`
             close()
           }
         }),
