@@ -58,7 +58,7 @@ export default {
     'The host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression (0-128)',
 
   'page.settings.tab.config.btn.enable': 'Enable BTN',
-  'page.settings.tab.config.btn.doc': 'Read the document first(Chinese only):',
+  'page.settings.tab.config.btn.doc': 'Read the document first:',
   'page.settings.tab.config.btn.enableSubmit': 'Enable submit',
   'page.settings.tab.config.btn.enableSubmit.modal.title': 'Warning',
   'page.settings.tab.config.btn.enableSubmit.modal.content':
