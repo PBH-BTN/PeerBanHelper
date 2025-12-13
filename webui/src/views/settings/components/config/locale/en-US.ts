@@ -58,7 +58,7 @@ export default {
     'The host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression (0-128)',
 
   'page.settings.tab.config.btn.enable': 'Enable BTN',
-  'page.settings.tab.config.btn.doc': 'Read the document first(Chinese only):',
+  'page.settings.tab.config.btn.doc': 'Read the document first:',
   'page.settings.tab.config.btn.enableSubmit': 'Enable submit',
   'page.settings.tab.config.btn.enableSubmit.modal.title': 'Warning',
   'page.settings.tab.config.btn.enableSubmit.modal.content':
@@ -69,7 +69,7 @@ export default {
     'Are you sure you want to enable submit?',
   'page.settings.tab.config.btn.allowScript': 'Allow BTN server push scripts',
   'page.settings.tab.config.btn.allowScript.warning':
-    'Warning: this means that the remote server can execute any code on your device, please enable with caution!',
+    'Warning: This means that the remote server can execute any code on your device, please enable with caution!',
   'page.settings.tab.config.btn.allowScript.tips':
     'This option will allow BTN server push scripts to your device, this may increase the accuracy of the ban',
 
