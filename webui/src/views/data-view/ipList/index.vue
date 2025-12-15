@@ -142,12 +142,29 @@
                   </a-tooltip> </a-space
               ></template>
               <a-space>
-                <a-button :href="`https://ip.ping0.cc/ip/${searchInput}`" type="outline">
-                  ping0
-                </a-button>
-                <a-button :href="`https://search.censys.io/hosts/${searchInput}`" type="outline">
-                  Censys
-                </a-button>
+                <a-button-group>
+                  <a-button
+                    target="_blank"
+                    :href="`https://ip.ping0.cc/ip/${searchInput}`"
+                    type="outline"
+                  >
+                    ping0
+                  </a-button>
+                  <a-button
+                    target="_blank"
+                    :href="`https://search.censys.io/hosts/${searchInput}`"
+                    type="outline"
+                  >
+                    Censys
+                  </a-button>
+                  <a-button
+                    target="_blank"
+                    :href="`https://ip.skk.moe/query?q=${searchInput}`"
+                    type="outline"
+                  >
+                    Sukka
+                  </a-button>
+                </a-button-group>
               </a-space>
             </a-descriptions-item>
           </a-descriptions>
