@@ -126,7 +126,7 @@ dependencies {
     implementation("dnsjava:dnsjava:3.6.3")
 
     // UI - FlatLaf
-    implementation("com.formdev:flatlaf-extras:3.6.2")
+    implementation("com.formdev:flatlaf-extras:3.7")
     implementation("com.formdev:flatlaf:$flatlafVersion")
     implementation("com.formdev:flatlaf-intellij-themes:3.6.2")
 
