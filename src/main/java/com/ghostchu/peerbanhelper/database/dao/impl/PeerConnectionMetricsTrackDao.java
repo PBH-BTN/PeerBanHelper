@@ -62,6 +62,16 @@ public final class PeerConnectionMetricsTrackDao extends AbstractPBHDao<PeerConn
         }
     }
 
+    public int deleteEntries(@NotNull List<PeerConnectionMetricsTrackEntity> entities) throws SQLException {
+        return callBatchTasks(() -> {
+            int deleted = 0;
+            for (PeerConnectionMetricsTrackEntity entity : entities) {
+                deleted += delete(entity);
+            }
+            return deleted;
+        });
+    }
+
     public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, TorrentDao torrentDao) throws SQLException, ExecutionException {
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
