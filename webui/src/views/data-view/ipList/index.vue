@@ -217,7 +217,7 @@
                 <icon-plus v-if="!active" />
                 <icon-minus v-else />
               </template>
-              <btnDataPanel :ip="searchInput" />
+              <btnDataPanel :ip="currentIp" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -253,6 +253,7 @@ const { t, d } = useI18n()
 const { data, loading, run, error } = useRequest(GetIPBasicData, {
   manual: true
 })
+const currentIp = ref<string>('')
 
 const endpointStore = useEndpointStore()
 
@@ -273,10 +274,11 @@ const handleSearch = (value: string) => {
         new URL(`${window.location.origin}${window.location.pathname}?${search.toString()}`)
       )
     }
+    currentIp.value = value
     run(value)
   }
 }
-onMounted(() => {
+onMounted(async () => {
   if (query.ip) {
     searchInput.value = query.ip as string
     handleSearch(searchInput.value)

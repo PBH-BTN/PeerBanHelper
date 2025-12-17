@@ -255,6 +255,7 @@
 <script setup lang="ts">
 import { GetBTNIPData } from '@/service/data'
 import { formatFileSize } from '@/utils/file'
+import { useDebounceFn } from '@vueuse/core'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
@@ -272,11 +273,15 @@ const { data, loading, error, run } = useRequest(GetBTNIPData, {
   manual: true
 })
 
+const debouncedRun = useDebounceFn((ip: string) => {
+  run(ip)
+}, 300)
+
 watch(
   () => props.ip,
   (newIp) => {
     if (newIp) {
-      run(newIp)
+      debouncedRun(newIp)
     }
   },
   { immediate: true }
