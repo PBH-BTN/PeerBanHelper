@@ -48,7 +48,7 @@
     "@arco-plugins/vite-vue": "^1.4.6",
     "@eslint/js": "^9.39.2",
     "@rushstack/eslint-patch": "^1.15.0",
-    "@tsconfig/node20": "^20.1.8",
+    "@tsconfig/node24": "^24.0.3",
     "@types/lodash": "^4.17.21",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^25.0.3",
