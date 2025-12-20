@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
-    id("com.install4j.gradle") version "12.0" apply false
+    id("com.install4j.gradle") version "12.0.2" apply false
 }
 
 group = "com.ghostchu.peerbanhelper"
@@ -64,7 +64,7 @@ configurations.all {
 
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.1")
+    implementation("org.springframework:spring-context:7.0.2")
 
     // Lombok
     compileOnly("org.projectlombok:lombok:1.18.42")
@@ -83,7 +83,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.47.0.0")
 
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:5.0.1")
+    implementation("com.maxmind.geoip2:geoip2:5.0.2")
 
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
@@ -151,7 +151,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.21")
+    implementation("ch.qos.logback:logback-classic:1.5.22")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
@@ -171,7 +171,7 @@ dependencies {
     implementation("com.opencsv:opencsv:5.12.0")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.7.Final") {
+    implementation("io.netty:netty-all:4.2.9.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")
@@ -187,7 +187,7 @@ dependencies {
     compileOnly("org.eclipse.swt:swt-classpath:local")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:12.0")
+    compileOnly("com.install4j:install4j-runtime:12.0.2")
 
 }
 
