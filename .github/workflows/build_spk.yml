@@ -20,7 +20,7 @@ jobs:
           PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
           IMAGE: ${{ inputs.image }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: spk-dist
           path: |

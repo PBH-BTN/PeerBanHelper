@@ -142,12 +142,29 @@
                   </a-tooltip> </a-space
               ></template>
               <a-space>
-                <a-button :href="`https://ip.ping0.cc/ip/${searchInput}`" type="outline">
-                  ping0
-                </a-button>
-                <a-button :href="`https://search.censys.io/hosts/${searchInput}`" type="outline">
-                  Censys
-                </a-button>
+                <a-button-group>
+                  <a-button
+                    target="_blank"
+                    :href="`https://ip.ping0.cc/ip/${searchInput}`"
+                    type="outline"
+                  >
+                    ping0
+                  </a-button>
+                  <a-button
+                    target="_blank"
+                    :href="`https://search.censys.io/hosts/${searchInput}`"
+                    type="outline"
+                  >
+                    Censys
+                  </a-button>
+                  <a-button
+                    target="_blank"
+                    :href="`https://ip.skk.moe/query?q=${searchInput}`"
+                    type="outline"
+                  >
+                    Sukka
+                  </a-button>
+                </a-button-group>
               </a-space>
             </a-descriptions-item>
           </a-descriptions>
@@ -200,7 +217,7 @@
                 <icon-plus v-if="!active" />
                 <icon-minus v-else />
               </template>
-              <btnDataPanel :ip="searchInput" />
+              <btnDataPanel :ip="currentIp" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -236,6 +253,7 @@ const { t, d } = useI18n()
 const { data, loading, run, error } = useRequest(GetIPBasicData, {
   manual: true
 })
+const currentIp = ref<string>('')
 
 const endpointStore = useEndpointStore()
 
@@ -256,10 +274,11 @@ const handleSearch = (value: string) => {
         new URL(`${window.location.origin}${window.location.pathname}?${search.toString()}`)
       )
     }
+    currentIp.value = value
     run(value)
   }
 }
-onMounted(() => {
+onMounted(async () => {
   if (query.ip) {
     searchInput.value = query.ip as string
     handleSearch(searchInput.value)

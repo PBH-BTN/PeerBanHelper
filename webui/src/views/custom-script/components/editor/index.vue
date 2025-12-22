@@ -32,8 +32,7 @@
 import {
   type MonacoEditor,
   VueMonacoEditor,
-  type VueMonacoEditorEmitsOptions,
-  loader
+  type VueMonacoEditorEmitsOptions
 } from '@guolao/vue-monaco-editor'
 import { shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -48,11 +47,6 @@ const { viewOnly = false } = defineProps<{
 }>()
 const model = defineModel<string | undefined>({ required: true })
 
-loader.config({
-  paths: {
-    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs'
-  }
-})
 const AV = 'aviatorscript'
 type onMountF = VueMonacoEditorEmitsOptions['mount']
 type editor = Parameters<onMountF>[0] // monacoEditor.editor.IStandaloneCodeEditor

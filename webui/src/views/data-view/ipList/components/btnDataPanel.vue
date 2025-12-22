@@ -97,27 +97,27 @@
             <a-grid :cols="24" :row-gap="16">
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.uploadedToPeer')"
-                  :value="getFileSizeValue(data.data.traffic.to_peer_traffic)"
+                  :title="t('page.ipList.btn.traffic.downloadedFromPeer')"
+                  :value="getFileSizeValue(data.data.traffic.from_peer_traffic)"
                 >
                   <template #prefix>
                     <icon-arrow-up class="green" />
                   </template>
                   <template #suffix>
-                    {{ getFileSizeUnit(data.data.traffic.to_peer_traffic) }}
+                    {{ getFileSizeUnit(data.data.traffic.from_peer_traffic) }}
                   </template>
                 </a-statistic>
               </a-grid-item>
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.downloadedFromPeer')"
-                  :value="getFileSizeValue(data.data.traffic.from_peer_traffic)"
+                  :title="t('page.ipList.btn.traffic.uploadedToPeer')"
+                  :value="getFileSizeValue(data.data.traffic.to_peer_traffic)"
                 >
                   <template #prefix>
                     <icon-arrow-down class="red" />
                   </template>
                   <template #suffix>
-                    {{ getFileSizeUnit(data.data.traffic.from_peer_traffic) }}
+                    {{ getFileSizeUnit(data.data.traffic.to_peer_traffic) }}
                   </template>
                 </a-statistic>
               </a-grid-item>
@@ -255,6 +255,7 @@
 <script setup lang="ts">
 import { GetBTNIPData } from '@/service/data'
 import { formatFileSize } from '@/utils/file'
+import { useDebounceFn } from '@vueuse/core'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
@@ -272,11 +273,15 @@ const { data, loading, error, run } = useRequest(GetBTNIPData, {
   manual: true
 })
 
+const debouncedRun = useDebounceFn((ip: string) => {
+  run(ip)
+}, 300)
+
 watch(
   () => props.ip,
   (newIp) => {
     if (newIp) {
-      run(newIp)
+      debouncedRun(newIp)
     }
   },
   { immediate: true }
