@@ -148,12 +148,18 @@ import { useUserStore } from '@/stores/userStore'
 import { getColor } from '@/utils/color'
 import { Message, Modal } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
+import { loader } from '@guolao/vue-monaco-editor'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination, useRequest } from 'vue-request'
 import DetailDrawer from './detailDrawer.vue'
 const { t } = useI18n()
 const userStore = useUserStore()
+loader.config({
+  paths: {
+    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.54.0/min/vs'
+  }
+})
 const columns = [
   {
     title: () => t('page.rule.custom-script.column.id'),

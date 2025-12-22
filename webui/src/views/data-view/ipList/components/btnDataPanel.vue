@@ -97,27 +97,27 @@
             <a-grid :cols="24" :row-gap="16">
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.uploadedToPeer')"
-                  :value="getFileSizeValue(data.data.traffic.to_peer_traffic)"
+                  :title="t('page.ipList.btn.traffic.fromPeerTraffic')"
+                  :value="getFileSizeValue(data.data.traffic.from_peer_traffic)"
                 >
                   <template #prefix>
                     <icon-arrow-up class="green" />
                   </template>
                   <template #suffix>
-                    {{ getFileSizeUnit(data.data.traffic.to_peer_traffic) }}
+                    {{ getFileSizeUnit(data.data.traffic.from_peer_traffic) }}
                   </template>
                 </a-statistic>
               </a-grid-item>
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.downloadedFromPeer')"
-                  :value="getFileSizeValue(data.data.traffic.from_peer_traffic)"
+                  :title="t('page.ipList.btn.traffic.toPeerTraffic')"
+                  :value="getFileSizeValue(data.data.traffic.to_peer_traffic)"
                 >
                   <template #prefix>
                     <icon-arrow-down class="red" />
                   </template>
                   <template #suffix>
-                    {{ getFileSizeUnit(data.data.traffic.from_peer_traffic) }}
+                    {{ getFileSizeUnit(data.data.traffic.to_peer_traffic) }}
                   </template>
                 </a-statistic>
               </a-grid-item>
@@ -193,12 +193,10 @@
             <a-space fill style="justify-content: space-between">
               <a-space fill direction="vertical">
                 <a-typography-text
-                  ><icon-arrow-up class="green" />
-                  {{ formatFileSize(record.to_peer_traffic) }}</a-typography-text
+                  ><icon-minus /> {{ formatFileSize(record.to_peer_traffic) }}</a-typography-text
                 >
                 <a-typography-text
-                  ><icon-arrow-down class="red" />
-                  {{ formatFileSize(record.from_peer_traffic) }}</a-typography-text
+                  ><icon-plus /> {{ formatFileSize(record.from_peer_traffic) }}</a-typography-text
                 >
               </a-space>
               <a-tooltip :content="(record.peer_progress * 100).toFixed(2) + '%'">
@@ -255,6 +253,7 @@
 <script setup lang="ts">
 import { GetBTNIPData } from '@/service/data'
 import { formatFileSize } from '@/utils/file'
+import { useDebounceFn } from '@vueuse/core'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
@@ -272,11 +271,15 @@ const { data, loading, error, run } = useRequest(GetBTNIPData, {
   manual: true
 })
 
+const debouncedRun = useDebounceFn((ip: string) => {
+  run(ip)
+}, 300)
+
 watch(
   () => props.ip,
   (newIp) => {
     if (newIp) {
-      run(newIp)
+      debouncedRun(newIp)
     }
   },
   { immediate: true }

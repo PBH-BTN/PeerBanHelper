@@ -11,12 +11,12 @@ public final class StatisticsRecord {
     private Long overallDataBytesReceived;
     private Long overallDataBytesSent;
     private Long sessionUptimeSeconds;
-    private Integer dataReceiveRate;
-    private Integer protocolReceiveRate;
-    private Integer dataAndProtocolReceiveRate;
-    private Integer dataSendRate;
-    private Integer protocolSendRate;
-    private Integer dataAndProtocolSendRate;
+    private Long dataReceiveRate;
+    private Long protocolReceiveRate;
+    private Long dataAndProtocolReceiveRate;
+    private Long dataSendRate;
+    private Long protocolSendRate;
+    private Long dataAndProtocolSendRate;
     private Long dataBytesReceived;
     private Long protocolBytesReceived;
     private Long dataBytesSent;

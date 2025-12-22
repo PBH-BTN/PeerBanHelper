@@ -217,15 +217,14 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 }
             };
         }
-        SwingUtilities.invokeLater(() -> {
-            if (isDark) {
-                pbhFlatLafTheme.applyDark();
-            } else {
-                pbhFlatLafTheme.applyLight();
-            }
-            Main.getEventBus().post(new PBHLookAndFeelNeedReloadEvent(isDark));
-            FlatLaf.updateUILater();
-        });
+
+        if (isDark) {
+            pbhFlatLafTheme.applyDark();
+        } else {
+            pbhFlatLafTheme.applyLight();
+        }
+        Main.getEventBus().post(new PBHLookAndFeelNeedReloadEvent(isDark));
+        FlatLaf.updateUILater();
     }
 
     /**
