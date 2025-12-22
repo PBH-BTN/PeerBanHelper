@@ -97,7 +97,7 @@
             <a-grid :cols="24" :row-gap="16">
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.downloadedFromPeer')"
+                  :title="t('page.ipList.btn.traffic.fromPeerTraffic')"
                   :value="getFileSizeValue(data.data.traffic.from_peer_traffic)"
                 >
                   <template #prefix>
@@ -110,7 +110,7 @@
               </a-grid-item>
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
-                  :title="t('page.ipList.btn.traffic.uploadedToPeer')"
+                  :title="t('page.ipList.btn.traffic.toPeerTraffic')"
                   :value="getFileSizeValue(data.data.traffic.to_peer_traffic)"
                 >
                   <template #prefix>
@@ -193,11 +193,11 @@
             <a-space fill style="justify-content: space-between">
               <a-space fill direction="vertical">
                 <a-typography-text
-                  ><icon-arrow-up class="green" />
+                  ><icon-minus/>
                   {{ formatFileSize(record.to_peer_traffic) }}</a-typography-text
                 >
                 <a-typography-text
-                  ><icon-arrow-down class="red" />
+                  ><icon-plus />
                   {{ formatFileSize(record.from_peer_traffic) }}</a-typography-text
                 >
               </a-space>
