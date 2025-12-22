@@ -193,12 +193,10 @@
             <a-space fill style="justify-content: space-between">
               <a-space fill direction="vertical">
                 <a-typography-text
-                  ><icon-minus/>
-                  {{ formatFileSize(record.to_peer_traffic) }}</a-typography-text
+                  ><icon-minus /> {{ formatFileSize(record.to_peer_traffic) }}</a-typography-text
                 >
                 <a-typography-text
-                  ><icon-plus />
-                  {{ formatFileSize(record.from_peer_traffic) }}</a-typography-text
+                  ><icon-plus /> {{ formatFileSize(record.from_peer_traffic) }}</a-typography-text
                 >
               </a-space>
               <a-tooltip :content="(record.peer_progress * 100).toFixed(2) + '%'">
