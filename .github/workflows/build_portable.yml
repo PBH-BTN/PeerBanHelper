@@ -19,6 +19,7 @@ jobs:
           mkdir -p pkg/portable/PeerBanHelper
           mv build/libraries pkg/portable/PeerBanHelper/
           cp build/libs/PeerBanHelper.jar pkg/portable/PeerBanHelper/
+          cp install4j/icon.ico pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
