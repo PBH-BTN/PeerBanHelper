@@ -7,9 +7,8 @@ if defined JAVA_EXEC (
     goto :LAUNCH
 )
 
-set "BUNDLED_JRE=%~dp0jre\bin\java.exe"
-if exist "%BUNDLED_JRE%" (
-    set "JAVA_EXEC=%BUNDLED_JRE%"
+set "JAVA_EXEC=%~dp0jre\bin\java.exe"
+if exist "%JAVA_EXEC%" (
     goto :LAUNCH
 )
 

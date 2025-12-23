@@ -6,9 +6,8 @@ if defined JAVAW_EXEC (
     goto :LAUNCH
 )
 
-set "BUNDLED_JRE=%~dp0jre\bin\javaw.exe"
-if exist "%BUNDLED_JRE%" (
-    set "JAVAW_EXEC=%BUNDLED_JRE%"
+set "JAVAW_EXEC=%~dp0jre\bin\javaw.exe"
+if exist "%JAVAW_EXEC%" (
     goto :LAUNCH
 )
 
