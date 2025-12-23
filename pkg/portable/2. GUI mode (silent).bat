@@ -1,6 +1,6 @@
 @echo off
 setlocal
-title PeerBanHelper (GUI mode, slient)
+title PeerBanHelper (GUI mode, silent)
 
 if defined JAVAW_EXEC (
     goto :LAUNCH
