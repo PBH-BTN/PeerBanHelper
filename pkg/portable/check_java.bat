@@ -1,7 +1,7 @@
 @echo off
 chcp 65001
 
-@REM Get language from 1st parameter
+:: Get language from 1st parameter
 set "LANG=%~1"
 set "REQ_VER=25"
 
