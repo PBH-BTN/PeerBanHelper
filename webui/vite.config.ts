@@ -1,12 +1,12 @@
-import {fileURLToPath, URL} from 'node:url'
+import { fileURLToPath, URL } from 'node:url'
 
-import {vitePluginForArco} from '@arco-plugins/vite-vue'
+import { vitePluginForArco } from '@arco-plugins/vite-vue'
 import vue from '@vitejs/plugin-vue'
-import {exec as execCallBack} from 'node:child_process'
-import {promisify} from 'node:util'
-import {defineConfig} from 'vite'
-import {analyzer} from 'vite-bundle-analyzer'
-import {nodePolyfills} from 'vite-plugin-node-polyfills'
+import { exec as execCallBack } from 'node:child_process'
+import { promisify } from 'node:util'
+import { defineConfig } from 'vite'
+import { analyzer } from 'vite-bundle-analyzer'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import removeConsole from 'vite-plugin-remove-console'
 import VueDevTools from 'vite-plugin-vue-devtools'
 
@@ -44,8 +44,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           libs: ['pinia', 'vue-request', 'vue-i18n', 'vue-router', 'vue', '@vueuse/core', 'lodash'],
+          monacoEditor: ['monaco-editor'],
           arcoDesign: ['@arco-design/web-vue'],
-          echarts: ['echarts', 'vue-echarts'],
+          echarts: ['echarts', 'vue-echarts', 'zrender'],
           uuid: ['uuid']
         }
       }
