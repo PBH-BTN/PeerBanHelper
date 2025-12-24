@@ -9,10 +9,12 @@ if /i "%LANG%"=="zh_CN" (
     set "MSG_NOT_FOUND_1=[Error] 在同目录下、JAVA_HOME和PATH下都没有找到Java。"
     set "MSG_NOT_FOUND_2=[Error] 您可能下载了Portable_nojava版本，请下载Portable版本。"
     set "MSG_VERSION_LOW=[Error] PeerBanHelper需要Java %REQ_VER%或以上版本，当前版本为{VER}。"
+    set "MSG_PARSE_FAILED=[Error] 无法识别Java版本。"
 ) else (
     set "MSG_NOT_FOUND_1=[Error] Java not found in current directory, JAVA_HOME or PATH."
     set "MSG_NOT_FOUND_2=[Error] Portable_nojava.zip downloaded? Please download the Portable.zip instead."
     set "MSG_VERSION_LOW=[Error] PeerBanHelper requires Java %REQ_VER% or later. Current version is {VER}."
+    set "MSG_PARSE_FAILED=[Error] Failed to recognize Java version."
 )
 
 :: Search Java in current directory (Portable.zip), JAVA_HOME and PATH
@@ -51,11 +53,16 @@ for /f "tokens=2" %%v in ('""%JAVA_EXE%" --version 2^>^&1 ^| findstr /i "openjdk
 set "VER_STR=%VER_STR:"=%"
 for /f "delims=. tokens=1" %%m in ("%VER_STR%") do set "MAJOR_VER=%%m"
 
+:: If `MAJOR_VER` is empty or not a number, set it to 0
+if "%MAJOR_VER%"=="" goto :ERROR_PARSE
+echo %MAJOR_VER%| findstr /r "^[0-9][0-9]*$" >nul
+if errorlevel 1 goto :ERROR_PARSE
+
 :: Enable Delayed Expansion to safely replace placeholders within the `MSG_VERSION_LOW_DISPLAY`
 setlocal enabledelayedexpansion
 set "MSG_VERSION_LOW_DISPLAY=!MSG_VERSION_LOW:{VER}=%MAJOR_VER%!"
-if %MAJOR_VER% LSS %REQ_VER% (
-    echo %MSG_VERSION_LOW_DISPLAY%
+if !MAJOR_VER! LSS %REQ_VER% (
+    echo !MSG_VERSION_LOW_DISPLAY!
     pause
     exit /b 1
 )
@@ -63,3 +70,8 @@ endlocal
 
 set "JAVA_BIN=%SEARCH_BIN%"
 exit /b 0
+
+:ERROR_PARSE
+echo %MSG_PARSE_FAILED%
+pause
+exit /b 1
