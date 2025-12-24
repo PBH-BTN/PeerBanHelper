@@ -66,6 +66,9 @@ importers:
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
+      monaco-editor:
+        specifier: ^0.55.1
+        version: 0.55.1
       normalize.css:
         specifier: ^8.0.1
         version: 8.0.1
@@ -142,9 +145,6 @@ importers:
       lint-staged:
         specifier: ^16.2.7
         version: 16.2.7
-      monaco-editor:
-        specifier: ^0.55.1
-        version: 0.55.1
       npm-run-all2:
         specifier: ^8.0.4
         version: 8.0.4
