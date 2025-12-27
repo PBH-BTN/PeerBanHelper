@@ -87,7 +87,7 @@
               :ellipsis="true"
               style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
             >
-              {{ formatFileSize(record.peerUploaded) }}
+              {{ formatFileSize(record.peerDownloaded) }}
             </a-typography-text>
           </div>
         </div>
