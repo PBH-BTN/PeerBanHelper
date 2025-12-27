@@ -85,12 +85,16 @@
       </a-list-item-meta>
 
       <template #actions>
-        <a-button size="small" @click="handleCopy(record.hash)">Hash</a-button>
+        <a-button size="small" @click="handleCopy(record.hash)">
+          {{ getColumnTitle('hash') }} ({{
+            t('page.rule_management.ruleSubscribe.column.clickToCopy')
+          }})
+        </a-button>
         <a-button
           size="small"
           @click="() => peerList?.showModal(downloader, record.id, record.name)"
         >
-          Peers
+          {{ getColumnTitle('peer') }} ({{ t('page.dashboard.torrentList.column.view') }})
         </a-button>
       </template>
     </a-list-item>
