@@ -3,6 +3,7 @@ chcp 65001
 
 :: Get language from 1st parameter
 set "LANG=%~1"
+:: Set require Java version
 set "REQ_VER=25"
 
 if /i "%LANG%"=="zh_CN" (
@@ -53,7 +54,7 @@ for /f "tokens=2" %%v in ('""%JAVA_EXE%" --version 2^>^&1 ^| findstr /i "openjdk
 set "VER_STR=%VER_STR:"=%"
 for /f "delims=. tokens=1" %%m in ("%VER_STR%") do set "MAJOR_VER=%%m"
 
-:: If `MAJOR_VER` is empty or not a number, set it to 0
+:: If `MAJOR_VER` is empty or not a number, error and exit
 if "%MAJOR_VER%"=="" goto :ERROR_PARSE
 echo %MAJOR_VER%| findstr /r "^[0-9][0-9]*$" >nul
 if errorlevel 1 goto :ERROR_PARSE
