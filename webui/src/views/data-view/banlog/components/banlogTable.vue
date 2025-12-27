@@ -25,8 +25,9 @@
       <div style="display: flex; align-items: center">
         <icon-stop />
         <a-typography-text
+          class="expandable-ellipsis-text"
           :ellipsis="{ showTooltip: true }"
-          style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+          style="margin-left: 4px"
         >
           {{ d(record.banAt, 'long') }}
         </a-typography-text>
@@ -34,8 +35,9 @@
       <div style="display: flex; align-items: center">
         <icon-clock-circle />
         <a-typography-text
+          class="expandable-ellipsis-text"
           :ellipsis="{ showTooltip: true }"
-          style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+          style="margin-left: 4px"
         >
           {{
             record.unbanAt ? d(record.unbanAt, 'long') : t('page.banlog.banlogTable.notUnbanned')
@@ -56,7 +58,7 @@
           :ellipsis="{
             showTooltip: true
           }"
-          style="flex: 1; min-width: 0; margin-bottom: 0"
+          class="expandable-ellipsis-text"
         >
           {{ record.peerId ? record.peerId : t('page.banlist.banlist.listItem.empty') }}
         </a-typography-text>
@@ -75,8 +77,9 @@
           <div style="display: flex; align-items: center">
             <icon-arrow-up class="green" />
             <a-typography-text
+              class="expandable-ellipsis-text"
               :ellipsis="true"
-              style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+              style="margin-left: 4px"
             >
               {{ formatFileSize(record.peerUploaded) }}
             </a-typography-text>
@@ -84,8 +87,9 @@
           <div style="display: flex; align-items: center; margin-top: 4px">
             <icon-arrow-down class="red" />
             <a-typography-text
+              class="expandable-ellipsis-text"
               :ellipsis="true"
-              style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+              style="margin-left: 4px"
             >
               {{ formatFileSize(record.peerDownloaded) }}
             </a-typography-text>
@@ -259,5 +263,11 @@ const sorterChange = (dataIndex: string, direction: string) => {
 }
 .green {
   color: rgb(var(--green-5));
+}
+
+.expandable-ellipsis-text {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
 }
 </style>
