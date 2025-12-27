@@ -1,6 +1,6 @@
 <template>
   <a-table
-    v-if="isMd"
+    v-if="mdAndLarger"
     :columns="columns"
     :data="data?.data"
     column-resizable
@@ -66,9 +66,7 @@
         <template #description>
           <a-space direction="vertical" fill>
             <a-space>
-              {{
-                typeof columns[1]?.title === 'function' ? columns[1].title() : columns[1]?.title
-              }}:
+              {{ getColumnTitle('speed') }}:
               <span class="green"
                 ><icon-arrow-up /> {{ formatFileSize(record.rtUploadSpeed) }}/s</span
               >
@@ -76,15 +74,9 @@
                 ><icon-arrow-down /> {{ formatFileSize(record.rtDownloadSpeed) }}/s</span
               >
             </a-space>
+            <a-space> {{ getColumnTitle('size') }}: {{ formatFileSize(record.size) }}</a-space>
             <a-space>
-              {{
-                typeof columns[2]?.title === 'function' ? columns[2].title() : columns[2]?.title
-              }}: {{ formatFileSize(record.size) }}</a-space
-            >
-            <a-space>
-              {{
-                typeof columns[4]?.title === 'function' ? columns[4].title() : columns[4]?.title
-              }}:
+              {{ getColumnTitle('progress') }}:
               <a-progress :percent="record.progress" size="mini" />
               <a-typography-text>{{ (record.progress * 100).toFixed(2) }}%</a-typography-text>
             </a-space>
@@ -109,11 +101,12 @@
 <script setup lang="ts">
 import { Message } from '@arco-design/web-vue'
 import { getTorrents } from '@/service/downloaders'
-import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 import { useRequest } from 'vue-request'
 import { formatFileSize } from '@/utils/file'
 import { useI18n } from 'vue-i18n'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import copy from 'copy-to-clipboard'
 const peerListModal = defineAsyncComponent(() => import('./peerListModal.vue'))
 const { t } = useI18n()
@@ -166,15 +159,14 @@ const columns = [
   }
 ]
 
-const windowWidth = ref(window.innerWidth)
-const updateWidth = () => {
-  windowWidth.value = window.innerWidth
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const mdAndLarger = breakpoints.greaterOrEqual('md')
+
+const getColumnTitle = (slotName: string) => {
+  const column = columns.find((c) => c.slotName === slotName)
+  if (!column?.title) return ''
+  return typeof column.title === 'function' ? column.title() : column.title
 }
-
-onMounted(() => window.addEventListener('resize', updateWidth))
-onUnmounted(() => window.removeEventListener('resize', updateWidth))
-
-const isMd = computed(() => windowWidth.value >= 768)
 </script>
 
 <style scoped>
