@@ -1,5 +1,5 @@
 <template>
-  <a-space direction="vertical" fill>
+  <a-space direction="vertical" fill align="center">
     <a-typography-text style="font-size: 1.2em">
       {{ t('page.banlog.description') }}
     </a-typography-text>

@@ -15,56 +15,86 @@
     column-resizable
     size="medium"
     class="banlog-table"
+    :bordered="{ cell: true }"
+    style="width: 80vw"
     @sorter-change="sorterChange"
     @page-change="changeCurrent"
     @page-size-change="changePageSize"
   >
     <template #banAt="{ record }">
-      <a-space fill direction="vertical">
-        <a-typography-text><icon-stop /> {{ d(record.banAt, 'long') }}</a-typography-text>
+      <div style="display: flex; align-items: center">
+        <icon-stop />
         <a-typography-text
-          ><icon-clock-circle />
+          :ellipsis="{ showTooltip: true }"
+          style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+        >
+          {{ d(record.banAt, 'long') }}
+        </a-typography-text>
+      </div>
+      <div style="display: flex; align-items: center">
+        <icon-clock-circle />
+        <a-typography-text
+          :ellipsis="{ showTooltip: true }"
+          style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+        >
           {{
             record.unbanAt ? d(record.unbanAt, 'long') : t('page.banlog.banlogTable.notUnbanned')
-          }}</a-typography-text
-        >
-      </a-space>
+          }}
+        </a-typography-text>
+      </div>
     </template>
     <template #peerAddress="{ record }">
-      <a-typography-text copyable code>
-        <queryIpLink :ip="record.peerIp" style="color: var(--color-text-2)">
+      <a-typography-text copyable :ellipsis="{ showTooltip: true }" style="margin-bottom: 0">
+        <queryIpLink :ip="record.peerIp" style="color: var(--color-text-2); font-style: italic">
           {{ formatIPAddressPort(record.peerIp, record.peerPort) }}
         </queryIpLink>
       </a-typography-text>
     </template>
-    <template #peerStatus="{ record }">
-      <a-space fill style="justify-content: space-between">
-        <a-space fill direction="vertical">
-          <a-typography-text
-            ><icon-arrow-up class="green" />
-            {{ formatFileSize(record.peerUploaded) }}</a-typography-text
-          >
-          <a-typography-text
-            ><icon-arrow-down class="red" />
-            {{ formatFileSize(record.peerDownloaded) }}</a-typography-text
-          >
-        </a-space>
-        <a-tooltip :content="(record.peerProgress * 100).toFixed(2) + '%'">
-          <a-progress :percent="record.peerProgress" size="mini" />
-        </a-tooltip>
-      </a-space>
-    </template>
     <template #peerId="{ record }">
-      <p>
-        {{ record.peerId ? record.peerId : t('page.banlist.banlist.listItem.empty') }}
+      <div style="display: flex; align-items: center">
+        <a-typography-text
+          :ellipsis="{
+            showTooltip: true
+          }"
+          style="flex: 1; min-width: 0; margin-bottom: 0"
+        >
+          {{ record.peerId ? record.peerId : t('page.banlist.banlist.listItem.empty') }}
+        </a-typography-text>
         <a-tooltip
           :content="
             record.peerClientName ? record.peerClientName : t('page.banlist.banlist.listItem.empty')
           "
         >
-          <icon-info-circle />
+          <icon-info-circle style="flex-shrink: 0; margin-left: 4px" />
         </a-tooltip>
-      </p>
+      </div>
+    </template>
+    <template #peerStatus="{ record }">
+      <div style="display: flex; align-items: center">
+        <div style="flex: 1">
+          <div style="display: flex; align-items: center">
+            <icon-arrow-up class="green" />
+            <a-typography-text
+              :ellipsis="true"
+              style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+            >
+              {{ formatFileSize(record.peerUploaded) }}
+            </a-typography-text>
+          </div>
+          <div style="display: flex; align-items: center; margin-top: 4px">
+            <icon-arrow-down class="red" />
+            <a-typography-text
+              :ellipsis="true"
+              style="flex: 1; min-width: 0; margin-bottom: 0; margin-left: 4px"
+            >
+              {{ formatFileSize(record.peerUploaded) }}
+            </a-typography-text>
+          </div>
+        </div>
+        <a-tooltip :content="(record.peerProgress * 100).toFixed(2) + '%'">
+          <a-progress :percent="record.peerProgress" size="mini" />
+        </a-tooltip>
+      </div>
     </template>
     <template #torrentName="{ record }">
       <a-tooltip
@@ -75,12 +105,14 @@
           })
         "
       >
-        <p>{{ record.torrentName }}</p>
+        <p style="text-overflow: ellipsis; overflow: hidden">{{ record.torrentName }}</p>
       </a-tooltip>
     </template>
     <template #torrentSize="{ record }">
       <a-tooltip :content="`Hash: ${record.torrentInfoHash}`">
-        <p>{{ formatFileSize(record.torrentSize) }}</p>
+        <p style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap">
+          {{ formatFileSize(record.torrentSize) }}
+        </p>
       </a-tooltip>
     </template>
   </a-table>
