@@ -46,11 +46,15 @@
       </div>
     </template>
     <template #peerAddress="{ record }">
-      <a-typography-text copyable :ellipsis="{ showTooltip: true }" style="margin-bottom: 0">
-        <queryIpLink :ip="record.peerIp" style="color: var(--color-text-2); font-style: italic">
+      <queryIpLink :ip="record.peerIp">
+        <a-typography-text
+          copyable
+          :ellipsis="{ showTooltip: true }"
+          style="margin-bottom: 0; color: var(--color-text-2); font-style: italic"
+        >
           {{ formatIPAddressPort(record.peerIp, record.peerPort) }}
-        </queryIpLink>
-      </a-typography-text>
+        </a-typography-text>
+      </queryIpLink>
     </template>
     <template #peerId="{ record }">
       <div style="display: flex; align-items: center">
