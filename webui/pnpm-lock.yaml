@@ -4,8 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: sha256-p9jYcEi0IEiHBS4URspAuc4sT1cMrsjrxxA9lhW+gzQ=
-
 patchedDependencies:
   vue-request@2.0.4:
     hash: a0013a8bdb361bbd3fd0a2a0c34418ae466b51e43079895b6666a63fdb8ef34d
@@ -22,8 +20,8 @@ importers:
         specifier: ^3.4.5
         version: 3.4.5
       '@formatjs/intl-durationformat':
-        specifier: ^0.8.2
-        version: 0.8.4
+        specifier: ^0.9.0
+        version: 0.9.0
       '@guolao/vue-monaco-editor':
         specifier: ^1.6.0
         version: 1.6.0(monaco-editor@0.55.1)(vue@3.5.26(typescript@5.9.3))
@@ -546,17 +544,17 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@formatjs/ecma402-abstract@3.0.3':
-    resolution: {integrity: sha512-1RGcY9guvulPKz2FJ3CvtfMh41h6S1fnHCUUCZbyRINokwsM740dMTBTkETT5QaYtjAIRoOFSPgf2LypzSgJHg==}
+  '@formatjs/ecma402-abstract@3.0.6':
+    resolution: {integrity: sha512-fIOujvbua2wbKk8et+ftvUvRiW8RQDAwix7ZZNjq7GbCh0npeqsLpRyBmDQ2w3tLT9PwcBwDepfJukByz8nbSA==}
 
   '@formatjs/fast-memoize@3.0.1':
     resolution: {integrity: sha512-kzk635kEmsxrrEWQXY7uKRocFCVXR4es5OQqcqCGg2NPtQztG/OBkE9THHu6UOTxpfyIkZhh6DjPBZGRp7y3og==}
 
-  '@formatjs/intl-durationformat@0.8.4':
-    resolution: {integrity: sha512-nnvSNmGJGz4f8VmYTrjJUVBDoKqvNlADDieO49gokuSf6WqE4ygzccL1XbGfBHQ8kkl2Ms79um81P4ufbUUqUg==}
+  '@formatjs/intl-durationformat@0.9.0':
+    resolution: {integrity: sha512-17gMyRgZ4HISimI7tdBN28IZbEgmqESef81ImGCwioaZevqqB0OsbUppxUQnA+p/2BMuSxXXXRRJK51iJ8XJmA==}
 
-  '@formatjs/intl-localematcher@0.7.2':
-    resolution: {integrity: sha512-1cpFlw1omNn2/Uz/vAdAyovlh7qS/po7MWipH3JrShT/lVUh2+lbEAWquyh9yRa84fqlLulTt7oysGtjATujZQ==}
+  '@formatjs/intl-localematcher@0.7.3':
+    resolution: {integrity: sha512-NaeABectKdTCOnlH9VFGmMS3K0JuR7Soc2t5R2MCkBrM3H/hlKVYh0XSrcjjPkbjIdrF7L/Bzx9JtGuVaSfYlA==}
 
   '@guolao/vue-monaco-editor@1.6.0':
     resolution: {integrity: sha512-w2IiJ6eJGGeuIgCK6EKZOAfhHTTUB5aZwslzwGbZ5e89Hb4avx6++GkLTW8p84Sng/arFMjLPPxSBI56cFudyQ==}
@@ -2926,10 +2924,10 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@formatjs/ecma402-abstract@3.0.3':
+  '@formatjs/ecma402-abstract@3.0.6':
     dependencies:
       '@formatjs/fast-memoize': 3.0.1
-      '@formatjs/intl-localematcher': 0.7.2
+      '@formatjs/intl-localematcher': 0.7.3
       decimal.js: 10.6.0
       tslib: 2.8.1
 
@@ -2937,14 +2935,15 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@formatjs/intl-durationformat@0.8.4':
+  '@formatjs/intl-durationformat@0.9.0':
     dependencies:
-      '@formatjs/ecma402-abstract': 3.0.3
-      '@formatjs/intl-localematcher': 0.7.2
+      '@formatjs/ecma402-abstract': 3.0.6
+      '@formatjs/intl-localematcher': 0.7.3
       tslib: 2.8.1
 
-  '@formatjs/intl-localematcher@0.7.2':
+  '@formatjs/intl-localematcher@0.7.3':
     dependencies:
+      '@formatjs/fast-memoize': 3.0.1
       tslib: 2.8.1
 
   '@guolao/vue-monaco-editor@1.6.0(monaco-editor@0.55.1)(vue@3.5.26(typescript@5.9.3))':
