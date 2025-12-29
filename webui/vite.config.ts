@@ -46,7 +46,7 @@ export default defineConfig({
           libs: ['pinia', 'vue-request', 'vue-i18n', 'vue-router', 'vue', '@vueuse/core', 'lodash'],
           monacoEditor: ['monaco-editor'],
           arcoDesign: ['@arco-design/web-vue'],
-          echarts: ['echarts', 'vue-echarts', 'zrender'],
+          echarts: ['echarts', 'vue-echarts'],
           uuid: ['uuid']
         }
       }
