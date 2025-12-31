@@ -4,7 +4,6 @@
     :columns="columns"
     :data="data?.data"
     column-resizable
-    :bordered="{ cell: true }"
     :loading="!loading && !data"
     :pagination="false"
   >
