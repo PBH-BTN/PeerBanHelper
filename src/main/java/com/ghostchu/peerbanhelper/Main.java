@@ -13,6 +13,8 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
+import com.ghostchu.peerbanhelper.platform.Platform;
+import com.ghostchu.peerbanhelper.platform.impl.win32.WindowsPlatform;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.*;
@@ -32,6 +34,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.Nullable;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +98,9 @@ public class Main {
     private static String[] startupArgs;
     @Getter
     private static final long startupAt = System.currentTimeMillis();
+    @Getter
+    @Nullable
+    private static Platform platform;
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 20;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.1";
@@ -120,6 +126,7 @@ public class Main {
                 DEF_LOCALE = defLocaleTag;
             }
         }
+        loadPlatform();
         initGUI(args);
         Thread.ofPlatform().name("Bootstrap").start(() -> {
             guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
@@ -141,6 +148,15 @@ public class Main {
         });
         guiManager.sync();
 
+    }
+
+    private static void loadPlatform() {
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        if (os.startsWith("win")) {
+            platform = new WindowsPlatform();
+            return;
+        }
+        platform = null;
     }
 
     private static void loadFlagsProperties() {

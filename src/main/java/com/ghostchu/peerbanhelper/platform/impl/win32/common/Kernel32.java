@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.platform.win32.workingset.jna;
+package com.ghostchu.peerbanhelper.platform.impl.win32.common;
 
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinDef;
