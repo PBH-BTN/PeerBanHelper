@@ -29,8 +29,8 @@
             {{ t('plus.begging') }}
           </a-typography-paragraph>
           <a href="https://mbd.pub/o/ghostchu" style="text-decoration: none" target="_blank">
-            <!-- <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" /> -->
-            <mbd :width="228" :height="83" />
+            <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
+            <!-- <mbd :width="228" :height="83" /> -->
           </a>
         </a-space>
         <a-split :size="0.5" disabled style="width: 100%">
@@ -138,7 +138,6 @@ import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import mbd from './mbdBadge.vue'
 import LicenseV1 from './plusLicenseV1.vue'
 import LicenseV2 from './plusLicenseV2.vue'
 import tryModal from './plusTryModal.vue'
