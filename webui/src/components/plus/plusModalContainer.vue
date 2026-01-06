@@ -28,7 +28,7 @@
           <a-typography-paragraph style="max-width: 50em; text-align: left">
             {{ t('plus.begging') }}
           </a-typography-paragraph>
-          <a href="https://mbd.pub/o/ghostchu" style="text-decoration: none" target="_blank">
+          <a href="https://afdian.com/a/Ghost_chu" style="text-decoration: none" target="_blank">
             <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
             <!-- <mbd :width="228" :height="83" /> -->
           </a>
