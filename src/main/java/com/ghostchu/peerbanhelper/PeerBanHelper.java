@@ -15,7 +15,6 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModul
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
-import com.ghostchu.peerbanhelper.platform.Platform;
 import com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -112,8 +111,8 @@ public class PeerBanHelper implements Reloadable {
     private void loadPlatformFeatures() {
         var platform = Main.getPlatform();
         if (platform == null) return;
-
-        if (platform.getEcoQosAPI().supported() && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
+        var ecoQosAPI = platform.getEcoQosAPI();
+        if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
             platform.getEcoQosAPI().apply();
         }
     }

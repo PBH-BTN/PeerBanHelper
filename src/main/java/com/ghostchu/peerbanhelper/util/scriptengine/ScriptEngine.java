@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.scriptengine;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -78,6 +79,19 @@ public final class ScriptEngine {
 
     @Nullable
     public CompiledScript compileScript(File file, String fallbackName, String scriptContent) {
+        var platform = Main.getPlatform();
+        if (platform != null) {
+            var scanner = platform.getMalwareScanner();
+            if (scanner != null) {
+                try (scanner) {
+                    if (scanner.isMalicious(scriptContent)) {
+                        log.error(tlUI(Lang.MALWARE_SCANNER_DETECTED, "UserScript", file.getAbsolutePath()));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
             String name = fallbackName;
             String author = "Unknown";

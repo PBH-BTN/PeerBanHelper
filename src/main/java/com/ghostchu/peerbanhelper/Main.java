@@ -34,6 +34,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ import java.math.MathContext;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Properties;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -98,8 +100,8 @@ public class Main {
     private static String[] startupArgs;
     @Getter
     private static final long startupAt = System.currentTimeMillis();
-    @Getter
     @Nullable
+    @Getter
     private static Platform platform;
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 20;

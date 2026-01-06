@@ -801,3 +801,4 @@ BTN_ABILITY_IP_QUERY_DESCRIPTION: |
   PeerBanHelper functional modules can use this service's capabilities to obtain an activity summary for specific IP addresses on BTN.
 BTN_ABILITY_IP_QUERY_STATUS_OK: "Query processed successfully: {}"
 BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP Query capability is not available on this BTN instance"
+MALWARE_SCANNER_DETECTED: "[Antivirus] Antivirus software on the computer reported malware in the {} being loaded (location: {}). For security reasons, PeerBanHelper has cancelled and refused to load this content."

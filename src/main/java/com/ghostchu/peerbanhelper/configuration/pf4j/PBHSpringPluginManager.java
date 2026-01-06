@@ -1,11 +1,10 @@
 package com.ghostchu.peerbanhelper.configuration.pf4j;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.pf4j.ExtensionFactory;
-import org.pf4j.PluginState;
-import org.pf4j.PluginStateEvent;
-import org.pf4j.PluginWrapper;
+import org.pf4j.*;
 import org.pf4j.spring.ExtensionsInjector;
 import org.pf4j.spring.SpringExtensionFactory;
 import org.pf4j.spring.SpringPluginManager;
@@ -14,10 +13,14 @@ import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFact
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class PBHSpringPluginManager extends SpringPluginManager implements ApplicationContextAware {
@@ -63,6 +66,44 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
     }
 
     @Override
+    public void loadPlugins() {
+        log.debug("Lookup plugins in '{}'", pluginsRoots);
+
+        // check for plugins roots
+        if (pluginsRoots.isEmpty()) {
+            log.warn("No plugins roots configured");
+            return;
+        }
+        pluginsRoots.forEach(path -> {
+            if (Files.notExists(path) || !Files.isDirectory(path)) {
+                log.warn("No '{}' root", path);
+            }
+        });
+
+        // get all plugin paths from repository
+        List<Path> pluginPaths = pluginRepository.getPluginPaths();
+
+        // check for no plugins
+        if (pluginPaths.isEmpty()) {
+            log.info("No plugins");
+            return;
+        }
+
+        log.debug("Found {} possible plugins: {}", pluginPaths.size(), pluginPaths);
+
+        // load plugins from plugin paths
+        for (Path pluginPath : pluginPaths) {
+            try {
+                loadPluginFromPath(pluginPath);
+            } catch (PluginRuntimeException e) {
+                log.error("Cannot load plugin '{}'", pluginPath, e);
+            }
+        }
+
+        resolvePlugins();
+    }
+
+    @Override
     public void startPlugins() {
         for (PluginWrapper pluginWrapper : resolvedPlugins) {
             PluginState pluginState = pluginWrapper.getPluginState();
@@ -83,6 +124,7 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
             }
         }
     }
+
     /**
      * Stop all active plugins.
      */
@@ -110,5 +152,33 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
                 log.debug("Plugin '{}' is not started, nothing to stop", getPluginLabel(pluginWrapper.getDescriptor()));
             }
         }
+    }
+
+    /**
+     * Load a plugin from disk. If the path is a zip file, first unpack.
+     *
+     * @param pluginPath plugin location on disk
+     * @return PluginWrapper for the loaded plugin or null if not loaded
+     * @throws PluginRuntimeException if problems during load
+     */
+    @Override
+    protected PluginWrapper loadPluginFromPath(Path pluginPath) {
+        var platform = Main.getPlatform();
+        if (platform != null) {
+            var scanner = platform.getMalwareScanner();
+            if (scanner != null) {
+                try (scanner) {
+                    File file = pluginPath.toFile();
+                    if (scanner.isMalicious(file)) {
+                        throw new PluginRuntimeException(tlUI(Lang.MALWARE_SCANNER_DETECTED, "[JavaPlugin", pluginPath.toAbsolutePath()));
+                    }
+                } catch (PluginRuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    log.debug("Malware scan failed for plugin '{}': Unable to close scanner", pluginPath, e);
+                }
+            }
+        }
+        return super.loadPluginFromPath(pluginPath);
     }
 }
