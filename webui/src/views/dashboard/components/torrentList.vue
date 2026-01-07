@@ -1,44 +1,53 @@
 <template>
   <a-table
+    v-if="mdAndLarger"
     :columns="columns"
     :data="data?.data"
+    column-resizable
     :loading="!loading && !data"
-    :virtual-list-props="{ height: 350, threshold: 10 }"
+    :virtual-list-props="useVirtualList"
     :pagination="false"
   >
     <template #name="{ record }">
-      <a-typography-text bold style="margin-bottom: 0" :ellipsis="{ showTooltip: true }">
+      <a-typography-text
+        :ellipsis="{
+          showTooltip: true
+        }"
+        style="margin-bottom: 0em"
+      >
         {{ record.name }}
       </a-typography-text>
-    </template>
-    <template #size="{ record }">
-      <a-typography-text>{{ formatFileSize(record.size) }}</a-typography-text>
-    </template>
-    <template #hash="{ record }">
-      <a-button @click="handleCopy(record.hash)">{{
-        t('page.rule_management.ruleSubscribe.column.clickToCopy')
-      }}</a-button>
-    </template>
-    <template #progress="{ record }">
-      <a-space>
-        <a-progress :percent="record.progress" size="mini" />
-        <a-typography-text>
-          {{ (record.progress * 100).toFixed(2) + '%' }}
-        </a-typography-text>
-      </a-space>
     </template>
     <template #speed="{ record }">
       <a-space fill style="justify-content: space-between">
         <a-space fill direction="vertical">
-          <a-typography-text
-            ><icon-arrow-up class="green" />
-            {{ formatFileSize(record.rtUploadSpeed) }}/s</a-typography-text
-          >
-          <a-typography-text
-            ><icon-arrow-down class="red" />
-            {{ formatFileSize(record.rtDownloadSpeed) }}/s</a-typography-text
-          >
+          <a-typography-text style="white-space: nowrap">
+            <icon-arrow-up class="green" />
+            {{ formatFileSize(record.rtUploadSpeed) }}/s
+          </a-typography-text>
+          <a-typography-text style="white-space: nowrap">
+            <icon-arrow-down class="red" />
+            {{ formatFileSize(record.rtDownloadSpeed) }}/s
+          </a-typography-text>
         </a-space>
+      </a-space>
+    </template>
+    <template #size="{ record }">
+      <a-typography-text style="white-space: nowrap">
+        {{ formatFileSize(record.size) }}
+      </a-typography-text>
+    </template>
+    <template #hash="{ record }">
+      <a-button @click="handleCopy(record.hash)">
+        {{ t('page.rule_management.ruleSubscribe.column.clickToCopy') }}
+      </a-button>
+    </template>
+    <template #progress="{ record }">
+      <a-space>
+        <a-progress :percent="record.progress" size="mini" />
+        <a-typography-text style="white-space: nowrap">
+          {{ (record.progress * 100).toFixed(2) + '%' }}
+        </a-typography-text>
       </a-space>
     </template>
     <template #peer="{ record }">
@@ -47,17 +56,68 @@
       </a-button>
     </template>
   </a-table>
+
+  <a-list
+    v-else
+    :loading="!loading && !data"
+    :bordered="true"
+    hoverable
+    :virtual-list-props="useVirtualList"
+  >
+    <a-list-item v-for="record in data?.data" :key="record.id" action-layout="vertical">
+      <a-list-item-meta style="width: 100%">
+        <template #title>
+          <div style="margin-bottom: 8px">{{ record.name }}</div>
+        </template>
+        <template #description>
+          <a-space direction="vertical" fill>
+            <a-space>
+              {{ getColumnTitle('speed') }}:
+              <span class="green"
+                ><icon-arrow-up /> {{ formatFileSize(record.rtUploadSpeed) }}/s</span
+              >
+              <span class="red"
+                ><icon-arrow-down /> {{ formatFileSize(record.rtDownloadSpeed) }}/s</span
+              >
+            </a-space>
+            <a-space> {{ getColumnTitle('size') }}: {{ formatFileSize(record.size) }}</a-space>
+            <a-space>
+              {{ getColumnTitle('progress') }}:
+              <a-progress :percent="record.progress" size="mini" />
+              <a-typography-text>{{ (record.progress * 100).toFixed(2) }}%</a-typography-text>
+            </a-space>
+          </a-space>
+        </template>
+      </a-list-item-meta>
+
+      <template #actions>
+        <a-button size="small" @click="handleCopy(record.hash)">
+          {{ getColumnTitle('hash') }} ({{
+            t('page.rule_management.ruleSubscribe.column.clickToCopy')
+          }})
+        </a-button>
+        <a-button
+          size="small"
+          @click="() => peerList?.showModal(downloader, record.id, record.name)"
+        >
+          {{ getColumnTitle('peer') }} ({{ t('page.dashboard.torrentList.column.view') }})
+        </a-button>
+      </template>
+    </a-list-item>
+  </a-list>
+
   <peerListModal ref="peerList" />
 </template>
 <script setup lang="ts">
-import { Message } from '@arco-design/web-vue'
 import { getTorrents } from '@/service/downloaders'
-import { defineAsyncComponent, ref } from 'vue'
-import { useRequest } from 'vue-request'
-import { formatFileSize } from '@/utils/file'
-import { useI18n } from 'vue-i18n'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { formatFileSize } from '@/utils/file'
+import { Message } from '@arco-design/web-vue'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import copy from 'copy-to-clipboard'
+import { computed, defineAsyncComponent, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 const peerListModal = defineAsyncComponent(() => import('./peerListModal.vue'))
 const { t } = useI18n()
 const { downloader } = defineProps<{
@@ -108,6 +168,19 @@ const columns = [
     slotName: 'peer'
   }
 ]
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const mdAndLarger = breakpoints.greaterOrEqual('md')
+
+const getColumnTitle = (slotName: string) => {
+  const column = columns.find((c) => c.slotName === slotName)
+  if (!column?.title) return ''
+  return typeof column.title === 'function' ? column.title() : column.title
+}
+
+const useVirtualList = computed(() => {
+  return (data.value?.data?.length ?? 0) > 10 ? { height: 350, threshold: 10 } : {}
+})
 </script>
 
 <style scoped>
