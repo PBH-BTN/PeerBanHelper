@@ -113,7 +113,7 @@ const handleOk = async () => {
     if (validateError || form.name.length === 0) {
       return false
     }
-    form.name = form.name + '.av'
+    if (!form.name.endsWith('.av')) form.name = form.name + '.av'
   }
   const result = await UpsertScript(form.name, content.value)
   if (result.success) {
