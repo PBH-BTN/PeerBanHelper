@@ -286,7 +286,7 @@ public final class BitComet extends AbstractDownloader {
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
         requirements.put("start", 0);
-        requirements.put("limit", Integer.MAX_VALUE);
+        requirements.put("limit", Integer.MAX_VALUE - 1);
         return fetchTorrents(requirements, !config.isIgnorePrivate());
     }
 
@@ -299,7 +299,7 @@ public final class BitComet extends AbstractDownloader {
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
         requirements.put("start", 0);
-        requirements.put("limit", Integer.MAX_VALUE);
+        requirements.put("limit", Integer.MAX_VALUE - 1);
         return fetchTorrents(requirements, true);
     }
 
