@@ -71,15 +71,10 @@ public final class BlockListController extends AbstractFeatureModule {
         }
         var result = builder.toString();
         var userAgent = ctx.userAgent();
-        if(userAgent != null){
-            log.info(userAgent);
-        }
         if(result.isBlank() && userAgent != null && userAgent.startsWith("Transmission")){
             result = "TransmissionWorkaround:127.127.127.127-127.127.127.127";
         }
         ctx.result(result);
-
-
     }
 
     private void blocklistIp(@NotNull Context ctx) {
