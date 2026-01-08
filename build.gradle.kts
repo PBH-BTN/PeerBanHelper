@@ -56,7 +56,7 @@ configurations.all {
         // Handle the custom sqlite-jdbc-loongarch64 dependency from local repo
         dependencySubstitution {
             substitute(module("com.ghostchu.peerbanhelper.external-libs:sqlite-jdbc-loongarch64"))
-                .using(module("org.xerial:sqlite-jdbc:3.47.0.0"))
+                .using(module("org.xerial:sqlite-jdbc:3.51.1.0"))
                 .because("Local repo has different coordinates")
         }
     }
@@ -80,7 +80,7 @@ dependencies {
     // Database - OrmLite
     implementation("com.j256.ormlite:ormlite-core:$ormliteVersion")
     implementation("com.j256.ormlite:ormlite-jdbc:$ormliteVersion")
-    implementation("org.xerial:sqlite-jdbc:3.47.0.0")
+    implementation("org.xerial:sqlite-jdbc:3.51.1.0")
 
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.0.2")
