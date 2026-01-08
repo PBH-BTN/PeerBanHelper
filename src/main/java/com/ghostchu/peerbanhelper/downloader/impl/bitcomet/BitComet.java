@@ -105,6 +105,9 @@ public final class BitComet extends AbstractDownloader {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(2);
         flags.add(DownloaderFeatureFlag.UNBAN_IP);
         flags.add(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
+        if (serverVersion.isGreaterThanOrEqualTo("2.20")) {
+            flags.add(DownloaderFeatureFlag.TRAFFIC_STATS);
+        }
         return flags;
     }
 
@@ -276,28 +279,32 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public @NotNull List<Torrent> getTorrents() {
-        Map<String, String> requirements = new HashMap<>();
+        Map<String, Object> requirements = new HashMap<>();
         requirements.put("state_group", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
+        requirements.put("start", 0);
+        requirements.put("limit", Integer.MAX_VALUE);
         return fetchTorrents(requirements, !config.isIgnorePrivate());
     }
 
     @Override
     public @NotNull List<Torrent> getAllTorrents() {
-        Map<String, String> requirements = new HashMap<>();
+        Map<String, Object> requirements = new HashMap<>();
         requirements.put("state_group", "ALL");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
+        requirements.put("start", 0);
+        requirements.put("limit", Integer.MAX_VALUE);
         return fetchTorrents(requirements, true);
     }
 
 
-    public List<Torrent> fetchTorrents(Map<String, String> requirements, boolean includePrivate) {
+    public List<Torrent> fetchTorrents(Map<String, Object> requirements, boolean includePrivate) {
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(requirements), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint())
@@ -398,7 +405,9 @@ public final class BitComet extends AbstractDownloader {
         long totalUploaded = 0;
         long totalDownloaded = 0;
         Map<String, Object> body = new HashMap<>();
-        body.put("token_list", List.of("${G_TOTAL_DOWNLOAD_AUTO}", "${G_TOTAL_UPLOAD_AUTO}", "${G_SESSION_DOWNLOAD_AUTO}", "${G_SESSION_UPLOAD_AUTO}"));
+        body.put("token_list", List.of(
+                "${G_TOTAL_DOWNLOAD_AUTO}", "${G_TOTAL_UPLOAD_AUTO}", "${G_SESSION_DOWNLOAD_AUTO}", "${G_SESSION_UPLOAD_AUTO}",
+                "${G_TOTAL_DOWNLOAD_BYTE}", "${G_TOTAL_UPLOAD_BYTE}", "${G_SESSION_DOWNLOAD_BYTE}", "${G_SESSION_UPLOAD_BYTE}"));
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(body), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + BCEndpoint.GET_STATISTICS_LIST.getEndpoint())
@@ -412,10 +421,20 @@ public final class BitComet extends AbstractDownloader {
             }
             var valueList = JsonUtil.standard().fromJson(respBody, BCStatisticsValueListResponse.class);
             for (BCStatisticsValueListResponse.ValueListDTO valueListDTO : valueList.getValueList()) {
-                switch (valueListDTO.getToken()) {
-                    case "${G_TOTAL_DOWNLOAD_AUTO}" -> totalDownloaded = readHumanReadableValue(valueListDTO.getValue());
-                    case "${G_TOTAL_UPLOAD_AUTO}" -> totalUploaded = readHumanReadableValue(valueListDTO.getValue());
+                if (serverVersion.isGreaterThanOrEqualTo("2.20")) {
+                    switch (valueListDTO.getToken()) {
+                        case "${G_TOTAL_DOWNLOAD_BYTE}" -> totalDownloaded = Long.parseLong(valueListDTO.getValue());
+                        case "${G_TOTAL_UPLOAD_BYTE}" -> totalUploaded = Long.parseLong(valueListDTO.getValue());
+                    }
+                } else {
+                    switch (valueListDTO.getToken()) {
+                        case "${G_TOTAL_DOWNLOAD_AUTO}" ->
+                                totalDownloaded = readHumanReadableValue(valueListDTO.getValue());
+                        case "${G_TOTAL_UPLOAD_AUTO}" ->
+                                totalUploaded = readHumanReadableValue(valueListDTO.getValue());
+                    }
                 }
+
             }
         } catch (Exception e) {
             log.warn("Failed to fetch BitComet statistics", e);
