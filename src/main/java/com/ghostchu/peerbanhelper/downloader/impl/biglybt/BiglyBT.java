@@ -414,7 +414,7 @@ public final class BiglyBT extends AbstractDownloader {
                     peer.isInterested(),
                     peer.isChoked(),
                     false, // unsupported
-                    peer.isIncoming(),
+                    !peer.isIncoming(),
                     !peer.isIncoming(),
                     peer.getState() == 20, // unsupported
                     peer.getState() == 10, // unsupported
