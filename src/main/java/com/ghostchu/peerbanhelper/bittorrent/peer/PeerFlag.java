@@ -18,7 +18,14 @@ public final class PeerFlag {
     }
 
     @Builder
-    public PeerFlag(boolean interesting, boolean choked, boolean remoteInterested, boolean remoteChoked, boolean supportsExtensions, boolean outgoingConnection, boolean localConnection, boolean handshake, boolean connecting, boolean onParole, boolean seed, boolean optimisticUnchoke, boolean snubbed, boolean uploadOnly, boolean endGameMode, boolean holePunched, boolean i2pSocket, boolean utpSocket, boolean sslSocket, boolean rc4Encrypted, boolean plainTextEncrypted, boolean fromTracker, boolean fromDHT, boolean fromPEX, boolean fromLSD, boolean fromResumeData, boolean fromIncoming) {
+    public PeerFlag(boolean interesting, boolean choked, boolean remoteInterested, boolean remoteChoked,
+                    boolean supportsExtensions, boolean outgoingConnection, boolean localConnection,
+                    boolean handshake, boolean connecting, boolean onParole, boolean seed,
+                    boolean optimisticUnchoke, boolean snubbed, boolean uploadOnly,
+                    boolean endGameMode, boolean holePunched, boolean i2pSocket,
+                    boolean utpSocket, boolean sslSocket, boolean rc4Encrypted,
+                    boolean plainTextEncrypted, boolean fromTracker, boolean fromDHT,
+                    boolean fromPEX, boolean fromLSD, boolean fromResumeData, boolean fromIncoming) {
         peerFlags.set(0, interesting);
         peerFlags.set(1, choked);
         peerFlags.set(2, remoteInterested);

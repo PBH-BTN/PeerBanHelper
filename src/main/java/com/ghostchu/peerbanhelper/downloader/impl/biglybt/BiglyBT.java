@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
@@ -394,13 +395,51 @@ public final class BiglyBT extends AbstractDownloader {
                         peer.getStats().getRtUploadSpeed(),
                         peer.getStats().getTotalSent(),
                         peer.getPercentDoneInThousandNotation() / 1000d,
-                        null,
+                        parseFlag(peer),
                         peer.getState() != 30 && peer.getState() != 40
                 ));
             }
             return peersList;
         } catch (IOException e) {
             throw new DownloaderRequestException(e);
+        }
+    }
+
+    @NotNull
+    private PeerFlag parseFlag(PeerRecord peer) {
+        try {
+            return new PeerFlag(
+                    peer.isInteresting(),
+                    peer.isChoking(),
+                    peer.isInterested(),
+                    peer.isChoked(),
+                    false, // unsupported
+                    peer.isIncoming(),
+                    !peer.isIncoming(),
+                    peer.getState() == 20, // unsupported
+                    peer.getState() == 10, // unsupported
+                    false, // unsupported
+                    peer.isSeed(),
+                    peer.isOptimisticUnchoke(),
+                    peer.isSnubbed(),
+                    false, // unsupported, uploadOnly
+                    false, // unsupported endGameMode
+                    peer.getPeerSource() != null && "HolePunch".equals(peer.getPeerSource()),
+                    peer.getIp().endsWith(".i2p"),
+                    peer.getProtocol().equals("uTP"),
+                    false,
+                    peer.isUseCrypto(),
+                    false,
+                    peer.getPeerSource() != null && "Tracker".equals(peer.getPeerSource()),
+                    peer.getPeerSource() != null && "DHT".equals(peer.getPeerSource()),
+                    peer.getPeerSource() != null && "PeerExchange".equals(peer.getPeerSource()),
+                    false,
+                    false,
+                    peer.isIncoming()
+            );
+        }catch (Exception e) {
+            log.debug("Failed to parse peer flag for peer: {}:{}: {}", peer.getIp(), peer.getPort(), peer, e);
+            return null;
         }
     }
 
