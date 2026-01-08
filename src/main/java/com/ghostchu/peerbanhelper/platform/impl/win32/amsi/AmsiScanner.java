@@ -16,20 +16,25 @@ import java.nio.channels.FileChannel;
 @Slf4j
 public class AmsiScanner implements MalwareScanner {
     private boolean available;
-    private final Pointer amsiContext;
-    private final Pointer amsiSession;
+    private Pointer amsiContext;
+    private Pointer amsiSession;
 
     public AmsiScanner(String appName) {
-        PointerByReference ctxRef = new PointerByReference();
-        int hr = AmsiLib.INSTANCE.AmsiInitialize(appName, ctxRef);
-        if (hr != 0) {
-            throw new IllegalStateException("Failed to initialize AMSI. HRESULT: " + hr);
+        try {
+            PointerByReference ctxRef = new PointerByReference();
+            int hr = AmsiLib.INSTANCE.AmsiInitialize(appName, ctxRef);
+            if (hr != 0) {
+                throw new IllegalStateException("Failed to initialize AMSI. HRESULT: " + hr);
+            }
+            amsiContext = ctxRef.getValue();
+            PointerByReference sessRef = new PointerByReference();
+            AmsiLib.INSTANCE.AmsiOpenSession(amsiContext, sessRef);
+            amsiSession = sessRef.getValue();
+            available = true;
+        } catch (Exception e) {
+            available = false;
+            log.debug("Unable to initialize AMSI: {}", e.getMessage());
         }
-        amsiContext = ctxRef.getValue();
-        PointerByReference sessRef = new PointerByReference();
-        AmsiLib.INSTANCE.AmsiOpenSession(amsiContext, sessRef);
-        amsiSession = sessRef.getValue();
-        available = true;
     }
 
     @Override
