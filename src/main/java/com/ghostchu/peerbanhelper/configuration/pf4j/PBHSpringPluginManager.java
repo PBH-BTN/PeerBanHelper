@@ -165,18 +165,17 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
     protected PluginWrapper loadPluginFromPath(Path pluginPath) {
         var platform = Main.getPlatform();
         if (platform != null) {
-            var scanner = platform.getMalwareScanner();
-            if (scanner != null) {
-                try (scanner) {
+            try (var scanner = platform.getMalwareScanner()) {
+                if (scanner != null) {
                     File file = pluginPath.toFile();
                     if (scanner.isMalicious(file)) {
                         throw new PluginRuntimeException(tlUI(Lang.MALWARE_SCANNER_DETECTED, "[JavaPlugin", pluginPath.toAbsolutePath()));
                     }
-                } catch (PluginRuntimeException e) {
-                    throw e;
-                } catch (Exception e) {
-                    log.debug("Malware scan failed for plugin '{}': Unable to close scanner", pluginPath, e);
                 }
+            } catch (PluginRuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                log.debug("Malware scan failed for plugin '{}': Unable to close scanner", pluginPath, e);
             }
         }
         return super.loadPluginFromPath(pluginPath);

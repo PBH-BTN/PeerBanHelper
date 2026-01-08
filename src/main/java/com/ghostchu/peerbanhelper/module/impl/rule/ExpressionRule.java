@@ -133,14 +133,17 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         var content = context.bodyAsBytes();
         var platform = Main.getPlatform();
         if (platform != null) {
-            var scanner = platform.getMalwareScanner();
-            if (scanner != null) {
-                if (scanner.isMalicious(context.body())) {
-                    context.status(HttpStatus.BAD_REQUEST);
-                    context.json(new StdResp(false, tl(locale(context), Lang.MALWARE_SCANNER_DETECTED, "WebAPI-ScriptCreate", scriptId), null));
-                    log.error(tlUI(Lang.MALWARE_SCANNER_DETECTED, "WebAPI-ScriptCreate", scriptId));
-                    return;
+            try(var scanner = platform.getMalwareScanner()) {
+                if (scanner != null) {
+                    if (scanner.isMalicious(context.body())) {
+                        context.status(HttpStatus.BAD_REQUEST);
+                        context.json(new StdResp(false, tl(locale(context), Lang.MALWARE_SCANNER_DETECTED, "WebAPI-ScriptCreate", scriptId), null));
+                        log.error(tlUI(Lang.MALWARE_SCANNER_DETECTED, "WebAPI-ScriptCreate", scriptId));
+                        return;
+                    }
                 }
+            }catch (Exception e){
+                log.debug("Malware scan failed for pending to add script", e);
             }
         }
         Files.write(readFile.toPath(), content, StandardOpenOption.CREATE);
