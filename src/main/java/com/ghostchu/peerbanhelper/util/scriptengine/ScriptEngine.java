@@ -86,6 +86,7 @@ public final class ScriptEngine {
                 try (scanner) {
                     if (scanner.isMalicious(scriptContent)) {
                         log.error(tlUI(Lang.MALWARE_SCANNER_DETECTED, "UserScript", file.getAbsolutePath()));
+                        return null;
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
