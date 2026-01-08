@@ -52,7 +52,6 @@ public class AmsiScanner implements MalwareScanner {
                     amsiSession,
                     result
             );
-            System.out.println(result[0]);
             return result[0] >= 32768;
         } catch (Exception e) {
             log.debug("AMSI scan file failed: {}", e.getMessage());
