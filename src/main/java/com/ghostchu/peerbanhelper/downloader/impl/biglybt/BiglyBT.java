@@ -405,7 +405,7 @@ public final class BiglyBT extends AbstractDownloader {
         }
     }
 
-    @NotNull
+    @Nullable
     private PeerFlag parseFlag(PeerRecord peer) {
         try {
             return new PeerFlag(
