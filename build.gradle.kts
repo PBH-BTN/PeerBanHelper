@@ -89,7 +89,7 @@ dependencies {
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
     // JSON
-    implementation("org.json:json:20250517")
+    implementation("org.json:json:20251224")
 
     // System theme detector
     implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1") {
