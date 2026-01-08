@@ -41,7 +41,6 @@ public final class Transmission extends AbstractDownloader {
     private final TrClient client;
     private final String blocklistUrl;
     private final Config config;
-    private boolean warningSent = false;
 
     public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(id, alertManager, natAddressProvider);
@@ -116,18 +115,10 @@ public final class Transmission extends AbstractDownloader {
         Semver semver = new Semver(version, Semver.SemverType.LOOSE);
         // must 4.1.0 or higher
         if (semver.getMajor() < 4) {
-            if(!warningSent) {
-                log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
-                warningSent = true;
-            }
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, "Transmission version must be 4.1.0 or higher"));
         }
         if (semver.getMajor() == 4) {
             if (semver.getMinor() < 1) {
-                if(!warningSent) {
-                    log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
-                    warningSent = true;
-                }
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, "Transmission version must higher then (or equals to) 4.1.0"));
             }
         }
