@@ -28,7 +28,7 @@ if exist "%~dp0jre\bin\java.exe" (
         set "SEARCH_BIN=%JAVA_HOME%\bin"
     ) else (
         echo %MSG_INVALID_JAVA_HOME%
-        echo [Error] JAVA_HOME = %JAVA_HOME%
+        echo [Error] JAVA_HOME = "%JAVA_HOME%"
         exit /b 1
     )
 ) else (
