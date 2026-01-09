@@ -9,11 +9,13 @@ set "REQ_VER=25"
 if /i "%LANG%"=="zh_CN" (
     set "MSG_NOT_FOUND_1=[Error] 在同目录下、JAVA_HOME和PATH下都没有找到Java。"
     set "MSG_NOT_FOUND_2=[Error] 您可能下载了Portable_nojava版本，请下载Portable版本。"
+    set "MSG_INVALID_JAVA_HOME=[Error] 环境变量JAVA_HOME配置不正确。"
     set "MSG_VERSION_LOW=[Error] PeerBanHelper需要Java %REQ_VER%或以上版本，当前版本为{VER}。"
     set "MSG_PARSE_FAILED=[Error] 无法识别Java版本。"
 ) else (
     set "MSG_NOT_FOUND_1=[Error] Java not found in current directory, JAVA_HOME or PATH."
     set "MSG_NOT_FOUND_2=[Error] Portable_nojava.zip downloaded? Please download the Portable.zip instead."
+    set "MSG_INVALID_JAVA_HOME=[Error] Environment variable of JAVA_HOME is invalid."
     set "MSG_VERSION_LOW=[Error] PeerBanHelper requires Java %REQ_VER% or later. Current version is {VER}."
     set "MSG_PARSE_FAILED=[Error] Failed to recognize Java version."
 )
@@ -22,7 +24,13 @@ if /i "%LANG%"=="zh_CN" (
 if exist "%~dp0jre\bin\java.exe" (
     set "SEARCH_BIN=%~dp0jre\bin"
 ) else if defined JAVA_HOME (
-    set "SEARCH_BIN=%JAVA_HOME%\bin"
+    if exist "%JAVA_HOME%\bin\java.exe" (
+        set "SEARCH_BIN=%JAVA_HOME%\bin"
+    ) else (
+        echo %MSG_INVALID_JAVA_HOME%
+        echo [Error] JAVA_HOME = "%JAVA_HOME%"
+        exit /b 1
+    )
 ) else (
     for /f "delims=" %%i in ('where.exe java.exe 2^>nul') do (
         :: Extract the full folder path (Drive + Path)
