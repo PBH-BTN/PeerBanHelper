@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDTO;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.support.ConnectionSource;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
@@ -180,11 +183,12 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
     }
 
     public void removeOutdatedData(@NotNull Timestamp beforeAt) {
+        log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANING_UP));
         try {
             var deleteBuilder = deleteBuilder();
             deleteBuilder.where().le("timeframeAt", beforeAt);
             var deleted = deleteBuilder.delete();
-            log.debug("Removed {} outdated peer connection metrics data before {}", deleted, beforeAt);
+            log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
         } catch (SQLException e) {
             log.error("Failed to remove outdated peer connection metrics data before {}", beforeAt, e);
         }

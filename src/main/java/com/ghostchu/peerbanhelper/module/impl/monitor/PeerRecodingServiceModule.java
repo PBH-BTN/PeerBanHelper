@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
@@ -27,6 +28,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Component
 @Slf4j
 public class PeerRecodingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
@@ -34,7 +37,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
     private PeerRecordDao peerRecordDao;
     private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
     private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
-    private final Cache<PeerRecordDao.BatchHandleTasks, Object> diskWriteCache = CacheBuilder
+    private final Cache<PeerRecordDao.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(ExternalSwitch.parseLong("pbh.module.peerRecordingServiceModule.diskWriteCache.timeout", 180000), TimeUnit.MILLISECONDS)
             .maximumSize(ExternalSwitch.parseInt("pbh.module.peerRecordingServiceModule.diskWriteCache.size", 3500))
@@ -122,13 +125,13 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
             if (dataRetentionTime <= 0) {
                 return;
             }
-            log.debug("Cleaning PeerRecording table...");
+            log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANING_UP));
             try {
                 var deleteBuilder = peerRecordDao.deleteBuilder();
                 var where = deleteBuilder.where().lt("lastTimeSeen", new Timestamp(System.currentTimeMillis() - dataRetentionTime));
                 deleteBuilder.setWhere(where);
                 int deleted = deleteBuilder.delete();
-                log.debug("Cleaned {} old records from peer_records tables", deleted);
+                log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
             } catch (SQLException e) {
                 log.warn("Unable to clean up peer_records tables", e);
             }

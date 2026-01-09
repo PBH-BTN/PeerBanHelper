@@ -802,3 +802,7 @@ BTN_ABILITY_IP_QUERY_DESCRIPTION: |
 BTN_ABILITY_IP_QUERY_STATUS_OK: "Query processed successfully: {}"
 BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP Query capability is not available on this BTN instance"
 MALWARE_SCANNER_DETECTED: "[Antivirus] Antivirus software on the computer reported malware in the {} being loaded (location: {}). For security reasons, PeerBanHelper has cancelled and refused to load this content."
+PEER_RECORDING_SERVICE_CLEANING_UP: "[Peer Recording Service] Cleaning up expired peer record data, please wait..."
+PEER_RECORDING_SERVICE_CLEANED_UP: "[Peer Recording Service] Deleted {} expired peer record data"
+CONNECTION_METRICS_SERVICE_CLEANING_UP: "[Peer Connection Analysis Service] Cleaning up expired connection metrics data, please wait..."
+CONNECTION_METRICS_SERVICE_CLEANED_UP: "[Peer Connection Analysis Service] Deleted {} expired connection metrics data"

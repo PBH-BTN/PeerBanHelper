@@ -19,7 +19,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @Slf4j
 public final class CommonUtil {
 
-    private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofVirtual().factory());
+    private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofPlatform().name("CommonScheduler").factory());
 
     public static ScheduledExecutorService getScheduler() {
         return GENERAL_SCHEDULER;
