@@ -425,8 +425,8 @@ public final class BiglyBT extends AbstractDownloader {
                     false, // unsupported, uploadOnly
                     false, // unsupported endGameMode
                     peer.getPeerSource() != null && "HolePunch".equals(peer.getPeerSource()),
-                    peer.getIp().endsWith(".i2p"),
-                    peer.getProtocol().equals("uTP"),
+                    peer.getIp() != null && peer.getIp().endsWith(".i2p"),
+                    "uTP".equals(peer.getProtocol()),
                     false,
                     peer.isUseCrypto(),
                     false,
