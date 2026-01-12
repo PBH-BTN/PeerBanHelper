@@ -1,8 +1,8 @@
-package com.ghostchu.peerbanhelper.platform.win32.ecoqos;
+package com.ghostchu.peerbanhelper.platform.impl.win32.ecoqos;
 
 import com.sun.jna.platform.win32.WinNT;
 
-import static com.ghostchu.peerbanhelper.platform.win32.ecoqos.EcoModeConstants.*;
+import static com.ghostchu.peerbanhelper.platform.impl.win32.ecoqos.EcoModeConstants.*;
 
 public class EcoMode {
 

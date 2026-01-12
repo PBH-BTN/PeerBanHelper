@@ -89,7 +89,9 @@ public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Lo
                     peer.getDownloadSpeed(),
                     peer.getFlags() == null ? "" : peer.getFlags().getLtStdString(),
                     new Timestamp(System.currentTimeMillis()),
-                    new Timestamp(System.currentTimeMillis())
+                    new Timestamp(System.currentTimeMillis()),
+                    peer.getDownloadSpeed(),
+                    peer.getUploadSpeed()
             ));
         });
         long newDownloaded = peer.getDownloaded() >= cachedEntity.getDownloadedOffset()
@@ -106,6 +108,8 @@ public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Lo
         cachedEntity.setPeerId(peer.getPeerId());
         cachedEntity.setLastFlags(peer.getFlags() == null ? "" : peer.getFlags().getLtStdString());
         cachedEntity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
+        cachedEntity.setDownloadSpeedMax(Math.max(peer.getDownloadSpeed(), cachedEntity.getDownloadSpeedMax()));
+        cachedEntity.setUploadSpeedMax(Math.max(peer.getUploadSpeed(), cachedEntity.getUploadSpeedMax()));
     }
 
     public void flushAll() {

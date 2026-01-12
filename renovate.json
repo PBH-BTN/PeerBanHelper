@@ -44,6 +44,5 @@
       "groupName": "all devDependencies"
     }
   ],
-  "allowScripts": true,
   "ignoreScripts": false
 }

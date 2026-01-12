@@ -80,7 +80,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         }
         javalinWebContainer.javalin()
                 .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
-                .get("/api/"+getConfigName()+"/editable", this::editable, Role.USER_READ)
+                .get("/api/" + getConfigName() + "/editable", this::editable, Role.USER_READ)
                 .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
                 .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
                 .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
@@ -130,7 +130,23 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             context.json(new StdResp(false, "Access to this resource is disallowed", null));
             return;
         }
-        Files.write(readFile.toPath(), context.bodyAsBytes(), StandardOpenOption.CREATE);
+        var content = context.bodyAsBytes();
+        var platform = Main.getPlatform();
+        if (platform != null) {
+            try(var scanner = platform.getMalwareScanner()) {
+                if (scanner != null) {
+                    if (scanner.isMalicious(context.body())) {
+                        context.status(HttpStatus.BAD_REQUEST);
+                        context.json(new StdResp(false, tl(locale(context), Lang.MALWARE_SCANNER_DETECTED, "WebAPI-ScriptCreate", scriptId), null));
+                        log.error(tlUI(Lang.MALWARE_SCANNER_DETECTED, "WebAPI-ScriptCreate", scriptId));
+                        return;
+                    }
+                }
+            }catch (Exception e){
+                log.debug("Malware scan failed for pending to add script", e);
+            }
+        }
+        Files.write(readFile.toPath(), content, StandardOpenOption.CREATE);
         context.json(new StdResp(true, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_SAVED), null));
         reloadConfig();
     }
@@ -166,13 +182,13 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         return null;
     }
 
-    private boolean isSafeNetworkEnvironment(Context context){
+    private boolean isSafeNetworkEnvironment(Context context) {
         var value = ExternalSwitch.parse("pbh.please-disable-safe-network-environment-check-i-know-this-is-very-dangerous-and-i-may-lose-my-data-and-hacker-may-attack-me-via-this-endpoint-and-steal-my-data-or-destroy-my-computer-i-am-fully-responsible-for-this-action-and-i-will-not-blame-the-developer-for-any-loss");
-        if(value != null && value.equals("true")){
+        if (value != null && value.equals("true")) {
             return true;
         }
         var ip = IPAddressUtil.getIPAddress(context.ip());
-        if(ip == null){
+        if (ip == null) {
             throw new IllegalArgumentException("Safe check for IPAddress failed, the IP cannot be null");
         }
         return (ip.isLocal() || ip.isLoopback()) && !WebUtil.isUsingReserveProxy(context);
@@ -266,7 +282,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                         returns = script.expression().execute(env);
                     }
                 }
-                result = scriptEngine.handleResult(script,banDuration, returns);
+                result = scriptEngine.handleResult(script, banDuration, returns);
             } catch (TimeoutException timeoutException) {
                 return pass();
             } catch (Exception ex) {
@@ -310,8 +326,8 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                             }
                             try {
                                 String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
-                                var compiledScript = scriptEngine.compileScript(script,script.getName(),scriptContent);
-                                if(compiledScript == null) return;
+                                var compiledScript = scriptEngine.compileScript(script, script.getName(), scriptContent);
+                                if (compiledScript == null) return;
                                 this.scripts.add(compiledScript);
                             } catch (IOException e) {
                                 log.error("Unable to load script file", e);

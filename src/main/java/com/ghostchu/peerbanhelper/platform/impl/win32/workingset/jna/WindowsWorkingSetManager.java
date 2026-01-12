@@ -1,5 +1,7 @@
-package com.ghostchu.peerbanhelper.platform.win32.workingset.jna;
+package com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna;
 
+import com.ghostchu.peerbanhelper.platform.impl.win32.common.Kernel32;
+import com.ghostchu.peerbanhelper.platform.impl.win32.common.PSAPI;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import org.slf4j.Logger;

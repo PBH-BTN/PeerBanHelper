@@ -48,6 +48,14 @@ public class BtnSwarm {
     private Timestamp lastTimeSeen;
     @SerializedName("peer_last_flags")
     private String peerLastFlags;
+    @SerializedName("upload_speed")
+    private long uploadSpeed;
+    @SerializedName("download_speed")
+    private long downloadSpeed;
+    @SerializedName("download_speed_max")
+    private long downloadSpeedMax;
+    @SerializedName("upload_speed_max")
+    private long uploadSpeedMax;
 
     public static BtnSwarm from(TrackedSwarmEntity entity) {
         BtnSwarm btnSwarm = new BtnSwarm();
@@ -69,6 +77,10 @@ public class BtnSwarm {
         btnSwarm.setPeerLastFlags(entity.getLastFlags());
         btnSwarm.setFirstTimeSeen(entity.getFirstTimeSeen());
         btnSwarm.setLastTimeSeen(entity.getLastTimeSeen());
+        btnSwarm.setDownloadSpeed(entity.getDownloadSpeed());
+        btnSwarm.setUploadSpeed(entity.getUploadSpeed());
+        btnSwarm.setDownloadSpeedMax(entity.getDownloadSpeedMax());
+        btnSwarm.setUploadSpeedMax(entity.getUploadSpeedMax());
         return btnSwarm;
     }
 }

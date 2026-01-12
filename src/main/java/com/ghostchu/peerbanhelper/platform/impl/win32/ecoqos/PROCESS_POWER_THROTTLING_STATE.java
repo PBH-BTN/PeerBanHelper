@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.platform.win32.ecoqos;
+package com.ghostchu.peerbanhelper.platform.impl.win32.ecoqos;
 
 import com.sun.jna.Structure;
 

@@ -1,6 +1,6 @@
-package com.ghostchu.peerbanhelper.platform.win32.workingset;
+package com.ghostchu.peerbanhelper.platform.impl.win32.workingset;
 
-import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
+import com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.sun.management.GarbageCollectionNotificationInfo;

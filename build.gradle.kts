@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.2.3"
+version = "9.2.4"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -56,7 +56,7 @@ configurations.all {
         // Handle the custom sqlite-jdbc-loongarch64 dependency from local repo
         dependencySubstitution {
             substitute(module("com.ghostchu.peerbanhelper.external-libs:sqlite-jdbc-loongarch64"))
-                .using(module("org.xerial:sqlite-jdbc:3.47.0.0"))
+                .using(module("org.xerial:sqlite-jdbc:3.51.1.0"))
                 .because("Local repo has different coordinates")
         }
     }
@@ -80,7 +80,7 @@ dependencies {
     // Database - OrmLite
     implementation("com.j256.ormlite:ormlite-core:$ormliteVersion")
     implementation("com.j256.ormlite:ormlite-jdbc:$ormliteVersion")
-    implementation("org.xerial:sqlite-jdbc:3.47.0.0")
+    implementation("org.xerial:sqlite-jdbc:3.51.1.0")
 
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.0.2")
@@ -89,7 +89,7 @@ dependencies {
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
     // JSON
-    implementation("org.json:json:20250517")
+    implementation("org.json:json:20251224")
 
     // System theme detector
     implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1") {
@@ -111,7 +111,7 @@ dependencies {
     }
 
     // System monitoring
-    implementation("com.github.oshi:oshi-core:6.9.1") {
+    implementation("com.github.oshi:oshi-core:6.9.2") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
@@ -151,7 +151,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.22")
+    implementation("ch.qos.logback:logback-classic:1.5.24")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")

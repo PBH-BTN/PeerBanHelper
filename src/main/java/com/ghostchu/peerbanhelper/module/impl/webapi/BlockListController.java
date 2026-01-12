@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public final class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -67,7 +69,12 @@ public final class BlockListController extends AbstractFeatureModule {
             String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
             builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
         }
-        ctx.result(builder.toString());
+        var result = builder.toString();
+        var userAgent = ctx.userAgent();
+        if(result.isBlank() && userAgent != null && userAgent.startsWith("Transmission")){
+            result = "TransmissionWorkaround:127.127.127.127-127.127.127.127";
+        }
+        ctx.result(result);
     }
 
     private void blocklistIp(@NotNull Context ctx) {
