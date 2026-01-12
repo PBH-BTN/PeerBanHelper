@@ -812,3 +812,8 @@ BTN_ABILITY_IP_QUERY_DESCRIPTION: |
   PeerBanHelper 功能模块可以使用此服务提供的能力获取有关特定 IP 地址在 BTN 上的活动概要。
 BTN_ABILITY_IP_QUERY_STATUS_OK: "查询成功处理: {}"
 BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP 查询功能能力在此 BTN 实例上不可用"
+MALWARE_SCANNER_DETECTED: "[反病毒] 计算机上的反病毒软件报告正在加载的 {} (位置: {}) 存在恶意软件。为安全起见，PeerBanHelper 已取消并拒绝加载该内容。"
+PEER_RECORDING_SERVICE_CLEANING_UP: "[Peer 记录服务] 正在清理过期的 Peer 记录数据，请稍等..."
+PEER_RECORDING_SERVICE_CLEANED_UP: "[Peer 记录服务] 已删除 {} 条过期的 Peer 记录数据"
+CONNECTION_METRICS_SERVICE_CLEANING_UP: "[Peer 连接分析服务] 正在清理过期的连接指标数据，请稍等..."
+CONNECTION_METRICS_SERVICE_CLEANED_UP: "[Peer 连接分析服务] 已删除 {} 条过期的连接指标数据"

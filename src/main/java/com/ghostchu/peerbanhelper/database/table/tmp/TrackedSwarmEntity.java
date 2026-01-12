@@ -54,4 +54,10 @@ public final class TrackedSwarmEntity { // 需要创建为临时表
     private Timestamp firstTimeSeen;
     @DatabaseField(canBeNull = false, index = true)
     private Timestamp lastTimeSeen;
+
+    @DatabaseField(canBeNull = false)
+    private long downloadSpeedMax;
+    @DatabaseField(canBeNull = false)
+    private long uploadSpeedMax;
+
 }

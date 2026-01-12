@@ -19,7 +19,7 @@
   "dependencies": {
     "@arco-design/web-vue": "2.56.3",
     "@dzangolab/flag-icon-css": "^3.4.5",
-    "@formatjs/intl-durationformat": "^0.8.2",
+    "@formatjs/intl-durationformat": "^0.9.0",
     "@guolao/vue-monaco-editor": "^1.6.0",
     "@octokit/core": "^7.0.6",
     "@octokit/request-error": "^7.1.0",
@@ -42,7 +42,8 @@
     "vue-echarts": "^8.0.1",
     "vue-i18n": "^11.2.2",
     "vue-request": "^2.0.4",
-    "vue-router": "^4.6.4"
+    "vue-router": "^4.6.4",
+    "monaco-editor": "^0.55.1"
   },
   "devDependencies": {
     "@arco-plugins/vite-vue": "^1.4.6",
@@ -61,7 +62,6 @@
     "husky": "^9.1.7",
     "less": "^4.5.1",
     "lint-staged": "^16.2.7",
-    "monaco-editor": "^0.55.1",
     "npm-run-all2": "^8.0.4",
     "prettier": "^3.7.4",
     "typescript": "~5.9.3",

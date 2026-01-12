@@ -14,9 +14,12 @@
 </template>
 <script setup lang="ts">
 import { CheckModuleEnable } from '@/service/settings'
+import { loader } from '@guolao/vue-monaco-editor'
+import * as monaco from 'monaco-editor'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import scriptList from './components/scriptList.vue'
+loader.config({ monaco })
 const { t } = useI18n()
 const { data, loading } = useRequest(CheckModuleEnable, {
   defaultParams: ['expression-engine']

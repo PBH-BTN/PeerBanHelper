@@ -15,7 +15,7 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModul
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
-import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
+import com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
@@ -79,6 +79,7 @@ public class PeerBanHelper implements Reloadable {
 
 
     public void start() {
+        loadPlatformFeatures();
         checkKnownCrashes();
         Main.getReloadManager().register(this);
         postCompatibilityCheck();
@@ -105,6 +106,15 @@ public class PeerBanHelper implements Reloadable {
             }
         });
         runTestCode();
+    }
+
+    private void loadPlatformFeatures() {
+        var platform = Main.getPlatform();
+        if (platform == null) return;
+        var ecoQosAPI = platform.getEcoQosAPI();
+        if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
+            ecoQosAPI.apply();
+        }
     }
 
     private void checkKnownCrashes() {
