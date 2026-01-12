@@ -65,6 +65,7 @@ public class AmsiScanner implements MalwareScanner {
     }
 
     // 扫描字符串
+    @Override
     public boolean isMalicious(@NotNull String content) throws UnsupportedOperationException {
         if (!available) throw new UnsupportedOperationException("AMSI is not available.");
         int[] result = new int[1];
@@ -83,16 +84,4 @@ public class AmsiScanner implements MalwareScanner {
             }
         }
     }
-
-//    public static void main(String[] args) throws Exception {
-//        AmsiScanner scanner = new AmsiScanner("MyJavaApp");
-//
-//        // 测试 EICAR 标准反病毒测试字符串
-//        String eicar = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
-//        var data = scanner.isMalicious(eicar);
-//        System.out.println("isMalicious: " + data);
-//
-//        scanner.close();
-//        Thread.sleep(4000);
-//    }
 }
