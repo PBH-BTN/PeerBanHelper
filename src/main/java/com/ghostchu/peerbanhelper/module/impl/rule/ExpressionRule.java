@@ -329,7 +329,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                                 var compiledScript = scriptEngine.compileScript(script, script.getName(), scriptContent);
                                 if (compiledScript == null) return;
                                 this.scripts.add(compiledScript);
-                            } catch (IOException e) {
+                            } catch (Exception e) {
                                 log.error("Unable to load script file", e);
                             }
                         } catch (ExpressionSyntaxErrorException err) {
