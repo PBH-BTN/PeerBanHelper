@@ -84,7 +84,7 @@ public final class ScriptEngine {
             try (var scanner = platform.getMalwareScanner()) {
                 if (scanner != null) {
                     if (scanner.isMalicious(scriptContent)) {
-                        log.error(tlUI(Lang.MALWARE_SCANNER_DETECTED, "UserScript", file.getAbsolutePath()));
+                        log.error(tlUI(Lang.MALWARE_SCANNER_DETECTED, "UserScript", file != null ? file.getAbsolutePath() : "<memory script>"));
                         return null;
                     }
                 }
