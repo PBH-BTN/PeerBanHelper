@@ -74,8 +74,14 @@ public class AmsiScanner implements MalwareScanner {
 
     @Override
     public void close() {
-        AmsiLib.INSTANCE.AmsiCloseSession(amsiContext, amsiSession);
-        AmsiLib.INSTANCE.AmsiUninitialize(amsiContext);
+        if (AmsiLib.INSTANCE != null) {
+            if (amsiContext != null) {
+                if (amsiSession != null) {
+                    AmsiLib.INSTANCE.AmsiCloseSession(amsiContext, amsiSession);
+                }
+                AmsiLib.INSTANCE.AmsiUninitialize(amsiContext);
+            }
+        }
     }
 
 //    public static void main(String[] args) throws Exception {
