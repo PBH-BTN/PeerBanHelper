@@ -16,7 +16,6 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -105,7 +104,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @Subscribe
     public void onPeerUnBan(PeerUnbanEvent event) {
-        if(event.getBanMetadata().isBanForDisconnect()){
+        if (event.getBanMetadata().isBanForDisconnect()) {
             return;
         }
         IPAddress peerPrefix;
@@ -344,6 +343,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 }
             }
         }
+
         return null;
     }
 
@@ -351,7 +351,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         if (computedUploaded != -1 && blockExcessiveClients) {
             if (computedUploaded > torrentSize) {
                 // 下载量超过种子大小，检查
-                long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
+                long maxAllowedExcessiveThreshold = (long) (Math.max(torrentSize, ExternalSwitch.parseLong("pbh.module.processcheatblocker.toosmallupscalevalue", 1024 * 1024 * 1024)) * excessiveThreshold);
                 structuredData.add("maxAllowedExcessiveThreshold", maxAllowedExcessiveThreshold);
                 if (computedUploaded > maxAllowedExcessiveThreshold) {
                     resetBanDelayWindow(rangeEntity, addressEntity);
