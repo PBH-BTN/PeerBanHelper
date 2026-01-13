@@ -50,7 +50,7 @@ public class PBHAsyncTaskController extends AbstractWebSocketFeatureModule {
 
     @Override
     public void onEnable() {
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .get("/api/asyncTask/list", this::handleTaskLists, Role.USER_READ)
                 .ws("/api/asyncTask/{taskId}/stream", this::handleStream, Role.USER_READ);
         Main.getEventBus().register(this);

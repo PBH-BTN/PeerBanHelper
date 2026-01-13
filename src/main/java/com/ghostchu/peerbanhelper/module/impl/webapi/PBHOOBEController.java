@@ -53,7 +53,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .post("/api/oobe/init", this::handleOOBERequest, Role.ANYONE)
                 .post("/api/oobe/scanDownloader", this::handleOOBEScanDownloader, Role.ANYONE)
                 .post("/api/oobe/testDownloader", ctx -> validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject()), Role.ANYONE); // 指定 ANYONE，否则会被鉴权代码拉取鉴权

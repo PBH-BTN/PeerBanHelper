@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import ch.qos.logback.core.util.TimeUtil;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -48,7 +47,6 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -95,7 +93,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
                 .post("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_WRITE)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
