@@ -351,7 +351,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         if (computedUploaded != -1 && blockExcessiveClients) {
             if (computedUploaded > torrentSize) {
                 // 下载量超过种子大小，检查
-                long maxAllowedExcessiveThreshold = (long) (Math.max(torrentSize, ExternalSwitch.parseLong("pbh.module.processcheatblocker.toosmallupscalevalue", 1024 * 1024 * 1024)) * excessiveThreshold);
+                long maxAllowedExcessiveThreshold = (long) (Math.max(torrentSize, torrentMinimumSize) * excessiveThreshold);
                 structuredData.add("maxAllowedExcessiveThreshold", maxAllowedExcessiveThreshold);
                 if (computedUploaded > maxAllowedExcessiveThreshold) {
                     resetBanDelayWindow(rangeEntity, addressEntity);
@@ -364,7 +364,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 }
             } else if (ExternalSwitch.parse("pbh.pcb.disable-completed-excessive") == null && completedSize > 0 && computedUploaded > completedSize) {
                 // 下载量超过任务大小，检查
-                long maxAllowedExcessiveThreshold = (long) (computedCompletedSize * excessiveThreshold);
+                long maxAllowedExcessiveThreshold = (long) (Math.max(computedCompletedSize, torrentMinimumSize) * excessiveThreshold);
                 structuredData.add("maxAllowedExcessiveThreshold", maxAllowedExcessiveThreshold);
                 if (computedUploaded > maxAllowedExcessiveThreshold) {
                     resetBanDelayWindow(rangeEntity, addressEntity);
