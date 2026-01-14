@@ -113,7 +113,11 @@ public class PeerBanHelper implements Reloadable {
         if (platform == null) return;
         var ecoQosAPI = platform.getEcoQosAPI();
         if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
-            ecoQosAPI.apply();
+            try {
+                ecoQosAPI.apply();
+            } catch (Exception e) {
+                log.warn("Unable to apply Windows EcoQosAPI feature", e);
+            }
         }
     }
 
