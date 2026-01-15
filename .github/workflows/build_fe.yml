@@ -43,11 +43,6 @@ jobs:
         run: pnpm run build
         env:
           GIT_HASH: ${{ github.sha }}
-      
-      - name: Enable tracker
-        run: |
-          cp webui/dist/index.html webui/dist/index2.html
-          sed -i '$i <script defer src="https://uma.pbh-btn.com/script.js" data-website-id="58076dc4-266e-4984-abb6-7c48afa22d4d" data-do-not-track="true"></script>' webui/dist/index2.html
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
