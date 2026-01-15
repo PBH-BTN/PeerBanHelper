@@ -37,6 +37,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 41)
+    public void privacyAnalytics(YamlConfiguration bundle) {
+        conf.set("privacy.analytics", bundle.get("privacy.analytics"));
+    }
+
     @UpdateScript(version = 40)
     public void banlistRemapping(YamlConfiguration bundle) {
         conf.set("banlist-remapping", bundle.get("banlist-remapping"));

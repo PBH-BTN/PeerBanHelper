@@ -14,6 +14,8 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.web.exception.*;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
@@ -42,7 +44,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public final class JavalinWebContainer {
+public final class JavalinWebContainer implements Reloadable {
     private final Javalin javalin;
     private final PBHPortMapper pBHPortMapper;
     @Setter
@@ -55,8 +57,10 @@ public final class JavalinWebContainer {
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
     @Getter
     private volatile boolean started;
+    private boolean webuiAnalyticsEnabled;
 
     public JavalinWebContainer(LicenseManager licenseManager, PBHPortMapper pBHPortMapper) {
+        reloadConfig();
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -90,15 +94,31 @@ public final class JavalinWebContainer {
                         });
                         c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
                     } else {
+                        //c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
+                        c.spaRoot.addHandler("/", ctx -> {
+                            try (var in = this.getClass().getResourceAsStream("/static/index.html")) {
+                                if (in == null) {
+                                    ctx.status(HttpStatus.NOT_FOUND);
+                                    ctx.result("SPA index.html not found in classpath.");
+                                    return;
+                                }
+                                String data = new String(in.readAllBytes());
+                                if (webuiAnalyticsEnabled) {
+                                    data = data.replace("<title>PeerBanHelper</title>",
+                                            "<title>PeerBanHelper</title>\n"
+                                                    + "<script defer src=\"https://uma.pbh-btn.com/script.js\" data-website-id=\"58076dc4-266e-4984-abb6-7c48afa22d4d\"></script>");
+                                }
+                                ctx.html(data);
+                            }
+                        });
                         c.staticFiles.add(staticFiles -> {
                             staticFiles.hostedPath = "/";
                             staticFiles.directory = "/static";
                             staticFiles.location = Location.CLASSPATH;
                             staticFiles.precompress = false;
                             staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
-                            //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
-                        c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
+
                     }
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
@@ -130,7 +150,7 @@ public final class JavalinWebContainer {
                 })
                 .exception(DemoModeException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
-                    ctx.json(new StdResp(false,  tl(reqLocale(ctx), Lang.DEMO_MODE_OPERATION_NOT_PERMITTED), null));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.DEMO_MODE_OPERATION_NOT_PERMITTED), null));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -152,8 +172,8 @@ public final class JavalinWebContainer {
                             throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
                         }
                     }
-                    if (ctx.routeRoles().contains(Role.USER_WRITE)){
-                        if(ExternalSwitch.parseBoolean("pbh.demoMode")){
+                    if (ctx.routeRoles().contains(Role.USER_WRITE)) {
+                        if (ExternalSwitch.parseBoolean("pbh.demoMode")) {
                             throw new DemoModeException();
                         }
                     }
@@ -191,6 +211,16 @@ public final class JavalinWebContainer {
                 });
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
         this.pBHPortMapper = pBHPortMapper;
+    }
+
+    private void reloadConfig() {
+        this.webuiAnalyticsEnabled = Main.getMainConfig().getBoolean("privacy.webui-analytics", true);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     private boolean securityCheck(Context ctx) {
@@ -307,7 +337,7 @@ public final class JavalinWebContainer {
         if (LOGIN_SESSION_TIMETABLE.getIfPresent(ipBlock) == null) {
             LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
-            if(!silent) {
+            if (!silent) {
                 Main.getGuiManager().createNotification(Level.INFO,
                         tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
                         tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
