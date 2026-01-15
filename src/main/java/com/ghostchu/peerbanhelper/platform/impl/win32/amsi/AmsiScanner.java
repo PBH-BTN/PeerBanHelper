@@ -34,6 +34,7 @@ public class AmsiScanner implements MalwareScanner {
         } catch (Exception e) {
             available = false;
             log.debug("Unable to initialize AMSI: {}", e.getMessage());
+            throw e;
         }
     }
 
