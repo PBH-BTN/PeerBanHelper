@@ -78,7 +78,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         } catch (Exception e) {
             log.error("Failed to load scripts", e);
         }
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
                 .get("/api/" + getConfigName() + "/editable", this::editable, Role.USER_READ)
                 .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)

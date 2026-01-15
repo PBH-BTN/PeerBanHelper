@@ -20,7 +20,7 @@ public abstract class AbstractWebSocketFeatureModule extends AbstractFeatureModu
 
     public void acceptWebSocket(WsConfig wsConfig, Consumer<WsContext> loggedInCallback) {
         wsConfig.onConnect(ctx -> {
-            if (ctx.session.getRemoteAddress() instanceof InetSocketAddress inetSocketAddress) {
+            if (ctx.session.getRemoteSocketAddress() instanceof InetSocketAddress inetSocketAddress) {
                 if (!javalinWebContainer.allowAttemptLogin(inetSocketAddress.getHostString(), ctx.getUpgradeCtx$javalin().userAgent())) {
                     ctx.closeSession(WsCloseStatus.TRY_AGAIN_LATER, JsonUtil.standard().toJson(new StdResp(false, "Too many failed retries, IP banned.", null)));
                     return;

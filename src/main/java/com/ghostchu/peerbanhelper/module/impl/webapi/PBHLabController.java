@@ -51,7 +51,7 @@ public final class PBHLabController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .post("/api/laboratory/config", this::handleConfig, Role.USER_WRITE)
                 .get("/api/laboratory/config", this::handleConfigGet, Role.USER_WRITE)
                 .get("/api/laboratory/experiments", this::handleExperiments, Role.USER_READ)

@@ -55,7 +55,7 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
         Main.getReloadManager().register(this);
     }

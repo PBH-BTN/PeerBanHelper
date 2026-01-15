@@ -43,7 +43,7 @@ public final class PBHAlertController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/api/alerts", this::handleListing, Role.USER_READ)
                 .patch("/api/alert/{id}/dismiss", this::handleRead, Role.USER_WRITE)
                 .post("/api/alert/dismissAll", this::handleAllRead, Role.USER_WRITE)

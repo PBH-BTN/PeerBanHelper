@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -74,9 +73,9 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onEnable() {
         Main.getEventBus().register(this);
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
         registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
     }

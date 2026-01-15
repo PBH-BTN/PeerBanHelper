@@ -80,7 +80,7 @@ public final class RuleSubController extends AbstractFeatureModule {
                 .ifPresent(ele -> peerNameBlackRuleList = (PeerNameBlackRuleList) ele);
 
         // 注册路由
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 // 查询检查间隔
                 .get("/api/sub/interval", this::getCheckInterval, Role.USER_READ)
                 // 修改检查间隔

@@ -75,7 +75,7 @@ dependencies {
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
-    implementation("io.javalin:javalin:6.7.0")
+    implementation("io.javalin:javalin:7.0.0-alpha.4")
 
     // Database - OrmLite
     implementation("com.j256.ormlite:ormlite-core:$ormliteVersion")

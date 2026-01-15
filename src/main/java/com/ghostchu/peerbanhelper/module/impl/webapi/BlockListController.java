@@ -31,7 +31,7 @@ public final class BlockListController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/blocklist/ip", this::blocklistIp)
                 .get("/blocklist/p2p-plain-format", this::blocklistP2pPlain, Role.ANYONE)
                 .get("/blocklist/dat-emule", this::blocklistDatEmule, Role.ANYONE);

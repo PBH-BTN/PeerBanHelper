@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.LoginRequestBody;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.SharedObject;
-import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
@@ -43,7 +42,7 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .post("/api/auth/login", this::handleLogin, Role.ANYONE)
                 .post("/api/auth/logout", this::handleLogout, Role.ANYONE);
     }

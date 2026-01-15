@@ -69,7 +69,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/api/modules/ipblacklist/{ruleType}", this::handleWebAPI, Role.USER_READ)
                 .post("/api/modules/ipblacklist/ip/test", this::handleIPTest, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/ip", this::handleIPPut, Role.USER_WRITE)

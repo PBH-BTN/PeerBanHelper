@@ -64,7 +64,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .get("/api/autostun/status", this::getModuleStatus, Role.USER_READ)
                 .post("/api/autostun/refreshNatType", this::refreshNatType, Role.USER_WRITE)
                 .post("/api/autostun/restart", this::autoStunRestart, Role.USER_WRITE)
