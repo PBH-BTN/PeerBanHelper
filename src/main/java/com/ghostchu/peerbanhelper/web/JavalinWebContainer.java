@@ -106,7 +106,14 @@ public final class JavalinWebContainer implements Reloadable {
                                 if (webuiAnalyticsEnabled) {
                                     data = data.replace("<title>PeerBanHelper</title>",
                                             "<title>PeerBanHelper</title>\n"
-                                                    + "<script defer src=\"https://uma.pbh-btn.com/script.js\" data-website-id=\"58076dc4-266e-4984-abb6-7c48afa22d4d\"></script>");
+                                                    + """
+                                                    <script defer src="https://uma.pbh-btn.com/script.js"
+                                                    data-website-id="58076dc4-266e-4984-abb6-7c48afa22d4d"
+                                                    data-exclude-search="true"
+                                                    data-exclude-ip="true"
+                                                    data-exclude-token="true"
+                                                    ></script>
+                                                    """);
                                 }
                                 ctx.html(data);
                             }
