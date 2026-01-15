@@ -101,9 +101,9 @@
         <a-typography-paragraph style="max-width: 50em; text-align: left">
           {{ t(status?.data?.type === LicenseType.Local ? 'plug.begging.local' : 'plus.begging') }}
         </a-typography-paragraph>
-        <a href="https://mbd.pub/o/ghostchu" style="text-decoration: none" target="_blank">
-          <!-- <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" /> -->
-          <mbd :width="228" :height="83" />
+        <a href="https://afdian.com/a/Ghost_chu" style="text-decoration: none" target="_blank">
+          <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
+          <!-- <mbd :width="228" :height="83" /> -->
         </a>
       </a-space>
     </template>
@@ -115,7 +115,6 @@ import { getColor } from '@/utils/color'
 import { Descriptions, DescriptionsItem, Modal, Tag, TypographyText } from '@arco-design/web-vue'
 import { h } from 'vue'
 import { useI18n } from 'vue-i18n'
-import mbd from './mbdBadge.vue'
 import medal from './plusMedal.vue'
 const { t, d } = useI18n()
 

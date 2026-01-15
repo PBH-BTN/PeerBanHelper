@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ability.impl;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -86,7 +87,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_SUCCESS));
                 ServerResponse data = JsonUtil.standard().fromJson(resp.body().charStream(), ServerResponse.class);
                 if (data != null && data.getExternalIp() != null) {
-                    lastResult = "default -> " + data.getExternalIp();
+                    lastResult = "default -> " + (ExternalSwitch.parseBoolean("pbh.demoMode") ? "<REDACTED>" : data.getExternalIp());
                 } else {
                     lastResult = "default -> No External IP returned";
                 }
@@ -144,7 +145,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         }
         StringBuilder builder = new StringBuilder();
         for (String ip : new LinkedHashSet<>(result.values())) {
-            builder.append(ip).append("  \n");
+            builder.append(ExternalSwitch.parseBoolean("pbh.demoMode") ? "<REDACTED>" : ip).append("  \n");
         }
         lastResult = builder.toString();
     }
