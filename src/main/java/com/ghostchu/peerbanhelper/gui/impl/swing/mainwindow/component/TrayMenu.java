@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
@@ -63,7 +64,9 @@ public class TrayMenu {
             parent.setVisible(false);
             if (!persistFlagTrayMessageSent) {
                 persistFlagTrayMessageSent = true;
-                parent.getSwingGUI().createNotification(Level.INFO, tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
+                if (!ExternalSwitch.parseBoolean("pbh.gui.hide-tray-message", false)) {
+                    parent.getSwingGUI().createNotification(Level.INFO, tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
+                }
             }
         }
     }
