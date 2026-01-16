@@ -9,6 +9,6 @@ maintainer_url        = https://github.com/PBH-BTN
 distributor           = PBH-BTN
 distributor_url       = https://github.com/PBH-BTN
 desktop_uidir         = ui
-desktop_applaunchname = peerBanHelper.application
+desktop_applaunchname = peerbanhelper.application
 service_port          = 9898
 checkport             = true
