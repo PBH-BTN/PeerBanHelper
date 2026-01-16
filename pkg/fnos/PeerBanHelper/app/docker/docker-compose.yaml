@@ -1,11 +1,10 @@
-version: "3.9"
 services:
   peerbanhelper:
     image: @IMAGE@
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
-      - /var/packages/peerbanhelper/shares/peerbanhelper:/app/data
+      - /var/apps/peerbanhelper/shares/peerbanhelper:/app/data
     network_mode: host
     environment:
       - PBH_USER_LOCALE=zh-CN

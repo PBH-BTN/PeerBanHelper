@@ -1,28 +1,22 @@
 {
-    "data-share":
-    {
-        "shares":
-        [
-            {
-                "name": "PeerBanHelper",
-                "permission":
-                {
-                    "rw":
-                    [
-                        "PeerBanHelper"
-                    ]
-                }
-            },
-            {
-                "name": "PeerBanHelper/data",
-                "permission":
-                {
-                    "rw":
-                    [
-                        "PeerBanHelper"
-                    ]
-                }
-            }
-        ]
-    }
+  "docker-project": {
+    "projects": [
+      {
+        "name": "peerbanhelper",
+        "path": "docker"
+      }
+    ]
+  },
+  "data-share": {
+    "shares": [
+      {
+        "name": "peerbanhelper",
+        "permission": {
+          "rw": [
+            "docker-peerbanhelper"
+          ]
+        }
+      }
+    ]
+  }
 }

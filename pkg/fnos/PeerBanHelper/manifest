@@ -1,12 +1,14 @@
-appname               = PeerBanHelper
+appname               = peerbanhelper
 version               = @PBH_VERSION@
 display_name          = PeerBanHelper
 desc                  = BT 反吸血工具 - 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。支持 qB/qBEE/Deluge/BiglyBT/BitComet
 arch                  = x86_64
 source                = thirdparty
 maintainer            = PBH-BTN
+maintainer_url        = https://github.com/PBH-BTN
 distributor           = PBH-BTN
+distributor_url       = https://github.com/PBH-BTN
 desktop_uidir         = ui
-desktop_applaunchname = PeerBanHelper.Application
+desktop_applaunchname = peerBanHelper.application
 service_port          = 9898
 checkport             = true
