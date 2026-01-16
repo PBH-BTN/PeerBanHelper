@@ -1,6 +1,6 @@
 {
     ".url": {
-        "PeerBanHelper.Application": {
+        "peerbanhelper.application": {
             "title": "PeerBanHelper",
             "icon": "images/icon_{0}.png",
             "type": "url",
