@@ -44,6 +44,11 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
 
+  Build_AUR:
+    name: Generate AUR Package
+    needs: Build_Executable
+    uses: ./.github/workflows/build_aur.yml
+
   Build_Portable:
     name: Generate Portable Version
     needs: Build_Executable
@@ -52,14 +57,14 @@ jobs:
   Empty_Old_S3_Files:
     name: Delete Outdate file in S3
     if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
-    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_AUR, Build_Portable]
     uses: ./.github/workflows/delete_old_s3_objects.yml
     secrets: inherit
 
   Upload_Updates_To_S3:
     name: Update To S3
     if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
-    needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files ]
+    needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_AUR, Build_Portable, Empty_Old_S3_Files ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v7
@@ -86,7 +91,7 @@ jobs:
     name: Upload Release Artifacts
     continue-on-error: true
     if: github.event_name != 'workflow_dispatch'
-    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_AUR, Build_Portable]
     permissions:
       contents: write
       checks: write
@@ -125,6 +130,10 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: freebsd-pkg-14.1-dist
+          path: build/media
+      - uses: actions/download-artifact@v7
+        with:
+          name: aur-dist
           path: build/media
       - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/

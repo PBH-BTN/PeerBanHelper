@@ -1,0 +1,45 @@
+name: AUR Package Build
+
+on:
+  workflow_call:
+
+jobs:
+  aur:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Install Build Dependencies
+        run: |
+          pacman -Sy --noconfirm git jdk-openjdk gradle nodejs pnpm
+
+      - uses: actions/checkout@v4
+
+      - name: Fix directory permissions
+        run: |
+          chown -R $(id -u):$(id -g) $PWD
+
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
+
+      - name: Update PKGBUILD version
+        run: |
+          sed -i "s/^pkgver=.*/pkgver=${{ steps.java_info.outputs.x_version }}/" pkg/aur/PKGBUILD
+          # Generate .SRCINFO
+          useradd -m builder
+          chown -R builder:builder .
+          su builder -c "cd pkg/aur && makepkg --printsrcinfo > .SRCINFO"
+
+      - name: Build Package
+        run: |
+          # makepkg cannot allow root
+          su builder -c "cd pkg/aur && makepkg -s --noconfirm"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: aur-dist
+          path: |
+            pkg/aur/*.pkg.tar.zst
+            pkg/aur/.SRCINFO
+            pkg/aur/PKGBUILD
+

@@ -1,0 +1,4 @@
+d /var/lib/peerbanhelper 0750 peerbanhelper peerbanhelper -
+d /var/log/peerbanhelper 0750 peerbanhelper peerbanhelper -
+d /etc/peerbanhelper 0750 peerbanhelper peerbanhelper -
+

@@ -1,0 +1,70 @@
+# Maintainer: Ghost_chu <ghostchu@ghostchu.com>
+
+pkgname=peerbanhelper
+_pkgname=PeerBanHelper
+pkgver=9.2.5
+pkgrel=1
+pkgdesc="PeerBanHelper is a tool to auto ban peers on the bitorrent network"
+arch=('any')
+url="https://github.com/PBH-BTN/PeerBanHelper"
+license=('GPL3')
+depends=('java-runtime>=25' 'bash')
+makedepends=('jdk-openjdk>=25' 'gradle' 'nodejs' 'pnpm' 'git')
+install=peerbanhelper.install
+source=("git+https://github.com/PBH-BTN/PeerBanHelper.git"
+        "peerbanhelper.sysusers"
+        "peerbanhelper.tmpfiles"
+        "peerbanhelper.service"
+        "peerbanhelper.install")
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
+
+pkgver() {
+  cd "$srcdir/$_pkgname"
+  # Generate version string based on git
+  printf "%s.r%s.g%s" "9.2.5" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "$srcdir/$_pkgname/webui"
+  pnpm install
+}
+
+build() {
+  cd "$srcdir/$_pkgname/webui"
+  pnpm run build
+
+  cd "$srcdir/$_pkgname"
+  # Copy WebUI assets
+  rm -rf src/main/resources/static
+  cp -r webui/dist src/main/resources/static
+
+  # Build JAR
+  chmod +x gradlew
+  ./gradlew clean jar copyDependencies --no-daemon
+}
+
+package() {
+  cd "$srcdir/$_pkgname"
+
+  # Install JAR and dependencies
+  install -dm755 "$pkgdir/usr/lib/$pkgname"
+  install -m644 build/libs/PeerBanHelper.jar "$pkgdir/usr/lib/$pkgname/"
+  cp -r build/libraries "$pkgdir/usr/lib/$pkgname/"
+
+  # Install systemd service
+  install -dm755 "$pkgdir/usr/lib/systemd/system"
+  install -m644 "$srcdir/peerbanhelper.service" "$pkgdir/usr/lib/systemd/system/"
+
+  # Install sysusers configuration
+  install -dm755 "$pkgdir/usr/lib/sysusers.d"
+  install -m644 "$srcdir/peerbanhelper.sysusers" "$pkgdir/usr/lib/sysusers.d/$pkgname.conf"
+
+  # Install tmpfiles configuration
+  install -dm755 "$pkgdir/usr/lib/tmpfiles.d"
+  install -m644 "$srcdir/peerbanhelper.tmpfiles" "$pkgdir/usr/lib/tmpfiles.d/$pkgname.conf"
+}
+
