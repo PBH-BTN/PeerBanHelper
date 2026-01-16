@@ -1,0 +1,28 @@
+{
+    "data-share":
+    {
+        "shares":
+        [
+            {
+                "name": "PeerBanHelper",
+                "permission":
+                {
+                    "rw":
+                    [
+                        "PeerBanHelper"
+                    ]
+                }
+            },
+            {
+                "name": "PeerBanHelper/data",
+                "permission":
+                {
+                    "rw":
+                    [
+                        "PeerBanHelper"
+                    ]
+                }
+            }
+        ]
+    }
+}
