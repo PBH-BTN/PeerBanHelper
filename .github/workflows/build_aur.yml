@@ -12,7 +12,7 @@ jobs:
         run: |
           pacman -Sy --noconfirm git jdk-openjdk gradle nodejs pnpm
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Fix directory permissions
         run: |
