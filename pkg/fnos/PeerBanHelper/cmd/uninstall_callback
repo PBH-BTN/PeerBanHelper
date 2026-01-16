@@ -1,0 +1,12 @@
+#!/bin/bash
+
+### This script is called after the user uninstalls the application.
+
+# Handle data deletion if requested by wizard
+DATA_PATH="/var/packages/peerbanhelper/shares/peerbanhelper"
+if [ "$wizard_delete_data" = "true" ]; then
+    echo "Deleting data directory: $DATA_PATH"
+    rm -rf "$DATA_PATH"
+fi
+
+exit 0

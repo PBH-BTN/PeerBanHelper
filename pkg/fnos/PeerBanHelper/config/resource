@@ -1,0 +1,22 @@
+{
+  "docker-project": {
+    "projects": [
+      {
+        "name": "peerbanhelper",
+        "path": "docker"
+      }
+    ]
+  },
+  "data-share": {
+    "shares": [
+      {
+        "name": "peerbanhelper",
+        "permission": {
+          "rw": [
+            "docker-peerbanhelper"
+          ]
+        }
+      }
+    ]
+  }
+}
