@@ -19,6 +19,15 @@ cp -r pkg/fnos/PeerBanHelper/* "${BUILD_DIR}/"
 sed -i "s#@IMAGE@#${IMAGE}#g" "${BUILD_DIR}/app/docker/docker-compose.yaml"
 sed -i "s#@PBH_VERSION@#${PBH_VERSION}#g" "${BUILD_DIR}/manifest"
 
+# Download and install fnpack
+echo "Downloading fnpack..."
+curl -s -L -o /usr/local/bin/fnpack https://static2.fnnas.com/fnpack/fnpack-1.2.0-linux-amd64
+chmod +x /usr/local/bin/fnpack
+
 # Create package
+echo "Building package..."
 cd "${BUILD_DIR}"
-zip -r "${OUTPUT_DIR}/${PACKAGE_NAME}_${PBH_VERSION}_x86_64.zip" .
+fnpack build
+
+# Move artifact
+mv *.fpk "${OUTPUT_DIR}/"

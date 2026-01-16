@@ -25,5 +25,5 @@ jobs:
         with:
           name: fnos-dist
           path: |
-            pkg/fnos/target/*.zip
+            pkg/fnos/target/*.fpk
 
