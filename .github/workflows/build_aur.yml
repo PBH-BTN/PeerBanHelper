@@ -24,6 +24,7 @@ jobs:
       - name: Update PKGBUILD version
         run: |
           sed -i "s/^pkgver=.*/pkgver=${{ steps.java_info.outputs.x_version }}/" pkg/aur/PKGBUILD
+          sed -i "/^pkgver() {/,/^}/{s/[0-9]\\+\\(\\.[0-9]\\+\\)\\{1,\\}/${{ steps.java_info.outputs.x_version }}/g}" pkg/aur/PKGBUILD
           # Generate .SRCINFO
           useradd -m builder
           chown -R builder:builder .
