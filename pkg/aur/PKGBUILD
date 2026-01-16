@@ -25,7 +25,7 @@ sha256sums=('SKIP'
 pkgver() {
   cd "$srcdir/$_pkgname"
   # Generate version string based on git
-  printf "%s.r%s.g%s" "9.2.5" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  printf "%s.r%s.g%s" "$pkgver" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 prepare() {
