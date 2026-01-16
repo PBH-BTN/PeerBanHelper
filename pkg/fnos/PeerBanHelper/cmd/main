@@ -40,4 +40,4 @@ status)
 *)
     exit 1
     ;;
-esac%
+esac
