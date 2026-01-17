@@ -117,7 +117,7 @@ dependencies {
     }
 
     // Markdown
-    implementation("org.commonmark:commonmark:0.27.0")
+    implementation("org.commonmark:commonmark:0.27.1")
 
     // Compression
     implementation("org.tukaani:xz:1.11")
