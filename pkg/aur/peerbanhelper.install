@@ -1,0 +1,13 @@
+post_install() {
+  echo ":: PeerBanHelper has been installed."
+  echo ":: Please enable and start the service:"
+  echo "   systemctl enable --now peerbanhelper.service"
+}
+
+post_upgrade() {
+  echo ":: PeerBanHelper has been upgraded."
+  echo ":: You may need to restart the service:"
+  echo "   systemctl daemon-reload"
+  echo "   systemctl restart peerbanhelper.service"
+}
+
