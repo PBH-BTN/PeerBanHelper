@@ -12,7 +12,7 @@ export default {
 
   'page.settings.tab.config.plus.button': 'Click to open',
 
-  'page.settings.tab.config.privacy.errorReport': 'Enable error report',
+  'page.settings.tab.config.privacy.analytics': 'Enable analytics',
 
   'page.settings.tab.config.server.title': 'WebUI',
   'page.settings.tab.config.server.port': 'Port',

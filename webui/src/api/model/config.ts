@@ -101,7 +101,7 @@ export interface Resolvers {
 }
 
 export interface Privacy {
-  error_reporting: boolean
+  analytics: boolean
 }
 
 export interface Performance {

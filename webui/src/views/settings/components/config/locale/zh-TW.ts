@@ -12,7 +12,7 @@ export default {
 
   'page.settings.tab.config.plus.button': '按此打開',
 
-  'page.settings.tab.config.privacy.errorReport': '啟用錯誤報告',
+  'page.settings.tab.config.privacy.analytics': '啟用遥测',
 
   'page.settings.tab.config.server.title': 'WebUI',
   'page.settings.tab.config.server.port': '埠',
