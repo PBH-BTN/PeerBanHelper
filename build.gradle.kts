@@ -64,7 +64,7 @@ configurations.all {
 
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.2")
+    implementation("org.springframework:spring-context:7.0.3")
 
     // Lombok
     compileOnly("org.projectlombok:lombok:1.18.42")
@@ -123,7 +123,7 @@ dependencies {
     implementation("org.tukaani:xz:1.11")
 
     // DNS
-    implementation("dnsjava:dnsjava:3.6.3")
+    implementation("dnsjava:dnsjava:3.6.4")
 
     // UI - FlatLaf
     implementation("com.formdev:flatlaf-extras:3.7")
@@ -151,7 +151,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.24")
+    implementation("ch.qos.logback:logback-classic:1.5.25")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
