@@ -3,6 +3,7 @@ plugins {
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
     id("com.install4j.gradle") version "12.0.2" apply false
+    id("io.sentry.jvm.gradle") version "5.12.2"
 }
 
 group = "com.ghostchu.peerbanhelper"
@@ -189,6 +190,9 @@ dependencies {
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0.2")
 
+    implementation(platform("io.sentry:sentry-bom:8.30.0")) //import bom
+    implementation("io.sentry:sentry")
+    implementation("io.sentry:sentry-logback")
 }
 
 application {
