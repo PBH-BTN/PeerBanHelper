@@ -212,6 +212,10 @@ tasks.processResources {
         expand(project.properties)
     }
 
+    filesMatching("sentry.properties") {
+        expand(mapOf("JAVA_SENTRY_DSN" to (System.getenv("JAVA_SENTRY_DSN") ?: "")))
+    }
+
     from("src/main/resources") {
         exclude("assets/", "static/", "native/", "lang/")
     }

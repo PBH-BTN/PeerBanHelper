@@ -30,6 +30,8 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew clean build
+        env:
+          JAVA_SENTRY_DSN: ${{ secrets.JAVA_SENTRY_DSN }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
         with:
