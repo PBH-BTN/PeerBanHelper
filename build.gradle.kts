@@ -190,7 +190,7 @@ dependencies {
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0.2")
 
-    implementation(platform("io.sentry:sentry-bom:8.30.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.31.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
 }
