@@ -194,7 +194,6 @@ public class Main {
                     )
             );
         });
-        Sentry.captureMessage("hello sentry3");
     }
 
     private static void loadPlatform() {
