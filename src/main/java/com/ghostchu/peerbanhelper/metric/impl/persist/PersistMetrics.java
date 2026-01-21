@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import inet.ipaddr.IPAddress;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -61,10 +62,12 @@ public final class PersistMetrics implements BasicMetrics {
                     log.info(tlUI(Lang.CLEANED_BANLOGS, builder.delete()));
                 } catch (Exception e) {
                     log.error("Unable to cleanup expired banlogs", e);
+                    Sentry.captureException(e);
                 }
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
+            Sentry.captureException(throwable);
         }
     }
 
@@ -142,6 +145,7 @@ public final class PersistMetrics implements BasicMetrics {
             ));
         } catch (SQLException e) {
             log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);
+            Sentry.captureException(e);
         }
     }
 

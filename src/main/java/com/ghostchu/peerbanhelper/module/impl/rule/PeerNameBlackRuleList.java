@@ -28,6 +28,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.j256.ormlite.stmt.SelectArg;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -141,6 +142,7 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
                 }
             } catch (Exception e) {
                 log.error(tlUI(Lang.PEER_NAME_RULE_MATCH_ERROR), e);
+                Sentry.captureException(e);
             }
         }
         return pass();
@@ -170,12 +172,14 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
                         log.info(tlUI(Lang.PEER_NAME_RULE_UPDATE_FINISH));
                     } catch (Exception e) {
                         log.warn(tlUI(Lang.PEER_NAME_RULE_UPDATE_FAILED, rule.getString("name")), e);
+                        Sentry.captureException(e);
                     }
                 }
             }
             getCache().invalidateAll();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
+            Sentry.captureException(throwable);
         }
     }
 
@@ -274,6 +278,7 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
                                 result.set(new StdResp(true, tl(locale, Lang.PEER_NAME_RULE_NO_UPDATE, name), null));
                             }
                         } catch (IOException e) {
+                            Sentry.captureException(e);
                             throw new RuntimeException(e);
                         } finally {
                             moduleMatchCache.invalidateAll();
@@ -335,6 +340,7 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
+                Sentry.captureException(e);
             } finally {
                 sj = new StringJoiner("\n");
             }
@@ -367,6 +373,7 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
+                Sentry.captureException(e);
             } finally {
                 sj = new StringJoiner("\n");
             }
@@ -406,6 +413,7 @@ public final class PeerNameBlackRuleList extends AbstractRuleFeatureModule imple
             return new AbstractMap.SimpleEntry<>(pattern, comment.isEmpty() ? regex : comment);
         } catch (Exception e) {
             log.error("Invalid regex pattern: {}", regex, e);
+            Sentry.captureException(e);
             return null;
         }
     }

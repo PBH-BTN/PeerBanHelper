@@ -26,6 +26,7 @@ import com.googlecode.aviator.exception.ExpressionSyntaxErrorException;
 import com.googlecode.aviator.exception.TimeoutException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.sentry.Sentry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -77,6 +78,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             reloadConfig();
         } catch (Exception e) {
             log.error("Failed to load scripts", e);
+            Sentry.captureException(e);
         }
         javalinWebContainer.javalin()
                 .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
@@ -144,6 +146,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 }
             }catch (Exception e){
                 log.debug("Malware scan failed for pending to add script", e);
+                Sentry.captureException(e);
             }
         }
         Files.write(readFile.toPath(), content, StandardOpenOption.CREATE);
@@ -287,6 +290,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 return pass();
             } catch (Exception ex) {
                 log.error(tlUI(Lang.RULE_ENGINE_ERROR, script.name()), ex);
+                Sentry.captureException(ex);
                 return pass();
             }
             if (result != null && result.action() != PeerAction.NO_ACTION) {
@@ -331,9 +335,11 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                                 this.scripts.add(compiledScript);
                             } catch (Exception e) {
                                 log.error("Unable to load script file", e);
+                                Sentry.captureException(e);
                             }
                         } catch (ExpressionSyntaxErrorException err) {
                             log.error(tlUI(Lang.RULE_ENGINE_BAD_EXPRESSION), err);
+                            Sentry.captureException(err);
                         }
                     });
                 }

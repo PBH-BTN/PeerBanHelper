@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.pbhplus.backend;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.pbhplus.data.LicenseStatus;
 import com.ghostchu.peerbanhelper.pbhplus.validator.LicenseRevokeValidator;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RevolvableLicenseBackend extends BasicLicenseBackend {
     private final Set<License> revokedLicenses = Collections.synchronizedSet(new LinkedHashSet<>());
-    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofPlatform().name("License Revoke Checker").factory());
+    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofPlatform().name("License Revoke Checker").uncaughtExceptionHandler((t, e) -> {
+        log.debug("Uncaught exception in thread {}: {}", t.getName(), e.getMessage(), e);
+        Sentry.captureException(e);
+    }).factory());
     private final List<LicenseRevokeValidator> revokeValidators;
 
     public RevolvableLicenseBackend(List<LicenseRevokeValidator> revokeValidators) {
@@ -39,6 +43,7 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
             }
         } catch (Exception e) {
             log.debug("Error checking revoked licenses: {}", e.getMessage(), e);
+            Sentry.captureException(e);
         }
     }
 
@@ -57,6 +62,7 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
             return revoked.contains(license);
         } catch (Exception e) {
             log.debug("Error checking revoked licenses: {}", e.getMessage(), e);
+            Sentry.captureException(e);
             return false;
         }
     }

@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.portmapper;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
@@ -44,6 +45,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                                 gatewayDevice.deletePortMapping(mappedPort.getExternalPort(), mappedPort.getProtocol().name());
                             } catch (IOException | SAXException e) {
                                 log.debug("Unable to delete port mapping on shutdown", e);
+                                Sentry.captureException(e);
                             }
                         });
                     }
@@ -84,6 +86,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             } catch (IOException | SAXException | ParserConfigurationException e) {
                 log.error(tlUI(Lang.PORT_MAPPER_DISCOVER_IGD_FAILED), e);
                 log.error("Unable to discover UPnP gateways", e);
+                Sentry.captureException(e);
             }
         }
     }

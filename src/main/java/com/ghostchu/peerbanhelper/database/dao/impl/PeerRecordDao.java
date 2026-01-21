@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.support.ConnectionSource;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
                     writeToDatabase(torrentDao, t.timestamp, t.downloader, t.torrent, t.peer);
                 } catch (SQLException e) {
                     log.error("Unable save peer record to database, please report to developer: {}, {}, {}, {}", t.timestamp, t.downloader, t.torrent, t.peer);
+                    Sentry.captureException(e);
                 }
             }
             return null;

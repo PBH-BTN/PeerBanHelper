@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
             connectionMetricsTrackDao.syncPeers(downloader, torrent, peers, torrentDao);
         } catch (SQLException | ExecutionException e) {
             log.warn("Failed to record torrent peers for session analyse", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -85,6 +87,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
             connectionMetricDao.saveAggregating(aggInTheDayList, true);
         } catch (SQLException e) {
             log.warn("Failed to flush session analyse data", e);
+            Sentry.captureException(e);
         }
     }
 

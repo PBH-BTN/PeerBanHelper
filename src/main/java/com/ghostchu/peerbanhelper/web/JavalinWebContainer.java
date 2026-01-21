@@ -25,6 +25,7 @@ import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,14 +48,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public final class JavalinWebContainer implements Reloadable {
     private final Javalin javalin;
-    private final PBHPortMapper pBHPortMapper;
     @Setter
     @Getter
     private String token;
-    private final Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
+    private final Cache<@NotNull IPAddress, @NotNull AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
             .build();
-    private final Cache<IPAddress, Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
+    private final Cache<@NotNull IPAddress, @NotNull Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
     @Getter
     private volatile boolean started;
@@ -163,6 +164,7 @@ public final class JavalinWebContainer implements Reloadable {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
                     log.error("500 Internal Server Error", e);
+                    Sentry.captureException(e);
                 })
                 .beforeMatched(ctx -> {
                     if (!securityCheck(ctx)) {
@@ -217,7 +219,6 @@ public final class JavalinWebContainer implements Reloadable {
                     ctx.header("Server", Main.getUserAgent());
                 });
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
-        this.pBHPortMapper = pBHPortMapper;
     }
 
     private void reloadConfig() {
@@ -298,7 +299,8 @@ public final class JavalinWebContainer implements Reloadable {
                 if (localeSettings.length > 1) {
                     prefer = Float.parseFloat(localeSettings[1].substring(2));
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Sentry.captureException(e);
             }
             preferLocales.add(new AcceptLanguages(localeCode, prefer));
         }
@@ -306,7 +308,7 @@ public final class JavalinWebContainer implements Reloadable {
         return preferLocales;
     }
 
-    @SneakyThrows
+    @SneakyThrows(ExecutionException.class)
     public boolean allowAttemptLogin(String ip, String userAgent) {
         var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
         boolean allowed = counter.get() <= 10;
@@ -316,7 +318,7 @@ public final class JavalinWebContainer implements Reloadable {
         return allowed;
     }
 
-    @SneakyThrows
+    @SneakyThrows(ExecutionException.class)
     public synchronized void markLoginFailed(String ip, String userAgent) {
         var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
         counter.incrementAndGet();
@@ -336,7 +338,7 @@ public final class JavalinWebContainer implements Reloadable {
         return ipAddr;
     }
 
-    @SneakyThrows
+    @SneakyThrows(ExecutionException.class)
     public synchronized void markLoginSuccess(String ip, String userAgent, boolean silent) {
         var ipBlock = getPrefixedIPAddr(ip);
         var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
@@ -352,7 +354,7 @@ public final class JavalinWebContainer implements Reloadable {
         }
     }
 
-    private Cache<IPAddress, AtomicInteger> fail2Ban() {
+    private Cache<@NotNull IPAddress, @NotNull AtomicInteger> fail2Ban() {
         return FAIL2BAN;
     }
 

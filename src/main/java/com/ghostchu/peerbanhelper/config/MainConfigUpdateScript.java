@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.config;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
@@ -75,6 +76,7 @@ public final class MainConfigUpdateScript {
                     downloaderSection.set("endpoint", new URL(uri.getScheme(), "127.0.0.1", uri.getPort(), uri.getPath()).toString());
                 } catch (MalformedURLException e) {
                     log.error("Unable to update endpoint for downloader {} on Synology DSM: {}", key, e.getMessage());
+                    Sentry.captureException(e);
                 }
             }
         }

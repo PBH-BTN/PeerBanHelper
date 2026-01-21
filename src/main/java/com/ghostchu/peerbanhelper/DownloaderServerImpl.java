@@ -36,6 +36,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.AssociativeAddressTrie;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -560,6 +561,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     results.add(checkResult);
                 } catch (Exception e) {
                     log.error(tlUI(Lang.UNABLE_EXECUTE_MODULE, module.getName()), e);
+                    Sentry.captureException(e);
                 }
             }
             CheckResult result = NO_MATCHES_CHECK_RESULT;
@@ -575,6 +577,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             return result;
         } catch (Exception e) {
             log.error("Failed to execute modules", e);
+            Sentry.captureException(e);
             return new CheckResult(getClass(), PeerAction.NO_ACTION, 0,
                     new TranslationComponent("ERROR"),
                     new TranslationComponent("ERROR"),
@@ -740,6 +743,10 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Thread thread = new Thread(r);
             thread.setName("Ban Wave");
             thread.setDaemon(true);
+            thread.setUncaughtExceptionHandler((t, e) -> {
+                log.error(tlUI(Lang.THREAD_UNCAUGHT_EXCEPTION, t.getName()), e);
+                Sentry.captureException(e);
+            });
             return thread;
         });
         BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);

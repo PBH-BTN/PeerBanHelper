@@ -138,10 +138,10 @@ public class Main {
             loadPlatform();
             initGUI(args);
             Thread.ofPlatform().name("Bootstrap").start(() -> {
-                guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
-                pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-                setupScriptEngine();
                 try {
+                    guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
+                    pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
+                    setupScriptEngine();
                     log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
                     applicationContext = new AnnotationConfigApplicationContext();
                     applicationContext.register(AppConfig.class);
@@ -157,7 +157,7 @@ public class Main {
                 setupShutdownHook();
             });
             guiManager.sync();
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), throwable);
             Sentry.captureException(throwable);
             throw throwable;
@@ -181,7 +181,7 @@ public class Main {
             sentryOptions.setTag("os", System.getProperty("os.name"));
             sentryOptions.setTag("osarch", System.getProperty("os.arch"));
             sentryOptions.setTag("osversion", System.getProperty("os.version"));
-            sentryOptions.setTag("publisher", meta.getCompileUser() +"("+meta.getCompileEmail()+")");
+            sentryOptions.setTag("publisher", meta.getCompileUser() + "(" + meta.getCompileEmail() + ")");
             sentryOptions.setTag("abbrev", meta.getAbbrev());
         });
         Sentry.captureMessage("hello sentry3");
@@ -191,7 +191,7 @@ public class Main {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (os.startsWith("win")) {
             platform = new WindowsPlatform();
-        }else{
+        } else {
             platform = null;
         }
         Sentry.setTag("platform", platform != null ? platform.getClass().getName() : "null");
@@ -356,6 +356,10 @@ public class Main {
         });
         shutdownThread.setDaemon(false);
         shutdownThread.setName("ShutdownThread");
+        shutdownThread.setUncaughtExceptionHandler((t, e) -> {
+            log.debug("Uncaught exception in shutdown thread {}", t.getName(), e);
+            Sentry.captureException(e);
+        });
         Runtime.getRuntime().addShutdownHook(shutdownThread);
     }
 
@@ -400,7 +404,9 @@ public class Main {
             var verInfo = info.getOperatingSystem().getVersionInfo();
             buildNumber = verInfo.getBuildNumber();
             codeName = verInfo.getCodeName();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            Sentry.captureException(e);
+            log.debug("Unable to get OS build number and code name", e);
         }
         userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
         return userAgent;
@@ -541,11 +547,13 @@ public class Main {
             AviatorEvaluator.addInstanceFunctions(StrUtil.uncapitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
+            Sentry.captureException(e);
         }
         try {
             AviatorEvaluator.addStaticFunctions(StrUtil.capitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
+            Sentry.captureException(e);
         }
     }
 

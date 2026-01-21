@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.configuration.pf4j;
 
+import io.sentry.Sentry;
 import org.pf4j.*;
 import org.pf4j.util.FileUtils;
 import org.slf4j.Logger;
@@ -110,6 +111,7 @@ public class PBHPluginManager extends AbstractPluginManager {
             pluginPath = FileUtils.expandIfZip(pluginPath);
         } catch (Exception e) {
             log.warn("Failed to unzip " + pluginPath, e);
+            Sentry.captureException(e);
             return null;
         }
 

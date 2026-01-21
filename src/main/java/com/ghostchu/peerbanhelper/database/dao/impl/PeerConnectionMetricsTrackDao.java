@@ -12,6 +12,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.j256.ormlite.support.ConnectionSource;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public final class PeerConnectionMetricsTrackDao extends AbstractPBHDao<PeerConn
                     createOrUpdate(v);
                 } catch (SQLException e) {
                     log.error("Unable flush back to database for sessionAnalyseServiceModule {}", v, e);
+                    Sentry.captureException(e);
                 }
             })
             .softValues()
@@ -53,12 +55,14 @@ public final class PeerConnectionMetricsTrackDao extends AbstractPBHDao<PeerConn
                         createOrUpdate(value);
                     } catch (SQLException e) {
                         log.error("Unable flush back to database for PeerConnectionMetricsTrack: {}", value, e);
+                        Sentry.captureException(e);
                     }
                 }
                 return null;
             });
         } catch (SQLException e) {
             log.error("Unable to flush all tracked swarm cache to database", e);
+            Sentry.captureException(e);
         }
     }
 

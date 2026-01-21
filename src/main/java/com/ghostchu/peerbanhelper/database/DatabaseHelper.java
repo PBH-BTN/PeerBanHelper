@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.config.ConfigTransfer;
 import com.ghostchu.peerbanhelper.database.table.*;
-import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.dao.Dao;
@@ -12,6 +11,7 @@ import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.TableUtils;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +102,7 @@ public final class DatabaseHelper {
                 torrentDao.executeRaw("ALTER TABLE " + torrentDao.getTableName() + " ADD COLUMN privateTorrent BOOLEAN NULL");
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
+                Sentry.captureException(err);
             }
             v = 9;
         }
@@ -112,6 +113,7 @@ public final class DatabaseHelper {
                 historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN downloaderProgress DOUBLE NULL");
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
+                Sentry.captureException(err);
             }
             v = 10;
         }
@@ -121,6 +123,7 @@ public final class DatabaseHelper {
                 database.getDataSource().getReadWriteConnection("peer_records").executeStatement("ALTER TABLE peer_records ADD COLUMN downloadSpeed BIGINT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
+                Sentry.captureException(err);
             }
             v = 11;
         }
@@ -129,6 +132,7 @@ public final class DatabaseHelper {
                 database.getDataSource().getReadWriteConnection("history").executeStatement("ALTER TABLE history ADD COLUMN structuredData TEXT NOT NULL DEFAULT '{}'", DatabaseConnection.DEFAULT_RESULT_FLAGS);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
+                Sentry.captureException(err);
             }
             v = 15;
         }
@@ -147,6 +151,7 @@ public final class DatabaseHelper {
                 TableUtils.clearTable(getDataSource(), BanListEntity.class);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
+                Sentry.captureException(err);
             }
             v = 16;
         }
@@ -161,6 +166,7 @@ public final class DatabaseHelper {
                 TableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
+                Sentry.captureException(err);
             }
             v = 19;
         }
@@ -170,6 +176,7 @@ public final class DatabaseHelper {
                 database.getDataSource().getReadWriteConnection("peer_records").executeStatement("ALTER TABLE peer_records ADD COLUMN port INT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
+                Sentry.captureException(err);
             }
             v = 20;
         }
@@ -191,6 +198,7 @@ public final class DatabaseHelper {
                     dao.createOrUpdate(entity);
                 } catch (Exception e) {
                     log.error("Unhandled error", e);
+                    Sentry.captureException(e);
                 }
             }
             return null;

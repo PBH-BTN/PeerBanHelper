@@ -22,6 +22,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -101,16 +102,26 @@ public final class BtnNetwork implements Reloadable {
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
         this.trackedSwarmDao = trackedSwarmDao;
-        new Thread(() -> {
+        var thr = new Thread(() -> {
             Main.getReloadManager().register(this);
             reloadConfig();
-        }).start();
+        });
+        thr.setUncaughtExceptionHandler((t, e) -> {
+            log.error("Uncaught Exception", e);
+            Sentry.captureException(e);
+        });
+        thr.start();
         this.systemInfo = systemInfo;
     }
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        new Thread(this::reloadConfig).start();
+        var thr = new Thread(this::reloadConfig);
+        thr.setUncaughtExceptionHandler((t, e) -> {
+            log.error("Unable to reload BtnNetwork", e);
+            Sentry.captureException(e);
+        });
+        thr.start();
         return Reloadable.super.reloadModule();
     }
 
@@ -240,6 +251,7 @@ public final class BtnNetwork implements Reloadable {
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
             configSuccess.set(false);
             nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
+            Sentry.captureException(e);
         }
     }
 
@@ -271,6 +283,7 @@ public final class BtnNetwork implements Reloadable {
             }
         } catch (Throwable e) {
             log.error("Unable to gather or solve PoW Captcha", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -296,6 +309,7 @@ public final class BtnNetwork implements Reloadable {
             }
         } catch (Throwable throwable) {
             log.error(tlUI(Lang.UNABLE_COMPLETE_SCHEDULE_TASKS), throwable);
+            Sentry.captureException(throwable);
         }
 
     }

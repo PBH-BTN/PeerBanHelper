@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.push.PushManagerImpl;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,6 +41,7 @@ public final class AlertManagerImpl implements AlertManager {
             log.info(tlUI(Lang.ALERT_MANAGER_CLEAN_UP, removed));
         } catch (SQLException e) {
             log.warn("Unable to cleanup expired history alerts", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -56,6 +58,7 @@ public final class AlertManagerImpl implements AlertManager {
             alertDao.markAsRead(identifier);
         } catch (Exception e) {
             log.error(tlUI(Lang.UNABLE_READ_ALERT), e);
+            Sentry.captureException(e);
         }
     }
 
@@ -69,6 +72,7 @@ public final class AlertManagerImpl implements AlertManager {
             return alertDao.identifierAlertExists(identifier);
         } catch (SQLException e) {
             log.warn("Unable query alert for identifier {}", identifier, e);
+            Sentry.captureException(e);
             return false;
         }
     }
@@ -83,6 +87,7 @@ public final class AlertManagerImpl implements AlertManager {
             return alertDao.identifierAlertExistsIncludeRead(identifier);
         } catch (SQLException e) {
             log.warn("Unable query alert for identifier {}", identifier, e);
+            Sentry.captureException(e);
             return false;
         }
     }
@@ -123,6 +128,7 @@ public final class AlertManagerImpl implements AlertManager {
             Main.getGuiManager().createNotification(slf4jLevel, tlUI(title), tlUI(content));
         } catch (Exception e) {
             log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT), e);
+            Sentry.captureException(e);
         }
 
     }
@@ -152,6 +158,7 @@ public final class AlertManagerImpl implements AlertManager {
         try {
             return  alertDao.getUnreadAlertsUnPaged();
         } catch (SQLException e) {
+            Sentry.captureException(e);
             return List.of();
         }
     }

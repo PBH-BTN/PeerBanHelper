@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -17,6 +16,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,9 +114,11 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
                 peerRecordDao.syncPendingTasks(dataBuffer, torrentDao);
             } catch (SQLException e) {
                 log.warn("Unable sync peers data to database", e);
+                Sentry.captureException(e);
             }
-        } catch (Throwable throwable) {
-            log.error("Unable to complete scheduled tasks", throwable);
+        } catch (Throwable e) {
+            log.error("Unable to complete scheduled tasks", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -134,9 +136,11 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
                 log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
             } catch (SQLException e) {
                 log.warn("Unable to clean up peer_records tables", e);
+                Sentry.captureException(e);
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
+            Sentry.captureException(throwable);
         }
     }
 

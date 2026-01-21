@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +20,12 @@ import java.util.concurrent.ScheduledExecutorService;
 @Slf4j
 public final class CommonUtil {
 
-    private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofPlatform().name("CommonScheduler").factory());
+    private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofPlatform()
+            .uncaughtExceptionHandler((t, e) -> {
+                log.warn("Uncaught exception in common scheduler thread {}", t.getName(), e);
+                Sentry.captureException(e);
+            })
+            .name("CommonScheduler").factory());
 
     public static ScheduledExecutorService getScheduler() {
         return GENERAL_SCHEDULER;
@@ -27,13 +33,13 @@ public final class CommonUtil {
 
     public static void deleteFileOrDirectory(@NotNull File file) {
         // Traverse the file tree in depth-first fashion and delete each file/directory.
-        if(!file.exists()) return;
-        if(file.isFile()){
+        if (!file.exists()) return;
+        if (file.isFile()) {
             file.delete();
             return;
         }
-        try (var stream = Files.walk(file.toPath())){
-                    stream.sorted(Comparator.reverseOrder())
+        try (var stream = Files.walk(file.toPath())) {
+            stream.sorted(Comparator.reverseOrder())
                     .forEach(path -> {
                         try {
                             Files.delete(path);

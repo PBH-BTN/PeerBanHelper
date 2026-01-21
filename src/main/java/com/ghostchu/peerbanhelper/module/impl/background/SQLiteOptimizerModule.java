@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -50,6 +51,7 @@ public final class SQLiteOptimizerModule extends AbstractFeatureModule implement
             torrentDao.executeRaw("PRAGMA optimize;");
         } catch (SQLException e) {
             log.warn("Failed to perform period SQLite database optimization", e);
+            Sentry.captureException(e);
         }
     }
 

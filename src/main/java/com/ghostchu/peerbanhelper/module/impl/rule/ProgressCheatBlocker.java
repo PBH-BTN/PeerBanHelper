@@ -30,6 +30,7 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +59,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     flushBackDatabase(pair.getLeft(), pair.getRight());
                 } catch (SQLException e) {
                     log.error("Unable flush back to database for pair {}", pair, e);
+                    Sentry.captureException(e);
                 }
             })
             .build();
@@ -124,6 +126,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
         } catch (SQLException e) {
             log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp, e);
+            Sentry.captureException(e);
         }
     }
 
@@ -134,6 +137,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             pcbAddressDao.cleanupDatabase(timestamp);
         } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -455,6 +459,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 }
             });
         } catch (ExecutionException e) {
+            Sentry.captureException(e);
             throw new RuntimeException(e.getCause());
         }
     }

@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ScriptStorageEntity;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.support.ConnectionSource;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, 
             createOrUpdate(entity);
         } catch (SQLException e) {
             log.warn("Unable to create/update script storage entity", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -38,6 +40,7 @@ public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, 
             return null;
         } catch (SQLException e) {
             log.warn("Unable to get script storage entity", e);
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -47,6 +50,7 @@ public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, 
             return queryBuilder().offset(offset).limit(limit).query().stream().map(ScriptStorageEntity::getKey).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage keys", e);
+            Sentry.captureException(e);
             return List.of();
         }
     }
@@ -56,6 +60,7 @@ public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, 
             return queryBuilder().offset(offset).limit(limit).query().stream().map(ScriptStorageEntity::getValue).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage values", e);
+            Sentry.captureException(e);
             return List.of();
         }
     }
@@ -65,6 +70,7 @@ public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, 
             return query(queryBuilder().where().like("key", new SelectArg(prefix + "%")).prepare()).stream().map(ScriptStorageEntity::getKey).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage keys", e);
+            Sentry.captureException(e);
             return List.of();
         }
     }
@@ -74,6 +80,7 @@ public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, 
             return queryBuilder().where().like("value", new SelectArg(prefix + "%")).query().stream().map(ScriptStorageEntity::getValue).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage values", e);
+            Sentry.captureException(e);
             return List.of();
         }
     }
@@ -95,6 +102,7 @@ public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, 
                     ));
         } catch (SQLException e) {
             log.warn("Unable to get script storage entries", e);
+            Sentry.captureException(e);
             return Map.of();
         }
     }

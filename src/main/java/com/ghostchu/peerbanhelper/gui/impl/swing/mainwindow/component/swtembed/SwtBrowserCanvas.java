@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed;
 
 import com.ghostchu.peerbanhelper.Main;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -69,6 +70,7 @@ public final class SwtBrowserCanvas extends Canvas {
                     }
                 } catch (Exception e) {
                     log.debug("Cannot load placeholder.html", e);
+                    Sentry.captureException(e);
                 }
                 this.browserInitialized = true;
                 // 应用正确的大小
@@ -76,6 +78,7 @@ public final class SwtBrowserCanvas extends Canvas {
             } catch (SWTError e) {
                 this.browserInitialized = false;
                 log.debug("Cannot init SWT Browser", e);
+                Sentry.captureException(e);
             }
         });
     }
@@ -152,6 +155,10 @@ public final class SwtBrowserCanvas extends Canvas {
         };
         thread.setDaemon(true);
         thread.setName("SwtBrowserEventLoop");
+        thread.setUncaughtExceptionHandler((t, e) -> {
+            log.debug("Uncaught exception in SWT event loop", e);
+            Sentry.captureException(e);
+        });
         return thread;
     }
 

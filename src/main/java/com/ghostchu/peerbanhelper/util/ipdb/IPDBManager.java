@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -58,11 +59,13 @@ public class IPDBManager {
                     if (ipdb != null) {
                         ipdb.close();
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    Sentry.captureException(e);
                 }
             }));
         } catch (Exception e) {
             log.info(tlUI(Lang.IPDB_INVALID), e);
+            Sentry.captureException(e);
         }
     }
 
@@ -75,13 +78,15 @@ public class IPDBManager {
                     return new IPDBResponse(new LazyLoad<>(() -> {
                         try {
                             return ipdb.query(address);
-                        } catch (Exception ignored) {
+                        } catch (Exception e) {
+                            Sentry.captureException(e);
                             return null;
                         }
                     }));
                 }
             });
         } catch (ExecutionException e) {
+            Sentry.captureException(e);
             return new IPDBResponse(null);
         }
     }

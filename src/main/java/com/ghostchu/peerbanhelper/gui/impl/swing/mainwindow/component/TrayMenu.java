@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.SwingTray;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.common.eventbus.Subscribe;
+import io.sentry.Sentry;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
@@ -54,6 +55,7 @@ public class TrayMenu {
                 updateTrayMenus();
                 this.swingTrayDialog = tray;
             } catch (AWTException e) {
+                Sentry.captureException(e);
                 throw new RuntimeException(e);
             }
         }

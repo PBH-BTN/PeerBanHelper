@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.config;
 
 import com.google.common.io.CharStreams;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -31,6 +32,7 @@ public final class PBHConfigUpdater {
             this.bundle.loadFromString(CharStreams.toString(reader));
         } catch (IOException | InvalidConfigurationException e) {
             log.error("Unable to load the bundled config from classloader resource", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -69,6 +71,7 @@ public final class PBHConfigUpdater {
                 log.info("Configuration successfully updated");
             } catch (Throwable throwable) {
                 log.error("Error while updating configuration, method={}, target_ver={}", method.getName(), method.getAnnotation(UpdateScript.class).version(), throwable);
+                Sentry.captureException(throwable);
             }
         }
         if(anyUpgradeExecuted) {
@@ -81,6 +84,7 @@ public final class PBHConfigUpdater {
                 }
             } catch (IOException e) {
                 log.error("Failed to save configuration!", e);
+                Sentry.captureException(e);
             }
         }
     }

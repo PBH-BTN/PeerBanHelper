@@ -7,13 +7,13 @@ import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +88,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
             context.json(new StdResp(true, null, page));
         } catch (SQLException e) {
             log.error("Unable to retrieve tracked swarm data", e);
+            Sentry.captureException(e);
             context.json(new StdResp(false, "Unable to retrieve tracked swarm data", null));
         }
     }
@@ -99,6 +100,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
             context.json(response);
         } catch (SQLException e) {
             log.error("Unable to retrieve tracked swarm data", e);
+            Sentry.captureException(e);
             context.status(500).json(new StdResp(false, "Unable to retrieve tracked swarm data", null));
         }
     }
@@ -120,6 +122,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
                 trackedSwarmDao.syncPeers(downloader, torrent, peer);
             }
         } catch (ExecutionException e) {
+            Sentry.captureException(e);
             log.error("Unable update tracked peers in SQLite temporary table", e);
         }
     }

@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsTrackEntit
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.support.ConnectionSource;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,6 +41,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
             }
         } catch (Exception e) {
             log.error("Failed to query global total connections count between {} and {}", startAt, endAt, e);
+            Sentry.captureException(e);
         }
         return total;
     }
@@ -74,6 +76,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
 
         } catch (SQLException e) {
             log.error("Failed to query peer connection metrics since {}", sinceAt, e);
+            Sentry.captureException(e);
         }
         return result;
     }
@@ -119,6 +122,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
                 createOrUpdate(entityInDb);
             } catch (SQLException e) {
                 log.error("Updating peer connection metrics failed for downloader {} at {}", peerConnectionMetricsEntity.getDownloader(), peerConnectionMetricsEntity.getTimeframeAt(), e);
+                Sentry.captureException(e);
             }
         }
     }
@@ -191,6 +195,7 @@ public class PeerConnectionMetricDao extends AbstractPBHDao<PeerConnectionMetric
             log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
         } catch (SQLException e) {
             log.error("Failed to remove outdated peer connection metrics data before {}", beforeAt, e);
+            Sentry.captureException(e);
         }
     }
 }

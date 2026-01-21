@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import inet.ipaddr.IPAddress;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public final class BanListDao extends AbstractPBHDao<BanListEntity, String> {
                     JsonUtil.tiny().fromJson(e.getMetadata(), BanMetadata.class)));
         } catch (Exception e) {
             log.error("Unable to read stored banlist, skipping...", e);
+            Sentry.captureException(e);
         }
         return map;
     }

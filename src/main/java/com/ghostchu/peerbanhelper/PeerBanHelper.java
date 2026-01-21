@@ -23,6 +23,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.util.JavalinBindException;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -180,6 +181,7 @@ public class PeerBanHelper implements Reloadable {
             downloaderManager.close();
         } catch (Exception e) {
             log.warn("Unable to safe shutdown downloader manager", e);
+            Sentry.captureException(e);
         }
         Main.getReloadManager().unregister(this);
         log.info(tlUI(Lang.SHUTDOWN_DONE));
@@ -201,6 +203,9 @@ public class PeerBanHelper implements Reloadable {
             } else if (e.getMessage().contains("require elevated privileges")) {
                 log.error(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES));
                 throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES, httpdPort), e);
+            } else {
+                Sentry.captureException(e);
+                log.error("Unable to start Javalin http server", e);
             }
         }
     }

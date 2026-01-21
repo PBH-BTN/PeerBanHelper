@@ -15,6 +15,7 @@ import com.maxmind.geoip2.model.CountryResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
 import com.maxmind.geoip2.record.Location;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -24,6 +25,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okio.Okio;
+import org.jetbrains.annotations.NotNull;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.*;
@@ -162,7 +164,8 @@ public final class IPDB implements AutoCloseable {
                 networkData.setNetType(tlUI(component));
             }
             geoData.setNetwork(networkData);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
         }
     }
 
@@ -173,7 +176,8 @@ public final class IPDB implements AutoCloseable {
             networkData.setIsp(asnResponse.autonomousSystemOrganization());
             networkData.setNetType(null);
             return networkData;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -195,6 +199,7 @@ public final class IPDB implements AutoCloseable {
             cityData.setLocation(locationData);
             return cityData;
         } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -216,7 +221,8 @@ public final class IPDB implements AutoCloseable {
             }
             countryData.setName(countryRegionName);
             return countryData;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -234,7 +240,8 @@ public final class IPDB implements AutoCloseable {
             asData.setIpAddress(asnResponse.ipAddress().getHostAddress());
             asData.setNetwork(network);
             return asData;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -433,7 +440,7 @@ public final class IPDB implements AutoCloseable {
     }
 
     public static final class MaxMindNodeCache implements NodeCache {
-        private final static Cache<CacheKey, DecodedValue> cache = CacheBuilder.newBuilder()
+        private final static Cache<@NotNull CacheKey, @NotNull DecodedValue> cache = CacheBuilder.newBuilder()
                 .maximumSize(2000)
                 .expireAfterAccess(1, TimeUnit.HOURS)
                 .build();

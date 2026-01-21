@@ -14,11 +14,11 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import io.sentry.Sentry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -90,6 +90,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                 }
             } catch (Throwable e) {
                 log.error("Unable to write hourly traffic journal to database", e);
+                Sentry.captureException(e);
             }
         }
         updateTrafficMonitoringService();
@@ -115,6 +116,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                 }
             } catch (Throwable e) {
                 log.error("Unable to update traffic settings followed by sliding window", e);
+                Sentry.captureException(e);
             }
         }
     }

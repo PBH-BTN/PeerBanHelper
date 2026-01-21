@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.MetadataEntity;
 import com.j256.ormlite.support.ConnectionSource;
+import io.sentry.Sentry;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ public final class MetadataDao extends AbstractPBHDao<MetadataEntity, String> {
                 return defaultValue;
             }
         } catch (SQLException e) {
+            Sentry.captureException(e);
             throw new RuntimeException(e);
         }
     }
@@ -52,6 +54,7 @@ public final class MetadataDao extends AbstractPBHDao<MetadataEntity, String> {
                 return create(entity);
             }
         } catch (SQLException e) {
+            Sentry.captureException(e);
             throw new RuntimeException(e);
         }
     }

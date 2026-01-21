@@ -11,6 +11,7 @@ import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.jdbc.JdbcSingleConnectionSource;
 import com.j256.ormlite.jdbc.db.SqliteDatabaseType;
 import com.j256.ormlite.support.ConnectionSource;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -66,6 +67,7 @@ public class Database {
         try {
             return Long.parseLong(Files.readString(dbMaintenanceFile.toPath()));
         } catch (Exception e) {
+            Sentry.captureException(e);
             return 0;
         }
     }
@@ -74,6 +76,7 @@ public class Database {
         try {
             Files.writeString(dbMaintenanceFile.toPath(), String.valueOf(time));
         } catch (IOException e) {
+            Sentry.captureException(e);
         }
     }
 
@@ -105,6 +108,7 @@ public class Database {
                                     log.info(tlUI(Lang.SQLITE_VACUUM_SUCCESS, MsgUtil.humanReadableByteCountBin(fileSize), MsgUtil.humanReadableByteCountBin(newFileSize)));
                                 } catch (IOException e) {
                                     log.warn(tlUI(Lang.SQLITE_VACUUM_BACKUP_FAILED), e);
+                                    Sentry.captureException(e);
                                 } finally {
                                     // 太好了，我们没有被强关
                                     outputBackup.delete();
@@ -114,11 +118,13 @@ public class Database {
                     }
                 } catch (Exception e) {
                     log.warn(tlUI(Lang.UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA), e);
+                    Sentry.captureException(e);
                 } finally {
                     setLastMaintenanceTime(System.currentTimeMillis());
                 }
             } catch (Exception e) {
                 log.warn(tlUI(Lang.UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA), e);
+                Sentry.captureException(e);
             }
         }
         this.dataSource = new JdbcSingleConnectionSource("jdbc:sqlite:" + file, new SqliteDatabaseType(), rawConnection);

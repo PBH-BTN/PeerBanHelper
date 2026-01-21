@@ -817,3 +817,4 @@ PEER_RECORDING_SERVICE_CLEANING_UP: "[Peer 记录服务] 正在清理过期的 P
 PEER_RECORDING_SERVICE_CLEANED_UP: "[Peer 记录服务] 已删除 {} 条过期的 Peer 记录数据"
 CONNECTION_METRICS_SERVICE_CLEANING_UP: "[Peer 连接分析服务] 正在清理过期的连接指标数据，请稍等..."
 CONNECTION_METRICS_SERVICE_CLEANED_UP: "[Peer 连接分析服务] 已删除 {} 条过期的连接指标数据"
+THREAD_UNCAUGHT_EXCEPTION: "[错误] {} 线程出现未捕获的错误，如果频繁出现，请向 PeerBanHelper 开发者反馈: {}"

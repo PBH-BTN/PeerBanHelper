@@ -8,6 +8,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
@@ -36,6 +37,7 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
             ct = qb.offset(null).limit(null).countOf();
         } catch (SQLException e) {
             log.debug("Unable to count total records for paging query", e);
+            Sentry.captureException(e);
         }
         return new Page<>(
                 pageable,
