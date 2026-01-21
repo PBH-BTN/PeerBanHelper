@@ -174,6 +174,7 @@ public class Main {
             sentryOptions.setEnabled(mainConfig.getBoolean("privacy.analytics")); // Disable Sentry if analytics is disabled in config
             sentryOptions.setDistinctId(mainConfig.getString("installation-id"));
             sentryOptions.setServerName(mainConfig.getString("installation-id"));
+            sentryOptions.setEnvironment(meta.isSnapshotOrBeta() ? "development" : "production");
             sentryOptions.setSendDefaultPii(false); // Do not track user information
             sentryOptions.setAttachThreads(true);
             sentryOptions.setPrintUncaughtStackTrace(true);
