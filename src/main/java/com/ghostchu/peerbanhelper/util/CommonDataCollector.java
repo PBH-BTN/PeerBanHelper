@@ -100,7 +100,6 @@ public class CommonDataCollector {
         var mem = hardware.getMemory();
         data.put("total", mem.getTotal());
         data.put("free", mem.getAvailable());
-        data.put("page_size", mem.getPageSize());
         return data;
     }
 
