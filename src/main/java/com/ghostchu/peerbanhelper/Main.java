@@ -29,6 +29,8 @@ import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
+import io.sentry.SendCachedEnvelopeFireAndForgetIntegration;
+import io.sentry.SendFireAndForgetEnvelopeSender;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -175,6 +177,7 @@ public class Main {
             sentryOptions.setSendDefaultPii(false); // Do not track user information
             sentryOptions.setAttachThreads(true);
             sentryOptions.setPrintUncaughtStackTrace(true);
+            sentryOptions.setEnableUncaughtExceptionHandler(true);
             sentryOptions.setProfilesSampleRate(1.0d); // TODO modify this value later
             sentryOptions.setEnableUserInteractionTracing(false); // Do not tracker user behavior
             sentryOptions.setRelease(meta.getVersion());
@@ -183,6 +186,11 @@ public class Main {
             sentryOptions.setTag("osversion", System.getProperty("os.version"));
             sentryOptions.setTag("publisher", meta.getCompileUser() + "(" + meta.getCompileEmail() + ")");
             sentryOptions.setTag("abbrev", meta.getAbbrev());
+            sentryOptions.addIntegration(
+                    new SendCachedEnvelopeFireAndForgetIntegration(
+                            new SendFireAndForgetEnvelopeSender(sentryOptions::getCacheDirPath)
+                    )
+            );
         });
         Sentry.captureMessage("hello sentry3");
     }
@@ -356,10 +364,6 @@ public class Main {
         });
         shutdownThread.setDaemon(false);
         shutdownThread.setName("ShutdownThread");
-        shutdownThread.setUncaughtExceptionHandler((t, e) -> {
-            log.debug("Uncaught exception in shutdown thread {}", t.getName(), e);
-            Sentry.captureException(e);
-        });
         Runtime.getRuntime().addShutdownHook(shutdownThread);
     }
 
@@ -463,47 +467,6 @@ public class Main {
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
     }
-
-//    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
-//        if (beanName == null) {
-//            beanName = decapitalize(clazz.getSimpleName());
-//        }
-//        if (applicationContext.containsBean(beanName)) {
-//            return;
-//        } else {
-//            String bn = decapitalize(clazz.getSimpleName());
-//            if (applicationContext.containsBean(bn)) {
-//                return;
-//            }
-//        }
-//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
-//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-//    }
-//
-//    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
-//        if (beanName == null) {
-//            beanName = decapitalize(clazz.getSimpleName());
-//        }
-//        if (applicationContext.containsBean(beanName)) {
-//            return;
-//        } else {
-//            String bn = decapitalize(clazz.getSimpleName());
-//            if (applicationContext.containsBean(bn)) {
-//                return;
-//            }
-//        }
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
-//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-//    }
-//
-//    public static void unregisterBean(String beanName) {
-//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-//        defaultListableBeanFactory.removeBeanDefinition(beanName);
-//    }
 
     private static void setupScriptEngine() {
         AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);

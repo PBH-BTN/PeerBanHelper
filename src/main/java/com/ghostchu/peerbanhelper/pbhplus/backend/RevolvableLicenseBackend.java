@@ -18,10 +18,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RevolvableLicenseBackend extends BasicLicenseBackend {
     private final Set<License> revokedLicenses = Collections.synchronizedSet(new LinkedHashSet<>());
-    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofPlatform().name("License Revoke Checker").uncaughtExceptionHandler((t, e) -> {
-        log.debug("Uncaught exception in thread {}: {}", t.getName(), e.getMessage(), e);
-        Sentry.captureException(e);
-    }).factory());
+    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofPlatform().name("License Revoke Checker").factory());
     private final List<LicenseRevokeValidator> revokeValidators;
 
     public RevolvableLicenseBackend(List<LicenseRevokeValidator> revokeValidators) {

@@ -106,10 +106,6 @@ public final class BtnNetwork implements Reloadable {
             Main.getReloadManager().register(this);
             reloadConfig();
         });
-        thr.setUncaughtExceptionHandler((t, e) -> {
-            log.error("Uncaught Exception", e);
-            Sentry.captureException(e);
-        });
         thr.start();
         this.systemInfo = systemInfo;
     }
@@ -117,10 +113,6 @@ public final class BtnNetwork implements Reloadable {
     @Override
     public ReloadResult reloadModule() throws Exception {
         var thr = new Thread(this::reloadConfig);
-        thr.setUncaughtExceptionHandler((t, e) -> {
-            log.error("Unable to reload BtnNetwork", e);
-            Sentry.captureException(e);
-        });
         thr.start();
         return Reloadable.super.reloadModule();
     }

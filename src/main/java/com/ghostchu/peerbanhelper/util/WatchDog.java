@@ -38,10 +38,6 @@ public final class WatchDog implements AutoCloseable {
             Thread thread = new Thread(r);
             thread.setDaemon(true);
             thread.setName("PBH-Watchdog-" + name);
-            thread.setUncaughtExceptionHandler((t, e) -> {
-                log.debug("Uncaught exception in PBH-Watchdog", e);
-                Sentry.captureException(e);
-            });
             return thread;
         });
     }

@@ -155,10 +155,6 @@ public final class SwtBrowserCanvas extends Canvas {
         };
         thread.setDaemon(true);
         thread.setName("SwtBrowserEventLoop");
-        thread.setUncaughtExceptionHandler((t, e) -> {
-            log.debug("Uncaught exception in SWT event loop", e);
-            Sentry.captureException(e);
-        });
         return thread;
     }
 

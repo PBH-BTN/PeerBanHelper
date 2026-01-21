@@ -743,10 +743,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Thread thread = new Thread(r);
             thread.setName("Ban Wave");
             thread.setDaemon(true);
-            thread.setUncaughtExceptionHandler((t, e) -> {
-                log.error(tlUI(Lang.THREAD_UNCAUGHT_EXCEPTION, t.getName()), e);
-                Sentry.captureException(e);
-            });
             return thread;
         });
         BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
