@@ -48,7 +48,6 @@ public class CommonDataCollector {
         pbh.put("commit_id", Main.getMeta().getCommit());
         pbh.put("compile_time", compile_time / 1000);
         pbh.put("release", release);
-        pbh.put("uptime", (System.currentTimeMillis() - Main.getStartupAt()) / 1000);
         pbh.put("gui_available", Main.getGuiManager().isGuiAvailable());
         pbh.put("default_locale", Main.DEF_LOCALE);
         return pbh;
@@ -69,7 +68,6 @@ public class CommonDataCollector {
         os.put("cores", osMXBean.getAvailableProcessors());
         var mem = generateSystemMemoryData(systemInfo.getHardware());
         os.put("memory", mem);
-        os.put("load", osMXBean.getSystemLoadAverage());
         var network = generateNetworkStats();
         os.put("network", network);
         return os;
