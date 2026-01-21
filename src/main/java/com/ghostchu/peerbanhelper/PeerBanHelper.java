@@ -18,7 +18,9 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
+import com.ghostchu.peerbanhelper.util.umami.UmamiHelper;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -35,6 +37,7 @@ import org.springframework.stereotype.Component;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -61,6 +64,8 @@ public class PeerBanHelper implements Reloadable {
     private CrashManager crashManager;
     @Autowired
     private IPDBManager iPDBManager;
+    @Autowired
+    private UmamiHelper telemetry;
 
     public PeerBanHelper() {
         reloadConfig();
@@ -107,6 +112,8 @@ public class PeerBanHelper implements Reloadable {
             }
         });
         runTestCode();
+        telemetry.sendBootEvent();
+        CommonUtil.getScheduler().scheduleAtFixedRate(telemetry::sendHeartbeatEvent, 1, 1, TimeUnit.HOURS);
     }
 
     private void loadPlatformFeatures() {
