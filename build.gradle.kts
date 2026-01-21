@@ -14,12 +14,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_25
 }
 
-sentry {
-    includeSourceContext.set(true)
-    includeNativeSources.set(true)
-    includeDependenciesReport.set(true)
-}
-
 repositories {
     mavenCentral()
     maven {
