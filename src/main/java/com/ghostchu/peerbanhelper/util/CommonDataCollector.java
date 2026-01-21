@@ -94,7 +94,6 @@ public class CommonDataCollector {
         mem.put("heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
         mem.put("non_heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));
         jvm.put("memory", mem);
-        jvm.put("startup_arguments", ManagementFactory.getRuntimeMXBean().getInputArguments());
         return jvm;
     }
 
