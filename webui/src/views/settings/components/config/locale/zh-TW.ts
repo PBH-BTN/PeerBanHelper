@@ -13,6 +13,8 @@ export default {
   'page.settings.tab.config.plus.button': '按此打開',
 
   'page.settings.tab.config.privacy.analytics': '啟用遥测',
+  'page.settings.tab.config.privacy.analytics.tips':
+    '收集的匿名資料不包含隱私資料，僅用於改進軟體品質，將不會傳送給第三方',
 
   'page.settings.tab.config.server.title': 'WebUI',
   'page.settings.tab.config.server.port': '埠',

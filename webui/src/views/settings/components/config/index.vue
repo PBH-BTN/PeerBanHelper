@@ -34,6 +34,9 @@
             field="privacy.analytics"
           >
             <a-switch v-model="form.privacy.analytics" />
+            <template #extra>
+              {{ t('page.settings.tab.config.privacy.analytics.tips') }}
+            </template>
           </a-form-item>
           <a-divider />
           <webui v-model="form.server" />

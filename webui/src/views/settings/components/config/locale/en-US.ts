@@ -13,6 +13,8 @@ export default {
   'page.settings.tab.config.plus.button': 'Click to open',
 
   'page.settings.tab.config.privacy.analytics': 'Enable analytics',
+  'page.settings.tab.config.privacy.analytics.tips':
+    'The collected anonymous data does not contain private data, is only used to improve software quality, and will not be transmitted to third parties',
 
   'page.settings.tab.config.server.title': 'WebUI',
   'page.settings.tab.config.server.port': 'Port',
