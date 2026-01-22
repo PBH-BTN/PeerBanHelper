@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.databasent.converter;
+package com.ghostchu.peerbanhelper.databasent.driver.postgres;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

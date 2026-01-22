@@ -11,16 +11,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.StandardEnvironment;
 
 @Configuration
-public class DynamicMapperConfig implements BeanDefinitionRegistryPostProcessor {
-    private final DatabaseDriver databaseDriver;
+public class DynamicDatabaseConfig implements BeanDefinitionRegistryPostProcessor {
+    public static DatabaseDriver driver;
 
-    public DynamicMapperConfig(@Autowired DatabaseDriver databaseDriver) {
-        this.databaseDriver = databaseDriver;
+    public DynamicDatabaseConfig(@Autowired DatabaseDriver databaseDriver) {
+        driver = databaseDriver;
     }
 
     @Override
     public void postProcessBeanDefinitionRegistry(@NotNull BeanDefinitionRegistry registry) throws BeansException {
         ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry, new StandardEnvironment());
-        scanner.doScan(databaseDriver.getMapperPackagePath());
+        scanner.doScan(driver.getMapperPackagePath());
     }
 }

@@ -52,4 +52,5 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         return new HikariDataSource(config);
 
     }
+
 }

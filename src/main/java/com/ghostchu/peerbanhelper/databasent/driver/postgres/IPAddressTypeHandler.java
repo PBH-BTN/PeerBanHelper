@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.databasent.converter;
+package com.ghostchu.peerbanhelper.databasent.driver.postgres;
 
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import inet.ipaddr.IPAddress;

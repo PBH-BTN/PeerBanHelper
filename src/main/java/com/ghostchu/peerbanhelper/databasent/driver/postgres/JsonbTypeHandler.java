@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.databasent.converter;
+package com.ghostchu.peerbanhelper.databasent.driver.postgres;
 
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.core.JacksonException;
