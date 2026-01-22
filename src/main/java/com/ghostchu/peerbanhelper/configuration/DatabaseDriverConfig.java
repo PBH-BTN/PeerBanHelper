@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInt
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
-import com.ghostchu.peerbanhelper.databasent.driver.H2DatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;

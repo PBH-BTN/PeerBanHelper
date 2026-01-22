@@ -1,7 +1,8 @@
-package com.ghostchu.peerbanhelper.databasent.driver;
+package com.ghostchu.peerbanhelper.databasent.driver.h2;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
+import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
