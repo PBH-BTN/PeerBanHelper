@@ -35,7 +35,7 @@ public final class AlertEntity implements Serializable {
     private AlertLevel level;
     @TableField(value = "identifier")
     private String identifier;
-    @TableField(value = "title", typeHandler = DynamicDatabaseConfig)
+    @TableField(value = "title", typeHandler = TranslationComponentTypeHandler.class)
     private TranslationComponent title;
     @TableField(value = "content", typeHandler = TranslationComponentTypeHandler.class)
     private TranslationComponent content;
