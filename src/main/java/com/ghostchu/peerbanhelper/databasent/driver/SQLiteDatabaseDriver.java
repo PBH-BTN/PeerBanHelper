@@ -36,7 +36,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     public @NotNull String getMapperPackagePath() {
-        return "com.ghostchu.peerbanhelper.databasent.mappers.sqlite";
+        return "com.ghostchu.peerbanhelper.databasent.mapper.sqlite";
     }
 
     @Override
