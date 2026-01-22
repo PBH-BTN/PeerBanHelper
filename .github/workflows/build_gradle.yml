@@ -9,15 +9,9 @@ jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
   Test:
-    needs: [WebUI]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
-        name: Download WebUI Files
-        with:
-          name: webui-dist
-          path: src/main/resources/static
       - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
