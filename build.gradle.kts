@@ -196,6 +196,17 @@ dependencies {
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation(kotlin("stdlib-jdk8"))
+
+    // Test dependencies
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito:mockito-core:5.15.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 application {

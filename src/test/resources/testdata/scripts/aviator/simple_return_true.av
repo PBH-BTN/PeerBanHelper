@@ -1,0 +1,7 @@
+## @NAME 简单返回 true
+## @AUTHOR Test
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+return true;

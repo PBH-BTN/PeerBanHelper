@@ -4,6 +4,7 @@ import org.python.core.PyCode
 import org.python.core.PyObject
 import org.python.util.PythonInterpreter
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
 
 class PyCompiledScript(
     private val _file: File?,
@@ -17,6 +18,9 @@ class PyCompiledScript(
     private val interpreter: PythonInterpreter?
 ) : CompiledScript {
 
+    // 用于保护解释器执行的锁，因为 PythonInterpreter 不是线程安全的
+    private val executionLock = ReentrantLock()
+
     override fun file(): File? = _file
     override fun name(): String? = _name
     override fun author(): String? = _author
@@ -26,12 +30,13 @@ class PyCompiledScript(
     override fun script(): String? = _script
 
     override fun execute(env: MutableMap<String, Any>): Any? {
-        if (_threadSafe) {
+        // 无论 threadSafe 标志如何，都需要对解释器执行加锁
+        // 因为 PythonInterpreter 本身不是线程安全的
+        executionLock.lock()
+        try {
             return executeInternal(env)
-        } else {
-            synchronized(compiledCode!!) {
-                return executeInternal(env)
-            }
+        } finally {
+            executionLock.unlock()
         }
     }
 
