@@ -221,13 +221,22 @@ tasks.withType<JavaCompile> {
 tasks.processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
+    // Use inputs.properties to make expand work with configuration cache
+    val expandProps = mapOf(
+        "version" to project.version.toString(),
+        "group" to project.group.toString(),
+        "name" to project.name
+    )
+    inputs.properties(expandProps)
+
     // Don't expand all files, only specific ones if needed
     filesMatching(listOf("**/*.properties")) {
-        expand(project.properties)
+        expand(expandProps)
     }
 
+    val sentryDsn = System.getenv("JAVA_SENTRY_DSN") ?: ""
     filesMatching("sentry.properties") {
-        expand(mapOf("JAVA_SENTRY_DSN" to (System.getenv("JAVA_SENTRY_DSN") ?: "")))
+        expand(mapOf("JAVA_SENTRY_DSN" to sentryDsn))
     }
 
     from("src/main/resources") {
