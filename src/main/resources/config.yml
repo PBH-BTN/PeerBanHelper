@@ -191,3 +191,17 @@ privacy:
   # 允许向 PBH-BTN 发送匿名统计信息，以便改进 PeerBanHelper 质量，此数据不包含任何个人信息
   # Allow to send anonymous statistics to PBH-BTN to improve PeerBanHelper quality, this data do not contain any personal information
   analytics: true
+
+# 数据库设置
+database:
+  # 0=SQLite, 1=Postgres, 2=MySQL
+  type: 0
+  host: "localhost"
+  port: 5432
+  username: "peerbanhelper"
+  password: "peerbanhelper"
+  database: "peerbanhelper"
+  pool:
+    max-size: 10
+    min-idle: 5
+    idle-timeout-millis: 600000
