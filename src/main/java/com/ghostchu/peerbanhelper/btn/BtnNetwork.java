@@ -16,7 +16,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.pow.PoWClient;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
-import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.hash.Hashing;
@@ -55,7 +55,7 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
 
-    private final ScriptEngine scriptEngine;
+    private final ScriptEngineManager scriptEngineManager;
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     private final SystemInfo systemInfo;
@@ -92,10 +92,10 @@ public final class BtnNetwork implements Reloadable {
     private String powCaptchaEndpoint;
     private long nextConfigAttemptTime = 0;
 
-    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
+    public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
                       MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
         this.server = downloaderServer;
-        this.scriptEngine = scriptEngine;
+        this.scriptEngineManager = scriptEngineManager;
         this.moduleMatchCache = moduleMatchCache;
         this.httpUtil = httpUtil;
         this.metadataDao = metadataDao;
@@ -198,7 +198,7 @@ public final class BtnNetwork implements Reloadable {
                     abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
                 }
                 if (ability.has("rules")) {
-                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
+                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngineManager, ability.get("rules").getAsJsonObject(), scriptExecute));
                 }
             } else {
                 if (ability.has("submit_bans") && submit) {
@@ -214,7 +214,7 @@ public final class BtnNetwork implements Reloadable {
                     abilities.put(BtnAbilityIPAllowList.class, new BtnAbilityIPAllowList(this, metadataDao, ability.get("ip_allowlist").getAsJsonObject()));
                 }
                 if (ability.has("rule_peer_identity")) {
-                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rule_peer_identity").getAsJsonObject(), scriptExecute));
+                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngineManager, ability.get("rule_peer_identity").getAsJsonObject(), scriptExecute));
                 }
             }
             if (ability.has("submit_histories") && submit) {

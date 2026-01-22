@@ -18,6 +18,7 @@ export default {
   'page.rule.custom-script.detail.title.view': '查看腳本：',
   'page.rule.custom-script.detail.title.edit': '編輯腳本：',
   'page.rule.custom-script.detail.form.name': '腳本名稱',
+  'page.rule.custom-script.detail.form.type': '腳本類型',
   'page.rule.custom-script.detail.loading': '正在載入編輯器，這可能需要一些時間...',
   'page.rule.custom-script.detail.failed': '無法載入編輯器',
   'page.rule.custom-script.detail.failed.tips': '請檢查網路連線或者重新整理頁面重試',

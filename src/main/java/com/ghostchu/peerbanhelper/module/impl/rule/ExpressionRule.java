@@ -16,7 +16,7 @@ import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
-import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -57,15 +57,15 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private final static String VERSION = "2";
     private final long maxScriptExecuteTime = 1500;
     private final JavalinWebContainer javalinWebContainer;
-    private final ScriptEngine scriptEngine;
+    private final ScriptEngineManager scriptEngineManager;
     private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
     private final ScriptStorageDao scriptStorageDao;
     private long banDuration;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
-    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngine scriptEngine, ScriptStorageDao scriptStorageDao) {
+    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngineManager scriptEngineManager, ScriptStorageDao scriptStorageDao) {
         super();
-        this.scriptEngine = scriptEngine;
+        this.scriptEngineManager = scriptEngineManager;
         this.javalinWebContainer = javalinWebContainer;
         this.scriptStorageDao = scriptStorageDao;
     }
@@ -174,7 +174,10 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private File getIfAllowedScriptId(String scriptId) {
         if (scriptId.isBlank())
             throw new IllegalArgumentException("ScriptId cannot be null or blank");
-        if (!scriptId.endsWith(".av")) {
+        // 检查是否为支持的脚本类型
+        boolean supported = scriptEngineManager.getSupportedExtensions().stream()
+                .anyMatch(scriptId::endsWith);
+        if (!supported) {
             return null;
         }
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
@@ -264,10 +267,10 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     }
 
     public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
-        return getCache().readCacheButWritePassOnly(this, script.expression().hashCode() + peer.getCacheKey(), () -> {
+        return getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
-                Map<String, Object> env = script.expression().newEnv();
+                Map<String, Object> env = script.newEnv();
                 env.put("torrent", torrent);
                 env.put("peer", peer);
                 env.put("downloader", downloader);
@@ -277,15 +280,8 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 env.put("banDuration", banDuration);
                 env.put("persistStorage", scriptStorageDao);
                 env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
-                Object returns;
-                if (script.threadSafe()) {
-                    returns = script.expression().execute(env);
-                } else {
-                    synchronized (script.expression()) {
-                        returns = script.expression().execute(env);
-                    }
-                }
-                result = scriptEngine.handleResult(script, banDuration, returns);
+                Object returns = script.execute(env);
+                result = scriptEngineManager.handleResult(script, banDuration, returns);
             } catch (TimeoutException timeoutException) {
                 return pass();
             } catch (Exception ex) {
@@ -325,12 +321,15 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 for (File script : scripts) {
                     executor.submit(() -> {
                         try {
-                            if (!script.getName().endsWith(".av") || script.isHidden()) {
+                            // 检查是否为支持的脚本类型
+                            boolean supported = scriptEngineManager.getSupportedExtensions().stream()
+                                    .anyMatch(ext -> script.getName().endsWith(ext));
+                            if (!supported || script.isHidden()) {
                                 return;
                             }
                             try {
                                 String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
-                                var compiledScript = scriptEngine.compileScript(script, script.getName(), scriptContent);
+                                var compiledScript = scriptEngineManager.compileScript(script, script.getName(), scriptContent);
                                 if (compiledScript == null) return;
                                 this.scripts.add(compiledScript);
                             } catch (Exception e) {

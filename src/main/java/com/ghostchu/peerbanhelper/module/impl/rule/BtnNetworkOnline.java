@@ -22,7 +22,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.rule.*;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
-import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -60,7 +60,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     @Autowired(required = false)
     private BtnNetwork btnNetwork;
     @Autowired
-    private ScriptEngine scriptEngine;
+    private ScriptEngineManager scriptEngineManager;
     @Autowired
     private ScriptStorageDao scriptStorageDao;
     private boolean allowScript;
@@ -261,10 +261,10 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
-        return getCache().readCacheButWritePassOnly(this, script.hashCode() + peer.getCacheKey(), () -> {
+        return getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
-                Map<String, Object> env = script.expression().newEnv();
+                Map<String, Object> env = script.newEnv();
                 env.put("torrent", torrent);
                 env.put("peer", peer);
                 env.put("downloader", downloader);
@@ -275,15 +275,8 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                 env.put("banDuration", banDuration);
                 env.put("kvStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
                 env.put("persistStorage", scriptStorageDao);
-                Object returns;
-                if (script.threadSafe()) {
-                    returns = script.expression().execute(env);
-                } else {
-                    synchronized (script.expression()) {
-                        returns = script.expression().execute(env);
-                    }
-                }
-                result = scriptEngine.handleResult(script, banDuration, returns);
+                Object returns = script.execute(env);
+                result = scriptEngineManager.handleResult(script, banDuration, returns);
             } catch (TimeoutException timeoutException) {
                 return pass();
             } catch (Exception ex) {

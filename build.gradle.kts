@@ -4,6 +4,9 @@ plugins {
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
     id("com.install4j.gradle") version "12.0.2" apply false
     id("io.sentry.jvm.gradle") version "5.12.2"
+    kotlin("jvm")
+    kotlin("plugin.lombok") version "2.3.0"
+    id("io.freefair.lombok") version "9.2.0"
 }
 
 group = "com.ghostchu.peerbanhelper"
@@ -67,10 +70,6 @@ dependencies {
     // Spring Framework
     implementation("org.springframework:spring-context:7.0.3")
 
-    // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.42")
-    annotationProcessor("org.projectlombok:lombok:1.18.42")
-
     // Annotations
     compileOnly("org.jetbrains:annotations:26.0.2-1")
 
@@ -88,6 +87,9 @@ dependencies {
 
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
+
+    // Python script engine (Jython)
+    implementation("org.python:jython-standalone:2.7.4")
 
     // JSON
     implementation("org.json:json:20251224")
@@ -193,6 +195,7 @@ dependencies {
     implementation(platform("io.sentry:sentry-bom:8.30.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 application {
@@ -332,4 +335,7 @@ tasks.register<Exec>("compileInstall4jDev") {
             throw GradleException("Install4j not found at: $install4jHome. Please set install4j.home property or INSTALL4J_HOME environment variable.")
         }
     }
+}
+kotlin {
+    jvmToolchain(25)
 }

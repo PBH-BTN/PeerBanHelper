@@ -21,7 +21,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public final class ScriptEngine {
+public final class AVScriptEngine implements ScriptEngine {
     public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"), StructuredData.create().add("status", "pass"));
 
     @Nullable
@@ -77,6 +77,7 @@ public final class ScriptEngine {
         return null;
     }
 
+    @Override
     @Nullable
     public CompiledScript compileScript(File file, String fallbackName, String scriptContent) {
         var platform = Main.getPlatform();
@@ -120,7 +121,7 @@ public final class ScriptEngine {
             }
             AviatorEvaluator.getInstance().validate(scriptContent);
             Expression expression = AviatorEvaluator.getInstance().compile(scriptContent, true);
-            return new CompiledScript(
+            return new AVCompiledScript(
                     file,
                     name,
                     author,
@@ -134,5 +135,15 @@ public final class ScriptEngine {
             log.warn("Script Engine unable to compile the script: {}", fallbackName, e);
             return null;
         }
+    }
+
+    @Override
+    public String getEngineName() {
+        return "Aviator";
+    }
+
+    @Override
+    public String getFileExtension() {
+        return ".av";
     }
 }

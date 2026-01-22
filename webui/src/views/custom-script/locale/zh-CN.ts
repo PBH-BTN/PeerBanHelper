@@ -19,6 +19,7 @@ export default {
   'page.rule.custom-script.detail.title.view': '查看脚本：',
   'page.rule.custom-script.detail.title.edit': '编辑脚本：',
   'page.rule.custom-script.detail.form.name': '脚本名称',
+  'page.rule.custom-script.detail.form.type': '脚本类型',
   'page.rule.custom-script.detail.loading': '正在加载编辑器，这可能需要一些时间...',
   'page.rule.custom-script.detail.failed': '无法加载编辑器',
   'page.rule.custom-script.detail.failed.tips': '请检查网络连接或者刷新页面重试',
