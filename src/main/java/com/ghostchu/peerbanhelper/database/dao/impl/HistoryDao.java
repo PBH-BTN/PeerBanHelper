@@ -75,7 +75,7 @@ public final class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 SELECT
                                                  	%field% AS %fieldraw%,
                                                  	SUM( %field% ) AS ct,
-                                                 	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history WHERE downloader LIKE ? ) AS percent ,
+                                                 	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history WHERE downloader = ? ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
@@ -91,7 +91,7 @@ public final class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
                                                  		)
                                                  		INNER JOIN modules ON modules.id = rules.module_id\s
-                                                 	WHERE downloader LIKE ?\s
+                                                 	WHERE downloader = ?\s
                                                  	)\s
                                                  GROUP BY
                                                  	%field%\s
@@ -127,7 +127,7 @@ public final class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 SELECT
                                                  	%field% AS %fieldraw%,
                                                  	COUNT( %field% ) AS ct,
-                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history WHERE downloader LIKE ? ) AS percent ,
+                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history WHERE downloader = ? ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
@@ -143,7 +143,7 @@ public final class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
                                                  		)
                                                  		INNER JOIN modules ON modules.id = rules.module_id\s
-                                                 	WHERE downloader LIKE ?\s
+                                                 	WHERE downloader = ?\s
                                                  	)\s
                                                  GROUP BY
                                                  	%field%\s
