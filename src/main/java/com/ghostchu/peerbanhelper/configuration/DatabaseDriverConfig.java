@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInt
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
-import com.ghostchu.peerbanhelper.databasent.driver.SQLiteDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.H2DatabaseDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +25,7 @@ public class DatabaseDriverConfig {
         var driver = switch (databaseTypeId) {
             // case 1 -> new PostgresDatabaseDriver(section);
             // case 2 -> new MySQLDatabaseDriver(section);
-            default -> new SQLiteDatabaseDriver(section);
+            default -> new H2DatabaseDriver(section);
         };
         log.info("Database driver loaded: {}", driver.getType().name());
         return driver;
@@ -35,7 +35,7 @@ public class DatabaseDriverConfig {
     public MybatisPlusInterceptor mybatisPlusInterceptor(@NotNull DatabaseDriver databaseDriver) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         DbType dbType = switch (databaseDriver.getType()) {
-            case SQLITE -> DbType.SQLITE;
+            case H2 -> DbType.H2;
             case POSTGRES -> DbType.POSTGRE_SQL;
             case MYSQL -> DbType.MYSQL;
         };
