@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
 @AllArgsConstructor
@@ -31,7 +32,7 @@ public final class PeerConnectionMetricsTrackEntity implements Serializable {
     @TableField(value = "torrent_id")
     private Long torrentId;
     @TableField(value = "address")
-    private String address;
+    private InetAddress address;
     @TableField(value = "port")
     private int port;
     @TableField(value = "peer_id")

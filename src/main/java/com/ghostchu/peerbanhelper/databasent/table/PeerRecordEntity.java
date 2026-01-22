@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
 @AllArgsConstructor
@@ -25,7 +26,7 @@ public final class PeerRecordEntity implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @TableField(value = "address")
-    private String address;
+    private InetAddress address;
     @TableField(value = "port")
     private int port;
     @TableField(value = "torrent_id")
