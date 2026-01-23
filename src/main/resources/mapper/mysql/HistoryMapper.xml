@@ -2,4 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper">
 
+	<select id="getBannedIpsWithFilter" resultType="com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount">
+		SELECT ip as peerIp, COUNT(*) as count
+		FROM history
+		WHERE ip LIKE CONCAT(#{filter}, '%')
+		GROUP BY ip
+		ORDER BY count DESC
+	</select>
+
+	<select id="getBannedIpsWithoutFilter" resultType="com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount">
+		SELECT ip as peerIp, COUNT(*) as count
+		FROM history
+		GROUP BY ip
+		ORDER BY count DESC
+	</select>
+
+	<select id="countDistinctIpWithFilter" resultType="long">
+		SELECT COUNT(DISTINCT ip)
+		FROM history
+		WHERE ip LIKE CONCAT(#{filter}, '%')
+	</select>
+
+	<select id="countDistinctIp" resultType="long">
+		SELECT COUNT(DISTINCT ip)
+		FROM history
+	</select>
+
 </mapper>
