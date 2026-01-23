@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
+import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
@@ -33,7 +34,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     @Autowired
     private PeerConnectionMetricsTrackService connectionMetricsTrackDao;
     @Autowired
-    private PeerConnectionMetricDao connectionMetricDao;
+    private PeerConnectionMetricsService connectionMetricDao;
     private long cleanupInterval;
     private long dataRetentionTime;
     private long dataFlushInterval;
