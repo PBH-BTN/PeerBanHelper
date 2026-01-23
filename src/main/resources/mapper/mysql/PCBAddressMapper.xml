@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper">
+    <delete id="deleteEntry">
+        delete from pcb_address
+        where torrent_id = #{torrentId}
+          and ip = #{ip}
+    </delete>
+    <delete id="cleanupDatabase">
+        delete
+        from pcb_address
+        where last_time_seen &lt; #{timestamp}
+    </delete>
 
     <select id="fetchFromDatabase" resultType="com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity">
         select id,

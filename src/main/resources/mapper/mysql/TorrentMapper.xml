@@ -10,15 +10,4 @@
                                 private_torrent = IF(private_torrent IS NULL AND VALUES(private_torrent) IS NOT NULL,
                                                      VALUES(private_torrent), private_torrent)
     </insert>
-
-
-    <select id="queryByInfoHash" resultType="com.ghostchu.peerbanhelper.databasent.table.TorrentEntity">
-        SELECT id, info_hash, name, size, private_torrent
-        FROM torrents
-        WHERE info_hash = #{infoHash}
-        limit 1
-    </select>
-
-
-
 </mapper>
