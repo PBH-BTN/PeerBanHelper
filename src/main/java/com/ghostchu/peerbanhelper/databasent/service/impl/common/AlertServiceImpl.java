@@ -15,7 +15,7 @@ import java.util.List;
 public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> implements AlertService {
     @Override
     public @NotNull List<AlertEntity> getUnreadAlerts() {
-        return baseMapper.selectList(new QueryWrapper<AlertEntity>().isNull("read_at").orderByDesc("created_at"));
+        return baseMapper.selectList(new QueryWrapper<AlertEntity>().isNull("read_at").orderByDesc("create_at"));
     }
 
     @Override
