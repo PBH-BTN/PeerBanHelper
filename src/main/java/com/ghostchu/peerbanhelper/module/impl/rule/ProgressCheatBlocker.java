@@ -4,10 +4,10 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.PCBAddressDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PCBRangeDao;
-import com.ghostchu.peerbanhelper.database.table.PCBAddressEntity;
-import com.ghostchu.peerbanhelper.database.table.PCBRangeEntity;
+import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
+import com.ghostchu.peerbanhelper.databasent.service.PCBRangeService;
+import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
+import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
@@ -38,8 +38,11 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -74,9 +77,9 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private JavalinWebContainer webContainer;
     private long banDuration;
     @Autowired
-    private PCBRangeDao pcbRangeDao;
+    private PCBRangeService pcbRangeDao;
     @Autowired
-    private PCBAddressDao pcbAddressDao;
+    private PCBAddressService pcbAddressDao;
     private long persistDuration;
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
@@ -116,18 +119,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         } else {
             peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
         }
-        try {
-            cache.asMap().keySet().removeIf(key ->
-                    key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
-                            key.peerAddressIp().equals(peerIp.toString())
-            );
-            int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
-            int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
-            log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
-        } catch (SQLException e) {
-            log.error("Unable to clean up PCB records on unban for torrent {} and ip {}", event.getBanMetadata().getTorrent().getId(), peerIp, e);
-            Sentry.captureException(e);
-        }
+        cache.asMap().keySet().removeIf(key ->
+                key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
+                        key.peerAddressIp().equals(peerIp.toString())
+        );
+        int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
+        int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toString());
+        log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
     }
 
     private void cleanDatabase() {
@@ -205,8 +203,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
         }
         String peerPrefixString = peerPrefix.toString();
-        String peerIpString = peerIp.toString();
-        var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIpString, peer.getPeerAddress().getPort());
+        var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
         PCBRangeEntity rangeEntity = pair.getLeft();
         PCBAddressEntity addressEntity = pair.getRight();
         long computedUploadedIncremental; // 上传增量
@@ -284,10 +281,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 rangeEntity.setLastReportProgress(peer.getProgress());
             }
             addressEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), addressEntity.getLastTorrentCompletedSize()));
-            addressEntity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
+            addressEntity.setLastTimeSeen(OffsetDateTime.now());
             rangeEntity.setLastReportUploaded(peer.getUploaded());
             rangeEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), rangeEntity.getLastTorrentCompletedSize()));
-            rangeEntity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
+            rangeEntity.setLastTimeSeen(OffsetDateTime.now());
         }
     }
 
@@ -405,29 +402,32 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private void scheduleBanDelayWindow(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
-        if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() <= 0) {
-            rangeEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration));
+        if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() <= 0) {
+            rangeEntity.setBanDelayWindowEndAt(OffsetDateTime.now().plus(this.maxWaitDuration, ChronoUnit.MILLIS));
         }
-        if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() <= 0) {
-            addressEntity.setBanDelayWindowEndAt(new Timestamp(System.currentTimeMillis() + this.maxWaitDuration));
+        if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() <= 0) {
+            addressEntity.setBanDelayWindowEndAt(OffsetDateTime.now().plus(this.maxWaitDuration, ChronoUnit.MILLIS));
         }
     }
 
     private boolean isBanDelayWindowScheduled(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
-        return rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() > 0 || addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() > 0;
+        return rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0
+                || addressEntity != null && addressEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0;
     }
 
     private boolean isBanDelayWindowExpired(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
-        return (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() > 0 && rangeEntity.getBanDelayWindowEndAt().before(new Timestamp(System.currentTimeMillis())))
-                || (addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() > 0 && addressEntity.getBanDelayWindowEndAt().before(new Timestamp(System.currentTimeMillis())));
+        return (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0
+                && rangeEntity.getBanDelayWindowEndAt().isBefore(OffsetDateTime.now()))
+                || (addressEntity != null && addressEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0
+                && addressEntity.getBanDelayWindowEndAt().isBefore(OffsetDateTime.now()));
     }
 
     private void resetBanDelayWindow(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
-        if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().getTime() > 0) {
-            rangeEntity.setBanDelayWindowEndAt(new Timestamp(0));
+        if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0) {
+            rangeEntity.setBanDelayWindowEndAt(OffsetDateTime.MIN);
         }
-        if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().getTime() > 0) {
-            addressEntity.setBanDelayWindowEndAt(new Timestamp(0));
+        if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0) {
+            addressEntity.setBanDelayWindowEndAt(OffsetDateTime.MIN);
         }
     }
 
@@ -440,7 +440,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     @NotNull
-    private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, String peerAddressIp, int port) {
+    private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp, int port) {
         CacheKey cacheKey = new CacheKey(downloader, torrentId, peerAddressPrefix, peerAddressIp);
         try {
             return cache.get(cacheKey, () -> {
@@ -449,11 +449,11 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
-                        rangeEntity = pcbRangeDao.createIfNotExists(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
+                        rangeEntity = pcbRangeDao.save(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
                     }
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
-                        pcbAddressEntity = pcbAddressDao.createIfNotExists(new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
+                        pcbAddressEntity = pcbAddressDao.save(new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
                     }
                     return Pair.of(rangeEntity, pcbAddressEntity);
                 }
@@ -467,8 +467,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) throws SQLException {
         log.debug("Flushing back to database for pair PCBRangeEntity id={} and PCBAddressEntity id={}", pcbRangeEntity.getId(), pcbAddressEntity.getId());
-        pcbRangeDao.update(pcbRangeEntity);
-        pcbAddressDao.update(pcbAddressEntity);
+        pcbRangeDao.saveOrUpdate(pcbRangeEntity);
+        pcbAddressDao.saveOrUpdate(pcbAddressEntity);
         return Pair.of(pcbRangeEntity, pcbAddressEntity);
     }
 
@@ -477,7 +477,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
 
-    record CacheKey(String downloader, String torrentId, String peerAddressPrefix, String peerAddressIp) {
+    record CacheKey(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp) {
     }
 }
 
