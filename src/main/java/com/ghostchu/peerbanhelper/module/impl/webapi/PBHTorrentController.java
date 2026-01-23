@@ -39,9 +39,6 @@ public final class PBHTorrentController extends AbstractFeatureModule {
     private final PeerRecordDao peerRecordDao;
     private final HistoryDao historyDao;
     private final DownloaderManagerImpl downloaderManager;
-    private final RuleDao ruleDao;
-    private final ModuleDao moduleDao;
-
     public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentService torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;

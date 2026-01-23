@@ -11,7 +11,6 @@ import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPAllowList;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPDenyList;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityRules;
 import com.ghostchu.peerbanhelper.btn.legacy.LegacyBtnExceptionRuleParsed;
-import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
@@ -61,8 +60,6 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     private BtnNetwork btnNetwork;
     @Autowired
     private ScriptEngineManager scriptEngineManager;
-    @Autowired
-    private ScriptStorageDao scriptStorageDao;
     private boolean allowScript;
 
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
@@ -274,7 +271,6 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                 env.put("btnNetwork", btnNetwork);
                 env.put("banDuration", banDuration);
                 env.put("kvStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
-                env.put("persistStorage", scriptStorageDao);
                 Object returns = script.execute(env);
                 result = scriptEngineManager.handleResult(script, banDuration, returns);
             } catch (TimeoutException timeoutException) {
