@@ -48,13 +48,19 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
+    @SuppressWarnings("NullableProblems")
     private final Cache<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
             .maximumSize(1024)
             .expireAfterAccess(10, TimeUnit.SECONDS)
             .softValues()
             .recordStats()
-            .removalListener((RemovalListener<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
+            .removalListener((RemovalListener<@NotNull CacheKey, @Nullable Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
                 var pair = notification.getValue();
+                //noinspection ConstantValue
+                if (pair == null) {
+                    // oom 引发 soft-value 被垃圾回收，则可能导致其为 null
+                    return;
+                }
                 try {
                     flushBackDatabase(pair.getLeft(), pair.getRight());
                 } catch (SQLException e) {
