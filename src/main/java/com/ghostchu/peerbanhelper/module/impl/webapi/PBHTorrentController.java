@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
@@ -37,16 +37,15 @@ public final class PBHTorrentController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final TorrentService torrentDao;
     private final PeerRecordDao peerRecordDao;
-    private final HistoryDao historyDao;
+    private final HistoryService historyDao;
     private final DownloaderManagerImpl downloaderManager;
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentService torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
+
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentService torrentDao, PeerRecordDao peerRecordDao, HistoryService historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
         this.downloaderManager = downloaderManager;
-        this.ruleDao = ruleDao;
-        this.moduleDao = moduleDao;
     }
 
     @Override
@@ -169,16 +168,13 @@ public final class PBHTorrentController extends AbstractFeatureModule {
 
     private void handleTorrentInfo(Context ctx) throws SQLException {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
-        if (torrent.isEmpty()) {
+        if (torrent == null) {
             ctx.status(404);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
             return;
         }
-        var t = torrent.get();
-        var peerBanCount = historyDao.queryBuilder()
-                .where()
-                .eq("torrent_id", t.getId())
-                .countOf();
+        long peerBanCount = historyDao.countHistoriesByTorrentId(torrent.getId());
+
         var peerAccessCount = peerRecordDao.queryBuilder()
                 .orderBy("lastTimeSeen", false)
                 .where()

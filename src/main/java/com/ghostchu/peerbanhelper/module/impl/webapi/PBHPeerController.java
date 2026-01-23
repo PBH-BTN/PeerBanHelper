@@ -2,8 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
@@ -48,7 +49,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 public final class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
-    private final HistoryDao historyDao;
+    private final HistoryService historyDao;
     private final PeerRecordDao peerRecordDao;
     private final ActiveMonitoringModule activeMonitoringModule;
     private final Laboratory laboratory;
@@ -59,7 +60,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final BtnNetwork btnNetwork;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
-                             HistoryDao historyDao, PeerRecordDao peerRecordDao,
+                             HistoryService historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
                              Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager,
                              TorrentService torrentDao, IPDBManager iPDBManager,
@@ -153,10 +154,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
         var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
         String ip = ipAddress.toNormalizedString();
-        long banCount = historyDao.queryBuilder()
-                .where()
-                .eq("ip", new SelectArg(ip))
-                .countOf();
+        long banCount = historyDao.countHistoriesByIp(InetAddress.ofLiteral(ip));
         long torrentAccessCount = peerRecordDao.queryBuilder()
                 .where()
                 .eq("address", new SelectArg(ip))
