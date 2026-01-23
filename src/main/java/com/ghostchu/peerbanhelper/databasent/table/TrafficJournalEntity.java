@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public final class TrafficJournalEntity implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @TableField(value = "timestamp")
-    private Long timestamp;
+    private OffsetDateTime timestamp;
     @TableField(value = "downloader")
     private String downloader;
     @TableField(value = "data_overall_uploaded_at_start")

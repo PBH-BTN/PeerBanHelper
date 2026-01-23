@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
+import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
@@ -34,7 +34,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
-    private TrafficJournalDao trafficJournalDao;
+    private TrafficJournalServiceImpl trafficJournalDao;
     @Autowired
     private AlertManager alertManager;
     @Autowired

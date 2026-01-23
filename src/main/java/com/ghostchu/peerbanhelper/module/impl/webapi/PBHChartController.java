@@ -2,10 +2,11 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
+import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
+import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
@@ -56,7 +57,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private HistoryDao historyDao;
     @Autowired
-    private TrafficJournalDao trafficJournalDao;
+    private TrafficJournalServiceImpl trafficJournalDao;
     @Autowired
     private IPDBManager iPDBManager;
     @Autowired
@@ -271,15 +272,15 @@ public final class PBHChartController extends AbstractFeatureModule {
                 timeQueryModel.endAt());
 
         // 按天分组,累加每天的流量数据（TrafficDataComputed中的值已经是增量，需要求和）
-        Map<Long, TrafficJournalDao.TrafficDataComputed> mergedData = new java.util.HashMap<>();
+        Map<Long, TrafficDataComputed> mergedData = new java.util.HashMap<>();
 
-        for (TrafficJournalDao.TrafficDataComputed record : records) {
+        for (TrafficDataComputed record : records) {
             Timestamp ts = record.getTimestamp();
             long dayStart = MiscUtil.getStartOfToday(ts.getTime());
 
             mergedData.compute(dayStart, (key, existing) -> {
                 if (existing == null) {
-                    return new TrafficJournalDao.TrafficDataComputed(
+                    return new TrafficDataComputed(
                             new Timestamp(key),
                             record.getDataOverallUploaded(),
                             record.getDataOverallDownloaded()
@@ -293,7 +294,7 @@ public final class PBHChartController extends AbstractFeatureModule {
             });
         }
 
-        List<TrafficJournalDao.TrafficDataComputed> mergedRecords = new ArrayList<>(mergedData.values());
+        List<TrafficDataComputed> mergedRecords = new ArrayList<>(mergedData.values());
         mergedRecords.sort(Comparator.comparing(data -> data.getTimestamp().getTime()));
 
         ctx.json(new StdResp(true, null, mergedRecords));
@@ -301,7 +302,7 @@ public final class PBHChartController extends AbstractFeatureModule {
 
 
 
-    private TrafficJournalDao.TrafficDataComputed fixTimezone(Context ctx, TrafficJournalDao.TrafficDataComputed data) {
+    private TrafficDataComputed fixTimezone(Context ctx, TrafficDataComputed data) {
         Timestamp ts = data.getTimestamp();
         var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
                 .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
@@ -309,7 +310,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         return data;
     }
 
-    private List<TrafficJournalDao.TrafficDataComputed> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataComputed> data) {
+    private List<TrafficDataComputed> fixTimezone(Context ctx, List<TrafficDataComputed> data) {
         data.forEach(d -> fixTimezone(ctx, d));
         return data;
     }
