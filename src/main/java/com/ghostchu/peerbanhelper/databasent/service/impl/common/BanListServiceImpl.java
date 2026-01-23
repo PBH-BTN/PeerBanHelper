@@ -1,0 +1,46 @@
+package com.ghostchu.peerbanhelper.databasent.service.impl.common;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ghostchu.peerbanhelper.BanList;
+import com.ghostchu.peerbanhelper.databasent.mapper.java.BanListMapper;
+import com.ghostchu.peerbanhelper.databasent.service.BanListService;
+import com.ghostchu.peerbanhelper.databasent.table.BanListEntity;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import inet.ipaddr.IPAddress;
+import io.sentry.Sentry;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity> implements BanListService {
+
+    @Override
+    public @NotNull Map<IPAddress, BanMetadata> readBanList() {
+        Map<IPAddress, BanMetadata> map = new HashMap<>();
+        try {
+            baseMapper.selectList(new QueryWrapper<>()).forEach(e -> map.put(IPAddressUtil.getIPAddress(e.getAddress()),
+                    JsonUtil.tiny().fromJson(e.getMetadata(), BanMetadata.class)));
+        } catch (Exception e) { // 可能因为 BanMetadata 有变动这里的数据会反序列化失败
+            log.error("Unable to read stored banlist, skipping...", e);
+            Sentry.captureException(e);
+        }
+        return map;
+    }
+
+    @Override
+    public int saveBanList(@NotNull BanList banlist) {
+        List<BanListEntity> entityList = new ArrayList<>();
+        banlist.forEach((key, value) -> entityList.add(new BanListEntity(
+                key.toNormalizedString(), JsonUtil.tiny().toJson(value))));
+        baseMapper.delete(new QueryWrapper<>());
+        return baseMapper.insert(entityList).size();
+    }
+}

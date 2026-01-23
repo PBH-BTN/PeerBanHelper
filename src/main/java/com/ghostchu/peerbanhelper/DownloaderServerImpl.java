@@ -7,7 +7,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
+import com.ghostchu.peerbanhelper.databasent.service.BanListService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -79,7 +79,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private ScheduledExecutorService BAN_WAVE_SERVICE;
     private WatchDog banWaveWatchDog;
-    private final BanListDao banListDao;
+    private final BanListService banListDao;
     private final DNSLookup dnsLookup;
     private final Laboratory laboratory;
     @Getter
@@ -91,7 +91,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     public DownloaderServerImpl(BanList banList, DownloaderManagerImpl downloaderManager,
                                 @Qualifier("persistMetrics") BasicMetrics metrics,
-                                ModuleManagerImpl moduleManager, BanListDao banListDao,
+                                ModuleManagerImpl moduleManager, BanListService banListDao,
                                 DNSLookup dnsLookup, Laboratory laboratory,
                                 AlertManager alertManager, Database databaseManager) {
         this.banList = banList;
