@@ -10,6 +10,8 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -59,6 +61,7 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     private final SystemInfo systemInfo;
+    private final TorrentService torrentDao;
     @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
@@ -77,7 +80,7 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final DownloaderServer server;
     @Getter
-    private final PeerRecordDao peerRecordDao;
+    private final PeerRecordService peerRecordDao;
     @Getter
     private final TrackedSwarmDao trackedSwarmDao;
     @Getter
@@ -93,7 +96,7 @@ public final class BtnNetwork implements Reloadable {
     private long nextConfigAttemptTime = 0;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo, TorrentService torrentService) {
         this.server = downloaderServer;
         this.scriptEngineManager = scriptEngineManager;
         this.moduleMatchCache = moduleMatchCache;
@@ -102,6 +105,7 @@ public final class BtnNetwork implements Reloadable {
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
         this.trackedSwarmDao = trackedSwarmDao;
+        this.torrentDao = torrentService;
         var thr = new Thread(() -> {
             Main.getReloadManager().register(this);
             reloadConfig();
@@ -202,7 +206,7 @@ public final class BtnNetwork implements Reloadable {
                 }
             } else {
                 if (ability.has("submit_bans") && submit) {
-                    abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
+                    abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao, torrentDao));
                 }
                 if (ability.has("submit_swarm") && submit) {
                     abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));

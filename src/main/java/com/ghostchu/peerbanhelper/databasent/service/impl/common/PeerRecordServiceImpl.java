@@ -34,6 +34,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     @Autowired
     private IPDBManager ipdbManager;
 
+    @Override
     public void syncPendingTasks(Deque<BatchHandleTasks> tasks) {
         while (!tasks.isEmpty()) {
             var t = tasks.pop();
@@ -46,6 +47,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         }
     }
 
+    @Override
     public long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt) {
         // 从 startAt 到 endAt，每天的开始时间戳
         return baseMapper.sessionBetween(downloader, startAt, endAt);
@@ -106,6 +108,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         return saveOrUpdate(databaseSnapshot);
     }
 
+    @Override
     public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, OffsetDateTime afterThan) {
         return baseMapper.selectPage(pageable.toPage(),
                 new QueryWrapper<PeerRecordEntity>().gt("last_time_seen", afterThan)
@@ -115,6 +118,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         );
     }
 
+    @Override
     public synchronized PeerRecordEntity createIfNotExists(PeerRecordEntity data) throws SQLException {
         PeerRecordEntity existing = baseMapper.selectOne(new QueryWrapper<PeerRecordEntity>()
                 .eq("address", data.getAddress())

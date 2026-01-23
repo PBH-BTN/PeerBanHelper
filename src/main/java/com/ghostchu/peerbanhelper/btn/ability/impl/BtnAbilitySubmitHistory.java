@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistory;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistoryPing;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -22,7 +24,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -42,14 +45,16 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final Lock lock = new ReentrantLock();
     private final boolean powCaptcha;
     private final MetadataService metadataDao;
+    private final TorrentService torrentService;
 
-    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, MetadataService metadataDao, JsonObject ability) {
+    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, MetadataService metadataDao, JsonObject ability, TorrentService torrentService) {
         this.btnNetwork = btnNetwork;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
         this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
         this.metadataDao = metadataDao;
+        this.torrentService = torrentService;
 
         if (metadataDao.get("btn.submithistory.timestamp") == null) {
             writeLastSubmitAtTimestamp(System.currentTimeMillis());
@@ -133,7 +138,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                     setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
                     return;
                 }
-                
+
                 var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
                 if (lastRecordAt >= lastSubmitAt.get()) {
                     if (lastRecordAt == lastSubmitAt.get()) {
@@ -161,8 +166,11 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private List<LegacyBtnPeerHistory> generatePing(long lastSubmitAt) {
         Pageable pageable = new Pageable(0, 5000);
         return btnNetwork.getPeerRecordDao().getPendingSubmitPeerRecords(pageable,
-                        new Timestamp(lastSubmitAt)).getResults().stream()
-                .map(LegacyBtnPeerHistory::from).collect(Collectors.toList());
+                        OffsetDateTime.from(Instant.ofEpochMilli(lastSubmitAt))).getRecords().stream()
+                .map(e -> {
+                    TorrentEntityDTO dto = TorrentEntityDTO.from(torrentService.getById(e.getTorrentId()));
+                    return LegacyBtnPeerHistory.from(e, dto);
+                }).collect(Collectors.toList());
     }
 
     @Override

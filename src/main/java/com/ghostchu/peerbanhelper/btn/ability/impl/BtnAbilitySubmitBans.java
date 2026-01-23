@@ -9,7 +9,9 @@ import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -40,12 +42,14 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final MetadataService metadataDao;
     private final HistoryService historyDao;
+    private final TorrentService torrentDao;
     private final boolean powCaptcha;
 
-    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, HistoryService historyDao) {
+    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, HistoryService historyDao, TorrentService torrentDao) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.historyDao = historyDao;
+        this.torrentDao = torrentDao;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
@@ -112,7 +116,8 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {
         BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(historyEntity -> {
             try {
-                return BtnBan.from(historyEntity); // 旧版本数据可能存在空值引发空指针错误，这里处理一下，这种数据就不提交了
+
+                return BtnBan.from(historyEntity, TorrentEntityDTO.from(torrentDao.getById(historyEntity.getTorrentId()))); // 旧版本数据可能存在空值引发空指针错误，这里处理一下，这种数据就不提交了
             } catch (Exception e) {
                 return null;
             }
