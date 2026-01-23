@@ -1,4 +1,4 @@
-CREATE TABLE peerbanhelper_prod.alert
+CREATE TABLE alert
 (
     id         BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     create_at  datetime     NOT NULL,
@@ -10,14 +10,14 @@ CREATE TABLE peerbanhelper_prod.alert
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.banlist
+CREATE TABLE banlist
 (
     address  VARCHAR(255) NOT NULL,
     metadata LONGTEXT     NOT NULL,
     CONSTRAINT `PRIMARY` PRIMARY KEY (address)
 );
 
-CREATE TABLE peerbanhelper_prod.`history`
+CREATE TABLE `history`
 (
     id               BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     ban_at           datetime     NOT NULL,
@@ -41,14 +41,14 @@ CREATE TABLE peerbanhelper_prod.`history`
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.metadata
+CREATE TABLE metadata
 (
     `key` VARCHAR(255) NOT NULL,
     value LONGTEXT NULL,
     CONSTRAINT `PRIMARY` PRIMARY KEY (`key`)
 );
 
-CREATE TABLE peerbanhelper_prod.pcb_address
+CREATE TABLE pcb_address
 (
     id                               BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     ip                               VARCHAR(255) NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE peerbanhelper_prod.pcb_address
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.pcb_range
+CREATE TABLE pcb_range
 (
     id                               BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     `range`                          VARCHAR(255) NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE peerbanhelper_prod.pcb_range
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.peer_connection_metrics
+CREATE TABLE peer_connection_metrics
 (
     id                               BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     timeframe_at                     datetime     NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE peerbanhelper_prod.peer_connection_metrics
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.peer_connection_metrics_track
+CREATE TABLE peer_connection_metrics_track
 (
     id           BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     timeframe_at datetime     NOT NULL,
@@ -127,7 +127,7 @@ CREATE TABLE peerbanhelper_prod.peer_connection_metrics_track
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.peer_records
+CREATE TABLE peer_records
 (
     id                BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     address           VARCHAR(255) NOT NULL,
@@ -148,7 +148,7 @@ CREATE TABLE peerbanhelper_prod.peer_records
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.torrents
+CREATE TABLE torrents
 (
     id              BIGINT UNSIGNED  NOT NULL,
     info_hash       VARCHAR(255) NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE peerbanhelper_prod.torrents
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-CREATE TABLE peerbanhelper_prod.traffic_journal_v3
+CREATE TABLE traffic_journal_v3
 (
     id                                   BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     timestamp                            datetime     NOT NULL,
@@ -174,56 +174,56 @@ CREATE TABLE peerbanhelper_prod.traffic_journal_v3
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
-ALTER TABLE peerbanhelper_prod.pcb_address
+ALTER TABLE pcb_address
     ADD CONSTRAINT idx_pcb_address_unique UNIQUE (ip, port, torrent_id, downloader);
 
-ALTER TABLE peerbanhelper_prod.pcb_range
+ALTER TABLE pcb_range
     ADD CONSTRAINT idx_pcb_range_unique UNIQUE (`range`, port, torrent_id, downloader);
 
-ALTER TABLE peerbanhelper_prod.peer_connection_metrics_track
+ALTER TABLE peer_connection_metrics_track
     ADD CONSTRAINT idx_peer_connection_metrics_track UNIQUE (timeframe_at, downloader, torrent_id, address, port);
 
-ALTER TABLE peerbanhelper_prod.peer_connection_metrics
+ALTER TABLE peer_connection_metrics
     ADD CONSTRAINT idx_peer_connection_metrics_unique UNIQUE (timeframe_at, downloader);
 
-ALTER TABLE peerbanhelper_prod.peer_records
+ALTER TABLE peer_records
     ADD CONSTRAINT idx_peer_records_unique UNIQUE (address, port, torrent_id, downloader);
 
-ALTER TABLE peerbanhelper_prod.traffic_journal_v3
+ALTER TABLE traffic_journal_v3
     ADD CONSTRAINT idx_traffic_journal_v3_unique UNIQUE (timestamp, downloader);
 
-CREATE INDEX idx_alert_alertExists ON peerbanhelper_prod.alert (read_at, identifier);
+CREATE INDEX idx_alert_alertExists ON alert (read_at, identifier);
 
-CREATE INDEX idx_alert_readAt ON peerbanhelper_prod.alert (read_at);
+CREATE INDEX idx_alert_readAt ON alert (read_at);
 
-CREATE INDEX idx_alert_unreadAlerts ON peerbanhelper_prod.alert (create_at, read_at);
+CREATE INDEX idx_alert_unreadAlerts ON alert (create_at, read_at);
 
-CREATE INDEX idx_history_downloader ON peerbanhelper_prod.`history` (downloader);
+CREATE INDEX idx_history_downloader ON `history` (downloader);
 
-CREATE INDEX idx_history_ip ON peerbanhelper_prod.`history` (ip);
+CREATE INDEX idx_history_ip ON `history` (ip);
 
-CREATE INDEX idx_history_module_name ON peerbanhelper_prod.`history` (module_name);
+CREATE INDEX idx_history_module_name ON `history` (module_name);
 
-CREATE INDEX idx_history_peer_id ON peerbanhelper_prod.`history` (peer_id);
+CREATE INDEX idx_history_peer_id ON `history` (peer_id);
 
-CREATE INDEX idx_history_torrent_id ON peerbanhelper_prod.`history` (torrent_id);
+CREATE INDEX idx_history_torrent_id ON `history` (torrent_id);
 
-CREATE INDEX idx_history_view ON peerbanhelper_prod.`history` (ban_at);
+CREATE INDEX idx_history_view ON `history` (ban_at);
 
-CREATE INDEX idx_pcb_address_last_time_seen ON peerbanhelper_prod.pcb_address (last_time_seen);
+CREATE INDEX idx_pcb_address_last_time_seen ON pcb_address (last_time_seen);
 
-CREATE INDEX idx_pcb_range_last_time_seen ON peerbanhelper_prod.pcb_range (last_time_seen);
+CREATE INDEX idx_pcb_range_last_time_seen ON pcb_range (last_time_seen);
 
-CREATE INDEX idx_peer_records_address ON peerbanhelper_prod.peer_records (address);
+CREATE INDEX idx_peer_records_address ON peer_records (address);
 
-CREATE INDEX idx_peer_records_client_analyse ON peerbanhelper_prod.peer_records (downloader, uploaded, downloaded, first_time_seen, last_time_seen);
+CREATE INDEX idx_peer_records_client_analyse ON peer_records (downloader, uploaded, downloaded, first_time_seen, last_time_seen);
 
-CREATE INDEX idx_peer_records_last_time_seen ON peerbanhelper_prod.peer_records (last_time_seen);
+CREATE INDEX idx_peer_records_last_time_seen ON peer_records (last_time_seen);
 
-CREATE INDEX idx_peer_records_session_between ON peerbanhelper_prod.peer_records (downloader, first_time_seen, last_time_seen);
+CREATE INDEX idx_peer_records_session_between ON peer_records (downloader, first_time_seen, last_time_seen);
 
-CREATE INDEX idx_torrents_info_hash ON peerbanhelper_prod.torrents (info_hash);
+CREATE INDEX idx_torrents_info_hash ON torrents (info_hash);
 
-CREATE INDEX idx_torrents_name ON peerbanhelper_prod.torrents (name);
+CREATE INDEX idx_torrents_name ON torrents (name);
 
-CREATE INDEX idx_torrents_private_torrent ON peerbanhelper_prod.torrents (private_torrent);
+CREATE INDEX idx_torrents_private_torrent ON torrents (private_torrent);
