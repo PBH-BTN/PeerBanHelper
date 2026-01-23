@@ -1,18 +1,19 @@
 package com.ghostchu.peerbanhelper.btn.ability.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
-import com.j256.ormlite.dao.CloseableWrappedIterable;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -24,8 +25,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -40,10 +39,10 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private final String endpoint;
     private final long randomInitialDelay;
     private final MetadataService metadataDao;
-    private final HistoryDao historyDao;
+    private final HistoryService historyDao;
     private final boolean powCaptcha;
 
-    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, HistoryDao historyDao) {
+    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, HistoryService historyDao) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.historyDao = historyDao;
@@ -80,7 +79,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
         Main.getEventBus().unregister(this);
     }
 
-    private int setMemCursor(long position) {
+    private boolean setMemCursor(long position) {
         return metadataDao.set("BtnAbilitySubmitBans.memCursor", String.valueOf(position));
     }
 
@@ -93,23 +92,13 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             int size = 0;
             int requests = 0;
-            List<HistoryEntity> historyEntities = new ArrayList<>(500);
-            try (var it = createSubmitIterator(getMemCursor())) {
-                for (HistoryEntity entity : it) {
-                    historyEntities.add(entity);
-                    if (historyEntities.size() >= 500) {
-                        setMemCursor(createSubmitRequest(historyEntities));
-                        size += historyEntities.size();
-                        requests++;
-                        historyEntities.clear();
-                    }
-                }
-            }
-            if (!historyEntities.isEmpty()) {
-                setMemCursor(createSubmitRequest(historyEntities));
+            Page<HistoryEntity> page = new Page<>(1, 100); // 每页处理 100 条
+            do {
+                var result = historyDao.page(page, new QueryWrapper<HistoryEntity>().gt("id", getMemCursor()));
+                setMemCursor(createSubmitRequest(result.getRecords()));
                 requests++;
-                size += historyEntities.size();
-            }
+                size += result.getRecords().size();
+            } while (page.hasNext());
             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, size, requests));
             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
         } catch (IllegalStateException ignored) {
@@ -118,15 +107,6 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             log.error(tlUI(Lang.BTN_UNKNOWN_ERROR), e);
             setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
         }
-    }
-
-    private CloseableWrappedIterable<HistoryEntity> createSubmitIterator(long memCursor) throws SQLException {
-        return historyDao.getWrappedIterable(historyDao
-                .queryBuilder()
-                .where().gt("id", memCursor)
-                .queryBuilder()
-                .orderBy("id", true)
-                .prepare());
     }
 
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {

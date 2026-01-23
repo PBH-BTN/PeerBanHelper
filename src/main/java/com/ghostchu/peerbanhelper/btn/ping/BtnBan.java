@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ping;
 
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.InfoHashUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
