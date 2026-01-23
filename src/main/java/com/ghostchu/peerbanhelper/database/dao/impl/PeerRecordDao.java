@@ -27,7 +27,7 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         super(database, PeerRecordEntity.class);
     }
 
-    public void syncPendingTasks(Deque<BatchHandleTasks> tasks, TorrentDao torrentDao) throws SQLException {
+    public void syncPendingTasks(Deque<BatchHandleTasks> tasks) throws SQLException {
         callBatchTasks(() -> {
             while (!tasks.isEmpty()) {
                 var t = tasks.pop();
@@ -54,7 +54,7 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         return queryBuilder.countOf();
     }
 
-    private int writeToDatabase(TorrentDao torrentDao, long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
+    private int writeToDatabase(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),

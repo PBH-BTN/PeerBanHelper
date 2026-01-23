@@ -10,4 +10,5 @@
                                 private_torrent = IF(private_torrent IS NULL AND VALUES(private_torrent) IS NOT NULL,
                                                      VALUES(private_torrent), private_torrent)
     </insert>
+
 </mapper>

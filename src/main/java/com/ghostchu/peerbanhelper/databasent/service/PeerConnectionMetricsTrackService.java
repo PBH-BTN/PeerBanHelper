@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.databasent.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +17,6 @@ public interface PeerConnectionMetricsTrackService extends IService<PeerConnecti
 
     int deleteEntries(@NotNull List<PeerConnectionMetricsTrackEntity> entities) throws SQLException;
 
-    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, TorrentDao torrentDao) throws SQLException, ExecutionException;
+    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) throws SQLException, ExecutionException;
 
 }

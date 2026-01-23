@@ -3,8 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
@@ -47,7 +46,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
     @Autowired
-    private TorrentDao torrentDao;
+    private TorrentService torrentDao;
 
     @Override
     public boolean isConfigurable() {

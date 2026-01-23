@@ -2,13 +2,8 @@ package com.ghostchu.peerbanhelper.metric.impl.persist;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.ModuleDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.RuleDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
-import com.ghostchu.peerbanhelper.database.table.ModuleEntity;
-import com.ghostchu.peerbanhelper.database.table.RuleEntity;
-import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -33,15 +28,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component("persistMetrics")
 public final class PersistMetrics implements BasicMetrics {
     private final InMemoryMetrics inMemory;
-    private final TorrentDao torrentDao;
-    private final ModuleDao moduleDao;
-    private final RuleDao ruleDao;
+    private final TorrentService torrentDao;
     private final HistoryDao historyDao;
 
-    public PersistMetrics(HistoryDao historyDao, RuleDao ruleDao, ModuleDao moduleDao, TorrentDao torrentDao, InMemoryMetrics inMemory) {
+    public PersistMetrics(HistoryDao historyDao, TorrentService torrentDao, InMemoryMetrics inMemory) {
         this.historyDao = historyDao;
-        this.ruleDao = ruleDao;
-        this.moduleDao = moduleDao;
         this.torrentDao = torrentDao;
         this.inMemory = inMemory;
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
@@ -114,15 +105,6 @@ public final class PersistMetrics implements BasicMetrics {
                     metadata.getTorrent().getName(),
                     metadata.getTorrent().getSize(),
                     metadata.getTorrent().isPrivateTorrent()
-            ));
-            ModuleEntity module = moduleDao.createIfNotExists(new ModuleEntity(
-                    null,
-                    metadata.getContext()
-            ));
-            RuleEntity rule = ruleDao.createIfNotExists(new RuleEntity(
-                    null,
-                    module,
-                    metadata.getRule()
             ));
             historyDao.create(new HistoryEntity(
                     null,

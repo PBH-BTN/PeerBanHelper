@@ -2,11 +2,11 @@ package com.ghostchu.peerbanhelper.databasent.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
-
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface TorrentService extends IService<TorrentEntity> {
-	Optional<TorrentEntity> queryByInfoHash(String infoHash);
+    @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent);
 
-	TorrentEntity createIfNotExists(TorrentEntity torrent);
+    @Nullable TorrentEntity queryByInfoHash(@NotNull String infoHash);
 }
