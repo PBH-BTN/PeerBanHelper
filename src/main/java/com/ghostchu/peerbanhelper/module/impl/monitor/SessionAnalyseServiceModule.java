@@ -4,7 +4,9 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricsTrackDao;
+import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
+import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
+import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class SessionAnalyseServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
-    private PeerConnectionMetricsTrackDao connectionMetricsTrackDao;
+    private PeerConnectionMetricsTrackService connectionMetricsTrackDao;
     @Autowired
     private PeerConnectionMetricDao connectionMetricDao;
     private long cleanupInterval;
@@ -87,7 +91,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     }
 
     private void cleanup() {
-        connectionMetricDao.removeOutdatedData(new Timestamp(System.currentTimeMillis() - this.dataRetentionTime));
+        connectionMetricDao.removeOutdatedData(OffsetDateTime.now().minus(this.dataRetentionTime, ChronoUnit.MILLIS));
     }
 
     @Override
