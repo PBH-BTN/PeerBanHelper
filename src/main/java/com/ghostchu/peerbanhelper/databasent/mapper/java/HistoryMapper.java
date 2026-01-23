@@ -1,12 +1,11 @@
 package com.ghostchu.peerbanhelper.databasent.mapper.java;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
-import org.apache.ibatis.annotations.Param;
-
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

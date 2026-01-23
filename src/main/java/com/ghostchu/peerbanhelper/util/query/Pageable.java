@@ -33,7 +33,7 @@ public final class Pageable {
         return this.page - 1;
     }
 
-    public <T> Page<T> toPage(Class<T> type) {
+    public <T> Page<T> toPage() {
         return Page.of(page, size);
     }
 

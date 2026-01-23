@@ -107,7 +107,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, OffsetDateTime afterThan) {
-        return baseMapper.selectPage(pageable.toPage(PeerRecordEntity.class),
+        return baseMapper.selectPage(pageable.toPage(),
                 new QueryWrapper<PeerRecordEntity>().gt("last_time_seen", afterThan)
                         .or()
                         .isNull("last_time_seen")

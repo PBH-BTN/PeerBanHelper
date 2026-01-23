@@ -92,5 +92,4 @@
 		ORDER BY count DESC;
 
 	</select>
-
 </mapper>

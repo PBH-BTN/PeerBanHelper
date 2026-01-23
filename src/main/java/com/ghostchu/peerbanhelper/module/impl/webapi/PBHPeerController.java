@@ -1,20 +1,20 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
 import com.ghostchu.peerbanhelper.databasent.dto.AccessHistoryDTO;
+import com.ghostchu.peerbanhelper.databasent.dto.BanHistoryDTO;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerInfoDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -32,8 +32,6 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.net.HostAndPort;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -201,26 +199,32 @@ public final class PBHPeerController extends AbstractFeatureModule {
 
 
     private void handleBanHistory(Context ctx) throws SQLException {
-        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
+        InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
-        var builder = new Orderable(Map.of("banAt", false), ctx)
-                .addMapping("torrent.name", "torrentName")
-                .addMapping("torrent.infoHash", "torrentInfoHash")
-                .addMapping("torrent.size", "torrentSize")
-                .addMapping("module.name", "module")
-                .addMapping("rule.rule", "rule")
-                .addMapping("port", "peerPort")
-                .apply(historyDao.queryBuilder().join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                        .join(ruleDao.queryBuilder().setAlias("rule")
-                                        .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                                , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
-        var where = builder
-                .where()
-                .eq("ip", new SelectArg(ip));
-        builder.setWhere(where);
-        var queryResult = historyDao.queryByPaging(builder, pageable);
-        var result = queryResult.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
-        ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
+        Orderable orderBy = new Orderable(Map.of("banAt", false), ctx);
+        IPage<HistoryEntity> page = historyDao.queryBanHistoryByIp(pageable.toPage(), ip, orderBy);
+        page.convert(entity -> {
+            TorrentEntityDTO torrentEntityDTO = TorrentEntityDTO.from(torrentDao.getById(entity.getTorrentId()));
+            return new BanHistoryDTO(
+                    entity.getBanAt(),
+                    entity.getUnbanAt(),
+                    entity.getIp().getHostAddress(),
+                    entity.getPort(),
+                    entity.getPeerId(),
+                    entity.getPeerClientName(),
+                    entity.getPeerUploaded(),
+                    entity.getPeerDownloaded(),
+                    entity.getPeerProgress(),
+                    torrentEntityDTO.infoHash(),
+                    torrentEntityDTO.name(),
+                    torrentEntityDTO.size(),
+                    entity.getModuleName(),
+                    entity.getRuleName(),
+                    tl(locale(ctx), entity.getDescription()),
+                    downloaderManager.getDownloadInfo(entity.getDownloader())
+            );
+        });
+        ctx.json(new StdResp(true, null, PBHPage.from(page)));
     }
 
 
@@ -228,8 +232,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
         Orderable orderBy = new Orderable(Map.of("lastTimeSeen", false, "address", false, "port", true), ctx);
-
-        IPage<PeerRecordEntity> page = peerRecordDao.queryAccessHistoryByIp(pageable.toPage(PeerRecordEntity.class), ip, orderBy);
+        IPage<PeerRecordEntity> page = peerRecordDao.queryAccessHistoryByIp(pageable.toPage(), ip, orderBy);
         IPage<AccessHistoryDTO> accessHistoryDTOIPage = page.convert(entity -> new AccessHistoryDTO(
                 entity.getId(),
                 entity.getAddress().getHostAddress(),

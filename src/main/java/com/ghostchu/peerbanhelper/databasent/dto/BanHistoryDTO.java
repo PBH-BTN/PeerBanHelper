@@ -2,17 +2,21 @@ package com.ghostchu.peerbanhelper.databasent.dto;
 
 import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
 import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
+@AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class BanHistoryDTO {
 
     @SerializedName("banAt")
-    private Long banAt;
+    private OffsetDateTime banAt;
     @SerializedName("unbanAt")
-    private Long unbanAt;
+    private OffsetDateTime unbanAt;
     @SerializedName("peerIp")
     private String peerIp;
     @SerializedName("peerPort")

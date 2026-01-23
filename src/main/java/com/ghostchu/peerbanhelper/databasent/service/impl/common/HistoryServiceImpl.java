@@ -8,7 +8,7 @@ import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
-import com.ghostchu.peerbanhelper.util.query.Pageable;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -19,8 +19,7 @@ import java.net.InetAddress;
 public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity> implements HistoryService {
 
 	@Override
-    public IPage<PeerBanCount> getBannedIps(@NotNull Pageable pageable, @Nullable String filter) {
-		Page<PeerBanCount> page = new Page<>(pageable.getPage(), pageable.getSize());
+    public IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter) {
 		if (filter != null && !filter.isEmpty()) {
 			return baseMapper.getBannedIpsWithFilter(page, filter);
 		} else {
@@ -36,5 +35,10 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
     @Override
     public long countHistoriesByIp(@NotNull InetAddress inetAddress) {
         return baseMapper.selectCount(new QueryWrapper<HistoryEntity>().eq("ip", inetAddress));
+    }
+
+    @Override
+    public IPage<HistoryEntity> queryBanHistoryByIp(@NotNull Page<HistoryEntity> pageable, @NotNull InetAddress ip, @NotNull Orderable orderBy) {
+        var page = baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("ip", ip)));
     }
 }
