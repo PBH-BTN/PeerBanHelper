@@ -13,7 +13,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -21,7 +21,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
-import com.j256.ormlite.stmt.QueryBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -174,7 +173,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .limit(pageable.getSize())
                 .toList();
 
-        ctx.json(new StdResp(true, null, new Page<>(pageable, total, pageResults)));
+        ctx.json(new StdResp(true, null, new PBHPage<>(pageable.getPage(), pageable.getSize(), total, pageResults)));
     }
 
     @Override
@@ -187,7 +186,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .entrySet()
                 .stream()
                 .filter(b -> {
-                    if(b.getValue().isExcludeFromDisplay()) return false;
+                    if (b.getValue().isExcludeFromDisplay()) return false;
                     if (!ignoreBanForDisconnect) return true;
                     return !b.getValue().isBanForDisconnect();
                 })

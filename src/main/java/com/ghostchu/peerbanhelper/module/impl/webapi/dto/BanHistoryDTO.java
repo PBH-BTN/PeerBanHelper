@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.databasent.dto;
+package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
 import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
 import com.google.gson.annotations.SerializedName;

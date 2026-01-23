@@ -1,7 +1,6 @@
-package com.ghostchu.peerbanhelper.databasent.dto;
+package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
 import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
