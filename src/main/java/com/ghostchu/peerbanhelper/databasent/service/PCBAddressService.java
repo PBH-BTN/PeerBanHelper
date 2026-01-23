@@ -10,7 +10,7 @@ import java.util.List;
 public interface PCBAddressService extends IService<PCBAddressEntity> {
 	List<PCBAddressEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader);
 
-	PCBAddressEntity fetchFromDatabaseOne(@NotNull String torrentId, @NotNull String ip, int port, @NotNull String downloader);
+	PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String ip, int port, @NotNull String downloader);
 
 	int deleteEntry(@NotNull String torrentId, @NotNull String ip);
 

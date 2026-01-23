@@ -11,7 +11,7 @@ public interface PCBRangeService extends IService<PCBRangeEntity> {
 
 	List<PCBRangeEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader);
 
-	PCBRangeEntity fetchFromDatabaseOne(@NotNull String torrentId, @NotNull String range, @NotNull String downloader);
+	PCBRangeEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String range, @NotNull String downloader);
 
 	int deleteEntry(@NotNull String torrentId,  @NotNull String range);
 
