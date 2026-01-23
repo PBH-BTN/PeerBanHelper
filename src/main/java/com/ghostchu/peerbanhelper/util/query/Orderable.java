@@ -1,15 +1,13 @@
 package com.ghostchu.peerbanhelper.util.query;
 
-import com.j256.ormlite.stmt.QueryBuilder;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.javalin.http.Context;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Orderable extends LinkedHashMap<String, Boolean> {
     // databaseName -> dtoName
-    private final Map<String, String> dto2DatabaseNames = new HashMap<>();
     public Orderable(Map<String, Boolean> def, Context ctx) {
         // 如果用户指定了排序参数，优先使用用户排序
         // If user specified sort parameters, prioritize user sorting
@@ -39,16 +37,6 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
         return this;
     }
 
-    public Orderable addMapping(String nameForDatabase, String nameForDto){
-        dto2DatabaseNames.put(nameForDto, nameForDatabase);
-        return this;
-    }
-
-    public Orderable addMappings(Map<String, String> dto2Databases){
-        dto2DatabaseNames.putAll(dto2Databases);
-        return this;
-    }
-
     private Orderable appendOrders(Context ctx) { // here is dtoName...
         for (String orderBy : ctx.queryParams("orderBy")) {
             String[] spilt = orderBy.split("\\|");
@@ -60,9 +48,9 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
         return this;
     }
 
-    public <T, ID> QueryBuilder<T, ID> apply(QueryBuilder<T, ID> queryBuilder) {
+    public <T> QueryWrapper<T> apply(QueryWrapper<T> queryBuilder) {
         for (Map.Entry<String, Boolean> entry : entrySet()) {
-            queryBuilder.orderByRaw(dto2DatabaseNames.getOrDefault(entry.getKey(), entry.getKey()) +" "+(entry.getValue() ? "ASC" : "DESC"));
+            queryBuilder.orderBy(true, entry.getValue(), entry.getKey());
         }
         return queryBuilder;
     }
@@ -73,7 +61,7 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             if(!sb.isEmpty()){
                 sb.append(", ");
             }
-            sb.append(dto2DatabaseNames.getOrDefault(entry.getKey(), entry.getKey()))
+            sb.append(entry.getKey())
               .append(" ")
               .append(entry.getValue() ? "ASC" : "DESC");
         }
