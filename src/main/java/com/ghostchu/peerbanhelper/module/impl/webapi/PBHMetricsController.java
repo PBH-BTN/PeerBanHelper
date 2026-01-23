@@ -2,9 +2,10 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
@@ -13,7 +14,6 @@ import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +36,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     @Qualifier("persistMetrics")
     private BasicMetrics metrics;
     @Autowired
-    private HistoryDao historyDao;
+    private HistoryService historyDao;
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
@@ -43,7 +44,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     @Autowired
     private TrackedSwarmDao trackedSwarmDao;
     @Autowired
-    private PeerConnectionMetricDao peerConnectionMetricDao;
+    private PeerConnectionMetricsService peerConnectionMetricDao;
 
     @Override
     public boolean isConfigurable() {
@@ -150,7 +151,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             case null, default -> throw new IllegalArgumentException("Unexpected value: " + type);
         };
 
-        Function<HistoryEntity, Timestamp> timestampGetter = switch (field) {
+        Function<HistoryEntity, OffsetDateTime> timestampGetter = switch (field) {
             case "banAt" -> HistoryEntity::getBanAt;
             case "unbanAt" -> HistoryEntity::getUnbanAt;
             case null, default -> throw new IllegalArgumentException("Unexpected value: " + field);

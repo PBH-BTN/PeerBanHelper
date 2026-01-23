@@ -1,13 +1,8 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
-import com.j256.ormlite.dao.GenericRawResults;
-import com.j256.ormlite.stmt.SelectArg;
-import com.j256.ormlite.support.ConnectionSource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

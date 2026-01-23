@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.InetAddress;
 
 public interface HistoryService extends IService<HistoryEntity> {
-    public IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter);
+    IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter);
 
     long countHistoriesByTorrentId(@NotNull Long id);
 
