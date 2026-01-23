@@ -6,11 +6,9 @@ import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.*;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
-import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -80,8 +78,6 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final DownloaderServer server;
     @Getter
-    private final PeerRecordService peerRecordDao;
-    @Getter
     private final TrackedSwarmDao trackedSwarmDao;
     @Getter
     private final MetadataService metadataDao;
@@ -96,14 +92,13 @@ public final class BtnNetwork implements Reloadable {
     private long nextConfigAttemptTime = 0;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo, TorrentService torrentService) {
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmDao trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService) {
         this.server = downloaderServer;
         this.scriptEngineManager = scriptEngineManager;
         this.moduleMatchCache = moduleMatchCache;
         this.httpUtil = httpUtil;
         this.metadataDao = metadataDao;
         this.historyDao = historyDao;
-        this.peerRecordDao = peerRecordDao;
         this.trackedSwarmDao = trackedSwarmDao;
         this.torrentDao = torrentService;
         var thr = new Thread(() -> {
@@ -222,7 +217,7 @@ public final class BtnNetwork implements Reloadable {
                 }
             }
             if (ability.has("submit_histories") && submit) {
-                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, metadataDao, ability.get("submit_histories").getAsJsonObject()));
+                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, metadataDao, ability.get("submit_histories").getAsJsonObject(), torrentDao));
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));

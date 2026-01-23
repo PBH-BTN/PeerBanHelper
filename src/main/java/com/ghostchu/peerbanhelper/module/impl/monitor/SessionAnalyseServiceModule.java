@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
