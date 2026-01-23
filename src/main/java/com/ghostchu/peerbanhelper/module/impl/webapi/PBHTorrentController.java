@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.*;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
-import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
-import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
@@ -35,14 +35,14 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 public final class PBHTorrentController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
-    private final TorrentDao torrentDao;
+    private final TorrentService torrentDao;
     private final PeerRecordDao peerRecordDao;
     private final HistoryDao historyDao;
     private final DownloaderManagerImpl downloaderManager;
     private final RuleDao ruleDao;
     private final ModuleDao moduleDao;
 
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentService torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;
         this.historyDao = historyDao;

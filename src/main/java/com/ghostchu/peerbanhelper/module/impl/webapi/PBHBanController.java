@@ -4,9 +4,7 @@ import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.ModuleDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.RuleDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -56,11 +54,7 @@ public final class PBHBanController extends AbstractFeatureModule {
     @Autowired
     private DownloaderManagerImpl downloaderManager;
     @Autowired
-    private TorrentDao torrentDao;
-    @Autowired
-    private ModuleDao moduleDao;
-    @Autowired
-    private RuleDao ruleDao;
+    private TorrentService torrentDao;
     @Autowired
     private BanList banList;
     @Autowired

@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsTrackMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -16,6 +16,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -40,6 +41,9 @@ public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConne
             .softValues()
             .build();
 
+    @Autowired
+    private TorrentService torrentService;
+
     @Override
     public void flushAll() {
         baseMapper.insertOrUpdate(cache.asMap().values());
@@ -51,8 +55,8 @@ public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConne
     }
 
     @Override
-    public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, TorrentDao torrentDao) throws SQLException, ExecutionException {
-        TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
+    public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) throws SQLException, ExecutionException {
+        TorrentEntity torrentEntity = torrentService.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),
                 torrent.getName(),

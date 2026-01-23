@@ -2,7 +2,9 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
-import com.ghostchu.peerbanhelper.database.dao.impl.*;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
@@ -52,9 +54,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final Laboratory laboratory;
     private final DNSLookup dnsLookup;
     private final DownloaderManagerImpl downloaderManager;
-    private final TorrentDao torrentDao;
-    private final RuleDao ruleDao;
-    private final ModuleDao moduleDao;
+    private final TorrentService torrentDao;
     private final IPDBManager iPDBManager;
     private final BtnNetwork btnNetwork;
 
@@ -62,7 +62,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
                              Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager,
-                             TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao, IPDBManager iPDBManager,
+                             TorrentService torrentDao, IPDBManager iPDBManager,
                              @Autowired(required = false) BtnNetwork btnNetwork) {
         super();
         this.javalinWebContainer = javalinWebContainer;
@@ -73,8 +73,6 @@ public final class PBHPeerController extends AbstractFeatureModule {
         this.dnsLookup = dnsLookup;
         this.downloaderManager = downloaderManager;
         this.torrentDao = torrentDao;
-        this.ruleDao = ruleDao;
-        this.moduleDao = moduleDao;
         this.iPDBManager = iPDBManager;
         this.btnNetwork = btnNetwork; // TODO: 测试禁用的情况下的依赖注入
     }
