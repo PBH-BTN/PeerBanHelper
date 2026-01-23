@@ -1,20 +1,24 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
+import com.ghostchu.peerbanhelper.databasent.dto.AccessHistoryDTO;
+import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
+import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerInfoDTO;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerRecordEntityDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
@@ -22,7 +26,7 @@ import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -39,7 +43,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -149,52 +153,20 @@ public final class PBHPeerController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, query));
     }
 
-    private void handleInfo(Context ctx) throws SQLException {
+    private void handleInfo(Context ctx) {
         // 转换 IP 格式到 PBH 统一内部格式
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
         var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
-        String ip = ipAddress.toNormalizedString();
-        long banCount = historyDao.countHistoriesByIp(InetAddress.ofLiteral(ip));
-        long torrentAccessCount = peerRecordDao.countRecordsByIp(InetAddress.ofLiteral(ip));
-        long uploadedToPeer;
-        long downloadedFromPeer;
-        String[] upDownResult = peerRecordDao.queryBuilder()
-                .selectRaw("SUM(uploaded) as uploaded_total, SUM(downloaded) as downloaded_total")
-                .groupBy("address")
-                .where()
-                .eq("address", MsgUtil.escapeSql(ip))
-                .queryRawFirst();
-        if (upDownResult != null) {
-            if (upDownResult.length == 2) {
-                uploadedToPeer = Long.parseLong(upDownResult[0]);
-                downloadedFromPeer = Long.parseLong(upDownResult[1]);
-            } else {
-                uploadedToPeer = -1;
-                downloadedFromPeer = -1;
-            }
-        } else {
-            uploadedToPeer = -1;
-            downloadedFromPeer = -1;
-        }
-        long firstTimeSeenTS = -1;
-        long lastTimeSeenTS = -1;
-        // 单独做查询，因为一个 IP 可能有多条记录（当 torrent 或者 下载器不同时）
-        var firstTimeSeen = peerRecordDao.queryBuilder()
-                .orderBy("firstTimeSeen", true)
-                .where()
-                .eq("address", new SelectArg(ip))
-                .queryForFirst();
-        var lastTimeSeen = peerRecordDao.queryBuilder()
-                .orderBy("lastTimeSeen", false)
-                .where()
-                .eq("address", new SelectArg(ip))
-                .queryForFirst();
-        if (firstTimeSeen != null) {
-            firstTimeSeenTS = new Timestamp(firstTimeSeen.getFirstTimeSeen().getTime()).getTime();
-        }
-        if (lastTimeSeen != null) {
-            lastTimeSeenTS = new Timestamp(lastTimeSeen.getLastTimeSeen().getTime()).getTime();
-        }
+        InetAddress inet = ipAddress.toInetAddress();
+        long banCount = historyDao.countHistoriesByIp(inet);
+        long torrentAccessCount = peerRecordDao.countRecordsByIp(inet);
+
+        IPAddressTotalTraffic upDownResult = peerRecordDao.queryAddressTotalTraffic(inet);
+        long uploadedToPeer = upDownResult.getTotalUploaded();
+        long downloadedFromPeer = upDownResult.getTotalDownloaded();
+        IPAddressTimeSeen timeSeen = peerRecordDao.queryAddressTimeSeen(inet);
+        OffsetDateTime firstTimeSeen = timeSeen.getFirstTimeSeen();
+        OffsetDateTime lastTimeSeen = timeSeen.getLastTimeSeen();
         IPDB ipdb = iPDBManager.getIpdb();
         IPGeoData geoIP = null;
         try {
@@ -202,12 +174,12 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 geoIP = ipdb.query(ipAddress.toInetAddress());
             }
         } catch (Exception e) {
-            log.warn("Unable to perform GeoIP query for ip {}", ip);
+            log.warn("Unable to perform GeoIP query for ip {}", inet);
         }
         String ptrLookup = null;
         try {
             //if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
-            ptrLookup = dnsLookup.ptr(ip).get(3, TimeUnit.SECONDS).orElse(null);
+            ptrLookup = dnsLookup.ptr(inet.getHostAddress()).get(3, TimeUnit.SECONDS).orElse(null);
 //            } else {
 //                ptrLookup = CompletableFuture.supplyAsync(() -> ipAddress.toInetAddress().getCanonicalHostName()).get(3, TimeUnit.SECONDS);
 //            }
@@ -221,8 +193,8 @@ public final class PBHPeerController extends AbstractFeatureModule {
             }
         }
         var info = new PeerInfoDTO(
-                upDownResult != null || banCount > 0 || torrentAccessCount > 0,
-                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount,
+                banCount > 0 || torrentAccessCount > 0,
+                inet.getHostAddress(), firstTimeSeen, lastTimeSeen, banCount, torrentAccessCount,
                 uploadedToPeer, downloadedFromPeer, geoIP, ptrLookup, btnQueryAvailable);
         ctx.json(new StdResp(true, null, info));
     }
@@ -251,25 +223,18 @@ public final class PBHPeerController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
-    private void handleAccessHistory(Context ctx) throws SQLException {
-        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
+
+    private void handleAccessHistory(Context ctx) {
+        InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
-        var builder = new Orderable(Map.of("lastTimeSeen", false, "address", false, "port", true), ctx)
-                .addMapping("torrent.name", "torrentName")
-                .addMapping("torrent.infoHash", "torrentInfoHash")
-                .addMapping("torrent.size", "torrentSize")
-                .apply(peerRecordDao.queryBuilder()
-                        .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
-        var where = builder
-                .where()
-                .eq("address", new SelectArg(ip));
-        builder.setWhere(where);
-        var page = peerRecordDao.queryByPaging(builder, pageable);
-        ctx.json(new StdResp(true, null, Page.map(page, (entity) -> new PeerRecordEntityDTO(
+        Orderable orderBy = new Orderable(Map.of("lastTimeSeen", false, "address", false, "port", true), ctx);
+
+        IPage<PeerRecordEntity> page = peerRecordDao.queryAccessHistoryByIp(pageable.toPage(PeerRecordEntity.class), ip, orderBy);
+        IPage<AccessHistoryDTO> accessHistoryDTOIPage = page.convert(entity -> new AccessHistoryDTO(
                 entity.getId(),
-                entity.getAddress(),
+                entity.getAddress().getHostAddress(),
                 entity.getPort(),
-                TorrentEntityDTO.from(entity.getTorrent()),
+                TorrentEntityDTO.from(torrentDao.getById(entity.getTorrentId())),
                 downloaderManager.getDownloadInfo(entity.getDownloader()),
                 entity.getPeerId(),
                 entity.getClientName(),
@@ -282,7 +247,9 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 entity.getLastFlags(),
                 entity.getFirstTimeSeen(),
                 entity.getLastTimeSeen()
-        ))));
+
+        ));
+        ctx.json(new StdResp(true, null, PBHPage.from(accessHistoryDTOIPage)));
     }
 
 

@@ -2,11 +2,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PeerRecordMapper">
-
     <select id="sessionBetween" resultType="long">
         SELECT COUNT(DISTINCT address)
+        FROM peer_records
         WHERE downloader = #{downloader}
             AND lastTimeSeen &lt;= #{startAt}
             AND firstTimeSeen &gt;= #{endAt}
+    </select>
+
+    <resultMap id="queryAddressTotalTraffic" type="com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic">
+        <result property="totalUploaded" column="uploaded_total"/>
+        <result property="totalDownloaded" column="downloaded_total"/>
+    </resultMap>
+
+    <select id="queryAddressTotalTraffic" resultMap="queryAddressTotalTraffic">
+        SELECT SUM(uploaded) as uploaded_total, SUM(downloaded) as downloaded_total
+        FROM peer_records
+        WHERE address = #{address}
+        GROUP BY address
+    </select>
+
+    <resultMap id="queryAddressTimeSeen" type="com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen">
+        <result property="firstTimeSeen" column="firstTimeSeen"/>
+        <result property="lastTimeSeen" column="lastTimeSeen"/>
+    </resultMap>
+
+    <select id="queryAddressTimeSeen" resultMap="queryAddressTimeSeen">
+        SELECT MIN(firstTimeSeen) as firstTimeSeen, MAX(lastTimeSeen) as lastTimeSeen
+        FROM peer_records
+        WHERE address = #{address}
+        GROUP BY address
+    </select>
+
+    <select id="queryAccessHistoryByIp" resultType="com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity">
+        SELECT * FROM peer_records
+        WHERE address = #{address}
+        ORDER BY ${orderBySql}
     </select>
 </mapper>

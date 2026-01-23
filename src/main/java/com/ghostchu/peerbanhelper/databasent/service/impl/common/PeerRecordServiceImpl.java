@@ -3,12 +3,15 @@ package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
+import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerRecordMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -31,7 +34,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     @Autowired
     private IPDBManager ipdbManager;
 
-    public void syncPendingTasks(Deque<BatchHandleTasks> tasks) throws SQLException {
+    public void syncPendingTasks(Deque<BatchHandleTasks> tasks) {
         while (!tasks.isEmpty()) {
             var t = tasks.pop();
             try {
@@ -127,8 +130,23 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    public long countRecordsByIp(InetAddress inetAddress) {
+    public long countRecordsByIp(@NotNull InetAddress inetAddress) {
         return baseMapper.selectCount(new QueryWrapper<PeerRecordEntity>().eq("address", inetAddress));
+    }
+
+    @Override
+    public IPAddressTotalTraffic queryAddressTotalTraffic(@NotNull InetAddress inet) {
+        return baseMapper.queryAddressTotalTraffic(inet);
+    }
+
+    @Override
+    public IPAddressTimeSeen queryAddressTimeSeen(@NotNull InetAddress inet) {
+        return baseMapper.queryAddressTimeSeen(inet);
+    }
+
+    @Override
+    public @NotNull Page<PeerRecordEntity> queryAccessHistoryByIp(@NotNull Page<PeerRecordEntity> page, @NotNull InetAddress ip, @NotNull Orderable orderable) {
+        return baseMapper.queryAccessHistoryByIp(page, ip, orderable.generateOrderBy());
     }
 
 
