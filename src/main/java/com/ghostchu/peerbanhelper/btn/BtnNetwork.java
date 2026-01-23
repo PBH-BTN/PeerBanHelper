@@ -7,9 +7,9 @@ import com.ghostchu.peerbanhelper.btn.ability.impl.*;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -81,7 +81,7 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final TrackedSwarmDao trackedSwarmDao;
     @Getter
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
     @Getter
     private final HistoryDao historyDao;
     @Getter
@@ -93,7 +93,7 @@ public final class BtnNetwork implements Reloadable {
     private long nextConfigAttemptTime = 0;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
+                      MetadataService metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
         this.server = downloaderServer;
         this.scriptEngineManager = scriptEngineManager;
         this.moduleMatchCache = moduleMatchCache;

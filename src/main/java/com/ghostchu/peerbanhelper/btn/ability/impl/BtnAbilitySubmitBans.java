@@ -6,8 +6,8 @@ import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -39,11 +39,11 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
     private final HistoryDao historyDao;
     private final boolean powCaptcha;
 
-    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataDao metadataDao, HistoryDao historyDao) {
+    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, HistoryDao historyDao) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.historyDao = historyDao;

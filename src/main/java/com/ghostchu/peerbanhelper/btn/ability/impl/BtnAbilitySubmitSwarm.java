@@ -5,9 +5,9 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.BtnSwarm;
 import com.ghostchu.peerbanhelper.btn.ping.BtnSwarmPeerPing;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -39,11 +39,11 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
     private final TrackedSwarmDao swarmDao;
     private final boolean powCaptcha;
 
-    public BtnAbilitySubmitSwarm(BtnNetwork btnNetwork, JsonObject ability, MetadataDao metadataDao, TrackedSwarmDao swarmDao) {
+    public BtnAbilitySubmitSwarm(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, TrackedSwarmDao swarmDao) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.swarmDao = swarmDao;

@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRuleset;
 import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -36,12 +36,12 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     private final ScriptEngineManager scriptEngineManager;
     private final boolean scriptExecute;
     private final boolean powCaptcha;
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
     @Getter
     private BtnRulesetParsed btnRule;
 
 
-    public BtnAbilityRules(BtnNetwork btnNetwork, MetadataDao metadataDao, ScriptEngineManager scriptEngineManager, JsonObject ability, boolean scriptExecute) {
+    public BtnAbilityRules(BtnNetwork btnNetwork, MetadataService metadataDao, ScriptEngineManager scriptEngineManager, JsonObject ability, boolean scriptExecute) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.scriptEngineManager = scriptEngineManager;

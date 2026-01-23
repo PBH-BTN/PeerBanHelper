@@ -4,7 +4,7 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistory;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistoryPing;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -41,9 +41,9 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final Lock lock = new ReentrantLock();
     private final boolean powCaptcha;
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
 
-    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, MetadataDao metadataDao, JsonObject ability) {
+    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, MetadataService metadataDao, JsonObject ability) {
         this.btnNetwork = btnNetwork;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
