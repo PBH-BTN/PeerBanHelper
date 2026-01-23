@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class InetAddressTypeHandler extends BaseTypeHandler<InetAddress> {
+public class PGInetAddressTypeHandler extends BaseTypeHandler<InetAddress> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, InetAddress parameter, JdbcType jdbcType) throws SQLException {

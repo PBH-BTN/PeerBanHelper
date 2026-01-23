@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ghostchu.peerbanhelper.databasent.converter.TranslationComponentTypeHandler;
+import com.ghostchu.peerbanhelper.databasent.driver.common.JsonTypeHandlerForwarder;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import lombok.AllArgsConstructor;
@@ -63,6 +64,6 @@ public final class HistoryEntity implements Serializable {
     private String downloader;
     @TableField(value = "structured_data")
     private Map<String, Object> structuredData;
-    @TableField(value = "peer_geoip")
+    @TableField(value = "peer_geoip", typeHandler = JsonTypeHandlerForwarder.class)
     private IPGeoData peerGeoIp;
 }

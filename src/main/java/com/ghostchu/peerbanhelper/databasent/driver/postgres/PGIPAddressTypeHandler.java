@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class IPAddressTypeHandler extends BaseTypeHandler<IPAddress> {
+public class PGIPAddressTypeHandler extends BaseTypeHandler<IPAddress> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, IPAddress parameter, JdbcType jdbcType) throws SQLException {

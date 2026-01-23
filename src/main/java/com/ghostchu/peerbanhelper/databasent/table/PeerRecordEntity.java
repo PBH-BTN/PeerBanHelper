@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ghostchu.peerbanhelper.databasent.driver.common.JsonTypeHandlerForwarder;
+import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,4 +57,6 @@ public final class PeerRecordEntity implements Serializable {
     private OffsetDateTime firstTimeSeen;
     @TableField(value = "last_time_seen")
     private OffsetDateTime lastTimeSeen;
+    @TableField(value = "peer_geoip", typeHandler = JsonTypeHandlerForwarder.class)
+    private IPGeoData peerGeoIp;
 }

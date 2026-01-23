@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DatabaseDriverConfig {
 
+    public static DatabaseDriver databaseDriver;
+
     @Bean
     public DatabaseDriver loadDriver() throws Exception {
         log.info("Please wait, loading database driver...");
@@ -26,9 +28,10 @@ public class DatabaseDriverConfig {
         var driver = switch (databaseTypeId) {
             // case 1 -> new PostgresDatabaseDriver(section);
             // case 2 -> new MySQLDatabaseDriver(section);
-            default -> new H2DatabaseDriver(section, ob);
+            default -> new H2DatabaseDriver(section);
         };
         log.info("Database driver loaded: {}", driver.getType().name());
+        databaseDriver = driver;
         return driver;
     }
 

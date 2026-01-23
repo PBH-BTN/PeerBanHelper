@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.databasent.driver.h2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
@@ -22,8 +21,8 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     private final String dbPath;
     private final ConfigurationSection section;
 
-    public H2DatabaseDriver(@NotNull ConfigurationSection section, @NotNull ObjectMapper objectMapper) throws IOException {
-        super(objectMapper);
+    public H2DatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
+        super();
         this.section = section;
         File persistDir = new File(Main.getDataDirectory(), "persist");
         if (!persistDir.exists()) {
