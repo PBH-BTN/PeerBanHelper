@@ -39,6 +39,6 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
 
     @Override
     public IPage<HistoryEntity> queryBanHistoryByIp(@NotNull Page<HistoryEntity> pageable, @NotNull InetAddress ip, @NotNull Orderable orderBy) {
-        var page = baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("ip", ip)));
+        return baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("ip", ip)));
     }
 }
