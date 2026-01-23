@@ -150,7 +150,7 @@ CREATE TABLE peer_records
 
 CREATE TABLE torrents
 (
-    id              BIGINT UNSIGNED  NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     info_hash       VARCHAR(255) NOT NULL,
     name            VARCHAR(255) NOT NULL,
     size            BIGINT UNSIGNED  NOT NULL,
