@@ -16,6 +16,6 @@
 //
 //    @Override
 //    public @NotNull String getMapperPackagePath() {
-//        return "com.ghostchu.peerbanhelper.databasent.mapper.postgres";
+//        return "mapper.postgres";
 //    }
 //}

@@ -42,7 +42,7 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     public @NotNull String getMapperPackagePath() {
-        return "com.ghostchu.peerbanhelper.databasent.mapper.mysql"; // H2 使用 MySQL 方言
+        return "mapper.mysql"; // H2 使用 MySQL 方言
     }
 
     @Override

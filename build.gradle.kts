@@ -269,6 +269,10 @@ tasks.processResources {
         exclude(".git/")
         into("lang")
     }
+
+    from("src/main/resources/mapper") {
+        into("mapper")
+    }
 }
 
 tasks.jar {
