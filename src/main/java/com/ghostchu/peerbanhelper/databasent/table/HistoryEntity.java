@@ -54,8 +54,8 @@ public final class HistoryEntity implements Serializable {
     private Long torrentId;
     @TableField(value = "module_name")
     private String moduleName;
-    @TableField(value = "rule_name")
-    private String ruleName;
+    @TableField(value = "rule_name", typeHandler = TranslationComponentTypeHandler.class)
+    private TranslationComponent ruleName;
     @TableField(value = "description", typeHandler = TranslationComponentTypeHandler.class)
     private TranslationComponent description;
     @TableField(value = "flags")
