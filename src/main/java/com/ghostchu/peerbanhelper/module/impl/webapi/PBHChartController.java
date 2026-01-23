@@ -2,10 +2,10 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerConnectionMetricDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
+import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
@@ -52,7 +52,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private PeerRecordDao peerRecordDao;
+    private PeerRecordService peerRecordDao;
     @Autowired
     private HistoryDao historyDao;
     @Autowired
@@ -62,7 +62,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private ActiveMonitoringModule activeMonitoringModule;
     @Autowired
-    private PeerConnectionMetricDao peerConnectionMetricDao;
+    private PeerConnectionMetricsService peerConnectionMetricDao;
 
     @Override
     public boolean isConfigurable() {

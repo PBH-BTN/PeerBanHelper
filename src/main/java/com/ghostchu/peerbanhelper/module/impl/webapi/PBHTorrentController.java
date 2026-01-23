@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
@@ -36,11 +36,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 public final class PBHTorrentController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final TorrentService torrentDao;
-    private final PeerRecordDao peerRecordDao;
+    private final PeerRecordService peerRecordDao;
     private final HistoryService historyDao;
     private final DownloaderManagerImpl downloaderManager;
 
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentService torrentDao, PeerRecordDao peerRecordDao, HistoryService historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentService torrentDao, PeerRecordService peerRecordDao, HistoryService historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;
         this.historyDao = historyDao;

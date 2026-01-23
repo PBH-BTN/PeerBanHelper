@@ -101,7 +101,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 
 		List<PeerConnectionMetricsEntity> buffer = new ArrayList<>();
 		for (PeerConnectionMetricsTrackEntity peerSessionEntity : fullPeerSessions) {
-			var entity = findOrCreateBuffer(buffer, Timestamp.from(peerSessionEntity.getTimeframeAt().toInstant()), peerSessionEntity.getDownloader());
+            var entity = findOrCreateBuffer(buffer, peerSessionEntity.getTimeframeAt(), peerSessionEntity.getDownloader());
 			entity.setTotalConnections(entity.getTotalConnections() + 1);
 			var flags = peerSessionEntity.getLastFlags();
 			if (flags != null) {
@@ -172,7 +172,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	}
 
 	@NotNull
-	private PeerConnectionMetricsEntity findOrCreateBuffer(List<PeerConnectionMetricsEntity> buffer, Timestamp timestamp, String downloader) {
+    private PeerConnectionMetricsEntity findOrCreateBuffer(List<PeerConnectionMetricsEntity> buffer, OffsetDateTime timestamp, String downloader) {
 		for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
 			if (peerConnectionMetricsEntity.getTimeframeAt().equals(timestamp) && peerConnectionMetricsEntity.getDownloader().equals(downloader)) {
 				return peerConnectionMetricsEntity;
