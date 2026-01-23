@@ -16,6 +16,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+@Service
 public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConnectionMetricsTrackMapper, PeerConnectionMetricsTrackEntity> implements PeerConnectionMetricsTrackService {
     private final Cache<@NotNull CacheKey, @NotNull PeerConnectionMetricsTrackEntity> cache = CacheBuilder.newBuilder()
             .maximumSize(ExternalSwitch.parseInt("pbh.module.session-analyse-service-module.cache-size", 1000))
