@@ -27,8 +27,7 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
 				.eq("torrent_id", torrentId)
 				.eq("ip", ip)
 				.eq("port", port)
-				.eq("downloader", downloader)
-				.last("limit 1"));
+				.eq("downloader", downloader));
 	}
 
 	@Override

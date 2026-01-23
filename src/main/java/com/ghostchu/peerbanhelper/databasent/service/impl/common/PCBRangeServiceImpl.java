@@ -26,8 +26,7 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
 		return baseMapper.selectOne(new QueryWrapper<PCBRangeEntity>()
 				.eq("torrent_id", torrentId)
 				.eq("range", range)
-				.eq("downloader", downloader)
-				.last("limit 1"));
+				.eq("downloader", downloader));
 	}
 
 	@Override
