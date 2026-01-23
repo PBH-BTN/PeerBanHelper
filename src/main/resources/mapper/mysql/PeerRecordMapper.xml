@@ -3,4 +3,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PeerRecordMapper">
 
+    <select id="sessionBetween" resultType="long">
+        SELECT COUNT(DISTINCT address)
+        WHERE downloader = #{downloader}
+            AND lastTimeSeen &lt;= #{startAt}
+            AND firstTimeSeen &gt;= #{endAt}
+    </select>
 </mapper>
