@@ -3,18 +3,14 @@ package com.ghostchu.peerbanhelper.databasent.driver.h2;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
-import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.apache.commons.lang3.NotImplementedException;
-import org.apache.ibatis.type.TypeHandler;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 
 public class H2DatabaseDriver extends AbstractDatabaseDriver {
     private final File dbFile;
@@ -56,16 +52,6 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-H2Pool").factory());
         return new HikariDataSource(config);
 
-    }
-
-    @Override
-    public @NotNull TypeHandler<InetAddress> getInetTypeHandler() {
-        return BasicInetTypeHandler.INSTANCE;
-    }
-
-    @Override
-    public @NotNull TypeHandler<Object> getJsonTypeHandler() {
-        throw new NotImplementedException();
     }
 
 }
