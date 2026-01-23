@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class DatabaseDriverConfig {
+
     @Bean
     public DatabaseDriver loadDriver() throws Exception {
         log.info("Please wait, loading database driver...");
@@ -25,7 +26,7 @@ public class DatabaseDriverConfig {
         var driver = switch (databaseTypeId) {
             // case 1 -> new PostgresDatabaseDriver(section);
             // case 2 -> new MySQLDatabaseDriver(section);
-            default -> new H2DatabaseDriver(section);
+            default -> new H2DatabaseDriver(section, ob);
         };
         log.info("Database driver loaded: {}", driver.getType().name());
         return driver;
