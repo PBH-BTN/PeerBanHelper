@@ -76,12 +76,12 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     private void flushData() {
         try {
             connectionMetricsTrackDao.flushAll();
-            long startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
-            List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.queryBuilder().where().ne("timeframeAt", new Timestamp(startOfToday)).query();
+            OffsetDateTime startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
+            List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.queryBuilder().where().ne("timeframeAt", startOfToday).query();
             List<PeerConnectionMetricsEntity> aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
             connectionMetricDao.saveAggregating(aggNotInTheDayList, true);
             connectionMetricsTrackDao.deleteEntries(listNotInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
-            List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.queryBuilder().where().eq("timeframeAt", new Timestamp(startOfToday)).query();
+            List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.queryBuilder().where().eq("timeframeAt", startOfToday).query();
             List<PeerConnectionMetricsEntity> aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
             connectionMetricDao.saveAggregating(aggInTheDayList, true);
         } catch (SQLException e) {

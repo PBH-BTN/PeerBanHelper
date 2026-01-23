@@ -108,7 +108,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     if(speedLimiter == null) continue;
                     if(!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
-                    DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
+                    DownloaderSpeedLimiter newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
                     if(Main.getMeta().isSnapshotOrBeta()) {
                         log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload()) + "/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload()) + "/s", calculatedData));
@@ -128,7 +128,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         }
         long now = System.currentTimeMillis();
         // Calculating the today traffic
-        long startOfToday = MiscUtil.getStartOfToday(now);
+        long startOfToday = MiscUtil.getStartOfToday(now).toEpochSecond();
         var data = trafficJournalDao.getTodayData(null);
         long totalBytes = data.getDataOverallUploaded();
         var dateTimeString = MiscUtil.formatDateTime(now);

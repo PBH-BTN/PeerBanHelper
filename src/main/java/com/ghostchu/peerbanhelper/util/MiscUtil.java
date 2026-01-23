@@ -76,7 +76,7 @@ public final class MiscUtil {
         return ZoneId.systemDefault().getRules().getOffset(Instant.now());
     }
 
-    public static long getStartOfToday(long time) {
+    public static OffsetDateTime getStartOfToday(long time) {
 //        Instant instant = Instant.now();
 //        ZoneId systemZone = ZoneId.systemDefault();
 //        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
@@ -85,10 +85,10 @@ public final class MiscUtil {
         ZoneId systemZone = ZoneId.systemDefault();
         ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.ofEpochMilli(time));
         LocalDate date = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
-        return date.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
+        return date.atStartOfDay().atOffset(currentOffsetForMyZone);
     }
 
-    public static long getEndOfToday(long time) {
+    public static OffsetDateTime getEndOfToday(long time) {
         ZoneId systemZone = ZoneId.systemDefault();
         ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
         // 转换为该时区的 LocalDateTime
@@ -96,10 +96,10 @@ public final class MiscUtil {
         // 获取当天的结束
         LocalDateTime dayEnd = dateTime.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
         // 转换回时间戳
-        return dayEnd.toInstant(currentOffsetForMyZone).toEpochMilli();
+        return dayEnd.atOffset(currentOffsetForMyZone);
     }
 
-    public static long getStartOfHour(long time) {
+    public static OffsetDateTime getStartOfHour(long time) {
         ZoneId systemZone = ZoneId.systemDefault();
         ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
         // 转换为该时区的 LocalDateTime
@@ -107,7 +107,7 @@ public final class MiscUtil {
         // 获取当前小时的开始（分钟和秒置为0）
         LocalDateTime hourStart = dateTime.withMinute(0).withSecond(0).withNano(0);
         // 转换回时间戳
-        return hourStart.toInstant(currentOffsetForMyZone).toEpochMilli();
+        return hourStart.atOffset(currentOffsetForMyZone);
     }
 
     public static boolean is64BitJVM() {

@@ -66,7 +66,7 @@ public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConne
         for (Peer peer : peers) {
             if (peer.isHandshaking()) continue;
             CacheKey cacheKey = new CacheKey(
-                    Instant.ofEpochMilli(MiscUtil.getStartOfToday(System.currentTimeMillis())).atOffset(MiscUtil.getSystemZoneOffset()),
+                    MiscUtil.getStartOfToday(System.currentTimeMillis()),
                     downloader.getId(),
                     torrentEntity.getId(),
                     peer.getPeerAddress().getAddress().toNormalizedString(),
