@@ -1,6 +1,24 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.TorrentMapper">
+
+    <insert id="createIfNotExists" parameterType="com.ghostchu.peerbanhelper.databasent.table.TorrentEntity">
+        INSERT INTO torrents (info_hash, name, size, private_torrent)
+        VALUES (#{infoHash}, #{name}, #{size}, #{privateTorrent})
+        ON DUPLICATE KEY UPDATE name            = IF(name != VALUES(name), VALUES(name), name),
+                                size            = IF(size != VALUES(size), VALUES(size), size),
+                                private_torrent = IF(private_torrent IS NULL AND VALUES(private_torrent) IS NOT NULL,
+                                                     VALUES(private_torrent), private_torrent)
+    </insert>
+
+
+    <select id="queryByInfoHash" resultType="com.ghostchu.peerbanhelper.databasent.table.TorrentEntity">
+        SELECT id, info_hash, name, size, private_torrent
+        FROM torrents
+        WHERE info_hash = #{infoHash}
+        limit 1
+    </select>
+
+
 
 </mapper>

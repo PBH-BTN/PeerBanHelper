@@ -1,6 +1,49 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper">
 
+    <select id="fetchFromDatabase" resultType="com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity">
+        select id,
+               ip,
+               port,
+               torrent_id,
+               last_report_progress,
+               last_report_uploaded,
+               tracking_uploaded_increase_total,
+               rewind_counter,
+               progress_difference_counter,
+               first_time_seen,
+               last_time_seen,
+               downloader,
+               ban_delay_window_end_at,
+               fast_pcb_test_execute_at,
+               last_torrent_completed_size
+        from pcb_address
+        where torrent_id = #{torrentId}
+          and downloader = #{downloader}
+    </select>
+
+    <select id="fetchFromDatabaseOne" resultType="com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity">
+        select id,
+               ip,
+               port,
+               torrent_id,
+               last_report_progress,
+               last_report_uploaded,
+               tracking_uploaded_increase_total,
+               rewind_counter,
+               progress_difference_counter,
+               first_time_seen,
+               last_time_seen,
+               downloader,
+               ban_delay_window_end_at,
+               fast_pcb_test_execute_at,
+               last_torrent_completed_size
+        from pcb_address
+        where torrent_id = #{torrentId}
+          and ip = #{ip}
+          and port = #{port}
+          and downloader = #{downloader}
+        limit 1
+    </select>
 </mapper>
