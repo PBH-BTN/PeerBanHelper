@@ -219,7 +219,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
                     torrentEntityDTO.name(),
                     torrentEntityDTO.size(),
                     entity.getModuleName(),
-                    entity.getRuleName(),
+                    tl(locale(ctx), entity.getRuleName()),
                     tl(locale(ctx), entity.getDescription()),
                     downloaderManager.getDownloadInfo(entity.getDownloader())
             );
