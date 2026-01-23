@@ -22,7 +22,7 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
 	}
 
 	@Override
-	public PCBAddressEntity fetchFromDatabaseOne(@NotNull String torrentId, @NotNull String ip, int port, @NotNull String downloader) {
+	public PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String ip, int port, @NotNull String downloader) {
 		return baseMapper.selectOne(new QueryWrapper<PCBAddressEntity>()
 				.eq("torrent_id", torrentId)
 				.eq("ip", ip)

@@ -22,7 +22,7 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
 	}
 
 	@Override
-	public PCBRangeEntity fetchFromDatabaseOne(@NotNull String torrentId, @NotNull String range, @NotNull String downloader) {
+	public PCBRangeEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String range, @NotNull String downloader) {
 		return baseMapper.selectOne(new QueryWrapper<PCBRangeEntity>()
 				.eq("torrent_id", torrentId)
 				.eq("range", range)
