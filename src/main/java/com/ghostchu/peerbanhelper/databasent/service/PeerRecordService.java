@@ -24,7 +24,7 @@ public interface PeerRecordService extends IService<PeerRecordEntity> {
 
     long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt);
 
-    Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, OffsetDateTime afterThan);
+    @NotNull Page<PeerRecordEntity> getPendingSubmitPeerRecords(@NotNull Pageable pageable, @NotNull OffsetDateTime afterThan);
 
     PeerRecordEntity createIfNotExists(PeerRecordEntity data) throws SQLException;
 
@@ -39,4 +39,6 @@ public interface PeerRecordService extends IService<PeerRecordEntity> {
     @NotNull Page<ClientAnalyseResult> queryClientAnalyse(@NotNull Page<ClientAnalyseResult> page, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt, @Nullable String downloader, @NotNull String orderBySql);
 
     long countRecordsByTorrentId(Long id);
+
+    @NotNull Page<PeerRecordEntity> queryAccessHistoryByTorrentId(@NotNull Page<PeerRecordEntity> page, @NotNull Long id, @NotNull Orderable orderable);
 }

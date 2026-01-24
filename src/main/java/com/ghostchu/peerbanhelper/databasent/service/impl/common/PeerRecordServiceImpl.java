@@ -111,7 +111,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, OffsetDateTime afterThan) {
+    public Page<PeerRecordEntity> getPendingSubmitPeerRecords(@NotNull Pageable pageable, @NotNull OffsetDateTime afterThan) {
         return baseMapper.selectPage(pageable.toPage(),
                 new QueryWrapper<PeerRecordEntity>().gt("last_time_seen", afterThan)
                         .or()
@@ -163,6 +163,11 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     @Override
     public long countRecordsByTorrentId(Long id) {
         return baseMapper.selectCount(new QueryWrapper<PeerRecordEntity>().eq("torrent_id", id));
+    }
+
+    @Override
+    public @NotNull Page<PeerRecordEntity> queryAccessHistoryByTorrentId(@NotNull Page<PeerRecordEntity> page, @NotNull Long id, @NotNull Orderable orderable) {
+        return baseMapper.selectPage(page, orderable.apply(new QueryWrapper<PeerRecordEntity>().eq("torrent_id", id)));
     }
 
 

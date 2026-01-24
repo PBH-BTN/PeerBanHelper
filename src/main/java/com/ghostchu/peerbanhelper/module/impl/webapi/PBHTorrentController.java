@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -15,13 +16,10 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.PBHPage;
-import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -166,40 +164,35 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                 peerBanCount, peerAccessCount)));
     }
 
-    private void handleConnectHistory(Context ctx) throws SQLException {
+    private void handleConnectHistory(Context ctx) {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
-        if (torrent.isEmpty()) {
+        if (torrent == null) {
             ctx.status(404);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
             return;
         }
         Pageable pageable = new Pageable(ctx);
-        var t = torrent.get();
-        var queryBuilder = new Orderable(Map.of("lastTimeSeen", false, "address", true, "port", true), ctx)
-                .addMapping("torrent.name", "torrentName")
-                .addMapping("torrent.infoHash", "torrentInfoHash")
-                .addMapping("torrent.size", "torrentSize")
-                .addMapping("ip", "peerIp")
-                .apply(peerRecordDao.queryBuilder().join(torrentDao.queryBuilder(), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
-        queryBuilder.where().eq("torrent_id", t);
-        Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
-        ctx.json(new StdResp(true, null,  Page.map(page, (entity)-> new PeerRecordEntityDTO(entity.getId(),
-                entity.getAddress(),
-                entity.getPort(),
-                TorrentEntityDTO.from(entity.getTorrent()),
-                downloaderManager.getDownloadInfo(entity.getDownloader()),
-                entity.getPeerId(),
-                entity.getClientName(),
-                entity.getUploaded(),
-                entity.getUploadedOffset(),
-                entity.getUploadSpeed(),
-                entity.getDownloaded(),
-                entity.getDownloadedOffset(),
-                entity.getDownloadSpeed(),
-                entity.getLastFlags(),
-                entity.getFirstTimeSeen(),
-                entity.getLastTimeSeen()
-        ))));
+        Orderable orderable = new Orderable(Map.of("lastTimeSeen", false, "address", true, "port", true), ctx);
+        IPage<PeerRecordEntity> page = peerRecordDao.queryAccessHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
+        page.convert(entity ->
+                new PeerRecordEntityDTO(entity.getId(),
+                        entity.getAddress(),
+                        entity.getPort(),
+                        TorrentEntityDTO.from(torrent),
+                        downloaderManager.getDownloadInfo(entity.getDownloader()),
+                        entity.getPeerId(),
+                        entity.getClientName(),
+                        entity.getUploaded(),
+                        entity.getUploadedOffset(),
+                        entity.getUploadSpeed(),
+                        entity.getDownloaded(),
+                        entity.getDownloadedOffset(),
+                        entity.getDownloadSpeed(),
+                        entity.getLastFlags(),
+                        entity.getFirstTimeSeen(),
+                        entity.getLastTimeSeen()
+                ));
+        ctx.json(new StdResp(true, null, PBHPage.from(page)));
     }
 
     @Override
