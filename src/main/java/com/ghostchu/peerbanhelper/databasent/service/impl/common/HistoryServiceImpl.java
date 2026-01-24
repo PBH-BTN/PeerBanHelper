@@ -46,6 +46,11 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
     }
 
     @Override
+    public IPage<HistoryEntity> queryBanHistoryByTorrentId(@NotNull Page<HistoryEntity> pageable, @NotNull Long torrentId, @NotNull Orderable orderBy) {
+        return baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("torrent_id", torrentId)));
+    }
+
+    @Override
     public List<UniversalFieldNumResult> countField(@NotNull String field, double percentFilter,
             @NotNull String downloader, @NotNull Integer substringLength) {
         return baseMapper.countField(field, percentFilter, downloader, substringLength);
