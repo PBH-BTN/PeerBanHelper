@@ -8,6 +8,12 @@
 		<result column="count" property="count"/>
 	</resultMap>
 
+	<resultMap id="UniversalFieldNumResultMap" type="com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult">
+		<result column="data" property="data"/>
+		<result column="count" property="count"/>
+		<result column="percent" property="percent"/>
+	</resultMap>
+
 	<!-- 封禁IP查询（带过滤） -->
 	<select id="getBannedIpsWithFilter" resultMap="PeerBanCountMap">
 		SELECT
@@ -46,7 +52,7 @@
 	</select>
 
 	<!-- 字段聚合统计 -->
-	<select id="sumField" resultType="com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult">
+	<select id="sumField" resultMap="UniversalFieldNumResultMap">
 		WITH filtered_data AS (
 		SELECT
 		<choose>
@@ -89,6 +95,49 @@
 		GROUP BY fd.field_value, ts.total
 		HAVING
 		(SUM(fd.field_sum) / NULLIF(ts.total, 0)) > #{percentFilter}
+		ORDER BY count DESC;
+
+	</select>
+
+	<!-- 字段计数统计 -->
+	<select id="countField" resultMap="UniversalFieldNumResultMap">
+		WITH filtered_data AS (
+		SELECT
+		<choose>
+			<when test="substringLength != null">
+				SUBSTRING(${field}, 1, #{substringLength}) AS field_value
+			</when>
+			<otherwise>
+				${field} AS field_value
+			</otherwise>
+		</choose>
+		,
+		t.infoHash AS torrentInfoHash,
+		t.name AS torrentName,
+		m.name AS module
+		FROM history h
+		JOIN torrents t ON h.torrent_id = t.id
+		JOIN rules r ON h.rule_id = r.id
+		JOIN modules m ON r.module_id = m.id
+		<if test="downloader != null and downloader != ''">
+			WHERE h.downloader = #{downloader}
+		</if>
+		),
+		total_count AS (
+		SELECT COUNT(*) AS total
+		FROM filtered_data
+		WHERE field_value IS NOT NULL
+		)
+		SELECT
+		fd.field_value AS data,
+		COUNT(*) AS count,
+		IF(tc.total > 0, COUNT(*) / tc.total, 0) AS percent
+		FROM filtered_data fd
+		CROSS JOIN total_count tc
+		WHERE fd.field_value IS NOT NULL
+		GROUP BY fd.field_value, tc.total
+		HAVING
+		(COUNT(*) / NULLIF(tc.total, 0)) > #{percentFilter}
 		ORDER BY count DESC;
 
 	</select>

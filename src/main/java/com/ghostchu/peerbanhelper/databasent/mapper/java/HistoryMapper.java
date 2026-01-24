@@ -18,10 +18,15 @@ public interface HistoryMapper extends BaseMapper<HistoryEntity> {
 
 	long countDistinctIp();
 
+	List<UniversalFieldNumResult> countField(
+			@Param("field") String field,
+			@Param("percentFilter") double percentFilter,
+			@Param("downloader") String downloader,
+			@Param("substringLength") Integer substringLength);
+
 	List<UniversalFieldNumResult> sumField(
 			@Param("field") String field,
 			@Param("percentFilter") double percentFilter,
 			@Param("downloader") String downloader,
-			@Param("substringLength") Integer substringLength
-	);
+			@Param("substringLength") Integer substringLength);
 }
