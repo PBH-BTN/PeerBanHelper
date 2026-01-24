@@ -1,8 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ghostchu.peerbanhelper.DownloaderServer;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
+import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldDateResult;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
@@ -22,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +36,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     @Qualifier("persistMetrics")
     private BasicMetrics metrics;
     @Autowired
-    private HistoryService historyDao;
+    private HistoryService historyService;
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
@@ -60,25 +60,24 @@ public final class PBHMetricsController extends AbstractFeatureModule {
                 .get("/api/statistic/analysis/date", this::handleHistoryDateAccess, Role.USER_READ);
     }
 
-    private void handleBanTrends(Context ctx) throws Exception {
+    private void handleBanTrends(Context ctx) {
         var downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
-        var queryBanned = historyDao.queryBuilder()
-                .selectColumns("id", "banAt")
-                .where()
-                .ge("banAt", timeQueryModel.startAt())
-                .and()
-                .le("banAt", timeQueryModel.endAt());
+        var queryBanned = Wrappers.<HistoryEntity>lambdaQuery()
+                .select(HistoryEntity::getId, HistoryEntity::getBanAt)
+                .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
+                .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
+
         if (downloader != null && !downloader.isBlank()) {
-            queryBanned.and().eq("downloader", new SelectArg(downloader));
+            queryBanned.eq(HistoryEntity::getDownloader, downloader);
         }
-        try (var it = queryBanned.iterator()) {
-            while (it.hasNext()) {
-                var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
-                bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
-            }
-        }
+
+        historyService.list(queryBanned).forEach(entity -> {
+            var startOfDay = MiscUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
+        });
+
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream()
                 .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
                 .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
@@ -156,11 +155,33 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             case "unbanAt" -> HistoryEntity::getUnbanAt;
             case null, default -> throw new IllegalArgumentException("Unexpected value: " + field);
         };
-        long startAt = timeQueryModel.startAt().getTime();
-        long endAt = timeQueryModel.endAt().getTime();
+
         double pctFilter = Double.parseDouble(filter);
 
-        var results = historyDao.countDateField(startAt, endAt, timestampGetter, trimmer, pctFilter);
+        var query = Wrappers.<HistoryEntity>lambdaQuery()
+                .select(HistoryEntity::getBanAt, HistoryEntity::getUnbanAt) // select both or optimize based on field
+                .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
+                .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
+
+        List<HistoryEntity> entities = historyService.list(query);
+        Map<Long, AtomicInteger> map = new HashMap<>();
+        for (HistoryEntity entity : entities) {
+            OffsetDateTime time = timestampGetter.apply(entity);
+            if (time == null) continue;
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(time.toInstant().toEpochMilli());
+            Calendar trimmed = trimmer.apply(cal);
+            map.computeIfAbsent(trimmed.getTimeInMillis(), k -> new AtomicInteger()).incrementAndGet();
+        }
+
+        long total = map.values().stream().mapToLong(AtomicInteger::get).sum();
+        List<UniversalFieldDateResult> results = new ArrayList<>();
+        for (var entry : map.entrySet()) {
+            double pct = (double) entry.getValue().get() / total;
+            if (pct >= pctFilter) {
+                results.add(new UniversalFieldDateResult(entry.getKey(), entry.getValue().get(), pct));
+            }
+        }
         ctx.json(new StdResp(true, null, results));
     }
 
@@ -193,30 +214,28 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             throw new IllegalArgumentException("field cannot be null");
         }
         List<UniversalFieldNumResult> results = switch (type) {
-            case "count" -> historyDao.countField(field, filter, downloader, substringLength);
-            case "sum" -> historyDao.sumField(field, filter, downloader, substringLength);
+            case "count" -> historyService.countField(field, filter, downloader, substringLength);
+            case "sum" -> historyService.sumField(field, filter, downloader, substringLength);
             case null, default -> throw new IllegalArgumentException("type invalid");
         };
         ctx.json(new StdResp(true, null, results));
     }
 
 
-    private void handlePeerBans(Context ctx) throws Exception {
+    private void handlePeerBans(Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
-        try (var it = historyDao.queryBuilder()
-                .selectColumns("id", "banAt")
-                .where()
-                .ge("banAt", timeQueryModel.startAt())
-                .and()
-                .le("banAt", timeQueryModel.endAt())
-                .iterator()) {
-            while (it.hasNext()) {
-                var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
-                bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
-            }
-        }
-        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e) -> new HistoryDao.UniversalFieldDateResult(e.getKey(), e.getValue().intValue(), 0)).toList()));
+        var query = Wrappers.<HistoryEntity>lambdaQuery()
+                .select(HistoryEntity::getId, HistoryEntity::getBanAt)
+                .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
+                .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
+
+        historyService.list(query).forEach(entity -> {
+            var startOfDay = MiscUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
+        });
+
+        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e) -> new UniversalFieldDateResult(e.getKey(), e.getValue().intValue(), 0)).toList()));
     }
 
     private void handleBasicCounter(Context ctx) {
@@ -230,20 +249,23 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         map.put("wastedTraffic", metrics.getWastedTraffic());
         //map.put("savedTraffic", metrics.getSavedTraffic());
         try {
-            long trackedPeers = trackedSwarmDao.countOf();
+            // long trackedPeers = trackedSwarmDao.queryBuilder().countOf();
+            long trackedPeers = trackedSwarmDao.countOf(); // TODO: Fix TrackedSwarmDao migration or resolution
             map.put("trackedSwarmCount", trackedPeers);
             if (trackedPeers > 0) {
                 map.put("peersBlockRate", (double) metrics.getPeerBanCounter() / trackedPeers);
             } else {
                 map.put("peersBlockRate", 0.0d);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             map.put("peersBlockRate", 0.0d);
             log.error("Unable to query tracked swarm count", e);
         }
+        var startWeekly = MiscUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000);
+        var endToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
         map.put("weeklySessions", peerConnectionMetricDao.getGlobalTotalConnectionsCount(
-                MiscUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000),
-                MiscUtil.getStartOfToday(System.currentTimeMillis())));
+                startWeekly,
+                endToday));
         ctx.json(new StdResp(true, null, map));
     }
 
