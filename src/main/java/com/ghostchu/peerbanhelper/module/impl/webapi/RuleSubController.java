@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.table.PeerNameRuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
@@ -38,8 +37,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 public final class RuleSubController extends AbstractFeatureModule {
-    private static final String TYPE_IP = "ip";
-    private static final String TYPE_PEER_NAME = "peer-name";
 
     @Autowired
     private JavalinWebContainer webContainer;
@@ -184,20 +181,11 @@ public final class RuleSubController extends AbstractFeatureModule {
 
         try {
             long interval = JsonUtil.readObject(ctx.body()).get("checkInterval").getAsLong();
-            if (TYPE_IP.equals(type)) {
-                ipBlackRuleList.changeCheckInterval(interval);
-                ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_UPDATED), null));
-            } else {
-                peerNameBlackRuleList.changeCheckInterval(interval);
-                ctx.json(new StdResp(true, tl(locale(ctx), Lang.PEER_NAME_RULE_CHECK_INTERVAL_UPDATED), null));
-            }
+            ipBlackRuleList.changeCheckInterval(interval);
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_UPDATED), null));
         } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            if (TYPE_IP.equals(type)) {
-                ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM), null));
-            } else {
-                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_CHECK_INTERVAL_WRONG_PARAM), null));
-            }
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM), null));
         }
     }
 
@@ -218,20 +206,14 @@ public final class RuleSubController extends AbstractFeatureModule {
 
         try {
             Pageable pageable = new Pageable(ctx);
-            if (TYPE_IP.equals(type)) {
-                ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), ipBlackRuleList.queryRuleSubLogs(ruleId, pageable)));
-            } else {
-                ctx.json(new StdResp(true, tl(locale(ctx), Lang.PEER_NAME_RULE_LOG_QUERY_SUCCESS), peerNameBlackRuleList.queryRuleSubLogs(ruleId, pageable)));
-            }
+
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), ipBlackRuleList.queryRuleSubLogs(ruleId, pageable)));
+
         } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            if (TYPE_IP.equals(type)) {
-                log.error(tlUI(Lang.IP_BAN_RULE_LOG_QUERY_ERROR), e);
-                ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM), null));
-            } else {
-                log.error(tlUI(Lang.PEER_NAME_RULE_LOG_QUERY_ERROR), e);
-                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_LOG_QUERY_WRONG_PARAM), null));
-            }
+            log.error(tlUI(Lang.IP_BAN_RULE_LOG_QUERY_ERROR), e);
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM), null));
+
         }
     }
 
@@ -249,21 +231,14 @@ public final class RuleSubController extends AbstractFeatureModule {
         }
 
         AtomicReference<StdResp> result = new AtomicReference<>();
-        if (TYPE_IP.equals(type)) {
-            ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream()
-                    .map(k -> updateIpRule(locale, k))
-                    .filter(ele -> !ele.isSuccess())
-                    .findFirst()
-                    .ifPresentOrElse(result::set, () ->
-                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_ALL_UPDATED), null)));
-        } else {
-            peerNameBlackRuleList.getRuleSubsConfig().getKeys(false).stream()
-                    .map(k -> updatePeerNameRule(locale, k))
-                    .filter(ele -> !ele.isSuccess())
-                    .findFirst()
-                    .ifPresentOrElse(result::set, () ->
-                            result.set(new StdResp(true, tl(locale, Lang.PEER_NAME_RULE_ALL_UPDATED), null)));
-        }
+
+        ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream()
+                .map(k -> updateIpRule(locale, k))
+                .filter(ele -> !ele.isSuccess())
+                .findFirst()
+                .ifPresentOrElse(result::set, () ->
+                        result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_ALL_UPDATED), null)));
+
         return result.get();
     }
 
@@ -280,11 +255,9 @@ public final class RuleSubController extends AbstractFeatureModule {
             return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null);
         }
 
-        if (TYPE_IP.equals(type)) {
-            return updateIpRule(locale, ruleId);
-        } else {
-            return updatePeerNameRule(locale, ruleId);
-        }
+
+        return updateIpRule(locale, ruleId);
+
     }
 
     private StdResp updateIpRule(String locale, String ruleId) {
@@ -330,19 +303,13 @@ public final class RuleSubController extends AbstractFeatureModule {
             enabled = JsonUtil.readObject(ctx.body()).get("enabled").getAsBoolean();
         } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            if (TYPE_IP.equals(type)) {
-                ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_ENABLED_WRONG_PARAM), null));
-            } else {
-                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_ENABLED_WRONG_PARAM), null));
-            }
+
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_ENABLED_WRONG_PARAM), null));
             return;
         }
 
-        if (TYPE_IP.equals(type)) {
-            switchIpRule(ctx, ruleId, enabled);
-        } else {
-            switchPeerNameRule(ctx, ruleId, enabled);
-        }
+        switchIpRule(ctx, ruleId, enabled);
+
     }
 
     private void switchIpRule(Context ctx, String ruleId, boolean enabled) throws SQLException, IOException {
@@ -356,24 +323,6 @@ public final class RuleSubController extends AbstractFeatureModule {
         if (enabled != ruleSubInfo.isEnabled()) {
             ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, enabled, ruleSubInfo.getRuleName(), ruleSubInfo.getSubUrl(), 0, 0));
             ipBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);
-            log.info(msg);
-            ctx.json(new StdResp(true, msg, null));
-        } else {
-            ctx.json(new StdResp(false, msg, null));
-        }
-    }
-
-    private void switchPeerNameRule(Context ctx, String ruleId, boolean enabled) throws SQLException, IOException {
-        PeerNameRuleSubInfoEntity ruleSubInfo = peerNameBlackRuleList.getRuleSubInfo(ruleId);
-        if (null == ruleSubInfo) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_CANT_FIND, ruleId), null));
-            return;
-        }
-        String msg = tl(locale(ctx), (enabled ? Lang.PEER_NAME_RULE_ENABLED : Lang.PEER_NAME_RULE_DISABLED), ruleSubInfo.getRuleName());
-        if (enabled != ruleSubInfo.isEnabled()) {
-            ConfigurationSection configurationSection = peerNameBlackRuleList.saveRuleSubInfo(new PeerNameRuleSubInfoEntity(ruleId, enabled, ruleSubInfo.getRuleName(), ruleSubInfo.getSubUrl(), 0, 0));
-            peerNameBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);
             log.info(msg);
             ctx.json(new StdResp(true, msg, null));
         } else {
@@ -397,11 +346,9 @@ public final class RuleSubController extends AbstractFeatureModule {
         }
 
         String ruleId = ctx.pathParam("ruleId");
-        if (TYPE_IP.equals(type)) {
-            deleteIpRule(ctx, ruleId);
-        } else {
-            deletePeerNameRule(ctx, ruleId);
-        }
+
+        deleteIpRule(ctx, ruleId);
+
     }
 
     private void deleteIpRule(Context ctx, String ruleId) throws IOException, SQLException {
@@ -414,20 +361,6 @@ public final class RuleSubController extends AbstractFeatureModule {
         ipBlackRuleList.deleteRuleSubInfo(ruleId);
         ipBlackRuleList.getIpBanMatchers().removeIf(ele -> ele.getRuleId().equals(ruleId));
         String msg = tl(locale(ctx), Lang.IP_BAN_RULE_DELETED, ruleSubInfo.getRuleName());
-        log.info(msg);
-        ctx.json(new StdResp(true, msg, null));
-    }
-
-    private void deletePeerNameRule(Context ctx, String ruleId) throws IOException, SQLException {
-        PeerNameRuleSubInfoEntity ruleSubInfo = peerNameBlackRuleList.getRuleSubInfo(ruleId);
-        if (null == ruleSubInfo) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_CANT_FIND, ruleId), null));
-            return;
-        }
-        peerNameBlackRuleList.deleteRuleSubInfo(ruleId);
-        peerNameBlackRuleList.getPeerNameMatchers().removeIf(ele -> ele.getRuleId().equals(ruleId));
-        String msg = tl(locale(ctx), Lang.PEER_NAME_RULE_DELETED, ruleSubInfo.getRuleName());
         log.info(msg);
         ctx.json(new StdResp(true, msg, null));
     }
@@ -447,11 +380,9 @@ public final class RuleSubController extends AbstractFeatureModule {
             return;
         }
 
-        if (TYPE_IP.equals(type)) {
-            saveIpRule(ctx, ruleId, isAdd);
-        } else {
-            savePeerNameRule(ctx, ruleId, isAdd);
-        }
+
+        saveIpRule(ctx, ruleId, isAdd);
+
     }
 
     private void saveIpRule(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {
@@ -516,68 +447,6 @@ public final class RuleSubController extends AbstractFeatureModule {
         }
     }
 
-    private void savePeerNameRule(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {
-        SubInfoDTO subInfoDTO = ctx.bodyValidator(SubInfoDTO.class).get();
-        if (isAdd) {
-            ruleId = subInfoDTO.ruleId();
-        }
-        if (ruleId == null || ruleId.isEmpty()) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_NO_ID), null));
-            return;
-        }
-        PeerNameRuleSubInfoEntity ruleSubInfo = peerNameBlackRuleList.getRuleSubInfo(ruleId);
-        if (isAdd && ruleSubInfo != null) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_ID_CONFLICT, ruleId), null));
-            return;
-        }
-        if (!isAdd && ruleSubInfo == null) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_CANT_FIND, ruleId), null));
-            return;
-        }
-        String ruleName = subInfoDTO.ruleName();
-        String subUrl = subInfoDTO.subUrl();
-        if (isAdd) {
-            if (ruleName == null || subUrl == null || ruleName.isEmpty() || subUrl.isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.json(new StdResp(false, tlUI(Lang.PEER_NAME_RULE_PARAM_WRONG), null));
-                return;
-            }
-        } else {
-            if (ruleName == null) {
-                ruleName = ruleSubInfo.getRuleName();
-            }
-            if (subUrl == null) {
-                subUrl = ruleSubInfo.getSubUrl();
-            }
-        }
-        if (ruleName.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + ruleName);
-        }
-        ConfigurationSection configurationSection = peerNameBlackRuleList.saveRuleSubInfo(new PeerNameRuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, 0, 0));
-        assert configurationSection != null;
-        try {
-            StdResp msg = peerNameBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);
-            if (!msg.isSuccess()) {
-                ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.json(msg);
-                return;
-            }
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.PEER_NAME_RULE_SAVED), null));
-        } catch (Exception e) {
-            if (isAdd) {
-                peerNameBlackRuleList.deleteRuleSubInfo(ruleId);
-            } else {
-                peerNameBlackRuleList.saveRuleSubInfo(ruleSubInfo);
-            }
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NAME_RULE_URL_WRONG, ruleName), null));
-            log.error("Unable to retrieve the sub from given URL", e);
-        }
-    }
-
     /**
      * 查询订阅规则
      */
@@ -591,11 +460,7 @@ public final class RuleSubController extends AbstractFeatureModule {
             return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null);
         }
 
-        if (TYPE_IP.equals(type)) {
-            return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
-        } else {
-            return new StdResp(true, tl(locale, Lang.PEER_NAME_RULE_INFO_QUERY_SUCCESS), peerNameBlackRuleList.getRuleSubInfo(ruleId));
-        }
+        return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
     }
 
     /**
@@ -611,20 +476,12 @@ public final class RuleSubController extends AbstractFeatureModule {
             return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null);
         }
 
-        if (TYPE_IP.equals(type)) {
-            List<String> keys = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
-            List<RuleSubInfoEntity> data = new ArrayList<>(keys.size());
-            for (String s : keys) {
-                data.add(ipBlackRuleList.getRuleSubInfo(s));
-            }
-            return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), data);
-        } else {
-            List<String> keys = peerNameBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
-            List<PeerNameRuleSubInfoEntity> data = new ArrayList<>(keys.size());
-            for (String s : keys) {
-                data.add(peerNameBlackRuleList.getRuleSubInfo(s));
-            }
-            return new StdResp(true, tl(locale, Lang.PEER_NAME_RULE_INFO_QUERY_SUCCESS), data);
+        List<String> keys = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
+        List<RuleSubInfoEntity> data = new ArrayList<>(keys.size());
+        for (String s : keys) {
+            data.add(ipBlackRuleList.getRuleSubInfo(s));
         }
+        return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), data);
+
     }
 }
