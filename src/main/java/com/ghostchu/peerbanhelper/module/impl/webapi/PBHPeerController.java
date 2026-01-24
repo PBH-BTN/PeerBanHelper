@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -198,7 +197,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
     }
 
 
-    private void handleBanHistory(Context ctx) throws SQLException {
+    private void handleBanHistory(Context ctx) {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
         Orderable orderBy = new Orderable(Map.of("banAt", false), ctx);

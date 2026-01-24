@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
-import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -32,8 +31,6 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
     private static final Logger log = LoggerFactory.getLogger(PBHUtilitiesController.class);
     @Autowired
     private JavalinWebContainer webContainer;
-    @Autowired
-    private AlertService alertDao;
     @Autowired
     private DownloaderManagerImpl downloaderManager;
 
