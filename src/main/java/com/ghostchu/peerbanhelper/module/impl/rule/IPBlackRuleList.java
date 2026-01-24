@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -416,7 +415,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         if (rule == null) {
             return null;
         }
-        var result = ruleSubLogsDao.getOne(new QueryWrapper<RuleSubLogEntity>().eq("rule_id", ruleId).orderByDesc("id"));
+        var result = ruleSubLogsDao.getLastLog(ruleId);
         long lastUpdate = result == null ? 0 : result.getUpdateTime();
         int count = result == null ? 0 : result.getCount();
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
@@ -462,9 +461,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @throws SQLException 查询异常
      */
     public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) throws SQLException {
-        return ruleSubLogsDao.page(pageable.toPage(), new QueryWrapper<RuleSubLogEntity>()
-                .eq(ruleId != null, "rule_id", ruleId)
-                .orderBy(true, false, "update_time"));
+        return (Page<RuleSubLogEntity>) ruleSubLogsDao.getLogs(pageable.toPage(), ruleId);
     }
 
     /**
@@ -475,8 +472,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @throws SQLException 查询异常
      */
     public long countRuleSubLogs(String ruleId) throws SQLException {
-        return ruleSubLogsDao.count(new QueryWrapper<RuleSubLogEntity>()
-                .eq(ruleId != null, "rule_id", ruleId));
+        return ruleSubLogsDao.countLogs(ruleId);
     }
 
     /**

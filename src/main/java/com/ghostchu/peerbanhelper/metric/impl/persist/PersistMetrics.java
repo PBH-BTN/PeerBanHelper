@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.metric.impl.persist;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -45,7 +43,7 @@ public final class PersistMetrics implements BasicMetrics {
             int keepDays = Main.getMainConfig().getInt("persist.ban-logs-keep-days");
             if (keepDays > 0) {
                 try {
-                    int deletes = historyDao.getBaseMapper().delete(new QueryWrapper<HistoryEntity>().le("ban_at", OffsetDateTime.now().minusDays(keepDays)));
+                    int deletes = historyDao.deleteExpiredLogs(keepDays);
                     log.info(tlUI(Lang.CLEANED_BANLOGS, deletes));
                 } catch (Exception e) {
                     log.error("Unable to cleanup expired banlogs", e);
@@ -140,18 +138,7 @@ public final class PersistMetrics implements BasicMetrics {
 
     @Override
     public void flush() {
-//        long startAt = System.currentTimeMillis();
-//        try {
-//            List<BanLog> logs = new LinkedList<>();
-//            while (!memoryBuffer.isEmpty()) {
-//                Map.Entry<PeerAddress, BanMetadata> e = memoryBuffer.poll();
-//                logs.add();
-//            }
-//            long lines = db.insertBanLogs(logs);
-//            log.info(Lang.DATABASE_BUFFER_SAVED, lines, System.currentTimeMillis() - startAt);
-//        } catch (SQLException e) {
-//
-//        }
+
     }
 
     @Override

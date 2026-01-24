@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -51,14 +52,24 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
     }
 
     @Override
+    public int deleteExpiredLogs(int keepDays) {
+        return baseMapper.delete(new QueryWrapper<HistoryEntity>().le("ban_at", OffsetDateTime.now().minusDays(keepDays)));
+    }
+
+    @Override
     public List<UniversalFieldNumResult> countField(@NotNull String field, double percentFilter,
-            @NotNull String downloader, @NotNull Integer substringLength) {
+                                                    @Nullable String downloader, @Nullable Integer substringLength) {
         return baseMapper.countField(field, percentFilter, downloader, substringLength);
     }
 
     @Override
     public List<UniversalFieldNumResult> sumField(@NotNull String field, double percentFilter,
-            @NotNull String downloader, @NotNull Integer substringLength) {
+                                                  @Nullable String downloader, @Nullable Integer substringLength) {
         return baseMapper.sumField(field, percentFilter, downloader, substringLength);
+    }
+
+    @Override
+    public IPage<HistoryEntity> getBanLogs(Page<HistoryEntity> pageRequest, Orderable orderable) {
+        return baseMapper.selectPage(pageRequest, orderable.apply(new QueryWrapper<>()));
     }
 }

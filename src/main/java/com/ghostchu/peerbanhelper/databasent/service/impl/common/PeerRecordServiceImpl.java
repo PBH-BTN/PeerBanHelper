@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -27,6 +28,7 @@ import java.net.InetAddress;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Deque;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -35,6 +37,14 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     private TorrentService torrentDao;
     @Autowired
     private IPDBManager ipdbManager;
+
+    @Override
+    public List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader) {
+        return baseMapper.selectList(new LambdaQueryWrapper<PeerRecordEntity>()
+                .ge(PeerRecordEntity::getFirstTimeSeen, start)
+                .le(PeerRecordEntity::getLastTimeSeen, end)
+                .eq(downloader != null, PeerRecordEntity::getDownloader, downloader));
+    }
 
     @Override
     public void syncPendingTasks(Deque<BatchHandleTasks> tasks) {

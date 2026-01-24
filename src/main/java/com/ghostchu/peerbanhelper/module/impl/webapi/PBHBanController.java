@@ -1,8 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
@@ -122,19 +120,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx);
         Page<HistoryEntity> pageRequest = pageable.toPage();
 
-        // 构建查询条件
-        QueryWrapper<HistoryEntity> queryWrapper = Wrappers.query();
-
-        // 检查排序参数
-        if (ctx.queryParam("orderBy") != null) {
-            // 简单处理: 如果包含 torrentName 等，可能暂时不支持或者忽略，回退到默认
-            // 或者如果 PBH 的 `Orderable` 类支持 apply 到 MP QueryWrapper。
-            new Orderable(Map.of("banAt", false), ctx).apply(queryWrapper);
-        } else {
-            queryWrapper.orderByDesc("ban_at");
-        }
-
-        IPage<HistoryEntity> pageResult = historyService.page(pageRequest, queryWrapper);
+        IPage<HistoryEntity> pageResult = historyService.getBanLogs(pageRequest, new Orderable(Map.of("ban_at", false), ctx));
 
         List<BanLogDTO> result = pageResult.getRecords().stream().map(r -> {
             var torrent = torrentService.getById(r.getTorrentId());

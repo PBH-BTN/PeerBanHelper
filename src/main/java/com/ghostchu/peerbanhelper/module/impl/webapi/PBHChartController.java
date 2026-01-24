@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
@@ -124,15 +123,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         long endAtTs = timeQueryModel.endAt().toInstant().toEpochMilli();
         Map<Long, SessionTimeRangeCounter> sessionDayBucket = new LinkedHashMap<>();
 
-        LambdaQueryWrapper<PeerRecordEntity> query = Wrappers.<PeerRecordEntity>lambdaQuery()
-                .ge(PeerRecordEntity::getFirstTimeSeen, timeQueryModel.startAt())
-                .le(PeerRecordEntity::getLastTimeSeen, timeQueryModel.endAt());
-
-        if (downloader != null) {
-            query.eq(PeerRecordEntity::getDownloader, downloader);
-        }
-
-        List<PeerRecordEntity> peerRecords = peerRecordService.list(query);
+        List<PeerRecordEntity> peerRecords = peerRecordService.getRecordsBetween(timeQueryModel.startAt(), timeQueryModel.endAt(), downloader);
         // 生成按日时间戳的桶，并填充数据
         for (PeerRecordEntity record : peerRecords) {
             long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().toInstant().toEpochMilli()).toInstant().toEpochMilli();

@@ -1,8 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
@@ -113,35 +111,13 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         }
 
         Page<TorrentEntity> pageRequest = pageable.toPage();
-        QueryWrapper<TorrentEntity> queryWrapper = Wrappers.query();
-
-        // 添加搜索条件
         String keyword = ctx.queryParam("keyword");
-        if (keyword != null) {
-            queryWrapper.and(q -> q.like("name", keyword)
-                    .or()
-                    .like("info_hash", keyword));
-        }
 
-        if (needsCountSort) {
-            // 使用 SQL 子查询进行排序
-            String subQueryTable = "peerBanCount".equals(countSortField) ? "history" : "peer_records"; // MP tableName is peer_records
-            String sortDirection = countSortAscending ? "ASC" : "DESC";
-            // 使用 orderByRaw 添加子查询排序
-            // 注意：使用实际表名 'torrents'
-            queryWrapper.last("ORDER BY (SELECT COUNT(*) FROM " + subQueryTable +
-                    " WHERE " + subQueryTable + ".torrent_id = torrents.id) " + sortDirection + ", id DESC");
-        } else {
-            // 普通排序（按数据库字段）
-            new Orderable(Map.of("id", false), ctx).apply(queryWrapper);
-        }
+        IPage<TorrentEntity> torrentEntityPage = torrentService.search(pageRequest, keyword, new Orderable(Map.of("id", false), ctx), needsCountSort ? countSortField : null, countSortAscending);
 
-        Page<TorrentEntity> torrentEntityPage = torrentService.page(pageRequest, queryWrapper);
         var results = torrentEntityPage.convert(result -> {
-            long peerBanCount = historyService.count(Wrappers.<HistoryEntity>lambdaQuery()
-                    .eq(HistoryEntity::getTorrentId, result.getId()));
-            long peerAccessCount = peerRecordService.count(Wrappers.<PeerRecordEntity>lambdaQuery()
-                    .eq(PeerRecordEntity::getTorrentId, result.getId()));
+            long peerBanCount = historyService.countHistoriesByTorrentId(result.getId());
+            long peerAccessCount = peerRecordService.countRecordsByTorrentId(result.getId());
             return new TorrentInfoDTO(result.getInfoHash(), result.getName(), result.getSize() == null ? 0 : result.getSize(), peerBanCount, peerAccessCount);
         });
         ctx.json(new StdResp(true, null, PBHPage.from(results)));

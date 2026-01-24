@@ -17,8 +17,10 @@ import java.net.InetAddress;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Deque;
+import java.util.List;
 
 public interface PeerRecordService extends IService<PeerRecordEntity> {
+    List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader);
 
     void syncPendingTasks(Deque<PeerRecordServiceImpl.BatchHandleTasks> tasks);
 

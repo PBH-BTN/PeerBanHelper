@@ -16,6 +16,8 @@ import java.util.List;
 public interface HistoryService extends IService<HistoryEntity> {
     IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter);
 
+    int deleteExpiredLogs(int keepDays);
+
     long countHistoriesByTorrentId(@NotNull Long id);
 
     long countHistoriesByIp(@NotNull InetAddress inetAddress);
@@ -28,5 +30,5 @@ public interface HistoryService extends IService<HistoryEntity> {
 
     List<UniversalFieldNumResult> sumField(@NotNull String field, double percentFilter, @Nullable String downloader, @Nullable Integer substringLength);
 
-
+    IPage<HistoryEntity> getBanLogs(Page<HistoryEntity> pageRequest, Orderable orderable);
 }
