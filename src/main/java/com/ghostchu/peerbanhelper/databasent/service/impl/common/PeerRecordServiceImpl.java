@@ -160,6 +160,11 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         return baseMapper.queryClientAnalyse(page, startAt, endAt, downloader, orderBySql);
     }
 
+    @Override
+    public long countRecordsByTorrentId(Long id) {
+        return baseMapper.selectCount(new QueryWrapper<PeerRecordEntity>().eq("torrent_id", id));
+    }
+
 
     public record BatchHandleTasks(OffsetDateTime timestamp, String downloader, TorrentWrapper torrent,
                                    PeerWrapper peer) {

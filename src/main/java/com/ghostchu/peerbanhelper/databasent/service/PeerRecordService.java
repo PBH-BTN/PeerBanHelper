@@ -37,4 +37,6 @@ public interface PeerRecordService extends IService<PeerRecordEntity> {
     @NotNull IPage<PeerRecordEntity> queryAccessHistoryByIp(@NotNull Page<PeerRecordEntity> page, @NotNull InetAddress ip, @NotNull Orderable orderable);
 
     @NotNull Page<ClientAnalyseResult> queryClientAnalyse(@NotNull Page<ClientAnalyseResult> page, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt, @Nullable String downloader, @NotNull String orderBySql);
+
+    long countRecordsByTorrentId(Long id);
 }

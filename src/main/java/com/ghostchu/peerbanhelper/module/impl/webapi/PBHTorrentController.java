@@ -152,7 +152,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
     }
 
 
-    private void handleTorrentInfo(Context ctx) throws SQLException {
+    private void handleTorrentInfo(Context ctx) {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent == null) {
             ctx.status(404);
@@ -160,15 +160,9 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             return;
         }
         long peerBanCount = historyDao.countHistoriesByTorrentId(torrent.getId());
-
-        var peerAccessCount = peerRecordDao.queryBuilder()
-                .orderBy("lastTimeSeen", false)
-                .where()
-                .eq("torrent_id", t.getId())
-                .countOf();
-
-        ctx.json(new StdResp(true, null, new TorrentInfoDTO(t.getInfoHash(),
-                t.getName(), t.getSize(),
+        long peerAccessCount = peerRecordDao.countRecordsByTorrentId(torrent.getId());
+        ctx.json(new StdResp(true, null, new TorrentInfoDTO(torrent.getInfoHash(),
+                torrent.getName(), torrent.getSize(),
                 peerBanCount, peerAccessCount)));
     }
 
