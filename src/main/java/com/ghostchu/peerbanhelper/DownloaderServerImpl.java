@@ -49,6 +49,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -294,7 +296,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                     BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
                                             UUID.randomUUID().toString().replace("-", "")
                                             , downloaderManager.getDownloadInfo(downloader.getId()),
-                                            System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
+                                            OffsetDateTime.now(), OffsetDateTime.now().plus(actualBanDuration, ChronoUnit.MILLIS),
                                             detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                             detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                             detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
@@ -448,7 +450,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         List<IPAddress> removeBan = new ArrayList<>();
         List<BanMetadata> metadata = new ArrayList<>();
         banList.forEach((key, v) -> {
-            if (System.currentTimeMillis() >= v.getUnbanAt()) {
+            if (OffsetDateTime.now().isAfter(v.getUnbanAt())) {
                 removeBan.add(key);
                 metadata.add(v);
             }
