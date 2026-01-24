@@ -174,6 +174,29 @@ CREATE TABLE traffic_journal_v3
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
+CREATE TABLE `rule_sub_info`
+(
+    `rule_id`     varchar(255) NOT NULL,
+    `enabled`     tinyint      NOT NULL,
+    `rule_name`   varchar(255) NOT NULL,
+    `sub_url`     varchar(255) NOT NULL,
+    `last_update` datetime NULL,
+    `ent_count`   int NULL,
+    PRIMARY KEY (`rule_id`),
+    INDEX         `idx_rule_sub_info_rule_id`(`rule_id`)
+);
+
+CREATE TABLE `rule_sub_logs`
+(
+    `id`          bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+    `rule_id`     varchar(255) NOT NULL,
+    `update_time` datetime     NOT NULL,
+    `count`       int          NOT NULL,
+    `update_ype`  varchar(255) NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX         `idx_rule_sub_logs_rule_id`(`rule_id`, `update_time` DESC)
+);
+
 ALTER TABLE pcb_address
     ADD CONSTRAINT idx_pcb_address_unique UNIQUE (ip, port, torrent_id, downloader);
 

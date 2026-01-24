@@ -1,14 +1,14 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
+import com.ghostchu.peerbanhelper.databasent.table.RuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
-import com.ghostchu.peerbanhelper.module.impl.rule.PeerNameBlackRuleList;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SubInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -45,7 +45,6 @@ public final class RuleSubController extends AbstractFeatureModule {
     private ModuleManagerImpl moduleManager;
 
     private IPBlackRuleList ipBlackRuleList;
-    private PeerNameBlackRuleList peerNameBlackRuleList;
 
     @Override
     public boolean isConfigurable() {
@@ -69,12 +68,6 @@ public final class RuleSubController extends AbstractFeatureModule {
                 .filter(ele -> ele.getConfigName().equals("ip-address-blocker-rules"))
                 .findFirst()
                 .ifPresent(ele -> ipBlackRuleList = (IPBlackRuleList) ele);
-
-        // 初始化 PeerName 规则列表
-        moduleManager.getModules().stream()
-                .filter(ele -> ele.getConfigName().equals("peer-name-blocker-rules"))
-                .findFirst()
-                .ifPresent(ele -> peerNameBlackRuleList = (PeerNameBlackRuleList) ele);
 
         // 注册路由
         webContainer.javalin()
@@ -109,54 +102,28 @@ public final class RuleSubController extends AbstractFeatureModule {
     }
 
     /**
-     * 获取规则类型，默认为 ip
-     */
-    private String getType(Context ctx) {
-        return ctx.queryParam("type") != null ? ctx.queryParam("type") : TYPE_IP;
-    }
-
-    /**
-     * 检查规则类型是否有效
-     */
-    private boolean isValidType(String type) {
-        return TYPE_IP.equals(type) || TYPE_PEER_NAME.equals(type);
-    }
-
-    /**
      * 检查对应类型的模块是否可用
      */
-    private boolean isModuleAvailable(String type) {
-        if (TYPE_IP.equals(type)) {
-            return ipBlackRuleList != null;
-        } else if (TYPE_PEER_NAME.equals(type)) {
-            return peerNameBlackRuleList != null;
-        }
-        return false;
+    private boolean isModuleAvailable() {
+        return ipBlackRuleList != null;
     }
 
     /**
      * 返回模块不可用错误
      */
-    private void moduleNotAvailable(Context ctx, String type) {
+    private void moduleNotAvailable(Context ctx) {
         ctx.status(HttpStatus.BAD_REQUEST);
-        ctx.json(new StdResp(false, tl(locale(ctx), Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null));
+        ctx.json(new StdResp(false, tl(locale(ctx), Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null));
     }
 
     /**
      * 查询检查间隔
      */
     private void getCheckInterval(Context ctx) {
-        String type = getType(ctx);
-        if (!isValidType(type)) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null));
+        if (!isModuleAvailable()) {
+            moduleNotAvailable(ctx);
             return;
         }
-        if (!isModuleAvailable(type)) {
-            moduleNotAvailable(ctx, type);
-            return;
-        }
-
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS), ipBlackRuleList.getCheckInterval()));
     }
 
@@ -164,17 +131,10 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 修改检查间隔
      */
     private void changeCheckInterval(Context ctx) {
-        String type = getType(ctx);
-        if (!isValidType(type)) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null));
+        if (!isModuleAvailable()) {
+            moduleNotAvailable(ctx);
             return;
         }
-        if (!isModuleAvailable(type)) {
-            moduleNotAvailable(ctx, type);
-            return;
-        }
-
         try {
             long interval = JsonUtil.readObject(ctx.body()).get("checkInterval").getAsLong();
             ipBlackRuleList.changeCheckInterval(interval);
@@ -189,27 +149,17 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 查询订阅规则日志
      */
     private void logs(Context ctx, String ruleId) {
-        String type = getType(ctx);
-        if (!isValidType(type)) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null));
+        if (!isModuleAvailable()) {
+            moduleNotAvailable(ctx);
             return;
         }
-        if (!isModuleAvailable(type)) {
-            moduleNotAvailable(ctx, type);
-            return;
-        }
-
         try {
             Pageable pageable = new Pageable(ctx);
-
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), ipBlackRuleList.queryRuleSubLogs(ruleId, pageable)));
-
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), PBHPage.from(ipBlackRuleList.queryRuleSubLogs(ruleId, pageable))));
         } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
             log.error(tlUI(Lang.IP_BAN_RULE_LOG_QUERY_ERROR), e);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM), null));
-
         }
     }
 
@@ -217,13 +167,9 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 手动更新全部订阅规则
      */
     private StdResp updateAll(Context ctx) {
-        String type = getType(ctx);
         String locale = locale(ctx);
-        if (!isValidType(type)) {
-            return new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null);
-        }
-        if (!isModuleAvailable(type)) {
-            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null);
+        if (!isModuleAvailable()) {
+            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
         }
 
         AtomicReference<StdResp> result = new AtomicReference<>();
@@ -242,18 +188,11 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 手动更新订阅规则
      */
     private StdResp update(Context ctx, String ruleId) {
-        String type = getType(ctx);
         String locale = locale(ctx);
-        if (!isValidType(type)) {
-            return new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null);
+        if (!isModuleAvailable()) {
+            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
         }
-        if (!isModuleAvailable(type)) {
-            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null);
-        }
-
-
         return updateIpRule(locale, ruleId);
-
     }
 
     private StdResp updateIpRule(String locale, String ruleId) {
@@ -267,29 +206,12 @@ public final class RuleSubController extends AbstractFeatureModule {
         return ipBlackRuleList.updateRule(locale, configurationSection, IPBanRuleUpdateType.MANUAL);
     }
 
-    private StdResp updatePeerNameRule(String locale, String ruleId) {
-        if (ruleId == null || ruleId.isEmpty()) {
-            return new StdResp(false, tlUI(Lang.PEER_NAME_RULE_NO_ID), null);
-        }
-        ConfigurationSection configurationSection = peerNameBlackRuleList.getRuleSubsConfig().getConfigurationSection(ruleId);
-        if (null == configurationSection) {
-            return new StdResp(false, tlUI(Lang.PEER_NAME_RULE_CANT_FIND, ruleId), null);
-        }
-        return peerNameBlackRuleList.updateRule(locale, configurationSection, IPBanRuleUpdateType.MANUAL);
-    }
-
     /**
      * 启用/禁用订阅规则
      */
     private void switcher(Context ctx) throws SQLException, IOException {
-        String type = getType(ctx);
-        if (!isValidType(type)) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null));
-            return;
-        }
-        if (!isModuleAvailable(type)) {
-            moduleNotAvailable(ctx, type);
+        if (!isModuleAvailable()) {
+            moduleNotAvailable(ctx);
             return;
         }
 
@@ -330,21 +252,12 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 删除订阅规则
      */
     private void delete(Context ctx) throws IOException, SQLException {
-        String type = getType(ctx);
-        if (!isValidType(type)) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null));
+        if (!isModuleAvailable()) {
+            moduleNotAvailable(ctx);
             return;
         }
-        if (!isModuleAvailable(type)) {
-            moduleNotAvailable(ctx, type);
-            return;
-        }
-
         String ruleId = ctx.pathParam("ruleId");
-
         deleteIpRule(ctx, ruleId);
-
     }
 
     private void deleteIpRule(Context ctx, String ruleId) throws IOException, SQLException {
@@ -365,18 +278,10 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 保存订阅规则（新增/修改）
      */
     private void save(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {
-        String type = getType(ctx);
-        if (!isValidType(type)) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null));
+        if (!isModuleAvailable()) {
+            moduleNotAvailable(ctx);
             return;
         }
-        if (!isModuleAvailable(type)) {
-            moduleNotAvailable(ctx, type);
-            return;
-        }
-
-
         saveIpRule(ctx, ruleId, isAdd);
 
     }
@@ -447,15 +352,10 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 查询订阅规则
      */
     private StdResp get(Context ctx, String ruleId) throws SQLException {
-        String type = getType(ctx);
         String locale = locale(ctx);
-        if (!isValidType(type)) {
-            return new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null);
+        if (!isModuleAvailable()) {
+            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
         }
-        if (!isModuleAvailable(type)) {
-            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null);
-        }
-
         return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
     }
 
@@ -463,21 +363,15 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 查询订阅规则列表
      */
     private StdResp list(Context ctx) throws SQLException {
-        String type = getType(ctx);
         String locale = locale(ctx);
-        if (!isValidType(type)) {
-            return new StdResp(false, "Invalid type parameter. Use 'ip' or 'peer-name'", null);
+        if (!isModuleAvailable()) {
+            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
         }
-        if (!isModuleAvailable(type)) {
-            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + type + "' is not available"), null);
-        }
-
         List<String> keys = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
         List<RuleSubInfoEntity> data = new ArrayList<>(keys.size());
         for (String s : keys) {
             data.add(ipBlackRuleList.getRuleSubInfo(s));
         }
         return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), data);
-
     }
 }
