@@ -1,13 +1,16 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleStringIntKVDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -33,10 +36,8 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -51,15 +52,13 @@ public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private PeerRecordService peerRecordDao;
+    private PeerRecordService peerRecordService;
     @Autowired
-    private HistoryService historyDao;
+    private HistoryService historyService;
     @Autowired
     private TrafficJournalServiceImpl trafficJournalDao;
     @Autowired
     private IPDBManager iPDBManager;
-    @Autowired
-    private ActiveMonitoringModule activeMonitoringModule;
     @Autowired
     private PeerConnectionMetricsService peerConnectionMetricDao;
 
@@ -85,18 +84,18 @@ public final class PBHChartController extends AbstractFeatureModule {
                 .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/sessionBetween", this::handleSessionBetween, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/chart/sessionDayBucket", this::handleSessionAnalyse, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/sessionDayBucket", this::handleSessionDayBucket, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/sessionAnalyse", this::handleSessionAnalyse, Role.USER_READ, Role.PBH_PLUS)
                 .get("/api/chart/clientAnalyse", this::handleClientAnalyse, Role.USER_READ, Role.PBH_PLUS)
         ;
     }
 
-    private void handleClientAnalyse(@NotNull Context ctx) throws Exception {
+    private void handleClientAnalyse(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         var downloader = ctx.queryParam("downloader");
         Pageable pageable = new Pageable(ctx);
         Orderable orderable = new Orderable(Map.of("uploaded", false), ctx);
-        var dtoPage = peerRecordDao.queryClientAnalyse(pageable.toPage(), timeQueryModel.startAt(), timeQueryModel.endAt(), downloader, orderable.generateOrderBy());
+        var dtoPage = peerRecordService.queryClientAnalyse(pageable.toPage(), timeQueryModel.startAt(), timeQueryModel.endAt(), downloader, orderable.generateOrderBy());
         ctx.json(new StdResp(true, null, PBHPage.from(dtoPage)));
     }
 
@@ -108,33 +107,36 @@ public final class PBHChartController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, data));
     }
 
-    private void handleSessionBetween(@NotNull Context ctx) throws SQLException {
+    private void handleSessionBetween(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
         if (downloader == null || downloader.isBlank()) {
             downloader = "%";
         }
         // 从 startAt 到 endAt，每天的开始时间戳
-        ctx.json(new StdResp(true, null, peerRecordDao.sessionBetween(downloader, timeQueryModel.startAt(), timeQueryModel.endAt())));
+        ctx.json(new StdResp(true, null, peerRecordService.sessionBetween(downloader, timeQueryModel.startAt(), timeQueryModel.endAt())));
     }
 
-    private void handleSessionDayBucket(@NotNull Context ctx) throws Exception {
+    private void handleSessionDayBucket(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
-        long startAtTs = timeQueryModel.startAt().getTime();
-        long endAtTs = timeQueryModel.endAt().getTime();
+        long startAtTs = timeQueryModel.startAt().toInstant().toEpochMilli();
+        long endAtTs = timeQueryModel.endAt().toInstant().toEpochMilli();
         Map<Long, SessionTimeRangeCounter> sessionDayBucket = new LinkedHashMap<>();
-        var where = peerRecordDao.queryBuilder().where();
+
+        LambdaQueryWrapper<PeerRecordEntity> query = Wrappers.<PeerRecordEntity>lambdaQuery()
+                .ge(PeerRecordEntity::getFirstTimeSeen, timeQueryModel.startAt())
+                .le(PeerRecordEntity::getLastTimeSeen, timeQueryModel.endAt());
+
         if (downloader != null) {
-            where.eq("downloader", downloader).and().ge("firstTimeSeen", startAtTs).and().le("lastTimeSeen", endAtTs);
-        } else {
-            where.ge("firstTimeSeen", startAtTs).and().le("lastTimeSeen", endAtTs);
+            query.eq(PeerRecordEntity::getDownloader, downloader);
         }
-        Set<PeerRecordEntity> peerRecords = new LinkedHashSet<>(where.query());
+
+        List<PeerRecordEntity> peerRecords = peerRecordService.list(query);
         // 生成按日时间戳的桶，并填充数据
         for (PeerRecordEntity record : peerRecords) {
-            long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().getTime());
-            long lastDay = MiscUtil.getStartOfToday(record.getLastTimeSeen().getTime());
+            long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().toInstant().toEpochMilli()).toInstant().toEpochMilli();
+            long lastDay = MiscUtil.getStartOfToday(record.getLastTimeSeen().toInstant().toEpochMilli()).toInstant().toEpochMilli();
             for (long day = firstDay; day <= lastDay; day += 86400000L) {
                 if (day < startAtTs || day > endAtTs) {
                     continue;
@@ -156,7 +158,6 @@ public final class PBHChartController extends AbstractFeatureModule {
 
     }
 
-
     private static class SessionTimeRangeCounter {
         @Getter
         private final AtomicInteger total = new AtomicInteger(0);
@@ -164,58 +165,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         private final AtomicInteger incoming = new AtomicInteger(0);
     }
 
-//    private void handleSessionDayBucket(@NotNull Context ctx) throws Exception {
-//        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-//        String downloader = ctx.queryParam("downloader");
-//        // 从 startAt 到 endAt，每天的开始时间戳
-//        var queryBuilder = peerRecordDao.queryBuilder();
-//        // 按天划分，每天的会话数量
-//        var where = queryBuilder
-//                .selectColumns("address", "firstTimeSeen", "lastTimeSeen")
-//                .distinct()
-//                .where();
-//        var subwhere = downloader == null || downloader.isBlank() ? where.raw("1=1") : where.like("downloader", downloader);
-//        where.and(subwhere, where.or(where.between("firstTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt()),
-//                where.between("lastTimeSeen", timeQueryModel.startAt(), timeQueryModel.endAt())));
-//        Map<Long, AtomicInteger> sessionDayBucket = new LinkedHashMap<>();
-//        long startAt = System.currentTimeMillis();
-//        try (var it = queryBuilder.iterator()) {
-//            while (it.hasNext()) {
-//                var record = it.next();
-//                long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().getTime());
-//                long lastDay = MiscUtil.getStartOfToday(record.getLastTimeSeen().getTime());
-//                for (long day = firstDay; day <= lastDay; day += 86400000L) {
-//                    sessionDayBucket.computeIfAbsent(day, k -> new AtomicInteger()).incrementAndGet();
-//                }
-//            }
-//            System.out.println("Iterator cost: "+ (System.currentTimeMillis() - startAt)+"ms");
-//            ctx.json(new StdResp(true, null, sessionDayBucket.entrySet().stream()
-//                    .map(e -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
-//                    .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
-//                    .toList()));
-//        }
-//    }
-
-    private void handleTraffic(Context ctx) throws Exception {
-        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-        String downloader = ctx.queryParam("downloader");
-        if (downloader == null || downloader.isBlank()) {
-            ctx.json(new StdResp(true, null, fixTimezone(ctx, trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt()))));
-        } else {
-            ctx.json(new StdResp(true, null, fixTimezone(ctx, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()))));
-        }
-    }
-
-//    private void handleTrafficClassic(Context ctx) throws Exception {
-//        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-//        String downloader = ctx.queryParam("downloader");
-//        var records = trafficJournalDao.getDayOffsetData(downloader,
-//                timeQueryModel.startAt(),
-//                timeQueryModel.endAt());
-//        ctx.json(new StdResp(true, null, fixTimezone(ctx, records)));
-//    }
-
-    private void handleTrafficClassic(Context ctx) throws Exception {
+    private void handleTrafficClassic(Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
         var records = trafficJournalDao.getDayOffsetData(downloader,
@@ -226,13 +176,13 @@ public final class PBHChartController extends AbstractFeatureModule {
         Map<Long, TrafficDataComputed> mergedData = new java.util.HashMap<>();
 
         for (TrafficDataComputed record : records) {
-            Timestamp ts = record.getTimestamp();
-            long dayStart = MiscUtil.getStartOfToday(ts.getTime());
+            OffsetDateTime ts = record.getTimestamp();
+            long dayStart = MiscUtil.getStartOfToday(ts.toInstant().toEpochMilli()).toInstant().toEpochMilli();
 
             mergedData.compute(dayStart, (key, existing) -> {
                 if (existing == null) {
                     return new TrafficDataComputed(
-                            new Timestamp(key),
+                            Instant.ofEpochMilli(key).atZone(ts.getOffset()).toOffsetDateTime(),
                             record.getDataOverallUploaded(),
                             record.getDataOverallDownloaded()
                     );
@@ -246,58 +196,41 @@ public final class PBHChartController extends AbstractFeatureModule {
         }
 
         List<TrafficDataComputed> mergedRecords = new ArrayList<>(mergedData.values());
-        mergedRecords.sort(Comparator.comparing(data -> data.getTimestamp().getTime()));
+        mergedRecords.sort(Comparator.comparing(TrafficDataComputed::getTimestamp));
 
         ctx.json(new StdResp(true, null, mergedRecords));
     }
 
-
-    private TrafficDataComputed fixTimezone(Context ctx, TrafficDataComputed data) {
-        Timestamp ts = data.getTimestamp();
-        var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
-                .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
-        data.setTimestamp(new Timestamp(epochSecond * 1000));
-        return data;
-    }
-
-    private List<TrafficDataComputed> fixTimezone(Context ctx, List<TrafficDataComputed> data) {
-        data.forEach(d -> fixTimezone(ctx, d));
-        return data;
-    }
-
-    private void handlePeerTrends(Context ctx) throws Exception {
+    private void handlePeerTrends(Context ctx) {
         var downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         Map<Long, AtomicInteger> connectedPeerTrends = new ConcurrentHashMap<>();
         Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
-        var queryConnected = peerRecordDao.queryBuilder()
-                .selectColumns("id", "lastTimeSeen")
-                .where()
-                .ge("lastTimeSeen", timeQueryModel.startAt())
-                .and()
-                .le("lastTimeSeen", timeQueryModel.endAt());
-        var queryBanned = historyDao.queryBuilder()
-                .selectColumns("id", "banAt")
-                .where()
-                .ge("banAt", timeQueryModel.startAt())
-                .and()
-                .le("banAt", timeQueryModel.endAt());
+
+        var queryConnected = Wrappers.<PeerRecordEntity>lambdaQuery()
+                .select(PeerRecordEntity::getId, PeerRecordEntity::getLastTimeSeen)
+                .ge(PeerRecordEntity::getLastTimeSeen, timeQueryModel.startAt())
+                .le(PeerRecordEntity::getLastTimeSeen, timeQueryModel.endAt());
+        var queryBanned = Wrappers.<HistoryEntity>lambdaQuery()
+                .select(HistoryEntity::getId, HistoryEntity::getBanAt)
+                .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
+                .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
+
         if (downloader != null && !downloader.isBlank()) {
-            queryConnected.and().eq("downloader", new SelectArg(downloader));
-            queryBanned.and().eq("downloader", new SelectArg(downloader));
+            queryConnected.eq(PeerRecordEntity::getDownloader, downloader);
+            queryBanned.eq(HistoryEntity::getDownloader, downloader);
         }
-        try (var it = queryConnected.iterator()) {
-            while (it.hasNext()) {
-                var startOfDay = MiscUtil.getStartOfToday(it.next().getLastTimeSeen().getTime());
-                connectedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
-            }
-        }
-        try (var it = queryBanned.iterator()) {
-            while (it.hasNext()) {
-                var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
-                bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
-            }
-        }
+
+        peerRecordService.list(queryConnected).forEach(entity -> {
+            var startOfDay = MiscUtil.getStartOfToday(entity.getLastTimeSeen().toInstant().toEpochMilli());
+            connectedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
+        });
+
+        historyService.list(queryBanned).forEach(entity -> {
+            var startOfDay = MiscUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
+        });
+
         ctx.json(new StdResp(true, null, Map.of(
                 "connectedPeersTrend", connectedPeerTrends.entrySet().stream()
                         .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
@@ -310,7 +243,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         )));
     }
 
-    private void handleGeoIP(Context ctx) throws Exception {
+    private void handleGeoIP(Context ctx) {
         IPDB ipdb = iPDBManager.getIpdb();
         if (ipdb == null) {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.CHARTS_IPDB_NEED_INIT), null));
@@ -324,81 +257,70 @@ public final class PBHChartController extends AbstractFeatureModule {
         Map<String, AtomicInteger> cnCityCounter = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> countryOrRegionCounter = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> netTypeCounter = new ConcurrentHashMap<>();
-        var queryBanned = historyDao.queryBuilder()
-                .distinct()
-                .selectColumns("id", "ip")
-                .where()
-                .ge("banAt", timeQueryModel.startAt())
-                .and()
-                .le("banAt", timeQueryModel.endAt());
-        var queryConnected = peerRecordDao.queryBuilder()
-                .distinct()
-                .selectColumns("id", "address")
-                .where()
-                .ge("lastTimeSeen", timeQueryModel.startAt())
-                .and()
-                .le("lastTimeSeen", timeQueryModel.endAt());
-        if (downloader != null && !downloader.isBlank()) {
-            queryBanned.and().eq("downloader", new SelectArg(downloader));
-            queryConnected.and().eq("downloader", new SelectArg(downloader));
-        }
-        try (var itBanned = queryBanned.iterator();
-             var itConnected = queryConnected.iterator()) {
-            try (ExecutorService service = Executors.newWorkStealingPool()) {
-                var ipIterator = new Iterator<String>() {
-                    @Override
-                    public boolean hasNext() {
-                        return bannedOnly ? itBanned.hasNext() : itConnected.hasNext();
-                    }
 
-                    @Override
-                    public String next() {
-                        return bannedOnly ? itBanned.next().getIp() : itConnected.next().getAddress();
-                    }
-                };
-                while (ipIterator.hasNext()) {
-                    var ip = ipIterator.next();
-                    service.submit(() -> {
-                        try {
-                            String determindIp = ip;
-                            if (IPAddressUtil.getIPAddress(determindIp).isPrefixed()) {
-                                determindIp = IPAddressUtil.getIPAddress(determindIp).toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
-                            }
-                            IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(determindIp));
-                            String isp = "N/A";
-                            if (ipGeoData.getAs() != null) {
-                                isp = ipGeoData.getAs().getOrganization();
-                            }
-                            String countryOrRegion = "N/A";
-                            String province = "N/A";
-                            String city = "N/A";
-                            String netType = "N/A";
-                            if (ipGeoData.getCountry() != null) {
-                                countryOrRegion = ipGeoData.getCountry().getName();
-                            }
-                            if (ipGeoData.getCity() != null) {
-                                city = ipGeoData.getCity().getName();
-                                if (ipGeoData.getCity().getCnProvince() != null) {
-                                    province = ipGeoData.getCity().getCnProvince();
-                                }
-                                if (ipGeoData.getCity().getCnCity() != null) {
-                                    city = ipGeoData.getCity().getCnProvince() + " " + ipGeoData.getCity().getCnCity();
-                                }
-                            }
-                            if (ipGeoData.getNetwork() != null) {
-                                isp = ipGeoData.getNetwork().getIsp();
-                                netType = ipGeoData.getNetwork().getNetType();
-                            }
-                            ispCounter.computeIfAbsent(isp, k -> new AtomicInteger()).incrementAndGet();
-                            cnProvinceCounter.computeIfAbsent(province, k -> new AtomicInteger()).incrementAndGet();
-                            cnCityCounter.computeIfAbsent(city, k -> new AtomicInteger()).incrementAndGet();
-                            countryOrRegionCounter.computeIfAbsent(countryOrRegion, k -> new AtomicInteger()).incrementAndGet();
-                            netTypeCounter.computeIfAbsent(netType, k -> new AtomicInteger()).incrementAndGet();
-                        } catch (UnknownHostException e) {
-                            log.error("Unable to resolve the GeoIP data for ip {}", ip, e);
+        var queryBanned = Wrappers.<HistoryEntity>lambdaQuery()
+                .select(HistoryEntity::getId, HistoryEntity::getIp) // distinct not supported directly in wrapper chain easily without custom SQL or loading all
+                .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
+                .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
+        var queryConnected = Wrappers.<PeerRecordEntity>lambdaQuery()
+                .select(PeerRecordEntity::getId, PeerRecordEntity::getAddress)
+                .ge(PeerRecordEntity::getLastTimeSeen, timeQueryModel.startAt())
+                .le(PeerRecordEntity::getLastTimeSeen, timeQueryModel.endAt());
+
+        if (downloader != null && !downloader.isBlank()) {
+            queryBanned.eq(HistoryEntity::getDownloader, downloader);
+            queryConnected.eq(PeerRecordEntity::getDownloader, downloader);
+        }
+
+        List<String> ips = new ArrayList<>();
+        if (bannedOnly) {
+            historyService.list(queryBanned).stream().map(historyEntity -> historyEntity.getIp().getHostAddress()).distinct().forEach(ips::add);
+        } else {
+            peerRecordService.list(queryConnected).stream().map(peerRecordEntity -> peerRecordEntity.getAddress().getHostAddress()).distinct().forEach(ips::add);
+        }
+
+        try (ExecutorService service = Executors.newWorkStealingPool()) {
+            for (String ip : ips) {
+                service.submit(() -> {
+                    try {
+                        String determindIp = ip;
+                        if (IPAddressUtil.getIPAddress(determindIp).isPrefixed()) {
+                            determindIp = IPAddressUtil.getIPAddress(determindIp).toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
                         }
-                    });
-                }
+                        IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(determindIp));
+                        String isp = "N/A";
+                        if (ipGeoData.getAs() != null) {
+                            isp = ipGeoData.getAs().getOrganization();
+                        }
+                        String countryOrRegion = "N/A";
+                        String province = "N/A";
+                        String city = "N/A";
+                        String netType = "N/A";
+                        if (ipGeoData.getCountry() != null) {
+                            countryOrRegion = ipGeoData.getCountry().getName();
+                        }
+                        if (ipGeoData.getCity() != null) {
+                            city = ipGeoData.getCity().getName();
+                            if (ipGeoData.getCity().getCnProvince() != null) {
+                                province = ipGeoData.getCity().getCnProvince();
+                            }
+                            if (ipGeoData.getCity().getCnCity() != null) {
+                                city = ipGeoData.getCity().getCnProvince() + " " + ipGeoData.getCity().getCnCity();
+                            }
+                        }
+                        if (ipGeoData.getNetwork() != null) {
+                            isp = ipGeoData.getNetwork().getIsp();
+                            netType = ipGeoData.getNetwork().getNetType();
+                        }
+                        ispCounter.computeIfAbsent(isp, k -> new AtomicInteger()).incrementAndGet();
+                        cnProvinceCounter.computeIfAbsent(province, k -> new AtomicInteger()).incrementAndGet();
+                        cnCityCounter.computeIfAbsent(city, k -> new AtomicInteger()).incrementAndGet();
+                        countryOrRegionCounter.computeIfAbsent(countryOrRegion, k -> new AtomicInteger()).incrementAndGet();
+                        netTypeCounter.computeIfAbsent(netType, k -> new AtomicInteger()).incrementAndGet();
+                    } catch (UnknownHostException e) {
+                        log.error("Unable to resolve the GeoIP data for ip {}", ip, e);
+                    }
+                });
             }
         }
         ctx.json(new StdResp(true, null, Map.of(
@@ -421,31 +343,4 @@ public final class PBHChartController extends AbstractFeatureModule {
     public void onDisable() {
 
     }
-
-    record SimpleLongLongKV(long key, long value) {
-
-    }
-
-    record TrafficJournalRecord(
-            long timestamp,
-            long uploaded,
-            long downloaded
-    ) {
-
-    }
-
-//    public record GeoIPQuery(GeoIPPie data, long count) {
-//
-//    }
-//
-//    public record GeoIPPie(
-//            String country,
-//            String province,
-//            String city,
-//            String districts,
-//            String net,
-//            String isp
-//    ) {
-//
-//    }
 }
