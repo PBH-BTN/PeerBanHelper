@@ -39,4 +39,23 @@
         WHERE address = #{address}
         ORDER BY ${orderBySql}
     </select>
+
+    <resultMap id="queryClientAnalyse" type="com.ghostchu.peerbanhelper.databasent.dto.ClientAnalyseResult">
+        <result property="peerId" column="peerId"/>
+        <result property="clientName" column="clientName"/>
+        <result property="uploaded" column="uploaded"/>
+        <result property="downloaded" column="downloaded"/>
+        <result property="count" column="ct"/>
+    </resultMap>
+
+    <select id="queryClientAnalyse" resultMap="queryClientAnalyse">
+        SELECT peerId, clientName, SUM(uploaded) AS uploaded, SUM(downloaded) AS downloaded, COUNT(*) AS ct
+        FROM peer_records
+        WHERE firstTimeSeen >= #{startAt} AND lastTimeSeen &lt;= #{endAt} AND uploaded > 0 AND downloaded > 0
+        <if test="downloader != null">
+            AND downloader = #{downloader}
+        </if>
+        GROUP BY peerId, clientName
+        ORDER BY ${orderBySql}
+    </select>
 </mapper>

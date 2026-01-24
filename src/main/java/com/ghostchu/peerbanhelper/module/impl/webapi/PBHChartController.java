@@ -1,9 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
@@ -19,12 +18,11 @@ import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +53,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private PeerRecordService peerRecordDao;
     @Autowired
-    private HistoryDao historyDao;
+    private HistoryService historyDao;
     @Autowired
     private TrafficJournalServiceImpl trafficJournalDao;
     @Autowired
@@ -98,57 +96,10 @@ public final class PBHChartController extends AbstractFeatureModule {
         var downloader = ctx.queryParam("downloader");
         Pageable pageable = new Pageable(ctx);
         Orderable orderable = new Orderable(Map.of("uploaded", false), ctx);
-        String generatedOrderBy = "ORDER BY "+orderable.generateOrderBy();
-        try (
-                var r = peerRecordDao.queryRaw("""
-                        SELECT peerId, clientName, SUM(uploaded) AS uploaded, SUM(downloaded) AS downloaded, COUNT(*) AS count
-                        FROM peer_records
-                        WHERE firstTimeSeen >= ? AND lastTimeSeen <= ? AND uploaded != 0 AND downloaded != 0
-                          AND (? IS NULL OR ? = '' OR downloader = ?)
-                        GROUP BY peerId, clientName
-                        %s
-                        LIMIT %s OFFSET %s
-                        """.formatted(generatedOrderBy,pageable.getSize(), pageable.getZeroBasedPage() * pageable.getSize()), String.valueOf(timeQueryModel.startAt().getTime()), String.valueOf(timeQueryModel.endAt()), downloader, downloader, downloader);
-                var ct = peerRecordDao.queryRaw("""
-                        SELECT COUNT(*)
-                        FROM (
-                            SELECT 1
-                            FROM peer_records
-                            WHERE firstTimeSeen >= ? AND lastTimeSeen <= ? AND uploaded != 0 AND downloaded != 0
-                              AND (? IS NULL OR ? = '' OR downloader = ?)
-                            GROUP BY peerId, clientName
-                        ) AS grouped_records
-                        """, String.valueOf(timeQueryModel.startAt().getTime()), String.valueOf(timeQueryModel.endAt()), downloader, downloader, downloader);
-        ) {
-            List<ClientAnalyseDTO> rList = new ArrayList<>();
-            for (var row : r.getResults()) {
-                String peerId = row[0];
-                String clientName = row[1];
-                long uploaded = Long.parseLong(row[2]);
-                long downloaded = Long.parseLong(row[3]);
-                long count = Long.parseLong(row[4]);
-                rList.add(new ClientAnalyseDTO(peerId, clientName, uploaded, downloaded, count));
-            }
-            var ctr = Long.parseLong(ct.getFirstResult()[0]);
-            ctx.json(new StdResp(true, null, new Page<>(pageable, ctr, rList)));
-        }
+        var dtoPage = peerRecordDao.queryClientAnalyse(pageable.toPage(), timeQueryModel.startAt(), timeQueryModel.endAt(), downloader, orderable.generateOrderBy());
+        ctx.json(new StdResp(true, null, PBHPage.from(dtoPage)));
     }
 
-    static class ClientAnalyseDTO {
-        public String peerId;
-        public String clientName;
-        public long uploaded;
-        public long downloaded;
-        public long count;
-
-        public ClientAnalyseDTO(String peerId, String clientName, long uploaded, long downloaded, long count) {
-            this.peerId = peerId;
-            this.clientName = clientName;
-            this.uploaded = uploaded;
-            this.downloaded = downloaded;
-            this.count = count;
-        }
-    }
 
     private void handleSessionAnalyse(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
@@ -299,7 +250,6 @@ public final class PBHChartController extends AbstractFeatureModule {
 
         ctx.json(new StdResp(true, null, mergedRecords));
     }
-
 
 
     private TrafficDataComputed fixTimezone(Context ctx, TrafficDataComputed data) {

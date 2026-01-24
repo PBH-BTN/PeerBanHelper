@@ -7,15 +7,14 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDT
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface PeerConnectionMetricsService extends IService<PeerConnectionMetricsEntity> {
 
-	long getGlobalTotalConnectionsCount(@NotNull Timestamp startAt, @NotNull Timestamp endAt);
+	long getGlobalTotalConnectionsCount(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt);
 
-	List<PeerConnectionMetricsDTO> getMetricsSince(@NotNull Timestamp sinceAt, @NotNull Timestamp untilAt, @Nullable String downloader);
+	List<PeerConnectionMetricsDTO> getMetricsSince(@NotNull OffsetDateTime sinceAt, @NotNull OffsetDateTime untilAt, @Nullable String downloader);
 
 	void saveAggregating(@NotNull List<PeerConnectionMetricsEntity> buffer, boolean overwrite);
 

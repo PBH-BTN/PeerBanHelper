@@ -31,7 +31,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 
 
 	@Override
-	public long getGlobalTotalConnectionsCount(@NotNull Timestamp startAt, @NotNull Timestamp endAt) {
+    public long getGlobalTotalConnectionsCount(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt) {
 		long total = 0;
 		try {
 			List<PeerConnectionMetricsEntity> entities = baseMapper.selectList(new QueryWrapper<PeerConnectionMetricsEntity>().between("timeframeAt", startAt, endAt));
@@ -46,7 +46,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	}
 
 	@Override
-	public List<PeerConnectionMetricsDTO> getMetricsSince(@NotNull Timestamp sinceAt, @NotNull Timestamp untilAt, @Nullable String downloader) {
+    public List<PeerConnectionMetricsDTO> getMetricsSince(@NotNull OffsetDateTime sinceAt, @NotNull OffsetDateTime untilAt, @Nullable String downloader) {
 		List<PeerConnectionMetricsDTO> result;
 
 		QueryWrapper<PeerConnectionMetricsEntity> wrapper = new QueryWrapper<PeerConnectionMetricsEntity>()

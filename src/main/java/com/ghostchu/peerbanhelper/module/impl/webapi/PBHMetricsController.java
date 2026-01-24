@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -236,9 +235,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             log.error("Unable to query tracked swarm count", e);
         }
         map.put("weeklySessions", peerConnectionMetricDao.getGlobalTotalConnectionsCount(
-                new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000)),
-                new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis())
-        )));
+                MiscUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000),
+                MiscUtil.getStartOfToday(System.currentTimeMillis())));
         ctx.json(new StdResp(true, null, map));
     }
 
