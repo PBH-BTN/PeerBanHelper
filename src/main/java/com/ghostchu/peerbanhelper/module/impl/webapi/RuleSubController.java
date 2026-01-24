@@ -157,11 +157,7 @@ public final class RuleSubController extends AbstractFeatureModule {
             return;
         }
 
-        if (TYPE_IP.equals(type)) {
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS), ipBlackRuleList.getCheckInterval()));
-        } else {
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.PEER_NAME_RULE_CHECK_INTERVAL_QUERY_SUCCESS), peerNameBlackRuleList.getCheckInterval()));
-        }
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS), ipBlackRuleList.getCheckInterval()));
     }
 
     /**
