@@ -22,8 +22,9 @@ public interface HistoryService extends IService<HistoryEntity> {
 
     IPage<HistoryEntity> queryBanHistoryByIp(@NotNull Page<HistoryEntity> pageable, @NotNull InetAddress ip, @NotNull Orderable orderBy);
 
-    List<UniversalFieldNumResult> countField(@NotNull String field, double percentFilter, @NotNull String downloader, @NotNull Integer substringLength);
+    List<UniversalFieldNumResult> countField(@NotNull String field, double percentFilter, @Nullable String downloader, @Nullable Integer substringLength);
 
-    List<UniversalFieldNumResult> sumField(@NotNull String field, double percentFilter, @NotNull String downloader, @NotNull Integer substringLength);
+    List<UniversalFieldNumResult> sumField(@NotNull String field, double percentFilter, @Nullable String downloader, @Nullable Integer substringLength);
+
 
 }

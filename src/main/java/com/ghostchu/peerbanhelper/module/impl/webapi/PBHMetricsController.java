@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
+import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
@@ -175,7 +176,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         return calendar;
     }
 
-    private void handleHistoryNumberAccess(Context ctx) throws Exception {
+    private void handleHistoryNumberAccess(Context ctx) {
         // 过滤 X% 以下的数据
         String type = ctx.queryParam("type");
         String field = ctx.queryParam("field");
@@ -185,7 +186,13 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         if ("peerId".equalsIgnoreCase(field)) {
             substringLength = 8;
         }
-        List<HistoryDao.UniversalFieldNumResult> results = switch (type) {
+        if (type == null) {
+            throw new IllegalArgumentException("type cannot be null");
+        }
+        if (field == null) {
+            throw new IllegalArgumentException("field cannot be null");
+        }
+        List<UniversalFieldNumResult> results = switch (type) {
             case "count" -> historyDao.countField(field, filter, downloader, substringLength);
             case "sum" -> historyDao.sumField(field, filter, downloader, substringLength);
             case null, default -> throw new IllegalArgumentException("type invalid");
