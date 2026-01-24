@@ -407,7 +407,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @param ruleId 规则ID
      * @return 规则订阅信息
      */
-    public RuleSubInfoEntity getRuleSubInfo(String ruleId) throws SQLException {
+    public RuleSubInfoEntity getRuleSubInfo(String ruleId) {
         ConfigurationSection rules = getRuleSubsConfig();
         if (rules == null) {
             return null;
@@ -416,11 +416,9 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         if (rule == null) {
             return null;
         }
-
-        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", new SelectArg(ruleId)).queryBuilder(), new Pageable(1, 1)).getResults();
-        Optional<RuleSubLogEntity> first = result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
-        long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
-        int count = first.map(RuleSubLogEntity::getCount).orElse(0);
+        var result = ruleSubLogsDao.getOne(new QueryWrapper<RuleSubLogEntity>().eq("rule_id", ruleId).orderByDesc("id"));
+        long lastUpdate = result == null ? 0 : result.getUpdateTime();
+        int count = result == null ? 0 : result.getCount();
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
     }
 
@@ -464,10 +462,9 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @throws SQLException 查询异常
      */
     public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) throws SQLException {
-        var page = ruleSubLogsDao.page(pageable.toPage(), new QueryWrapper<RuleSubLogEntity>()
+        return ruleSubLogsDao.page(pageable.toPage(), new QueryWrapper<RuleSubLogEntity>()
                 .eq(ruleId != null, "rule_id", ruleId)
                 .orderBy(true, false, "update_time"));
-        return page;
     }
 
     /**
@@ -478,11 +475,8 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @throws SQLException 查询异常
      */
     public long countRuleSubLogs(String ruleId) throws SQLException {
-        var builder = ruleSubLogsDao.queryBuilder();
-        if (ruleId != null) {
-            builder = builder.where().eq("ruleId", new SelectArg(ruleId)).queryBuilder();
-        }
-        return ruleSubLogsDao.countOf(builder.setCountOf(true).prepare());
+        return ruleSubLogsDao.count(new QueryWrapper<RuleSubLogEntity>()
+                .eq(ruleId != null, "rule_id", ruleId));
     }
 
     /**
