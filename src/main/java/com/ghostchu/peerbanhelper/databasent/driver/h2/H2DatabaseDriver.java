@@ -36,8 +36,8 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull String getMapperPackagePath() {
-        return "mapper.mysql"; // H2 使用 MySQL 方言
+    public @NotNull String getMapperXmlPath() {
+        return "mapper/mysql/**/*.xml"; // H2 使用 MySQL 方言
     }
 
     @Override

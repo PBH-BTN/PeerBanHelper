@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 public interface DatabaseDriver {
     @NotNull DatabaseType getType();
 
-    @NotNull String getMapperPackagePath();
+    @NotNull String getMapperXmlPath();
 
     @NotNull DataSource getDataSource();
 }
