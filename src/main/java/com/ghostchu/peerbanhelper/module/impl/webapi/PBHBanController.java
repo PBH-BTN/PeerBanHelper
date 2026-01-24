@@ -1,15 +1,20 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
-import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
@@ -31,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -40,20 +44,18 @@ import java.util.stream.Stream;
 
 public final class PBHBanController extends AbstractFeatureModule {
     @Autowired
-    private Database db;
-    @Autowired
     @Qualifier("persistMetrics")
     private BasicMetrics persistMetrics;
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private HistoryDao historyDao;
+    private HistoryService historyService;
     @Autowired
     private DownloaderServer downloaderServer;
     @Autowired
     private DownloaderManagerImpl downloaderManager;
     @Autowired
-    private TorrentService torrentDao;
+    private TorrentService torrentService;
     @Autowired
     private BanList banList;
     @Autowired
@@ -109,34 +111,37 @@ public final class PBHBanController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, Map.of("count", pendingRemovals.size())));
     }
 
-    private void handleRanks(Context ctx) throws Exception {
+    private void handleRanks(Context ctx) {
         Pageable pageable = new Pageable(ctx);
         String filter = ctx.queryParam("filter");
-        ctx.json(new StdResp(true, null, historyDao.getBannedIps(pageable, filter)));
+        ctx.json(new StdResp(true, null, PBHPage.from(historyService.getBannedIps(pageable.toPage(), filter))));
     }
 
-    private void handleLogs(Context ctx) throws SQLException {
-        if (db == null) {
-            throw new IllegalStateException("Database not initialized on this PeerBanHelper server");
-        }
+    private void handleLogs(Context ctx) {
         persistMetrics.flush();
         Pageable pageable = new Pageable(ctx);
-        Orderable orderable = new Orderable(Map.of("banAt", false), ctx);
-        var queryResult = historyDao.queryByPaging(orderable
-                .addMapping("torrent.name", "torrentName")
-                .addMapping("torrent.infoHash", "torrentInfoHash")
-                .addMapping("torrent.size", "torrentSize")
-                .addMapping("module.name", "module")
-                .addMapping("rule.rule", "rule")
-                .addMapping("ip", "peerIp")  // IP地址排序映射
-                .apply(historyDao.queryBuilder()
-                        .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                        .join(ruleDao.queryBuilder().setAlias("rule")
-                                        .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                                , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                ), pageable);
-        var result = queryResult.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
-        ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
+        Page<HistoryEntity> pageRequest = pageable.toPage();
+
+        // 构建查询条件
+        QueryWrapper<HistoryEntity> queryWrapper = Wrappers.query();
+
+        // 检查排序参数
+        if (ctx.queryParam("orderBy") != null) {
+            // 简单处理: 如果包含 torrentName 等，可能暂时不支持或者忽略，回退到默认
+            // 或者如果 PBH 的 `Orderable` 类支持 apply 到 MP QueryWrapper。
+            new Orderable(Map.of("banAt", false), ctx).apply(queryWrapper);
+        } else {
+            queryWrapper.orderByDesc("ban_at");
+        }
+
+        IPage<HistoryEntity> pageResult = historyService.page(pageRequest, queryWrapper);
+
+        List<BanLogDTO> result = pageResult.getRecords().stream().map(r -> {
+            var torrent = torrentService.getById(r.getTorrentId());
+            return new BanLogDTO(ctx.req().getLocale().toString(), downloaderManager, r, TorrentEntityDTO.from(torrent));
+        }).toList();
+
+        ctx.json(new StdResp(true, null, new PBHPage<>(pageResult.getCurrent(), pageResult.getSize(), pageResult.getTotal(), result)));
     }
 
     private void handleBans(Context ctx) {
@@ -148,8 +153,6 @@ public final class PBHBanController extends AbstractFeatureModule {
          *  The controller detects the presence of the `page` query parameter.
          */
 
-        boolean hasPageParam = ctx.queryParam("page") != null;
-
         boolean ignoreBanForDisconnect =
                 Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
         String search = ctx.queryParam("search");
@@ -158,9 +161,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx); // reads page & pageSize
 
         // We always sort by ban time (desc) as default
-        var banStream = getBanResponseStream(locale(ctx),
-                -1,       // lastBanTime unused
-                -1,       // limit unused
+        var banStream = getBanResponseStream(ctx.req().getLocale().toString(),
                 ignoreBanForDisconnect,
                 search);
 
@@ -181,7 +182,7 @@ public final class PBHBanController extends AbstractFeatureModule {
 
     }
 
-    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
+    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, boolean ignoreBanForDisconnect, String search) {
         var banResponseList = banList.toMap()
                 .entrySet()
                 .stream()
@@ -195,12 +196,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                 .map(entry -> new BanDTO(entry.getKey().toNormalizedString(), new BakedBanMetadata(locale, entry.getValue()), null))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
-        if (lastBanTime > 0) {
-            banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);
-        }
-        if (limit > 0) {
-            banResponseList = banResponseList.limit(limit);
-        }
+
         banResponseList = banResponseList.peek(response -> {
             PeerWrapper peerWrapper = response.getBanMetadata().getPeer();
             if (peerWrapper != null) {
