@@ -64,7 +64,7 @@ CREATE TABLE pcb_address
     downloader                       VARCHAR(255) NOT NULL,
     ban_delay_window_end_at          datetime     NOT NULL,
     fast_pcb_test_execute_at         datetime     NOT NULL,
-    last_torrent_completed_size      datetime     NOT NULL,
+    last_torrent_completed_size BIGINT NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -72,7 +72,6 @@ CREATE TABLE pcb_range
 (
     id                               BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     `range`                          VARCHAR(255) NOT NULL,
-    port                             INT UNSIGNED                   NOT NULL,
     torrent_id VARCHAR(255) NOT NULL,
     last_report_progress DOUBLE NOT NULL,
     last_report_uploaded             BIGINT NULL,
@@ -145,6 +144,7 @@ CREATE TABLE peer_records
     last_flags        VARCHAR(255) NULL,
     first_time_seen   datetime     NOT NULL,
     last_time_seen    datetime     NOT NULL,
+    peer_geoip JSON NULL,
     PRIMARY KEY (id)
 );
 
