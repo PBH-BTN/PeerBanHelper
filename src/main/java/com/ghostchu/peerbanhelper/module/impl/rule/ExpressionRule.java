@@ -12,7 +12,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.WebUtil;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
@@ -217,7 +217,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             ));
         }
         var r = list.stream().skip(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).toList();
-        context.json(new StdResp(true, null, new Page<>(pageable, list.size(), r)));
+        context.json(new StdResp(true, null, new PBHPage<>(pageable.getPage(), pageable.getSize(), list.size(), r)));
     }
 
 

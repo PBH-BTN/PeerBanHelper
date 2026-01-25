@@ -100,7 +100,6 @@ dependencies {
     implementation("org.flywaydb:flyway-core:10.15.0")
     implementation("org.flywaydb:flyway-mysql:10.15.0")
     implementation("org.flywaydb:flyway-database-postgresql:10.15.0")
-    implementation("org.flywaydb:flyway-database-h2:10.15.0")
     compileOnly("org.jetbrains:annotations:26.0.2-1")
 
     // Core dependencies

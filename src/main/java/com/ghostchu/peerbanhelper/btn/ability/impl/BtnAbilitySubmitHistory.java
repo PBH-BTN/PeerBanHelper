@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistory;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistoryPing;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -46,8 +47,9 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final boolean powCaptcha;
     private final MetadataService metadataDao;
     private final TorrentService torrentService;
+    private final PeerRecordService peerRecordService;
 
-    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, MetadataService metadataDao, JsonObject ability, TorrentService torrentService) {
+    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, MetadataService metadataDao, JsonObject ability, TorrentService torrentService, PeerRecordService peerRecordService) {
         this.btnNetwork = btnNetwork;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
@@ -55,6 +57,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
         this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
         this.metadataDao = metadataDao;
         this.torrentService = torrentService;
+        this.peerRecordService = peerRecordService;
 
         if (metadataDao.get("btn.submithistory.timestamp") == null) {
             writeLastSubmitAtTimestamp(System.currentTimeMillis());
@@ -165,7 +168,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     @SneakyThrows
     private List<LegacyBtnPeerHistory> generatePing(long lastSubmitAt) {
         Pageable pageable = new Pageable(0, 5000);
-        return btnNetwork.getPeerRecordDao().getPendingSubmitPeerRecords(pageable,
+        return peerRecordService.getPendingSubmitPeerRecords(pageable,
                         OffsetDateTime.from(Instant.ofEpochMilli(lastSubmitAt))).getRecords().stream()
                 .map(e -> {
                     TorrentEntityDTO dto = TorrentEntityDTO.from(torrentService.getById(e.getTorrentId()));

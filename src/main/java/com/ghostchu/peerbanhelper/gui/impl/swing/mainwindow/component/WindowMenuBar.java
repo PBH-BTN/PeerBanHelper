@@ -5,7 +5,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
-import com.ghostchu.peerbanhelper.database.table.AlertEntity;
+import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;

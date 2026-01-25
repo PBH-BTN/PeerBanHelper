@@ -1,9 +1,13 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.service.impl.common.PeerRecordServiceImpl;
+import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
@@ -21,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.*;
@@ -33,14 +37,14 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class PeerRecodingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
-    private PeerRecordDao peerRecordDao;
-    private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
+    private PeerRecordService peerRecordDao;
+    private final Deque<PeerRecordServiceImpl.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
     private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
-    private final Cache<PeerRecordDao.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = CacheBuilder
+    private final Cache<PeerRecordServiceImpl.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(ExternalSwitch.parseLong("pbh.module.peerRecordingServiceModule.diskWriteCache.timeout", 180000), TimeUnit.MILLISECONDS)
             .maximumSize(ExternalSwitch.parseInt("pbh.module.peerRecordingServiceModule.diskWriteCache.size", 3500))
-            .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
+            .removalListener(notification -> dataBuffer.offer((PeerRecordServiceImpl.BatchHandleTasks) notification.getKey()))
             .build();
 
     private ExecutorService taskWriteService;
@@ -67,7 +71,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
                     return !peer.isHandshaking();
                 })
                 .forEach(peer ->
-                        diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(),
+                        diskWriteCache.put(new PeerRecordServiceImpl.BatchHandleTasks(OffsetDateTime.now(),
                                         downloader.getId(), new TorrentWrapper(torrent), new PeerWrapper(peer)),
                                 MiscUtil.EMPTY_OBJECT));
     }
@@ -108,13 +112,8 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
 
     public void flush() {
         try {
-            try {
-                diskWriteCache.asMap().forEach((k, v) -> dataBuffer.offer(k));
-                peerRecordDao.syncPendingTasks(dataBuffer, torrentDao);
-            } catch (SQLException e) {
-                log.warn("Unable sync peers data to database", e);
-                Sentry.captureException(e);
-            }
+            diskWriteCache.asMap().forEach((k, v) -> dataBuffer.offer(k));
+            peerRecordDao.syncPendingTasks(dataBuffer);
         } catch (Throwable e) {
             log.error("Unable to complete scheduled tasks", e);
             Sentry.captureException(e);
@@ -127,16 +126,8 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
                 return;
             }
             log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANING_UP));
-            try {
-                var deleteBuilder = peerRecordDao.deleteBuilder();
-                var where = deleteBuilder.where().lt("lastTimeSeen", new Timestamp(System.currentTimeMillis() - dataRetentionTime));
-                deleteBuilder.setWhere(where);
-                int deleted = deleteBuilder.delete();
-                log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
-            } catch (SQLException e) {
-                log.warn("Unable to clean up peer_records tables", e);
-                Sentry.captureException(e);
-            }
+            int deleted = peerRecordDao.getBaseMapper().delete(new QueryWrapper<PeerRecordEntity>().lt("last_time_seen", OffsetDateTime.now().minus(dataRetentionTime, ChronoUnit.MILLIS)));
+            log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
             Sentry.captureException(throwable);
