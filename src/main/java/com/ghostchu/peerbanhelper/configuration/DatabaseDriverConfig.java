@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.common.BasicIPAddressTypeHandler;
+import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -63,7 +65,7 @@ public class DatabaseDriverConfig {
         // DatabaseDriver 作为 Bean 注入，从中获取 DataSource，而不是依赖 Spring 上下文中的 DataSource Bean
         factoryBean.setDataSource(driver.getDataSource());
         factoryBean.setPlugins(interceptor);
-        //factoryBean.setTypeHandlers(new OffsetDateTimeTypeHandlerForwarder()); // 注册 OffsetDateTime 类型处理器
+        factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler()); // 注册 OffsetDateTime 类型处理器
 
         // 关键逻辑：根据 Driver 提供的路径（例如 "mapper/mysql/**/*.xml"）动态构建 XML 扫描路径
         // 结果如: "classpath*:mapper/mysql/**/*.xml"

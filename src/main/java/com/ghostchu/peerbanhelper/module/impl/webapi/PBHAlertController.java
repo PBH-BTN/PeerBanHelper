@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.time.OffsetDateTime;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -47,13 +46,13 @@ public final class PBHAlertController extends AbstractFeatureModule {
                 .delete("/api/alert/{id}", this::handleDelete, Role.USER_WRITE);
     }
 
-    private void handleAllRead(Context context) throws SQLException {
+    private void handleAllRead(Context context) {
         alertDao.markAllAsRead();
         context.json(new StdResp(true, "OK!", null));
     }
 
 
-    private void handleListing(Context ctx) throws SQLException {
+    private void handleListing(Context ctx) {
         ctx.status(200);
         ctx.json(new StdResp(true, null, alertDao.getUnreadAlerts()
                 .stream()

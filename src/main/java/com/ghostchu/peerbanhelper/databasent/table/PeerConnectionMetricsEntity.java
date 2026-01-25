@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("peer_connection_metrics")
+@TableName(value = "peer_connection_metrics", autoResultMap = true)
 public final class PeerConnectionMetricsEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

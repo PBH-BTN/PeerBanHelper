@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("alert")
+@TableName(value = "alert", autoResultMap = true)
 public final class AlertEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

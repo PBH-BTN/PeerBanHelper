@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("peer_records")
+@TableName(value = "peer_records", autoResultMap = true)
 public final class PeerRecordEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

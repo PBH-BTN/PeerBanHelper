@@ -59,13 +59,31 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
     @Override
     public List<UniversalFieldNumResult> countField(@NotNull String field, double percentFilter,
                                                     @Nullable String downloader, @Nullable Integer substringLength) {
-        return baseMapper.countField(field, percentFilter, downloader, substringLength);
+        String mappedField = mapField(field);
+        return baseMapper.countField(mappedField, percentFilter, downloader, substringLength);
     }
 
     @Override
     public List<UniversalFieldNumResult> sumField(@NotNull String field, double percentFilter,
                                                   @Nullable String downloader, @Nullable Integer substringLength) {
-        return baseMapper.sumField(field, percentFilter, downloader, substringLength);
+        String mappedField = mapField(field);
+        return baseMapper.sumField(mappedField, percentFilter, downloader, substringLength);
+    }
+
+    private String mapField(String field) {
+        return switch (field) {
+            case "torrent_name" -> "t.name";
+            case "module_name" -> "h.module_name";
+            case "peer_client_name" -> "h.peer_client_name";
+            case "peer_ip", "ip" -> "h.ip";
+            case "port" -> "h.port";
+            case "peer_id" -> "h.peer_id";
+            case "peer_uploaded" -> "h.peer_uploaded";
+            case "peer_downloaded" -> "h.peer_downloaded";
+            case "peer_progress" -> "h.peer_progress";
+            case "time" -> "h.ban_at";
+            default -> field; // Fallback to original, assuming it's a valid column or expression
+        };
     }
 
     @Override

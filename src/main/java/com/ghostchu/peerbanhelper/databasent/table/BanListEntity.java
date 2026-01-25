@@ -15,7 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("banlist")
+@TableName(value = "banlist", autoResultMap = true)
 public final class BanListEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

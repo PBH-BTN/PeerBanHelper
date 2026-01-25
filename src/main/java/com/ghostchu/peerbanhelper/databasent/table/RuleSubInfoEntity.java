@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("rule_sub_info")
+@TableName(value = "rule_sub_info", autoResultMap = true)
 public final class RuleSubInfoEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

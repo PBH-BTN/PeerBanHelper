@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("pcb_address")
+@TableName(value = "pcb_address", autoResultMap = true)
 public final class PCBAddressEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

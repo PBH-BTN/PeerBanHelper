@@ -34,7 +34,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
     public long getGlobalTotalConnectionsCount(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt) {
 		long total = 0;
 		try {
-			List<PeerConnectionMetricsEntity> entities = baseMapper.selectList(new QueryWrapper<PeerConnectionMetricsEntity>().between("timeframeAt", startAt, endAt));
+            List<PeerConnectionMetricsEntity> entities = baseMapper.selectList(new QueryWrapper<PeerConnectionMetricsEntity>().between("timeframe_at", startAt, endAt));
 			for (PeerConnectionMetricsEntity entity : entities) {
 				total += entity.getTotalConnections();
 			}
@@ -50,7 +50,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 		List<PeerConnectionMetricsDTO> result;
 
 		QueryWrapper<PeerConnectionMetricsEntity> wrapper = new QueryWrapper<PeerConnectionMetricsEntity>()
-				.between("timeframeAt", sinceAt, untilAt);
+                .between("timeframe_at", sinceAt, untilAt);
 		if (downloader != null && !downloader.isBlank()) {
 			wrapper.eq("downloader", downloader);
 		}
@@ -82,7 +82,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	@Override
 	public void saveAggregating(@NotNull List<PeerConnectionMetricsEntity> buffer, boolean overwrite) {
 		for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
-			PeerConnectionMetricsEntity entityInDb = baseMapper.selectOne(new QueryWrapper<PeerConnectionMetricsEntity>().eq("timeframeAt", peerConnectionMetricsEntity.getTimeframeAt()).eq("downloader", peerConnectionMetricsEntity.getDownloader()));
+            PeerConnectionMetricsEntity entityInDb = baseMapper.selectOne(new QueryWrapper<PeerConnectionMetricsEntity>().eq("timeframe_at", peerConnectionMetricsEntity.getTimeframeAt()).eq("downloader", peerConnectionMetricsEntity.getDownloader()));
 			if (entityInDb != null) {
 				if (overwrite) {
 					peerConnectionMetricsEntity.setId(entityInDb.getId());
@@ -146,7 +146,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	@Override
 	public void removeOutdatedData(OffsetDateTime beforeAt) {
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANING_UP));
-		var deleted = baseMapper.delete(new QueryWrapper<PeerConnectionMetricsEntity>().le("timeframeAt", beforeAt));
+        var deleted = baseMapper.delete(new QueryWrapper<PeerConnectionMetricsEntity>().le("timeframe_at", beforeAt));
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}
 

@@ -17,7 +17,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("torrents")
+@TableName(value = "torrents", autoResultMap = true)
 public final class TorrentEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

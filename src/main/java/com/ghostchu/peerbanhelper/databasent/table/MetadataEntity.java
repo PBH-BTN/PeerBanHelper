@@ -15,7 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("metadata")
+@TableName(value = "metadata", autoResultMap = true)
 public final class MetadataEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -65,9 +65,9 @@
 		</choose>
 		,
 		${field} AS field_sum,
-		t.infoHash AS torrentInfoHash,
-		t.name AS torrentName,
-		m.name AS module
+		t.infoHash AS torrent_info_hash,
+		t.name AS torrent_name,
+		m.name AS module_name
 		FROM history h
 		JOIN torrents t ON h.torrent_id = t.id
 		JOIN rules r ON h.rule_id = r.id
@@ -112,9 +112,9 @@
 			</otherwise>
 		</choose>
 		,
-		t.infoHash AS torrentInfoHash,
-		t.name AS torrentName,
-		m.name AS module
+		t.infoHash AS torrent_info_hash,
+		t.name AS torrent_name,
+		m.name AS module_name
 		FROM history h
 		JOIN torrents t ON h.torrent_id = t.id
 		JOIN rules r ON h.rule_id = r.id

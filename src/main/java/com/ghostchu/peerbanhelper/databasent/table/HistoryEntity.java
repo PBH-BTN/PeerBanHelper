@@ -23,7 +23,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("history")
+@TableName(value = "history", autoResultMap = true)
 public final class HistoryEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -62,7 +62,7 @@ public final class HistoryEntity implements Serializable {
     private String flags;
     @TableField(value = "downloader")
     private String downloader;
-    @TableField(value = "structured_data")
+    @TableField(value = "structured_data", typeHandler = JsonTypeHandlerForwarder.class)
     private Map<String, Object> structuredData;
     @TableField(value = "peer_geoip", typeHandler = JsonTypeHandlerForwarder.class)
     private IPGeoData peerGeoIp;

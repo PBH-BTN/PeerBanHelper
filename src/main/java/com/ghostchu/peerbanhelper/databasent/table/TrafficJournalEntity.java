@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
-@TableName("traffic_journal_v3")
+@TableName(value = "traffic_journal_v3", autoResultMap = true)
 public final class TrafficJournalEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -43,14 +43,14 @@
           <a-form :model="option" style="width: 25vh">
             <a-form-item field="field" :label="t('page.charts.options.field')">
               <a-select v-model="option.field" :trigger-props="{ autoFitPopupMinWidth: true }">
-                <a-option value="peerId">
-                  {{ t('page.charts.options.field.peerId') }}
+                <a-option value="peer_id">
+                  {{ t('page.charts.options.field.peer_id') }}
                 </a-option>
-                <a-option value="torrentName">
-                  {{ t('page.charts.options.field.torrentName') }}
+                <a-option value="torrent_name">
+                  {{ t('page.charts.options.field.torrent_name') }}
                 </a-option>
-                <a-option value="module">
-                  {{ t('page.charts.options.field.module') }}
+                <a-option value="module_name">
+                  {{ t('page.charts.options.field.module_name') }}
                 </a-option>
               </a-select>
             </a-form-item>
@@ -60,7 +60,7 @@
                 <a-typography-text>{{ t('page.charts.options.thresold') }}</a-typography-text>
               </a-space>
             </a-form-item>
-            <a-form-item v-if="option.field === 'peerId'" field="mergeSameVersion">
+            <a-form-item v-if="option.field === 'peer_id'" field="mergeSameVersion">
               <a-space>
                 <a-switch v-model="option.mergeSameVersion" />
                 <a-typography-text>{{ t('page.charts.options.mergeSame') }}</a-typography-text>
@@ -73,16 +73,16 @@
   </a-card>
 </template>
 <script lang="ts" setup>
-import { getAnalysisDataByField } from '@/service/charts'
-import { useDarkStore } from '@/stores/dark'
-import { PieChart } from 'echarts/charts'
-import { LegendComponent, TooltipComponent } from 'echarts/components'
-import { use } from 'echarts/core'
-import { SVGRenderer } from 'echarts/renderers'
-import { computed, reactive, ref, watch } from 'vue'
+import {getAnalysisDataByField} from '@/service/charts'
+import {useDarkStore} from '@/stores/dark'
+import {PieChart} from 'echarts/charts'
+import {LegendComponent, TooltipComponent} from 'echarts/components'
+import {use} from 'echarts/core'
+import {SVGRenderer} from 'echarts/renderers'
+import {computed, reactive, ref, watch} from 'vue'
 import VChart from 'vue-echarts'
-import { useI18n } from 'vue-i18n'
-import { useRequest } from 'vue-request'
+import {useI18n} from 'vue-i18n'
+import {useRequest} from 'vue-request'
 
 const { t } = useI18n()
 
@@ -90,7 +90,7 @@ use([TooltipComponent, LegendComponent, PieChart, SVGRenderer])
 const darkStore = useDarkStore()
 
 const option = reactive({
-  field: 'peerId' as 'peerId' | 'torrentName' | 'module',
+  field: 'peer_id' as 'peer_id' | 'torrent_name' | 'module_name',
   enableThreshold: true,
   mergeSameVersion: false
 })
@@ -161,14 +161,14 @@ const props = defineProps<{
 }>()
 
 const { loading, run, refresh, data } = useRequest(getAnalysisDataByField, {
-  defaultParams: ['peerId', true, props.downloader],
+  defaultParams: ['peer_id', true, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
       const nonEmptyData = data.data.map((it) => {
         if (it.data === '') it.data = t('page.charts.options.field.empty')
         return it
       })
-      if (option.mergeSameVersion && option.field === 'peerId') {
+      if (option.mergeSameVersion && option.field === 'peer_id') {
         const map = new Map<string, number>()
         nonEmptyData.forEach((it) => {
           let key = it.data
