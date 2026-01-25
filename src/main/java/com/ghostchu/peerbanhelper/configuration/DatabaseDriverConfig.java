@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.configuration;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
@@ -50,12 +49,13 @@ public class DatabaseDriverConfig {
         };
         var pagination = new PaginationInnerInterceptor(dbType);
         pagination.setMaxLimit(1000L);
-        interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor()); // 防止全表更新与删除插件
+        //interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor()); // 防止全表更新与删除插件
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         interceptor.addInnerInterceptor(pagination); // 如果配置多个插件, 切记分页最后添加
         // 如果有多数据源可以不配具体类型, 否则都建议配上具体的 DbType
         return interceptor;
     }
+
 
     @Bean
     public SqlSessionFactory sqlSessionFactory(MybatisPlusInterceptor interceptor, DatabaseDriver driver) throws Exception {
@@ -63,6 +63,7 @@ public class DatabaseDriverConfig {
         // DatabaseDriver 作为 Bean 注入，从中获取 DataSource，而不是依赖 Spring 上下文中的 DataSource Bean
         factoryBean.setDataSource(driver.getDataSource());
         factoryBean.setPlugins(interceptor);
+        //factoryBean.setTypeHandlers(new OffsetDateTimeTypeHandlerForwarder()); // 注册 OffsetDateTime 类型处理器
 
         // 关键逻辑：根据 Driver 提供的路径（例如 "mapper/mysql/**/*.xml"）动态构建 XML 扫描路径
         // 结果如: "classpath*:mapper/mysql/**/*.xml"

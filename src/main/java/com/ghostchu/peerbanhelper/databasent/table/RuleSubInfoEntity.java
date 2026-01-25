@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,7 +31,7 @@ public final class RuleSubInfoEntity implements Serializable {
     @TableField(value = "sub_url")
     private String subUrl;
     @TableField(value = "last_update")
-    private long lastUpdate;
+    private OffsetDateTime lastUpdate;
     @TableField(value = "ent_count")
     private int entCount;
 }

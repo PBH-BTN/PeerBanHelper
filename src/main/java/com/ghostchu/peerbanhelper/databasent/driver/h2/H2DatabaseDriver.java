@@ -44,7 +44,7 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     public @NotNull DataSource getDataSource() {
         // Hikari CP SQLite DataSource implementation
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE");
+        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL");
         config.setDriverClassName("org.h2.Driver");
         config.setMaximumPoolSize(section.getInt("pool.max-size"));
         config.setMinimumIdle(section.getInt("pool.min-idle"));

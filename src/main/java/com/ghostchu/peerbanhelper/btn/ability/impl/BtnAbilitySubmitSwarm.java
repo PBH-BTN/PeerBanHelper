@@ -105,6 +105,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                         .gt("id", id)
                         .orderByAsc("last_time_seen", "id")
                 );
+                if (result.getRecords().isEmpty()) break;
                 var resultPair = createSubmitRequest(result.getRecords());
                 setMemCursor(resultPair.getLeft(), resultPair.getRight());
                 requests++;

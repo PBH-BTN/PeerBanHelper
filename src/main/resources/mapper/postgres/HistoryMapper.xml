@@ -2,4 +2,143 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper">
 
+	<!-- 基础字段映射 -->
+	<resultMap id="PeerBanCountMap" type="com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount">
+		<result column="peerIp" property="peerIp"/>
+		<result column="count" property="count"/>
+	</resultMap>
+
+	<resultMap id="UniversalFieldNumResultMap" type="com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult">
+		<result column="data" property="data"/>
+		<result column="count" property="count"/>
+		<result column="percent" property="percent"/>
+	</resultMap>
+
+	<!-- 封禁IP查询（带过滤） -->
+	<select id="getBannedIpsWithFilter" resultMap="PeerBanCountMap">
+		SELECT
+		ip AS peerIp,
+		COUNT(*) AS count
+		FROM history
+		<if test="filter != null and filter != ''">
+			WHERE ip LIKE CONCAT(#{filter}, '%')
+		</if>
+		GROUP BY ip
+		ORDER BY count DESC
+	</select>
+
+	<!-- 封禁IP查询（无过滤） -->
+	<select id="getBannedIpsWithoutFilter" resultMap="PeerBanCountMap">
+		SELECT ip       AS peerIp,
+			   COUNT(*) AS count
+		FROM history
+		GROUP BY ip
+		ORDER BY count DESC
+	</select>
+
+	<!-- 统计唯一IP数量（带过滤） -->
+	<select id="countDistinctIpWithFilter" resultType="long">
+		SELECT COUNT(DISTINCT ip)
+		FROM history
+		<if test="filter != null and filter != ''">
+			WHERE ip LIKE CONCAT(#{filter}, '%')
+		</if>
+	</select>
+
+	<!-- 统计所有唯一IP数量 -->
+	<select id="countDistinctIp" resultType="long">
+		SELECT COUNT(DISTINCT ip)
+		FROM history
+	</select>
+
+	<!-- 字段聚合统计 -->
+	<select id="sumField" resultMap="UniversalFieldNumResultMap">
+		WITH filtered_data AS (
+		SELECT
+		<choose>
+			<when test="substringLength != null">
+				SUBSTRING(${field}, 1, #{substringLength}) AS field_value
+			</when>
+			<otherwise>
+				${field} AS field_value
+			</otherwise>
+		</choose>
+		,
+		${field} AS field_sum,
+		t.infoHash AS torrentInfoHash,
+		t.name AS torrentName,
+		m.name AS module
+		FROM history h
+		JOIN torrents t ON h.torrent_id = t.id
+		JOIN rules r ON h.rule_id = r.id
+		JOIN modules m ON r.module_id = m.id
+		<if test="downloader != null and downloader != ''">
+			WHERE h.downloader = #{downloader}
+		</if>
+		),
+		total_sum AS (
+		SELECT SUM(field_sum) AS total
+		FROM filtered_data
+		WHERE field_sum IS NOT NULL
+		)
+		SELECT
+		fd.field_value AS data,
+		SUM(fd.field_sum) AS count,
+		CASE
+		WHEN ts.total > 0
+		THEN SUM(fd.field_sum) / ts.total
+		ELSE 0
+		END AS percent
+		FROM filtered_data fd
+		CROSS JOIN total_sum ts
+		WHERE fd.field_sum IS NOT NULL
+		GROUP BY fd.field_value, ts.total
+		HAVING
+		(SUM(fd.field_sum) / NULLIF(ts.total, 0)) > #{percentFilter}
+		ORDER BY count DESC;
+
+	</select>
+
+	<!-- 字段计数统计 -->
+	<select id="countField" resultMap="UniversalFieldNumResultMap">
+		WITH filtered_data AS (
+		SELECT
+		<choose>
+			<when test="substringLength != null">
+				SUBSTRING(${field}, 1, #{substringLength}) AS field_value
+			</when>
+			<otherwise>
+				${field} AS field_value
+			</otherwise>
+		</choose>
+		,
+		t.infoHash AS torrentInfoHash,
+		t.name AS torrentName,
+		m.name AS module
+		FROM history h
+		JOIN torrents t ON h.torrent_id = t.id
+		JOIN rules r ON h.rule_id = r.id
+		JOIN modules m ON r.module_id = m.id
+		<if test="downloader != null and downloader != ''">
+			WHERE h.downloader = #{downloader}
+		</if>
+		),
+		total_count AS (
+		SELECT COUNT(*) AS total
+		FROM filtered_data
+		WHERE field_value IS NOT NULL
+		)
+		SELECT
+		fd.field_value AS data,
+		COUNT(*) AS count,
+		IF(tc.total > 0, COUNT(*) / tc.total, 0) AS percent
+		FROM filtered_data fd
+		CROSS JOIN total_count tc
+		WHERE fd.field_value IS NOT NULL
+		GROUP BY fd.field_value, tc.total
+		HAVING
+		(COUNT(*) / NULLIF(tc.total, 0)) > #{percentFilter}
+		ORDER BY count DESC;
+
+	</select>
 </mapper>

@@ -1,12 +1,15 @@
 package com.ghostchu.peerbanhelper.alert;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.push.PushManagerImpl;
+import com.google.common.eventbus.Subscribe;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -27,10 +30,17 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class AlertManagerImpl implements AlertManager {
     private final AlertService alertDao;
     private final PushManagerImpl pushManager;
+    private final DatabaseDriver databaseDriver;
 
-    public AlertManagerImpl(AlertService alertDao, PushManagerImpl pushManager) {
+    public AlertManagerImpl(AlertService alertDao, PushManagerImpl pushManager, DatabaseDriver databaseDriver) {
         this.alertDao = alertDao;
         this.pushManager = pushManager;
+        this.databaseDriver = databaseDriver;
+        Main.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void init(PBHServerStartedEvent event) {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
     }
 

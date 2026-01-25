@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -12,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +32,17 @@ public final class PersistMetrics implements BasicMetrics {
     private final HistoryService historyDao;
     private final IPDBManager ipdbManager;
 
+
     public PersistMetrics(HistoryService historyDao, TorrentService torrentDao, InMemoryMetrics inMemory, IPDBManager ipdbManager) {
         this.historyDao = historyDao;
         this.torrentDao = torrentDao;
         this.inMemory = inMemory;
         this.ipdbManager = ipdbManager;
+        Main.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void init(PBHServerStartedEvent event) {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
     }
 

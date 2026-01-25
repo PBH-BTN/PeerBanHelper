@@ -1,6 +1,37 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsMapper">
+
+	<insert id="createOrUpdate">
+		INSERT INTO peer_connection_metrics (timeframe_at, downloader, total_connections, incoming_connections,
+											 remote_refuse_transfer_to_client, remote_accept_transfer_to_client,
+											 local_refuse_transfer_to_peer, local_accept_transfer_to_peer,
+											 local_not_interested, question_status, optimistic_unchoke, from_dht,
+											 from_pex, from_lsd, from_tracker_or_other, rc4_encrypted,
+											 plain_text_encrypted, utp_socket, tcp_socket)
+		VALUES (#{timeframeAt}, #{downloader}, #{totalConnections}, #{incomingConnections},
+				#{remoteRefuseTransferToClient}, #{remoteAcceptTransferToClient},
+				#{localRefuseTransferToPeer}, #{localAcceptTransferToPeer},
+				#{localNotInterested}, #{questionStatus}, #{optimisticUnchoke},
+				#{fromDht}, #{fromPex}, #{fromLsd}, #{fromTrackerOrOther},
+				#{rc4Encrypted}, #{plainTextEncrypted}, #{utpSocket}, #{tcpSocket})
+		ON DUPLICATE KEY UPDATE total_connections                = #{totalConnections},
+								incoming_connections             = #{incomingConnections},
+								remote_refuse_transfer_to_client = #{remoteRefuseTransferToClient},
+								remote_accept_transfer_to_client = #{remoteAcceptTransferToClient},
+								local_refuse_transfer_to_peer    = #{localRefuseTransferToPeer},
+								local_accept_transfer_to_peer    = #{localAcceptTransferToPeer},
+								local_not_interested             = #{localNotInterested},
+								question_status                  = #{questionStatus},
+								optimistic_unchoke               = #{optimisticUnchoke},
+								from_dht                         = #{fromDht},
+								from_pex                         = #{fromPex},
+								from_lsd                         = #{fromLsd},
+								from_tracker_or_other            = #{fromTrackerOrOther},
+								rc4_encrypted                    = #{rc4Encrypted},
+								plain_text_encrypted             = #{plainTextEncrypted},
+								utp_socket                       = #{utpSocket},
+								tcp_socket                       = #{tcpSocket}
+	</insert>
 
 </mapper>

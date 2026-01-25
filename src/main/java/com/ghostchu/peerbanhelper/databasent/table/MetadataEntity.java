@@ -20,8 +20,24 @@ public final class MetadataEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "key")
-    private String key;
-    @TableField(value = "value")
-    private String value;
+    @TableId(value = "k")
+    private String k;
+    @TableField(value = "v")
+    private String v;
+
+    public String getKey() {
+        return k;
+    }
+
+    public String getValue() {
+        return v;
+    }
+
+    public void setKey(String k) {
+        this.k = k;
+    }
+
+    public void setValue(String v) {
+        this.v = v;
+    }
 }

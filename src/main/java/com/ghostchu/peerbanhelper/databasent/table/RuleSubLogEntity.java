@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,7 +28,7 @@ public final class RuleSubLogEntity implements Serializable {
     @TableField(value = "rule_id")
     private String ruleId;
     @TableField(value = "update_time")
-    private long updateTime;
+    private OffsetDateTime updateTime;
     @TableField(value = "count")
     private int count;
     @TableField(value = "update_type")

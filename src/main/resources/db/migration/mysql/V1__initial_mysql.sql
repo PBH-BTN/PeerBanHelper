@@ -7,14 +7,14 @@ CREATE TABLE alert
     identifier VARCHAR(255) NOT NULL,
     title      VARCHAR(255) NOT NULL,
     content    LONGTEXT     NOT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE banlist
 (
     address  VARCHAR(255) NOT NULL,
     metadata LONGTEXT     NOT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (address)
+    PRIMARY KEY (address)
 );
 
 CREATE TABLE `history`
@@ -38,14 +38,14 @@ CREATE TABLE `history`
     downloader       VARCHAR(255) NOT NULL,
     structured_data  JSON NULL,
     peer_geoip       JSON NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE metadata
 (
-    `key` VARCHAR(255) NOT NULL,
-    value LONGTEXT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (`key`)
+    `k` VARCHAR(255) NOT NULL,
+    `v` LONGTEXT NULL,
+    PRIMARY KEY (`k`)
 );
 
 CREATE TABLE pcb_address
@@ -65,7 +65,7 @@ CREATE TABLE pcb_address
     ban_delay_window_end_at          datetime     NOT NULL,
     fast_pcb_test_execute_at         datetime     NOT NULL,
     last_torrent_completed_size      datetime     NOT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE pcb_range
@@ -85,7 +85,7 @@ CREATE TABLE pcb_range
     ban_delay_window_end_at          datetime     NOT NULL,
     fast_pcb_test_execute_at         datetime     NOT NULL,
     last_torrent_completed_size      datetime     NOT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE peer_connection_metrics
@@ -110,7 +110,7 @@ CREATE TABLE peer_connection_metrics
     plain_text_encrypted             BIGINT UNSIGNED                NOT NULL,
     utp_socket                       BIGINT UNSIGNED                NOT NULL,
     tcp_socket                       BIGINT UNSIGNED                NOT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE peer_connection_metrics_track
@@ -124,7 +124,7 @@ CREATE TABLE peer_connection_metrics_track
     peer_id      VARCHAR(255) NOT NULL,
     client_name TEXT NULL,
     last_flags   VARCHAR(255) NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE peer_records
@@ -145,7 +145,7 @@ CREATE TABLE peer_records
     last_flags        VARCHAR(255) NULL,
     first_time_seen   datetime     NOT NULL,
     last_time_seen    datetime     NOT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE torrents
@@ -155,7 +155,7 @@ CREATE TABLE torrents
     name            VARCHAR(255) NOT NULL,
     size            BIGINT UNSIGNED  NOT NULL,
     private_torrent TINYINT UNSIGNED NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE traffic_journal_v3
@@ -171,7 +171,7 @@ CREATE TABLE traffic_journal_v3
     protocol_overall_uploaded            BIGINT UNSIGNED                NOT NULL,
     protocol_overall_downloaded_at_start BIGINT UNSIGNED                NOT NULL,
     protocol_overall_downloaded          BIGINT UNSIGNED                NOT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE `tracked_swarm`
@@ -214,13 +214,13 @@ CREATE TABLE `rule_sub_info`
     INDEX         `idx_rule_sub_info_rule_id`(`rule_id`)
 );
 
-CREATE TABLE `rule_sub_logs`
+CREATE TABLE `rule_sub_log`
 (
     `id`          bigint UNSIGNED NOT NULL AUTO_INCREMENT,
     `rule_id`     varchar(255) NOT NULL,
     `update_time` datetime     NOT NULL,
     `count`       int          NOT NULL,
-    `update_ype`  varchar(255) NOT NULL,
+    `update_type` varchar(255) NOT NULL,
     PRIMARY KEY (`id`),
     INDEX         `idx_rule_sub_logs_rule_id`(`rule_id`, `update_time` DESC)
 );

@@ -99,6 +99,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             Page<HistoryEntity> page = new Page<>(1, 100); // 每页处理 100 条
             do {
                 var result = historyDao.page(page, new QueryWrapper<HistoryEntity>().gt("id", getMemCursor()));
+                if (result.getRecords().isEmpty()) break;
                 setMemCursor(createSubmitRequest(result.getRecords()));
                 requests++;
                 size += result.getRecords().size();

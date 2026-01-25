@@ -49,6 +49,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -271,7 +272,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                     result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_LOAD_SUCCESS, name), null));
                                 });
                                 // 更新日志
-                                ruleSubLogsDao.save(new RuleSubLogEntity(null, ruleId, System.currentTimeMillis(), ent_count, updateType));
+                                ruleSubLogsDao.save(new RuleSubLogEntity(null, ruleId, OffsetDateTime.now(), ent_count, updateType));
                                 result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATED, name), null));
                             } else {
                                 result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
@@ -416,7 +417,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             return null;
         }
         var result = ruleSubLogsDao.getLastLog(ruleId);
-        long lastUpdate = result == null ? 0 : result.getUpdateTime();
+        OffsetDateTime lastUpdate = result == null ? OffsetDateTime.MIN : result.getUpdateTime();
         int count = result == null ? 0 : result.getCount();
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
     }

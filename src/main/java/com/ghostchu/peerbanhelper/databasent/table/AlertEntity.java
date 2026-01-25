@@ -25,7 +25,7 @@ public final class AlertEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "hash", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @TableField(value = "create_at")
     private OffsetDateTime createAt;

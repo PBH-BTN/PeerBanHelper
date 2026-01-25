@@ -37,6 +37,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 42)
+    public void databaseSection(YamlConfiguration bundle) {
+        conf.set("database", bundle.get("database"));
+    }
+
     @UpdateScript(version = 41)
     public void privacyAnalytics(YamlConfiguration bundle) {
         conf.set("privacy.analytics", bundle.get("privacy.analytics"));
