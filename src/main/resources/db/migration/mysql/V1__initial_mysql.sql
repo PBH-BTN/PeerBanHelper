@@ -6,14 +6,14 @@ CREATE TABLE alert
     level      VARCHAR(255) NOT NULL,
     identifier VARCHAR(255) NOT NULL,
     title      VARCHAR(255) NOT NULL,
-    content    LONGTEXT     NOT NULL,
+    content TEXT NOT NULL,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE banlist
 (
     address  VARCHAR(255) NOT NULL,
-    metadata LONGTEXT     NOT NULL,
+    metadata MEDIUMTEXT NOT NULL,
     PRIMARY KEY (address)
 );
 
@@ -33,11 +33,11 @@ CREATE TABLE `history`
     torrent_id       BIGINT UNSIGNED                NOT NULL,
     module_name      VARCHAR(255) NOT NULL,
     rule_name        VARCHAR(255) NOT NULL,
-    `description`    LONGTEXT     NOT NULL,
+    `description`   TEXT NOT NULL,
     flags            VARCHAR(255) NULL,
     downloader       VARCHAR(255) NOT NULL,
-    structured_data  JSON NULL,
-    peer_geoip       JSON NULL,
+    structured_data TEXT NULL,
+    peer_geoip      TEXT NULL,
     PRIMARY KEY (id)
 );
 
@@ -144,7 +144,7 @@ CREATE TABLE peer_records
     last_flags        VARCHAR(255) NULL,
     first_time_seen   datetime     NOT NULL,
     last_time_seen    datetime     NOT NULL,
-    peer_geoip JSON NULL,
+    peer_geoip TEXT NULL,
     PRIMARY KEY (id)
 );
 

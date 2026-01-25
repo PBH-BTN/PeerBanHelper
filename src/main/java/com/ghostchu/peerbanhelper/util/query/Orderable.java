@@ -49,6 +49,9 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
     }
 
     public <T> QueryWrapper<T> apply(QueryWrapper<T> queryBuilder) {
+        if (queryBuilder == null) {
+            return null;
+        }
         for (Map.Entry<String, Boolean> entry : entrySet()) {
             queryBuilder.orderBy(true, entry.getValue(), entry.getKey());
         }
