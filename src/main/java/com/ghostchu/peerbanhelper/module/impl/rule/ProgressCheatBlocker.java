@@ -385,11 +385,11 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private @Nullable CheckResult fastPcbTest(PCBAddressEntity addressEntity, PCBRangeEntity rangeEntity, long computedUploaded, long torrentSize, StructuredData<String, Object> structuredData, Downloader downloader) {
         if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize) && downloader.getFeatureFlags().contains(DownloaderFeatureFlag.UNBAN_IP)) {
             // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
-            if (addressEntity.getFastPcbTestExecuteAt() <= 0 || rangeEntity.getFastPcbTestExecuteAt() <= 0) {
+            if (addressEntity.getFastPcbTestExecuteAt().isEqual(OffsetDateTime.MIN) || rangeEntity.getFastPcbTestExecuteAt().isEqual(OffsetDateTime.MIN)) {
                 // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
                 if (computedUploaded >= (fastPcbTestPercentage * torrentSize)) {
-                    addressEntity.setFastPcbTestExecuteAt(computedUploaded);
-                    rangeEntity.setFastPcbTestExecuteAt(computedUploaded);
+                    addressEntity.setFastPcbTestExecuteAt(OffsetDateTime.now());
+                    rangeEntity.setFastPcbTestExecuteAt(OffsetDateTime.now());
                     return new CheckResult(getClass(), PeerAction.BAN_FOR_DISCONNECT, fastPcbTestBlockingDuration,
                             new TranslationComponent(Lang.PCB_RULE_PEER_PROGRESS_CHEAT_TESTING),
                             new TranslationComponent(Lang.PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING),
@@ -449,12 +449,12 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
-                        rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, 0, 0);
+                        rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, OffsetDateTime.MIN, 0);
                         pcbRangeDao.save(rangeEntity);
                     }
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
-                        pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, 0L, 0);
+                        pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, OffsetDateTime.MIN, 0);
                         pcbAddressDao.save(pcbAddressEntity);
                     }
                     return Pair.of(rangeEntity, pcbAddressEntity);

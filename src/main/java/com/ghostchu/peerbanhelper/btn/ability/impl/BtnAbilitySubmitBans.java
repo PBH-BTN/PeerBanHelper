@@ -84,11 +84,11 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     }
 
     private boolean setMemCursor(long position) {
-        return metadataDao.set("BtnAbilitySubmitBans.memCursor", String.valueOf(position));
+        return metadataDao.set("BtnAbilitySubmitBans.cursor", String.valueOf(position));
     }
 
     private long getMemCursor() {
-        return Long.parseLong(metadataDao.getOrDefault("BtnAbilitySubmitBans.memCursor", "0"));
+        return Long.parseLong(metadataDao.getOrDefault("BtnAbilitySubmitBans.cursor", "0"));
     }
 
     private void submit() {

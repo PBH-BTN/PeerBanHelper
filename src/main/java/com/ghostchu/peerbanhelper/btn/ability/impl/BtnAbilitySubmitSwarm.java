@@ -80,11 +80,11 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     }
 
     private boolean setMemCursor(long lastTimeSeen, long id) {
-        return metadataDao.set("BtnAbilitySubmitSwarm.memCursor", lastTimeSeen + "," + id);
+        return metadataDao.set("BtnAbilitySubmitSwarm.cursor", lastTimeSeen + "," + id);
     }
 
     private Pair<Long, Long> getMemCursor() {
-        String[] memCursor = metadataDao.getOrDefault("BtnAbilitySubmitSwarm.memCursor", "0,0").split(",");
+        String[] memCursor = metadataDao.getOrDefault("BtnAbilitySubmitSwarm.cursor", "0,0").split(",");
         return Pair.of(Long.parseLong(memCursor[0]), Long.parseLong(memCursor[1]));
     }
 

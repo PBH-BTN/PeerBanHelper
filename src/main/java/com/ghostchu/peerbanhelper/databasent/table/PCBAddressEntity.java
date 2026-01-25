@@ -50,7 +50,7 @@ public final class PCBAddressEntity implements Serializable {
     @TableField(value = "ban_delay_window_end_at")
     private OffsetDateTime banDelayWindowEndAt;
     @TableField(value = "fast_pcb_test_execute_at")
-    private long fastPcbTestExecuteAt;
+    private OffsetDateTime fastPcbTestExecuteAt;
     @TableField(value = "last_torrent_completed_size")
     private long lastTorrentCompletedSize;
 }
