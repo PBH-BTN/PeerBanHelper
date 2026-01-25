@@ -83,7 +83,7 @@ CREATE TABLE pcb_range
     downloader                       VARCHAR(255) NOT NULL,
     ban_delay_window_end_at          datetime     NOT NULL,
     fast_pcb_test_execute_at         datetime     NOT NULL,
-    last_torrent_completed_size      datetime     NOT NULL,
+    last_torrent_completed_size BIGINT NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -229,7 +229,7 @@ ALTER TABLE pcb_address
     ADD CONSTRAINT idx_pcb_address_unique UNIQUE (ip, port, torrent_id, downloader);
 
 ALTER TABLE pcb_range
-    ADD CONSTRAINT idx_pcb_range_unique UNIQUE (`range`, port, torrent_id, downloader);
+    ADD CONSTRAINT idx_pcb_range_unique UNIQUE (`range`, torrent_id, downloader);
 
 ALTER TABLE peer_connection_metrics_track
     ADD CONSTRAINT idx_peer_connection_metrics_track UNIQUE (timeframe_at, downloader, torrent_id, address, port);
