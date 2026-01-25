@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.databasent.service.BanListService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -87,7 +86,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private boolean globalPaused = false;
     private final AlertManager alertManager;
-    private final Database databaseManager;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
 
@@ -95,7 +93,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                 @Qualifier("persistMetrics") BasicMetrics metrics,
                                 ModuleManagerImpl moduleManager, BanListService banListDao,
                                 DNSLookup dnsLookup, Laboratory laboratory,
-                                AlertManager alertManager, Database databaseManager) {
+                                AlertManager alertManager) {
         this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.metrics = metrics;
@@ -104,7 +102,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.moduleManager = moduleManager;
         this.laboratory = laboratory;
         this.alertManager = alertManager;
-        this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
     }
 

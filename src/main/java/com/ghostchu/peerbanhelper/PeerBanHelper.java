@@ -2,13 +2,11 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
-import com.ghostchu.peerbanhelper.module.impl.background.SQLiteOptimizerModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.PeerRecodingServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModule;
@@ -52,8 +50,6 @@ public class PeerBanHelper implements Reloadable {
     private DownloaderServerImpl downloaderServer;
     @Getter
     private int httpdPort;
-    @Autowired
-    private Database databaseManager;
     @Autowired
     private ModuleManager moduleManager;
     @Autowired
@@ -183,7 +179,6 @@ public class PeerBanHelper implements Reloadable {
         // place some clean code here
         downloaderServer.close();
         this.moduleManager.unregisterAll();
-        this.databaseManager.close();
         try {
             downloaderManager.close();
         } catch (Exception e) {
@@ -234,9 +229,6 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(BtnNetworkOnline.class);
         moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
-        if (ExternalSwitch.parseBoolean("pbh.modules.peerclientnameblackrulelist.testing", false)) {
-            moduleManager.register(PeerNameBlackRuleList.class);
-        }
         //moduleManager.register(PTRBlacklist.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);
@@ -256,7 +248,6 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
         moduleManager.register(PBHUtilitiesController.class);
-        moduleManager.register(SQLiteOptimizerModule.class);
         moduleManager.register(SwarmTrackingModule.class);
         // moduleManager.register(MCPController.class);
         moduleManager.register(PBHAutoStunController.class);
