@@ -5,7 +5,7 @@ import urlJoin from 'url-join'
 import {getCommonHeader} from './utils'
 
 export async function getAnalysisDataByField(
-    field: 'peer_id' | 'torrent_name' | 'module_name',
+    field: 'peerId' | 'torrentName' | 'module',
   filter = false,
   downloader?: string
 ): Promise<CommonResponse<AnalysisField[]>> {

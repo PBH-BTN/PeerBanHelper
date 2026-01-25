@@ -43,14 +43,14 @@
           <a-form :model="option" style="width: 25vh">
             <a-form-item field="field" :label="t('page.charts.options.field')">
               <a-select v-model="option.field" :trigger-props="{ autoFitPopupMinWidth: true }">
-                <a-option value="peer_id">
-                  {{ t('page.charts.options.field.peer_id') }}
+                <a-option value="peerId">
+                  {{ t('page.charts.options.field.peerId') }}
                 </a-option>
-                <a-option value="torrent_name">
-                  {{ t('page.charts.options.field.torrent_name') }}
+                <a-option value="torrentName">
+                  {{ t('page.charts.options.field.torrentName') }}
                 </a-option>
-                <a-option value="module_name">
-                  {{ t('page.charts.options.field.module_name') }}
+                <a-option value="module">
+                  {{ t('page.charts.options.field.module') }}
                 </a-option>
               </a-select>
             </a-form-item>
@@ -60,7 +60,7 @@
                 <a-typography-text>{{ t('page.charts.options.thresold') }}</a-typography-text>
               </a-space>
             </a-form-item>
-            <a-form-item v-if="option.field === 'peer_id'" field="mergeSameVersion">
+            <a-form-item v-if="option.field === 'peerId'" field="mergeSameVersion">
               <a-space>
                 <a-switch v-model="option.mergeSameVersion" />
                 <a-typography-text>{{ t('page.charts.options.mergeSame') }}</a-typography-text>
@@ -90,7 +90,7 @@ use([TooltipComponent, LegendComponent, PieChart, SVGRenderer])
 const darkStore = useDarkStore()
 
 const option = reactive({
-  field: 'peer_id' as 'peer_id' | 'torrent_name' | 'module_name',
+  field: 'peerId' as 'peerId' | 'torrentName' | 'module',
   enableThreshold: true,
   mergeSameVersion: false
 })
@@ -161,14 +161,14 @@ const props = defineProps<{
 }>()
 
 const { loading, run, refresh, data } = useRequest(getAnalysisDataByField, {
-  defaultParams: ['peer_id', true, props.downloader],
+  defaultParams: ['peerId', true, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
       const nonEmptyData = data.data.map((it) => {
         if (it.data === '') it.data = t('page.charts.options.field.empty')
         return it
       })
-      if (option.mergeSameVersion && option.field === 'peer_id') {
+      if (option.mergeSameVersion && option.field === 'peerId') {
         const map = new Map<string, number>()
         nonEmptyData.forEach((it) => {
           let key = it.data
