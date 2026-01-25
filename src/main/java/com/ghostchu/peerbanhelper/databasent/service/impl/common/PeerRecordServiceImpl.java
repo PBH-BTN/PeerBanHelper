@@ -192,6 +192,11 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         return counts.stream().collect(Collectors.toMap(TorrentCount::getTorrentId, TorrentCount::getCount));
     }
 
+    @Override
+    public List<String> getDistinctIps(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt, @Nullable String downloader) {
+        return baseMapper.getDistinctIps(startAt, endAt, downloader);
+    }
+
 
     public record BatchHandleTasks(OffsetDateTime timestamp, String downloader, TorrentWrapper torrent,
                                    PeerWrapper peer) {

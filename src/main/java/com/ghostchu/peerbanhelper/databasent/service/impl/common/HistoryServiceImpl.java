@@ -103,4 +103,9 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         List<TorrentCount> counts = baseMapper.countByTorrentIds(torrentIds);
         return counts.stream().collect(Collectors.toMap(TorrentCount::getTorrentId, TorrentCount::getCount));
     }
+
+    @Override
+    public List<String> getDistinctIps(@NotNull OffsetDateTime start, @NotNull OffsetDateTime end, @Nullable String downloader) {
+        return baseMapper.getDistinctIps(start, end, downloader);
+    }
 }

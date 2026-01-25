@@ -70,4 +70,13 @@
         </foreach>
         GROUP BY torrent_id
     </select>
+
+    <select id="getDistinctIps" resultType="java.lang.String">
+        SELECT DISTINCT address
+        FROM peer_records
+        WHERE lastTimeSeen &gt;= #{start} AND lastTimeSeen &lt;= #{end}
+        <if test="downloader != null and downloader != ''">
+            AND downloader = #{downloader}
+        </if>
+    </select>
 </mapper>

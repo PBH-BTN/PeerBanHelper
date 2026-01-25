@@ -34,4 +34,8 @@ public interface HistoryService extends IService<HistoryEntity> {
     IPage<HistoryEntity> getBanLogs(Page<HistoryEntity> pageRequest, Orderable orderable);
 
     Map<Long, Long> countByTorrentIds(@NotNull List<Long> torrentIds);
+
+    List<String> getDistinctIps(@NotNull java.time.OffsetDateTime start,
+                                @NotNull java.time.OffsetDateTime end,
+                                @Nullable String downloader);
 }

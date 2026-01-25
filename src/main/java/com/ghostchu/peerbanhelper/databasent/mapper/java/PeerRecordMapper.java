@@ -27,4 +27,8 @@ public interface PeerRecordMapper extends BaseMapper<PeerRecordEntity> {
     @NotNull Page<ClientAnalyseResult> queryClientAnalyse(@NotNull Page<ClientAnalyseResult> page, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt, @Nullable String downloader, @NotNull String orderBySql);
 
     List<TorrentCount> countByTorrentIds(@Param("torrentIds") List<Long> torrentIds);
+
+    List<String> getDistinctIps(@Param("start") java.time.OffsetDateTime start,
+                                @Param("end") java.time.OffsetDateTime end,
+                                @Param("downloader") String downloader);
 }

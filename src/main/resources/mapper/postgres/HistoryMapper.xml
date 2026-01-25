@@ -101,45 +101,63 @@
 
 	<!-- 字段计数统计 -->
 	<select id="countField" resultMap="UniversalFieldNumResultMap">
-		WITH filtered_data AS (
+        <bind name="dbField" value="
+            field == 'torrent_name' ? 't.name' :
+            field == 'module_name' ? 'h.module_name' :
+            field == 'peer_client_name' ? 'h.peer_client_name' :
+            (field == 'peer_ip' or field == 'ip') ? 'h.ip' :
+            field == 'port' ? 'h.port' :
+            field == 'peer_id' ? 'h.peer_id' :
+            field == 'peer_uploaded' ? 'h.peer_uploaded' :
+            field == 'peer_downloaded' ? 'h.peer_downloaded' :
+            field == 'peer_progress' ? 'h.peer_progress' :
+            field == 'time' ? 'h.ban_at' :
+            field
+        " />
+		WITH counts AS (
 		SELECT
 		<choose>
 			<when test="substringLength != null">
-				SUBSTRING(${field}, 1, #{substringLength}) AS field_value
+				SUBSTRING(${dbField}, 1, #{substringLength})
 			</when>
 			<otherwise>
-				${field} AS field_value
+				${dbField}
 			</otherwise>
 		</choose>
-		,
-		t.infoHash AS torrent_info_hash,
-		t.name AS torrent_name,
-		m.name AS module_name
+		AS data,
+		COUNT(*) AS count
 		FROM history h
-		JOIN torrents t ON h.torrent_id = t.id
-		JOIN rules r ON h.rule_id = r.id
-		JOIN modules m ON r.module_id = m.id
-		<if test="downloader != null and downloader != ''">
-			WHERE h.downloader = #{downloader}
+		<if test="field == 't.name' or field == 'torrent_name'">
+			JOIN torrents t ON h.torrent_id = t.id
 		</if>
+		<where>
+			<if test="downloader != null and downloader != ''">
+				AND h.downloader = #{downloader}
+			</if>
+			AND ${dbField} IS NOT NULL
+		</where>
+		GROUP BY data
 		),
-		total_count AS (
-		SELECT COUNT(*) AS total
-		FROM filtered_data
-		WHERE field_value IS NOT NULL
+		total AS (
+		SELECT COUNT(*) AS total FROM history h
+		<if test="field == 't.name' or field == 'torrent_name'">
+			JOIN torrents t ON h.torrent_id = t.id
+		</if>
+		<where>
+			<if test="downloader != null and downloader != ''">
+				AND h.downloader = #{downloader}
+			</if>
+			AND ${dbField} IS NOT NULL
+		</where>
 		)
 		SELECT
-		fd.field_value AS data,
-		COUNT(*) AS count,
-		IF(tc.total > 0, COUNT(*) / tc.total, 0) AS percent
-		FROM filtered_data fd
-		CROSS JOIN total_count tc
-		WHERE fd.field_value IS NOT NULL
-		GROUP BY fd.field_value, tc.total
-		HAVING
-		(COUNT(*) / NULLIF(tc.total, 0)) > #{percentFilter}
-		ORDER BY count DESC;
-
+		c.data,
+		c.count,
+		CAST(c.count AS double precision) / NULLIF(t.total, 0) AS percent
+		FROM counts c
+		CROSS JOIN total t
+		WHERE (CAST(c.count AS double precision) / NULLIF(t.total, 0)) &gt; #{percentFilter}
+		ORDER BY c.count DESC
 	</select>
 
 	<!-- 批量统计Torrent的封禁数量 -->
@@ -153,5 +171,14 @@
 			#{id}
 		</foreach>
 		GROUP BY torrent_id
+	</select>
+
+	<select id="getDistinctIps" resultType="java.lang.String">
+		SELECT DISTINCT ip
+		FROM history
+		WHERE ban_at &gt;= #{start} AND ban_at &lt;= #{end}
+		<if test="downloader != null and downloader != ''">
+			AND downloader = #{downloader}
+		</if>
 	</select>
 </mapper>

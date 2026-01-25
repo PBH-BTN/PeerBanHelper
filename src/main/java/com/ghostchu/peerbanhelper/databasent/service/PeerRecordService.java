@@ -46,4 +46,8 @@ public interface PeerRecordService extends IService<PeerRecordEntity> {
     @NotNull Page<PeerRecordEntity> queryAccessHistoryByTorrentId(@NotNull Page<PeerRecordEntity> page, @NotNull Long id, @NotNull Orderable orderable);
 
     Map<Long, Long> countByTorrentIds(@NotNull List<Long> torrentIds);
+
+    List<String> getDistinctIps(@NotNull java.time.OffsetDateTime startAt,
+                                @NotNull java.time.OffsetDateTime endAt,
+                                @Nullable String downloader);
 }

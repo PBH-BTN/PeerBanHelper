@@ -123,46 +123,40 @@
             field == 'time' ? 'h.ban_at' :
             field
         " />
-        WITH filtered_data AS (
         SELECT
         <choose>
             <when test="substringLength != null">
-                SUBSTRING(${dbField}, 1, #{substringLength}) AS field_value
+                SUBSTRING(${dbField}, 1, #{substringLength})
             </when>
             <otherwise>
-                ${dbField} AS field_value
+                ${dbField}
             </otherwise>
         </choose>
-        ,
-        t.info_hash AS torrent_info_hash,
-        t.name AS torrent_name,
-        h.module_name AS module_name
-        FROM history h
-        JOIN torrents t ON h.torrent_id = t.id
-        <if test="downloader != null and downloader != ''">
-            WHERE h.downloader = #{downloader}
-        </if>
-        ),
-        total_count AS (
-        SELECT COUNT(*) AS total
-        FROM filtered_data
-        WHERE field_value IS NOT NULL
-        )
-        SELECT
-        fd.field_value AS data,
+        AS data,
         COUNT(*) AS count,
-        CASE
-        WHEN tc.total > 0
-        THEN COUNT(*) / tc.total
-        ELSE 0
-        END AS percent
-        FROM filtered_data fd
-        CROSS JOIN total_count tc
-        WHERE fd.field_value IS NOT NULL
-        GROUP BY fd.field_value, tc.total
-        HAVING
-        (COUNT(*) / NULLIF(tc.total, 0)) > #{percentFilter}
-        ORDER BY count DESC;
+        COUNT(*) / (SELECT COUNT(*) FROM history h
+        <if test="field == 't.name' or field == 'torrent_name'">
+            JOIN torrents t ON h.torrent_id = t.id
+        </if>
+        <where>
+            <if test="downloader != null and downloader != ''">
+                AND h.downloader = #{downloader}
+            </if>
+            AND ${dbField} IS NOT NULL
+        </where>) AS percent
+        FROM history h
+        <if test="field == 't.name' or field == 'torrent_name'">
+            JOIN torrents t ON h.torrent_id = t.id
+        </if>
+        <where>
+            <if test="downloader != null and downloader != ''">
+                AND h.downloader = #{downloader}
+            </if>
+            AND ${dbField} IS NOT NULL
+        </where>
+        GROUP BY data
+        HAVING percent &gt; #{percentFilter}
+        ORDER BY count DESC
     </select>
 
     <!-- 批量统计Torrent的封禁数量 -->
@@ -176,5 +170,14 @@
             #{id}
         </foreach>
         GROUP BY torrent_id
+    </select>
+
+    <select id="getDistinctIps" resultType="java.lang.String">
+        SELECT DISTINCT ip
+        FROM history
+        WHERE ban_at &gt;= #{start} AND ban_at &lt;= #{end}
+        <if test="downloader != null and downloader != ''">
+            AND downloader = #{downloader}
+        </if>
     </select>
 </mapper>

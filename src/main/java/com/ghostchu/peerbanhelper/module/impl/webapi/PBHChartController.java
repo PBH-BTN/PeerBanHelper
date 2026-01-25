@@ -249,29 +249,18 @@ public final class PBHChartController extends AbstractFeatureModule {
         Map<String, AtomicInteger> countryOrRegionCounter = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> netTypeCounter = new ConcurrentHashMap<>();
 
-        var queryBanned = Wrappers.<HistoryEntity>lambdaQuery()
-                .select(HistoryEntity::getId, HistoryEntity::getIp) // distinct not supported directly in wrapper chain easily without custom SQL or loading all
-                .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
-                .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
-        var queryConnected = Wrappers.<PeerRecordEntity>lambdaQuery()
-                .select(PeerRecordEntity::getId, PeerRecordEntity::getAddress)
-                .ge(PeerRecordEntity::getLastTimeSeen, timeQueryModel.startAt())
-                .le(PeerRecordEntity::getLastTimeSeen, timeQueryModel.endAt());
-
-        if (downloader != null && !downloader.isBlank()) {
-            queryBanned.eq(HistoryEntity::getDownloader, downloader);
-            queryConnected.eq(PeerRecordEntity::getDownloader, downloader);
-        }
-
-        List<String> ips = new ArrayList<>();
+        List<String> ips;
         if (bannedOnly) {
-            historyService.list(queryBanned).stream().map(historyEntity -> historyEntity.getIp().getHostAddress()).distinct().forEach(ips::add);
+            ips = historyService.getDistinctIps(timeQueryModel.startAt(), timeQueryModel.endAt(), downloader);
         } else {
-            peerRecordService.list(queryConnected).stream().map(peerRecordEntity -> peerRecordEntity.getAddress().getHostAddress()).distinct().forEach(ips::add);
+            ips = peerRecordService.getDistinctIps(timeQueryModel.startAt(), timeQueryModel.endAt(), downloader);
         }
 
         try (ExecutorService service = Executors.newWorkStealingPool()) {
             for (String ip : ips) {
+                if (ip == null || ip.isBlank()) {
+                    continue;
+                }
                 service.submit(() -> {
                     try {
                         String determindIp = ip;
