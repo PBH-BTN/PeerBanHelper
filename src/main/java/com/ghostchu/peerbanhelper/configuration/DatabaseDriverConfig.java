@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicIPAddressTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +33,8 @@ public class DatabaseDriverConfig {
         if (section == null) throw new IllegalStateException("Database configuration section is missing!");
         int databaseTypeId = section.getInt("type");
         var driver = switch (databaseTypeId) {
-            // case 1 -> new PostgresDatabaseDriver(section);
-            // case 2 -> new MySQLDatabaseDriver(section);
+            case 1 -> new MySQLDatabaseDriver(section);
+            // case 2 -> new PostgresDatabaseDriver(section);
             default -> new H2DatabaseDriver(section);
         };
         log.info("Database driver loaded: {}", driver.getType().name());
@@ -45,7 +46,7 @@ public class DatabaseDriverConfig {
     public MybatisPlusInterceptor mybatisPlusInterceptor(@NotNull DatabaseDriver databaseDriver) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         DbType dbType = switch (databaseDriver.getType()) {
-            case H2 -> DbType.H2;
+            case H2 -> DbType.MYSQL; // H2 USE MYSQL
             case POSTGRES -> DbType.POSTGRE_SQL;
             case MYSQL -> DbType.MYSQL;
         };

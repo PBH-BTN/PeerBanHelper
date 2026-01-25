@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.configuration;
 
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
-import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.text.Lang;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -29,24 +28,21 @@ public class DatabaseSchemaInitializer {
         log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
         log.info("Check and upgrading database schema for {}", databaseDriver.getType());
         try {
-            String dbType = "mysql";
-            if (databaseDriver.getType() == DatabaseType.POSTGRES) {
-                dbType = "postgres";
-            }
-
+            String migrationType = databaseDriver.getType().getMigrationType();
+            String repeatType = databaseDriver.getType().getRepeatType();
             // 1. Run Flyway Migration
-            log.info("Running Flyway migration for {}", dbType);
+            log.info("Running Flyway migration for {}", databaseDriver.getType().name());
             Flyway flyway = Flyway.configure()
                     .dataSource(databaseDriver.getDataSource())
-                    .locations("classpath:db/migration/" + dbType)
+                    .locations("classpath:db/migration/" + migrationType)
                     .baselineOnMigrate(true)
                     .load();
             flyway.migrate();
 
             // 2. Run Repeat Scripts
-            log.info("Running repeat scripts for {}", dbType);
+            log.info("Running repeat scripts for {}", migrationType);
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources("classpath:db/repeat/" + dbType + "/*.sql");
+            Resource[] resources = resolver.getResources("classpath:db/repeat/" + repeatType + "/*.sql");
 
             // Sort by filename to ensure deterministic execution order
             Arrays.sort(resources, Comparator.comparing(Resource::getFilename));

@@ -36,11 +36,6 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull String getMapperXmlPath() {
-        return "mapper/mysql/**/*.xml"; // H2 使用 MySQL 方言
-    }
-
-    @Override
     public @NotNull DataSource getDataSource() {
         // Hikari CP SQLite DataSource implementation
         HikariConfig config = new HikariConfig();
