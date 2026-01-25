@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private long lastReport = System.currentTimeMillis();
+    private OffsetDateTime lastReport = OffsetDateTime.now();
 
     public LegacyBtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
@@ -83,7 +84,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
             List<LegacyBtnBan> btnPeers = generateBans();
             if (btnPeers.isEmpty()) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_LAST_REPORT_EMPTY));
-                lastReport = System.currentTimeMillis();
+                lastReport = OffsetDateTime.now();
                 return;
             }
             LegacyBtnBanPing ping = new LegacyBtnBanPing(
@@ -106,7 +107,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
                 } else {
                     log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
                     setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
-                    lastReport = System.currentTimeMillis();
+                    lastReport = OffsetDateTime.now();
                 }
             } catch (Exception e) {
                 log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
@@ -123,7 +124,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
         Map<LegacyBtnPeer, BanMetadata> map = new HashMap<>();
         btnNetwork.getServer().getBanList().forEach((pa, meta) -> map.put(LegacyBtnPeer.from(meta.getTorrent(), meta.getPeer()), meta));
         for (Map.Entry<LegacyBtnPeer, BanMetadata> e : map.entrySet()) {
-            if (e.getValue().getBanAt() <= lastReport) {
+            if (e.getValue().getBanAt().isBefore(lastReport) || e.getValue().getBanAt().isEqual(lastReport)) {
                 continue;
             }
             if (e.getValue().isBanForDisconnect() || e.getValue().isExcludeFromReport()) {

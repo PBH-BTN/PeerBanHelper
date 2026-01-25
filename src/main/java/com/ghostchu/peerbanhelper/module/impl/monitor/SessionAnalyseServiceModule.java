@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -77,11 +77,11 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
         try {
             connectionMetricsTrackDao.flushAll();
             OffsetDateTime startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
-            List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.queryBuilder().where().ne("timeframeAt", startOfToday).query();
+            List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.list(new QueryWrapper<PeerConnectionMetricsTrackEntity>().ne("timeframe_at", startOfToday));
             List<PeerConnectionMetricsEntity> aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
             connectionMetricDao.saveAggregating(aggNotInTheDayList, true);
             connectionMetricsTrackDao.deleteEntries(listNotInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
-            List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.queryBuilder().where().eq("timeframeAt", startOfToday).query();
+            List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.list(new QueryWrapper<PeerConnectionMetricsTrackEntity>().eq("timeframeAt", startOfToday));
             List<PeerConnectionMetricsEntity> aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
             connectionMetricDao.saveAggregating(aggInTheDayList, true);
         } catch (SQLException e) {

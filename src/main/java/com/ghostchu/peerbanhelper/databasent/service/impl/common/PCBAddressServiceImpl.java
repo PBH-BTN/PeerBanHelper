@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
 	}
 
 	@Override
-	public PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String ip, int port, @NotNull String downloader) {
+    public PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull InetAddress ip, int port, @NotNull String downloader) {
 		return baseMapper.selectOne(new QueryWrapper<PCBAddressEntity>()
 				.eq("torrent_id", torrentId)
 				.eq("ip", ip)

@@ -449,11 +449,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
-                        rangeEntity = pcbRangeDao.save(new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0, 0));
+                        rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, 0, 0);
+                        pcbRangeDao.save(rangeEntity);
                     }
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
-                        pcbAddressEntity = pcbAddressDao.save(new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), downloader, new Timestamp(0), 0L, 0));
+                        pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, 0L, 0);
+                        pcbAddressDao.save(pcbAddressEntity);
                     }
                     return Pair.of(rangeEntity, pcbAddressEntity);
                 }
