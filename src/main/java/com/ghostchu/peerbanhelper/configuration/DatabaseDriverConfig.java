@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.MultiDbExplainInterceptor;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicIPAddressTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
@@ -59,23 +60,45 @@ public class DatabaseDriverConfig {
         return interceptor;
     }
 
-
     @Bean
-    public SqlSessionFactory sqlSessionFactory(MybatisPlusInterceptor interceptor, DatabaseDriver driver) throws Exception {
-        MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
-        // DatabaseDriver 作为 Bean 注入，从中获取 DataSource，而不是依赖 Spring 上下文中的 DataSource Bean
-        factoryBean.setDataSource(driver.getDataSource());
-        factoryBean.setPlugins(interceptor);
-        factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler()); // 注册 OffsetDateTime 类型处理器
+    public SqlSessionFactory sqlSessionFactory(
+            MybatisPlusInterceptor mpInterceptor,
+            MultiDbExplainInterceptor explainInterceptor, // 引入自定义拦截器
+            DatabaseDriver driver) throws Exception {
 
-        // 关键逻辑：根据 Driver 提供的路径（例如 "mapper/mysql/**/*.xml"）动态构建 XML 扫描路径
-        // 结果如: "classpath*:mapper/mysql/**/*.xml"
-        // 这样就只加载特定数据库的 SQL XML，避免了 MySQL 和 Postgres 的 XML 同时被加载产生的冲突
+        MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
+        factoryBean.setDataSource(driver.getDataSource());
+
+        // 关键修复点：将两个拦截器都设置进去
+        // setPlugins 接受 Interceptor[] 数组
+        factoryBean.setPlugins(mpInterceptor);
+
+        factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler());
+
         String xmlPath = "classpath*:" + driver.getMapperXmlPath();
         log.info("Loading Mapper XMLs from: {}", xmlPath);
-
         factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(xmlPath));
 
         return factoryBean.getObject();
     }
+//
+//
+//    @Bean
+//    public SqlSessionFactory sqlSessionFactory(MybatisPlusInterceptor interceptor, DatabaseDriver driver) throws Exception {
+//        MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
+//        // DatabaseDriver 作为 Bean 注入，从中获取 DataSource，而不是依赖 Spring 上下文中的 DataSource Bean
+//        factoryBean.setDataSource(driver.getDataSource());
+//        factoryBean.setPlugins(interceptor);
+//        factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler()); // 注册 OffsetDateTime 类型处理器
+//
+//        // 关键逻辑：根据 Driver 提供的路径（例如 "mapper/mysql/**/*.xml"）动态构建 XML 扫描路径
+//        // 结果如: "classpath*:mapper/mysql/**/*.xml"
+//        // 这样就只加载特定数据库的 SQL XML，避免了 MySQL 和 Postgres 的 XML 同时被加载产生的冲突
+//        String xmlPath = "classpath*:" + driver.getMapperXmlPath();
+//        log.info("Loading Mapper XMLs from: {}", xmlPath);
+//
+//        factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(xmlPath));
+//
+//        return factoryBean.getObject();
+//    }
 }

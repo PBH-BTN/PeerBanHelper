@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -40,10 +39,10 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
 
     @Override
     public List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader) {
-        return baseMapper.selectList(new LambdaQueryWrapper<PeerRecordEntity>()
-                .ge(PeerRecordEntity::getFirstTimeSeen, start)
-                .le(PeerRecordEntity::getLastTimeSeen, end)
-                .eq(downloader != null, PeerRecordEntity::getDownloader, downloader));
+        return baseMapper.selectList(new QueryWrapper<PeerRecordEntity>()
+                .ge("first_time_seen", start)
+                .le("last_time_seen", end)
+                .eq(downloader != null, "downloader", downloader));
     }
 
     @Override

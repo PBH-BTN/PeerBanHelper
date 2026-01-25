@@ -1,88 +1,94 @@
 package com.ghostchu.peerbanhelper.databasent;
 
-import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
+import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 @Component
+@Slf4j
 @Intercepts({
-        @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class})
+        @Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})
 })
 public class MultiDbExplainInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        Object[] args = invocation.getArgs();
-        MappedStatement ms = (MappedStatement) args[0];
-        Object parameter = args[1];
-        BoundSql boundSql = ms.getBoundSql(parameter);
+        StatementHandler handler = (StatementHandler) invocation.getTarget();
+        BoundSql boundSql = handler.getBoundSql();
+        String originalSql = boundSql.getSql();
 
-        if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
-            // 获取数据库连接（注意：不要关闭这个 connection，它由 MyBatis 管理）
-            Connection connection = ms.getConfiguration().getEnvironment().getDataSource().getConnection();
-            try {
-                String dbProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
-                executeExplain(ms, parameter, boundSql, connection, dbProductName);
-            } finally {
-                // 必须手动关闭从 DataSource 获取的临时连接
-                if (connection != null && !connection.isClosed()) {
-                    connection.close();
-                }
+        // 仅处理 SELECT 语句，避开 INSERT/UPDATE/DELETE
+        if (originalSql.trim().toUpperCase().startsWith("SELECT")) {
+            // 从当前的 Invocation 中获取 Connection
+            Connection connection = (Connection) invocation.getArgs()[0];
+
+            // 获取当前驱动类型（通过你配置类中的静态变量或注入）
+            var driver = DatabaseDriverConfig.databaseDriver;
+            if (driver != null) {
+                runExplain(connection, handler, boundSql, driver);
             }
         }
+
         return invocation.proceed();
     }
 
-    private void executeExplain(MappedStatement ms, Object parameter, BoundSql boundSql, Connection conn, String dbType) {
+    private void runExplain(Connection conn, StatementHandler handler, BoundSql boundSql, DatabaseDriver driver) {
         String explainSql = "EXPLAIN " + boundSql.getSql();
 
+        // 注意：这里使用原有的 Connection，不要关闭它，否则后续主查询会失败
         try (PreparedStatement ps = conn.prepareStatement(explainSql)) {
-            // 修复点：使用 MyBatis 提供的默认参数处理器
-            ParameterHandler ph = ms.getConfiguration().newParameterHandler(ms, parameter, boundSql);
-            ph.setParameters(ps);
+            // 绑定参数
+            handler.getParameterHandler().setParameters(ps);
 
             try (ResultSet rs = ps.executeQuery()) {
-                analyzeResult(rs, dbType, boundSql.getSql());
+                analyzeResult(rs, driver, boundSql.getSql());
             }
         } catch (Exception e) {
-            System.err.println("Explain 执行跳过: " + e.getMessage());
+            // 静默处理：部分特殊语法（如 UNION）在某些数据库下 EXPLAIN 可能会报错
+            log.trace("Explain failed for SQL: {}", explainSql, e);
         }
     }
 
-    private void analyzeResult(ResultSet rs, String dbType, String sql) throws SQLException {
+    private void analyzeResult(ResultSet rs, DatabaseDriver driver, String sql) throws Exception {
         if (!rs.next()) return;
 
-        if (dbType.contains("mysql")) {
+        DatabaseType dbType = driver.getType();
+
+        if (dbType == DatabaseType.MYSQL) {
             String type = rs.getString("type");
-            // MySQL: ALL 代表全表扫描，index 代表全索引扫描
             if ("ALL".equalsIgnoreCase(type)) {
-                System.err.println("⚠️ [MySQL 风险] 全表扫描: " + sql);
+                log.warn("🚨 [MySQL 性能风险] 检测到全表扫描！\nSQL: {}", formatSql(sql));
             }
-        } else if (dbType.contains("postgresql")) {
+        } else if (dbType == DatabaseType.H2) {
             String plan = rs.getString(1);
-            if (plan.toLowerCase().contains("seq scan")) {
-                System.err.println("⚠️ [Postgres 风险] 顺序扫描: " + sql);
-            }
-        } else if (dbType.contains("h2")) {
-            String plan = rs.getString(1);
-            // H2 的执行计划中，如果没有出现 "INDEX"，通常意味着全表扫描
-            if (!plan.contains("INDEX") && plan.contains("/*")) {
-                System.err.println("⚠️ [H2 风险] 可能的全表扫描: " + sql);
+
+            // --- 核心逻辑优化 ---
+            // 1. 如果包含 "SCAN()" 且不包含任何索引引用，则是全表扫描
+            // 2. 如果 plan 包含 "/*" 且里面有索引名（通常以 IDX_ 或 PRIMARY_KEY 开头），则是索引扫描
+
+            boolean hasIndexIndicator = plan.contains("INDEX")
+                    || plan.contains("PRIMARY_KEY")
+                    || plan.contains("IDX_") // 匹配常见的索引命名规范
+                    || (plan.contains("/*") && !plan.contains(".SCAN()")); // 注释块内不是 SCAN 往往就是索引
+
+            // 只有明确出现 SCAN 且没被判定为有索引时，才报错
+            if (plan.contains(".SCAN()") && !hasIndexIndicator) {
+                log.warn("🚨 [H2 性能风险] 检测到全表扫描！\nPLAN: {}\nSQL: {}", plan.trim(), formatSql(sql));
             }
         }
+    }
+
+    private String formatSql(String sql) {
+        return sql.replaceAll("\\s+", " ").trim();
     }
 }

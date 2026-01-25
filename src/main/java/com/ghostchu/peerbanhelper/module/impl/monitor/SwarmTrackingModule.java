@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
-import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
@@ -85,7 +84,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
 
     private void handleDetails(@NotNull Context context) {
         Pageable pageable = new Pageable(context);
-        var page = trackedSwarmDao.page(pageable.toPage(), new Orderable(Map.of(), context).apply(new QueryWrapper<TrackedSwarmEntity>()));
+        var page = trackedSwarmDao.page(pageable.toPage(), new Orderable(Map.of(), context).apply(new QueryWrapper<>()));
         context.json(new StdResp(true, null, PBHPage.from(page)));
     }
 

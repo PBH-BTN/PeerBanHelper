@@ -200,7 +200,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleBanHistory(Context ctx) {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
-        Orderable orderBy = new Orderable(Map.of("banAt", false), ctx);
+        Orderable orderBy = new Orderable(Map.of("ban_at", false), ctx);
         IPage<HistoryEntity> page = historyDao.queryBanHistoryByIp(pageable.toPage(), ip, orderBy);
         page.convert(entity -> {
             TorrentEntityDTO torrentEntityDTO = TorrentEntityDTO.from(torrentDao.getById(entity.getTorrentId()));
@@ -230,7 +230,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleAccessHistory(Context ctx) {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
-        Orderable orderBy = new Orderable(Map.of("lastTimeSeen", false, "address", false, "port", true), ctx);
+        Orderable orderBy = new Orderable(Map.of("last_time_seen", false, "address", false, "port", true), ctx);
         IPage<PeerRecordEntity> page = peerRecordDao.queryAccessHistoryByIp(pageable.toPage(), ip, orderBy);
         IPage<AccessHistoryDTO> accessHistoryDTOIPage = page.convert(entity -> new AccessHistoryDTO(
                 entity.getId(),

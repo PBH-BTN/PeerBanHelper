@@ -83,7 +83,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             return;
         }
         Pageable pageable = new Pageable(ctx);
-        Orderable orderable = new Orderable(Map.of("banAt", false), ctx);
+        Orderable orderable = new Orderable(Map.of("ban_at", false), ctx);
 
         IPage<HistoryEntity> page = historyService.queryBanHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
         var result = page.convert(r -> new BanLogDTO(locale(ctx), downloaderManager, r, TorrentEntityDTO.from(torrent)));
@@ -146,7 +146,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             return;
         }
         Pageable pageable = new Pageable(ctx);
-        Orderable orderable = new Orderable(Map.of("lastTimeSeen", false, "address", true, "port", true), ctx);
+        Orderable orderable = new Orderable(Map.of("last_time_seen", false, "address", true, "port", true), ctx);
         IPage<PeerRecordEntity> page = peerRecordService.queryAccessHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
         var result = page.convert(entity ->
                 new PeerRecordEntityDTO(entity.getId(),
