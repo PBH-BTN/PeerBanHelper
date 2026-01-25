@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.btn.ability.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
@@ -19,13 +21,11 @@ import okhttp3.Response;
 import okio.BufferedSink;
 import okio.GzipSink;
 import okio.Okio;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -79,37 +79,37 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
         Main.getEventBus().unregister(this);
     }
 
-    private boolean setMemCursor(long position) {
-        return metadataDao.set("BtnAbilitySubmitSwarm.memCursor", String.valueOf(position));
+    private boolean setMemCursor(long lastTimeSeen, long id) {
+        return metadataDao.set("BtnAbilitySubmitSwarm.memCursor", lastTimeSeen + "," + id);
     }
 
-    private long getMemCursor() {
-        return Long.parseLong(metadataDao.getOrDefault("BtnAbilitySubmitSwarm.memCursor", "0"));
+    private Pair<Long, Long> getMemCursor() {
+        String[] memCursor = metadataDao.getOrDefault("BtnAbilitySubmitSwarm.memCursor", "0,0").split(",");
+        return Pair.of(Long.parseLong(memCursor[0]), Long.parseLong(memCursor[1]));
     }
 
     private void submit() {
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
             swarmDao.flushAll();
+
             int size = 0;
             int requests = 0;
-            List<TrackedSwarmEntity> trackedSwarmEntities = new ArrayList<>(500);
-            try (var it = createSubmitIterator(getMemCursor())) {
-                for (TrackedSwarmEntity entity : it) {
-                    trackedSwarmEntities.add(entity);
-                    if (trackedSwarmEntities.size() >= 500) {
-                        setMemCursor(createSubmitRequest(trackedSwarmEntities).getTime());
-                        requests++;
-                        size += trackedSwarmEntities.size();
-                        trackedSwarmEntities.clear();
-                    }
-                }
-            }
-            if (!trackedSwarmEntities.isEmpty()) {
-                setMemCursor(createSubmitRequest(trackedSwarmEntities).getTime());
+            Page<TrackedSwarmEntity> page = new Page<>(1, 1000); // 每页处理 100 条
+            do {
+                var pair = getMemCursor();
+                long lastTimeSeen = pair.getLeft();
+                long id = pair.getRight();
+                var result = swarmDao.page(page, new QueryWrapper<TrackedSwarmEntity>()
+                        .ge("last_time_seen", lastTimeSeen)
+                        .gt("id", id)
+                        .orderByAsc("last_time_seen", "id")
+                );
+                var resultPair = createSubmitRequest(result.getRecords());
+                setMemCursor(resultPair.getLeft(), resultPair.getRight());
                 requests++;
-                size += trackedSwarmEntities.size();
-            }
+                size += result.getRecords().size();
+            } while (page.hasNext());
             log.info(tlUI(Lang.BTN_SUBMITTED_SWARM, size, requests));
             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
         } catch (IllegalStateException ignored) {
@@ -120,16 +120,8 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
         }
     }
 
-    private CloseableWrappedIterable<TrackedSwarmEntity> createSubmitIterator(long memCursor) throws SQLException {
-        return swarmDao.getWrappedIterable(swarmDao
-                .queryBuilder()
-                .where().gt("lastTimeSeen", memCursor)
-                .queryBuilder()
-                .orderBy("lastTimeSeen", true)
-                .prepare());
-    }
 
-    private Timestamp createSubmitRequest(List<TrackedSwarmEntity> swarmEntities) throws RuntimeException {
+    private Pair<Long, Long> createSubmitRequest(List<TrackedSwarmEntity> swarmEntities) throws RuntimeException {
         BtnSwarmPeerPing ping = new BtnSwarmPeerPing(swarmEntities.stream().map(BtnSwarm::from).toList());
         byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
         RequestBody body = createGzipRequestBody(jsonBytes);
@@ -145,7 +137,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody));
                 throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody)));
             } else {
-                return swarmEntities.getLast().getLastTimeSeen();
+                return Pair.of(swarmEntities.getLast().getLastTimeSeen().toInstant().toEpochMilli(), swarmEntities.getLast().getId());
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.BTN_REQUEST_FAILS, e.getMessage()), e);
