@@ -1,63 +1,66 @@
 package com.ghostchu.peerbanhelper.databasent.table.tmp;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-import java.sql.Timestamp;
+import java.net.InetAddress;
+import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "tmp_tracked_swarm", daoClass = TrackedSwarmDao.class)
+@Accessors(chain = true)
+@TableName("tracked_swarm")
 public final class TrackedSwarmEntity { // 需要创建为临时表
-    @DatabaseField(generatedId = true, index = true)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
-    private String ip;
-    @DatabaseField(canBeNull = false, uniqueCombo = true)
+    @TableField(value = "ip")
+    private InetAddress ip;
+    @TableField(value = "port")
     private int port;
-    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
+    @TableField(value = "info_hash")
     private String infoHash;
-    @DatabaseField(canBeNull = false, index = true)
+    @TableField(value = "torrent_is_private")
     private Boolean torrentIsPrivate;
-    @DatabaseField(canBeNull = false, index = true)
+    @TableField(value = "torrent_size")
     private long torrentSize;
-    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
+    @TableField(value = "downloader")
     private String downloader;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "downloader_progress")
     private double downloaderProgress;
-    @DatabaseField(index = true)
+    @TableField(value = "peer_id")
     private String peerId;
-    @DatabaseField(index = true)
+    @TableField(value = "client_name")
     private String clientName;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "peer_progress")
     private double peerProgress;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "uploaded")
     private long uploaded;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "uploaded_offset")
     private long uploadedOffset;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "upload_speed")
     private long uploadSpeed;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "downloaded")
     private long downloaded;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "downloaded_offset")
     private long downloadedOffset;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "download_speed")
     private long downloadSpeed;
-    @DatabaseField
+    @TableField(value = "last_flags")
     private String lastFlags;
-    @DatabaseField(canBeNull = false, index = true)
-    private Timestamp firstTimeSeen;
-    @DatabaseField(canBeNull = false, index = true)
-    private Timestamp lastTimeSeen;
-
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "first_time_seen")
+    private OffsetDateTime firstTimeSeen;
+    @TableField(value = "last_time_seen")
+    private OffsetDateTime lastTimeSeen;
+    @TableField(value = "download_speed_max")
     private long downloadSpeedMax;
-    @DatabaseField(canBeNull = false)
+    @TableField(value = "upload_speed_max")
     private long uploadSpeedMax;
 
 }

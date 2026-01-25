@@ -25,7 +25,7 @@ CREATE TABLE `history`
     ip               VARCHAR(255) NOT NULL,
     port             INT UNSIGNED                   NOT NULL,
     peer_id          VARCHAR(255) NULL,
-    peer_client_name LONGTEXT NULL,
+    peer_client_name TEXT NULL,
     peer_uploaded    BIGINT NULL,
     peer_downloaded  BIGINT NULL,
     peer_progress DOUBLE NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE peer_connection_metrics_track
     address      VARCHAR(255) NOT NULL,
     port         INT UNSIGNED                   NOT NULL,
     peer_id      VARCHAR(255) NOT NULL,
-    client_name  VARCHAR(255) NULL,
+    client_name TEXT NULL,
     last_flags   VARCHAR(255) NULL,
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
@@ -135,7 +135,7 @@ CREATE TABLE peer_records
     torrent_id        BIGINT       NOT NULL,
     downloader        VARCHAR(255) NOT NULL,
     peer_id           VARCHAR(255) NULL,
-    client_name       VARCHAR(255) NULL,
+    client_name TEXT NULL,
     uploaded          BIGINT UNSIGNED      NOT NULL,
     uploaded_offset   BIGINT UNSIGNED                NOT NULL,
     upload_speed      BIGINT UNSIGNED                NOT NULL,
@@ -172,6 +172,34 @@ CREATE TABLE traffic_journal_v3
     protocol_overall_downloaded_at_start BIGINT UNSIGNED                NOT NULL,
     protocol_overall_downloaded          BIGINT UNSIGNED                NOT NULL,
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+);
+
+CREATE TABLE `tracked_swarm`
+(
+    `id`                 bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+    `ip`                 varchar(255) NOT NULL,
+    `port`               int UNSIGNED NOT NULL,
+    `info_hash`          varchar(255) NOT NULL,
+    `torrent_is_private` tinyint UNSIGNED NOT NULL,
+    `downloader`         varchar(255) NOT NULL,
+    `downloader_progress` double NOT NULL,
+    `peer_id`            varchar(255) NULL,
+    `client_name`        text NULL,
+    `peer_progress`      varchar(255) NOT NULL,
+    `uploaded`           bigint       NOT NULL,
+    `uploaded_offset`    bigint       NOT NULL,
+    `upload_speed`       bigint       NOT NULL,
+    `downloaded`         bigint       NOT NULL,
+    `downloaded_offset`  bigint       NOT NULL,
+    `download_speed`     bigint       NOT NULL,
+    `last_flags`         varchar(255) NULL,
+    `first_time_seen`    datetime     NOT NULL,
+    `last_time_seen`     datetime     NOT NULL,
+    `download_speed_max` bigint       NOT NULL,
+    `upload_speed_max`   bigint       NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `idx_tracked_swarm_unique`(`ip`, `port`, `info_hash`, `downloader`),
+    INDEX                `idx_tracked_swarm_last_seen_time`(`last_time_seen` DESC)
 );
 
 CREATE TABLE `rule_sub_info`

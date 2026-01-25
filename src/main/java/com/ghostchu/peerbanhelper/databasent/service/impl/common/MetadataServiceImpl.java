@@ -17,7 +17,7 @@ public class MetadataServiceImpl extends ServiceImpl<MetadataMapper, MetadataEnt
     }
 
     @Override
-    public @Nullable String getOrDefault(String key, @Nullable String defaultValue) {
+    public @Nullable String getOrDefault(@NotNull String key, @Nullable String defaultValue) {
         MetadataEntity entity = baseMapper.selectOne(new QueryWrapper<MetadataEntity>().ge("key", key));
         if (entity == null) return defaultValue;
         return entity.getValue();

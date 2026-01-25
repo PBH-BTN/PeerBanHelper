@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.BanListMapper;
@@ -26,7 +25,7 @@ public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity
     public @NotNull Map<IPAddress, BanMetadata> readBanList() {
         Map<IPAddress, BanMetadata> map = new HashMap<>();
         try {
-            baseMapper.selectList(new QueryWrapper<>()).forEach(e -> map.put(IPAddressUtil.getIPAddress(e.getAddress()),
+            baseMapper.selectList(null).forEach(e -> map.put(IPAddressUtil.getIPAddress(e.getAddress()),
                     JsonUtil.tiny().fromJson(e.getMetadata(), BanMetadata.class)));
         } catch (Exception e) { // 可能因为 BanMetadata 有变动这里的数据会反序列化失败
             log.error("Unable to read stored banlist, skipping...", e);
@@ -40,7 +39,7 @@ public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity
         List<BanListEntity> entityList = new ArrayList<>();
         banlist.forEach((key, value) -> entityList.add(new BanListEntity(
                 key.toNormalizedString(), JsonUtil.tiny().toJson(value))));
-        baseMapper.delete(new QueryWrapper<>());
+        baseMapper.delete(null);
         return baseMapper.insert(entityList).size();
     }
 }

@@ -70,6 +70,6 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
 
     @Override
     public IPage<HistoryEntity> getBanLogs(Page<HistoryEntity> pageRequest, Orderable orderable) {
-        return baseMapper.selectPage(pageRequest, orderable.apply(new QueryWrapper<>()));
+        return baseMapper.selectPage(pageRequest, orderable.apply(null));
     }
 }

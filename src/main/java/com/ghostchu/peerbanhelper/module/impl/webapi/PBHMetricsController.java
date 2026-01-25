@@ -2,11 +2,11 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ghostchu.peerbanhelper.DownloaderServer;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldDateResult;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
+import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -42,7 +42,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     @Autowired
     private DownloaderServer downloaderServer;
     @Autowired
-    private TrackedSwarmDao trackedSwarmDao;
+    private TrackedSwarmService trackedSwarmDao;
     @Autowired
     private PeerConnectionMetricsService peerConnectionMetricDao;
 
@@ -249,8 +249,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         map.put("wastedTraffic", metrics.getWastedTraffic());
         //map.put("savedTraffic", metrics.getSavedTraffic());
         try {
-            // long trackedPeers = trackedSwarmDao.queryBuilder().countOf();
-            long trackedPeers = trackedSwarmDao.countOf(); // TODO: Fix TrackedSwarmDao migration or resolution
+            long trackedPeers = trackedSwarmDao.count();
             map.put("trackedSwarmCount", trackedPeers);
             if (trackedPeers > 0) {
                 map.put("peersBlockRate", (double) metrics.getPeerBanCounter() / trackedPeers);

@@ -5,14 +5,13 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.BtnSwarm;
 import com.ghostchu.peerbanhelper.btn.ping.BtnSwarmPeerPing;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
-import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
+import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
-import com.j256.ormlite.dao.CloseableWrappedIterable;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -40,10 +39,10 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     private final String endpoint;
     private final long randomInitialDelay;
     private final MetadataService metadataDao;
-    private final TrackedSwarmDao swarmDao;
+    private final TrackedSwarmService swarmDao;
     private final boolean powCaptcha;
 
-    public BtnAbilitySubmitSwarm(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, TrackedSwarmDao swarmDao) {
+    public BtnAbilitySubmitSwarm(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, TrackedSwarmService swarmDao) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.swarmDao = swarmDao;
@@ -80,7 +79,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
         Main.getEventBus().unregister(this);
     }
 
-    private int setMemCursor(long position) {
+    private boolean setMemCursor(long position) {
         return metadataDao.set("BtnAbilitySubmitSwarm.memCursor", String.valueOf(position));
     }
 
