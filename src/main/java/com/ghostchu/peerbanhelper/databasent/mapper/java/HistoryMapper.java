@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.databasent.mapper.java;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
+import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import org.apache.ibatis.annotations.Param;
@@ -29,4 +30,6 @@ public interface HistoryMapper extends BaseMapper<HistoryEntity> {
 			@Param("percentFilter") double percentFilter,
 			@Param("downloader") String downloader,
 			@Param("substringLength") Integer substringLength);
+
+    List<TorrentCount> countByTorrentIds(@Param("torrentIds") List<Long> torrentIds);
 }

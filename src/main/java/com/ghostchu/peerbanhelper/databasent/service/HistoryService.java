@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
 
 public interface HistoryService extends IService<HistoryEntity> {
     IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter);
@@ -31,4 +32,6 @@ public interface HistoryService extends IService<HistoryEntity> {
     List<UniversalFieldNumResult> sumField(@NotNull String field, double percentFilter, @Nullable String downloader, @Nullable Integer substringLength);
 
     IPage<HistoryEntity> getBanLogs(Page<HistoryEntity> pageRequest, Orderable orderable);
+
+    Map<Long, Long> countByTorrentIds(@NotNull List<Long> torrentIds);
 }

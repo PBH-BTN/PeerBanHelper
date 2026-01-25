@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -115,9 +116,17 @@ public final class PBHTorrentController extends AbstractFeatureModule {
 
         IPage<TorrentEntity> torrentEntityPage = torrentService.search(pageRequest, keyword, new Orderable(Map.of("id", false), ctx), needsCountSort ? countSortField : null, countSortAscending);
 
+        // 批量查询计数 - 优化 N+1 查询问题
+        List<Long> torrentIds = torrentEntityPage.getRecords().stream()
+                .map(TorrentEntity::getId)
+                .toList();
+
+        Map<Long, Long> banCountMap = historyService.countByTorrentIds(torrentIds);
+        Map<Long, Long> accessCountMap = peerRecordService.countByTorrentIds(torrentIds);
+
         var results = torrentEntityPage.convert(result -> {
-            long peerBanCount = historyService.countHistoriesByTorrentId(result.getId());
-            long peerAccessCount = peerRecordService.countRecordsByTorrentId(result.getId());
+            long peerBanCount = banCountMap.getOrDefault(result.getId(), 0L);
+            long peerAccessCount = accessCountMap.getOrDefault(result.getId(), 0L);
             return new TorrentInfoDTO(result.getInfoHash(), result.getName(), result.getSize() == null ? 0 : result.getSize(), peerBanCount, peerAccessCount);
         });
         ctx.json(new StdResp(true, null, PBHPage.from(results)));

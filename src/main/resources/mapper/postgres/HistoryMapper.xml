@@ -141,4 +141,17 @@
 		ORDER BY count DESC;
 
 	</select>
+
+	<!-- 批量统计Torrent的封禁数量 -->
+	<select id="countByTorrentIds" resultType="com.ghostchu.peerbanhelper.databasent.dto.TorrentCount">
+		SELECT
+			torrent_id AS torrentId,
+			COUNT(*) AS count
+		FROM history
+		WHERE torrent_id IN
+		<foreach collection="torrentIds" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		GROUP BY torrent_id
+	</select>
 </mapper>

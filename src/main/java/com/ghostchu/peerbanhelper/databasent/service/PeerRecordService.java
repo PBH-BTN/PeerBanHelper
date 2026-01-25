@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 public interface PeerRecordService extends IService<PeerRecordEntity> {
     List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader);
@@ -43,4 +44,6 @@ public interface PeerRecordService extends IService<PeerRecordEntity> {
     long countRecordsByTorrentId(Long id);
 
     @NotNull Page<PeerRecordEntity> queryAccessHistoryByTorrentId(@NotNull Page<PeerRecordEntity> page, @NotNull Long id, @NotNull Orderable orderable);
+
+    Map<Long, Long> countByTorrentIds(@NotNull List<Long> torrentIds);
 }

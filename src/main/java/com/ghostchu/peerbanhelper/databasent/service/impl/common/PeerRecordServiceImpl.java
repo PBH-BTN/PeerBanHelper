@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.dto.ClientAnalyseResult;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
+import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerRecordMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
@@ -26,8 +27,11 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -177,6 +181,15 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     @Override
     public @NotNull Page<PeerRecordEntity> queryAccessHistoryByTorrentId(@NotNull Page<PeerRecordEntity> page, @NotNull Long id, @NotNull Orderable orderable) {
         return baseMapper.selectPage(page, orderable.apply(new QueryWrapper<PeerRecordEntity>().eq("torrent_id", id)));
+    }
+
+    @Override
+    public Map<Long, Long> countByTorrentIds(@NotNull List<Long> torrentIds) {
+        if (torrentIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<TorrentCount> counts = baseMapper.countByTorrentIds(torrentIds);
+        return counts.stream().collect(Collectors.toMap(TorrentCount::getTorrentId, TorrentCount::getCount));
     }
 
 

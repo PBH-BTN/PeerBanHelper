@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
+import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
@@ -16,7 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity> implements HistoryService {
@@ -89,5 +93,14 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
     @Override
     public IPage<HistoryEntity> getBanLogs(Page<HistoryEntity> pageRequest, Orderable orderable) {
         return baseMapper.selectPage(pageRequest, orderable.apply(null));
+    }
+
+    @Override
+    public Map<Long, Long> countByTorrentIds(@NotNull List<Long> torrentIds) {
+        if (torrentIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<TorrentCount> counts = baseMapper.countByTorrentIds(torrentIds);
+        return counts.stream().collect(Collectors.toMap(TorrentCount::getTorrentId, TorrentCount::getCount));
     }
 }
