@@ -176,7 +176,7 @@
 	<select id="getDistinctIps" resultType="java.lang.String">
 		SELECT DISTINCT ip
 		FROM history
-		WHERE ban_at &gt;= #{start} AND ban_at &lt;= #{end}
+		WHERE ban_at BETWEEN #{start} AND #{end}
 		<if test="downloader != null and downloader != ''">
 			AND downloader = #{downloader}
 		</if>
