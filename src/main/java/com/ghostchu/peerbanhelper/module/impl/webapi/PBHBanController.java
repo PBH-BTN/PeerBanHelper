@@ -181,7 +181,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                         || Arrays.stream(b.getKey().toStandardStrings()).anyMatch(ip -> ip.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                 .map(entry -> new BanDTO(entry.getKey().toNormalizedString(), new BakedBanMetadata(locale, entry.getValue()), null))
-                .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
+                .sorted((o1, o2) -> o2.getBanMetadata().getBanAt().compareTo(o1.getBanMetadata().getBanAt()));
 
         banResponseList = banResponseList.peek(response -> {
             PeerWrapper peerWrapper = response.getBanMetadata().getPeer();
