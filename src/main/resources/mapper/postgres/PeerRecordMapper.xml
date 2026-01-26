@@ -5,8 +5,8 @@
         SELECT COUNT(DISTINCT address)
         FROM peer_records
         WHERE downloader = #{downloader}
-            AND lastTimeSeen &lt;= #{startAt}
-            AND firstTimeSeen &gt;= #{endAt}
+        AND lastTimeSeen &lt;= #{startAt}
+        AND firstTimeSeen &gt;= #{endAt}
     </select>
 
     <resultMap id="queryAddressTotalTraffic" type="com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic">
@@ -27,7 +27,7 @@
     </resultMap>
 
     <select id="queryAddressTimeSeen" resultMap="queryAddressTimeSeen">
-        SELECT MIN(firstTimeSeen) as firstTimeSeen, MAX(lastTimeSeen) as lastTimeSeen
+        SELECT MIN(first_time_seen) as firstTimeSeen, MAX(last_time_seen) as lastTimeSeen
         FROM peer_records
         WHERE address = #{address}
         GROUP BY address
@@ -48,21 +48,21 @@
     </resultMap>
 
     <select id="queryClientAnalyse" resultMap="queryClientAnalyse">
-        SELECT peerId, clientName, SUM(uploaded) AS uploaded, SUM(downloaded) AS downloaded, COUNT(*) AS ct
+        SELECT peer_id, client_name, SUM(uploaded) AS uploaded, SUM(downloaded) AS downloaded, COUNT(*) AS ct
         FROM peer_records
-        WHERE firstTimeSeen >= #{startAt} AND lastTimeSeen &lt;= #{endAt} AND uploaded > 0 AND downloaded > 0
+        WHERE first_time_seen >= #{startAt} AND last_time_seen &lt;= #{endAt} AND uploaded > 0 AND downloaded > 0
         <if test="downloader != null">
             AND downloader = #{downloader}
         </if>
-        GROUP BY peerId, clientName
+        GROUP BY peer_id, client_name
         ORDER BY ${orderBySql}
     </select>
 
     <!-- 批量统计Torrent的访问记录数量 -->
     <select id="countByTorrentIds" resultType="com.ghostchu.peerbanhelper.databasent.dto.TorrentCount">
         SELECT
-            torrent_id AS torrentId,
-            COUNT(*) AS count
+        torrent_id AS torrentId,
+        COUNT(*) AS count
         FROM peer_records
         WHERE torrent_id IN
         <foreach collection="torrentIds" item="id" open="(" separator="," close=")">
@@ -74,7 +74,7 @@
     <select id="getDistinctIps" resultType="java.lang.String">
         SELECT DISTINCT address
         FROM peer_records
-        WHERE "lastTimeSeen" BETWEEN #{start} AND #{end}
+        WHERE last_time_seen BETWEEN #{start} AND #{end}
         <if test="downloader != null and downloader != ''">
             AND downloader = #{downloader}
         </if>
