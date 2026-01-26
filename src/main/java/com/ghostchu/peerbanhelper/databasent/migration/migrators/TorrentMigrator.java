@@ -65,6 +65,10 @@ public class TorrentMigrator implements TableMigrator {
                         ? rs.getBoolean("privateTorrent")
                         : null;
 
+                if (size < 0) {
+                    log.warn("Torrent {} has invalid size {}", oldId, size);
+                    continue;
+                }
                 TorrentEntity entity = new TorrentEntity();
                 entity.setInfoHash(infoHash);
                 entity.setName(name);
