@@ -36,17 +36,15 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource getDataSource() {
+    public @NotNull DataSource createDataSource() {
         // Hikari CP SQLite DataSource implementation
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL");
+        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1");
         config.setDriverClassName("org.h2.Driver");
         config.setMaximumPoolSize(section.getInt("pool.max-size"));
         config.setMinimumIdle(section.getInt("pool.min-idle"));
         config.setIdleTimeout(section.getLong("pool.idle-timeout-millis"));
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-H2Pool").factory());
         return new HikariDataSource(config);
-
     }
-
 }

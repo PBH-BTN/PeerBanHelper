@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
 
-public interface DatabaseDriver {
+public interface DatabaseDriver extends AutoCloseable {
     @NotNull DatabaseType getType();
 
     @NotNull String getMapperXmlPath();
