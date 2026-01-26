@@ -1,106 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper">
+    <!-- 基础字段映射 -->
+    <resultMap id="PeerBanCountMap" type="com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount">
+        <result column="peerIp" property="peerIp"/>
+        <result column="count" property="count"/>
+    </resultMap>
 
-	<!-- 基础字段映射 -->
-	<resultMap id="PeerBanCountMap" type="com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount">
-		<result column="peerIp" property="peerIp"/>
-		<result column="count" property="count"/>
-	</resultMap>
+    <resultMap id="UniversalFieldNumResultMap" type="com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult">
+        <result column="data" property="data"/>
+        <result column="count" property="count"/>
+        <result column="percent" property="percent"/>
+    </resultMap>
 
-	<resultMap id="UniversalFieldNumResultMap" type="com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult">
-		<result column="data" property="data"/>
-		<result column="count" property="count"/>
-		<result column="percent" property="percent"/>
-	</resultMap>
+    <!-- 封禁IP查询（带过滤） -->
+    <select id="getBannedIpsWithFilter" resultMap="PeerBanCountMap">
+        SELECT
+        ip AS peerIp,
+        COUNT(*) AS count
+        FROM history
+        <if test="filter != null and filter != ''">
+            WHERE ip LIKE CONCAT(#{filter}, '%')
+        </if>
+        GROUP BY ip
+        ORDER BY count DESC
+    </select>
 
-	<!-- 封禁IP查询（带过滤） -->
-	<select id="getBannedIpsWithFilter" resultMap="PeerBanCountMap">
-		SELECT
-		ip AS peerIp,
-		COUNT(*) AS count
-		FROM history
-		<if test="filter != null and filter != ''">
-			WHERE ip LIKE CONCAT(#{filter}, '%')
-		</if>
-		GROUP BY ip
-		ORDER BY count DESC
-	</select>
+    <!-- 封禁IP查询（无过滤） -->
+    <select id="getBannedIpsWithoutFilter" resultMap="PeerBanCountMap">
+        SELECT ip AS peerIp,
+               COUNT(*) AS count
+        FROM history
+        GROUP BY ip
+        ORDER BY count DESC
+    </select>
 
-	<!-- 封禁IP查询（无过滤） -->
-	<select id="getBannedIpsWithoutFilter" resultMap="PeerBanCountMap">
-		SELECT ip       AS peerIp,
-			   COUNT(*) AS count
-		FROM history
-		GROUP BY ip
-		ORDER BY count DESC
-	</select>
+    <!-- 统计唯一IP数量（带过滤） -->
+    <select id="countDistinctIpWithFilter" resultType="long">
+        SELECT COUNT(DISTINCT ip)
+        FROM history
+        <if test="filter != null and filter != ''">
+            WHERE ip LIKE CONCAT(#{filter}, '%')
+        </if>
+    </select>
 
-	<!-- 统计唯一IP数量（带过滤） -->
-	<select id="countDistinctIpWithFilter" resultType="long">
-		SELECT COUNT(DISTINCT ip)
-		FROM history
-		<if test="filter != null and filter != ''">
-			WHERE ip LIKE CONCAT(#{filter}, '%')
-		</if>
-	</select>
+    <!-- 统计所有唯一IP数量 -->
+    <select id="countDistinctIp" resultType="long">
+        SELECT COUNT(DISTINCT ip)
+        FROM history
+    </select>
 
-	<!-- 统计所有唯一IP数量 -->
-	<select id="countDistinctIp" resultType="long">
-		SELECT COUNT(DISTINCT ip)
-		FROM history
-	</select>
-
-	<!-- 字段聚合统计 -->
-	<select id="sumField" resultMap="UniversalFieldNumResultMap">
-		WITH filtered_data AS (
-		SELECT
-		<choose>
-			<when test="substringLength != null">
-				SUBSTRING(${field}, 1, #{substringLength}) AS field_value
-			</when>
-			<otherwise>
-				${field} AS field_value
-			</otherwise>
-		</choose>
-		,
-		${field} AS field_sum,
-		t.infoHash AS torrent_info_hash,
-		t.name AS torrent_name,
-		m.name AS module_name
-		FROM history h
-		JOIN torrents t ON h.torrent_id = t.id
-		JOIN rules r ON h.rule_id = r.id
-		JOIN modules m ON r.module_id = m.id
-		<if test="downloader != null and downloader != ''">
-			WHERE h.downloader = #{downloader}
-		</if>
-		),
-		total_sum AS (
-		SELECT SUM(field_sum) AS total
-		FROM filtered_data
-		WHERE field_sum IS NOT NULL
-		)
-		SELECT
-		fd.field_value AS data,
-		SUM(fd.field_sum) AS count,
-		CASE
-		WHEN ts.total > 0
-		THEN SUM(fd.field_sum) / ts.total
-		ELSE 0
-		END AS percent
-		FROM filtered_data fd
-		CROSS JOIN total_sum ts
-		WHERE fd.field_sum IS NOT NULL
-		GROUP BY fd.field_value, ts.total
-		HAVING
-		(SUM(fd.field_sum) / NULLIF(ts.total, 0)) > #{percentFilter}
-		ORDER BY count DESC;
-
-	</select>
-
-	<!-- 字段计数统计 -->
-	<select id="countField" resultMap="UniversalFieldNumResultMap">
+    <!-- 字段聚合统计 -->
+    <select id="sumField" resultMap="UniversalFieldNumResultMap">
         <bind name="dbField" value="
             field == 'torrent_name' ? 't.name' :
             field == 'module_name' ? 'h.module_name' :
@@ -114,71 +65,119 @@
             field == 'time' ? 'h.ban_at' :
             field
         " />
-		WITH counts AS (
-		SELECT
-		<choose>
-			<when test="substringLength != null">
-				SUBSTRING(${dbField}, 1, #{substringLength})
-			</when>
-			<otherwise>
-				${dbField}
-			</otherwise>
-		</choose>
-		AS data,
-		COUNT(*) AS count
-		FROM history h
-		<if test="field == 't.name' or field == 'torrent_name'">
-			JOIN torrents t ON h.torrent_id = t.id
-		</if>
-		<where>
-			<if test="downloader != null and downloader != ''">
-				AND h.downloader = #{downloader}
-			</if>
-			AND ${dbField} IS NOT NULL
-		</where>
-		GROUP BY data
-		),
-		total AS (
-		SELECT COUNT(*) AS total FROM history h
-		<if test="field == 't.name' or field == 'torrent_name'">
-			JOIN torrents t ON h.torrent_id = t.id
-		</if>
-		<where>
-			<if test="downloader != null and downloader != ''">
-				AND h.downloader = #{downloader}
-			</if>
-			AND ${dbField} IS NOT NULL
-		</where>
-		)
-		SELECT
-		c.data,
-		c.count,
-		CAST(c.count AS double precision) / NULLIF(t.total, 0) AS percent
-		FROM counts c
-		CROSS JOIN total t
-		WHERE (CAST(c.count AS double precision) / NULLIF(t.total, 0)) &gt; #{percentFilter}
-		ORDER BY c.count DESC
-	</select>
+        WITH filtered_data AS (
+        SELECT
+        <choose>
+            <when test="substringLength != null">
+                SUBSTRING(${dbField}, 1, #{substringLength}) AS field_value
+            </when>
+            <otherwise>
+                ${dbField} AS field_value
+            </otherwise>
+        </choose>
+        ,
+        ${dbField} AS field_sum,
+        t.info_hash AS torrent_info_hash,
+        t.name AS torrent_name,
+        h.module_name AS module_name
+        FROM history h
+        JOIN torrents t ON h.torrent_id = t.id
+        <if test="downloader != null and downloader != ''">
+            WHERE h.downloader = #{downloader}
+        </if>
+        ),
+        total_sum AS (
+        SELECT SUM(field_sum) AS total
+        FROM filtered_data
+        WHERE field_sum IS NOT NULL
+        )
+        SELECT
+        fd.field_value AS data,
+        SUM(fd.field_sum) AS count,
+        CASE
+        WHEN ts.total > 0
+        THEN SUM(fd.field_sum) / ts.total
+        ELSE 0
+        END AS percent
+        FROM filtered_data fd
+        CROSS JOIN total_sum ts
+        WHERE fd.field_sum IS NOT NULL
+        GROUP BY fd.field_value, ts.total
+        HAVING
+        (SUM(fd.field_sum) / NULLIF(ts.total, 0)) > #{percentFilter}
+        ORDER BY count DESC;
+    </select>
 
-	<!-- 批量统计Torrent的封禁数量 -->
-	<select id="countByTorrentIds" resultType="com.ghostchu.peerbanhelper.databasent.dto.TorrentCount">
-		SELECT
-			torrent_id AS torrentId,
-			COUNT(*) AS count
-		FROM history
-		WHERE torrent_id IN
-		<foreach collection="torrentIds" item="id" open="(" separator="," close=")">
-			#{id}
-		</foreach>
-		GROUP BY torrent_id
-	</select>
+    <!-- 字段计数统计 -->
+    <select id="countField" resultMap="UniversalFieldNumResultMap">
+        <bind name="dbField" value="
+            field == 'torrent_name' ? 't.name' :
+            field == 'module_name' ? 'h.module_name' :
+            field == 'peer_client_name' ? 'h.peer_client_name' :
+            (field == 'peer_ip' or field == 'ip') ? 'h.ip' :
+            field == 'port' ? 'h.port' :
+            field == 'peer_id' ? 'h.peer_id' :
+            field == 'peer_uploaded' ? 'h.peer_uploaded' :
+            field == 'peer_downloaded' ? 'h.peer_downloaded' :
+            field == 'peer_progress' ? 'h.peer_progress' :
+            field == 'time' ? 'h.ban_at' :
+            field
+        " />
+        SELECT
+        <choose>
+            <when test="substringLength != null">
+                SUBSTRING(${dbField}, 1, #{substringLength})
+            </when>
+            <otherwise>
+                ${dbField}
+            </otherwise>
+        </choose>
+        AS data,
+        COUNT(*) AS count,
+        COUNT(*) / (SELECT COUNT(*) FROM history h
+        <if test="field == 't.name' or field == 'torrent_name'">
+            JOIN torrents t ON h.torrent_id = t.id
+        </if>
+        <where>
+            <if test="downloader != null and downloader != ''">
+                AND h.downloader = #{downloader}
+            </if>
+            AND ${dbField} IS NOT NULL
+        </where>) AS percent
+        FROM history h
+        <if test="field == 't.name' or field == 'torrent_name'">
+            JOIN torrents t ON h.torrent_id = t.id
+        </if>
+        <where>
+            <if test="downloader != null and downloader != ''">
+                AND h.downloader = #{downloader}
+            </if>
+            AND ${dbField} IS NOT NULL
+        </where>
+        GROUP BY data
+        HAVING percent &gt; #{percentFilter}
+        ORDER BY count DESC
+    </select>
 
-	<select id="getDistinctIps" resultType="java.lang.String">
-		SELECT DISTINCT ip
-		FROM history
-		WHERE ban_at BETWEEN #{start} AND #{end}
-		<if test="downloader != null and downloader != ''">
-			AND downloader = #{downloader}
-		</if>
-	</select>
+    <!-- 批量统计Torrent的封禁数量 -->
+    <select id="countByTorrentIds" resultType="com.ghostchu.peerbanhelper.databasent.dto.TorrentCount">
+        SELECT
+            torrent_id AS torrentId,
+            COUNT(*) AS count
+        FROM history
+        WHERE torrent_id IN
+        <foreach collection="torrentIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY torrent_id
+    </select>
+
+    <select id="getDistinctIps" resultType="java.lang.String">
+        SELECT DISTINCT ip
+        FROM history
+        WHERE ban_at BETWEEN #{start} AND #{end}
+        <if test="downloader != null and downloader != ''">
+            AND downloader = #{downloader}
+        </if>
+    </select>
 </mapper>

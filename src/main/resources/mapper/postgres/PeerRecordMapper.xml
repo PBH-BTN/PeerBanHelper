@@ -5,8 +5,8 @@
         SELECT COUNT(DISTINCT address)
         FROM peer_records
         WHERE downloader = #{downloader}
-          AND lastTimeSeen &gt;= #{startAt}
-          AND firstTimeSeen &lt;= #{endAt}
+            AND lastTimeSeen &gt;= #{startAt}
+            AND firstTimeSeen &lt;= #{endAt}
     </select>
 
     <resultMap id="queryAddressTotalTraffic" type="com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic">
@@ -61,8 +61,8 @@
     <!-- 批量统计Torrent的访问记录数量 -->
     <select id="countByTorrentIds" resultType="com.ghostchu.peerbanhelper.databasent.dto.TorrentCount">
         SELECT
-        torrent_id AS torrentId,
-        COUNT(*) AS count
+            torrent_id AS torrentId,
+            COUNT(*) AS count
         FROM peer_records
         WHERE torrent_id IN
         <foreach collection="torrentIds" item="id" open="(" separator="," close=")">
