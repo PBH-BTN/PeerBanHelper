@@ -41,7 +41,6 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
@@ -131,9 +130,12 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     private void cleanDatabase() {
         try {
-            var timestamp = new Timestamp(System.currentTimeMillis() - persistDuration);
-            pcbRangeDao.cleanupDatabase(timestamp);
-            pcbAddressDao.cleanupDatabase(timestamp);
+            log.info("Cleaning up expired PCB data from database...");
+            long now = System.currentTimeMillis();
+            var ofd = OffsetDateTime.now().minus(persistDuration, ChronoUnit.MILLIS);
+            pcbRangeDao.cleanupDatabase(ofd);
+            pcbAddressDao.cleanupDatabase(ofd);
+            log.info("Expired PCB data cleanup completed. Cost: {}ms", System.currentTimeMillis() - now);
         } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
             Sentry.captureException(e);

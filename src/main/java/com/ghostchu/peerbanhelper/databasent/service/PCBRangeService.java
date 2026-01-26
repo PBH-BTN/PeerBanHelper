@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface PCBRangeService extends IService<PCBRangeEntity> {
@@ -15,5 +15,5 @@ public interface PCBRangeService extends IService<PCBRangeEntity> {
 
 	int deleteEntry(@NotNull String torrentId,  @NotNull String range);
 
-	int cleanupDatabase(Timestamp timestamp);
+    int cleanupDatabase(OffsetDateTime timestamp);
 }

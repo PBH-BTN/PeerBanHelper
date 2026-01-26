@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface PCBAddressService extends IService<PCBAddressEntity> {
@@ -15,5 +15,5 @@ public interface PCBAddressService extends IService<PCBAddressEntity> {
 
 	int deleteEntry(@NotNull String torrentId, @NotNull String ip);
 
-	int cleanupDatabase(Timestamp timestamp);
+    int cleanupDatabase(OffsetDateTime timestamp);
 }

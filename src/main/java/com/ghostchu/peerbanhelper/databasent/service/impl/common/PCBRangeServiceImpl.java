@@ -8,7 +8,7 @@ import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -37,7 +37,7 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
 	}
 
 	@Override
-	public int cleanupDatabase(Timestamp timestamp) {
+    public int cleanupDatabase(OffsetDateTime timestamp) {
 		return baseMapper.delete(new QueryWrapper<PCBRangeEntity>()
 				.lt("last_time_seen", timestamp));
 	}

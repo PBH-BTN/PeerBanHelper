@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -39,7 +39,7 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
 	}
 
 	@Override
-	public int cleanupDatabase(Timestamp timestamp) {
+    public int cleanupDatabase(OffsetDateTime timestamp) {
 		return baseMapper.delete(new QueryWrapper<PCBAddressEntity>()
 				.lt("last_time_seen", timestamp));
 	}
