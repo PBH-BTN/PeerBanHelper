@@ -26,7 +26,9 @@ import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -156,12 +158,23 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     @Override
     public IPAddressTotalTraffic queryAddressTotalTraffic(@NotNull InetAddress inet) {
         IPAddressTotalTraffic traffic = baseMapper.queryAddressTotalTraffic(inet);
-        return traffic != null ? traffic : new IPAddressTotalTraffic();
+        if (traffic == null) {
+            traffic = new IPAddressTotalTraffic();
+            traffic.setTotalUploaded(-1);
+            traffic.setTotalDownloaded(-1);
+        }
+        return traffic;
     }
 
     @Override
     public IPAddressTimeSeen queryAddressTimeSeen(@NotNull InetAddress inet) {
-        return baseMapper.queryAddressTimeSeen(inet);
+        IPAddressTimeSeen timeSeen = baseMapper.queryAddressTimeSeen(inet);
+        if (timeSeen == null) {
+            timeSeen = new IPAddressTimeSeen();
+            timeSeen.setFirstTimeSeen(OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC));
+            timeSeen.setLastTimeSeen(OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC));
+        }
+        return timeSeen;
     }
 
     @Override
