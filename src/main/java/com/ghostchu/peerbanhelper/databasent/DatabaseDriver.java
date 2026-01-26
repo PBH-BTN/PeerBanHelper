@@ -10,4 +10,6 @@ public interface DatabaseDriver {
     @NotNull String getMapperXmlPath();
 
     @NotNull DataSource getDataSource();
+
+    void close() throws Exception;
 }

@@ -418,7 +418,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             return null;
         }
         var result = ruleSubLogsDao.getLastLog(ruleId);
-        OffsetDateTime lastUpdate = result == null ? TimeUtil.zeroOffsetDateTime() : result.getUpdateTime();
+        OffsetDateTime lastUpdate = result == null ? TimeUtil.zeroOffsetDateTime : result.getUpdateTime();
         int count = result == null ? 0 : result.getCount();
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
     }

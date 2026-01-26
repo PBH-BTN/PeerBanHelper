@@ -24,7 +24,7 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource getDataSource() {
+    public @NotNull DataSource createDataSource() {
         // Hikari CP SQLite DataSource implementation
         HikariConfig config = new HikariConfig();
         String host = section.getString("host");

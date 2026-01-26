@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.util.json;
 
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -20,6 +20,6 @@ public final class OffsetDateTimeTypeAdapter implements JsonSerializer<OffsetDat
         if (!(json instanceof JsonPrimitive)) {
             throw new JsonParseException("The date should be a number value");
         }
-        return Instant.ofEpochMilli(json.getAsLong()).atOffset(MiscUtil.getSystemZoneOffset());
+        return Instant.ofEpochMilli(json.getAsLong()).atOffset(TimeUtil.getSystemZoneOffset());
     }
 }

@@ -11,7 +11,7 @@ import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEnt
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.sentry.Sentry;
@@ -76,7 +76,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     private void flushData() {
         try {
             connectionMetricsTrackDao.flushAll();
-            OffsetDateTime startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
+            OffsetDateTime startOfToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
             List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.list(new QueryWrapper<PeerConnectionMetricsTrackEntity>().ne("timeframe_at", startOfToday));
             List<PeerConnectionMetricsEntity> aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
             connectionMetricDao.saveAggregating(aggNotInTheDayList, true);

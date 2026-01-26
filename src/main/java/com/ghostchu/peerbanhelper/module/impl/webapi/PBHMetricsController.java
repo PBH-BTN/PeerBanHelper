@@ -11,7 +11,7 @@ import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -74,7 +74,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         }
 
         historyService.list(queryBanned).forEach(entity -> {
-            var startOfDay = MiscUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
             bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
         });
 
@@ -231,7 +231,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
                 .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
 
         historyService.list(query).forEach(entity -> {
-            var startOfDay = MiscUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
             bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
         });
 
@@ -260,8 +260,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             map.put("peersBlockRate", 0.0d);
             log.error("Unable to query tracked swarm count", e);
         }
-        var startWeekly = MiscUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000);
-        var endToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
+        var startWeekly = TimeUtil.getStartOfToday(System.currentTimeMillis() - 7 * 24 * 3600 * 1000);
+        var endToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
         map.put("weeklySessions", peerConnectionMetricDao.getGlobalTotalConnectionsCount(
                 startWeekly,
                 endToday));

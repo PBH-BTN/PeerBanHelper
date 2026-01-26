@@ -14,7 +14,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleStringIntKVDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
@@ -126,8 +126,8 @@ public final class PBHChartController extends AbstractFeatureModule {
         List<PeerRecordEntity> peerRecords = peerRecordService.getRecordsBetween(timeQueryModel.startAt(), timeQueryModel.endAt(), downloader);
         // 生成按日时间戳的桶，并填充数据
         for (PeerRecordEntity record : peerRecords) {
-            long firstDay = MiscUtil.getStartOfToday(record.getFirstTimeSeen().toInstant().toEpochMilli()).toInstant().toEpochMilli();
-            long lastDay = MiscUtil.getStartOfToday(record.getLastTimeSeen().toInstant().toEpochMilli()).toInstant().toEpochMilli();
+            long firstDay = TimeUtil.getStartOfToday(record.getFirstTimeSeen().toInstant().toEpochMilli()).toInstant().toEpochMilli();
+            long lastDay = TimeUtil.getStartOfToday(record.getLastTimeSeen().toInstant().toEpochMilli()).toInstant().toEpochMilli();
             for (long day = firstDay; day <= lastDay; day += 86400000L) {
                 if (day < startAtTs || day > endAtTs) {
                     continue;
@@ -168,7 +168,7 @@ public final class PBHChartController extends AbstractFeatureModule {
 
         for (TrafficDataComputed record : records) {
             OffsetDateTime ts = record.getTimestamp();
-            long dayStart = MiscUtil.getStartOfToday(ts.toInstant().toEpochMilli()).toInstant().toEpochMilli();
+            long dayStart = TimeUtil.getStartOfToday(ts.toInstant().toEpochMilli()).toInstant().toEpochMilli();
 
             mergedData.compute(dayStart, (key, existing) -> {
                 if (existing == null) {
@@ -213,12 +213,12 @@ public final class PBHChartController extends AbstractFeatureModule {
         }
 
         peerRecordService.list(queryConnected).forEach(entity -> {
-            var startOfDay = MiscUtil.getStartOfToday(entity.getLastTimeSeen().toInstant().toEpochMilli());
+            var startOfDay = TimeUtil.getStartOfToday(entity.getLastTimeSeen().toInstant().toEpochMilli());
             connectedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
         });
 
         historyService.list(queryBanned).forEach(entity -> {
-            var startOfDay = MiscUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
             bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
         });
 
