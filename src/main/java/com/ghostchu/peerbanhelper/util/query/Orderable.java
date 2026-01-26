@@ -1,12 +1,19 @@
 package com.ghostchu.peerbanhelper.util.query;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import io.javalin.http.Context;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Getter
 public class Orderable extends LinkedHashMap<String, Boolean> {
+    private final BiMap<String, String> remapping = HashBiMap.create();
+
     // databaseName -> dtoName
     public Orderable(Map<String, Boolean> def, Context ctx) {
         // 如果用户指定了排序参数，优先使用用户排序
@@ -48,26 +55,33 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
         return this;
     }
 
+    @NotNull
+    public Orderable addRemapping(String oldName, String databaseFieldName) {
+        remapping.put(oldName, databaseFieldName);
+        return this;
+    }
+
     public <T> QueryWrapper<T> apply(QueryWrapper<T> queryBuilder) {
         if (queryBuilder == null) {
             return null;
         }
         for (Map.Entry<String, Boolean> entry : entrySet()) {
-            queryBuilder.orderBy(true, entry.getValue(), entry.getKey());
+            queryBuilder.orderBy(true, entry.getValue(), remapping.getOrDefault(entry.getKey(), entry.getKey()));
         }
         return queryBuilder;
     }
 
-    public String generateOrderBy(){
+    public String generateOrderBy() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Boolean> entry : entrySet()) {
-            if(!sb.isEmpty()){
+            if (!sb.isEmpty()) {
                 sb.append(", ");
             }
-            sb.append(entry.getKey())
-              .append(" ")
-              .append(entry.getValue() ? "ASC" : "DESC");
+            sb.append(remapping.getOrDefault(entry.getKey(), entry.getKey()))
+                    .append(" ")
+                    .append(entry.getValue() ? "ASC" : "DESC");
         }
         return sb.toString();
     }
+
 }

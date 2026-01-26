@@ -84,7 +84,20 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             return;
         }
         Pageable pageable = new Pageable(ctx);
-        Orderable orderable = new Orderable(Map.of("ban_at", false), ctx);
+        Orderable orderable = new Orderable(Map.of("ban_at", false), ctx)
+                .addRemapping("banAt", "ban_at")
+                .addRemapping("unbanAt", "unban_at")
+                .addRemapping("peerIp", "ip")
+                .addRemapping("peerPort", "port")
+                .addRemapping("peerId", "peer_id")
+                .addRemapping("peerClientName", "peer_client_name")
+                .addRemapping("peerUploaded", "peer_uploaded")
+                .addRemapping("peerDownloaded", "peer_downloaded")
+                .addRemapping("peerProgress", "peer_progress")
+                .addRemapping("torrentInfoHash", "torrent_info_hash")
+                .addRemapping("module", "module_name")
+                .addRemapping("rule", "rule_name")
+                .addRemapping("description", "description");
 
         IPage<HistoryEntity> page = historyService.queryBanHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
         var result = page.convert(r -> new BanLogDTO(locale(ctx), downloaderManager, r, TorrentEntityDTO.from(torrent)));
@@ -114,7 +127,10 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         Page<TorrentEntity> pageRequest = pageable.toPage();
         String keyword = ctx.queryParam("keyword");
 
-        IPage<TorrentEntity> torrentEntityPage = torrentService.search(pageRequest, keyword, new Orderable(Map.of("id", false), ctx), needsCountSort ? countSortField : null, countSortAscending);
+        IPage<TorrentEntity> torrentEntityPage = torrentService.search(pageRequest, keyword,
+                new Orderable(Map.of("id", false), ctx)
+                        .addRemapping("infoHash", "info_hash")
+                , needsCountSort ? countSortField : null, countSortAscending);
 
         // 批量查询计数 - 优化 N+1 查询问题
         List<Long> torrentIds = torrentEntityPage.getRecords().stream()
@@ -155,7 +171,12 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             return;
         }
         Pageable pageable = new Pageable(ctx);
-        Orderable orderable = new Orderable(Map.of("last_time_seen", false, "address", true, "port", true), ctx);
+        Orderable orderable = new Orderable(Map.of("last_time_seen", false, "address", true, "port", true), ctx)
+                .addRemapping("peerId", "peer_id")
+                .addRemapping("clientName", "client_name")
+                .addRemapping("firstTimeSeen", "first_time_seen")
+                .addRemapping("lastTimeSeen", "last_time_seen");
+        ;
         IPage<PeerRecordEntity> page = peerRecordService.queryAccessHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
         var result = page.convert(entity ->
                 new PeerRecordEntityDTO(entity.getId(),

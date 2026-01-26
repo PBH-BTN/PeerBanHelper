@@ -200,7 +200,20 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleBanHistory(Context ctx) {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
-        Orderable orderBy = new Orderable(Map.of("ban_at", false), ctx);
+        Orderable orderBy = new Orderable(Map.of("ban_at", false), ctx)
+                .addRemapping("banAt", "ban_at")
+                .addRemapping("unbanAt", "unban_at")
+                .addRemapping("peerIp", "ip")
+                .addRemapping("peerPort", "port")
+                .addRemapping("peerId", "peer_id")
+                .addRemapping("peerClientName", "peer_client_name")
+                .addRemapping("peerUploaded", "peer_uploaded")
+                .addRemapping("peerDownloaded", "peer_downloaded")
+                .addRemapping("peerProgress", "peer_progress")
+                .addRemapping("torrentInfoHash", "torrent_info_hash")
+                .addRemapping("module", "module_name")
+                .addRemapping("rule", "rule_name")
+                .addRemapping("description", "description");
         IPage<HistoryEntity> page = historyDao.queryBanHistoryByIp(pageable.toPage(), ip, orderBy);
         page.convert(entity -> {
             TorrentEntityDTO torrentEntityDTO = TorrentEntityDTO.from(torrentDao.getById(entity.getTorrentId()));
@@ -230,7 +243,11 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleAccessHistory(Context ctx) {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
-        Orderable orderBy = new Orderable(Map.of("last_time_seen", false, "address", false, "port", true), ctx);
+        Orderable orderBy = new Orderable(Map.of("last_time_seen", false, "address", false, "port", true), ctx)
+                .addRemapping("peerId", "peer_id")
+                .addRemapping("clientName", "client_name")
+                .addRemapping("firstTimeSeen", "first_time_seen")
+                .addRemapping("lastTimeSeen", "last_time_seen");
         IPage<PeerRecordEntity> page = peerRecordDao.queryAccessHistoryByIp(pageable.toPage(), ip, orderBy);
         IPage<AccessHistoryDTO> accessHistoryDTOIPage = page.convert(entity -> new AccessHistoryDTO(
                 entity.getId(),

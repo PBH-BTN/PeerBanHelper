@@ -120,7 +120,22 @@ public final class PBHBanController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx);
         Page<HistoryEntity> pageRequest = pageable.toPage();
 
-        IPage<HistoryEntity> pageResult = historyService.getBanLogs(pageRequest, new Orderable(Map.of("ban_at", false), ctx));
+        IPage<HistoryEntity> pageResult = historyService.getBanLogs(pageRequest,
+                new Orderable(Map.of("ban_at", false), ctx)
+                        .addRemapping("banAt", "ban_at")
+                        .addRemapping("unbanAt", "unban_at")
+                        .addRemapping("peerIp", "ip")
+                        .addRemapping("peerPort", "port")
+                        .addRemapping("peerId", "peer_id")
+                        .addRemapping("peerClientName", "peer_client_name")
+                        .addRemapping("peerUploaded", "peer_uploaded")
+                        .addRemapping("peerDownloaded", "peer_downloaded")
+                        .addRemapping("peerProgress", "peer_progress")
+                        .addRemapping("torrentInfoHash", "torrent_info_hash")
+                        .addRemapping("module", "module_name")
+                        .addRemapping("rule", "rule_name")
+                        .addRemapping("description", "description")
+        );
 
         List<BanLogDTO> result = pageResult.getRecords().stream().map(r -> {
             var torrent = torrentService.getById(r.getTorrentId());
