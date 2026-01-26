@@ -274,7 +274,7 @@ CREATE INDEX idx_peer_records_last_time_seen ON peer_records (last_time_seen);
 
 CREATE INDEX idx_peer_records_session_between ON peer_records (downloader, first_time_seen, last_time_seen);
 
-CREATE INDEX idx_torrents_info_hash ON torrents (info_hash);
+CREATE UNIQUE INDEX idx_torrents_info_hash ON torrents (info_hash);
 
 CREATE INDEX idx_torrents_name ON torrents (name);
 
