@@ -154,7 +154,7 @@ public class HistoryMigrator implements TableMigrator {
         entity.setPeerDownloaded(peerDownloaded);
         entity.setPeerProgress(rs.getDouble("peerProgress"));
 
-        Double downloaderProgress = rs.getObject("downloaderProgress") != null ? rs.getDouble("downloaderProgress") : 0;
+        Double downloaderProgress = rs.getObject("downloaderProgress") != null ? rs.getDouble("downloaderProgress") : null;
         entity.setDownloaderProgress(downloaderProgress);
 
         // Torrent reference
@@ -248,6 +248,6 @@ public class HistoryMigrator implements TableMigrator {
 
     private void saveBatch(List<HistoryEntity> batch) {
         // Use MyBatis-Plus batch insert for better performance
-        historyService.getBaseMapper().insert(batch);
+        historyService.getBaseMapper().insertOrUpdate(batch);
     }
 }
