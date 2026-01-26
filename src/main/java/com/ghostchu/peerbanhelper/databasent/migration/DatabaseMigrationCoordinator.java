@@ -69,22 +69,22 @@ public class DatabaseMigrationCoordinator {
     public void checkAndMigrate() {
         // Check if migration is needed
         if (!shouldMigrate()) {
-            log.info("Database migration not needed or already completed");
+            log.debug("Database migration not needed or already completed");
             return;
         }
 
         log.info("=".repeat(60));
-        log.info(tlUI(Lang.DATABASE_MIGRATION_STARTING));
+        log.info(tlUI(Lang.DBNT_MIGRATOR_STARTING));
         log.info("=".repeat(60));
 
         try {
             performMigration();
             markMigrationCompleted();
             log.info("=".repeat(60));
-            log.info(tlUI(Lang.DATABASE_MIGRATION_COMPLETED));
+            log.info(tlUI(Lang.DBNT_MIGRATOR_COMPLETED));
             log.info("=".repeat(60));
         } catch (Exception e) {
-            log.error(tlUI(Lang.DATABASE_MIGRATION_FAILED), e);
+            log.error(tlUI(Lang.DBNT_MIGRATOR_FAILED), e);
             Sentry.captureException(e);
             // Don't throw - allow application to start even if migration fails
             // User can manually fix and restart
@@ -104,7 +104,7 @@ public class DatabaseMigrationCoordinator {
             return false;
         }
 
-        log.info("Found SQLite database at {}, migration will proceed", sqliteDbFile);
+        log.debug("Found SQLite database at {}, migration will proceed", sqliteDbFile);
         return true;
     }
 
@@ -113,7 +113,7 @@ public class DatabaseMigrationCoordinator {
 
         // Connect to SQLite database
         String jdbcUrl = "jdbc:sqlite:" + sqliteDbFile.getAbsolutePath();
-        log.info("Connecting to SQLite database: {}", jdbcUrl);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_CONNECTING_SQLITE));
 
         try (Connection sqliteConnection = DriverManager.getConnection(jdbcUrl)) {
             // Upgrade SQLite schema to version 20
@@ -140,10 +140,8 @@ public class DatabaseMigrationCoordinator {
                         continue;
                     }
 
-                    log.info("Migrating table: {}", migrator.getTableName());
-                    long recordCount = migrator.migrate(sqliteConnection, context);
-                    log.info("Successfully migrated {} records from table '{}'",
-                            recordCount, migrator.getTableName());
+                    log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PREPARE, migrator.getTableName()));
+                    migrator.migrate(sqliteConnection, context);
                 } catch (Exception e) {
                     log.error("Failed to migrate table '{}': {}",
                             migrator.getTableName(), e.getMessage(), e);
@@ -152,8 +150,7 @@ public class DatabaseMigrationCoordinator {
             }
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Migration completed in {} seconds. Total records migrated: {}",
-                    duration / 1000, context.getTotalRecordsMigrated());
+            log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_FINISHED, context.getTotalRecordsMigrated(), duration / 1000));
         }
     }
 
@@ -181,7 +178,7 @@ public class DatabaseMigrationCoordinator {
     private void markMigrationCompleted() {
         try {
             migrationMarkerFile.createNewFile();
-            log.info("Created migration marker file: {}", migrationMarkerFile);
+            log.debug("Created migration marker file: {}", migrationMarkerFile);
         } catch (Exception e) {
             log.warn("Failed to create migration marker file", e);
         }

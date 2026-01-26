@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.configuration;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.text.Lang;
 import jakarta.annotation.PostConstruct;
@@ -25,22 +26,21 @@ public class DatabaseSchemaInitializer {
 
     @PostConstruct
     public void init() {
-        log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
-        log.info("Check and upgrading database schema for {}", databaseDriver.getType());
+        log.info(tlUI(Lang.DBNT_FLYWAY_VALIDATING_SCHEMA, databaseDriver.getType().name()));
         try {
             String migrationType = databaseDriver.getType().getMigrationType();
             String repeatType = databaseDriver.getType().getRepeatType();
             // 1. Run Flyway Migration
-            log.info("Running Flyway migration for {}", databaseDriver.getType().name());
             Flyway flyway = Flyway.configure()
                     .dataSource(databaseDriver.getDataSource())
                     .locations("classpath:db/migration/" + migrationType)
                     .baselineOnMigrate(true)
+                    .validateOnMigrate(ExternalSwitch.parseBoolean("dbnt.flyway.validateOnMigrate", true))
                     .load();
-            flyway.migrate();
 
+            flyway.migrate();
             // 2. Run Repeat Scripts
-            log.info("Running repeat scripts for {}", migrationType);
+            log.debug("Running repeat scripts for {}", migrationType);
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             Resource[] resources = resolver.getResources("classpath:db/repeat/" + repeatType + "/*.sql");
 
@@ -49,14 +49,14 @@ public class DatabaseSchemaInitializer {
 
             try (Connection conn = databaseDriver.getDataSource().getConnection()) {
                 for (Resource resource : resources) {
-                    log.info("Executing repeat script: {}", resource.getFilename());
+                    log.debug("Executing repeat script: {}", resource.getFilename());
                     ScriptUtils.executeSqlScript(conn, resource);
                 }
             }
 
         } catch (Exception e) {
-            log.error("Failed to initialize database schema", e);
-            throw new RuntimeException("Database initialization failed", e);
+            log.error(tlUI(Lang.DBNT_FLYWAY_ERROR), e);
+            throw new RuntimeException(tlUI(Lang.DBNT_FLYWAY_ERROR), e);
         }
     }
 }

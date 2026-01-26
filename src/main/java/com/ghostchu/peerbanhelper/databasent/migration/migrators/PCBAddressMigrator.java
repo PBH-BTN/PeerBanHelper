@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
@@ -15,6 +16,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class PCBAddressMigrator implements TableMigrator {
@@ -108,8 +111,7 @@ public class PCBAddressMigrator implements TableMigrator {
                         batch.clear();
 
                         if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                            log.info("Migrated {} / {} pcb_address records ({})",
-                                    count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                            log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "pcb_address", MigrationContext.formatProgress(count, totalCount)));
                             lastLogged = count;
                         }
                     }
@@ -124,7 +126,7 @@ public class PCBAddressMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of pcb_address table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "pcb_address"));
         context.incrementTotalRecords(count);
         return count;
     }

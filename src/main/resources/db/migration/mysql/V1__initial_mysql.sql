@@ -53,7 +53,7 @@ CREATE TABLE pcb_address
     id                               BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     ip                               VARCHAR(255) NOT NULL,
     port                             INT UNSIGNED                   NOT NULL,
-    torrent_id VARCHAR(255) NOT NULL,
+    torrent_id                  VARCHAR(255) NOT NULL,
     last_report_progress DOUBLE NOT NULL,
     last_report_uploaded             BIGINT NULL,
     tracking_uploaded_increase_total BIGINT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE pcb_address
     downloader                       VARCHAR(255) NOT NULL,
     ban_delay_window_end_at          datetime     NOT NULL,
     fast_pcb_test_execute_at         datetime     NOT NULL,
-    last_torrent_completed_size BIGINT NOT NULL,
+    last_torrent_completed_size BIGINT       NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -72,7 +72,7 @@ CREATE TABLE pcb_range
 (
     id                               BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     `range`                          VARCHAR(255) NOT NULL,
-    torrent_id VARCHAR(255) NOT NULL,
+    torrent_id                  VARCHAR(255) NOT NULL,
     last_report_progress DOUBLE NOT NULL,
     last_report_uploaded             BIGINT NULL,
     tracking_uploaded_increase_total BIGINT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE pcb_range
     downloader                       VARCHAR(255) NOT NULL,
     ban_delay_window_end_at          datetime     NOT NULL,
     fast_pcb_test_execute_at         datetime     NOT NULL,
-    last_torrent_completed_size BIGINT NOT NULL,
+    last_torrent_completed_size BIGINT       NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -134,7 +134,7 @@ CREATE TABLE peer_records
     torrent_id        BIGINT       NOT NULL,
     downloader        VARCHAR(255) NOT NULL,
     peer_id           VARCHAR(255) NULL,
-    client_name TEXT NULL,
+    client_name       TEXT NULL,
     uploaded          BIGINT NOT NULL,
     uploaded_offset   BIGINT NOT NULL,
     upload_speed      BIGINT NOT NULL,
@@ -144,13 +144,13 @@ CREATE TABLE peer_records
     last_flags        VARCHAR(255) NULL,
     first_time_seen   datetime     NOT NULL,
     last_time_seen    datetime     NOT NULL,
-    peer_geoip TEXT NULL,
+    peer_geoip        TEXT NULL,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE torrents
 (
-    id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    id   BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     info_hash       VARCHAR(255) NOT NULL,
     name            VARCHAR(255) NOT NULL,
     size BIGINT NOT NULL,

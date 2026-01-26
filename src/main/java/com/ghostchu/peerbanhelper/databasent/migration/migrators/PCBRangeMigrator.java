@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.PCBRangeService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -14,6 +15,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class PCBRangeMigrator implements TableMigrator {
@@ -44,8 +47,6 @@ public class PCBRangeMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of pcb_range table...");
-
         String selectQuery = """
                 SELECT range, torrentId, lastReportProgress, lastReportUploaded,
                        trackingUploadedIncreaseTotal, rewindCounter, progressDifferenceCounter,
@@ -105,8 +106,7 @@ public class PCBRangeMigrator implements TableMigrator {
                         batch.clear();
 
                         if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                            log.info("Migrated {} / {} pcb_range records ({})",
-                                    count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                            log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "pcb_range", MigrationContext.formatProgress(count, totalCount)));
                             lastLogged = count;
                         }
                     }
@@ -121,7 +121,7 @@ public class PCBRangeMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of pcb_range table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "pcb_range"));
         context.incrementTotalRecords(count);
         return count;
     }

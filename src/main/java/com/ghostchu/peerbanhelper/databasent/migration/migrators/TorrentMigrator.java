@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -11,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * Migrates torrents table
@@ -44,8 +47,6 @@ public class TorrentMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of torrents table...");
-
         String selectQuery = "SELECT id, infoHash, name, size, privateTorrent FROM torrents";
         long count = 0;
         long totalCount = getTotalCount(sqliteConnection);
@@ -79,8 +80,8 @@ public class TorrentMigrator implements TableMigrator {
                     batch.clear();
 
                     if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                        log.info("Migrated {} / {} torrent records ({})",
-                                count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "torrent", MigrationContext.formatProgress(count, totalCount)));
+
                         lastLogged = count;
                     }
                 }
@@ -93,7 +94,7 @@ public class TorrentMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of torrents table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "torrent"));
         context.incrementTotalRecords(count);
         return count;
     }

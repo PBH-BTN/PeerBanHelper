@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +17,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * Migrates peer_records table
@@ -49,8 +52,6 @@ public class PeerRecordMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of peer_records table...");
-
         String selectQuery = """
                 SELECT address, port, torrent_id, downloader, peerId, clientName,
                        uploaded, uploadedOffset, uploadSpeed, downloaded, downloadedOffset, downloadSpeed,
@@ -76,8 +77,8 @@ public class PeerRecordMigrator implements TableMigrator {
                         saveBatch(batch);
                         count += batch.size();
                         batch.clear();
-                        log.info("Migrated {} / {} peer_records ({} %)",
-                                count, totalCount, (count * 100 / totalCount));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "peer_records", MigrationContext.formatProgress(count, totalCount)));
+
                     }
                 } catch (Exception e) {
                     log.error("Failed to migrate peer_record: {}", e.getMessage());
@@ -90,7 +91,7 @@ public class PeerRecordMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of peer_records table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "peer_records"));
         context.incrementTotalRecords(count);
         return count;
     }

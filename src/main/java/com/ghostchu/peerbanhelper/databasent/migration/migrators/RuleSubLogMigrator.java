@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.RuleSubLogService;
 import com.ghostchu.peerbanhelper.databasent.table.RuleSubLogEntity;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -15,6 +16,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class RuleSubLogMigrator implements TableMigrator {
@@ -45,8 +48,6 @@ public class RuleSubLogMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of rule_sub_log table...");
-
         String selectQuery = "SELECT id, ruleId, updateTime, count, updateType FROM rule_sub_log";
         long count = 0;
         long totalCount = getTotalCount(sqliteConnection);
@@ -84,8 +85,8 @@ public class RuleSubLogMigrator implements TableMigrator {
                     batch.clear();
 
                     if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                        log.info("Migrated {} / {} rule_sub_log records ({})",
-                                count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "rule_sub_log", MigrationContext.formatProgress(count, totalCount)));
+
                         lastLogged = count;
                     }
                 }
@@ -97,7 +98,7 @@ public class RuleSubLogMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of rule_sub_log table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "rule_sub_log"));
         context.incrementTotalRecords(count);
         return count;
     }

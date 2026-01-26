@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,13 +20,15 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 /**
  * Migrates alert table
  * Note: Service may not be available, using placeholder for now
  */
 @Slf4j
 public class AlertMigrator implements TableMigrator {
-    private final AlertService alertService; // TODO: Replace with AlertService when available
+    private final AlertService alertService;
 
     public AlertMigrator(AlertService alertService) {
         this.alertService = alertService;
@@ -52,8 +55,6 @@ public class AlertMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of alert table...");
-
         String selectQuery = """
                 SELECT createAt, readAt, level, identifier, title, content
                 FROM alert
@@ -104,8 +105,7 @@ public class AlertMigrator implements TableMigrator {
                         batch.clear();
 
                         if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                            log.info("Migrated {} / {} alert records ({})",
-                                    count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                            log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "alert", MigrationContext.formatProgress(count, totalCount)));
                             lastLogged = count;
                         }
                     }
@@ -121,7 +121,7 @@ public class AlertMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of alert table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "alert"));
         context.incrementTotalRecords(count);
         return count;
     }

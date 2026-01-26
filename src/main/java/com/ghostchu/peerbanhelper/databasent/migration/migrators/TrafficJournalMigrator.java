@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.TrafficJournalService;
 import com.ghostchu.peerbanhelper.databasent.table.TrafficJournalEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -14,6 +15,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * Migrates traffic_journal_v3 table
@@ -47,8 +50,6 @@ public class TrafficJournalMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of traffic_journal_v3 table...");
-
         String selectQuery = """
                 SELECT timestamp, downloader, dataOverallUploadedAtStart, dataOverallUploaded,
                        dataOverallDownloadedAtStart, dataOverallDownloaded, protocolOverallUploadedAtStart,
@@ -93,8 +94,8 @@ public class TrafficJournalMigrator implements TableMigrator {
                         batch.clear();
 
                         if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                            log.info("Migrated {} / {} traffic_journal records ({})",
-                                    count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                            log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "traffic_journal_v3", MigrationContext.formatProgress(count, totalCount)));
+
                             lastLogged = count;
                         }
                     }
@@ -109,7 +110,7 @@ public class TrafficJournalMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of traffic_journal_v3 table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "traffic_journal_v3"));
         context.incrementTotalRecords(count);
         return count;
     }

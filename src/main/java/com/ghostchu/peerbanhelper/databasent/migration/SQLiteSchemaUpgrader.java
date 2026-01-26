@@ -69,15 +69,11 @@ public class SQLiteSchemaUpgrader {
      */
     public void upgradeToLatest() throws SQLException {
         int currentVersion = getCurrentVersion();
-        log.info(tlUI(Lang.DATABASE_MIGRATION_SQLITE_VERSION, currentVersion));
-
         if (currentVersion >= 20) {
-            log.info("SQLite database is already at target version 20, no upgrade needed");
             return;
         }
 
-        log.info("Upgrading SQLite schema from version {} to version 20", currentVersion);
-
+        log.info(tlUI(Lang.DBNT_MIGRATOR_LEGACY_UPGRADE_PROCESS, currentVersion));
         // Perform upgrades step by step
         int v = currentVersion;
 

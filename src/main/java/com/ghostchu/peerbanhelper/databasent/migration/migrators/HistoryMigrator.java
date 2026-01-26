@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * Migrates history (ban records) table
@@ -65,8 +68,6 @@ public class HistoryMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of history table...");
-
         // Query with JOIN to get module and rule names
         String selectQuery = """
                 SELECT 
@@ -99,8 +100,7 @@ public class HistoryMigrator implements TableMigrator {
                         saveBatch(batch);
                         count += batch.size();
                         batch.clear();
-                        log.info("Migrated {} / {} history records ({} %)",
-                                count, totalCount, (count * 100 / totalCount));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "history", MigrationContext.formatProgress(count, totalCount)));
                     }
                 } catch (Exception e) {
                     log.error("Failed to migrate history record at row: {}", rs.getLong("id"), e);
@@ -114,7 +114,7 @@ public class HistoryMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of history table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "history"));
         context.incrementTotalRecords(count);
         return count;
     }

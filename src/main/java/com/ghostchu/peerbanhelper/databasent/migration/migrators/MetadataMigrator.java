@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.databasent.table.MetadataEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -12,6 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * Migrates metadata table
@@ -46,8 +49,6 @@ public class MetadataMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of metadata table...");
-
         String selectQuery = "SELECT \"key\", \"value\" FROM metadata";
         long count = 0;
         long totalCount = getTotalCount(sqliteConnection);
@@ -79,8 +80,7 @@ public class MetadataMigrator implements TableMigrator {
                     batch.clear();
 
                     if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                        log.info("Migrated {} / {} metadata records ({})",
-                                count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "metadata", MigrationContext.formatProgress(count, totalCount)));
                         lastLogged = count;
                     }
                 }
@@ -93,7 +93,7 @@ public class MetadataMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of metadata table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "metadata"));
         context.incrementTotalRecords(count);
         return count;
     }

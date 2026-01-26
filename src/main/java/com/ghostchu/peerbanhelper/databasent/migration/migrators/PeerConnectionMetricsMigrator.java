@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -14,6 +15,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class PeerConnectionMetricsMigrator implements TableMigrator {
@@ -44,8 +47,6 @@ public class PeerConnectionMetricsMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of peer_connection_metrics table...");
-
         String selectQuery = """
                 SELECT timeframeAt, downloader, totalConnections, incomingConnections,
                        remoteRefuseTransferToClient, remoteAcceptTransferToClient,
@@ -98,8 +99,7 @@ public class PeerConnectionMetricsMigrator implements TableMigrator {
                     batch.clear();
 
                     if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                        log.info("Migrated {} / {} peer_connection_metrics records ({})",
-                                count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "peer_connection_metrics", MigrationContext.formatProgress(count, totalCount)));
                         lastLogged = count;
                     }
                 }
@@ -111,7 +111,7 @@ public class PeerConnectionMetricsMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of peer_connection_metrics table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "peer_connection_metrics"));
         context.incrementTotalRecords(count);
         return count;
     }

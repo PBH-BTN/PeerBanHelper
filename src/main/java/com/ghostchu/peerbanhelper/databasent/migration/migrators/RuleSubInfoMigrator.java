@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.RuleSubInfoService;
 import com.ghostchu.peerbanhelper.databasent.table.RuleSubInfoEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -14,6 +15,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class RuleSubInfoMigrator implements TableMigrator {
@@ -44,8 +47,6 @@ public class RuleSubInfoMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of rule_sub_info table...");
-
         String selectQuery = "SELECT ruleId, enabled, ruleName, subUrl, lastUpdate, entCount FROM rule_sub_info";
         long count = 0;
         long totalCount = getTotalCount(sqliteConnection);
@@ -79,8 +80,8 @@ public class RuleSubInfoMigrator implements TableMigrator {
                     batch.clear();
 
                     if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                        log.info("Migrated {} / {} rule_sub_info records ({})",
-                                count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "rule_sub_info", MigrationContext.formatProgress(count, totalCount)));
+
                         lastLogged = count;
                     }
                 }
@@ -92,7 +93,7 @@ public class RuleSubInfoMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of rule_sub_info table: {} records", count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "rule_sub_info"));
         context.incrementTotalRecords(count);
         return count;
     }

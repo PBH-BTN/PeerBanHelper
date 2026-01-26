@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.BanListService;
 import com.ghostchu.peerbanhelper.databasent.table.BanListEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -11,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * Migrates banlist table
@@ -46,8 +49,6 @@ public class BanListMigrator implements TableMigrator {
 
     @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
-        log.info("Starting migration of banlist table...");
-
         // Note: According to DatabaseHelper upgrade v19, banlist was cleared
         // We'll still migrate it if data exists, but it may be empty
         String selectQuery = "SELECT address, metadata FROM banlist";
@@ -74,8 +75,7 @@ public class BanListMigrator implements TableMigrator {
                         batch.clear();
 
                         if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                            log.info("Migrated {} / {} banlist records ({})",
-                                    count, totalCount, MigrationContext.formatProgress(count, totalCount));
+                            log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "banlist", MigrationContext.formatProgress(count, totalCount)));
                             lastLogged = count;
                         }
                     }
@@ -91,8 +91,7 @@ public class BanListMigrator implements TableMigrator {
             }
         }
 
-        log.info("Completed migration of banlist table: {} records (may be empty due to v19 clearing)",
-                count);
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "banlist"));
         context.incrementTotalRecords(count);
         return count;
     }
