@@ -14,15 +14,13 @@ import java.util.*
 
 @Component
 class ScriptEngineManager(
-    avScriptEngine: AVScriptEngine,
-    pyScriptEngine: PyScriptEngine
+    avScriptEngine: AVScriptEngine
 ) {
     private val engineMap: MutableMap<String, ScriptEngine> = HashMap()
 
     init {
         // 注册引擎
         engineMap[".av"] = avScriptEngine
-        engineMap[".py"] = pyScriptEngine
     }
 
     val supportedExtensions: List<String>
@@ -38,7 +36,7 @@ class ScriptEngineManager(
                 return entry.value
             }
         }
-        return null
+        return engineMap[".av"]
     }
 
     fun compileScript(file: File?, fallbackName: String?, scriptContent: String?): CompiledScript? {

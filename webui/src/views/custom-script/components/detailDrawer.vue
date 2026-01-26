@@ -24,16 +24,10 @@
     >
       <a-spin />
     </div>
-    <editor v-else v-model="content" :file-type="form.fileType" :view-only="viewOnly" />
+    <editor v-else v-model="content" :view-only="viewOnly" />
     <template v-if="!viewOnly" #footer>
       <a-space fill style="display: flex; justify-content: space-between">
         <a-form ref="formRef" :model="form" :disabled="!isNew" auto-label-width>
-          <a-form-item :label="t('page.rule.custom-script.detail.form.type')" field="fileType">
-            <a-radio-group v-model="form.fileType" type="button">
-              <a-radio value="av">AviatorScript</a-radio>
-              <a-radio value="py">Python 2</a-radio>
-            </a-radio-group>
-          </a-form-item>
           <a-form-item
             field="name"
             :label="t('page.rule.custom-script.detail.form.name')"
@@ -41,7 +35,7 @@
             style="margin-bottom: 0"
           >
             <a-input v-model="form.name" style="width: 20rem">
-              <template #suffix> .{{ form.fileType }}</template>
+              <template #suffix> .av </template>
             </a-input>
           </a-form-item>
         </a-form>
@@ -66,12 +60,11 @@
 </template>
 <script setup lang="ts">
 import { GetScriptContent, UpsertScript } from '@/service/script'
-import { type Form, Message } from '@arco-design/web-vue'
+import { Message, type Form } from '@arco-design/web-vue'
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import editor from './editor/index.vue'
-
 const { t } = useI18n()
 
 const visible = ref(false)
@@ -82,8 +75,7 @@ const content = ref('')
 
 const form = reactive<{
   name: string
-  fileType: string
-}>({ name: '', fileType: 'av' })
+}>({ name: '' })
 const { run, loading } = useRequest(GetScriptContent, {
   manual: true,
   onSuccess: (res) => {
@@ -102,7 +94,6 @@ defineExpose({
       isNew.value = false
       editId.value = id
       form.name = id
-      form.fileType = id.endsWith('.py') ? 'py' : 'av'
       run(editId.value)
     }
     visible.value = true
@@ -122,7 +113,7 @@ const handleOk = async () => {
     if (validateError || form.name.length === 0) {
       return false
     }
-    if (!form.name.endsWith('.' + form.fileType)) form.name = form.name + '.' + form.fileType
+    if (!form.name.endsWith('.av')) form.name = form.name + '.av'
   }
   const result = await UpsertScript(form.name, content.value)
   if (result.success) {
