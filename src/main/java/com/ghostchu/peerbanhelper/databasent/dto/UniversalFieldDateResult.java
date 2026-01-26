@@ -1,4 +1,14 @@
 package com.ghostchu.peerbanhelper.databasent.dto;
 
-public record UniversalFieldDateResult(long timestamp, long count, double percent) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UniversalFieldDateResult {
+    private long timestamp;
+    private long count;
+    private double percent;
 }
