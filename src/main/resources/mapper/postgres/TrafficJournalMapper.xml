@@ -13,8 +13,8 @@
         SUM(data_overall_uploaded) - SUM(data_overall_uploaded_at_start) AS uploaded,
         SUM(data_overall_downloaded) - SUM(data_overall_downloaded_at_start) AS downloaded
         FROM traffic_journal_v3
-        WHERE `timestamp` &lt;= #{start}
-        AND `timestamp` &gt;= #{end}
+        WHERE `timestamp` &gt;= #{start}
+        AND `timestamp` &lt;= #{end}
         GROUP BY `timestamp`
     </select>
 
@@ -25,7 +25,7 @@
         GREATEST(0, data_overall_downloaded - data_overall_downloaded_at_start) AS downloaded
         FROM traffic_journal_v3
         WHERE downloader = #{downloader}
-        AND `timestamp` &lt;= #{start}
-        AND `timestamp` &gt;= #{end}
+        AND `timestamp` &gt;= #{start}
+        AND `timestamp` &lt;= #{end}
     </select>
 </mapper>
