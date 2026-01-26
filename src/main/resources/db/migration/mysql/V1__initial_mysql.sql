@@ -181,6 +181,7 @@ CREATE TABLE `tracked_swarm`
     `port`               int UNSIGNED NOT NULL,
     `info_hash`          varchar(255) NOT NULL,
     `torrent_is_private` tinyint UNSIGNED NOT NULL,
+    `torrent_size`       bigint       NOT NULL,
     `downloader`         varchar(255) NOT NULL,
     `downloader_progress` double NOT NULL,
     `peer_id`            varchar(255) NULL,
