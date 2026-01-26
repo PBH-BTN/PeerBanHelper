@@ -388,7 +388,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private @Nullable CheckResult fastPcbTest(PCBAddressEntity addressEntity, PCBRangeEntity rangeEntity, long computedUploaded, long torrentSize, StructuredData<String, Object> structuredData, Downloader downloader) {
         if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize) && downloader.getFeatureFlags().contains(DownloaderFeatureFlag.UNBAN_IP)) {
             // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
-            if (addressEntity.getFastPcbTestExecuteAt().isEqual(TimeUtil.zeroOffsetDateTime) || rangeEntity.getFastPcbTestExecuteAt().isEqual(OffsetDateTime.MIN)) {
+            if (addressEntity.getFastPcbTestExecuteAt().isEqual(TimeUtil.zeroOffsetDateTime) || rangeEntity.getFastPcbTestExecuteAt().isEqual(TimeUtil.zeroOffsetDateTime)) {
                 // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
                 if (computedUploaded >= (fastPcbTestPercentage * torrentSize)) {
                     addressEntity.setFastPcbTestExecuteAt(OffsetDateTime.now());
