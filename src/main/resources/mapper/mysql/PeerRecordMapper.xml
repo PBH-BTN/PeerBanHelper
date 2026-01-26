@@ -5,8 +5,8 @@
         SELECT COUNT(DISTINCT address)
         FROM peer_records
         WHERE downloader = #{downloader}
-            AND lastTimeSeen &lt;= #{startAt}
-            AND firstTimeSeen &gt;= #{endAt}
+            AND lastTimeSeen &gt;= #{startAt}
+            AND firstTimeSeen &lt;= #{endAt}
     </select>
 
     <resultMap id="queryAddressTotalTraffic" type="com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic">
