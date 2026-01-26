@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.MetadataMapper;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
@@ -18,7 +18,7 @@ public class MetadataServiceImpl extends ServiceImpl<MetadataMapper, MetadataEnt
 
     @Override
     public @Nullable String getOrDefault(@NotNull String key, @Nullable String defaultValue) {
-        MetadataEntity entity = baseMapper.selectOne(new QueryWrapper<MetadataEntity>().eq("k", key));
+        MetadataEntity entity = baseMapper.selectOne(new LambdaQueryWrapper<MetadataEntity>().eq(MetadataEntity::getK, key));
         if (entity == null) return defaultValue;
         return entity.getValue();
     }

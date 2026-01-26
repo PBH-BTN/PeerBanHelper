@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -126,7 +126,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
                 return;
             }
             log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANING_UP));
-            int deleted = peerRecordDao.getBaseMapper().delete(new QueryWrapper<PeerRecordEntity>().lt("last_time_seen", OffsetDateTime.now().minus(dataRetentionTime, ChronoUnit.MILLIS)));
+            int deleted = peerRecordDao.getBaseMapper().delete(new LambdaQueryWrapper<PeerRecordEntity>().lt(PeerRecordEntity::getLastTimeSeen, OffsetDateTime.now().minus(dataRetentionTime, ChronoUnit.MILLIS)));
             log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);

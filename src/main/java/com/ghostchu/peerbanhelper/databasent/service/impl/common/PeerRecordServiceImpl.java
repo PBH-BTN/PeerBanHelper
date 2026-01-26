@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -45,10 +46,10 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
 
     @Override
     public List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader) {
-        return baseMapper.selectList(new QueryWrapper<PeerRecordEntity>()
-                .ge("first_time_seen", start)
-                .le("last_time_seen", end)
-                .eq(downloader != null, "downloader", downloader));
+        return baseMapper.selectList(new LambdaQueryWrapper<PeerRecordEntity>()
+                .ge(PeerRecordEntity::getFirstTimeSeen, start)
+                .le(PeerRecordEntity::getLastTimeSeen, end)
+                .eq(downloader != null, PeerRecordEntity::getDownloader, downloader));
     }
 
     @Override
@@ -128,19 +129,19 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     @Override
     public Page<PeerRecordEntity> getPendingSubmitPeerRecords(@NotNull Pageable pageable, @NotNull OffsetDateTime afterThan) {
         return baseMapper.selectPage(pageable.toPage(),
-                new QueryWrapper<PeerRecordEntity>().gt("last_time_seen", afterThan)
+                new LambdaQueryWrapper<PeerRecordEntity>().gt(PeerRecordEntity::getLastTimeSeen, afterThan)
                         .or()
-                        .isNull("last_time_seen")
-                        .orderByAsc("last_time_seen")
+                        .isNull(PeerRecordEntity::getLastTimeSeen)
+                        .orderByAsc(PeerRecordEntity::getLastTimeSeen)
         );
     }
 
     @Override
     public synchronized PeerRecordEntity createIfNotExists(PeerRecordEntity data) throws SQLException {
-        PeerRecordEntity existing = baseMapper.selectOne(new QueryWrapper<PeerRecordEntity>()
-                .eq("address", data.getAddress())
-                .eq("torrent_id", data.getTorrentId())
-                .eq("downloader", data.getDownloader())
+        PeerRecordEntity existing = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
+                .eq(PeerRecordEntity::getAddress, data.getAddress())
+                .eq(PeerRecordEntity::getTorrentId, data.getTorrentId())
+                .eq(PeerRecordEntity::getDownloader, data.getDownloader())
         );
         if (existing == null) {
             save(data);
@@ -152,7 +153,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
 
     @Override
     public long countRecordsByIp(@NotNull InetAddress inetAddress) {
-        return baseMapper.selectCount(new QueryWrapper<PeerRecordEntity>().eq("address", inetAddress));
+        return baseMapper.selectCount(new LambdaQueryWrapper<PeerRecordEntity>().eq(PeerRecordEntity::getAddress, inetAddress));
     }
 
     @Override
@@ -189,7 +190,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
 
     @Override
     public long countRecordsByTorrentId(Long id) {
-        return baseMapper.selectCount(new QueryWrapper<PeerRecordEntity>().eq("torrent_id", id));
+        return baseMapper.selectCount(new LambdaQueryWrapper<PeerRecordEntity>().eq(PeerRecordEntity::getTorrentId, id));
     }
 
     @Override

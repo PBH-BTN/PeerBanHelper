@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.AlertMapper;
 import com.ghostchu.peerbanhelper.databasent.service.AlertService;
@@ -15,22 +15,22 @@ import java.util.List;
 public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> implements AlertService {
     @Override
     public @NotNull List<AlertEntity> getUnreadAlerts() {
-        return baseMapper.selectList(new QueryWrapper<AlertEntity>().isNull("read_at").orderByDesc("create_at"));
+        return baseMapper.selectList(new LambdaQueryWrapper<AlertEntity>().isNull(AlertEntity::getReadAt).orderByDesc(AlertEntity::getCreateAt));
     }
 
     @Override
     public boolean identifierAlertExists(@NotNull String identifier) {
-        return baseMapper.exists(new QueryWrapper<AlertEntity>().eq("identifier", identifier).isNull("read_at"));
+        return baseMapper.exists(new LambdaQueryWrapper<AlertEntity>().eq(AlertEntity::getIdentifier, identifier).isNull(AlertEntity::getReadAt));
     }
 
     @Override
     public boolean identifierAlertExistsIncludeRead(@NotNull String identifier) {
-        return baseMapper.exists(new QueryWrapper<AlertEntity>().eq("identifier", identifier));
+        return baseMapper.exists(new LambdaQueryWrapper<AlertEntity>().eq(AlertEntity::getIdentifier, identifier));
     }
 
     @Override
     public int deleteOldAlerts(@NotNull OffsetDateTime before) {
-        return baseMapper.delete(new QueryWrapper<AlertEntity>().lt("created_at", before));
+        return baseMapper.delete(new LambdaQueryWrapper<AlertEntity>().lt(AlertEntity::getCreateAt, before));
     }
 
     @Override

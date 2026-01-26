@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PCBRangeMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PCBRangeService;
@@ -16,29 +16,29 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
 
 	@Override
 	public List<PCBRangeEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
-		return baseMapper.selectList(new QueryWrapper<PCBRangeEntity>()
-				.eq("torrent_id", torrentId)
-				.eq("downloader", downloader));
+        return baseMapper.selectList(new LambdaQueryWrapper<PCBRangeEntity>()
+                .eq(PCBRangeEntity::getTorrentId, torrentId)
+                .eq(PCBRangeEntity::getDownloader, downloader));
 	}
 
 	@Override
 	public PCBRangeEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String range, @NotNull String downloader) {
-		return baseMapper.selectOne(new QueryWrapper<PCBRangeEntity>()
-				.eq("torrent_id", torrentId)
-				.eq("`range`", range)
-				.eq("downloader", downloader));
+        return baseMapper.selectOne(new LambdaQueryWrapper<PCBRangeEntity>()
+                .eq(PCBRangeEntity::getTorrentId, torrentId)
+                .eq(PCBRangeEntity::getRange, range)
+                .eq(PCBRangeEntity::getDownloader, downloader));
 	}
 
 	@Override
 	public int deleteEntry(@NotNull String torrentId, @NotNull String range) {
-		return baseMapper.delete(new QueryWrapper<PCBRangeEntity>()
-				.eq("torrent_id", torrentId)
-				.eq("`range`", range));
+        return baseMapper.delete(new LambdaQueryWrapper<PCBRangeEntity>()
+                .eq(PCBRangeEntity::getTorrentId, torrentId)
+                .eq(PCBRangeEntity::getRange, range));
 	}
 
 	@Override
     public int cleanupDatabase(OffsetDateTime timestamp) {
-		return baseMapper.delete(new QueryWrapper<PCBRangeEntity>()
-				.lt("last_time_seen", timestamp));
+        return baseMapper.delete(new LambdaQueryWrapper<PCBRangeEntity>()
+                .lt(PCBRangeEntity::getLastTimeSeen, timestamp));
 	}
 }

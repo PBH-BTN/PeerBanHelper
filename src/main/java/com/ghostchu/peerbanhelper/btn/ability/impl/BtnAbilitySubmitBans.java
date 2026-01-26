@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ability.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
@@ -98,7 +98,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             int requests = 0;
             Page<HistoryEntity> page = new Page<>(1, 100); // 每页处理 100 条
             do {
-                var result = historyDao.page(page, new QueryWrapper<HistoryEntity>().gt("id", getMemCursor()));
+                var result = historyDao.page(page, new LambdaQueryWrapper<HistoryEntity>().gt(HistoryEntity::getId, getMemCursor()));
                 if (result.getRecords().isEmpty()) break;
                 setMemCursor(createSubmitRequest(result.getRecords()));
                 requests++;

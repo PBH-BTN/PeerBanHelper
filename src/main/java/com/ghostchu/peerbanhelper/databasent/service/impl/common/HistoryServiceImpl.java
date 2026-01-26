@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -36,12 +37,12 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
 
     @Override
     public long countHistoriesByTorrentId(@NotNull Long id) {
-        return baseMapper.selectCount(new QueryWrapper<HistoryEntity>().eq("torrent_id", id));
+        return baseMapper.selectCount(new LambdaQueryWrapper<HistoryEntity>().eq(HistoryEntity::getTorrentId, id));
     }
 
     @Override
     public long countHistoriesByIp(@NotNull InetAddress inetAddress) {
-        return baseMapper.selectCount(new QueryWrapper<HistoryEntity>().eq("ip", inetAddress));
+        return baseMapper.selectCount(new LambdaQueryWrapper<HistoryEntity>().eq(HistoryEntity::getIp, inetAddress));
     }
 
     @Override
@@ -57,7 +58,7 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
 
     @Override
     public int deleteExpiredLogs(int keepDays) {
-        return baseMapper.delete(new QueryWrapper<HistoryEntity>().le("ban_at", OffsetDateTime.now().minusDays(keepDays)));
+        return baseMapper.delete(new LambdaQueryWrapper<HistoryEntity>().le(HistoryEntity::getBanAt, OffsetDateTime.now().minusDays(keepDays)));
     }
 
     @Override

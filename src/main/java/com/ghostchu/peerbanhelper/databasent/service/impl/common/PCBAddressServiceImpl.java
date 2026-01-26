@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
@@ -17,30 +17,30 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
 
 	@Override
 	public List<PCBAddressEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
-		return baseMapper.selectList(new QueryWrapper<PCBAddressEntity>()
-				.eq("torrent_id", torrentId)
-				.eq("downloader", downloader));
+        return baseMapper.selectList(new LambdaQueryWrapper<PCBAddressEntity>()
+                .eq(PCBAddressEntity::getTorrentId, torrentId)
+                .eq(PCBAddressEntity::getDownloader, downloader));
 	}
 
 	@Override
     public PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull InetAddress ip, int port, @NotNull String downloader) {
-		return baseMapper.selectOne(new QueryWrapper<PCBAddressEntity>()
-				.eq("torrent_id", torrentId)
-				.eq("ip", ip)
-				.eq("port", port)
-				.eq("downloader", downloader));
+        return baseMapper.selectOne(new LambdaQueryWrapper<PCBAddressEntity>()
+                .eq(PCBAddressEntity::getTorrentId, torrentId)
+                .eq(PCBAddressEntity::getIp, ip)
+                .eq(PCBAddressEntity::getPort, port)
+                .eq(PCBAddressEntity::getDownloader, downloader));
 	}
 
 	@Override
-	public int deleteEntry(@NotNull String torrentId, @NotNull String ip) {
-		return baseMapper.delete(new QueryWrapper<PCBAddressEntity>()
-				.eq("torrent_id", torrentId)
-				.eq("ip", ip));
+    public int deleteEntry(@NotNull String torrentId, @NotNull InetAddress ip) {
+        return baseMapper.delete(new LambdaQueryWrapper<PCBAddressEntity>()
+                .eq(PCBAddressEntity::getTorrentId, torrentId)
+                .eq(PCBAddressEntity::getIp, ip));
 	}
 
 	@Override
     public int cleanupDatabase(OffsetDateTime timestamp) {
-		return baseMapper.delete(new QueryWrapper<PCBAddressEntity>()
-				.lt("last_time_seen", timestamp));
+        return baseMapper.delete(new LambdaQueryWrapper<PCBAddressEntity>()
+                .lt(PCBAddressEntity::getLastTimeSeen, timestamp));
 	}
 }

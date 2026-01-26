@@ -13,7 +13,7 @@ public interface PCBAddressService extends IService<PCBAddressEntity> {
 
 	PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull InetAddress ip, int port, @NotNull String downloader);
 
-	int deleteEntry(@NotNull String torrentId, @NotNull String ip);
+    int deleteEntry(@NotNull String torrentId, @NotNull InetAddress ip);
 
     int cleanupDatabase(OffsetDateTime timestamp);
 }

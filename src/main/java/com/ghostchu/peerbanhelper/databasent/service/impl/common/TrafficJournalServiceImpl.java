@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.TrafficJournalMapper;
@@ -26,7 +26,9 @@ public class TrafficJournalServiceImpl extends ServiceImpl<TrafficJournalMapper,
     @Override
     public void updateData(@NotNull String downloader, long overallDownloaded, long overallUploaded, long overallDownloadedProtocol, long overallUploadedProtocol) {
         OffsetDateTime timestamp = TimeUtil.getStartOfHour(System.currentTimeMillis());
-        TrafficJournalEntity entityInDb = baseMapper.selectOne(new QueryWrapper<TrafficJournalEntity>().eq("downloader", downloader).eq("timestamp", timestamp));
+        TrafficJournalEntity entityInDb = baseMapper.selectOne(new LambdaQueryWrapper<TrafficJournalEntity>()
+                .eq(TrafficJournalEntity::getDownloader, downloader)
+                .eq(TrafficJournalEntity::getTimestamp, timestamp));
         if (entityInDb == null){
             entityInDb = new TrafficJournalEntity();
             entityInDb.setTimestamp(timestamp);

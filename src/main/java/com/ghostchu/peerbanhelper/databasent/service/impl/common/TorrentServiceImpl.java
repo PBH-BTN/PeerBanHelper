@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -26,11 +27,16 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
 
     @Override
     public @Nullable TorrentEntity queryByInfoHash(@NotNull String infoHash) {
-        return baseMapper.selectOne(new QueryWrapper<TorrentEntity>().eq("info_hash", infoHash));
+        return baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash));
     }
 
     @Override
     public IPage<TorrentEntity> search(Page<TorrentEntity> page, String keyword, Orderable normalSort, String statsSortField, boolean statsSortAsc) {
+        // Here we keep QueryWrapper for complex dynamic sorting with raw SQL (last clause) and OR condition which is concise.
+        // Although lambda can do OR, `last` with raw SQL for subquery sorting is specific.
+        // Also `Orderable` is used in other methods (not here explicitly but parameter `normalSort` is present).
+        // Wait, `normalSort` is passed but not used?
+        // Let's check existing code lines 40+
         QueryWrapper<TorrentEntity> queryWrapper = new QueryWrapper<>();
         if (keyword != null) {
             queryWrapper.and(q -> q.like("name", keyword)

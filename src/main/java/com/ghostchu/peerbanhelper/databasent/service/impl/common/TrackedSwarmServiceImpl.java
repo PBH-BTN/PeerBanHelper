@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +42,7 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
 
     @Override
     public @NotNull Page<TrackedSwarmEntity> getPendingSubmitTrackedPeers(@NotNull Pageable pageable, long idAfterThan) {
-        return baseMapper.selectPage(pageable.toPage(), new QueryWrapper<TrackedSwarmEntity>().gt("id", idAfterThan).orderByAsc("id"));
+        return baseMapper.selectPage(pageable.toPage(), new LambdaQueryWrapper<TrackedSwarmEntity>().gt(TrackedSwarmEntity::getId, idAfterThan).orderByAsc(TrackedSwarmEntity::getId));
     }
 
     @Override
@@ -55,13 +55,21 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
         );
         TrackedSwarmEntity cachedEntity = cache.get(cacheKey, () -> {
 
-            TrackedSwarmEntity lastData = baseMapper.selectOne(new QueryWrapper<TrackedSwarmEntity>()
-                    .eq("ip", cacheKey.ip)
-                    .eq("port", cacheKey.port)
-                    .eq("info_hash", cacheKey.infoHash)
-                    .eq("downloader", cacheKey.downloader)
+            TrackedSwarmEntity lastData = baseMapper.selectOne(new LambdaQueryWrapper<TrackedSwarmEntity>()
+                    .eq(TrackedSwarmEntity::getIp, InetAddress.getByName(cacheKey.ip))
+                    .eq(TrackedSwarmEntity::getPort, cacheKey.port)
+                    .eq(TrackedSwarmEntity::getInfoHash, cacheKey.infoHash)
+                    .eq(TrackedSwarmEntity::getDownloader, cacheKey.downloader)
+                    .orderByDesc(TrackedSwarmEntity::getId)
+                    .last("LIMIT 1")
             );
-            return Objects.requireNonNullElseGet(lastData, () -> new TrackedSwarmEntity(
+
+            if (lastData != null) {
+                lastData.setLastTimeSeen(OffsetDateTime.now());
+                return lastData;
+            }
+
+            return new TrackedSwarmEntity(
                     null,
                     peer.getPeerAddress().getAddress().toInetAddress(),
                     peer.getPeerAddress().getPort(),
@@ -84,7 +92,7 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
                     OffsetDateTime.now(),
                     peer.getDownloadSpeed(),
                     peer.getUploadSpeed()
-            ));
+            );
         });
         long newDownloaded = peer.getDownloaded() >= cachedEntity.getDownloadedOffset()
                 ? peer.getDownloaded() - cachedEntity.getDownloadedOffset()

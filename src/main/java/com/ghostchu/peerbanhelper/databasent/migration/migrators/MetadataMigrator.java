@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.migration.migrators;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
@@ -114,7 +114,7 @@ public class MetadataMigrator implements TableMigrator {
         for (MetadataEntity entity : batch) {
             // Check if exists and update, or insert
             MetadataEntity existing = metadataService.getOne(
-                    new QueryWrapper<MetadataEntity>().eq("k", entity.getK())
+                    new LambdaQueryWrapper<MetadataEntity>().eq(MetadataEntity::getK, entity.getK())
             );
             if (existing != null) {
                 // Update with SQLite data (SQLite takes priority)

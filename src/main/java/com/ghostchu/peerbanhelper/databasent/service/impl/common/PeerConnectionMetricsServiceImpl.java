@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsMapper;
@@ -34,7 +34,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
     public long getGlobalTotalConnectionsCount(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt) {
 		long total = 0;
 		try {
-            List<PeerConnectionMetricsEntity> entities = baseMapper.selectList(new QueryWrapper<PeerConnectionMetricsEntity>().between("timeframe_at", startAt, endAt));
+            List<PeerConnectionMetricsEntity> entities = baseMapper.selectList(new LambdaQueryWrapper<PeerConnectionMetricsEntity>().between(PeerConnectionMetricsEntity::getTimeframeAt, startAt, endAt));
 			for (PeerConnectionMetricsEntity entity : entities) {
 				total += entity.getTotalConnections();
 			}
@@ -49,10 +49,10 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
     public List<PeerConnectionMetricsDTO> getMetricsSince(@NotNull OffsetDateTime sinceAt, @NotNull OffsetDateTime untilAt, @Nullable String downloader) {
 		List<PeerConnectionMetricsDTO> result;
 
-		QueryWrapper<PeerConnectionMetricsEntity> wrapper = new QueryWrapper<PeerConnectionMetricsEntity>()
-                .between("timeframe_at", sinceAt, untilAt);
+        LambdaQueryWrapper<PeerConnectionMetricsEntity> wrapper = new LambdaQueryWrapper<PeerConnectionMetricsEntity>()
+                .between(PeerConnectionMetricsEntity::getTimeframeAt, sinceAt, untilAt);
 		if (downloader != null && !downloader.isBlank()) {
-			wrapper.eq("downloader", downloader);
+            wrapper.eq(PeerConnectionMetricsEntity::getDownloader, downloader);
 		}
 		var entities = baseMapper.selectList(wrapper);
 
@@ -82,7 +82,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	@Override
 	public void saveAggregating(@NotNull List<PeerConnectionMetricsEntity> buffer, boolean overwrite) {
 		for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
-            PeerConnectionMetricsEntity entityInDb = baseMapper.selectOne(new QueryWrapper<PeerConnectionMetricsEntity>().eq("timeframe_at", peerConnectionMetricsEntity.getTimeframeAt()).eq("downloader", peerConnectionMetricsEntity.getDownloader()));
+            PeerConnectionMetricsEntity entityInDb = baseMapper.selectOne(new LambdaQueryWrapper<PeerConnectionMetricsEntity>().eq(PeerConnectionMetricsEntity::getTimeframeAt, peerConnectionMetricsEntity.getTimeframeAt()).eq(PeerConnectionMetricsEntity::getDownloader, peerConnectionMetricsEntity.getDownloader()));
 			if (entityInDb != null) {
 				if (overwrite) {
 					peerConnectionMetricsEntity.setId(entityInDb.getId());
@@ -146,7 +146,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	@Override
 	public void removeOutdatedData(OffsetDateTime beforeAt) {
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANING_UP));
-        var deleted = baseMapper.delete(new QueryWrapper<PeerConnectionMetricsEntity>().le("timeframe_at", beforeAt));
+        var deleted = baseMapper.delete(new LambdaQueryWrapper<PeerConnectionMetricsEntity>().le(PeerConnectionMetricsEntity::getTimeframeAt, beforeAt));
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}
 

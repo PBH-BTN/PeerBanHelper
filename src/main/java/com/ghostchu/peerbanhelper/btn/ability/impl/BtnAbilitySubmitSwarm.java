@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ability.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
@@ -26,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -100,10 +102,10 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                 var pair = getMemCursor();
                 long lastTimeSeen = pair.getLeft();
                 long id = pair.getRight();
-                var result = swarmDao.page(page, new QueryWrapper<TrackedSwarmEntity>()
-                        .ge("last_time_seen", lastTimeSeen)
-                        .gt("id", id)
-                        .orderByAsc("last_time_seen", "id")
+                var result = swarmDao.page(page, new LambdaQueryWrapper<TrackedSwarmEntity>()
+                        .ge(TrackedSwarmEntity::getLastTimeSeen, java.time.OffsetDateTime.ofInstant(Instant.ofEpochMilli(lastTimeSeen), ZoneId.systemDefault()))
+                        .gt(TrackedSwarmEntity::getId, id)
+                        .orderByAsc(TrackedSwarmEntity::getLastTimeSeen, TrackedSwarmEntity::getId)
                 );
                 if (result.getRecords().isEmpty()) break;
                 var resultPair = createSubmitRequest(result.getRecords());

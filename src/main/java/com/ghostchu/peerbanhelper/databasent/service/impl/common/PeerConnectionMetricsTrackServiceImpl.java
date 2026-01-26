@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -72,12 +73,12 @@ public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConne
                     peer.getPeerAddress().getPort()
             );
             PeerConnectionMetricsTrackEntity trackEntity = cache.get(cacheKey, () -> {
-                PeerConnectionMetricsTrackEntity entity = baseMapper.selectOne(new QueryWrapper<PeerConnectionMetricsTrackEntity>()
-                        .eq("timeframe_at", cacheKey.timeframeAt())
-                        .eq("downloader", cacheKey.downloader())
-                        .eq("torrent_id", cacheKey.torrentId())
-                        .eq("address", cacheKey.address())
-                        .eq("port", cacheKey.port())
+                PeerConnectionMetricsTrackEntity entity = baseMapper.selectOne(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>()
+                        .eq(PeerConnectionMetricsTrackEntity::getTimeframeAt, cacheKey.timeframeAt())
+                        .eq(PeerConnectionMetricsTrackEntity::getDownloader, cacheKey.downloader())
+                        .eq(PeerConnectionMetricsTrackEntity::getTorrentId, cacheKey.torrentId())
+                        .eq(PeerConnectionMetricsTrackEntity::getAddress, InetAddress.getByName(cacheKey.address()))
+                        .eq(PeerConnectionMetricsTrackEntity::getPort, cacheKey.port())
                 );
                 if (entity == null) {
                     entity = new PeerConnectionMetricsTrackEntity();
