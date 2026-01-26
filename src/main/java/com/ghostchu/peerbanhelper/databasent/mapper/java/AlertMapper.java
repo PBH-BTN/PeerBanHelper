@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface AlertMapper extends BaseMapper<AlertEntity> {
     @Select("UPDATE alert SET read_at = NOW() WHERE read_at IS NULL")
-    int markAllAsRead();
+    void markAllAsRead();
 
     @Select("UPDATE alert SET read_at = NOW() WHERE identifier = #{identifier} AND read_at IS NULL")
-    int markAsRead(@NotNull @Param("identifier") String identifier);
+    void markAsRead(@NotNull @Param("identifier") String identifier);
 }

@@ -34,12 +34,12 @@ public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> impl
     }
 
     @Override
-    public int markAllAsRead() {
-        return baseMapper.markAllAsRead();
+    public void markAllAsRead() {
+        baseMapper.markAllAsRead();
     }
 
     @Override
-    public int markAsRead(@NotNull String identifier) {
-        return baseMapper.markAsRead(identifier);
+    public void markAsRead(@NotNull String identifier) {
+        baseMapper.markAsRead(identifier);
     }
 }
