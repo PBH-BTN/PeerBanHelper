@@ -25,7 +25,7 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
 	public PCBRangeEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String range, @NotNull String downloader) {
 		return baseMapper.selectOne(new QueryWrapper<PCBRangeEntity>()
 				.eq("torrent_id", torrentId)
-				.eq("range", range)
+				.eq("`range`", range)
 				.eq("downloader", downloader));
 	}
 
@@ -33,7 +33,7 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
 	public int deleteEntry(@NotNull String torrentId, @NotNull String range) {
 		return baseMapper.delete(new QueryWrapper<PCBRangeEntity>()
 				.eq("torrent_id", torrentId)
-				.eq("range", range));
+				.eq("`range`", range));
 	}
 
 	@Override
