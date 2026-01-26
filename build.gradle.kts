@@ -88,9 +88,6 @@ dependencies {
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
-    // Python script engine (Jython)
-    implementation("org.python:jython-standalone:2.7.4")
-
     // JSON
     implementation("org.json:json:20251224")
 
