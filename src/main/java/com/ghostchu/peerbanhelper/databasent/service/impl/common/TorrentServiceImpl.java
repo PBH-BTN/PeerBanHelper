@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity> implements TorrentService {
     @Override
     public @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
-        return baseMapper.createIfNotExists(torrent);
+        baseMapper.insertOrUpdate(torrent);
+        return torrent;
     }
 
     @Override
