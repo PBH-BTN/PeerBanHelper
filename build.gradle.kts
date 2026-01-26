@@ -301,6 +301,14 @@ tasks.jar {
     dependsOn("copyDependencies")
 }
 
+tasks.compileJava {
+    options.compilerArgs.addAll(
+        listOf(
+            "-parameters"
+        )
+    )
+}
+
 // Git properties configuration - disabled temporarily
 gitProperties {
     dotGitDirectory.set(file("${project.rootDir}/.git"))
