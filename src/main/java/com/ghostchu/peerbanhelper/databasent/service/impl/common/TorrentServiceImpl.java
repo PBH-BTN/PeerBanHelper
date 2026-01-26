@@ -15,13 +15,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity> implements TorrentService {
     @Override
-    public @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
+    public synchronized @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
         TorrentEntity existing = queryByInfoHash(torrent.getInfoHash());
         if (existing != null) {
             return existing;
         }
-        save(torrent);
-        return baseMapper.selectOne(new QueryWrapper<TorrentEntity>().eq("info_hash", torrent.getInfoHash()));
+        baseMapper.insertOrUpdate(torrent);
+        return torrent;
     }
 
     @Override
