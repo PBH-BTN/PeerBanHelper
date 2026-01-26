@@ -7,7 +7,7 @@ import com.ghostchu.peerbanhelper.databasent.mapper.java.TrafficJournalMapper;
 import com.ghostchu.peerbanhelper.databasent.service.TrafficJournalService;
 import com.ghostchu.peerbanhelper.databasent.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.List;
 public class TrafficJournalServiceImpl extends ServiceImpl<TrafficJournalMapper, TrafficJournalEntity> implements TrafficJournalService {
     @Override
     public void updateData(@NotNull String downloader, long overallDownloaded, long overallUploaded, long overallDownloadedProtocol, long overallUploadedProtocol) {
-        OffsetDateTime timestamp = MiscUtil.getStartOfHour(System.currentTimeMillis());
+        OffsetDateTime timestamp = TimeUtil.getStartOfHour(System.currentTimeMillis());
         TrafficJournalEntity entityInDb = baseMapper.selectOne(new QueryWrapper<TrafficJournalEntity>().eq("downloader", downloader).eq("timestamp", timestamp));
         if (entityInDb == null){
             entityInDb = new TrafficJournalEntity();
@@ -45,8 +45,8 @@ public class TrafficJournalServiceImpl extends ServiceImpl<TrafficJournalMapper,
 
     @Override
     public TrafficDataComputed getTodayData(@Nullable String downloader) {
-        OffsetDateTime startOfToday = MiscUtil.getStartOfToday(System.currentTimeMillis());
-        OffsetDateTime endOfToday = MiscUtil.getEndOfToday(System.currentTimeMillis());
+        OffsetDateTime startOfToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
+        OffsetDateTime endOfToday = TimeUtil.getEndOfToday(System.currentTimeMillis());
         List<TrafficDataComputed> results;
         if (downloader == null || downloader.isBlank()) {
             results = getAllDownloadersOverallData(startOfToday, endOfToday).stream().toList();

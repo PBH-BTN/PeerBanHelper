@@ -11,7 +11,7 @@ import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -66,7 +65,7 @@ public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConne
         for (Peer peer : peers) {
             if (peer.isHandshaking()) continue;
             CacheKey cacheKey = new CacheKey(
-                    MiscUtil.getStartOfToday(System.currentTimeMillis()),
+                    TimeUtil.getStartOfToday(System.currentTimeMillis()),
                     downloader.getId(),
                     torrentEntity.getId(),
                     peer.getPeerAddress().getAddress().toNormalizedString(),

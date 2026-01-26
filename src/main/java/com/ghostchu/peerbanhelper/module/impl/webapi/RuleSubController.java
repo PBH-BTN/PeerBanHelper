@@ -328,7 +328,7 @@ public final class RuleSubController extends AbstractFeatureModule {
         if (ruleName.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + ruleName);
         }
-        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, TimeUtil.zeroOffsetDateTime(), 0));
+        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, TimeUtil.zeroOffsetDateTime, 0));
         assert configurationSection != null;
         try {
             StdResp msg = ipBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);

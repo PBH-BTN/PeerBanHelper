@@ -14,8 +14,8 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.sentry.Sentry;
@@ -128,11 +128,11 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         }
         long now = System.currentTimeMillis();
         // Calculating the today traffic
-        long startOfToday = MiscUtil.getStartOfToday(now).toEpochSecond();
+        long startOfToday = TimeUtil.getStartOfToday(now).toEpochSecond();
         var data = trafficJournalDao.getTodayData(null);
         long totalBytes = data.getDataOverallUploaded();
-        var dateTimeString = MiscUtil.formatDateTime(now);
-        var dateString = MiscUtil.formatDateOnly(now);
+        var dateTimeString = TimeUtil.formatDateTime(now);
+        var dateString = TimeUtil.formatDateOnly(now);
         var identifier = "dataTrafficCapping-" + startOfToday;
         // 一天只发一次
         if (totalBytes < dailyTrafficCapping) {

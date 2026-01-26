@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V1License;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.hash.Hashing;
@@ -104,7 +104,7 @@ public class LicenseParser {
                 BigDecimal.ZERO,
                 System.currentTimeMillis(),
                 System.currentTimeMillis(),
-                LocalDateTime.now().plusDays(15).atOffset(MiscUtil.getSystemZoneOffset()).toInstant().toEpochMilli(),
+                LocalDateTime.now().plusDays(15).atOffset(TimeUtil.getSystemZoneOffset()).toInstant().toEpochMilli(),
                 tlUI(Lang.FREE_LICENSE_DESCRIPTION),
                 "Local License",
                 List.of("basic"));

@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.util.json;
 
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -12,7 +12,7 @@ public final class LocalDateTimeTypeAdapter implements JsonSerializer<LocalDateT
 
     @Override
     public JsonElement serialize(LocalDateTime ts, Type t, JsonSerializationContext jsc) {
-        return new JsonPrimitive(ts.toInstant(MiscUtil.getSystemZoneOffset()).toEpochMilli());
+        return new JsonPrimitive(ts.toInstant(TimeUtil.getSystemZoneOffset()).toEpochMilli());
     }
 
     @Override
@@ -20,6 +20,6 @@ public final class LocalDateTimeTypeAdapter implements JsonSerializer<LocalDateT
         if (!(json instanceof JsonPrimitive)) {
             throw new JsonParseException("The date should be a number value");
         }
-        return Instant.ofEpochMilli(json.getAsLong()).atOffset(MiscUtil.getSystemZoneOffset()).toLocalDateTime();
+        return Instant.ofEpochMilli(json.getAsLong()).atOffset(TimeUtil.getSystemZoneOffset()).toLocalDateTime();
     }
 }
