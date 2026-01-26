@@ -92,7 +92,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 			} else {
 				entityInDb = peerConnectionMetricsEntity;
 			}
-			baseMapper.createOrUpdate(entityInDb);
+			baseMapper.insertOrUpdate(entityInDb);
 		}
 	}
 
