@@ -112,7 +112,7 @@ public class PeerBanHelper implements Reloadable {
         });
         runTestCode();
         telemetry.sendBootEvent();
-        CommonUtil.getScheduler().scheduleAtFixedRate(telemetry::sendHeartbeatEvent, 1, 1, TimeUnit.HOURS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(telemetry::sendHeartbeatEvent, 1, 1, TimeUnit.HOURS);
     }
 
     private void loadPlatformFeatures() {

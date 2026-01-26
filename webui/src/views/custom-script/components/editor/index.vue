@@ -11,7 +11,7 @@
         foldingStrategy: 'indentation',
         autoIndent: 'brackets'
       }"
-      :language="currentLanguage"
+      :default-language="AV"
       @mount="handleMount"
       @change="handleChange"
     >
@@ -34,7 +34,7 @@ import {
   VueMonacoEditor,
   type VueMonacoEditorEmitsOptions
 } from '@guolao/vue-monaco-editor'
-import { computed, shallowRef, watch } from 'vue'
+import { shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GrammarParser from './aviatorscript/grammar/GrammarParser'
 import monarch from './aviatorscript/monarch'
@@ -42,20 +42,12 @@ import getSuggestion from './aviatorscript/suggestions'
 
 const { t } = useI18n()
 
-const { viewOnly = false, fileType = 'av' } = defineProps<{
+const { viewOnly = false } = defineProps<{
   viewOnly?: boolean
-  fileType?: string
 }>()
 const model = defineModel<string | undefined>({ required: true })
 
 const AV = 'aviatorscript'
-const PYTHON = 'python'
-
-// 根据 fileType 计算当前语言
-const currentLanguage = computed(() => {
-  return fileType === 'py' ? PYTHON : AV
-})
-
 type onMountF = VueMonacoEditorEmitsOptions['mount']
 type editor = Parameters<onMountF>[0] // monacoEditor.editor.IStandaloneCodeEditor
 const editorRef = shallowRef<editor>()
@@ -65,12 +57,8 @@ const grammarParser = new GrammarParser()
 const handleMount: onMountF = (editor, monaco) => {
   editorRef.value = editor
   monacoRef.value = monaco
-
-  // 注册 AviatorScript 语言
   monaco.languages.register({ id: AV })
   monaco.languages.setMonarchTokensProvider(AV, monarch)
-
-  // 为 AviatorScript 设置自动补全
   monaco.languages.registerCompletionItemProvider(AV, {
     provideCompletionItems: () =>
       ({
@@ -83,32 +71,8 @@ const handleMount: onMountF = (editor, monaco) => {
   })
   editor.updateOptions({ readOnly: viewOnly })
 }
-
-// 监听 fileType 变化，清除错误标记
-watch(
-  () => fileType,
-  () => {
-    // 清除之前的错误标记
-    const model = editorRef.value?.getModel()
-    if (model && monacoRef.value) {
-      monacoRef.value.editor.setModelMarkers(model, AV, [])
-    }
-  }
-)
-
 const handleChange = (value: string | undefined) => {
   if (!value) return
-
-  // 只对 AviatorScript 进行语法检查
-  if (currentLanguage.value !== AV) {
-    // 清除标记
-    const model = editorRef.value?.getModel()
-    if (model && monacoRef.value) {
-      monacoRef.value.editor.setModelMarkers(model, AV, [])
-    }
-    return
-  }
-
   const ast = grammarParser.parse(value + '\n')
   const markers = []
   for (const error of ast.errors) {

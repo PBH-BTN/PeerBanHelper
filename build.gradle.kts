@@ -109,8 +109,7 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:5.0.2")
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
-    // Python script engine (Jython)
-    implementation("org.python:jython-standalone:2.7.4")
+
     // JSON
     implementation("org.json:json:20251224")
     // System theme detector
@@ -165,7 +164,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.25")
+    implementation("ch.qos.logback:logback-classic:1.5.26")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
@@ -209,11 +208,11 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:5.14.2"))
+    testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.21.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.2")
 }
 
 tasks.test {

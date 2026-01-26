@@ -20,7 +20,6 @@ export default {
   'page.rule.custom-script.detail.title.view': 'View script: ',
   'page.rule.custom-script.detail.title.edit': 'Edit script: ',
   'page.rule.custom-script.detail.form.name': 'Script name',
-  'page.rule.custom-script.detail.form.type': 'Script type',
   'page.rule.custom-script.detail.loading': 'Loading editor, this may take a while...',
   'page.rule.custom-script.detail.failed': 'Unable to load editor',
   'page.rule.custom-script.detail.failed.tips':

@@ -108,11 +108,8 @@ public class Main {
     @Getter
     private static final long startupAt = System.currentTimeMillis();
     @Nullable
+    @Getter
     private static Platform platform;
-
-    public static Platform getPlatform() {
-        return platform;
-    }
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 20;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.1";
