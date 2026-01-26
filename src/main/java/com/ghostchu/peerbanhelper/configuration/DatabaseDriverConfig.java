@@ -14,12 +14,16 @@ import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.jetbrains.annotations.NotNull;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -68,14 +72,16 @@ public class DatabaseDriverConfig {
     public SqlSessionFactory sqlSessionFactory(
             MybatisPlusInterceptor mpInterceptor,
             MultiDbExplainInterceptor explainInterceptor, // 引入自定义拦截器
+            SentryMyBatisInterceptor sentryMyBatisInterceptor,
             DatabaseDriver driver) throws Exception {
 
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(driver.getDataSource());
 
-        // 关键修复点：将两个拦截器都设置进去
-        // setPlugins 接受 Interceptor[] 数组
-        factoryBean.setPlugins(mpInterceptor);
+        List<Interceptor> interceptorList = new ArrayList<>();
+        interceptorList.add(mpInterceptor);
+        interceptorList.add(sentryMyBatisInterceptor);
+        factoryBean.setPlugins(interceptorList.toArray(new Interceptor[0]));
 
         factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler());
 
