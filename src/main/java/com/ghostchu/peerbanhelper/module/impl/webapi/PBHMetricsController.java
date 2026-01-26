@@ -204,7 +204,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
         String downloader = ctx.queryParam("downloader");
         Integer substringLength = null;
-        if ("peerId".equalsIgnoreCase(field)) {
+        if ("peerId".equalsIgnoreCase(field) || "peer_id".equalsIgnoreCase(field)) {
             substringLength = 8;
         }
         if (type == null) {

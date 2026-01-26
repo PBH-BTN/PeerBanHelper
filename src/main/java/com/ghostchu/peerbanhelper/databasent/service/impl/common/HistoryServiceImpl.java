@@ -81,7 +81,7 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
             case "torrent_name" -> "t.name";
             case "module" -> "module_name";
             case "module_name" -> "h.module_name";
-            case "peer_client_name" -> "h.peer_client_name";
+            case "client_name", "peer_client_name" -> "h.peer_client_name";
             case "peer_ip", "ip" -> "h.ip";
             case "port" -> "h.port";
             case "peer_id" -> "h.peer_id";

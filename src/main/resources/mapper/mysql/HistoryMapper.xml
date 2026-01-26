@@ -52,109 +52,82 @@
 
     <!-- 字段聚合统计 -->
     <select id="sumField" resultMap="UniversalFieldNumResultMap">
-        <bind name="dbField" value="
-            field == 'torrent_name' ? 't.name' :
-            field == 'module_name' ? 'h.module_name' :
-            field == 'peer_client_name' ? 'h.peer_client_name' :
-            (field == 'peer_ip' or field == 'ip') ? 'h.ip' :
-            field == 'port' ? 'h.port' :
-            field == 'peer_id' ? 'h.peer_id' :
-            field == 'peer_uploaded' ? 'h.peer_uploaded' :
-            field == 'peer_downloaded' ? 'h.peer_downloaded' :
-            field == 'peer_progress' ? 'h.peer_progress' :
-            field == 'time' ? 'h.ban_at' :
-            field
-        " />
         WITH filtered_data AS (
         SELECT
         <choose>
             <when test="substringLength != null">
-                SUBSTRING(${dbField}, 1, #{substringLength}) AS field_value
+                SUBSTRING(${field}, 1, #{substringLength}) AS field_value
             </when>
             <otherwise>
-                ${dbField} AS field_value
+                ${field} AS field_value
             </otherwise>
         </choose>
         ,
-        ${dbField} AS field_sum,
-        t.info_hash AS torrent_info_hash,
-        t.name AS torrent_name,
-        h.module_name AS module_name
+        ${field} AS field_sum
         FROM history h
         JOIN torrents t ON h.torrent_id = t.id
-        <if test="downloader != null and downloader != ''">
-            WHERE h.downloader = #{downloader}
-        </if>
+        <where>
+            <if test="downloader != null and downloader != ''">
+                AND h.downloader = #{downloader}
+            </if>
+            AND ${field} IS NOT NULL
+            AND ${field} != ''
+        </where>
         ),
         total_sum AS (
         SELECT SUM(field_sum) AS total
         FROM filtered_data
-        WHERE field_sum IS NOT NULL
+        WHERE field_sum IS NOT NULL AND field_value IS NOT NULL AND field_value != ''
         )
         SELECT
         fd.field_value AS data,
         SUM(fd.field_sum) AS count,
         CASE
         WHEN ts.total > 0
-        THEN SUM(fd.field_sum) / ts.total
+        THEN CAST(SUM(fd.field_sum) AS DECIMAL(20, 10)) / ts.total
         ELSE 0
         END AS percent
         FROM filtered_data fd
         CROSS JOIN total_sum ts
-        WHERE fd.field_sum IS NOT NULL
+        WHERE fd.field_sum IS NOT NULL AND fd.field_value IS NOT NULL AND fd.field_value != ''
         GROUP BY fd.field_value, ts.total
         HAVING
-        (SUM(fd.field_sum) / NULLIF(ts.total, 0)) > #{percentFilter}
+        (CAST(SUM(fd.field_sum) AS DECIMAL(20, 10)) / NULLIF(ts.total, 0)) > #{percentFilter}
         ORDER BY count DESC;
     </select>
 
     <!-- 字段计数统计 -->
     <select id="countField" resultMap="UniversalFieldNumResultMap">
-        <bind name="dbField" value="
-            field == 'torrent_name' ? 't.name' :
-            field == 'module_name' ? 'h.module_name' :
-            field == 'peer_client_name' ? 'h.peer_client_name' :
-            (field == 'peer_ip' or field == 'ip') ? 'h.ip' :
-            field == 'port' ? 'h.port' :
-            field == 'peer_id' ? 'h.peer_id' :
-            field == 'peer_uploaded' ? 'h.peer_uploaded' :
-            field == 'peer_downloaded' ? 'h.peer_downloaded' :
-            field == 'peer_progress' ? 'h.peer_progress' :
-            field == 'time' ? 'h.ban_at' :
-            field
-        " />
+        WITH data_source AS (
+            SELECT
+            <choose>
+                <when test="substringLength != null">
+                    SUBSTRING(${field}, 1, #{substringLength})
+                </when>
+                <otherwise>
+                    ${field}
+                </otherwise>
+            </choose>
+            AS field_data
+            FROM history h
+            <if test="field == 't.name'">
+                JOIN torrents t ON h.torrent_id = t.id
+            </if>
+            <where>
+                <if test="downloader != null and downloader != ''">
+                    AND h.downloader = #{downloader}
+                </if>
+                AND ${field} IS NOT NULL
+                AND ${field} != ''
+            </where>
+        )
         SELECT
-        <choose>
-            <when test="substringLength != null">
-                SUBSTRING(${dbField}, 1, #{substringLength})
-            </when>
-            <otherwise>
-                ${dbField}
-            </otherwise>
-        </choose>
-        AS data,
-        COUNT(*) AS count,
-        COUNT(*) / (SELECT COUNT(*) FROM history h
-        <if test="field == 't.name' or field == 'torrent_name'">
-            JOIN torrents t ON h.torrent_id = t.id
-        </if>
-        <where>
-            <if test="downloader != null and downloader != ''">
-                AND h.downloader = #{downloader}
-            </if>
-            AND ${dbField} IS NOT NULL
-        </where>) AS percent
-        FROM history h
-        <if test="field == 't.name' or field == 'torrent_name'">
-            JOIN torrents t ON h.torrent_id = t.id
-        </if>
-        <where>
-            <if test="downloader != null and downloader != ''">
-                AND h.downloader = #{downloader}
-            </if>
-            AND ${dbField} IS NOT NULL
-        </where>
-        GROUP BY data
+            field_data AS data,
+            COUNT(*) AS count,
+            CAST(COUNT(*) AS DECIMAL(20, 10)) / (SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != '') AS percent
+        FROM data_source
+        WHERE field_data IS NOT NULL AND field_data != ''
+        GROUP BY field_data
         HAVING percent &gt; #{percentFilter}
         ORDER BY count DESC
     </select>
