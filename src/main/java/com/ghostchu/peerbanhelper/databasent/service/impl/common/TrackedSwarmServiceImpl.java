@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
@@ -115,6 +116,11 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
     @Override
     public void flushAll() {
         baseMapper.insertOrUpdate(cache.asMap().values(), 100);
+    }
+
+    @Override
+    public void resetTable() {
+        baseMapper.delete(new QueryWrapper<>());
     }
 
     record CacheKey(String ip, int port, String infoHash, String downloader) {

@@ -17,4 +17,6 @@ public interface TrackedSwarmService extends IService<TrackedSwarmEntity> {
     void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull Peer peer) throws ExecutionException;
 
     void flushAll();
+
+    void resetTable();
 }
