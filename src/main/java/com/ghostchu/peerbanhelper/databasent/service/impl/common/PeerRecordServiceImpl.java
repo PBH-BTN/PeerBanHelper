@@ -26,14 +26,14 @@ import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.ghostchu.peerbanhelper.util.TimeUtil.zeroOffsetDateTime;
 
 @Slf4j
 @Service
@@ -171,8 +171,8 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         IPAddressTimeSeen timeSeen = baseMapper.queryAddressTimeSeen(inet);
         if (timeSeen == null) {
             timeSeen = new IPAddressTimeSeen();
-            timeSeen.setFirstTimeSeen(OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC));
-            timeSeen.setLastTimeSeen(OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC));
+            timeSeen.setFirstTimeSeen(zeroOffsetDateTime);
+            timeSeen.setLastTimeSeen(zeroOffsetDateTime);
         }
         return timeSeen;
     }
