@@ -44,12 +44,6 @@
         </if>
     </select>
 
-    <!-- 统计所有唯一IP数量 -->
-    <select id="countDistinctIp" resultType="long">
-        SELECT COUNT(DISTINCT ip)
-        FROM history
-    </select>
-
     <!-- 字段聚合统计 -->
     <select id="sumField" resultMap="UniversalFieldNumResultMap">
         WITH filtered_data AS (

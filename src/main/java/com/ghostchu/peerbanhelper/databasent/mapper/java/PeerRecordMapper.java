@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
 import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,6 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface PeerRecordMapper extends BaseMapper<PeerRecordEntity> {
+    @Select("SELECT COUNT(DISTINCT address) FROM peer_records WHERE downloader = #{downloader} AND lastTimeSeen &gt;= #{startAt} AND firstTimeSeen &lt;= #{endAt}")
     long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt);
 
     IPAddressTotalTraffic queryAddressTotalTraffic(InetAddress address);

@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public interface HistoryMapper extends BaseMapper<HistoryEntity> {
 
 	long countDistinctIpWithFilter(@Param("filter") String filter);
 
+    @Select("SELECT COUNT(DISTINCT ip) FROM history")
 	long countDistinctIp();
 
 	List<UniversalFieldNumResult> countField(
