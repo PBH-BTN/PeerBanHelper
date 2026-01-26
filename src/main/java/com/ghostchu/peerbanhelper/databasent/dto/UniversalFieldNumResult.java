@@ -1,4 +1,14 @@
 package com.ghostchu.peerbanhelper.databasent.dto;
 
-public record UniversalFieldNumResult(String data, long count, double percent) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class UniversalFieldNumResult {
+    private String data;
+    private long count;
+    private double percent;
 }
