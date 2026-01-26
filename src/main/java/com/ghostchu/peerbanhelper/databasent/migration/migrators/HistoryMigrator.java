@@ -97,7 +97,7 @@ public class HistoryMigrator implements TableMigrator {
                     batch.add(entity);
 
                     if (batch.size() >= context.getBatchSize()) {
-                        saveBatch(batch);
+                        historyService.getBaseMapper().insertOrUpdate(batch);
                         count += batch.size();
                         batch.clear();
                         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "history", MigrationContext.formatProgress(count, totalCount)));
@@ -109,7 +109,7 @@ public class HistoryMigrator implements TableMigrator {
 
             // Save remaining records
             if (!batch.isEmpty()) {
-                saveBatch(batch);
+                historyService.getBaseMapper().insertOrUpdate(batch);
                 count += batch.size();
             }
         }
@@ -171,9 +171,13 @@ public class HistoryMigrator implements TableMigrator {
         if (ruleNameStr != null && !ruleNameStr.isEmpty()) {
             try {
                 JsonObject ruleJson = JsonParser.parseString(ruleNameStr).getAsJsonObject();
+                Object[] params = new Object[0];
+                if (ruleJson.has("args") && !ruleJson.get("args").isJsonNull()) {
+                    params = JsonUtil.standard().fromJson(ruleJson.get("args"), Object[].class);
+                }
                 TranslationComponent ruleName = new TranslationComponent(
                         ruleJson.get("key").getAsString(),
-                        ruleJson.has("args") ? ruleJson.get("args").toString() : null
+                        params
                 );
                 entity.setRuleName(ruleName);
             } catch (Exception e) {
@@ -187,9 +191,13 @@ public class HistoryMigrator implements TableMigrator {
         if (descriptionStr != null && !descriptionStr.isEmpty()) {
             try {
                 JsonObject descJson = JsonParser.parseString(descriptionStr).getAsJsonObject();
+                Object[] params = new Object[0];
+                if (descJson.has("args") && !descJson.get("args").isJsonNull()) {
+                    params = JsonUtil.standard().fromJson(descJson.get("args"), Object[].class);
+                }
                 TranslationComponent description = new TranslationComponent(
                         descJson.get("key").getAsString(),
-                        descJson.has("args") ? descJson.get("args").toString() : null
+                        params
                 );
                 entity.setDescription(description);
             } catch (Exception e) {
