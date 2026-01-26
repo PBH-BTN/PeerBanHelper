@@ -3,15 +3,12 @@ package com.ghostchu.peerbanhelper.databasent.migration.migrators;
 import com.ghostchu.peerbanhelper.databasent.migration.MigrationContext;
 import com.ghostchu.peerbanhelper.databasent.migration.TableMigrator;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
-import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,11 +37,9 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class HistoryMigrator implements TableMigrator {
     private final HistoryService historyService;
-    private final TorrentService torrentService;
 
-    public HistoryMigrator(HistoryService historyService, TorrentService torrentService) {
+    public HistoryMigrator(HistoryService historyService) {
         this.historyService = historyService;
-        this.torrentService = torrentService;
     }
 
     @Override
@@ -70,7 +65,7 @@ public class HistoryMigrator implements TableMigrator {
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         // Query with JOIN to get module and rule names
         String selectQuery = """
-                SELECT 
+                SELECT
                     h.id, h.banAt, h.unbanAt, h.ip, h.port, h.peerId, h.peerClientName,
                     h.peerUploaded, h.peerDownloaded, h.peerProgress, h.downloaderProgress,
                     h.torrent_id, h.rule_id, h.description, h.flags, h.downloader,
@@ -170,18 +165,11 @@ public class HistoryMigrator implements TableMigrator {
         // Parse rule name as TranslationComponent
         if (ruleNameStr != null && !ruleNameStr.isEmpty()) {
             try {
-                JsonObject ruleJson = JsonParser.parseString(ruleNameStr).getAsJsonObject();
-                Object[] params = new Object[0];
-                if (ruleJson.has("args") && !ruleJson.get("args").isJsonNull()) {
-                    params = JsonUtil.standard().fromJson(ruleJson.get("args"), Object[].class);
-                }
-                TranslationComponent ruleName = new TranslationComponent(
-                        ruleJson.get("key").getAsString(),
-                        params
-                );
+                // Use JsonUtil's TranslationComponentTypeAdapter to properly deserialize
+                TranslationComponent ruleName = JsonUtil.standard().fromJson(ruleNameStr, TranslationComponent.class);
                 entity.setRuleName(ruleName);
             } catch (Exception e) {
-                log.warn("Failed to parse rule name as TranslationComponent: {}", ruleNameStr);
+                log.warn("Failed to parse rule name as TranslationComponent: {}", ruleNameStr, e);
                 entity.setRuleName(new TranslationComponent(ruleNameStr));
             }
         }
@@ -190,18 +178,11 @@ public class HistoryMigrator implements TableMigrator {
         String descriptionStr = rs.getString("description");
         if (descriptionStr != null && !descriptionStr.isEmpty()) {
             try {
-                JsonObject descJson = JsonParser.parseString(descriptionStr).getAsJsonObject();
-                Object[] params = new Object[0];
-                if (descJson.has("args") && !descJson.get("args").isJsonNull()) {
-                    params = JsonUtil.standard().fromJson(descJson.get("args"), Object[].class);
-                }
-                TranslationComponent description = new TranslationComponent(
-                        descJson.get("key").getAsString(),
-                        params
-                );
+                // Use JsonUtil's TranslationComponentTypeAdapter to properly deserialize
+                TranslationComponent description = JsonUtil.standard().fromJson(descriptionStr, TranslationComponent.class);
                 entity.setDescription(description);
             } catch (Exception e) {
-                log.warn("Failed to parse description as TranslationComponent: {}", descriptionStr);
+                log.warn("Failed to parse description as TranslationComponent: {}", descriptionStr, e);
                 entity.setDescription(new TranslationComponent(descriptionStr));
             }
         }
@@ -252,10 +233,5 @@ public class HistoryMigrator implements TableMigrator {
         // Query from new DB - need to find by some unique field
         // This is a simplified version - in production we'd need better ID mapping
         return oldTorrentId; // Fallback - may need adjustment
-    }
-
-    private void saveBatch(List<HistoryEntity> batch) {
-        // Use MyBatis-Plus batch insert for better performance
-        historyService.getBaseMapper().insertOrUpdate(batch);
     }
 }

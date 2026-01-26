@@ -160,7 +160,7 @@ public class DatabaseMigrationCoordinator {
         // Add all migrators
         migrators.add(new MetadataMigrator(metadataService));
         migrators.add(new TorrentMigrator(torrentService));
-        migrators.add(new HistoryMigrator(historyService, torrentService));
+        migrators.add(new HistoryMigrator(historyService));
         migrators.add(new PeerRecordMigrator(peerRecordService));
         migrators.add(new TrafficJournalMigrator(trafficJournalService));
         migrators.add(new RuleSubInfoMigrator(ruleSubInfoService));
