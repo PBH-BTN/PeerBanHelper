@@ -121,7 +121,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         }
         cache.asMap().keySet().removeIf(key ->
                 key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
-                        key.peerAddressIp().equals(peerIp.toString())
+                        key.peerAddressIp().equals(peerIp.toInetAddress())
         );
         int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
         int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toInetAddress());
