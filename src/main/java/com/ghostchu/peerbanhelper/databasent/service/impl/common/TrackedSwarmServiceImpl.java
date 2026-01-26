@@ -33,7 +33,7 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
                 var v = notification.getValue();
                 //noinspection ConstantValue
                 if (v != null) {
-                    save(v);
+                    baseMapper.insertOrUpdate(v);
                 }
             })
             .softValues()
