@@ -155,7 +155,8 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
 
     @Override
     public IPAddressTotalTraffic queryAddressTotalTraffic(@NotNull InetAddress inet) {
-        return baseMapper.queryAddressTotalTraffic(inet);
+        IPAddressTotalTraffic traffic = baseMapper.queryAddressTotalTraffic(inet);
+        return traffic != null ? traffic : new IPAddressTotalTraffic();
     }
 
     @Override
