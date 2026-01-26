@@ -4,10 +4,12 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
 
-public interface DatabaseDriver extends AutoCloseable {
+public interface DatabaseDriver {
     @NotNull DatabaseType getType();
 
     @NotNull String getMapperXmlPath();
 
     @NotNull DataSource getDataSource();
+
+    void close() throws Exception;
 }
