@@ -18,6 +18,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -385,7 +386,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private @Nullable CheckResult fastPcbTest(PCBAddressEntity addressEntity, PCBRangeEntity rangeEntity, long computedUploaded, long torrentSize, StructuredData<String, Object> structuredData, Downloader downloader) {
         if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize) && downloader.getFeatureFlags().contains(DownloaderFeatureFlag.UNBAN_IP)) {
             // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
-            if (addressEntity.getFastPcbTestExecuteAt().isEqual(OffsetDateTime.MIN) || rangeEntity.getFastPcbTestExecuteAt().isEqual(OffsetDateTime.MIN)) {
+            if (addressEntity.getFastPcbTestExecuteAt().isEqual(TimeUtil.zeroOffsetDateTime()) || rangeEntity.getFastPcbTestExecuteAt().isEqual(OffsetDateTime.MIN)) {
                 // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
                 if (computedUploaded >= (fastPcbTestPercentage * torrentSize)) {
                     addressEntity.setFastPcbTestExecuteAt(OffsetDateTime.now());
@@ -424,10 +425,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     private void resetBanDelayWindow(@Nullable PCBRangeEntity rangeEntity, @Nullable PCBAddressEntity addressEntity) {
         if (rangeEntity != null && rangeEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0) {
-            rangeEntity.setBanDelayWindowEndAt(OffsetDateTime.MIN);
+            rangeEntity.setBanDelayWindowEndAt(TimeUtil.zeroOffsetDateTime());
         }
         if (addressEntity != null && addressEntity.getBanDelayWindowEndAt().toInstant().toEpochMilli() > 0) {
-            addressEntity.setBanDelayWindowEndAt(OffsetDateTime.MIN);
+            addressEntity.setBanDelayWindowEndAt(TimeUtil.zeroOffsetDateTime());
         }
     }
 
@@ -449,12 +450,12 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
-                        rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, OffsetDateTime.MIN, 0);
+                        rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime(), TimeUtil.zeroOffsetDateTime(), 0);
                         pcbRangeDao.save(rangeEntity);
                     }
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
-                        pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, OffsetDateTime.MIN, OffsetDateTime.MIN, 0);
+                        pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime(), TimeUtil.zeroOffsetDateTime(), 0);
                         pcbAddressDao.save(pcbAddressEntity);
                     }
                     return Pair.of(rangeEntity, pcbAddressEntity);

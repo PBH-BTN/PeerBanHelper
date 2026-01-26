@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SubInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -327,7 +328,7 @@ public final class RuleSubController extends AbstractFeatureModule {
         if (ruleName.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + ruleName);
         }
-        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, OffsetDateTime.MIN, 0));
+        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, TimeUtil.zeroOffsetDateTime(), 0));
         assert configurationSection != null;
         try {
             StdResp msg = ipBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);

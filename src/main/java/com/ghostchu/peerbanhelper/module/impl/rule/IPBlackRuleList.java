@@ -18,6 +18,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -417,7 +418,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             return null;
         }
         var result = ruleSubLogsDao.getLastLog(ruleId);
-        OffsetDateTime lastUpdate = result == null ? OffsetDateTime.MIN : result.getUpdateTime();
+        OffsetDateTime lastUpdate = result == null ? TimeUtil.zeroOffsetDateTime() : result.getUpdateTime();
         int count = result == null ? 0 : result.getCount();
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
     }
