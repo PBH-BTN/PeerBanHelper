@@ -26,6 +26,7 @@
     <logger name="com.offbynull.portmapper" level="OFF"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="p6spy" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
