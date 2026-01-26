@@ -28,7 +28,7 @@
 
     <select id="queryAccessHistoryByIp" resultType="com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity">
         SELECT * FROM peer_records
-        WHERE address = #{address}
+        WHERE address = #{ip}
         ORDER BY ${orderBySql}
     </select>
 
