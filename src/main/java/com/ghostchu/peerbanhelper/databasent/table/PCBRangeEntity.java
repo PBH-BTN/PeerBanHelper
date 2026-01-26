@@ -24,7 +24,7 @@ public final class PCBRangeEntity implements Serializable {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    @TableField(value = "range")
+    @TableField(value = "`range`")
     private String range;
     @TableField(value = "torrent_id")
     private String torrentId;
