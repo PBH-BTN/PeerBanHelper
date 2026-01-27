@@ -11,11 +11,14 @@ import org.jetbrains.annotations.NotNull;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class H2DatabaseDriver extends AbstractDatabaseDriver {
     private final File dbFile;
     private final String dbPath;
     private final ConfigurationSection section;
+    private final AtomicBoolean requestCompactOnShutdown = new AtomicBoolean(false);
 
     public H2DatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
@@ -46,5 +49,17 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         config.setIdleTimeout(section.getLong("pool.idle-timeout-millis"));
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-H2Pool").factory());
         return new HikariDataSource(config);
+    }
+
+    @Override
+    public void close() throws Exception {
+        try (Connection connection = getDataSource().getConnection()) {
+            if (requestCompactOnShutdown.get()) {
+                connection.createStatement().execute("SHUTDOWN COMPACT");
+            } else {
+                connection.createStatement().execute("SHUTDOWN");
+            }
+        }
+        super.close();
     }
 }
