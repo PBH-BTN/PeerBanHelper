@@ -92,7 +92,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private double fastPcbTestPercentage;
     private final Object cacheDBLoadingLock = new Object();
     @Autowired
-    private PlatformTransactionManager platformTransactionManager;
+    private TransactionTemplate transactionTemplate;
+
 
     @Override
     public @NotNull String getName() {
@@ -180,15 +181,14 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     public void onDisable() {
         Main.getEventBus().unregister(this);
         Main.getReloadManager().unregister(this);
-        cacheBackFlushFlag.set(false);
         flushBackDatabaseAll();
+        cacheBackFlushFlag.set(false);
         cache.invalidateAll();
         cacheBackFlushFlag.set(true);
     }
 
     private void flushBackDatabaseAll() {
-        TransactionTemplate template = new TransactionTemplate(platformTransactionManager);
-        template.execute(_ ->{
+        transactionTemplate.execute(_ ->{
             for (Map.Entry<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> entry : cache.asMap().entrySet()) {
                 flushBackDatabase(entry.getValue().getKey(), entry.getValue().getRight());
             }

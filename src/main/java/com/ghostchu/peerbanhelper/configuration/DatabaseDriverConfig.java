@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,5 +102,10 @@ public class DatabaseDriverConfig {
         factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(xmlPath));
 
         return factoryBean.getObject();
+    }
+
+    @Bean
+    public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager){
+        return new TransactionTemplate(platformTransactionManager);
     }
 }

@@ -16,7 +16,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -26,6 +28,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, TrackedSwarmEntity> implements TrackedSwarmService {
+    @Autowired
+    private TransactionTemplate transactionTemplate;
     private final Cache<@NotNull CacheKey, @NotNull TrackedSwarmEntity> cache = CacheBuilder.newBuilder()
             .maximumSize(ExternalSwitch.parseInt("pbh.module.swarm-tracking-module.cache-size", 1000))
             .expireAfterAccess(3, TimeUnit.MINUTES)
@@ -114,7 +118,10 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
 
     @Override
     public void flushAll() {
-        baseMapper.insertOrUpdate(cache.asMap().values(), 100);
+        transactionTemplate.execute(_ -> {
+            baseMapper.insertOrUpdate(cache.asMap().values());
+            return null;
+        });
     }
 
     @Override

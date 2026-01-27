@@ -53,16 +53,8 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    public void syncPendingTasks(Deque<BatchHandleTasks> tasks) {
-        while (!tasks.isEmpty()) {
-            var t = tasks.pop();
-            try {
-                writeToDatabase(t.timestamp, t.downloader, t.torrent, t.peer);
-            } catch (SQLException e) {
-                log.error("Unable save peer record to database, please report to developer: {}, {}, {}, {}", t.timestamp, t.downloader, t.torrent, t.peer);
-                Sentry.captureException(e);
-            }
-        }
+    public void syncPendingTasks(BatchHandleTasks t) {
+        writeToDatabase(t.timestamp, t.downloader, t.torrent, t.peer);
     }
 
     @Override
@@ -71,7 +63,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         return baseMapper.sessionBetween(downloader, startAt, endAt);
     }
 
-    private boolean writeToDatabase(OffsetDateTime timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
+    private boolean writeToDatabase(OffsetDateTime timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer)  {
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),
@@ -137,7 +129,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    public synchronized PeerRecordEntity createIfNotExists(PeerRecordEntity data) throws SQLException {
+    public synchronized PeerRecordEntity createIfNotExists(PeerRecordEntity data) {
         PeerRecordEntity existing = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
                 .eq(PeerRecordEntity::getAddress, data.getAddress())
                 .eq(PeerRecordEntity::getTorrentId, data.getTorrentId())

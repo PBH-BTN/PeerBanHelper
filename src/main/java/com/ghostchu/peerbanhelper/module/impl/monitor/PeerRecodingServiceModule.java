@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
-import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.service.impl.common.PeerRecordServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -19,38 +18,60 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
 public class PeerRecodingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
+    private final AtomicBoolean databaseBackFlushFlag = new AtomicBoolean(true);
     @Autowired
     private PeerRecordService peerRecordDao;
-    private final Deque<PeerRecordServiceImpl.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
-    private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @SuppressWarnings("NullableProblems")
     private final Cache<PeerRecordServiceImpl.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(ExternalSwitch.parseLong("pbh.module.peerRecordingServiceModule.diskWriteCache.timeout", 180000), TimeUnit.MILLISECONDS)
             .maximumSize(ExternalSwitch.parseInt("pbh.module.peerRecordingServiceModule.diskWriteCache.size", 3500))
-            .removalListener(notification -> dataBuffer.offer((PeerRecordServiceImpl.BatchHandleTasks) notification.getKey()))
+            .removalListener((RemovalListener<PeerRecordServiceImpl.BatchHandleTasks, Object>) notification -> {
+                //noinspection ConstantValue
+                if (notification.getValue() == null) return; // OOM could be null
+                if (!databaseBackFlushFlag.get()) return;
+                backFlushDatabase(notification.getKey());
+            })
             .build();
 
-    private ExecutorService taskWriteService;
     private long dataRetentionTime;
-    @Autowired
-    private TorrentService torrentDao;
+
+    public void flush() {
+        transactionTemplate.execute(_ -> {
+            for (Map.Entry<PeerRecordServiceImpl.BatchHandleTasks, @NotNull Object> entry : diskWriteCache.asMap().entrySet()) {
+                backFlushDatabase(entry.getKey());
+            }
+            return null;
+        });
+    }
+
+    private void backFlushDatabase(PeerRecordServiceImpl.BatchHandleTasks key) {
+        peerRecordDao.syncPendingTasks(key);
+    }
+
 
     @Override
     public boolean isConfigurable() {
@@ -89,7 +110,6 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
     @Override
     public void onEnable() {
         reloadConfig();
-        this.taskWriteService = new ThreadPoolExecutor(1, 2, 60L, TimeUnit.SECONDS, taskWriteQueue);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
         long dataFlushInterval = getConfig().getLong("data-flush-interval", 20000);
         registerScheduledTask(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
@@ -103,22 +123,9 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
     }
 
     private void reloadConfig() {
-        if (this.taskWriteService != null) {
-            this.taskWriteService.shutdown();
-        }
-        this.taskWriteService = Executors.newSingleThreadExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
     }
 
-    public void flush() {
-        try {
-            diskWriteCache.asMap().forEach((k, v) -> dataBuffer.offer(k));
-            peerRecordDao.syncPendingTasks(dataBuffer);
-        } catch (Throwable e) {
-            log.error("Unable to complete scheduled tasks", e);
-            Sentry.captureException(e);
-        }
-    }
 
     private void cleanup() {
         try {
@@ -136,15 +143,9 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
 
     @Override
     public void onDisable() {
-        diskWriteCache.invalidateAll();
         flush();
-        taskWriteService.shutdown();
-        try {
-            if (!taskWriteService.awaitTermination(10, TimeUnit.SECONDS)) {
-                taskWriteService.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        databaseBackFlushFlag.set(false);
+        diskWriteCache.invalidateAll();
+        databaseBackFlushFlag.set(true);
     }
 }

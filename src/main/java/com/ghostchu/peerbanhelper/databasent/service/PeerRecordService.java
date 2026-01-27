@@ -23,7 +23,7 @@ import java.util.Map;
 public interface PeerRecordService extends IService<PeerRecordEntity> {
     List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader);
 
-    void syncPendingTasks(Deque<PeerRecordServiceImpl.BatchHandleTasks> tasks);
+    void syncPendingTasks(PeerRecordServiceImpl.BatchHandleTasks tasks);
 
     long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt);
 
