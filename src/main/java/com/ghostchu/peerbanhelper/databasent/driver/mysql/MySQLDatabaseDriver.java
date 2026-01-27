@@ -32,10 +32,10 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         String database = section.getString("database");
         String username = section.getString("username");
         String password = section.getString("password");
-        config.setJdbcUrl("jdbc:p6spy:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC");
+        config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC");
         config.setUsername(username);
         config.setPassword(password);
-        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setMaximumPoolSize(section.getInt("pool.max-size"));
         config.setMinimumIdle(section.getInt("pool.min-idle"));
         config.setIdleTimeout(section.getLong("pool.idle-timeout-millis"));

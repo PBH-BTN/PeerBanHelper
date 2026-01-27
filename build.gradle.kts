@@ -95,7 +95,6 @@ dependencies {
     implementation("com.baomidou:mybatis-plus-spring")
     implementation("com.baomidou:mybatis-plus-jsqlparser")
     implementation("org.mybatis:mybatis-spring:4.0.0")
-    implementation("p6spy:p6spy:3.9.1")
 
     // Annotations
     implementation("org.flywaydb:flyway-core:10.15.0")
