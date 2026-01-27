@@ -49,7 +49,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         config.setDriverClassName("org.sqlite.JDBC");
 
         // SQLite doesn't support true connection pooling, use single connection
-        config.setMaximumPoolSize(1);
+        config.setMaximumPoolSize(8);
         config.setMinimumIdle(1);
         config.setIdleTimeout(section.getLong("pool.idle-timeout-millis", 600000L));
         config.setConnectionTimeout(30000);

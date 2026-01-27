@@ -24,6 +24,8 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,11 @@ public class DatabaseDriverConfig {
         log.info(tlUI(Lang.DBNT_LOADING_DRIVER_LOADED, driver.getType().name()));
         databaseDriver = driver;
         return driver;
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(@NotNull DatabaseDriver driver) {
+        return new DataSourceTransactionManager(driver.getDataSource());
     }
 
     @Bean

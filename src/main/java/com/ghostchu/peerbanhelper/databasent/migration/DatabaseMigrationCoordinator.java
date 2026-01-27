@@ -10,6 +10,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
 import java.sql.Connection;
@@ -56,8 +58,11 @@ public class DatabaseMigrationCoordinator {
     @Autowired(required = false)
     private IPDBManager ipdbManager;
 
+
     private final File sqliteDbFile;
     private final File migrationMarkerFile;
+    @Autowired
+    private PlatformTransactionManager platformTransactionManager;
 
     public DatabaseMigrationCoordinator() {
         File persistDir = new File(Main.getDataDirectory(), "persist");
@@ -114,7 +119,7 @@ public class DatabaseMigrationCoordinator {
         // Connect to SQLite database
         String jdbcUrl = "jdbc:sqlite:" + sqliteDbFile.getAbsolutePath();
         log.info(tlUI(Lang.DBNT_MIGRATOR_CONNECTING_SQLITE));
-
+        TransactionTemplate transactionTemplate = new TransactionTemplate(platformTransactionManager);
         try (Connection sqliteConnection = DriverManager.getConnection(jdbcUrl)) {
             // Upgrade SQLite schema to version 20
             SQLiteSchemaUpgrader upgrader = new SQLiteSchemaUpgrader(sqliteConnection);
@@ -141,7 +146,13 @@ public class DatabaseMigrationCoordinator {
                     }
 
                     log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PREPARE, migrator.getTableName()));
-                    migrator.migrate(sqliteConnection, context);
+                    transactionTemplate.execute(_ -> {
+                        try {
+                            return migrator.migrate(sqliteConnection, context);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } catch (Exception e) {
                     log.error("Failed to migrate table '{}': {}",
                             migrator.getTableName(), e.getMessage(), e);
