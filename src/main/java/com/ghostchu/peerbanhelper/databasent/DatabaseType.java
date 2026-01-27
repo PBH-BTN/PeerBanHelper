@@ -7,9 +7,11 @@ import lombok.Getter;
 @AllArgsConstructor
 
 public enum DatabaseType {
+    SQLITE("sqlite", "sqlite", "sqlite"),
     H2("mysql", "mysql", "mysql"),
     POSTGRES("postgres", "postgres", "postgres"),
-    MYSQL("mysql", "mysql", "mysql");
+    MYSQL("mysql", "mysql", "mysql"),
+    ;
 
     private final String mapperType;
     private final String migrationType;

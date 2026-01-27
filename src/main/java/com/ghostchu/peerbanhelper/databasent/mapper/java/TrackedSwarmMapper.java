@@ -5,6 +5,5 @@ import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import org.apache.ibatis.annotations.Select;
 
 public interface TrackedSwarmMapper extends BaseMapper<TrackedSwarmEntity> {
-    @Select("TRUNCATE TABLE tracked_swarm")
     void resetTable();
 }

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.TrackedSwarmMapper">
-    <select id="resetTable">
-        TRUNCATE TABLE tracked_swarm
-    </select>
-
+    <delete id="resetTable">
+        DELETE FROM tracked_swarm
+    </delete>
 </mapper>

@@ -17,6 +17,7 @@ package com.ghostchu.peerbanhelper.databasent.driver.common;
 
 import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
+import com.ghostchu.peerbanhelper.databasent.driver.sqlite.OffsetDateTimeTypeHandlerForSQLite;
 import org.apache.ibatis.lang.UsesJava8;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -40,6 +41,8 @@ public class OffsetDateTimeTypeHandlerForwarder extends BaseTypeHandler<OffsetDa
         if (handler == null) {
             if (DatabaseDriverConfig.databaseDriver.getType() == DatabaseType.MYSQL) {
                 handler = new OffsetDateTimeTypeHandlerForMySQL();
+            } else if (DatabaseDriverConfig.databaseDriver.getType() == DatabaseType.SQLITE) {
+                handler = new OffsetDateTimeTypeHandlerForSQLite();
             } else {
                 handler = new OffsetDateTimeTypeHandler();
             }

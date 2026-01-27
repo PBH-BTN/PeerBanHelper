@@ -20,7 +20,7 @@
         COUNT(*) AS count
         FROM history
         <if test="filter != null and filter != ''">
-            WHERE ip LIKE CONCAT(#{filter}, '%')
+            WHERE ip LIKE #{filter} || '%'
         </if>
         GROUP BY ip
         ORDER BY count DESC
@@ -40,7 +40,7 @@
         SELECT COUNT(DISTINCT ip)
         FROM history
         <if test="filter != null and filter != ''">
-            WHERE ip LIKE CONCAT(#{filter}, '%')
+            WHERE ip LIKE #{filter} || '%'
         </if>
     </select>
 
@@ -50,7 +50,7 @@
         SELECT
         <choose>
             <when test="substringLength != null">
-                SUBSTRING(${field}, 1, #{substringLength}) AS field_value
+                SUBSTR(${field}, 1, #{substringLength}) AS field_value
             </when>
             <otherwise>
                 ${field} AS field_value
@@ -78,7 +78,7 @@
         SUM(fd.field_sum) AS count,
         CASE
         WHEN ts.total > 0
-        THEN CAST(SUM(fd.field_sum) AS DECIMAL(20, 10)) / ts.total
+        THEN CAST(SUM(fd.field_sum) AS REAL) / ts.total
         ELSE 0
         END AS percent
         FROM filtered_data fd
@@ -86,8 +86,8 @@
         WHERE fd.field_sum IS NOT NULL AND fd.field_value IS NOT NULL AND fd.field_value != ''
         GROUP BY fd.field_value, ts.total
         HAVING
-        (CAST(SUM(fd.field_sum) AS DECIMAL(20, 10)) / NULLIF(ts.total, 0)) > #{percentFilter}
-        ORDER BY count DESC;
+        (CAST(SUM(fd.field_sum) AS REAL) / NULLIF(ts.total, 0)) > #{percentFilter}
+        ORDER BY count DESC
     </select>
 
     <!-- 字段计数统计 -->
@@ -96,7 +96,7 @@
             SELECT
             <choose>
                 <when test="substringLength != null">
-                    SUBSTRING(${field}, 1, #{substringLength})
+                    SUBSTR(${field}, 1, #{substringLength})
                 </when>
                 <otherwise>
                     ${field}
@@ -118,7 +118,7 @@
         SELECT
             field_data AS data,
             COUNT(*) AS count,
-            CAST(COUNT(*) AS DECIMAL(20, 10)) / (SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != '') AS percent
+            CAST(COUNT(*) AS REAL) / (SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != '') AS percent
         FROM data_source
         WHERE field_data IS NOT NULL AND field_data != ''
         GROUP BY field_data

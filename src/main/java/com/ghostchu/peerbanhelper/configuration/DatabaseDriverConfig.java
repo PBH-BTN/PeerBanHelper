@@ -10,8 +10,10 @@ import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.MultiDbExplainInterceptor;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicIPAddressTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
+import com.ghostchu.peerbanhelper.databasent.driver.common.OffsetDateTimeTypeHandlerForwarder;
 import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.sqlite.SQLiteDatabaseDriver;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.plugin.Interceptor;
@@ -41,9 +43,10 @@ public class DatabaseDriverConfig {
         if (section == null) throw new IllegalStateException("Database configuration section is missing!");
         int databaseTypeId = section.getInt("type");
         var driver = switch (databaseTypeId) {
-            case 1 -> new MySQLDatabaseDriver(section);
-            // case 2 -> new PostgresDatabaseDriver(section);
-            default -> new H2DatabaseDriver(section);
+            case 1 -> new H2DatabaseDriver(section);
+            case 10 -> new MySQLDatabaseDriver(section);
+            // case 11 -> new PostgresDatabaseDriver(section);
+            default -> new SQLiteDatabaseDriver(section);
         };
         log.info(tlUI(Lang.DBNT_LOADING_DRIVER_LOADED, driver.getType().name()));
         databaseDriver = driver;
@@ -57,6 +60,7 @@ public class DatabaseDriverConfig {
             case H2 -> DbType.MYSQL; // H2 USE MYSQL
             case POSTGRES -> DbType.POSTGRE_SQL;
             case MYSQL -> DbType.MYSQL;
+            case SQLITE -> DbType.SQLITE;
         };
         var pagination = new PaginationInnerInterceptor(dbType);
         pagination.setMaxLimit(1000L);
@@ -82,7 +86,7 @@ public class DatabaseDriverConfig {
         interceptorList.add(sentryMyBatisInterceptor);
         factoryBean.setPlugins(interceptorList.toArray(new Interceptor[0]));
 
-        factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler());
+        factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler(), new OffsetDateTimeTypeHandlerForwarder());
 
         String xmlPath = "classpath*:" + driver.getMapperXmlPath();
         log.info(tlUI(Lang.DBNT_LOADING_MAPPER, xmlPath));
