@@ -106,13 +106,12 @@ public final class IPDB implements AutoCloseable {
         geoData.setNetwork(queryNetwork(address));
         if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
             String iso = geoData.getCountry().getIso();
-            if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
-                    || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
+            if ("CN".equalsIgnoreCase(iso) || "TW".equalsIgnoreCase(iso)
+                    || "HK".equalsIgnoreCase(iso) || "MO".equalsIgnoreCase(iso)) {
                 queryGeoCN(address, geoData);
             }
         }
         return geoData;
-
     }
 
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
