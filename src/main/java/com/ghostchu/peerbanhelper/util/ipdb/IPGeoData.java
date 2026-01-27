@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.ipdb;
 
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,9 +30,6 @@ public final class IPGeoData {
         private Long iso;
 
         @Nullable
-        private LocationData location;
-
-        @Nullable
         private String cnProvince;
 
         @Nullable
@@ -40,19 +38,19 @@ public final class IPGeoData {
         @Nullable
         private String cnDistricts;
 
-        @AllArgsConstructor
-        @NoArgsConstructor
-        @Data
-        public static final class LocationData {
-            @Nullable
-            private Double latitude;
-            @Nullable
-            private Double longitude;
-            @Nullable
-            private String timeZone;
-            @Nullable
-            private Integer accuracyRadius;
-        }
+//        @AllArgsConstructor
+//        @NoArgsConstructor
+//        @Data
+//        public static final class LocationData {
+//            @Nullable
+//            private Double latitude;
+//            @Nullable
+//            private Double longitude;
+//            @Nullable
+//            private String timeZone;
+//            @Nullable
+//            private Integer accuracyRadius;
+//        }
     }
 
     @AllArgsConstructor
