@@ -13,7 +13,7 @@ CREATE TABLE alert
 CREATE TABLE banlist
 (
     address  VARCHAR(255) NOT NULL,
-    metadata MEDIUMTEXT NOT NULL,
+    metadata TEXT NOT NULL,
     PRIMARY KEY (address)
 );
 
