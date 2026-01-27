@@ -38,6 +38,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.sql.SQLException;
@@ -47,10 +49,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
+    private final AtomicBoolean cacheBackFlushFlag = new AtomicBoolean(true);
     @SuppressWarnings("NullableProblems")
     private final Cache<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
             .maximumSize(1024)
@@ -64,12 +68,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     // oom 引发 soft-value 被垃圾回收，则可能导致其为 null
                     return;
                 }
-                try {
-                    flushBackDatabase(pair.getLeft(), pair.getRight());
-                } catch (SQLException e) {
-                    log.error("Unable flush back to database for pair {}", pair, e);
-                    Sentry.captureException(e);
-                }
+                if(!cacheBackFlushFlag.get()) return;
+                flushBackDatabase(pair.getLeft(), pair.getRight());
             })
             .build();
     private long torrentMinimumSize;
@@ -91,6 +91,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private long fastPcbTestBlockingDuration;
     private double fastPcbTestPercentage;
     private final Object cacheDBLoadingLock = new Object();
+    @Autowired
+    private PlatformTransactionManager platformTransactionManager;
 
     @Override
     public @NotNull String getName() {
@@ -178,7 +180,20 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     public void onDisable() {
         Main.getEventBus().unregister(this);
         Main.getReloadManager().unregister(this);
+        cacheBackFlushFlag.set(false);
+        flushBackDatabaseAll();
         cache.invalidateAll();
+        cacheBackFlushFlag.set(true);
+    }
+
+    private void flushBackDatabaseAll() {
+        TransactionTemplate template = new TransactionTemplate(platformTransactionManager);
+        template.execute(_ ->{
+            for (Map.Entry<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> entry : cache.asMap().entrySet()) {
+                flushBackDatabase(entry.getValue().getKey(), entry.getValue().getRight());
+            }
+            return null;
+        });
     }
 
     private void reloadConfig() {
@@ -476,7 +491,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     @NotNull
-    private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) throws SQLException {
+    private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
         log.debug("Flushing back to database for pair PCBRangeEntity id={} and PCBAddressEntity id={}", pcbRangeEntity.getId(), pcbAddressEntity.getId());
         pcbRangeDao.saveOrUpdate(pcbRangeEntity);
         pcbAddressDao.saveOrUpdate(pcbAddressEntity);
