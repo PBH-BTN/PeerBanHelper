@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +39,17 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
                 var v = notification.getValue();
                 //noinspection ConstantValue
                 if (v != null) {
-                    baseMapper.insertOrUpdate(v);
+                    try {
+                        baseMapper.insertOrUpdate(v);
+                    } catch (Exception e) {
+                        if (isUniqueConstraintViolation(e)) {
+                            log.debug("Duplicate tracked swarm entry on cache eviction, ignoring: ip={}, port={}, hash={}, downloader={}",
+                                    v.getIp(), v.getPort(), v.getInfoHash(), v.getDownloader());
+                        } else {
+                            log.error("Failed to save tracked swarm on cache eviction", e);
+                            Sentry.captureException(e);
+                        }
+                    }
                 }
             })
             .softValues()
@@ -119,7 +131,19 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
     @Override
     public void flushAll() {
         transactionTemplate.execute(_ -> {
-            baseMapper.insertOrUpdate(cache.asMap().values());
+            for (TrackedSwarmEntity entity : cache.asMap().values()) {
+                try {
+                    baseMapper.insertOrUpdate(entity);
+                } catch (Exception e) {
+                    if (isUniqueConstraintViolation(e)) {
+                        log.debug("Duplicate tracked swarm entry on flush, ignoring: ip={}, port={}, hash={}, downloader={}",
+                                entity.getIp(), entity.getPort(), entity.getInfoHash(), entity.getDownloader());
+                    } else {
+                        log.error("Failed to flush tracked swarm entity", e);
+                        Sentry.captureException(e);
+                    }
+                }
+            }
             return null;
         });
     }
@@ -127,6 +151,56 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
     @Override
     public void resetTable() {
         baseMapper.resetTable();
+    }
+
+    private boolean isUniqueConstraintViolation(@NotNull Exception e) {
+        Throwable cause = e;
+        while (cause != null) {
+            String exceptionClass = cause.getClass().getName();
+            String message = cause.getMessage() != null ? cause.getMessage().toLowerCase() : "";
+
+            // SQLite: SQLITE_CONSTRAINT_UNIQUE (error code 2067)
+            if (exceptionClass.contains("sqlite.SQLiteException")) {
+                try {
+                    int errorCode = ((org.sqlite.SQLiteException) cause).getErrorCode();
+                    if (errorCode == 2067) {
+                        return true;
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            // MySQL: error code 1062 or "Duplicate entry"
+            if (exceptionClass.contains("mysql") || exceptionClass.contains("jdbc")) {
+                if (message.contains("duplicate entry") || message.contains("unique constraint")) {
+                    return true;
+                }
+                if (cause instanceof SQLException sqlEx && sqlEx.getErrorCode() == 1062) {
+                    return true;
+                }
+            }
+
+            // PostgreSQL: error code 23505 or "unique constraint"
+            if (exceptionClass.contains("postgresql")) {
+                if (message.contains("unique constraint") || message.contains("duplicate key")) {
+                    return true;
+                }
+                if (cause instanceof SQLException sqlEx && sqlEx.getErrorCode() == 23505) {
+                    return true;
+                }
+            }
+
+            // Generic SQL exception check
+            if (cause instanceof SQLException sqlEx) {
+                String sqlState = sqlEx.getSQLState();
+                if (sqlState != null && (sqlState.equals("23000") || sqlState.equals("23505"))) {
+                    return true;
+                }
+            }
+
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     record CacheKey(String ip, int port, String infoHash, String downloader) {

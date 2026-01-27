@@ -4,4 +4,5 @@
     <delete id="resetTable">
         DELETE FROM tracked_swarm
     </delete>
+
 </mapper>

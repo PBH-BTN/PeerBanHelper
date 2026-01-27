@@ -149,7 +149,7 @@ public class HistoryMigrator implements TableMigrator {
         entity.setPeerDownloaded(peerDownloaded);
         entity.setPeerProgress(rs.getDouble("peerProgress"));
 
-        Double downloaderProgress = rs.getObject("downloaderProgress") != null ? rs.getDouble("downloaderProgress") : null;
+        Double downloaderProgress = rs.getObject("downloaderProgress") != null ? rs.getDouble("downloaderProgress") : 0;
         entity.setDownloaderProgress(downloaderProgress);
 
         // Torrent reference
