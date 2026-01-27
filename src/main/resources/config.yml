@@ -194,7 +194,7 @@ privacy:
 
 # 数据库设置
 database:
-  # 0=H2, 1=MySQL, 2=SQLite, 3=PostgreSQL
+  # 0=SQLite, 1=H2, 10=MySQL, 11=PostgreSQL
   type: 0
   host: "localhost"
   port: 5432
