@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.btn.ability.impl.*;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
 import com.ghostchu.peerbanhelper.databasent.service.*;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -16,6 +17,7 @@ import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -101,18 +103,19 @@ public final class BtnNetwork implements Reloadable {
         this.historyDao = historyDao;
         this.trackedSwarmDao = trackedSwarmDao;
         this.torrentDao = torrentService;
-        var thr = new Thread(() -> {
-            Main.getReloadManager().register(this);
-            reloadConfig();
-        });
-        thr.start();
         this.systemInfo = systemInfo;
+        Main.getReloadManager().register(this);
+        Main.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void onServerStarted(PBHServerStartedEvent event) {
+        reloadConfig();
     }
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        var thr = new Thread(this::reloadConfig);
-        thr.start();
+        reloadConfig();
         return Reloadable.super.reloadModule();
     }
 
