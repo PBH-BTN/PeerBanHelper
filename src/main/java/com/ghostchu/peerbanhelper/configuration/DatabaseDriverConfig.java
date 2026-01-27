@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.common.OffsetDateTimeTypeHandlerForwarder;
 import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.postgres.PostgresDatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.sqlite.SQLiteDatabaseDriver;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class DatabaseDriverConfig {
         var driver = switch (databaseTypeId) {
             case 1 -> new H2DatabaseDriver(section);
             case 10 -> new MySQLDatabaseDriver(section);
-            // case 11 -> new PostgresDatabaseDriver(section);
+            case 11 -> new PostgresDatabaseDriver(section);
             default -> new SQLiteDatabaseDriver(section);
         };
         log.info(tlUI(Lang.DBNT_LOADING_DRIVER_LOADED, driver.getType().name()));
