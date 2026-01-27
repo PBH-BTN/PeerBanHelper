@@ -11,7 +11,9 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import inet.ipaddr.IPAddress;
 import io.sentry.Sentry;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +22,8 @@ import java.util.Map;
 
 @Service
 public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity> implements BanListService {
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public @NotNull Map<IPAddress, BanMetadata> readBanList() {
@@ -39,7 +43,13 @@ public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity
         List<BanListEntity> entityList = new ArrayList<>();
         banlist.forEach((key, value) -> entityList.add(new BanListEntity(
                 key.toNormalizedString(), JsonUtil.tiny().toJson(value))));
-        baseMapper.delete(null);
-        return baseMapper.insert(entityList).size();
+        Integer integer = transactionTemplate.execute(_->{
+            baseMapper.delete(null);
+            return baseMapper.insert(entityList).size();
+        });
+        if(integer == null){
+            return 0;
+        }
+        return integer;
     }
 }
