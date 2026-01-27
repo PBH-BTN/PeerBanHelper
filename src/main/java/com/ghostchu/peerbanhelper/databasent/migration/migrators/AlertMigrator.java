@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
@@ -144,12 +145,10 @@ public class AlertMigrator implements TableMigrator {
         }
 
         try {
-            JsonObject json = JsonParser.parseString(str).getAsJsonObject();
-            return new TranslationComponent(
-                    json.get("key").getAsString(),
-                    json.has("args") ? json.get("args").toString() : null
-            );
+            // Use JsonUtil's TranslationComponentTypeAdapter to properly deserialize
+            return JsonUtil.standard().fromJson(str, TranslationComponent.class);
         } catch (Exception e) {
+            log.warn("Failed to parse rule name as TranslationComponent: {}", str, e);
             return new TranslationComponent(str);
         }
     }
