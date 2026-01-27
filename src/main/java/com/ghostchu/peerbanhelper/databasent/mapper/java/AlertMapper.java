@@ -6,10 +6,12 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.jetbrains.annotations.NotNull;
 
-public interface AlertMapper extends BaseMapper<AlertEntity> {
-    @Select("UPDATE alert SET read_at = NOW() WHERE read_at IS NULL")
-    void markAllAsRead();
+import java.time.OffsetDateTime;
 
-    @Select("UPDATE alert SET read_at = NOW() WHERE identifier = #{identifier} AND read_at IS NULL")
-    void markAsRead(@NotNull @Param("identifier") String identifier);
+public interface AlertMapper extends BaseMapper<AlertEntity> {
+    @Select("UPDATE alert SET read_at = #{readAt} WHERE read_at IS NULL")
+    void markAllAsRead(@NotNull OffsetDateTime readAt);
+
+    @Select("UPDATE alert SET read_at = #{readAt} WHERE identifier = #{identifier} AND read_at IS NULL")
+    void markAsRead(@NotNull @Param("identifier") String identifier, @NotNull OffsetDateTime readAt);
 }

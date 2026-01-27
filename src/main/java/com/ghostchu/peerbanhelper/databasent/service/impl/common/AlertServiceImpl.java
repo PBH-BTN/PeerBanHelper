@@ -35,11 +35,11 @@ public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> impl
 
     @Override
     public void markAllAsRead() {
-        baseMapper.markAllAsRead();
+        baseMapper.markAllAsRead(OffsetDateTime.now());
     }
 
     @Override
     public void markAsRead(@NotNull String identifier) {
-        baseMapper.markAsRead(identifier);
+        baseMapper.markAsRead(identifier, OffsetDateTime.now());
     }
 }
