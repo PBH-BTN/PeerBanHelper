@@ -17,7 +17,7 @@ public class MigrationContext {
     /**
      * Batch size for reading from SQLite and inserting to target DB
      */
-    private int batchSize = 2000;
+    private int batchSize = 1000;
 
     /**
      * IPDBManager for GeoIP lookups
