@@ -36,7 +36,6 @@ public class DatabaseDriverConfig {
 
     @Bean
     public DatabaseDriver loadDriver() throws Exception {
-        log.info("Please wait, loading database driver...");
         log.info(tlUI(Lang.DBNT_LOADING_DRIVER));
         var section = Main.getMainConfig().getConfigurationSection("database");
         if (section == null) throw new IllegalStateException("Database configuration section is missing!");
