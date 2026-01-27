@@ -87,15 +87,15 @@
 </template>
 <script setup lang="ts">
 import queryIpLink from '@/components/queryIpLink.vue'
-import {getBanlogs} from '@/service/banLogs'
-import {useFirstPageOnlyAutoUpdatePlugin} from '@/stores/autoUpdate'
-import {useEndpointStore} from '@/stores/endpoint'
-import {formatFileSize} from '@/utils/file'
-import {formatIPAddressPort} from '@/utils/string'
-import type {TableSortable} from '@arco-design/web-vue'
-import {computed, ref, watch} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {usePagination} from 'vue-request'
+import { getBanlogs } from '@/service/banLogs'
+import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useEndpointStore } from '@/stores/endpoint'
+import { formatFileSize } from '@/utils/file'
+import { formatIPAddressPort } from '@/utils/string'
+import type { TableSortable } from '@arco-design/web-vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePagination } from 'vue-request'
 
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()

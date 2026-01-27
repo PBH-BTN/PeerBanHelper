@@ -1,11 +1,18 @@
-import type {CommonResponse} from '@/api/model/common'
-import type {AnalysisField, BanTrends, GeoIP, SessionDayBucket, Traffic, Trends} from '@/api/model/statistic'
-import {useEndpointStore} from '@/stores/endpoint'
+import type { CommonResponse } from '@/api/model/common'
+import type {
+  AnalysisField,
+  BanTrends,
+  GeoIP,
+  SessionDayBucket,
+  Traffic,
+  Trends
+} from '@/api/model/statistic'
+import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import {getCommonHeader} from './utils'
+import { getCommonHeader } from './utils'
 
 export async function getAnalysisDataByField(
-    field: 'peer_id' | 'torrent_name' | 'module_name',
+  field: 'peer_id' | 'torrent_name' | 'module_name',
   filter = false,
   downloader?: string
 ): Promise<CommonResponse<AnalysisField[]>> {
