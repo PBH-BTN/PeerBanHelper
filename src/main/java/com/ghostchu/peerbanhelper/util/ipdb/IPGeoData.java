@@ -27,15 +27,19 @@ public final class IPGeoData {
         private String name;
 
         @Nullable
+        @JsonUtil.Hidden
         private Long iso;
 
         @Nullable
+        @JsonUtil.Hidden
         private String cnProvince;
 
         @Nullable
+        @JsonUtil.Hidden
         private String cnCity;
 
         @Nullable
+        @JsonUtil.Hidden
         private String cnDistricts;
 
 //        @AllArgsConstructor
@@ -58,6 +62,7 @@ public final class IPGeoData {
     @Data
     public static final class CountryData {
         @Nullable
+        @JsonUtil.Hidden
         private String name;
         @Nullable
         private String iso;
@@ -71,10 +76,13 @@ public final class IPGeoData {
         @Nullable
         private Long number;
         @Nullable
+        @JsonUtil.Hidden
         private String organization;
         @Nullable
+        @JsonUtil.Hidden
         private String ipAddress;
         @Nullable
+        @JsonUtil.Hidden
         private ASNetwork network;
 
         @AllArgsConstructor
