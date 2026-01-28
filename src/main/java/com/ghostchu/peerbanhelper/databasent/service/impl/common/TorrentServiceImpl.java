@@ -35,6 +35,8 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
                 torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(existing));
             }
             return existing;
+        } else {
+            torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(torrent));
         }
         return torrent;
     }
