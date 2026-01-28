@@ -12,16 +12,26 @@ import com.ghostchu.peerbanhelper.util.query.Orderable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity> implements TorrentService {
+    private final TransactionTemplate torrentCreateNoTransactionTemplate;
+
+    public TorrentServiceImpl(PlatformTransactionManager transactionManager) {
+        torrentCreateNoTransactionTemplate = new TransactionTemplate(transactionManager);
+        torrentCreateNoTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+    }
+
     @Override
     public synchronized @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
         TorrentEntity existing = queryByInfoHash(torrent.getInfoHash());
         if (existing != null) {
             return existing;
         }
-        baseMapper.insertOrUpdate(torrent);
+        torrentCreateNoTransactionTemplate.execute(_-> baseMapper.insertOrUpdate(torrent));
         return torrent;
     }
 
