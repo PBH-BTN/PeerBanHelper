@@ -133,56 +133,6 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
         baseMapper.resetTable();
     }
 
-    private boolean isUniqueConstraintViolation(@NotNull Exception e) {
-        Throwable cause = e;
-        while (cause != null) {
-            String exceptionClass = cause.getClass().getName();
-            String message = cause.getMessage() != null ? cause.getMessage().toLowerCase() : "";
-
-            // SQLite: SQLITE_CONSTRAINT_UNIQUE (error code 2067)
-            if (exceptionClass.contains("sqlite.SQLiteException")) {
-                try {
-                    int errorCode = ((org.sqlite.SQLiteException) cause).getErrorCode();
-                    if (errorCode == 2067) {
-                        return true;
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-
-            // MySQL: error code 1062 or "Duplicate entry"
-            if (exceptionClass.contains("mysql") || exceptionClass.contains("jdbc")) {
-                if (message.contains("duplicate entry") || message.contains("unique constraint")) {
-                    return true;
-                }
-                if (cause instanceof SQLException sqlEx && sqlEx.getErrorCode() == 1062) {
-                    return true;
-                }
-            }
-
-            // PostgreSQL: error code 23505 or "unique constraint"
-            if (exceptionClass.contains("postgresql")) {
-                if (message.contains("unique constraint") || message.contains("duplicate key")) {
-                    return true;
-                }
-                if (cause instanceof SQLException sqlEx && sqlEx.getErrorCode() == 23505) {
-                    return true;
-                }
-            }
-
-            // Generic SQL exception check
-            if (cause instanceof SQLException sqlEx) {
-                String sqlState = sqlEx.getSQLState();
-                if (sqlState != null && (sqlState.equals("23000") || sqlState.equals("23505"))) {
-                    return true;
-                }
-            }
-
-            cause = cause.getCause();
-        }
-        return false;
-    }
-
     record CacheKey(String ip, int port, String infoHash, String downloader) {
     }
 }
