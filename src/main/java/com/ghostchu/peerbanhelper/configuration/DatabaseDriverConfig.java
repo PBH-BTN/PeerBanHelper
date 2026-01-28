@@ -45,11 +45,11 @@ public class DatabaseDriverConfig {
         log.info(tlUI(Lang.DBNT_LOADING_DRIVER));
         var section = Main.getMainConfig().getConfigurationSection("database");
         if (section == null) throw new IllegalStateException("Database configuration section is missing!");
-        int databaseTypeId = section.getInt("type");
+        String databaseTypeId = section.getString("type", "sqlite").toLowerCase();
         var driver = switch (databaseTypeId) {
-            case 1 -> new H2DatabaseDriver(section);
-            case 10 -> new MySQLDatabaseDriver(section);
-            case 11 -> new PostgresDatabaseDriver(section);
+            case "h2" -> new H2DatabaseDriver(section);
+            case "mysql" -> new MySQLDatabaseDriver(section);
+            case "postgresql" -> new PostgresDatabaseDriver(section);
             default -> new SQLiteDatabaseDriver(section);
         };
         log.info(tlUI(Lang.DBNT_LOADING_DRIVER_LOADED, driver.getType().name()));
