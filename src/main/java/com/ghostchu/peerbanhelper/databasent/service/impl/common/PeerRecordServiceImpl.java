@@ -53,17 +53,11 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    public void syncPendingTasks(BatchHandleTasks t) {
-        writeToDatabase(t.timestamp, t.downloader, t.torrent, t.peer);
-    }
-
-    @Override
-    public long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt) {
-        // 从 startAt 到 endAt，每天的开始时间戳
-        return baseMapper.sessionBetween(downloader, startAt, endAt);
-    }
-
-    private boolean writeToDatabase(OffsetDateTime timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer)  {
+    public void flushToDatabase(BatchHandleTasks t) {
+        var torrent = t.torrent;
+        var peer = t.peer;
+        var downloader = t.downloader;
+        var timestamp = t.timestamp;
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),
@@ -95,7 +89,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         );
         PeerRecordEntity databaseSnapshot = createIfNotExists(currentSnapshot);
         if (databaseSnapshot.getLastTimeSeen().isAfter(timestamp)) {
-            return false;
+            return;
         }
         long downloadedIncremental = peer.getDownloaded() - databaseSnapshot.getDownloadedOffset();
         long uploadedIncremental = peer.getUploaded() - databaseSnapshot.getUploadedOffset();
@@ -115,8 +109,15 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         databaseSnapshot.setClientName(currentSnapshot.getClientName());
         databaseSnapshot.setLastFlags(currentSnapshot.getLastFlags());
         databaseSnapshot.setLastTimeSeen(currentSnapshot.getLastTimeSeen());
-        return saveOrUpdate(databaseSnapshot);
+        baseMapper.insertOrUpdate(databaseSnapshot);
     }
+
+    @Override
+    public long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt) {
+        // 从 startAt 到 endAt，每天的开始时间戳
+        return baseMapper.sessionBetween(downloader, startAt, endAt);
+    }
+
 
     @Override
     public Page<PeerRecordEntity> getPendingSubmitPeerRecords(@NotNull Pageable pageable, @NotNull OffsetDateTime afterThan) {

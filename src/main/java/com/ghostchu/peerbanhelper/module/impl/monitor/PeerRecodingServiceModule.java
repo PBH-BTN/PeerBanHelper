@@ -69,7 +69,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
     }
 
     private void backFlushDatabase(PeerRecordServiceImpl.BatchHandleTasks key) {
-        peerRecordDao.syncPendingTasks(key);
+        peerRecordDao.flushToDatabase(key);
     }
 
 
