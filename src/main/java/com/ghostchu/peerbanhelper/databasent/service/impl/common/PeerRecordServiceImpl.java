@@ -138,7 +138,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
                 .last("limit 1")
         );
         if (existing == null) {
-            baseMapper.insert(data); // 此处不 update
+            baseMapper.insertOrUpdate(data);
             return data;
         } else {
             return existing;
