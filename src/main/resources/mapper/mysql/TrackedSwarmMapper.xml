@@ -4,5 +4,35 @@
     <select id="resetTable">
         TRUNCATE TABLE tracked_swarm
     </select>
+    <insert id="upsert" parameterType="com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity">
+        INSERT INTO tracked_swarm (ip, port, info_hash, torrent_is_private, torrent_size,
+                                   downloader, downloader_progress, peer_id, client_name,
+                                   peer_progress, uploaded, uploaded_offset, upload_speed,
+                                   downloaded, downloaded_offset, download_speed, last_flags,
+                                   first_time_seen, last_time_seen, download_speed_max, upload_speed_max)
+        VALUES (#{ip}, #{port}, #{infoHash}, #{torrentIsPrivate}, #{torrentSize}, #{downloader},
+                #{downloaderProgress}, #{peerId}, #{clientName}, #{peerProgress},
+                #{uploaded}, #{uploadedOffset}, #{uploadSpeed}, #{downloaded}, #{downloadedOffset},
+                #{downloadSpeed}, #{lastFlags}, #{firstTimeSeen}, #{lastTimeSeen}, #{downloadSpeedMax},
+                #{uploadSpeedMax})
+        ON DUPLICATE KEY UPDATE
+            torrent_is_private = #{torrentIsPrivate},
+            torrent_size = #{torrentSize},
+            downloader_progress = #{downloaderProgress},
+            peer_id = #{peerId},
+            client_name = #{clientName},
+            peer_progress = #{peerProgress},
+            uploaded = #{uploaded},
+            uploaded_offset = #{uploadedOffset},
+            upload_speed = #{uploadSpeed},
+            downloaded = #{downloaded},
+            downloaded_offset = #{downloadedOffset},
+            download_speed = #{downloadSpeed},
+            last_flags = #{lastFlags},
+            first_time_seen = #{firstTimeSeen},
+            last_time_seen = #{lastTimeSeen},
+            download_speed_max = #{downloadSpeedMax},
+            upload_speed_max = #{uploadSpeedMax}
+    </insert>
 
 </mapper>

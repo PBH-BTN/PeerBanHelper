@@ -6,4 +6,5 @@ import org.apache.ibatis.annotations.Select;
 
 public interface TrackedSwarmMapper extends BaseMapper<TrackedSwarmEntity> {
     void resetTable();
+    void upsert(TrackedSwarmEntity entity);
 }

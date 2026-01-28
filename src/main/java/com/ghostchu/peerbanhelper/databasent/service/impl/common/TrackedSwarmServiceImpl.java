@@ -39,17 +39,7 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
                 var v = notification.getValue();
                 //noinspection ConstantValue
                 if (v != null) {
-                    try {
-                        baseMapper.insertOrUpdate(v);
-                    } catch (Exception e) {
-                        if (isUniqueConstraintViolation(e)) {
-                            log.debug("Duplicate tracked swarm entry on cache eviction, ignoring: ip={}, port={}, hash={}, downloader={}",
-                                    v.getIp(), v.getPort(), v.getInfoHash(), v.getDownloader());
-                        } else {
-                            log.error("Failed to save tracked swarm on cache eviction", e);
-                            Sentry.captureException(e);
-                        }
-                    }
+                    baseMapper.upsert(v);
                 }
             })
             .softValues()
@@ -132,17 +122,7 @@ public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, Tra
     public void flushAll() {
         transactionTemplate.execute(_ -> {
             for (TrackedSwarmEntity entity : cache.asMap().values()) {
-                try {
-                    baseMapper.insertOrUpdate(entity);
-                } catch (Exception e) {
-                    if (isUniqueConstraintViolation(e)) {
-                        log.debug("Duplicate tracked swarm entry on flush, ignoring: ip={}, port={}, hash={}, downloader={}",
-                                entity.getIp(), entity.getPort(), entity.getInfoHash(), entity.getDownloader());
-                    } else {
-                        log.error("Failed to flush tracked swarm entity", e);
-                        Sentry.captureException(e);
-                    }
-                }
+                baseMapper.upsert(entity);
             }
             return null;
         });
