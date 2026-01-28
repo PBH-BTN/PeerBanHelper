@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.google.common.cache.Cache;
@@ -32,12 +33,14 @@ public class IPDBManager {
             .softValues()
             .build();
     private final HTTPUtil hTTPUtil;
+    private final BackgroundTaskManager backgroundTaskManager;
     @Getter
     @Nullable
     private IPDB ipdb = null;
 
-    public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory) {
+    public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory, BackgroundTaskManager backgroundTaskManager) {
         this.hTTPUtil = hTTPUtil;
+        this.backgroundTaskManager = backgroundTaskManager;
         if (laboratory.isExperimentActivated(Experiments.ASYNC_IPDB_SETUP.getExperiment())) {
             CompletableFuture.runAsync(this::setupIPDB);
         } else {
@@ -53,7 +56,7 @@ public class IPDBManager {
             String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "GeoLite2-ASN");
             boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
-                    databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), hTTPUtil);
+                    databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), hTTPUtil, backgroundTaskManager);
             Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().name("IPDB Shutdown Worker").unstarted(() -> {
                 try {
                     if (ipdb != null) {

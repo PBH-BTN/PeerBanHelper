@@ -91,7 +91,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     }
 
     private void submit() {
-        try {
+        try(var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_SWARM_SYNC_SERVER))) {
             log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
             swarmDao.flushAll();
 
