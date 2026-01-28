@@ -37,8 +37,8 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
             return existing;
         } else {
             torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(torrent));
+            return torrent;
         }
-        return torrent;
     }
 
     @Override
