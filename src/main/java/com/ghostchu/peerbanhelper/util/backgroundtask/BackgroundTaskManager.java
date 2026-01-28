@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.backgroundtask;
 
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class BackgroundTaskManager {
-    @Getter
     private final List<BackgroundTask> taskList = Collections.synchronizedList(new ArrayList<>());
 
     public BackgroundTaskManager() {
@@ -36,9 +35,33 @@ public class BackgroundTaskManager {
     }
 
     @NotNull
-    public BackgroundTask create() {
-        BackgroundTask task = new BackgroundTask(this);
+    public BackgroundTask create(@NotNull TranslationComponent title) {
+        BackgroundTask task = new BackgroundTask(this, title);
         taskList.add(task);
         return task;
+    }
+
+    @NotNull
+    public List<BackgroundTask> getTaskList() {
+        var orderableList = new ArrayList<>(taskList);
+        // 优先运行中和暂停中、然后是失败和完成的、最后是排队中的，时间倒序
+        orderableList.sort((a, b) -> {
+            if (a.getStatus().isActive() && !b.getStatus().isActive()) {
+                return -1;
+            } else if (!a.getStatus().isActive() && b.getStatus().isActive()) {
+                return 1;
+            } else {
+                if ((a.getStatus() == BackgroundTaskStatus.COMPLETED || a.getStatus() == BackgroundTaskStatus.FAILED)
+                        && !(b.getStatus() == BackgroundTaskStatus.COMPLETED || b.getStatus() == BackgroundTaskStatus.FAILED)) {
+                    return -1;
+                } else if (!(a.getStatus() == BackgroundTaskStatus.COMPLETED || a.getStatus() == BackgroundTaskStatus.FAILED)
+                        && (b.getStatus() == BackgroundTaskStatus.COMPLETED || b.getStatus() == BackgroundTaskStatus.FAILED)) {
+                    return 1;
+                } else {
+                    return b.getStartAt().compareTo(a.getStartAt());
+                }
+            }
+        });
+        return orderableList;
     }
 }
