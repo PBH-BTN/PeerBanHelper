@@ -29,15 +29,20 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
     public synchronized @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
         TorrentEntity existing = queryByInfoHash(torrent.getInfoHash());
         if (existing != null) {
+            if (existing.getSize() <= 0 || existing.getPrivateTorrent() == null) { // 旧数据可能没有 privateTorrent 数据；获取元数据时，size 可能为 0
+                existing.setSize(torrent.getSize());
+                existing.setPrivateTorrent(torrent.getPrivateTorrent());
+                torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(existing));
+            }
             return existing;
         }
-        torrentCreateNoTransactionTemplate.execute(_-> baseMapper.insertOrUpdate(torrent));
         return torrent;
     }
 
     @Override
     public @Nullable TorrentEntity queryByInfoHash(@NotNull String infoHash) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash));
+        return baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash)
+                .last("limit 1"));
     }
 
     @Override

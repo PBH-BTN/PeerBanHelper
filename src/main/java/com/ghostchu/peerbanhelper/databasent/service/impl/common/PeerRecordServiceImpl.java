@@ -135,9 +135,10 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
                 .eq(PeerRecordEntity::getAddress, data.getAddress())
                 .eq(PeerRecordEntity::getTorrentId, data.getTorrentId())
                 .eq(PeerRecordEntity::getDownloader, data.getDownloader())
+                .last("limit 1")
         );
         if (existing == null) {
-            save(data);
+            baseMapper.insert(data); // 此处不 update
             return data;
         } else {
             return existing;
