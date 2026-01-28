@@ -6,10 +6,8 @@ import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.*;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
+import com.ghostchu.peerbanhelper.databasent.service.*;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -19,6 +17,7 @@ import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -59,6 +58,8 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     private final SystemInfo systemInfo;
+    private final TorrentService torrentDao;
+    private final PeerRecordService peerRecordService;
     @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
@@ -77,13 +78,11 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final DownloaderServer server;
     @Getter
-    private final PeerRecordDao peerRecordDao;
+    private final TrackedSwarmService trackedSwarmDao;
     @Getter
-    private final TrackedSwarmDao trackedSwarmDao;
+    private final MetadataService metadataDao;
     @Getter
-    private final MetadataDao metadataDao;
-    @Getter
-    private final HistoryDao historyDao;
+    private final HistoryService historyDao;
     @Getter
     private final HTTPUtil httpUtil;
     @Getter
@@ -93,27 +92,30 @@ public final class BtnNetwork implements Reloadable {
     private long nextConfigAttemptTime = 0;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
+                      PeerRecordService peerRecordService) {
+        this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
         this.scriptEngineManager = scriptEngineManager;
         this.moduleMatchCache = moduleMatchCache;
         this.httpUtil = httpUtil;
         this.metadataDao = metadataDao;
         this.historyDao = historyDao;
-        this.peerRecordDao = peerRecordDao;
         this.trackedSwarmDao = trackedSwarmDao;
-        var thr = new Thread(() -> {
-            Main.getReloadManager().register(this);
-            reloadConfig();
-        });
-        thr.start();
+        this.torrentDao = torrentService;
         this.systemInfo = systemInfo;
+        Main.getReloadManager().register(this);
+        Main.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void onServerStarted(PBHServerStartedEvent event) {
+        reloadConfig();
     }
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        var thr = new Thread(this::reloadConfig);
-        thr.start();
+        reloadConfig();
         return Reloadable.super.reloadModule();
     }
 
@@ -202,7 +204,7 @@ public final class BtnNetwork implements Reloadable {
                 }
             } else {
                 if (ability.has("submit_bans") && submit) {
-                    abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
+                    abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao, torrentDao));
                 }
                 if (ability.has("submit_swarm") && submit) {
                     abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
@@ -218,7 +220,7 @@ public final class BtnNetwork implements Reloadable {
                 }
             }
             if (ability.has("submit_histories") && submit) {
-                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, metadataDao, ability.get("submit_histories").getAsJsonObject()));
+                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, metadataDao, ability.get("submit_histories").getAsJsonObject(), torrentDao, peerRecordService));
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));

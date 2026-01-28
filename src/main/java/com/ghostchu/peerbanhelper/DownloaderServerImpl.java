@@ -6,8 +6,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
-import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
+import com.ghostchu.peerbanhelper.databasent.service.BanListService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -49,6 +48,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -79,21 +80,20 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private ScheduledExecutorService BAN_WAVE_SERVICE;
     private WatchDog banWaveWatchDog;
-    private final BanListDao banListDao;
+    private final BanListService banListDao;
     private final DNSLookup dnsLookup;
     private final Laboratory laboratory;
     @Getter
     private boolean globalPaused = false;
     private final AlertManager alertManager;
-    private final Database databaseManager;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
 
     public DownloaderServerImpl(BanList banList, DownloaderManagerImpl downloaderManager,
                                 @Qualifier("persistMetrics") BasicMetrics metrics,
-                                ModuleManagerImpl moduleManager, BanListDao banListDao,
+                                ModuleManagerImpl moduleManager, BanListService banListDao,
                                 DNSLookup dnsLookup, Laboratory laboratory,
-                                AlertManager alertManager, Database databaseManager) {
+                                AlertManager alertManager) {
         this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.metrics = metrics;
@@ -102,7 +102,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.moduleManager = moduleManager;
         this.laboratory = laboratory;
         this.alertManager = alertManager;
-        this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
     }
 
@@ -294,7 +293,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                     BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
                                             UUID.randomUUID().toString().replace("-", "")
                                             , downloaderManager.getDownloadInfo(downloader.getId()),
-                                            System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
+                                            OffsetDateTime.now(), OffsetDateTime.now().plus(actualBanDuration, ChronoUnit.MILLIS),
                                             detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                             detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                             detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
@@ -448,7 +447,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         List<IPAddress> removeBan = new ArrayList<>();
         List<BanMetadata> metadata = new ArrayList<>();
         banList.forEach((key, v) -> {
-            if (System.currentTimeMillis() >= v.getUnbanAt()) {
+            if (OffsetDateTime.now().isAfter(v.getUnbanAt())) {
                 removeBan.add(key);
                 metadata.add(v);
             }

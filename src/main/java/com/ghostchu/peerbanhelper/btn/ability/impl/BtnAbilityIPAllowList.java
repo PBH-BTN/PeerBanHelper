@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.btn.ability.impl;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -34,11 +34,11 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
     private final long randomInitialDelay;
     @Getter
     private final IPMatcher ipMatcher = new IPMatcher("btn-ip-allowlist", "Empty IP Allowlist", List.of(new DualIPv4v6AssociativeTries<>()));
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
     private final boolean powCaptcha;
     private String ruleVersion = "initial";
 
-    public BtnAbilityIPAllowList(BtnNetwork btnNetwork, MetadataDao metadataDao, JsonObject ability) {
+    public BtnAbilityIPAllowList(BtnNetwork btnNetwork, MetadataService metadataDao, JsonObject ability) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.interval = ability.get("interval").getAsLong();

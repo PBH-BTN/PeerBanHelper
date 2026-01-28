@@ -1,18 +1,21 @@
 package com.ghostchu.peerbanhelper.btn.ability.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
-import com.j256.ormlite.dao.CloseableWrappedIterable;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -24,8 +27,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -39,14 +40,16 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final MetadataDao metadataDao;
-    private final HistoryDao historyDao;
+    private final MetadataService metadataDao;
+    private final HistoryService historyDao;
+    private final TorrentService torrentDao;
     private final boolean powCaptcha;
 
-    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataDao metadataDao, HistoryDao historyDao) {
+    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataService metadataDao, HistoryService historyDao, TorrentService torrentDao) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.historyDao = historyDao;
+        this.torrentDao = torrentDao;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
@@ -80,12 +83,12 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
         Main.getEventBus().unregister(this);
     }
 
-    private int setMemCursor(long position) {
-        return metadataDao.set("BtnAbilitySubmitBans.memCursor", String.valueOf(position));
+    private boolean setMemCursor(long position) {
+        return metadataDao.set("BtnAbilitySubmitBans.cursor", String.valueOf(position));
     }
 
     private long getMemCursor() {
-        return Long.parseLong(metadataDao.getOrDefault("BtnAbilitySubmitBans.memCursor", "0"));
+        return Long.parseLong(metadataDao.getOrDefault("BtnAbilitySubmitBans.cursor", "0"));
     }
 
     private void submit() {
@@ -93,23 +96,14 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             int size = 0;
             int requests = 0;
-            List<HistoryEntity> historyEntities = new ArrayList<>(500);
-            try (var it = createSubmitIterator(getMemCursor())) {
-                for (HistoryEntity entity : it) {
-                    historyEntities.add(entity);
-                    if (historyEntities.size() >= 500) {
-                        setMemCursor(createSubmitRequest(historyEntities));
-                        size += historyEntities.size();
-                        requests++;
-                        historyEntities.clear();
-                    }
-                }
-            }
-            if (!historyEntities.isEmpty()) {
-                setMemCursor(createSubmitRequest(historyEntities));
+            Page<HistoryEntity> page = new Page<>(1, 100); // 每页处理 100 条
+            do {
+                var result = historyDao.page(page, new LambdaQueryWrapper<HistoryEntity>().gt(HistoryEntity::getId, getMemCursor()));
+                if (result.getRecords().isEmpty()) break;
+                setMemCursor(createSubmitRequest(result.getRecords()));
                 requests++;
-                size += historyEntities.size();
-            }
+                size += result.getRecords().size();
+            } while (page.hasNext());
             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, size, requests));
             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
         } catch (IllegalStateException ignored) {
@@ -120,19 +114,11 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
         }
     }
 
-    private CloseableWrappedIterable<HistoryEntity> createSubmitIterator(long memCursor) throws SQLException {
-        return historyDao.getWrappedIterable(historyDao
-                .queryBuilder()
-                .where().gt("id", memCursor)
-                .queryBuilder()
-                .orderBy("id", true)
-                .prepare());
-    }
-
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {
         BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(historyEntity -> {
             try {
-                return BtnBan.from(historyEntity); // 旧版本数据可能存在空值引发空指针错误，这里处理一下，这种数据就不提交了
+
+                return BtnBan.from(historyEntity, TorrentEntityDTO.from(torrentDao.getById(historyEntity.getTorrentId()))); // 旧版本数据可能存在空值引发空指针错误，这里处理一下，这种数据就不提交了
             } catch (Exception e) {
                 return null;
             }

@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
+import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
@@ -14,8 +14,8 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.sentry.Sentry;
@@ -34,7 +34,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
-    private TrafficJournalDao trafficJournalDao;
+    private TrafficJournalServiceImpl trafficJournalDao;
     @Autowired
     private AlertManager alertManager;
     @Autowired
@@ -108,7 +108,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     if(speedLimiter == null) continue;
                     if(!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
-                    DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
+                    DownloaderSpeedLimiter newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
                     if(Main.getMeta().isSnapshotOrBeta()) {
                         log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload()) + "/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload()) + "/s", calculatedData));
@@ -128,11 +128,11 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         }
         long now = System.currentTimeMillis();
         // Calculating the today traffic
-        long startOfToday = MiscUtil.getStartOfToday(now);
+        long startOfToday = TimeUtil.getStartOfToday(now).toEpochSecond();
         var data = trafficJournalDao.getTodayData(null);
         long totalBytes = data.getDataOverallUploaded();
-        var dateTimeString = MiscUtil.formatDateTime(now);
-        var dateString = MiscUtil.formatDateOnly(now);
+        var dateTimeString = TimeUtil.formatDateTime(now);
+        var dateString = TimeUtil.formatDateOnly(now);
         var identifier = "dataTrafficCapping-" + startOfToday;
         // 一天只发一次
         if (totalBytes < dailyTrafficCapping) {

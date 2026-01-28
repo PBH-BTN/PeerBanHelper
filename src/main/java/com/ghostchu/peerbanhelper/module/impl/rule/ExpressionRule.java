@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
@@ -13,7 +12,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.WebUtil;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
@@ -59,15 +58,13 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private final JavalinWebContainer javalinWebContainer;
     private final ScriptEngineManager scriptEngineManager;
     private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
-    private final ScriptStorageDao scriptStorageDao;
     private long banDuration;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
-    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngineManager scriptEngineManager, ScriptStorageDao scriptStorageDao) {
+    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngineManager scriptEngineManager) {
         super();
         this.scriptEngineManager = scriptEngineManager;
         this.javalinWebContainer = javalinWebContainer;
-        this.scriptStorageDao = scriptStorageDao;
     }
 
 
@@ -220,7 +217,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             ));
         }
         var r = list.stream().skip(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).toList();
-        context.json(new StdResp(true, null, new Page<>(pageable, list.size(), r)));
+        context.json(new StdResp(true, null, new PBHPage<>(pageable.getPage(), pageable.getSize(), list.size(), r)));
     }
 
 
@@ -278,7 +275,6 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 env.put("server", getServer());
                 env.put("moduleInstance", this);
                 env.put("banDuration", banDuration);
-                env.put("persistStorage", scriptStorageDao);
                 env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
                 Object returns = script.execute(env);
                 result = scriptEngineManager.handleResult(script, banDuration, returns);

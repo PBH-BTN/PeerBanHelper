@@ -1,12 +1,15 @@
 package com.ghostchu.peerbanhelper.alert;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
-import com.ghostchu.peerbanhelper.database.table.AlertEntity;
+import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.service.AlertService;
+import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.push.PushManagerImpl;
+import com.google.common.eventbus.Subscribe;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,27 +28,30 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public final class AlertManagerImpl implements AlertManager {
-    private final AlertDao alertDao;
+    private final AlertService alertDao;
     private final PushManagerImpl pushManager;
+    private final DatabaseDriver databaseDriver;
 
-    public AlertManagerImpl(AlertDao alertDao, PushManagerImpl pushManager) {
+    public AlertManagerImpl(AlertService alertDao, PushManagerImpl pushManager, DatabaseDriver databaseDriver) {
         this.alertDao = alertDao;
         this.pushManager = pushManager;
+        this.databaseDriver = databaseDriver;
+        Main.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void init(PBHServerStartedEvent event) {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
     }
 
     private void cleanup() {
-        try {
-            int removed = this.alertDao.deleteOldAlerts(new Timestamp(System.currentTimeMillis() - 31536000000L));
-            log.info(tlUI(Lang.ALERT_MANAGER_CLEAN_UP, removed));
-        } catch (SQLException e) {
-            log.warn("Unable to cleanup expired history alerts", e);
-            Sentry.captureException(e);
-        }
+        int removed = this.alertDao.deleteOldAlerts(OffsetDateTime.now().minusDays(30));
+        log.info(tlUI(Lang.ALERT_MANAGER_CLEAN_UP, removed));
     }
 
     /**
      * 移除已发布的警报
+     *
      * @param identifier 标识符
      */
     @Override
@@ -64,32 +69,22 @@ public final class AlertManagerImpl implements AlertManager {
 
     /**
      * 检查指定标识符的警报是否存在且处于未读状态
+     *
      * @param identifier 标识符
      */
     @Override
     public boolean identifierAlertExists(@NotNull String identifier) {
-        try {
-            return alertDao.identifierAlertExists(identifier);
-        } catch (SQLException e) {
-            log.warn("Unable query alert for identifier {}", identifier, e);
-            Sentry.captureException(e);
-            return false;
-        }
+        return alertDao.identifierAlertExists(identifier);
     }
 
     /**
      * 检查指定标识符的警报是否存在，无论是否已读
+     *
      * @param identifier 标识符
      */
     @Override
     public boolean identifierAlertExistsIncludeRead(@NotNull String identifier) {
-        try {
-            return alertDao.identifierAlertExistsIncludeRead(identifier);
-        } catch (SQLException e) {
-            log.warn("Unable query alert for identifier {}", identifier, e);
-            Sentry.captureException(e);
-            return false;
-        }
+        return alertDao.identifierAlertExistsIncludeRead(identifier);
     }
 
     /**
@@ -113,17 +108,17 @@ public final class AlertManagerImpl implements AlertManager {
             alertEntity.setIdentifier(Objects.requireNonNullElseGet(identifier, () -> UUID.randomUUID().toString() + System.currentTimeMillis()));
             alertEntity.setTitle(title);
             alertEntity.setContent(content);
-            alertEntity.setCreateAt(new Timestamp(System.currentTimeMillis()));
-            alertDao.create(alertEntity);
+            alertEntity.setCreateAt(OffsetDateTime.now());
+            alertDao.saveOrUpdate(alertEntity);
             if (push) {
                 if (!pushManager.pushMessage("[PeerBanHelper/" + level.name() + "] " + tlUI(title), tlUI(content))) {
                     log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT_VIA_PROVIDERS));
                 }
             }
-            Level slf4jLevel = switch (level){
-                case ERROR, FATAL ->  Level.ERROR;
+            Level slf4jLevel = switch (level) {
+                case ERROR, FATAL -> Level.ERROR;
                 case WARN -> Level.WARN;
-                default ->  Level.INFO;
+                default -> Level.INFO;
             };
             Main.getGuiManager().createNotification(slf4jLevel, tlUI(title), tlUI(content));
         } catch (Exception e) {
@@ -136,31 +131,22 @@ public final class AlertManagerImpl implements AlertManager {
     @Override
     public @Nullable AlertLevel getHighestUnreadAlertLevel() {
         AlertLevel alertLevel = null;
-        try {
-            var unreadAlerts = alertDao.getUnreadAlertsUnPaged();
-            for (AlertEntity unreadAlert : unreadAlerts) {
-              if(alertLevel == null) {
-                  alertLevel = unreadAlert.getLevel();
-                  continue;
-              }
-              if(unreadAlert.getLevel().ordinal() > alertLevel.ordinal()) {
-                  alertLevel = unreadAlert.getLevel();
-              }
+        var unreadAlerts = alertDao.getUnreadAlerts();
+        for (AlertEntity unreadAlert : unreadAlerts) {
+            if (alertLevel == null) {
+                alertLevel = unreadAlert.getLevel();
+                continue;
             }
-        } catch (SQLException ignored) {
-
+            if (unreadAlert.getLevel().ordinal() > alertLevel.ordinal()) {
+                alertLevel = unreadAlert.getLevel();
+            }
         }
         return alertLevel;
     }
 
     @Override
     public @NotNull List<AlertEntity> getUnreadAlerts() {
-        try {
-            return  alertDao.getUnreadAlertsUnPaged();
-        } catch (SQLException e) {
-            Sentry.captureException(e);
-            return List.of();
-        }
+        return alertDao.getUnreadAlerts();
     }
 
 }

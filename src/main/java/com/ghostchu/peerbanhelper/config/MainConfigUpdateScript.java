@@ -37,6 +37,24 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 43)
+    public void databaseTypeChange(YamlConfiguration bundle) {
+        var id = conf.getInt("database.type", -1);
+        if (id == -1) return;
+        switch (id) {
+            case 1 -> conf.set("database.type", "h2");
+            case 2, 10 -> conf.set("database.type", "mysql");
+            case 3, 11 -> conf.set("database.type", "postgresql");
+            default -> conf.set("database.type", "sqlite"); // 0 and other use sqlite
+        }
+    }
+
+
+    @UpdateScript(version = 42)
+    public void databaseSection(YamlConfiguration bundle) {
+        conf.set("database", bundle.get("database"));
+    }
+
     @UpdateScript(version = 41)
     public void privacyAnalytics(YamlConfiguration bundle) {
         conf.set("privacy.analytics", bundle.get("privacy.analytics"));

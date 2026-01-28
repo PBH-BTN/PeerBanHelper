@@ -48,7 +48,7 @@ public final class TranslationComponent implements Serializable {
     public String toString() {
         return "TranslationComponent{" +
                "key='" + key + '\'' +
-               ", params=" + Arrays.toString(params) +
+                ", params=" + (params == null ? "null" : Arrays.toString(params)) +
                '}';
     }
 }

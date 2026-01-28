@@ -185,17 +185,17 @@ public final class IPDB implements AutoCloseable {
     private IPGeoData.CityData queryCity(InetAddress address) {
         try {
             IPGeoData.CityData cityData = new IPGeoData.CityData();
-            IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
+            //IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
             CityResponse cityResponse = mmdbCity.city(address);
             City city = cityResponse.city();
-            Location location = cityResponse.location();
+//            Location location = cityResponse.location();
             cityData.setName(city.name());
             cityData.setIso(city.geonameId());
-            locationData.setTimeZone(location.timeZone());
-            locationData.setLongitude(location.longitude());
-            locationData.setLatitude(location.latitude());
-            locationData.setAccuracyRadius(location.accuracyRadius());
-            cityData.setLocation(locationData);
+//            locationData.setTimeZone(location.timeZone());
+//            locationData.setLongitude(location.longitude());
+//            locationData.setLatitude(location.latitude());
+//            locationData.setAccuracyRadius(location.accuracyRadius());
+//            cityData.setLocation(locationData);
             return cityData;
         } catch (Exception e) {
             Sentry.captureException(e);

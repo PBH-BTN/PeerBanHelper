@@ -1,4 +1,4 @@
-config-version: 41
+config-version: 43
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -191,3 +191,21 @@ privacy:
   # 允许向 PBH-BTN 发送匿名统计信息，以便改进 PeerBanHelper 质量，此数据不包含任何个人信息
   # Allow to send anonymous statistics to PBH-BTN to improve PeerBanHelper quality, this data do not contain any personal information
   analytics: true
+
+# 数据库设置
+database:
+  # 支持：
+  # sqlite - 嵌入式 SQLite 数据库，适用于大多数用户（默认）
+  # h2 - 嵌入式 H2 数据库
+  # mysql - 远程 MySQL/MariaDB 数据库
+  # postgresql - 远程 PostgreSQL 数据库
+  type: "sqlite"
+  host: "localhost"
+  port: 5432
+  username: "peerbanhelper"
+  password: "peerbanhelper"
+  database: "peerbanhelper"
+  pool:
+    max-size: 10
+    min-idle: 5
+    idle-timeout-millis: 600000

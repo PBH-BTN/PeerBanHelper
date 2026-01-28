@@ -29,6 +29,8 @@ import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
+import io.javalin.util.JavalinBindException;
 import io.sentry.SendCachedEnvelopeFireAndForgetIntegration;
 import io.sentry.SendFireAndForgetEnvelopeSender;
 import io.sentry.Sentry;
@@ -193,6 +195,9 @@ public class Main {
                             new SendFireAndForgetEnvelopeSender(sentryOptions::getCacheDirPath)
                     )
             );
+            sentryOptions.addIgnoredExceptionForType(AddressNotFoundException.class);
+            sentryOptions.addIgnoredExceptionForType(JavalinBindException.class);
+
         });
     }
 
