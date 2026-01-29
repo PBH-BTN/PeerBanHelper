@@ -20,6 +20,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -39,7 +40,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
@@ -143,17 +143,23 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private void cleanDatabase() {
-        try(var _ = backgroundTaskManager.create(new TranslationComponent(Lang.MODULE_PCB_BGTASK_DELETING_EXPIRED_DATA))) {
-            log.info(tlUI(Lang.MODULE_PCB_DELETING_EXPIRED_DATA));
-            var ofd = OffsetDateTime.now().minus(persistDuration, ChronoUnit.MILLIS);
-            long deleted = 0;
-            deleted += pcbRangeDao.cleanupDatabase(ofd);
-            deleted += pcbAddressDao.cleanupDatabase(ofd);
-            log.info(tlUI(Lang.MODULE_PCB_DELETED_EXPIRED_DATA, deleted));
-        } catch (Throwable e) {
-            log.error("Unable to remove expired data from database", e);
-            Sentry.captureException(e);
-        }
+        backgroundTaskManager.addTask(new FunctionalBackgroundTask(
+                new TranslationComponent(Lang.MODULE_PCB_BGTASK_DELETING_EXPIRED_DATA),
+                (task, callback) -> {
+                    try {
+                        log.info(tlUI(Lang.MODULE_PCB_DELETING_EXPIRED_DATA));
+                        var ofd = OffsetDateTime.now().minus(persistDuration, ChronoUnit.MILLIS);
+                        long deleted = 0;
+                        deleted += pcbRangeDao.cleanupDatabase(ofd);
+                        deleted += pcbAddressDao.cleanupDatabase(ofd);
+                        log.info(tlUI(Lang.MODULE_PCB_DELETED_EXPIRED_DATA, deleted));
+                    } catch (Throwable e) {
+                        log.error("Unable to remove expired data from database", e);
+                        Sentry.captureException(e);
+                        throw e;
+                    }
+                }
+        ));
     }
 
     public void handleConfig(Context ctx) {

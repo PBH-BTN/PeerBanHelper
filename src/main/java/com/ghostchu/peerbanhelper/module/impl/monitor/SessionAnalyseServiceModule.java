@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.sentry.Sentry;
@@ -29,8 +30,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
@@ -100,9 +99,10 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     }
 
     private void cleanup() {
-        try(var _ = backgroundTaskManager.create(new TranslationComponent(Lang.MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA))) {
-            connectionMetricDao.removeOutdatedData(OffsetDateTime.now().minus(this.dataRetentionTime, ChronoUnit.MILLIS));
-        }
+        backgroundTaskManager.addTask(new FunctionalBackgroundTask(
+                new TranslationComponent(Lang.MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA),
+                (task, callback) -> connectionMetricDao.removeOutdatedData(OffsetDateTime.now().minus(this.dataRetentionTime, ChronoUnit.MILLIS))
+        ));
     }
 
     @Override
