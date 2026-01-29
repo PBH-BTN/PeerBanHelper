@@ -100,7 +100,7 @@ dependencies {
         exclude(group = "net.java.dev.jna", module = "jna")
     }
     // Email
-    implementation("org.apache.commons:commons-email:1.6.0")
+    implementation("org.eclipse.angus:angus-mail:2.0.5")
     implementation("org.apache.james:apache-mime4j-dom:0.8.13") {
         exclude(group = "commons-io", module = "commons-io")
     }
