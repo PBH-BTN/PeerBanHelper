@@ -9,13 +9,9 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.WebUtil;
-import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
-import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskProgressBarType;
-import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
@@ -61,16 +57,14 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private final long maxScriptExecuteTime = 1500;
     private final JavalinWebContainer javalinWebContainer;
     private final ScriptEngineManager scriptEngineManager;
-    private final BackgroundTaskManager backgroundTaskManager;
     private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
     private long banDuration;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
-    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngineManager scriptEngineManager, BackgroundTaskManager backgroundTaskManager) {
+    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngineManager scriptEngineManager) {
         super();
         this.scriptEngineManager = scriptEngineManager;
         this.javalinWebContainer = javalinWebContainer;
-        this.backgroundTaskManager = backgroundTaskManager;
     }
 
 
@@ -314,61 +308,40 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         scripts.clear();
         this.banDuration = getConfig().getLong("ban-duration", 0);
         initScripts();
-
-        backgroundTaskManager.addTask(new FunctionalBackgroundTask(
-                new TranslationComponent(Lang.RULE_ENGINE_COMPILING),
-                (task, callback) -> {
-                    log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
-                    long start = System.currentTimeMillis();
-
-                    File scriptDir = new File(Main.getDataDirectory(), "scripts");
-                    File[] scriptFiles = scriptDir.listFiles();
-                    if (scriptFiles == null || scriptFiles.length == 0) {
-                        getCache().invalidateAll();
-                        log.info(tlUI(Lang.RULE_ENGINE_COMPILED, 0, System.currentTimeMillis() - start));
-                        return;
-                    }
-
-                    // Filter supported scripts first
-                    var supportedScripts = java.util.Arrays.stream(scriptFiles)
-                            .filter(f -> !f.isHidden())
-                            .filter(f -> scriptEngineManager.getSupportedExtensions().stream()
-                                    .anyMatch(ext -> f.getName().endsWith(ext)))
-                            .toList();
-
-                    task.setMax(supportedScripts.size());
-                    task.setCurrent(0);
-                    task.setBarType(BackgroundTaskProgressBarType.DETERMINATE);
-                    callback.accept(task);
-
-                    var completed = new java.util.concurrent.atomic.AtomicInteger(0);
-
-                    try (var executor = Executors.newWorkStealingPool()) {
-                        for (File script : supportedScripts) {
-                            executor.submit(() -> {
-                                try {
-                                    String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
-                                    var compiledScript = scriptEngineManager.compileScript(script, script.getName(), scriptContent);
-                                    if (compiledScript != null) {
-                                        this.scripts.add(compiledScript);
-                                    }
-                                } catch (ExpressionSyntaxErrorException err) {
-                                    log.error(tlUI(Lang.RULE_ENGINE_BAD_EXPRESSION), err);
-                                    Sentry.captureException(err);
-                                } catch (Exception e) {
-                                    log.error("Unable to load script file", e);
-                                    Sentry.captureException(e);
-                                } finally {
-                                    task.setCurrent(completed.incrementAndGet());
-                                    callback.accept(task);
-                                }
-                            });
+        log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
+        long start = System.currentTimeMillis();
+        try (var executor = Executors.newWorkStealingPool()) {
+            File scriptDir = new File(Main.getDataDirectory(), "scripts");
+            File[] scripts = scriptDir.listFiles();
+            if (scripts != null) {
+                for (File script : scripts) {
+                    executor.submit(() -> {
+                        try {
+                            // 检查是否为支持的脚本类型
+                            boolean supported = scriptEngineManager.getSupportedExtensions().stream()
+                                    .anyMatch(ext -> script.getName().endsWith(ext));
+                            if (!supported || script.isHidden()) {
+                                return;
+                            }
+                            try {
+                                String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
+                                var compiledScript = scriptEngineManager.compileScript(script, script.getName(), scriptContent);
+                                if (compiledScript == null) return;
+                                this.scripts.add(compiledScript);
+                            } catch (Exception e) {
+                                log.error("Unable to load script file", e);
+                                Sentry.captureException(e);
+                            }
+                        } catch (ExpressionSyntaxErrorException err) {
+                            log.error(tlUI(Lang.RULE_ENGINE_BAD_EXPRESSION), err);
+                            Sentry.captureException(err);
                         }
-                    }
-                    getCache().invalidateAll();
-                    log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
+                    });
                 }
-        ));
+            }
+        }
+        getCache().invalidateAll();
+        log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
     }
 
     private void initScripts() throws IOException {

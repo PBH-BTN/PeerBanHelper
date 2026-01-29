@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.URLUtil;
-import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
@@ -103,7 +102,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     }
 
     private void updateRule() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_RULEES_SYNC_SERVER), (task, callback) -> {
+        try(var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_RULEES_SYNC_SERVER))) {
             String version;
             if (btnRule == null || btnRule.getVersion() == null) {
                 version = "initial";
@@ -145,7 +144,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                 setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
             }
-        }));
+        }
     }
 
     @Override

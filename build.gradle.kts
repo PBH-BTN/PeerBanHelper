@@ -190,7 +190,6 @@ dependencies {
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     // Test dependencies
     testImplementation(platform("org.junit:junit-bom:6.0.2"))

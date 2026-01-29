@@ -20,7 +20,6 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
-import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -210,7 +209,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             // 未启用跳过更新逻辑
             return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), null);
         }
-        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.MODULE_IP_BLACK_RULE_LIST_UPDATING_RULE_TITLE), (task, callback) -> {
+        try (var bgTask = backgroundTaskManager.create(new TranslationComponent(Lang.MODULE_IP_BLACK_RULE_LIST_UPDATING_RULE_TITLE))) {
             String url = rule.getString("url");
             if (null != url) {
                 // 解析远程订阅
@@ -293,8 +292,8 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             } else {
                 result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_URL_WRONG, name), null));
             }
-        })).join();
-        return result.get();
+            return result.get();
+        }
     }
 
     private CompletableFuture<DataUpdateResultDTO> getResource(String url) {

@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
-import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
@@ -92,7 +91,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
     }
 
     private void updateRule() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_DENY_LIST_SYNC_SERVER), (task, callback) -> {
+        try(var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_DENY_LIST_SYNC_SERVER))) {
             String version = Objects.requireNonNullElse(ruleVersion, "initial");
             String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
             Request.Builder request = new Request.Builder()
@@ -124,7 +123,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                 setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
             }
-        }));
+        }
     }
 
     /**
