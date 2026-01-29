@@ -35,7 +35,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     private final Lock nicCheckChangeLock = new ReentrantLock();
 
     public PBHPortMapperImpl() {
-        Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
+        Thread.ofVirtual().name("PortMapperScanner").start(this::scanMappers);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 for (GatewayDevice gatewayDevice : getGatewayDevices()) {
@@ -63,7 +63,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 if (!currentNics.equals(lastCheckedNics)) {
                     updateNICsList();
                     log.debug(tlUI(Lang.PORT_MAPPER_NIC_CHANGES_DETECTED));
-                    Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
+                    Thread.ofVirtual().name("PortMapperScanner").start(this::scanMappers);
                 }
             } finally {
                 nicCheckChangeLock.unlock();
