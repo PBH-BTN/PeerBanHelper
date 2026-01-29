@@ -11,9 +11,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
-import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -60,8 +58,6 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
             .build();
 
     private long dataRetentionTime;
-    @Autowired
-    private BackgroundTaskManager backgroundTaskManager;
 
     public void flush() {
         transactionTemplate.execute(_ -> {
@@ -136,11 +132,9 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
             if (dataRetentionTime <= 0) {
                 return;
             }
-            try(var _ = backgroundTaskManager.create(new TranslationComponent(Lang.MODULE_PEER_RECORDING_DELETING_EXPIRED_DATA))) {
-                log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANING_UP));
-                int deleted = peerRecordDao.getBaseMapper().delete(new LambdaQueryWrapper<PeerRecordEntity>().lt(PeerRecordEntity::getLastTimeSeen, OffsetDateTime.now().minus(dataRetentionTime, ChronoUnit.MILLIS)));
-                log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
-            }
+            log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANING_UP));
+            int deleted = peerRecordDao.getBaseMapper().delete(new LambdaQueryWrapper<PeerRecordEntity>().lt(PeerRecordEntity::getLastTimeSeen, OffsetDateTime.now().minus(dataRetentionTime, ChronoUnit.MILLIS)));
+            log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
             Sentry.captureException(throwable);
