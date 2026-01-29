@@ -86,8 +86,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private boolean globalPaused = false;
     private final AlertManager alertManager;
-    private final ExecutorService peerGatherThreadPool = Executors.newWorkStealingPool(4);
-    private final ExecutorService reuseTimeoutService = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors()));
+    private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
 
     public DownloaderServerImpl(BanList banList, DownloaderManagerImpl downloaderManager,
@@ -242,7 +241,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             banWaveWatchDog.setLastOperation("Check Bans", false);
             Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_CHECK_BANS));
             // 注意：此处 TimeoutProtect 是一个嵌套并发，在 checkBans 里还有一个类似的结构
-            try (TimeoutProtect protect = new TimeoutProtect("Check Bans", ExceptedTime.CHECK_BANS.getTimeout(), reuseTimeoutService, (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
+            try (TimeoutProtect protect = new TimeoutProtect("Check Bans", ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
                 peers.keySet().forEach(downloader -> protect.getService().submit(() -> {
                     try {
                         downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
@@ -280,7 +279,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_HANDLE_BAN_ENTRIES));
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist", false);
-            try (TimeoutProtect protect = new TimeoutProtect("Add Ban Entry", ExceptedTime.ADD_BAN_ENTRY.getTimeout(),reuseTimeoutService, (t) -> log.error(tlUI(Lang.TIMING_ADD_BANS)))) {
+            try (TimeoutProtect protect = new TimeoutProtect("Add Ban Entry", ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_ADD_BANS)))) {
                 var banlistClone = banList.copyKeySet();
                 downloaderBanDetailMap.forEach((downloader, details) -> {
                     try {
@@ -326,7 +325,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_APPLY_BAN_LIST));
             banWaveWatchDog.setLastOperation("Apply banlist", true);
             // 如果需要，则应用更改封禁列表到下载器
-            try (TimeoutProtect protect = new TimeoutProtect("Apply Banlist", ExceptedTime.APPLY_BANLIST.getTimeout(),reuseTimeoutService, (t) -> log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST)))) {
+            try (TimeoutProtect protect = new TimeoutProtect("Apply Banlist", ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST)))) {
                 if (!needReApplyBanList.get()) {
                     downloaderManager.forEach(downloader -> protect.getService().submit(() ->
                             updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false)));
@@ -371,7 +370,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
-        try (TimeoutProtect protect = new TimeoutProtect("Check Bans (inMethod)", ExceptedTime.CHECK_BANS.getTimeout(), reuseTimeoutService, (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
+        try (TimeoutProtect protect = new TimeoutProtect("Check Bans (inMethod)", ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
             Semaphore semaphore = new Semaphore(Math.min(Math.max(Runtime.getRuntime().availableProcessors(), 4), ExternalSwitch.parseInt("pbh.checkParallelism", 32)));
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
@@ -473,7 +472,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             } catch (Exception e) {
                 log.error(tlUI(Lang.DOWNLOADER_UNHANDLED_EXCEPTION), e);
             }
-        }, peerGatherThreadPool)).toList()) {
+        }, parallelService)).toList()) {
             future.join();
         }
         return peers;
@@ -495,7 +494,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         }
         List<Torrent> torrents = downloader.getTorrents();
         Semaphore parallelReqRestrict = new Semaphore(downloader.getMaxConcurrentPeerRequestSlots());
-        try (TimeoutProtect protect = new TimeoutProtect("Collect Peers", ExceptedTime.COLLECT_PEERS.getTimeout(),reuseTimeoutService , (t) -> log.error(tlUI(Lang.TIMING_COLLECT_PEERS)))) {
+        try (TimeoutProtect protect = new TimeoutProtect("Collect Peers", ExceptedTime.COLLECT_PEERS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_COLLECT_PEERS)))) {
             torrents.forEach(torrent -> protect.getService().submit(() -> {
                 try {
                     parallelReqRestrict.acquire();
