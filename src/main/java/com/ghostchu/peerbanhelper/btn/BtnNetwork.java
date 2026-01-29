@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.pow.PoWClient;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -159,7 +160,7 @@ public final class BtnNetwork implements Reloadable {
     }
 
     public synchronized void configBtnNetwork() {
-        try(var bgTask = backgroundTaskManager.create(new TranslationComponent(Lang.BTN_CONFIGURE_SYNC_SERVER))) {
+        backgroundTaskManager.addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_CONFIGURE_SYNC_SERVER), (task, callback) -> {
             String response;
             int statusCode;
             Request request = new Request.Builder()
@@ -252,7 +253,7 @@ public final class BtnNetwork implements Reloadable {
                 nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
                 Sentry.captureException(e);
             }
-        }
+        }));
     }
 
     public void gatherAndSolveCaptchaBlocking(@NotNull Request.Builder requestBuilder, @NotNull String type) {

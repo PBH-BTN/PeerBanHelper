@@ -12,7 +12,7 @@ public enum BackgroundTaskStatus {
     PAUSED(true),
     CANCELLED(false);
 
-    private boolean active;
+    private final boolean active;
 
     BackgroundTaskStatus(boolean active) {
         this.active = active;

@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +93,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     }
 
     private void submit() {
-        try(var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_BANS_SYNC_SERVER))) {
+        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_BANS_SYNC_SERVER), (task, callback) -> {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             int size = 0;
             int requests = 0;
@@ -106,12 +107,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             } while (page.hasNext());
             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, size, requests));
             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
-        } catch (IllegalStateException ignored) {
-            // 子请求已处理报错信息
-        } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_UNKNOWN_ERROR), e);
-            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
-        }
+        }));
     }
 
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {

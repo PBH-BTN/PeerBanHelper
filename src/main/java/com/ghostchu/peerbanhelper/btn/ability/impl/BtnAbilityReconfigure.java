@@ -4,11 +4,13 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.Response;
+
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +52,7 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     }
 
     private void checkIfReconfigure() {
-        try(var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_RECONFIGURE_SYNC_SERVER))) {
+        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_RECONFIGURE_SYNC_SERVER), (task, callback) -> {
             Request request = new Request.Builder()
                     .url(btnNetwork.getConfigUrl())
                     .get()
@@ -82,7 +84,7 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, -1, e.getMessage()));
                 log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, e.getMessage()), e);
             }
-        }
+        }));
     }
 
     @Override
