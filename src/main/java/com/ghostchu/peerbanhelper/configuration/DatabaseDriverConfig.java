@@ -1,10 +1,13 @@
 package com.ghostchu.peerbanhelper.configuration;
 
 import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.parser.JsqlParserGlobal;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import com.baomidou.mybatisplus.jsqlparser.JsqlParserThreadPool;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.MultiDbExplainInterceptor;
@@ -16,6 +19,7 @@ import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.postgres.PostgresDatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.sqlite.SQLiteDatabaseDriver;
 import com.ghostchu.peerbanhelper.text.Lang;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -30,6 +34,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -39,6 +45,14 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class DatabaseDriverConfig {
 
     public static DatabaseDriver databaseDriver;
+
+    @PostConstruct
+    public void setupJsqlParserThreadPool(){
+        int parallelism = ExternalSwitch.parseInt("pbh.database.jsqlparser.thread-pool.parallelism", Math.min(4, Runtime.getRuntime().availableProcessors()));
+        ExecutorService executorService = Executors.newWorkStealingPool(parallelism);
+        //noinspection deprecation
+        JsqlParserGlobal.setExecutorService(executorService, true);
+    }
 
     @Bean
     public DatabaseDriver loadDriver() throws Exception {
