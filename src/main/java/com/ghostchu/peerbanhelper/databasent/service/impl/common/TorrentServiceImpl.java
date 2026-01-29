@@ -47,12 +47,12 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
                 existing.setSize(torrent.getSize());
                 existing.setPrivateTorrent(torrent.getPrivateTorrent());
                 torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(existing));
-                instanceCache.invalidate(torrent.getInfoHash());
+                instanceCache.put(torrent.getInfoHash(), torrent);
             }
             return existing;
         } else {
             torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(torrent));
-            instanceCache.invalidate(torrent.getInfoHash());
+            instanceCache.put(torrent.getInfoHash(), torrent);
             return torrent;
         }
     }
