@@ -21,6 +21,7 @@ jobs:
           cp build/libs/PeerBanHelper.jar pkg/portable/PeerBanHelper/
           cp install4j/icon.ico pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
+          cp -r platform-natives/windows-x86_64/libraries pkg/portable/PeerBanHelper/
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
           mkdir -p jbr
