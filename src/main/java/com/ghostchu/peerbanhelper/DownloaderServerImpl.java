@@ -11,7 +11,10 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
-import com.ghostchu.peerbanhelper.event.banwave.*;
+import com.ghostchu.peerbanhelper.event.banwave.FeatureModuleExecuteEvent;
+import com.ghostchu.peerbanhelper.event.banwave.LivePeersUpdatedEvent;
+import com.ghostchu.peerbanhelper.event.banwave.PeerBanEvent;
+import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
@@ -299,14 +302,10 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             banWaveWatchDog.setLastOperation("Apply banlist", true);
             // 如果需要，则应用更改封禁列表到下载器
             if (!needReApplyBanList.get()) {
-                downloaderManager.stream().map(downloader -> CompletableFuture.runAsync(() -> {
-                    updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false);
-                }, mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
+                downloaderManager.stream().map(downloader -> CompletableFuture.runAsync(() -> updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false), mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
             } else {
                 log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
-                downloaderManager.stream().map(downloader -> CompletableFuture.runAsync(() -> {
-                    updateDownloader(downloader, true, null, null, true);
-                }, mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
+                downloaderManager.stream().map(downloader -> CompletableFuture.runAsync(() -> updateDownloader(downloader, true, null, null, true), mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
                 needReApplyBanList.set(false);
             }
             if (!hideFinishLogs && !downloaderManager.isEmpty()) {
@@ -341,27 +340,26 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
-        List<CompletableFuture<?>> futures = new ArrayList<>();
-        List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
+        List<CompletableFuture<BanDetail>> futures = Collections.synchronizedList(new ArrayList<>());
         Semaphore semaphore = new Semaphore(Math.min(Math.max(Runtime.getRuntime().availableProcessors(), 4), ExternalSwitch.parseInt("pbh.checkParallelism", 32)));
         for (Torrent torrent : provided.keySet()) {
             List<Peer> peers = provided.get(torrent);
             for (Peer peer : peers) {
-                futures.add(CompletableFuture.runAsync(() -> {
+                futures.add(CompletableFuture.supplyAsync(() -> {
                     try {
                         semaphore.acquire();
                         CheckResult checkResult = checkBan(torrent, peer, downloader);
-                        details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
+                        return new BanDetail(torrent, peer, checkResult, checkResult.duration());
                     } catch (Exception e) {
                         log.error("Unexpected error occurred while checking bans", e);
+                        return null;
                     } finally {
                         semaphore.release();
                     }
                 }, slaveWorkStealingService));
             }
         }
-        futures.forEach(CompletableFuture::join);
-        return details;
+        return futures.stream().map(CompletableFuture::join).toList();
     }
 
     private void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
