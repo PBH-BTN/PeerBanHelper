@@ -248,7 +248,7 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void updateGeoCN(File mmdbGeoCNFile) {
-        backgroundTaskManager.addTask(new FunctionalBackgroundTask(
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
                 new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB),
                 (task, callback) -> {
                     log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
@@ -262,7 +262,7 @@ public final class IPDB implements AutoCloseable {
                     }
                     Files.move(tmp, mmdbGeoCNFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
-        ));
+        )).join();
     }
 
 
@@ -282,7 +282,7 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void updateMMDB(String databaseName, File target) {
-        backgroundTaskManager.addTask(new FunctionalBackgroundTask(
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
                 new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB),
                 (task, callback) -> {
                     log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
@@ -300,7 +300,7 @@ public final class IPDB implements AutoCloseable {
                     }
                     Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
-        ));
+        )).join();
     }
 
 

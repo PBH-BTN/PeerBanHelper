@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.module.AbstractWebSocketFeatureModule
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskDTO
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEvent
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEventType
+import com.ghostchu.peerbanhelper.text.TextManager.tl
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTask
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager
 import com.ghostchu.peerbanhelper.util.backgroundtask.TaskStatusListener
@@ -53,9 +54,23 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     }
 
     private fun sendCurrentTasks(ctx: WsContext) {
+        val lang = locale(getContextFromWsContext(ctx))
         for (task in backgroundTaskManager.getTaskList()) {
             try {
-                ctx.send(BackgroundTaskEvent(BackgroundTaskEventType.UPDATED, BackgroundTaskDTO.from(task)))
+                ctx.send(
+                    BackgroundTaskEvent(
+                        BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
+                            id = task.id,
+                            title = tl(lang, task.title),
+                            statusText = if (task.statusText != null) tl(lang, task.statusText!!) else null,
+                            status = task.status,
+                            barType = task.barType,
+                            progress = task.progress,
+                            current = task.current,
+                            max = task.max
+                        )
+                    )
+                )
             } catch (e: Exception) {
                 logger.error("Failed to send task status to WebSocket client", e)
             }
@@ -63,9 +78,21 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     }
 
     private fun broadcastTaskUpdate(task: BackgroundTask) {
-        val response = BackgroundTaskEvent(BackgroundTaskEventType.UPDATED, BackgroundTaskDTO.from(task))
         for (session in wsSessions) {
             try {
+                val lang = locale(getContextFromWsContext(session))
+                val response = BackgroundTaskEvent(
+                    BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
+                        id = task.id,
+                        title = tl(lang, task.title),
+                        statusText = if (task.statusText != null) tl(lang, task.statusText!!) else null,
+                        status = task.status,
+                        barType = task.barType,
+                        progress = task.progress,
+                        current = task.current,
+                        max = task.max
+                    )
+                )
                 session.send(response)
             } catch (e: Exception) {
                 logger.debug("Failed to send task update to WebSocket client", e)

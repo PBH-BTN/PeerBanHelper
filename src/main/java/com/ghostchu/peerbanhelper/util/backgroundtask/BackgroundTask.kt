@@ -5,7 +5,7 @@ import java.time.OffsetDateTime
 import java.util.*
 import java.util.function.Consumer
 
-abstract class BackgroundTask(var title: TranslationComponent) {
+abstract class BackgroundTask(val title: TranslationComponent) {
     val id: String = UUID.randomUUID().toString()
     var statusText: TranslationComponent? = null
     val startAt: OffsetDateTime = OffsetDateTime.now()
