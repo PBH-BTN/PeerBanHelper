@@ -238,6 +238,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
         //moduleManager.register(PTRBlacklist.class);
+        moduleManager.register(PBHBackgroundTaskController.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);
         moduleManager.register(PBHMetadataController.class);

@@ -5,6 +5,15 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTask
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskProgressBarType
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskStatus
 
+enum class BackgroundTaskEventType {
+    UPDATED,
+}
+
+data class BackgroundTaskEvent(
+    val type: BackgroundTaskEventType,
+    val task: BackgroundTaskDTO
+)
+
 data class BackgroundTaskDTO(
     val id: String,
     val title: TranslationComponent,

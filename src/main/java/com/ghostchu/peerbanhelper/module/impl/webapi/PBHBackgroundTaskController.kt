@@ -2,12 +2,13 @@ package com.ghostchu.peerbanhelper.module.impl.webapi
 
 import com.ghostchu.peerbanhelper.module.AbstractWebSocketFeatureModule
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskDTO
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEvent
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEventType
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTask
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager
 import com.ghostchu.peerbanhelper.util.backgroundtask.TaskStatusListener
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer
 import com.ghostchu.peerbanhelper.web.Role
-import com.ghostchu.peerbanhelper.web.wrapper.StdResp
 import io.javalin.websocket.WsConfig
 import io.javalin.websocket.WsContext
 import org.slf4j.LoggerFactory
@@ -52,10 +53,9 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     }
 
     private fun sendCurrentTasks(ctx: WsContext) {
-        val tasks = backgroundTaskManager.getTaskList()
-        for (task in tasks) {
+        for (task in backgroundTaskManager.getTaskList()) {
             try {
-                ctx.send(StdResp(true, null, BackgroundTaskDTO.from(task)))
+                ctx.send(BackgroundTaskEvent(BackgroundTaskEventType.UPDATED, BackgroundTaskDTO.from(task)))
             } catch (e: Exception) {
                 logger.error("Failed to send task status to WebSocket client", e)
             }
@@ -63,11 +63,8 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     }
 
     private fun broadcastTaskUpdate(task: BackgroundTask) {
-        val dto = BackgroundTaskDTO.from(task)
-        val response = StdResp(true, null, dto)
-
-        val sessionsSnapshot = ArrayList(wsSessions)
-        for (session in sessionsSnapshot) {
+        val response = BackgroundTaskEvent(BackgroundTaskEventType.UPDATED, BackgroundTaskDTO.from(task))
+        for (session in wsSessions) {
             try {
                 session.send(response)
             } catch (e: Exception) {
