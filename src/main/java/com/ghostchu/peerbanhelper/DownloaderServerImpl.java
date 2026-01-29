@@ -242,7 +242,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_CHECK_BANS));
             // 注意：此处 TimeoutProtect 是一个嵌套并发，在 checkBans 里还有一个类似的结构
             try (TimeoutProtect protect = new TimeoutProtect("Check Bans", ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
-                peers.keySet().forEach(downloader -> protect.getService().submit(() -> {
+                peers.keySet().forEach(downloader -> protect.submit(() -> {
                     try {
                         downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
                     } catch (Exception e) {
@@ -283,7 +283,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 var banlistClone = banList.copyKeySet();
                 downloaderBanDetailMap.forEach((downloader, details) -> {
                     try {
-                        details.forEach(detail -> protect.getService().submit(() -> {
+                        details.forEach(detail -> protect.submit(() -> {
                             try {
                                 if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
                                     long actualBanDuration = banDuration;
@@ -327,11 +327,11 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 如果需要，则应用更改封禁列表到下载器
             try (TimeoutProtect protect = new TimeoutProtect("Apply Banlist", ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST)))) {
                 if (!needReApplyBanList.get()) {
-                    downloaderManager.forEach(downloader -> protect.getService().submit(() ->
+                    downloaderManager.forEach(downloader -> protect.submit(() ->
                             updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
-                    downloaderManager.forEach(downloader -> protect.getService().submit(() -> updateDownloader(downloader, true, null, null, true)));
+                    downloaderManager.forEach(downloader -> protect.submit(() -> updateDownloader(downloader, true, null, null, true)));
                     needReApplyBanList.set(false);
                 }
             }
@@ -375,7 +375,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
-                    protect.getService().submit(() -> {
+                    protect.submit(() -> {
                         try {
                             semaphore.acquire();
                             CheckResult checkResult = checkBan(torrent, peer, downloader);
@@ -495,7 +495,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         List<Torrent> torrents = downloader.getTorrents();
         Semaphore parallelReqRestrict = new Semaphore(downloader.getMaxConcurrentPeerRequestSlots());
         try (TimeoutProtect protect = new TimeoutProtect("Collect Peers", ExceptedTime.COLLECT_PEERS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_COLLECT_PEERS)))) {
-            torrents.forEach(torrent -> protect.getService().submit(() -> {
+            torrents.forEach(torrent -> protect.submit(() -> {
                 try {
                     parallelReqRestrict.acquire();
                     var p = downloader.getPeers(torrent);

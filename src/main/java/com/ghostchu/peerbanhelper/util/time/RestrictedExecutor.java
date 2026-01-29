@@ -10,20 +10,54 @@ import java.util.function.Supplier;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class RestrictedExecutor {
-    public static <T> RestrictedExecResult<T> execute(String name, long timeout, Supplier<T> target) {
-        CompletableFuture<T> sandbox = CompletableFuture.supplyAsync(target, Executors.newThreadPerTaskExecutor(Thread.ofPlatform().name("Restricted Executor [" + name + "]").factory()));
+public final class RestrictedExecutor {
+    // JDK25 虚拟线程执行器（共享）
+    private static final ExecutorService executorService =
+            Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("RestrictedExecutor").factory());
+
+    public static <T> RestrictedExecResult<T> execute(String name, long timeoutMillis, Supplier<T> target) {
+        CompletableFuture<T> cf = CompletableFuture.supplyAsync(target, executorService);
+
+        // 让 CompletableFuture 在超时后以 TimeoutException 完成（便于判定）
+        cf.orTimeout(timeoutMillis, TimeUnit.MILLISECONDS);
+
         try {
-            return new RestrictedExecResult<>(false, sandbox.get(timeout, TimeUnit.MILLISECONDS));
-        } catch (TimeoutException e) {
+            T res = cf.join();
+            return new RestrictedExecResult<>(false, res);
+        } catch (CompletionException ce) {
+            Throwable cause = ce.getCause();
+            // 超时或被取消：主动尝试取消以中断底层线程（尽早停掉）
+            if (cause instanceof TimeoutException || cause instanceof CancellationException) {
+                // 尝试中断正在运行的底层任务（如果还在运行）
+                try { cf.cancel(true); } catch (Throwable ignore) { /* ignore */ }
+                return new RestrictedExecResult<>(true, null);
+            }
+            if (containsCause(cause)) {
+                log.warn(tlUI(Lang.THREAD_INTERRUPTED), cause);
+                Thread.currentThread().interrupt();
+                return new RestrictedExecResult<>(false, null);
+            }
+            Sentry.captureException(cause);
+            throw new RuntimeException(cause);
+        } catch (CancellationException cex) {
+            try { cf.cancel(true); } catch (Throwable ignore) { /* ignore */ }
             return new RestrictedExecResult<>(true, null);
-        } catch (InterruptedException e) {
-            log.warn(tlUI(Lang.THREAD_INTERRUPTED), e);
-            Thread.currentThread().interrupt();
-            return new RestrictedExecResult<>(false, null);
-        } catch (ExecutionException e) {
-            Sentry.captureException(e);
-            throw new RuntimeException(e);
+        } catch (Throwable t) {
+            Sentry.captureException(t);
+            throw new RuntimeException(t);
         }
+    }
+
+    private static boolean containsCause(Throwable t) {
+        Throwable cur = t;
+        while (cur != null) {
+            if (cur instanceof InterruptedException) return true;
+            cur = cur.getCause();
+        }
+        return false;
+    }
+
+    static ExecutorService getExecutorService() {
+        return executorService;
     }
 }
