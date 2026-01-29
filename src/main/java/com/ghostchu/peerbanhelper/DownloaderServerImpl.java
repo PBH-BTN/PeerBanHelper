@@ -311,7 +311,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                         } catch (Exception e) {
                             log.error(tlUI(Lang.BAN_PEER_EXCEPTION), e);
                         }
-                    })).collect(CompletableFutures.joinList()).join();
+                    }, mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
                 } catch (Exception e) {
                     log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
                 }
@@ -323,12 +323,12 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             if (!needReApplyBanList.get()) {
                 downloaderManager.stream().map(downloader -> CompletableFuture.runAsync(() -> {
                     updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false);
-                })).collect(CompletableFutures.joinList()).join();
+                }, mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
             } else {
                 log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
                 downloaderManager.stream().map(downloader -> CompletableFuture.runAsync(() -> {
                     updateDownloader(downloader, true, null, null, true);
-                })).collect(CompletableFutures.joinList()).join();
+                }, mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
                 needReApplyBanList.set(false);
             }
             if (!hideFinishLogs && !downloaderManager.isEmpty()) {
