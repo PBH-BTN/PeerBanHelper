@@ -178,7 +178,7 @@ public final class RuleSubController extends AbstractFeatureModule {
 
         ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream()
                 .map(k -> updateIpRule(locale, k))
-                .filter(ele -> !ele.isSuccess())
+                .filter(ele -> !ele.success())
                 .findFirst()
                 .ifPresentOrElse(result::set, () ->
                         result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_ALL_UPDATED), null)));
@@ -332,7 +332,7 @@ public final class RuleSubController extends AbstractFeatureModule {
         assert configurationSection != null;
         try {
             StdResp msg = ipBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);
-            if (!msg.isSuccess()) {
+            if (!msg.success()) {
                 ctx.status(HttpStatus.BAD_REQUEST);
                 ctx.json(msg);
                 return;
