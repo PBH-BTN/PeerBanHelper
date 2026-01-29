@@ -49,7 +49,7 @@ public class DatabaseDriverConfig {
     public void setupJsqlParserThreadPool(){
         int parallelism = ExternalSwitch.parseInt("pbh.database.jsqlparser.thread-pool.parallelism", Math.min(4, Runtime.getRuntime().availableProcessors()));
         ExecutorService executorService = Executors.newWorkStealingPool(parallelism);
-        JsqlParserGlobal.setExecutorService(executorService, Thread.startVirtualThread(() -> {
+        JsqlParserGlobal.setExecutorService(executorService, Thread.ofVirtual().unstarted(() -> {
             if (!executorService.isShutdown()) {
                 executorService.shutdown();
             }
