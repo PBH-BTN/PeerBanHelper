@@ -226,6 +226,7 @@ public class PeerBanHelper implements Reloadable {
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
+        moduleManager.register(PBHAsyncTaskController.class);
         moduleManager.register(PBHGeneralController.class);
         moduleManager.register(IPBlackList.class);
         moduleManager.register(PeerIdBlacklist.class);
