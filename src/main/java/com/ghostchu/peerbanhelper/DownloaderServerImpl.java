@@ -85,7 +85,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private boolean globalPaused = false;
     private final AlertManager alertManager;
-    private final ExecutorService parallelService = Executors.newWorkStealingPool();
+    private final ExecutorService slaveWorkStealingService = Executors.newWorkStealingPool();
     private final ExecutorService mainWorkStealingService = Executors.newWorkStealingPool();
 
 
@@ -381,7 +381,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     } finally {
                         semaphore.release();
                     }
-                }, mainWorkStealingService));
+                }, slaveWorkStealingService));
             }
         }
         futures.forEach(CompletableFuture::join);
@@ -468,7 +468,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             } catch (Exception e) {
                 log.error(tlUI(Lang.DOWNLOADER_UNHANDLED_EXCEPTION), e);
             }
-        }, parallelService)).toList()) {
+        }, slaveWorkStealingService)).toList()) {
             future.join();
         }
         return peers;
@@ -504,7 +504,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     } finally {
                         parallelReqRestrict.release();
                     }
-                }, mainWorkStealingService)));
+                }, slaveWorkStealingService)));
         futures.forEach(CompletableFuture::join);
         downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent(Lang.STATUS_TEXT_OK));
         return peers;
