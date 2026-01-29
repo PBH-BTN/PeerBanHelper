@@ -50,36 +50,38 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     }
 
     private void checkIfReconfigure() {
-        Request request = new Request.Builder()
-                .url(btnNetwork.getConfigUrl())
-                .get()
-                .build();
-                
-        try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
-            if (!response.isSuccessful()) {
+        try(var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_RECONFIGURE_SYNC_SERVER))) {
+            Request request = new Request.Builder()
+                    .url(btnNetwork.getConfigUrl())
+                    .get()
+                    .build();
+
+            try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
+                    log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, response.code() + " - " + responseBody));
+                    return;
+                }
+
                 String responseBody = response.body().string();
-                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
-                log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, response.code() + " - " + responseBody));
-                return;
+                JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
+                JsonObject ability = json.get("ability").getAsJsonObject();
+                if (!ability.has("reconfigure")) {
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_DISABLED_BY_SERVER));
+                    return;
+                }
+                JsonObject reconfigure = ability.get("reconfigure").getAsJsonObject();
+                if (!reconfigure.get("version").getAsString().equals(this.version)) {
+                    log.info(tlUI(Lang.BTN_RECONFIGURING));
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_PREPARE_RECONFIGURE));
+                    btnNetwork.configBtnNetwork();
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
+                }
+            } catch (Exception e) {
+                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, -1, e.getMessage()));
+                log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, e.getMessage()), e);
             }
-            
-            String responseBody = response.body().string();
-            JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
-            JsonObject ability = json.get("ability").getAsJsonObject();
-            if (!ability.has("reconfigure")) {
-                setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_DISABLED_BY_SERVER));
-                return;
-            }
-            JsonObject reconfigure = ability.get("reconfigure").getAsJsonObject();
-            if (!reconfigure.get("version").getAsString().equals(this.version)) {
-                log.info(tlUI(Lang.BTN_RECONFIGURING));
-                setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_PREPARE_RECONFIGURE));
-                btnNetwork.configBtnNetwork();
-                setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
-            }
-        } catch (Exception e) {
-            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, -1, e.getMessage()));
-            log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, e.getMessage()), e);
         }
     }
 
