@@ -180,12 +180,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
                 return;
             }
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.STARTING));
             if (isGlobalPaused()) {
                 if (needReApplyBanList.get()) {
-                    Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_REAPPLY_BAN_LIST));
                     reApplyBanListForDownloaders();
-                    Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_REAPPLY_BAN_LIST));
                 }
                 return;
             }
@@ -196,36 +193,25 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 声明基本集合
             // 执行计划任务
             banWaveWatchDog.setLastOperation("Run scheduled tasks", true);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_EXECUTE_DOWNLOADER_SCHEDULED_TASKS));
             downloaderManager.forEach(Downloader::runScheduleTasks);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_EXECUTE_DOWNLOADER_SCHEDULED_TASKS));
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans", false);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_REMOVE_EXPIRED_BANS));
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_REMOVE_EXPIRED_BANS));
             // 被新封禁的对等体列表
             Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>();
             // 当前所有活跃的对等体列表
             banWaveWatchDog.setLastOperation("Collect peers", true);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_COLLECT_PEERS));
             Map<Downloader, Map<Torrent, List<Peer>>> peers = collectPeers();
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_COLLECT_PEERS));
             // 更新 LIVE_PEERS 用于数据展示
             banWaveWatchDog.setLastOperation("Update live peers", false);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_UPDATE_LIVE_PEERS));
             updateLivePeers(peers);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_UPDATE_LIVE_PEERS));
             banWaveWatchDog.setLastOperation("Notify BatchMonitorFeatureModules", false);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_NOTIFY_BATCH_MONITOR_MODULES));
             for (FeatureModule module : moduleManager.getModules()) {
                 if (module instanceof BatchMonitorFeatureModule batchMonitorFeatureModule) {
                     Main.getEventBus().post(new FeatureModuleExecuteEvent(module));
                     batchMonitorFeatureModule.onPeersRetrieved(peers);
                 }
             }
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_NOTIFY_BATCH_MONITOR_MODULES));
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_NOTIFY_MONITOR_MODULES));
             peers.forEach((downloader, entry) -> {
                 banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules", false);
                 for (FeatureModule module : moduleManager.getModules()) {
@@ -235,11 +221,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     }
                 }
             });
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_NOTIFY_MONITOR_MODULES));
             // ========== 处理封禁逻辑 ==========
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
             banWaveWatchDog.setLastOperation("Check Bans", false);
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_CHECK_BANS));
             peers.keySet().stream().map(downloader -> CompletableFuture.runAsync(() -> {
                 try {
                     downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
@@ -248,9 +232,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     throw e;
                 }
             }, mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_CHECK_BANS));
             // 处理计划操作
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_PROCESS_SCHEDULED_TASKS));
             int scheduled = 0;
             while (!scheduledBanListOperations.isEmpty()) {
                 ScheduledBanListOperation ops = scheduledBanListOperations.poll();
@@ -272,8 +254,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             if (scheduled > 0) {
                 log.info(tlUI(Lang.SCHEDULED_OPERATIONS, scheduled));
             }
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_PROCESS_SCHEDULED_TASKS));
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_HANDLE_BAN_ENTRIES));
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist", false);
             var banlistClone = banList.copyKeySet();
@@ -316,8 +296,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
                 }
             });
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_HANDLE_BAN_ENTRIES));
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.PRE_APPLY_BAN_LIST));
             banWaveWatchDog.setLastOperation("Apply banlist", true);
             // 如果需要，则应用更改封禁列表到下载器
             if (!needReApplyBanList.get()) {
@@ -337,7 +315,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.POST_APPLIED_BAN_LIST));
             banWaveWatchDog.setLastOperation("Completed", false);
         } catch (InterruptedException e) {
             log.error("Thread interrupted");
@@ -348,7 +325,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             banWaveWatchDog.feed();
             metrics.recordCheck();
             banWaveLock.unlock();
-            Main.getEventBus().post(new BanWaveLifeCycleEvent(BanWaveLifeCycleEvent.Stage.ENDED));
         }
     }
 
