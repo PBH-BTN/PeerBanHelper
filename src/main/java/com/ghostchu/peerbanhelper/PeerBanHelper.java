@@ -15,7 +15,6 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModul
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
-import com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -89,8 +88,8 @@ public class PeerBanHelper implements Reloadable {
     public void start() {
         loadPlatformFeatures();
         checkKnownCrashes();
-        Main.getReloadManager().register(this);
         postCompatibilityCheck();
+        Main.getReloadManager().register(this);
         registerModules();
         sendSnapshotAlert();
         downloaderServer.load();
@@ -106,25 +105,20 @@ public class PeerBanHelper implements Reloadable {
             }
             Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
         }
-        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-        System.gc();
-        Thread.startVirtualThread(() -> {
-            if (os.startsWith("win")) {
-                WorkingSetManagerFactory.trimMemory();
-            }
-        });
         runTestCode();
         telemetry.sendBootEvent();
         CommonUtil.getScheduler().scheduleWithFixedDelay(telemetry::sendHeartbeatEvent, 1, 1, TimeUnit.HOURS);
     }
 
     private void loadPlatformFeatures() {
-        var platform = Main.getPlatform();
-        if (platform == null) return;
-        var ecoQosAPI = platform.getEcoQosAPI();
-        if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
-            ecoQosAPI.apply();
-        }
+        Thread.startVirtualThread(()->{
+            var platform = Main.getPlatform();
+            if (platform == null) return;
+            var ecoQosAPI = platform.getEcoQosAPI();
+            if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
+                ecoQosAPI.apply();
+            }
+        });
     }
 
     private void checkKnownCrashes() {
