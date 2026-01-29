@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.backgroundtask
 
+import com.ghostchu.peerbanhelper.util.CommonUtil
 import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -7,8 +8,8 @@ import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
-import kotlin.time.Duration.Companion.seconds
 
 typealias TaskStatusListener = (BackgroundTask) -> Unit
 
@@ -17,15 +18,10 @@ class BackgroundTaskManager {
     private val logger = LoggerFactory.getLogger(BackgroundTaskManager::class.java)
     private val taskList = CopyOnWriteArrayList<BackgroundTask>()
     private val statusListeners = CopyOnWriteArrayList<TaskStatusListener>()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(8))
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
-        scope.launch {
-            while (isActive) {
-                cleanTask()
-                delay(5.seconds)
-            }
-        }
+        CommonUtil.getScheduler().scheduleWithFixedDelay(::cleanTask, 0L, 5L, TimeUnit.SECONDS)
     }
 
     private fun cleanTask() {
