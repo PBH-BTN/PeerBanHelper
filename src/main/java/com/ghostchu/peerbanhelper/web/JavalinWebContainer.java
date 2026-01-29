@@ -60,7 +60,7 @@ public final class JavalinWebContainer implements Reloadable {
     private volatile boolean started;
     private boolean webuiAnalyticsEnabled;
 
-    public JavalinWebContainer(LicenseManager licenseManager, PBHPortMapper pBHPortMapper) {
+    public JavalinWebContainer(LicenseManager licenseManager) {
         reloadConfig();
         JsonMapper gsonMapper = new JsonMapper() {
             @Override

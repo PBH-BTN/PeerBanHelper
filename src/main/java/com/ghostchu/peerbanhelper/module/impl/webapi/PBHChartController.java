@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
+import com.ghostchu.peerbanhelper.databasent.service.TrafficJournalService;
 import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
@@ -55,7 +56,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private HistoryService historyService;
     @Autowired
-    private TrafficJournalServiceImpl trafficJournalDao;
+    private TrafficJournalService trafficJournalDao;
     @Autowired
     private IPDBManager iPDBManager;
     @Autowired

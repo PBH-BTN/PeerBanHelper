@@ -87,9 +87,9 @@ public class TrafficJournalServiceImpl extends ServiceImpl<TrafficJournalMapper,
         return baseMapper.selectSpecificDownloaderOverallData(downloadName, start, end);
     }
 
-    @NotNull
-    public SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting,
-                                                                             long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) {
+    @Override
+    public @NotNull SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting,
+                                                                                      long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) {
         SlidingWindowDynamicSpeedLimiter slidingWindowDynamicSpeedLimiter = new SlidingWindowDynamicSpeedLimiter();
         slidingWindowDynamicSpeedLimiter.setThreshold(thresholdBytes);
         slidingWindowDynamicSpeedLimiter.setMaxSpeed(maxSpeedBytesPerSecond);

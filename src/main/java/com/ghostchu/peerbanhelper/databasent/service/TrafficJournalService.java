@@ -2,7 +2,9 @@ package com.ghostchu.peerbanhelper.databasent.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
+import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.table.TrafficJournalEntity;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,4 +22,7 @@ public interface TrafficJournalService extends IService<TrafficJournalEntity> {
     List<TrafficDataComputed> getAllDownloadersOverallData(OffsetDateTime start, OffsetDateTime end);
 
     List<TrafficDataComputed> getSpecificDownloaderOverallData(String downloadName, OffsetDateTime start, OffsetDateTime end);
+
+    @NotNull TrafficJournalServiceImpl.SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting,
+                                                                                                         long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond);
 }
