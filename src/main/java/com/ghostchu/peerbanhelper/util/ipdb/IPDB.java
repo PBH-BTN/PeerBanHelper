@@ -334,14 +334,10 @@ public final class IPDB implements AutoCloseable {
                     .build();
             try (Response response = httpClient.newCall(request).execute()) {
                 var body = response.body();
-                long totalSize = body.contentLength();
+                long totalSize =  body.contentLength();
                 long totalRead = 0;
                 bgTask.setMax(totalSize);
-                if (totalSize <= 0) {
-                    bgTask.setBarType(BackgroundTaskProgressBarType.INDETERMINATE);
-                } else {
-                    bgTask.setBarType(BackgroundTaskProgressBarType.DETERMINATE);
-                }
+                bgTask.setBarType(BackgroundTaskProgressBarType.DETERMINATE);
                 callback.accept(bgTask);
                 if (response.code() == 200) {
                     if (mirror.supportXzip()) {
