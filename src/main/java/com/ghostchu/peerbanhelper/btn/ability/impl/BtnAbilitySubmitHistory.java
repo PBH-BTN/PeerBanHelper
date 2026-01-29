@@ -108,11 +108,11 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     }
 
     private void submit() {
+        if (!lock.tryLock()) {
+            return; // this is possible since we can send multiple requests
+        }
         try {
             btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_HISTORY_SYNC_SERVER), (task, callback) -> {
-                if (!lock.tryLock()) {
-                    return; // this is possible since we can send multiple requests
-                }
                 log.info(tlUI(Lang.BTN_SUBMITTING_HISTORIES));
                 AtomicLong lastSubmitAt = new AtomicLong(getLastSubmitAtTimestamp());
                 List<LegacyBtnPeerHistory> btnPeers = generatePing(lastSubmitAt.get());
