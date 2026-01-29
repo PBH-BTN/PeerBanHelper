@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
+import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.PeerRecodingServiceModule;
@@ -14,7 +15,6 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModul
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
-import com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -35,6 +35,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -86,8 +88,8 @@ public class PeerBanHelper implements Reloadable {
     public void start() {
         loadPlatformFeatures();
         checkKnownCrashes();
-        Main.getReloadManager().register(this);
         postCompatibilityCheck();
+        Main.getReloadManager().register(this);
         registerModules();
         sendSnapshotAlert();
         downloaderServer.load();
@@ -103,25 +105,20 @@ public class PeerBanHelper implements Reloadable {
             }
             Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
         }
-        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-        System.gc();
-        Thread.startVirtualThread(() -> {
-            if (os.startsWith("win")) {
-                WorkingSetManagerFactory.trimMemory();
-            }
-        });
         runTestCode();
         telemetry.sendBootEvent();
         CommonUtil.getScheduler().scheduleWithFixedDelay(telemetry::sendHeartbeatEvent, 1, 1, TimeUnit.HOURS);
     }
 
     private void loadPlatformFeatures() {
-        var platform = Main.getPlatform();
-        if (platform == null) return;
-        var ecoQosAPI = platform.getEcoQosAPI();
-        if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
-            ecoQosAPI.apply();
-        }
+        Thread.startVirtualThread(()->{
+            var platform = Main.getPlatform();
+            if (platform == null) return;
+            var ecoQosAPI = platform.getEcoQosAPI();
+            if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
+                ecoQosAPI.apply();
+            }
+        });
     }
 
     private void checkKnownCrashes() {
@@ -226,44 +223,48 @@ public class PeerBanHelper implements Reloadable {
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
-        moduleManager.register(PBHGeneralController.class);
-        moduleManager.register(IPBlackList.class);
-        moduleManager.register(PeerIdBlacklist.class);
-        moduleManager.register(ClientNameBlacklist.class);
-        moduleManager.register(ExpressionRule.class);
-        moduleManager.register(ProgressCheatBlocker.class);
-        moduleManager.register(MultiDialingBlocker.class);
-        moduleManager.register(AutoRangeBan.class);
-        moduleManager.register(BtnNetworkOnline.class);
-        moduleManager.register(BlockListController.class);
-        moduleManager.register(IPBlackRuleList.class);
-        //moduleManager.register(PTRBlacklist.class);
-        moduleManager.register(PBHBackgroundTaskController.class);
-        moduleManager.register(PBHMetricsController.class);
-        moduleManager.register(PBHBanController.class);
-        moduleManager.register(PBHMetadataController.class);
-        moduleManager.register(PBHDownloaderController.class);
-        moduleManager.register(RuleSubController.class);
-        moduleManager.register(PBHAuthenticateController.class);
-        moduleManager.register(ActiveMonitoringModule.class);
-        moduleManager.register(PBHPlusController.class);
-        moduleManager.register(PBHOOBEController.class);
-        moduleManager.register(PBHChartController.class);
-        moduleManager.register(PBHTorrentController.class);
-        moduleManager.register(PBHPeerController.class);
-        moduleManager.register(PBHAlertController.class);
-        moduleManager.register(PBHLogsController.class);
-        moduleManager.register(PBHPushController.class);
-        moduleManager.register(PBHLabController.class);
-        moduleManager.register(PBHEasterEggController.class);
-        moduleManager.register(PBHUtilitiesController.class);
-        moduleManager.register(SwarmTrackingModule.class);
-        // moduleManager.register(MCPController.class);
-        moduleManager.register(PBHAutoStunController.class);
-        moduleManager.register(IdleConnectionDosProtection.class);
-        moduleManager.register(SessionAnalyseServiceModule.class);
-        moduleManager.register(PeerRecodingServiceModule.class);
-        moduleManager.register(AntiVampire.class);
+        List<Class<? extends FeatureModule>> moduleClasses = new ArrayList<>();
+        moduleClasses.add(PBHGeneralController.class);
+        moduleClasses.add(IPBlackList.class);
+        moduleClasses.add(PeerIdBlacklist.class);
+        moduleClasses.add(ClientNameBlacklist.class);
+        moduleClasses.add(ExpressionRule.class);
+        moduleClasses.add(ProgressCheatBlocker.class);
+        moduleClasses.add(MultiDialingBlocker.class);
+        moduleClasses.add(AutoRangeBan.class);
+        moduleClasses.add(BtnNetworkOnline.class);
+        moduleClasses.add(BlockListController.class);
+        moduleClasses.add(IPBlackRuleList.class);
+        //moduleClasses.add(PTRBlacklist.class);
+        moduleClasses.add(PBHBackgroundTaskController.class);
+        moduleClasses.add(PBHMetricsController.class);
+        moduleClasses.add(PBHBanController.class);
+        moduleClasses.add(PBHMetadataController.class);
+        moduleClasses.add(PBHDownloaderController.class);
+        moduleClasses.add(RuleSubController.class);
+        moduleClasses.add(PBHAuthenticateController.class);
+        moduleClasses.add(ActiveMonitoringModule.class);
+        moduleClasses.add(PBHPlusController.class);
+        moduleClasses.add(PBHOOBEController.class);
+        moduleClasses.add(PBHChartController.class);
+        moduleClasses.add(PBHTorrentController.class);
+        moduleClasses.add(PBHPeerController.class);
+        moduleClasses.add(PBHAlertController.class);
+        moduleClasses.add(PBHLogsController.class);
+        moduleClasses.add(PBHPushController.class);
+        moduleClasses.add(PBHLabController.class);
+        moduleClasses.add(PBHEasterEggController.class);
+        moduleClasses.add(PBHUtilitiesController.class);
+        moduleClasses.add(SwarmTrackingModule.class);
+        // moduleClasses.add(MCPController.class);
+        moduleClasses.add(PBHAutoStunController.class);
+        moduleClasses.add(IdleConnectionDosProtection.class);
+        moduleClasses.add(SessionAnalyseServiceModule.class);
+        moduleClasses.add(PeerRecodingServiceModule.class);
+        moduleClasses.add(AntiVampire.class);
+        moduleClasses.parallelStream().forEach(moduleClass -> {
+            moduleManager.register(moduleClass);
+        });
     }
 
     @Deprecated(forRemoval = true)
