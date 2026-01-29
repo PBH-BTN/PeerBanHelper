@@ -82,6 +82,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
 
     private void flushData() {
         try {
+            log.info(tlUI(Lang.MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA_LOG));
             long deleted = 0;
             connectionMetricsTrackDao.flushAll();
             OffsetDateTime startOfToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
@@ -93,6 +94,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
             List<PeerConnectionMetricsEntity> aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
             connectionMetricDao.saveAggregating(aggInTheDayList, false);
             deleted += connectionMetricsTrackDao.deleteEntries(listInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
+            log.info(tlUI(Lang.MODULE_PEER_ANALYSING_DELETED_EXPIRED_DATA, deleted));
         } catch (SQLException e) {
             log.warn("Failed to flush session analyse data", e);
             Sentry.captureException(e);

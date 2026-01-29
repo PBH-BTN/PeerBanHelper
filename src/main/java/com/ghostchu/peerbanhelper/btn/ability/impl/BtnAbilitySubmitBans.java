@@ -92,7 +92,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     }
 
     private void submit() {
-        try(var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_BANS_SYNC_SERVER))) {
+        try {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             int size = 0;
             int requests = 0;

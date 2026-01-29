@@ -91,38 +91,37 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
     }
 
     private void updateRule() {
-        try (var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_SYNC_SERVER))) {
-            String version = Objects.requireNonNullElse(ruleVersion, "initial");
-            String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
-            Request.Builder request = new Request.Builder()
-                    .url(url)
-                    .get();
-            if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "ip_allowlist");
-            try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
-                if (response.code() == 204) {
-                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ruleVersion));
-                    return;
-                }
-                String responseBody = response.body().string();
-                if (!response.isSuccessful()) {
-                    log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
-                    setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
-                } else {
-                    DualIPv4v6AssociativeTries<String> associativeTries = new DualIPv4v6AssociativeTries<>();
-                    var loaded = stringToIPList(responseBody, associativeTries);
-                    this.ipMatcher.setData("BTN AllowList (Remote)", List.of(associativeTries));
-                    Main.getEventBus().post(new BtnRuleUpdateEvent());
-                    ruleVersion = response.header("X-BTN-ContentVersion", "unknown");
-                    metadataDao.set("btn.ability.ip_allowlist.cache.version", ruleVersion);
-                    metadataDao.set("btn.ability.ip_allowlist.cache.value", responseBody);
-                    log.info(tlUI(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
-                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
-                    btnNetwork.getModuleMatchCache().invalidateAll();
-                }
-            } catch (Exception e) {
-                log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
+        String version = Objects.requireNonNullElse(ruleVersion, "initial");
+
+        String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
+        Request.Builder request = new Request.Builder()
+                .url(url)
+                .get();
+        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "ip_allowlist");
+        try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
+            if (response.code() == 204) {
+                setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ruleVersion));
+                return;
             }
+            String responseBody = response.body().string();
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
+                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
+            } else {
+                DualIPv4v6AssociativeTries<String> associativeTries = new DualIPv4v6AssociativeTries<>();
+                var loaded = stringToIPList(responseBody, associativeTries);
+                this.ipMatcher.setData("BTN AllowList (Remote)", List.of(associativeTries));
+                Main.getEventBus().post(new BtnRuleUpdateEvent());
+                ruleVersion = response.header("X-BTN-ContentVersion", "unknown");
+                metadataDao.set("btn.ability.ip_allowlist.cache.version", ruleVersion);
+                metadataDao.set("btn.ability.ip_allowlist.cache.value", responseBody);
+                log.info(tlUI(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
+                setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
+                btnNetwork.getModuleMatchCache().invalidateAll();
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
+            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 

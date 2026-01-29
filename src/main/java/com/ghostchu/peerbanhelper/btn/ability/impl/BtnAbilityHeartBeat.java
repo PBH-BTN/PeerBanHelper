@@ -66,12 +66,10 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     }
 
     private void sendHeartBeat() {
-        try (var bgTask = btnNetwork.getBackgroundTaskManager().create(new TranslationComponent(Lang.BTN_ABILITY_HEARTBEAT_SYNC_SERVER))) {
-            if (multiIf) {
-                sendHeartBeatMultiIf();
-            } else {
-                sendHeartBeatDefaultIf();
-            }
+        if (multiIf) {
+            sendHeartBeatMultiIf();
+        } else {
+            sendHeartBeatDefaultIf();
         }
     }
 
