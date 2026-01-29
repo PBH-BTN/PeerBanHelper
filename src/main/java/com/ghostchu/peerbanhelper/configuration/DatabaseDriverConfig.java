@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
-import com.baomidou.mybatisplus.jsqlparser.JsqlParserThreadPool;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
@@ -50,8 +49,11 @@ public class DatabaseDriverConfig {
     public void setupJsqlParserThreadPool(){
         int parallelism = ExternalSwitch.parseInt("pbh.database.jsqlparser.thread-pool.parallelism", Math.min(4, Runtime.getRuntime().availableProcessors()));
         ExecutorService executorService = Executors.newWorkStealingPool(parallelism);
-        //noinspection deprecation
-        JsqlParserGlobal.setExecutorService(executorService, true);
+        JsqlParserGlobal.setExecutorService(executorService, Thread.startVirtualThread(() -> {
+            if (!executorService.isShutdown()) {
+                executorService.shutdown();
+            }
+        }));
     }
 
     @Bean
