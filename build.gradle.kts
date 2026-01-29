@@ -22,10 +22,6 @@ java {
 repositories {
     mavenCentral()
     maven {
-        name = "local-repo"
-        url = uri(file("${project.projectDir}/m2-local-repo"))
-    }
-    maven {
         name = "spring-snapshots"
         url = uri("https://repo.spring.io/snapshot")
         mavenContent {
@@ -41,10 +37,6 @@ repositories {
         url = uri("https://jitpack.io")
     }
     maven {
-        name = "maven-eclipse-repo-fork"
-        url = uri("https://lislei.github.io/maven-eclipse.github.io/maven")
-    }
-    maven {
         name = "maven-snapshots"
         url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     }
@@ -56,17 +48,6 @@ repositories {
 
 val flatlafVersion = "3.7"
 val ormliteVersion = "6.1"
-
-configurations.all {
-    resolutionStrategy {
-        // Handle the custom sqlite-jdbc-loongarch64 dependency from local repo
-        dependencySubstitution {
-            substitute(module("com.ghostchu.peerbanhelper.external-libs:sqlite-jdbc-loongarch64"))
-                .using(module("org.xerial:sqlite-jdbc:3.51.1.0"))
-                .because("Local repo has different coordinates")
-        }
-    }
-}
 
 dependencyManagement {
     imports {
@@ -200,7 +181,7 @@ dependencies {
     }
 
     // SWT (provided scope - for compilation only)
-    compileOnly("org.eclipse.swt:swt-classpath:local")
+    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.132.0")
 
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0.2")
