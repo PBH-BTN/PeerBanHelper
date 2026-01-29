@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
-
 @Data
 public class BackgroundTask implements AutoCloseable {
     @NotNull
@@ -18,7 +17,7 @@ public class BackgroundTask implements AutoCloseable {
     @NotNull
     private OffsetDateTime finishedAt;
     @NotNull
-    private BackgroundTaskStatus status = BackgroundTaskStatus.RUNNING;
+    private BackgroundTaskStatus status = BackgroundTaskStatus.QUEUED;
     @NotNull
     private BackgroundTaskProgressBarType barType = BackgroundTaskProgressBarType.INDETERMINATE;
     private boolean disposalImmediatelyAfterComplete = false;
@@ -27,7 +26,7 @@ public class BackgroundTask implements AutoCloseable {
 
     private final @NotNull BackgroundTaskManager manager;
 
-    public BackgroundTask(@NotNull BackgroundTaskManager manager, @NotNull TranslationComponent title) {
+    public BackgroundTask(@NotNull BackgroundTaskManager manager, @NotNull TranslationComponent title){
         this.manager = manager;
         this.title = title;
     }
@@ -35,12 +34,12 @@ public class BackgroundTask implements AutoCloseable {
     @Override
     public void close() {
         finishedAt = OffsetDateTime.now();
-        if (status == BackgroundTaskStatus.QUEUED || status == BackgroundTaskStatus.RUNNING) { // 只有这两个状态才变更为 COMPLETED，避免覆盖掉 FAILED 之类的状态
+        if( status == BackgroundTaskStatus.QUEUED || status == BackgroundTaskStatus.RUNNING ){ // 只有这两个状态才变更为 COMPLETED，避免覆盖掉 FAILED 之类的状态
             status = BackgroundTaskStatus.COMPLETED;
         }
     }
 
-    public double getProgress() {
+    public double getProgress(){
         return max == 0 ? 0.0 : (double) current / (double) max;
     }
 }
