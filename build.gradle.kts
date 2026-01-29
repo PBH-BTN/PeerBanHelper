@@ -3,7 +3,7 @@ plugins {
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
     id("com.install4j.gradle") version "12.0.2" apply false
-    id("io.sentry.jvm.gradle") version "5.12.2"
+    id("io.sentry.jvm.gradle") version "6.0.0"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.3.0"
@@ -196,7 +196,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.21.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
 }
 
 tasks.test {
