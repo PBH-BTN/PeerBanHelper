@@ -108,9 +108,8 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     }
 
     private void submit() {
-        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_HISTORY_SYNC_SERVER), (task, callback) ->
-        {
-            try {
+        try {
+            btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_HISTORY_SYNC_SERVER), (task, callback) -> {
                 if (!lock.tryLock()) {
                     return; // this is possible since we can send multiple requests
                 }
@@ -158,13 +157,13 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                     }
                     btnPeers = generatePing(lastSubmitAt.get());
                 }
-            } catch (Throwable e) {
-                log.error("Unable to submit peer histories", e);
-                setLastStatus(false, new TranslationComponent("Unknown Error: " + e.getClass().getName() + ": " + e.getMessage()));
-            } finally {
-                lock.unlock();
-                }
             })).join();
+        } catch (Throwable e) {
+            log.error("Unable to submit peer histories", e);
+            setLastStatus(false, new TranslationComponent("Unknown Error: " + e.getClass().getName() + ": " + e.getMessage()));
+        } finally {
+            lock.unlock();
+        }
     }
 
 
