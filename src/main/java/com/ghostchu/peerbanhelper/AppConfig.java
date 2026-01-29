@@ -16,7 +16,6 @@ import java.io.File;
 @Slf4j
 @EnableTransactionManagement
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@EnableAsync
 public class AppConfig {
     @Bean
     public BuildMeta buildMeta() {
