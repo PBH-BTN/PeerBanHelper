@@ -834,3 +834,11 @@ DBNT_LOADING_DRIVER_LOADED: "[数据库引擎] 已加载数据库驱动程序: {
 DBNT_LOADING_MAPPER: "[数据库引擎] 已选定 Mappers 加载路径: {}"
 DBNT_FLYWAY_VALIDATING_SCHEMA: "[数据库引擎] Flyway 正在验证数据库架构..."
 DBNT_FLYWAY_ERROR: "[数据库引擎] Flyway 初始化数据库架构失败，请检查日志以获取更多信息。如果您已自行调整数据库架构，请指定 dbnt.flyway.validateOnMigrate 跳过校验环节，不推荐此操作，因为未来的升级流程可能会被破坏。"
+
+MODULE_PCB_BGTASK_DELETING_EXPIRED_DATA: "[进度反作弊] 删除不需要的过期数据"
+MODULE_PCB_DELETING_EXPIRED_DATA: "[进度反作弊] 正在删除不需要的过期数据，请稍等..."
+MDOULE_PCB_DELETED_EXPIRED_DATA: "[进度反作弊] 已删除 {} 条不需要的过期数据"
+MODULE_PEER_RECORDING_DELETING_EXPIRED_DATA: "[Peer 跟踪记录服务] 删除不需要的过期数据"
+MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA: "[Peer 会话分析服务] 删除不需要的过期数据"
+MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA_LOG: "[Peer 会话分析服务] 正在删除不需要的过期数据，请稍等..."
+MODULE_PEER_ANALYSING_DELETED_EXPIRED_DATA: "[Peer 会话分析服务] 已删除 {} 条不需要的过期数据"
