@@ -20,7 +20,6 @@ public class BackgroundTask implements AutoCloseable {
     private BackgroundTaskStatus status = BackgroundTaskStatus.QUEUED;
     @NotNull
     private BackgroundTaskProgressBarType barType = BackgroundTaskProgressBarType.INDETERMINATE;
-    private boolean disposalImmediatelyAfterComplete = false;
     private long max;
     private long current;
 
@@ -33,7 +32,7 @@ public class BackgroundTask implements AutoCloseable {
     @Override
     public void close() throws Exception {
         finishedAt = OffsetDateTime.now();
-        if( status == BackgroundTaskStatus.QUEUED || status == BackgroundTaskStatus.RUNNING ){ // 只有这两个状态才变更为 COMPLETED，避免覆盖掉 FAILED 之类的状态
+        if( status == BackgroundTaskStatus.QUEUED || status == BackgroundTaskStatus.RUNNING){ // 只有这两个状态才变更为 COMPLETED，避免覆盖掉 FAILED 之类的状态
             status = BackgroundTaskStatus.COMPLETED;
         }
     }

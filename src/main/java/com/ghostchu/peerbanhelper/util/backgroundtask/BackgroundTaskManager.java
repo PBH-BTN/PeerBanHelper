@@ -17,7 +17,7 @@ public class BackgroundTaskManager {
     private final List<BackgroundTask> taskList = Collections.synchronizedList(new ArrayList<>());
 
     public BackgroundTaskManager() {
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanTask, 0L, 5L, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanTask, 0L, 10L, TimeUnit.SECONDS);
     }
 
     private void cleanTask() {
@@ -27,8 +27,7 @@ public class BackgroundTaskManager {
             var task = it.next();
             if (!task.getStatus().isActive()) {
                 if ((task.getStatus() == BackgroundTaskStatus.COMPLETED && OffsetDateTime.now().isAfter(task.getFinishedAt().plusMinutes(1)))
-                        || OffsetDateTime.now().isAfter(task.getFinishedAt().plusMinutes(30))
-                        || task.isDisposalImmediatelyAfterComplete()) {
+                        || OffsetDateTime.now().isAfter(task.getFinishedAt().plusMinutes(30))) {
                     it.remove();
                 }
             }
