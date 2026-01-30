@@ -10,7 +10,7 @@ import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleOffsetDateTimeIntKVDTO;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -63,7 +63,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private void handleBanTrends(Context ctx) {
         var downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-        Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
+        Map<OffsetDateTime, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
         var queryBanned = Wrappers.<HistoryEntity>lambdaQuery()
                 .select(HistoryEntity::getId, HistoryEntity::getBanAt)
                 .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
@@ -75,12 +75,12 @@ public final class PBHMetricsController extends AbstractFeatureModule {
 
         historyService.list(queryBanned).forEach(entity -> {
             var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt());
-            bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
+            bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
         });
 
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream()
-                .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
-                .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
+                .map((e) -> new SimpleOffsetDateTimeIntKVDTO(e.getKey(), e.getValue().intValue()))
+                .sorted(Comparator.comparing(SimpleOffsetDateTimeIntKVDTO::key))
                 .toList()
         ));
     }
