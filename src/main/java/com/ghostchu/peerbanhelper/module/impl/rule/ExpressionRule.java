@@ -315,7 +315,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         this.banDuration = getConfig().getLong("ban-duration", 0);
         initScripts();
 
-        backgroundTaskManager.addTask(new FunctionalBackgroundTask(
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
                 new TranslationComponent(Lang.RULE_ENGINE_COMPILING),
                 (task, callback) -> {
                     log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
@@ -368,7 +368,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                     getCache().invalidateAll();
                     log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
                 }
-        ));
+        )).join();
     }
 
     private void initScripts() throws IOException {

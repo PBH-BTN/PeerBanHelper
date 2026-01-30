@@ -143,7 +143,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private void cleanDatabase() {
-        backgroundTaskManager.addTask(new FunctionalBackgroundTask(
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
                 new TranslationComponent(Lang.MODULE_PCB_BGTASK_DELETING_EXPIRED_DATA),
                 (task, callback) -> {
                     try {
@@ -159,7 +159,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         throw e;
                     }
                 }
-        ));
+        )).join();
     }
 
     public void handleConfig(Context ctx) {
