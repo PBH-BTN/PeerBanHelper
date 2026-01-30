@@ -39,15 +39,16 @@ public class TimeUtil {
     }
 
     public static OffsetDateTime getStartOfToday(long time) {
-//        Instant instant = Instant.now();
-//        ZoneId systemZone = ZoneId.systemDefault();
-//        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
-//        LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
-//        return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
         ZoneId systemZone = ZoneId.systemDefault();
         ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.ofEpochMilli(time));
         LocalDate date = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
         return date.atStartOfDay().atOffset(currentOffsetForMyZone);
+    }
+
+    public static OffsetDateTime getStartOfToday(OffsetDateTime time) {
+        ZoneId systemZone = ZoneId.systemDefault();
+        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(time.toInstant());
+        return time.toLocalDate().atStartOfDay().atOffset(currentOffsetForMyZone);
     }
 
     public static OffsetDateTime getEndOfToday(long time) {

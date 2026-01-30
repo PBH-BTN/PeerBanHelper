@@ -74,7 +74,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         }
 
         historyService.list(queryBanned).forEach(entity -> {
-            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt());
             bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
         });
 
@@ -231,7 +231,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
                 .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
 
         historyService.list(query).forEach(entity -> {
-            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt().toInstant().toEpochMilli());
+            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt());
             bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
         });
 
