@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna.WorkingSetM
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.sun.management.GarbageCollectionNotificationInfo;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,7 @@ public class PBHWin32MemoryManagement {
             log.debug("PBHWin32MemoryManagement scheduled to run every 10 minutes.");
         } catch (Throwable e) {
             log.warn("Failed to initialize PBHWin32MemoryManagement, memory management may not work properly.", e);
+            Sentry.captureException(e);
         }
     }
 

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.module.ModuleRegisterEvent;
 import com.ghostchu.peerbanhelper.event.module.ModuleUnregisterEvent;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -27,8 +29,13 @@ public final class ModuleManagerImpl implements ModuleManager {
     @Override
     public void register(@NotNull Class<? extends FeatureModule> moduleClass) {
         // Main.registerBean(moduleClass, null);
-        FeatureModule module = context.getBean(moduleClass);
-        attemptRegister(module);
+        try {
+            FeatureModule module = context.getBean(moduleClass);
+            attemptRegister(module);
+        } catch (Exception e) {
+            log.warn("Unable to register feature module", e);
+            Sentry.captureException(e);
+        }
     }
 
     /**
@@ -42,7 +49,7 @@ public final class ModuleManagerImpl implements ModuleManager {
         attemptRegister(module);
     }
 
-    private void attemptRegister(FeatureModule module){
+    private void attemptRegister(FeatureModule module) {
         synchronized (modules) {
             // 添加到模块列表（不管是否启用）
             if (!modules.contains(module)) {
@@ -73,7 +80,12 @@ public final class ModuleManagerImpl implements ModuleManager {
         synchronized (modules) {
             var moduleUnregisterEvent = new ModuleUnregisterEvent(module);
             Main.getEventBus().post(moduleUnregisterEvent);
-            module.disable();
+            try {
+                module.disable();
+            } catch (Exception e) {
+                log.warn("Unable to unregister module {}", module.getName(), e);
+                Sentry.captureException(e);
+            }
             return this.modules.remove(module);
         }
     }

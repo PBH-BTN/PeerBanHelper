@@ -1,0 +1,5 @@
+#!/bin/bash
+
+### This script is called before the user installs the application.
+
+exit 0

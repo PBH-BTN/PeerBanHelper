@@ -6,22 +6,24 @@ import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.*;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
+import com.ghostchu.peerbanhelper.databasent.service.*;
+import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.pow.PoWClient;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
-import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -54,10 +56,14 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
 
-    private final ScriptEngine scriptEngine;
+    private final ScriptEngineManager scriptEngineManager;
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     private final SystemInfo systemInfo;
+    private final TorrentService torrentDao;
+    private final PeerRecordService peerRecordService;
+    @Getter
+    private final BackgroundTaskManager backgroundTaskManager;
     @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
@@ -76,13 +82,11 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final DownloaderServer server;
     @Getter
-    private final PeerRecordDao peerRecordDao;
+    private final TrackedSwarmService trackedSwarmDao;
     @Getter
-    private final TrackedSwarmDao trackedSwarmDao;
+    private final MetadataService metadataDao;
     @Getter
-    private final MetadataDao metadataDao;
-    @Getter
-    private final HistoryDao historyDao;
+    private final HistoryService historyDao;
     @Getter
     private final HTTPUtil httpUtil;
     @Getter
@@ -91,26 +95,32 @@ public final class BtnNetwork implements Reloadable {
     private String powCaptchaEndpoint;
     private long nextConfigAttemptTime = 0;
 
-    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao, SystemInfo systemInfo) {
+    public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
+                      PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager) {
+        this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
-        this.scriptEngine = scriptEngine;
+        this.scriptEngineManager = scriptEngineManager;
         this.moduleMatchCache = moduleMatchCache;
         this.httpUtil = httpUtil;
         this.metadataDao = metadataDao;
         this.historyDao = historyDao;
-        this.peerRecordDao = peerRecordDao;
         this.trackedSwarmDao = trackedSwarmDao;
-        new Thread(() -> {
-            Main.getReloadManager().register(this);
-            reloadConfig();
-        }).start();
+        this.torrentDao = torrentService;
         this.systemInfo = systemInfo;
+        this.backgroundTaskManager = backgroundTaskManager;
+        Main.getReloadManager().register(this);
+        Main.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void onServerStarted(PBHServerStartedEvent event) {
+        reloadConfig();
     }
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        new Thread(this::reloadConfig).start();
+        reloadConfig();
         return Reloadable.super.reloadModule();
     }
 
@@ -150,97 +160,100 @@ public final class BtnNetwork implements Reloadable {
     }
 
     public synchronized void configBtnNetwork() {
-        String response;
-        int statusCode;
-        Request request = new Request.Builder()
-                .url(configUrl)
-                .get()
-                .build();
-        try (Response resp = httpClient.newCall(request).execute()) {
-            statusCode = resp.code();
-            response = resp.body().string();
-            if (!resp.isSuccessful()) {
-                log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600));
-                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, statusCode, response);
-                return;
-            }
-            JsonObject json = JsonParser.parseString(response).getAsJsonObject();
-            if (!json.has("min_protocol_version")) {
-                throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));
-            }
-            int min_protocol_version = json.get("min_protocol_version").getAsInt();
-            if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
-                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, min_protocol_version);
-                throw new IllegalStateException(tlUI(configResult));
-            }
-            int max_protocol_version = json.get("max_protocol_version").getAsInt();
-            if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION > max_protocol_version) {
-                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, max_protocol_version);
-                throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
-            }
-            boolean useLegacyAbilities = min_protocol_version < 20;
-            resetScheduler();
-            abilities.values().forEach(BtnAbility::unload);
-            abilities.clear();
-            if (json.has("proof_of_work_captcha") && !json.isJsonNull()) {
-                JsonObject powCaptcha = json.get("proof_of_work_captcha").getAsJsonObject();
-                this.powCaptchaEndpoint = powCaptcha.get("endpoint").getAsString();
-            }
-            JsonObject ability = json.get("ability").getAsJsonObject();
-            if (useLegacyAbilities) {
-                if (ability.has("submit_peers") && submit) {
-                    abilities.put(LegacyBtnAbilitySubmitPeers.class, new LegacyBtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
+        backgroundTaskManager.addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_CONFIGURE_SYNC_SERVER), (task, callback) -> {
+            String response;
+            int statusCode;
+            Request request = new Request.Builder()
+                    .url(configUrl)
+                    .get()
+                    .build();
+            try (Response resp = httpClient.newCall(request).execute()) {
+                statusCode = resp.code();
+                response = resp.body().string();
+                if (!resp.isSuccessful()) {
+                    log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600));
+                    configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, statusCode, response);
+                    return;
                 }
-                if (ability.has("submit_bans") && submit) {
-                    abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
+                JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+                if (!json.has("min_protocol_version")) {
+                    throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));
                 }
-                if (ability.has("rules")) {
-                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
+                int min_protocol_version = json.get("min_protocol_version").getAsInt();
+                if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
+                    configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, min_protocol_version);
+                    throw new IllegalStateException(tlUI(configResult));
                 }
-            } else {
-                if (ability.has("submit_bans") && submit) {
-                    abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
+                int max_protocol_version = json.get("max_protocol_version").getAsInt();
+                if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION > max_protocol_version) {
+                    configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, max_protocol_version);
+                    throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
                 }
-                if (ability.has("submit_swarm") && submit) {
-                    abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
+                boolean useLegacyAbilities = min_protocol_version < 20;
+                resetScheduler();
+                abilities.values().forEach(BtnAbility::unload);
+                abilities.clear();
+                if (json.has("proof_of_work_captcha") && !json.isJsonNull()) {
+                    JsonObject powCaptcha = json.get("proof_of_work_captcha").getAsJsonObject();
+                    this.powCaptchaEndpoint = powCaptcha.get("endpoint").getAsString();
                 }
-                if (ability.has("ip_denylist")) {
-                    abilities.put(BtnAbilityIPDenyList.class, new BtnAbilityIPDenyList(this, metadataDao, ability.get("ip_denylist").getAsJsonObject()));
+                JsonObject ability = json.get("ability").getAsJsonObject();
+                if (useLegacyAbilities) {
+                    if (ability.has("submit_peers") && submit) {
+                        abilities.put(LegacyBtnAbilitySubmitPeers.class, new LegacyBtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
+                    }
+                    if (ability.has("submit_bans") && submit) {
+                        abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
+                    }
+                    if (ability.has("rules")) {
+                        abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngineManager, ability.get("rules").getAsJsonObject(), scriptExecute));
+                    }
+                } else {
+                    if (ability.has("submit_bans") && submit) {
+                        abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao, torrentDao));
+                    }
+                    if (ability.has("submit_swarm") && submit) {
+                        abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
+                    }
+                    if (ability.has("ip_denylist")) {
+                        abilities.put(BtnAbilityIPDenyList.class, new BtnAbilityIPDenyList(this, metadataDao, ability.get("ip_denylist").getAsJsonObject()));
+                    }
+                    if (ability.has("ip_allowlist")) {
+                        abilities.put(BtnAbilityIPAllowList.class, new BtnAbilityIPAllowList(this, metadataDao, ability.get("ip_allowlist").getAsJsonObject()));
+                    }
+                    if (ability.has("rule_peer_identity")) {
+                        abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngineManager, ability.get("rule_peer_identity").getAsJsonObject(), scriptExecute));
+                    }
                 }
-                if (ability.has("ip_allowlist")) {
-                    abilities.put(BtnAbilityIPAllowList.class, new BtnAbilityIPAllowList(this, metadataDao, ability.get("ip_allowlist").getAsJsonObject()));
+                if (ability.has("submit_histories") && submit) {
+                    abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, metadataDao, ability.get("submit_histories").getAsJsonObject(), torrentDao, peerRecordService));
                 }
-                if (ability.has("rule_peer_identity")) {
-                    abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, metadataDao, scriptEngine, ability.get("rule_peer_identity").getAsJsonObject(), scriptExecute));
+                if (ability.has("reconfigure")) {
+                    abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));
                 }
+                if (ability.has("heartbeat")) {
+                    abilities.put(BtnAbilityHeartBeat.class, new BtnAbilityHeartBeat(this, ability.get("heartbeat").getAsJsonObject()));
+                }
+                if (ability.has("ip_query")) {
+                    abilities.put(BtnAbilityIpQuery.class, new BtnAbilityIpQuery(this, ability.get("ip_query").getAsJsonObject()));
+                }
+                abilities.values().forEach(a -> {
+                    try {
+                        a.load();
+                    } catch (Exception e) {
+                        log.error(tlUI(Lang.UNABLE_LOAD_BTN_ABILITY, a.getClass().getSimpleName()), e);
+                    }
+                });
+                configSuccess.set(true);
+                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
+            } catch (Throwable e) {
+                log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage()), e);
+                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
+                configSuccess.set(false);
+                nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
+                Sentry.captureException(e);
             }
-            if (ability.has("submit_histories") && submit) {
-                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, metadataDao, ability.get("submit_histories").getAsJsonObject()));
-            }
-            if (ability.has("reconfigure")) {
-                abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));
-            }
-            if (ability.has("heartbeat")) {
-                abilities.put(BtnAbilityHeartBeat.class, new BtnAbilityHeartBeat(this, ability.get("heartbeat").getAsJsonObject()));
-            }
-            if (ability.has("ip_query")) {
-                abilities.put(BtnAbilityIpQuery.class, new BtnAbilityIpQuery(this, ability.get("ip_query").getAsJsonObject()));
-            }
-            abilities.values().forEach(a -> {
-                try {
-                    a.load();
-                } catch (Exception e) {
-                    log.error(tlUI(Lang.UNABLE_LOAD_BTN_ABILITY, a.getClass().getSimpleName()), e);
-                }
-            });
-            configSuccess.set(true);
-            configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
-        } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage()), e);
-            configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
-            configSuccess.set(false);
-            nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
-        }
+        }));
     }
 
     public void gatherAndSolveCaptchaBlocking(@NotNull Request.Builder requestBuilder, @NotNull String type) {
@@ -271,6 +284,7 @@ public final class BtnNetwork implements Reloadable {
             }
         } catch (Throwable e) {
             log.error("Unable to gather or solve PoW Captcha", e);
+            Sentry.captureException(e);
         }
     }
 
@@ -296,6 +310,7 @@ public final class BtnNetwork implements Reloadable {
             }
         } catch (Throwable throwable) {
             log.error(tlUI(Lang.UNABLE_COMPLETE_SCHEDULE_TASKS), throwable);
+            Sentry.captureException(throwable);
         }
 
     }

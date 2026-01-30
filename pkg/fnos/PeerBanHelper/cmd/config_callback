@@ -1,0 +1,5 @@
+#!/bin/bash
+
+### This script is called after the user change environment variables in application setting page.
+
+exit 0

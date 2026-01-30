@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -42,8 +43,10 @@ public final class IPAddressUtil {
             return ipAddress;
         } catch (AddressStringException e) {
             log.error("Unable to get ipaddress from ip {}", ipFinal, e);
+            Sentry.captureException(e);
             return INVALID_ADDRESS_MISSINGNO;
         } catch (Exception e) {
+            Sentry.captureException(e);
             log.error("Unable to get ipaddress from ip {} because an unknown error, returning default.", ipFinal, e);
             return INVALID_ADDRESS_MISSINGNO;
         }

@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
@@ -66,11 +67,13 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     }
 
     private void sendHeartBeat() {
-        if (multiIf) {
-            sendHeartBeatMultiIf();
-        } else {
-            sendHeartBeatDefaultIf();
-        }
+        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_HEARTBEAT_SYNC_SERVER), (task, callback) -> {
+            if (multiIf) {
+                sendHeartBeatMultiIf();
+            } else {
+                sendHeartBeatDefaultIf();
+            }
+        }));
     }
 
     private void sendHeartBeatDefaultIf() {

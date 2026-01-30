@@ -25,6 +25,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.jthemedetecor.OsThemeDetector;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -147,7 +148,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             OsThemeDetector detector = OsThemeDetector.getDetector();
             detector.registerListener(this::updateTheme);
             updateTheme(detector.isDark());
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
         }
         createMainWindow();
     }
@@ -277,6 +279,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
+                Sentry.captureException(e);
             }
         }
         return false;
@@ -334,6 +337,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             UIManager.setLookAndFeel(clazz.getName());
         } catch (Exception ex) {
             log.info("Failed to setup UI theme", ex);
+            Sentry.captureException(ex);
         }
         // FlatLaf.updateUI();
     }

@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.platform.impl.win32.ecoqos.EcoMode;
 import com.ghostchu.peerbanhelper.platform.types.EcoQosAPI;
 import com.ghostchu.peerbanhelper.text.Lang;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -23,6 +24,7 @@ public final class WindowsEcoQosAPI implements EcoQosAPI {
             ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("eco-mode", 10, tlUI(Lang.IN_ECOMODE_SHORT)));
         }catch (Exception e) {
             log.warn("Unable to apply Windows EcoQosAPI feature", e);
+            Sentry.captureException(e);
         }
     }
 }

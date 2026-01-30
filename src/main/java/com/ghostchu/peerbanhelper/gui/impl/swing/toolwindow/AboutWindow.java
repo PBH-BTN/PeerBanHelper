@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.MIDIPlayer;
+import io.sentry.Sentry;
 import lombok.Cleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +120,7 @@ public class AboutWindow {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Sentry.captureException(e);
         }
     }
 
@@ -170,6 +172,7 @@ public class AboutWindow {
                 }
             } catch (BadLocationException ex) {
                 ex.printStackTrace();
+                Sentry.captureException(ex);
             }
         });
 
@@ -230,6 +233,7 @@ public class AboutWindow {
             textPane.setCaretPosition(doc.getLength());
         } catch (BadLocationException ex) {
             ex.printStackTrace();
+            Sentry.captureException(ex);
         } finally {
             cursorLock = false;
         }
@@ -252,6 +256,7 @@ public class AboutWindow {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            Sentry.captureException(ex);
         }
     }
 

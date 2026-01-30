@@ -30,10 +30,13 @@
             </template>
           </a-form-item>
           <a-form-item
-            :label="t('page.settings.tab.config.privacy.errorReport')"
-            field="privacy.error_reporting"
+            :label="t('page.settings.tab.config.privacy.analytics')"
+            field="privacy.analytics"
           >
-            <a-switch v-model="form.privacy.error_reporting" />
+            <a-switch v-model="form.privacy.analytics" />
+            <template #extra>
+              {{ t('page.settings.tab.config.privacy.analytics.tips') }}
+            </template>
           </a-form-item>
           <a-divider />
           <webui v-model="form.server" />

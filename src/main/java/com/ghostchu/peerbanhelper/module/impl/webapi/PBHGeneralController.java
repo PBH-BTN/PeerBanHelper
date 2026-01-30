@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import ch.qos.logback.core.util.TimeUtil;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -48,7 +47,6 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -130,6 +128,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("globalPaused", downloaderServer.isGlobalPaused());
+        data.put("analytics", Main.getMainConfig().getBoolean("privacy.analytics"));
         context.json(new StdResp(true, null, data));
     }
 

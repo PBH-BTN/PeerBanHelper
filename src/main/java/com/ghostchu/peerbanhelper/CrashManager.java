@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,7 @@ public final class CrashManager {
             }));
         } catch (IOException e) {
             log.error("Unable to create running flag file", e);
+            Sentry.captureException(e);
         }
     }
 

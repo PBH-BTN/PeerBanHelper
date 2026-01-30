@@ -83,7 +83,11 @@ public abstract class AbstractFeatureModule implements FeatureModule {
             actuallyEnabled = false;
             onDisable();
             cancelAllScheduledTasks();
-            Main.getEventBus().unregister(this);
+            try {
+                Main.getEventBus().unregister(this);
+            } catch (IllegalArgumentException ignored) {
+                // unregister 时可能会抛出未注册异常，忽略即可
+            }
             log.info(tlUI(Lang.MODULE_UNREGISTER, getName()));
         }
     }

@@ -3,20 +3,20 @@ package com.ghostchu.peerbanhelper.util.push.impl;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
 import com.google.gson.JsonObject;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 
 @Slf4j
 public final class SmtpPushProvider extends AbstractPushProvider {
@@ -70,37 +70,69 @@ public final class SmtpPushProvider extends AbstractPushProvider {
         return section;
     }
 
-    public String sendMail(List<String> email, String subject, String text) throws EmailException {
-        Email mail = new HtmlEmail();
-        mail.setAuthentication(config.getUsername(), config.getPassword());
-        mail.setCharset("UTF-8");
-        mail.setHostName(config.getHost());
-        mail.setSmtpPort(config.getPort());
+    public String sendMail(List<String> email, String subject, String text) throws MessagingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", config.getHost());
+        props.put("mail.smtp.port", String.valueOf(config.getPort()));
+        props.put("mail.smtp.auth", String.valueOf(config.isAuth()));
+        props.put("mail.smtp.sendpartial", String.valueOf(config.isSendPartial()));
+
         try {
-            switch (Encryption.valueOf(config.getEncryption())) {
-                case STARTTLS -> mail.setStartTLSEnabled(true);
-                case ENFORCE_STARTTLS -> {
-                    mail.setStartTLSEnabled(true);
-                    mail.setStartTLSRequired(true);
+            Encryption enc = Encryption.valueOf(config.getEncryption());
+            switch (enc) {
+                case STARTTLS -> {
+                    props.put("mail.smtp.starttls.enable", "true");
                 }
-                case SSLTLS -> mail.setSSLOnConnect(true);
+                case ENFORCE_STARTTLS -> {
+                    props.put("mail.smtp.starttls.enable", "true");
+                    props.put("mail.smtp.starttls.required", "true");
+                }
+                case SSLTLS -> {
+                    props.put("mail.smtp.ssl.enable", "true");
+                }
             }
         } catch (Exception e) {
             log.error("Unable to load mail encryption type: {}, it's valid?", config.getEncryption(), e);
         }
-        mail.setSendPartial(config.isSendPartial());
-        mail.setSubject(subject);
-        mail.setContent(markdown2Html(text), "text/html");
-        mail.setFrom(config.getSender(), config.getSenderName(), "UTF-8");
-        mail.setTo(email.stream().map(str -> {
-            try {
-                return new InternetAddress(str);
-            } catch (AddressException exception) {
-                log.warn("The email address [{}] is invalid", str, exception);
-                return null;
-            }
-        }).filter(Objects::nonNull).toList());
-        return mail.send();
+
+        Session session;
+        if (config.isAuth()) {
+            session = Session.getInstance(props, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(config.getUsername(), config.getPassword());
+                }
+            });
+        } else {
+            session = Session.getInstance(props);
+        }
+
+        MimeMessage message = new MimeMessage(session);
+
+        try {
+            message.setFrom(new InternetAddress(config.getSender(), config.getSenderName(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            message.setFrom(new InternetAddress(config.getSender()));
+        }
+
+        InternetAddress[] recipients = email.stream()
+                .map(str -> {
+                    try {
+                        return new InternetAddress(str);
+                    } catch (Exception exception) {
+                        log.warn("The email address [{}] is invalid", str, exception);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toArray(InternetAddress[]::new);
+
+        message.setRecipients(Message.RecipientType.TO, recipients);
+        message.setSubject(subject, "UTF-8");
+        message.setContent(markdown2Html(text), "text/html; charset=UTF-8");
+
+        Transport.send(message);
+        return message.getMessageID();
     }
 
     @Override
@@ -118,7 +150,7 @@ public final class SmtpPushProvider extends AbstractPushProvider {
         try {
             sendMail(config.getReceivers(), title, content);
             return true;
-        } catch (EmailException e) {
+        } catch (MessagingException e) {
             log.warn("Unable to push message via SMTP", e);
             return false;
         }

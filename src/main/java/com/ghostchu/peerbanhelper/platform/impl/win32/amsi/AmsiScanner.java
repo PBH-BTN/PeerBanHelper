@@ -5,6 +5,7 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
 import com.sun.jna.ptr.PointerByReference;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,6 +62,7 @@ public class AmsiScanner implements MalwareScanner {
             return result[0] >= 32768;
         } catch (Exception e) {
             log.debug("AMSI scan file failed: {}", e.getMessage());
+            Sentry.captureException(e);
             return false;
         }
     }
