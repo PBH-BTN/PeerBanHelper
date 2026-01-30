@@ -106,13 +106,31 @@ public final class JavalinWebContainer implements Reloadable {
                                 String data = new String(in.readAllBytes());
                                 if (webuiAnalyticsEnabled) {
                                     data = data.replace("<title>PeerBanHelper</title>",
-                                            "<title>PeerBanHelper</title>\n"
-                                                    + """
+                                                    """
+                                                    <title>PeerBanHelper</title>
+                                                    <script>
+                                                            window.beforeSendHandler = function(type, payload) {
+                                                                payload.hostname = "privacy-redacted.local";
+                                                                payload.referrer = "http://privacy-redacted.local";
+                                                                try {
+                                                                    if (payload.url.startsWith('http')) {
+                                                                        const urlObj = new URL(payload.url);
+                                                                        payload.url = "http://privacy-redacted.local" + urlObj.pathname + urlObj.search;
+                                                                    } else {
+                                                                        payload.url = "http://privacy-redacted.local" + (payload.url.startsWith('/') ? payload.url : '/' + payload.url);
+                                                                    }
+                                                                } catch (e) {
+                                                                    payload.url = payload.url.replace(/^https?:\\/\\/[^/]+/, 'http://0.0.0.0');
+                                                                }
+                                                                return payload;
+                                                            };
+                                                    </script>
                                                     <script defer src="https://uma.pbh-btn.com/script.js"
                                                     data-website-id="58076dc4-266e-4984-abb6-7c48afa22d4d"
                                                     data-exclude-search="true"
                                                     data-exclude-ip="true"
                                                     data-exclude-token="true"
+                                                    data-before-send="beforeSendHandler"
                                                     ></script>
                                                     """);
                                 }
