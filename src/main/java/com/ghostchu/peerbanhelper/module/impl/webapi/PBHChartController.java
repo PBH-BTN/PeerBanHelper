@@ -11,7 +11,7 @@ import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalS
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleOffsetDateTimeIntKVDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleStringIntKVDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -165,16 +165,16 @@ public final class PBHChartController extends AbstractFeatureModule {
                 timeQueryModel.endAt());
 
         // 按天分组,累加每天的流量数据（TrafficDataComputed中的值已经是增量，需要求和）
-        Map<Long, TrafficDataComputed> mergedData = new java.util.HashMap<>();
+        Map<OffsetDateTime, TrafficDataComputed> mergedData = new java.util.HashMap<>();
 
         for (TrafficDataComputed record : records) {
             OffsetDateTime ts = record.getTimestamp();
-            long dayStart = TimeUtil.getStartOfToday(ts).toInstant().toEpochMilli();
+            OffsetDateTime dayStart = TimeUtil.getStartOfToday(ts);
 
             mergedData.compute(dayStart, (key, existing) -> {
                 if (existing == null) {
                     return new TrafficDataComputed(
-                            Instant.ofEpochMilli(key).atZone(ts.getOffset()).toOffsetDateTime(),
+                            key,
                             record.getDataOverallUploaded(),
                             record.getDataOverallDownloaded()
                     );
@@ -196,8 +196,8 @@ public final class PBHChartController extends AbstractFeatureModule {
     private void handlePeerTrends(Context ctx) {
         var downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-        Map<Long, AtomicInteger> connectedPeerTrends = new ConcurrentHashMap<>();
-        Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
+        Map<OffsetDateTime, AtomicInteger> connectedPeerTrends = new ConcurrentHashMap<>();
+        Map<OffsetDateTime, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
 
         var queryConnected = Wrappers.<PeerRecordEntity>lambdaQuery()
                 .select(PeerRecordEntity::getId, PeerRecordEntity::getLastTimeSeen)
@@ -215,22 +215,22 @@ public final class PBHChartController extends AbstractFeatureModule {
 
         peerRecordService.list(queryConnected).forEach(entity -> {
             var startOfDay = TimeUtil.getStartOfToday(entity.getLastTimeSeen());
-            connectedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
+            connectedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
         });
 
         historyService.list(queryBanned).forEach(entity -> {
             var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt());
-            bannedPeerTrends.computeIfAbsent(startOfDay.toInstant().toEpochMilli(), k -> new AtomicInteger()).addAndGet(1);
+            bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
         });
 
         ctx.json(new StdResp(true, null, Map.of(
                 "connectedPeersTrend", connectedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
+                        .map((e) -> new SimpleOffsetDateTimeIntKVDTO(e.getKey(), e.getValue().intValue()))
+                        .sorted(Comparator.comparing(SimpleOffsetDateTimeIntKVDTO::key))
                         .toList(),
                 "bannedPeersTrend", bannedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
+                        .map((e) -> new SimpleOffsetDateTimeIntKVDTO(e.getKey(), e.getValue().intValue()))
+                        .sorted(Comparator.comparing(SimpleOffsetDateTimeIntKVDTO::key))
                         .toList()
         )));
     }
