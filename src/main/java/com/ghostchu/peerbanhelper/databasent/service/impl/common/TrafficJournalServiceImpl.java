@@ -38,10 +38,18 @@ public class TrafficJournalServiceImpl extends ServiceImpl<TrafficJournalMapper,
             entityInDb.setProtocolOverallDownloadedAtStart(overallDownloadedProtocol);
             entityInDb.setProtocolOverallUploadedAtStart(overallUploadedProtocol);
         }
-        entityInDb.setDataOverallDownloaded(overallDownloaded);
-        entityInDb.setDataOverallUploaded(overallUploaded);
-        entityInDb.setProtocolOverallDownloaded(overallDownloadedProtocol);
-        entityInDb.setProtocolOverallUploaded(overallUploadedProtocol);
+        if (entityInDb.getDataOverallDownloaded() < overallDownloaded) {
+            entityInDb.setDataOverallDownloaded(overallDownloaded);
+        }
+        if (entityInDb.getDataOverallUploaded() < overallUploaded) {
+            entityInDb.setDataOverallUploaded(overallUploaded);
+        }
+        if (entityInDb.getProtocolOverallDownloaded() < overallDownloadedProtocol) {
+            entityInDb.setProtocolOverallDownloaded(overallDownloadedProtocol);
+        }
+        if (entityInDb.getProtocolOverallUploaded() < overallUploadedProtocol) {
+            entityInDb.setProtocolOverallUploaded(overallUploadedProtocol);
+        }
         baseMapper.insertOrUpdate(entityInDb);
     }
 
