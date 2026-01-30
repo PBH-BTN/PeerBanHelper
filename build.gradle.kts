@@ -63,7 +63,7 @@ dependencies {
     implementation("org.aspectj:aspectjweaver:1.9.25.1")
     implementation("org.xerial:sqlite-jdbc:3.51.1.0")
     implementation("com.h2database:h2:2.3.232")
-    implementation("com.mysql:mysql-connector-j:9.5.0")
+    implementation("com.mysql:mysql-connector-j:9.6.0")
     implementation("org.postgresql:postgresql:42.7.9")
     implementation("com.zaxxer:HikariCP:7.0.2")
 
@@ -269,7 +269,7 @@ tasks.jar {
     manifest {
         attributes(
             "Main-Class" to "com.ghostchu.peerbanhelper.MainJumpLoader",
-            "Class-Path" to configurations.runtimeClasspath.get().files.joinToString(" ") { "libraries/${it.name}" },
+            "Class-Path" to configurations.runtimeClasspath.get().files.joinToString(" ") { "libraries/${it.name}" } + " libraries/swt.jar",
             "Enable-Native-Access" to "ALL-UNNAMED"
         )
     }

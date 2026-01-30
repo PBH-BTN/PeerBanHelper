@@ -9,6 +9,9 @@ import com.ghostchu.peerbanhelper.databasent.mapper.java.TorrentMapper;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -16,9 +19,18 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
 @Service
 public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity> implements TorrentService {
     private final TransactionTemplate torrentCreateNoTransactionTemplate;
+    private final Cache<@NotNull String, @NotNull TorrentEntity> instanceCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .maximumSize(1000)
+            .softValues()
+            .build();
+
 
     public TorrentServiceImpl(PlatformTransactionManager transactionManager) {
         torrentCreateNoTransactionTemplate = new TransactionTemplate(transactionManager);
@@ -33,18 +45,28 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
                 existing.setSize(torrent.getSize());
                 existing.setPrivateTorrent(torrent.getPrivateTorrent());
                 torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(existing));
+                instanceCache.put(torrent.getInfoHash(), torrent);
             }
             return existing;
         } else {
             torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(torrent));
+            instanceCache.put(torrent.getInfoHash(), torrent);
             return torrent;
         }
     }
 
     @Override
     public @Nullable TorrentEntity queryByInfoHash(@NotNull String infoHash) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash)
+        var cached = instanceCache.getIfPresent(infoHash);
+        if (cached != null) {
+            return cached;
+        }
+        var entity = baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash)
                 .last("limit 1"));
+        if (entity != null) {
+            instanceCache.put(infoHash, entity);
+        }
+        return entity;
     }
 
     @Override
