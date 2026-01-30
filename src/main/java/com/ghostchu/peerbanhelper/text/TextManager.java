@@ -280,7 +280,10 @@ public final class TextManager implements Reloadable {
         return tl(locale, new TranslationComponent(key.getKey(), (Object[]) convert(locale, params)));
     }
 
-    public static String tl(String locale, TranslationComponent translationComponent) {
+    public static String tl(String locale, @Nullable TranslationComponent translationComponent) {
+        if (translationComponent == null) {
+            return null;
+        }
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
 
         // 按需加载语言文件
