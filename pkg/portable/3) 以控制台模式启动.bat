@@ -14,6 +14,7 @@ set "JAVA_EXEC=%JAVA_BIN%\java.exe"
 :: ============================================================
 "%JAVA_EXEC%"^
  -XX:+UseCompactObjectHeaders^
+ -XX:ZCollectionInterval=60^
  --enable-native-access=ALL-UNNAMED^
  -Djdk.attach.allowAttachSelf=true^
  -XX:MaxRAMPercentage=85.0^
