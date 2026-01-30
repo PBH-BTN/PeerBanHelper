@@ -11,7 +11,6 @@ import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +19,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -59,16 +57,16 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
 
     @Override
     public @Nullable TorrentEntity queryByInfoHash(@NotNull String infoHash) {
-        try {
-            return instanceCache.get(infoHash, () -> baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash)
-                    .last("limit 1")));
-        } catch (ExecutionException e) {
-            var torrent = baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash)
-                    .last("limit 1"));
-            log.debug("Error querying torrent by info hash from cache: {}... WTF?!", infoHash, e);
-            Sentry.captureException(e);
-            return torrent;
+        var cached = instanceCache.getIfPresent(infoHash);
+        if (cached != null) {
+            return cached;
         }
+        var entity = baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash)
+                .last("limit 1"));
+        if (entity != null) {
+            instanceCache.put(infoHash, entity);
+        }
+        return entity;
     }
 
     @Override
