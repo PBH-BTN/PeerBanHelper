@@ -14,6 +14,8 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.web.exception.*;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
@@ -24,6 +26,7 @@ import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -35,6 +38,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -43,21 +47,22 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public final class JavalinWebContainer {
+public final class JavalinWebContainer implements Reloadable {
     private final Javalin javalin;
-    private final PBHPortMapper pBHPortMapper;
     @Setter
     @Getter
     private String token;
-    private final Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
+    private final Cache<@NotNull IPAddress, @NotNull AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
             .build();
-    private final Cache<IPAddress, Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
+    private final Cache<@NotNull IPAddress, @NotNull Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
     @Getter
     private volatile boolean started;
+    private boolean webuiAnalyticsEnabled;
 
-    public JavalinWebContainer(LicenseManager licenseManager, PBHPortMapper pBHPortMapper) {
+    public JavalinWebContainer(LicenseManager licenseManager) {
+        reloadConfig();
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -92,15 +97,56 @@ public final class JavalinWebContainer {
                         });
                         c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
                     } else {
+                        //c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
+                        c.spaRoot.addHandler("/", ctx -> {
+                            try (var in = this.getClass().getResourceAsStream("/static/index.html")) {
+                                if (in == null) {
+                                    ctx.status(HttpStatus.NOT_FOUND);
+                                    ctx.result("SPA index.html not found in classpath.");
+                                    return;
+                                }
+                                String data = new String(in.readAllBytes());
+                                if (webuiAnalyticsEnabled) {
+                                    data = data.replace("<title>PeerBanHelper</title>",
+                                                    """
+                                                    <title>PeerBanHelper</title>
+                                                    <script>
+                                                            window.beforeSendHandler = function(type, payload) {
+                                                                payload.hostname = "privacy-redacted.local";
+                                                                payload.referrer = "http://privacy-redacted.local";
+                                                                try {
+                                                                    if (payload.url.startsWith('http')) {
+                                                                        const urlObj = new URL(payload.url);
+                                                                        payload.url = "http://privacy-redacted.local" + urlObj.pathname + urlObj.search;
+                                                                    } else {
+                                                                        payload.url = "http://privacy-redacted.local" + (payload.url.startsWith('/') ? payload.url : '/' + payload.url);
+                                                                    }
+                                                                } catch (e) {
+                                                                    payload.url = payload.url.replace(/^https?:\\/\\/[^/]+/, 'http://0.0.0.0');
+                                                                }
+                                                                return payload;
+                                                            };
+                                                    </script>
+                                                    <script defer src="https://uma.pbh-btn.com/script.js"
+                                                    data-website-id="58076dc4-266e-4984-abb6-7c48afa22d4d"
+                                                    data-exclude-search="true"
+                                                    data-exclude-ip="true"
+                                                    data-exclude-token="true"
+                                                    data-before-send="beforeSendHandler"
+                                                    ></script>
+                                                    """);
+                                }
+                                ctx.html(data);
+                            }
+                        });
                         c.staticFiles.add(staticFiles -> {
                             staticFiles.hostedPath = "/";
                             staticFiles.directory = "/static";
                             staticFiles.location = Location.CLASSPATH;
                             staticFiles.precompressMaxSize = -1;
                             staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
-                            //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
-                        c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
+
                     }
             state.routes.exception(IPAddressBannedException.class, (e, ctx) -> {
                         ctx.status(HttpStatus.TOO_MANY_REQUESTS);
@@ -137,6 +183,7 @@ public final class JavalinWebContainer {
                         ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
                         ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
                         log.error("500 Internal Server Error", e);
+                        Sentry.captureException(e);
                     })
                     .beforeMatched(ctx -> {
                         if (!securityCheck(ctx)) {
@@ -193,7 +240,16 @@ public final class JavalinWebContainer {
         });
 
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
-        this.pBHPortMapper = pBHPortMapper;
+    }
+
+    private void reloadConfig() {
+        this.webuiAnalyticsEnabled = Main.getMainConfig().getBoolean("privacy.webui-analytics", true);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     private boolean securityCheck(Context ctx) {
@@ -264,7 +320,8 @@ public final class JavalinWebContainer {
                 if (localeSettings.length > 1) {
                     prefer = Float.parseFloat(localeSettings[1].substring(2));
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Sentry.captureException(e);
             }
             preferLocales.add(new AcceptLanguages(localeCode, prefer));
         }
@@ -272,7 +329,7 @@ public final class JavalinWebContainer {
         return preferLocales;
     }
 
-    @SneakyThrows
+    @SneakyThrows(ExecutionException.class)
     public boolean allowAttemptLogin(String ip, String userAgent) {
         var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
         boolean allowed = counter.get() <= 10;
@@ -282,7 +339,7 @@ public final class JavalinWebContainer {
         return allowed;
     }
 
-    @SneakyThrows
+    @SneakyThrows(ExecutionException.class)
     public synchronized void markLoginFailed(String ip, String userAgent) {
         var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
         counter.incrementAndGet();
@@ -302,7 +359,7 @@ public final class JavalinWebContainer {
         return ipAddr;
     }
 
-    @SneakyThrows
+    @SneakyThrows(ExecutionException.class)
     public synchronized void markLoginSuccess(String ip, String userAgent, boolean silent) {
         var ipBlock = getPrefixedIPAddr(ip);
         var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
@@ -310,7 +367,7 @@ public final class JavalinWebContainer {
         if (LOGIN_SESSION_TIMETABLE.getIfPresent(ipBlock) == null) {
             LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
-            if(!silent) {
+            if (!silent) {
                 Main.getGuiManager().createNotification(Level.INFO,
                         tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
                         tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
@@ -318,7 +375,7 @@ public final class JavalinWebContainer {
         }
     }
 
-    private Cache<IPAddress, AtomicInteger> fail2Ban() {
+    private Cache<@NotNull IPAddress, @NotNull AtomicInteger> fail2Ban() {
         return FAIL2BAN;
     }
 

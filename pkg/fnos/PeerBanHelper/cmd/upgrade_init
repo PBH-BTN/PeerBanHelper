@@ -1,0 +1,5 @@
+#!/bin/bash
+
+### This script is called before the user upgrades the application.
+
+exit 0

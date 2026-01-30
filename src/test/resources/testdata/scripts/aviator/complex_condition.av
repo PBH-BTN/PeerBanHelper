@@ -1,0 +1,42 @@
+## @NAME 复杂条件检查
+## @AUTHOR Test
+## @CACHEABLE false
+## @VERSION 1.0
+## @THREADSAFE false
+
+## 综合多个条件进行判断
+## 使用 Aviator 内置函数
+
+let isClientNameBlank = clientName == nil || clientName == '';
+let isPeerIdBlank = peerId == nil || peerId == '';
+
+if(isClientNameBlank && isPeerIdBlank) {
+    return '@客户端信息不完整，跳过检查';
+}
+
+## 检测可疑行为的标志
+let reason = '';
+
+## 条件1: 上传速度为0但下载速度很高 (> 1MB/s)
+if(uploadSpeed == 0 && downloadSpeed > 1048576) {
+    reason = '只下载不上传';
+}
+
+## 条件2: 进度异常（已经100%但还在下载）
+if(reason == '' && progress >= 1.0 && downloadSpeed > 0) {
+    reason = '进度100%仍在下载';
+}
+
+## 条件3: 客户端名称包含可疑关键字
+if(reason == '' && !isClientNameBlank) {
+    if(string.contains(clientName, 'fake') || string.contains(clientName, 'Fake') ||
+       string.contains(clientName, 'hack') || string.contains(clientName, 'Hack')) {
+        reason = '可疑客户端名称';
+    }
+}
+
+if(reason != '') {
+    return '可疑行为检测: ' + reason;
+}
+
+return false;

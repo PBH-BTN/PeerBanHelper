@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.gui;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.database.table.AlertEntity;
+import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import org.springframework.stereotype.Component;
 

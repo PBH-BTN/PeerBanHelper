@@ -6,7 +6,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.*;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
-import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Data
 @Slf4j
 public final class BtnRulesetParsed {
-    private final ScriptEngine scriptEngine;
+    private final ScriptEngineManager scriptEngineManager;
     private String version;
     private Map<String, List<Rule>> peerIdRules;
     private Map<String, List<Rule>> clientNameRules;
@@ -30,8 +30,8 @@ public final class BtnRulesetParsed {
     private Map<String, List<Rule>> portRules;
     private Map<String, CompiledScript> scriptRules;
 
-    public BtnRulesetParsed(ScriptEngine scriptEngine, BtnRuleset btnRuleset, boolean scriptExecute) {
-        this.scriptEngine = scriptEngine;
+    public BtnRulesetParsed(ScriptEngineManager scriptEngineManager, BtnRuleset btnRuleset, boolean scriptExecute) {
+        this.scriptEngineManager = scriptEngineManager;
         this.version = btnRuleset.getVersion();
         this.ipRules = parseIPRule(btnRuleset.getIpRules());
         this.portRules = parsePortRule(btnRuleset.getPortRules());
@@ -46,7 +46,7 @@ public final class BtnRulesetParsed {
         long startAt = System.currentTimeMillis();
         scriptRules.forEach((name, content) -> {
             try {
-                var script = scriptEngine.compileScript(null, name, content);
+                var script = scriptEngineManager.compileScript(null, name, content);
                 if (script != null) {
                     scripts.put(name, script);
                 }

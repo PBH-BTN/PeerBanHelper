@@ -1,0 +1,52 @@
+## @NAME 正则表达式匹配测试
+## @AUTHOR Test
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+## 使用字符串函数检查客户端名称和 PeerId
+
+if(clientName == nil || clientName == '') {
+    return false;
+}
+
+## 检查是否为可疑的随机字符串（只有字母数字且长度异常，超过20个字符）
+## 使用长度检查代替正则表达式
+if(string.length(clientName) >= 20) {
+    ## 简化检查：如果不包含常见分隔符（/, -, 空格, .）则可疑
+    if(!string.contains(clientName, '/') &&
+       !string.contains(clientName, '-') &&
+       !string.contains(clientName, ' ') &&
+       !string.contains(clientName, '.')) {
+        return '可疑随机客户端名称: ' + clientName;
+    }
+}
+
+## 检查 PeerId 格式
+if(peerId != nil && peerId != '') {
+    ## 使用 string.startsWith 代替正则表达式
+    ## 标准 PeerId 格式通常以 - 开头，后跟两个字母/数字
+
+    let isStandardFormat = false;
+
+    ## 格式1: -XX 格式（最常见，如 -qB, -TR, -DE, -UT）
+    if(string.startsWith(peerId, '-')) {
+        ## PeerId 以 - 开头，是标准格式
+        isStandardFormat = true;
+    }
+
+    ## 格式2: 以字母开头（某些老客户端）
+    if(!isStandardFormat) {
+        let firstChar = string.substring(peerId, 0, 1);
+        ## 检查是否为字母 A-Z 或 a-z
+        if((firstChar >= 'A' && firstChar <= 'Z') || (firstChar >= 'a' && firstChar <= 'z')) {
+            isStandardFormat = true;
+        }
+    }
+
+    if(!isStandardFormat) {
+        return '非标准 PeerId 格式: ' + peerId;
+    }
+}
+
+return false;

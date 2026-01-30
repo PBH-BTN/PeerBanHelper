@@ -1,0 +1,45 @@
+## @NAME IP 范围检查
+## @AUTHOR Test
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+## 检查 IP 是否包含特定特征
+
+if(ipAddress == nil || ipAddress == '') {
+    return false;
+}
+
+## 检查 IPv6 特定段
+if(string.contains(ipAddress, ':2e0:61ff:fe')) {
+    return '检测到特征 IPv6 段: 2e0:61ff:fe';
+}
+
+## 检查是否为保留地址
+if(string.startsWith(ipAddress, '0.') || string.startsWith(ipAddress, '127.')) {
+    return '@保留地址，跳过检查';
+}
+
+## 检查私有地址范围
+if(string.startsWith(ipAddress, '192.168.') ||
+   string.startsWith(ipAddress, '10.') ||
+   string.startsWith(ipAddress, '172.16.') ||
+   string.startsWith(ipAddress, '172.17.') ||
+   string.startsWith(ipAddress, '172.18.') ||
+   string.startsWith(ipAddress, '172.19.') ||
+   string.startsWith(ipAddress, '172.20.') ||
+   string.startsWith(ipAddress, '172.21.') ||
+   string.startsWith(ipAddress, '172.22.') ||
+   string.startsWith(ipAddress, '172.23.') ||
+   string.startsWith(ipAddress, '172.24.') ||
+   string.startsWith(ipAddress, '172.25.') ||
+   string.startsWith(ipAddress, '172.26.') ||
+   string.startsWith(ipAddress, '172.27.') ||
+   string.startsWith(ipAddress, '172.28.') ||
+   string.startsWith(ipAddress, '172.29.') ||
+   string.startsWith(ipAddress, '172.30.') ||
+   string.startsWith(ipAddress, '172.31.')) {
+    return '@私有地址，跳过检查';
+}
+
+return false;

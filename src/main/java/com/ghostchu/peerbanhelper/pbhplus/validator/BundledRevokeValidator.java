@@ -7,6 +7,7 @@ import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,6 +56,7 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
             });
         } catch (IOException e) {
             log.debug("Unable to validate license {} to check if it revoked locally: {}", license.getLicenseTo(), e.getMessage());
+            Sentry.captureException(e);
             return false;
         }
     }

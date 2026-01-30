@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
+import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +68,7 @@ public class DownloaderDiscovery {
                             }
                         } catch (Exception e) {
                             log.debug("Failed to get downloader information from {}:{}", listenConnection.getLocalAddress(), listenConnection.getLocalPort(), e);
+                            Sentry.captureException(e);
                         } finally {
                             semaphore.release();
                         }

@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.util.pow;
 
+import io.sentry.Sentry;
+
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -48,6 +50,7 @@ public class PoWClient implements AutoCloseable {
                         nonce += threadCount;
                     }
                 } catch (Exception e) {
+                    Sentry.captureException(e);
                     resultFuture.completeExceptionally(e);
                 }
             });

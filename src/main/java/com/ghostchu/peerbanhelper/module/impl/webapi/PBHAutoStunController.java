@@ -8,7 +8,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunInstance;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunManager;
@@ -153,7 +153,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 .reversed());
         long total = connectionList.size();
         long skip = pageable.getZeroBasedPage() * pageable.getSize();
-        context.json(new StdResp(true, null, new Page<>(pageable, total, connectionList.stream().skip(skip).limit(pageable.getSize()).toList())));
+        context.json(new StdResp(true, null, new PBHPage<>(pageable.getPage(), pageable.getSize(), total, connectionList.stream().skip(skip).limit(pageable.getSize()).toList())));
     }
 
     private void tunnelInfo(@NotNull Context context) {

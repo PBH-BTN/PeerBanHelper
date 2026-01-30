@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +85,7 @@ public final class TextManager implements Reloadable {
             }
         } catch (IOException e) {
             log.warn("Failed to scan bundled translations", e);
+            Sentry.captureException(e);
         }
 
         // 扫描覆盖语言
@@ -125,10 +127,12 @@ public final class TextManager implements Reloadable {
                     loaded = true;
                 } catch (IOException | InvalidConfigurationException e) {
                     log.warn("Failed to load bundled translation for {}", locale, e);
+                    Sentry.captureException(e);
                 }
             }
         } catch (IOException e) {
             log.debug("No bundled translations found for {}", locale);
+            Sentry.captureException(e);
         }
 
         // 尝试加载覆盖语言
@@ -141,6 +145,7 @@ public final class TextManager implements Reloadable {
                 loaded = true;
             } catch (InvalidConfigurationException | IOException e) {
                 log.warn("Failed to load override translation for {}", locale, e);
+                Sentry.captureException(e);
             }
         }
 
@@ -188,6 +193,7 @@ public final class TextManager implements Reloadable {
             return configuration;
         } catch (IOException | InvalidConfigurationException e) {
             log.warn("Failed to load built-in fallback translation.", e);
+            Sentry.captureException(e);
             return configuration;
         }
     }
@@ -274,7 +280,10 @@ public final class TextManager implements Reloadable {
         return tl(locale, new TranslationComponent(key.getKey(), (Object[]) convert(locale, params)));
     }
 
-    public static String tl(String locale, TranslationComponent translationComponent) {
+    public static String tl(String locale, @Nullable TranslationComponent translationComponent) {
+        if (translationComponent == null) {
+            return null;
+        }
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
 
         // 按需加载语言文件
@@ -293,9 +302,6 @@ public final class TextManager implements Reloadable {
                 }
             }
         }
-        if (translationComponent == null) {
-            return "null";
-        }
         if (translationComponent.getKey().isBlank()) {
             return "";
         }
@@ -309,6 +315,7 @@ public final class TextManager implements Reloadable {
                 str = postProcessor.process(str, locale, params);
             } catch (Exception e) {
                 log.warn("Unable to process post processor: key={}, locale={}, params={}", translationComponent.getKey(), locale, translationComponent.getParams());
+                Sentry.captureException(e);
             }
         }
         return str;
@@ -335,6 +342,7 @@ public final class TextManager implements Reloadable {
                 components[i] = obj.toString();
             } catch (Exception exception) {
                 log.debug("Failed to process the object: {}", obj);
+                Sentry.captureException(exception);
                 components[i] = String.valueOf(obj); // null safe
             }
         }

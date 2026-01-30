@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
-import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+
+import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 
 public record TorrentEntityDTO(Long id, String infoHash, String name, Long size, Boolean privateTorrent) {
     public static TorrentEntityDTO from(TorrentEntity torrentEntity){

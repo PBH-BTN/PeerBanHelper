@@ -3,7 +3,9 @@ package com.ghostchu.peerbanhelper.util;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 public final class WebUtil {
@@ -17,8 +19,8 @@ public final class WebUtil {
         if (endAtStr == null) {
             throw new IllegalArgumentException("endAt cannot be null");
         }
-        Timestamp startAt = new Timestamp(Long.parseLong(startAtStr));
-        Timestamp endAt = new Timestamp(Long.parseLong(endAtStr));
+        OffsetDateTime startAt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(startAtStr)), ZoneOffset.UTC);
+        OffsetDateTime endAt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(endAtStr)), ZoneOffset.UTC);
         return new TimeQueryModel(startAt, endAt);
     }
 
@@ -56,8 +58,8 @@ public final class WebUtil {
     }
 
     public record TimeQueryModel(
-            Timestamp startAt,
-            Timestamp endAt
+            OffsetDateTime startAt,
+            OffsetDateTime endAt
     ) {
     }
 }

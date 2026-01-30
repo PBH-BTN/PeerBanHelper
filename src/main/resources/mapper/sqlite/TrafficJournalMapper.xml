@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.TrafficJournalMapper">
+    <resultMap id="TrafficDataComputedMap" type="com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed">
+        <result property="timestamp" column="ts" javaType="java.time.OffsetDateTime"/>
+        <result property="dataOverallUploaded" column="uploaded" javaType="long"/>
+        <result property="dataOverallDownloaded" column="downloaded" javaType="long"/>
+    </resultMap>
+
+    <select id="selectAllDownloadersOverallData" parameterType="map" resultMap="TrafficDataComputedMap">
+        SELECT
+        timestamp AS ts,
+        SUM(data_overall_uploaded) - SUM(data_overall_uploaded_at_start) AS uploaded,
+        SUM(data_overall_downloaded) - SUM(data_overall_downloaded_at_start) AS downloaded
+        FROM traffic_journal_v3
+        WHERE timestamp &gt;= #{start}
+        AND timestamp &lt;= #{end}
+        GROUP BY timestamp
+    </select>
+
+    <select id="selectSpecificDownloaderOverallData" parameterType="map" resultMap="TrafficDataComputedMap">
+        SELECT
+        timestamp AS ts,
+        MAX(0, data_overall_uploaded - data_overall_uploaded_at_start) AS uploaded,
+        MAX(0, data_overall_downloaded - data_overall_downloaded_at_start) AS downloaded
+        FROM traffic_journal_v3
+        WHERE downloader = #{downloader}
+        AND timestamp &gt;= #{start}
+        AND timestamp &lt;= #{end}
+    </select>
+</mapper>

@@ -12,7 +12,9 @@ export default {
 
   'page.settings.tab.config.plus.button': '点击打开',
 
-  'page.settings.tab.config.privacy.errorReport': '启用错误报告',
+  'page.settings.tab.config.privacy.analytics': '启用遥测',
+  'page.settings.tab.config.privacy.analytics.tips':
+    '收集的匿名数据不包含隐私数据，仅用于改进软件质量，将不会传送给第三方',
 
   'page.settings.tab.config.server.title': 'WebUI',
   'page.settings.tab.config.server.port': '端口',

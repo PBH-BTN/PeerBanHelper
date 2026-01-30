@@ -47,7 +47,6 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private JavalinWebContainer webContainer;
     private long banDuration;
     private Set<String> cities;
-    private boolean preloadBanList;
     @Autowired
     private IPDBManager iPDBManager;
 
@@ -281,7 +280,6 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
 
     private void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
-        this.preloadBanList = getConfig().getBoolean("preload-banlist", false);
         this.ips = new HashSet<>();
         for (String s : getConfig().getStringList("ips")) {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(s);

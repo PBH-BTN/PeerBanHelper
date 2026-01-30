@@ -128,6 +128,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("globalPaused", downloaderServer.isGlobalPaused());
+        data.put("analytics", Main.getMainConfig().getBoolean("privacy.analytics"));
         context.json(new StdResp(true, null, data));
     }
 

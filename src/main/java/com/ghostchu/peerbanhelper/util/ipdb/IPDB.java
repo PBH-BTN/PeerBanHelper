@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.backgroundtask.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
@@ -14,7 +15,7 @@ import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.model.CountryResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
-import com.maxmind.geoip2.record.Location;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -24,6 +25,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okio.Okio;
+import org.jetbrains.annotations.NotNull;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.*;
@@ -52,6 +54,7 @@ public final class IPDB implements AutoCloseable {
     private final File mmdbGeoCNFile;
     private final OkHttpClient httpClient;
     private final HTTPUtil httpUtil;
+    private final BackgroundTaskManager backgroundTaskManager;
     @Getter
     private DatabaseReader mmdbCity;
     @Getter
@@ -59,7 +62,7 @@ public final class IPDB implements AutoCloseable {
     private Reader geoCN;
     private List<String> languageTag;
 
-    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent, HTTPUtil httpUtil) throws IllegalArgumentException, IOException {
+    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent, HTTPUtil httpUtil, BackgroundTaskManager backgroundTaskManager) throws IllegalArgumentException, IOException {
 //        this.dataFolder = dataFolder;
 //        this.accountId = accountId;
 //        this.licenseKey = licenseKey;
@@ -70,6 +73,7 @@ public final class IPDB implements AutoCloseable {
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
         this.httpUtil = httpUtil;
+        this.backgroundTaskManager = backgroundTaskManager;
 //        this.userAgent = userAgent;
         this.httpClient = httpUtil.addProgressTracker(httpUtil.newBuilder()
                         .connectTimeout(Duration.ofSeconds(15))
@@ -104,13 +108,12 @@ public final class IPDB implements AutoCloseable {
         geoData.setNetwork(queryNetwork(address));
         if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
             String iso = geoData.getCountry().getIso();
-            if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
-                    || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
+            if ("CN".equalsIgnoreCase(iso) || "TW".equalsIgnoreCase(iso)
+                    || "HK".equalsIgnoreCase(iso) || "MO".equalsIgnoreCase(iso)) {
                 queryGeoCN(address, geoData);
             }
         }
         return geoData;
-
     }
 
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
@@ -162,7 +165,8 @@ public final class IPDB implements AutoCloseable {
                 networkData.setNetType(tlUI(component));
             }
             geoData.setNetwork(networkData);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
         }
     }
 
@@ -173,7 +177,8 @@ public final class IPDB implements AutoCloseable {
             networkData.setIsp(asnResponse.autonomousSystemOrganization());
             networkData.setNetType(null);
             return networkData;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -182,19 +187,20 @@ public final class IPDB implements AutoCloseable {
     private IPGeoData.CityData queryCity(InetAddress address) {
         try {
             IPGeoData.CityData cityData = new IPGeoData.CityData();
-            IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
+            //IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
             CityResponse cityResponse = mmdbCity.city(address);
             City city = cityResponse.city();
-            Location location = cityResponse.location();
+//            Location location = cityResponse.location();
             cityData.setName(city.name());
             cityData.setIso(city.geonameId());
-            locationData.setTimeZone(location.timeZone());
-            locationData.setLongitude(location.longitude());
-            locationData.setLatitude(location.latitude());
-            locationData.setAccuracyRadius(location.accuracyRadius());
-            cityData.setLocation(locationData);
+//            locationData.setTimeZone(location.timeZone());
+//            locationData.setLongitude(location.longitude());
+//            locationData.setLatitude(location.latitude());
+//            locationData.setAccuracyRadius(location.accuracyRadius());
+//            cityData.setLocation(locationData);
             return cityData;
         } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -216,7 +222,8 @@ public final class IPDB implements AutoCloseable {
             }
             countryData.setName(countryRegionName);
             return countryData;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
@@ -234,23 +241,28 @@ public final class IPDB implements AutoCloseable {
             asData.setIpAddress(asnResponse.ipAddress().getHostAddress());
             asData.setNetwork(network);
             return asData;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
             return null;
         }
     }
 
-    private void updateGeoCN(File mmdbGeoCNFile) throws IOException {
-        log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
-        IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
-        //IPDBDownloadSource mirror2 = new IPDBDownloadSource("https://ghp.ci/https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
-        IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", "GeoCN", true);
-        IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", "GeoCN", true);
-        Path tmp = Files.createTempFile("GeoCN", ".mmdb");
-        downloadFile(tmp, "GeoCN", mirror1, mirror3, mirror4).join();
-        if (!tmp.toFile().exists()) {
-            throw new IllegalStateException("Download mmdb database failed!");
-        }
-        Files.move(tmp, mmdbGeoCNFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    private void updateGeoCN(File mmdbGeoCNFile) {
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
+                new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB),
+                (task, callback) -> {
+                    log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
+                    IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
+                    IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", "GeoCN", true);
+                    IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", "GeoCN", true);
+                    Path tmp = Files.createTempFile("GeoCN", ".mmdb");
+                    downloadFile(tmp, "GeoCN", task, callback, mirror1, mirror3, mirror4).join();
+                    if (!tmp.toFile().exists()) {
+                        throw new IllegalStateException("Download mmdb database failed!");
+                    }
+                    Files.move(tmp, mmdbGeoCNFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+        )).join();
     }
 
 
@@ -269,22 +281,26 @@ public final class IPDB implements AutoCloseable {
         this.geoCN = new Reader(mmdbGeoCNFile, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache());
     }
 
-    private void updateMMDB(String databaseName, File target) throws IOException {
-        log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
-        IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/PBH-BTN/GeoLite.mmdb/releases/latest/download/", databaseName, true);
-        //IPDBDownloadSource mirror2 = new IPDBDownloadSource("https://ghp.ci/https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/", databaseName);
-        IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", databaseName, true);
-        IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);
-        Path tmp = Files.createTempFile(databaseName, ".mmdb");
-        downloadFile(tmp, databaseName, mirror1, mirror3, mirror4).join();
-        if (!tmp.toFile().exists()) {
-            if (isMmdbNeverDownloaded(target)) {
-                throw new IllegalStateException("Download mmdb database failed!");
-            } else {
-                log.warn(tlUI(Lang.IPDB_EXISTS_UPDATE_FAILED, databaseName));
-            }
-        }
-        Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    private void updateMMDB(String databaseName, File target) {
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
+                new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB),
+                (task, callback) -> {
+                    log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
+                    IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/PBH-BTN/GeoLite.mmdb/releases/latest/download/", databaseName, true);
+                    IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", databaseName, true);
+                    IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);
+                    Path tmp = Files.createTempFile(databaseName, ".mmdb");
+                    downloadFile(tmp, databaseName, task, callback, mirror1, mirror3, mirror4).join();
+                    if (!tmp.toFile().exists()) {
+                        if (isMmdbNeverDownloaded(target)) {
+                            throw new IllegalStateException("Download mmdb database failed!");
+                        } else {
+                            log.warn(tlUI(Lang.IPDB_EXISTS_UPDATE_FAILED, databaseName));
+                        }
+                    }
+                    Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+        )).join();
     }
 
 
@@ -302,22 +318,31 @@ public final class IPDB implements AutoCloseable {
         return System.currentTimeMillis() - target.lastModified() > updateInterval;
     }
 
-    private CompletableFuture<Void> downloadFile(Path path, String databaseName, IPDBDownloadSource... mirrorList) {
-        return downloadFile(Arrays.stream(mirrorList).collect(Collectors.toList()), path, databaseName);
+    private CompletableFuture<Void> downloadFile(Path path, String databaseName, BackgroundTask bgTask, java.util.function.Consumer<BackgroundTask> callback, IPDBDownloadSource... mirrorList) {
+        return downloadFile(Arrays.stream(mirrorList).collect(Collectors.toList()), path, databaseName, bgTask, callback);
     }
 
-    private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
+    private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName, BackgroundTask bgTask, java.util.function.Consumer<BackgroundTask> callback) {
         return CompletableFuture.runAsync(() -> {
             IPDBDownloadSource mirror = mirrorList.removeFirst();
             // 创建带有进度追踪器的 HTTP 客户端
-
+            bgTask.setStatusText(new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB_DESCRIPTION, mirror.getIPDBUrl()));
+            callback.accept(bgTask);
             Request request = new Request.Builder()
                     .url(mirror.getIPDBUrl())
                     .get()
                     .build();
-
             try (Response response = httpClient.newCall(request).execute()) {
                 var body = response.body();
+                long totalSize = body.contentLength();
+                long totalRead = 0;
+                bgTask.setMax(totalSize);
+                if (totalSize <= 0) {
+                    bgTask.setBarType(BackgroundTaskProgressBarType.INDETERMINATE);
+                } else {
+                    bgTask.setBarType(BackgroundTaskProgressBarType.DETERMINATE);
+                }
+                callback.accept(bgTask);
                 if (response.code() == 200) {
                     if (mirror.supportXzip()) {
                         try {
@@ -327,9 +352,14 @@ public final class IPDB implements AutoCloseable {
                                 byte[] buffer = new byte[1024];
                                 int len;
                                 while ((len = gzipInputStream.read(buffer)) > 0) {
+                                    totalRead += len;
                                     fileOutputStream.write(buffer, 0, len);
+                                    bgTask.setCurrent(totalRead);
+                                    callback.accept(bgTask);
                                 }
                             }
+                            bgTask.setBarType(BackgroundTaskProgressBarType.INDETERMINATE);
+                            callback.accept(bgTask);
                             // validate mmdb
                             validateMMDB(tmp);
                             Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
@@ -351,17 +381,20 @@ public final class IPDB implements AutoCloseable {
 
                 if (!mirrorList.isEmpty()) {
                     log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                    downloadFile(mirrorList, path, databaseName).join();
+                    downloadFile(mirrorList, path, databaseName, bgTask, callback).join();
                     return;
                 }
                 log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, response.code() + " - " + response.body().string()));
             } catch (Exception e) {
                 if (!mirrorList.isEmpty()) {
                     log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                    downloadFile(mirrorList, path, databaseName).join();
+                    downloadFile(mirrorList, path, databaseName, bgTask, callback).join();
                     return;
                 }
                 log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
+                bgTask.setStatus(BackgroundTaskStatus.FAILED);
+                bgTask.setStatusText(new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB_FAILED_DESCRIPTION, e.getMessage()));
+                callback.accept(bgTask);
             }
         });
     }
@@ -433,7 +466,7 @@ public final class IPDB implements AutoCloseable {
     }
 
     public static final class MaxMindNodeCache implements NodeCache {
-        private final static Cache<CacheKey, DecodedValue> cache = CacheBuilder.newBuilder()
+        private final static Cache<@NotNull CacheKey, @NotNull DecodedValue> cache = CacheBuilder.newBuilder()
                 .maximumSize(2000)
                 .expireAfterAccess(1, TimeUnit.HOURS)
                 .build();

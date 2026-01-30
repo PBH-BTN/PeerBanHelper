@@ -29,12 +29,16 @@ import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
+import io.javalin.util.JavalinBindException;
+import io.sentry.SendCachedEnvelopeFireAndForgetIntegration;
+import io.sentry.SendFireAndForgetEnvelopeSender;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
@@ -52,13 +56,15 @@ import java.math.MathContext;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class Main {
+    @Getter
+    private static final UUID runtimeInstanceId = UUID.randomUUID();
     @Getter
     private static final EventBus eventBus = new EventBus();
     @Getter
@@ -66,6 +72,8 @@ public class Main {
     public static String DEF_LOCALE = Locale.getDefault().toLanguageTag().toLowerCase(Locale.ROOT).replace("-", "_");
     @Getter
     private static File dataDirectory;
+    @Getter
+    private static File cacheDirectory;
     @Getter
     private static File logsDirectory;
     @Getter
@@ -110,55 +118,97 @@ public class Main {
     private static long bootSince;
 
     public static void main(String[] args) {
-        bootSince = System.currentTimeMillis();
-        startupArgs = args;
-        System.setProperty("sun.net.useExclusiveBind", "false");
-        setupReloading();
-        setupConfDirectory(args);
-        loadFlagsProperties();
-        setupConfiguration();
-        meta = buildMeta();
-        setupLogback();
-        String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
-        log.info("Current system language tag: {}", defLocaleTag);
-        DEF_LOCALE = mainConfig.getString("language");
-        if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
-            DEF_LOCALE = ExternalSwitch.parse("pbh.userLocale");
-            if (DEF_LOCALE == null) {
-                DEF_LOCALE = defLocaleTag;
+        try {
+            bootSince = System.currentTimeMillis();
+            startupArgs = args;
+            System.setProperty("sun.net.useExclusiveBind", "false");
+            setupReloading();
+            setupConfDirectory(args);
+            loadFlagsProperties();
+            setupConfiguration();
+            meta = buildMeta();
+            setupLogback();
+            setupSentry();
+            String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+            Sentry.setTag("locale", defLocaleTag);
+            log.info("Current system language tag: {}", defLocaleTag);
+            DEF_LOCALE = mainConfig.getString("language");
+            if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
+                DEF_LOCALE = ExternalSwitch.parse("pbh.userLocale");
+                if (DEF_LOCALE == null) {
+                    DEF_LOCALE = defLocaleTag;
+                }
             }
+            loadPlatform();
+            initGUI(args);
+            Thread.ofPlatform().name("Bootstrap").start(() -> {
+                try {
+                    guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
+                    pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
+                    setupScriptEngine();
+                    log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
+                    applicationContext = new AnnotationConfigApplicationContext();
+                    applicationContext.register(AppConfig.class);
+                    applicationContext.refresh();
+                    server = applicationContext.getBean(PeerBanHelper.class);
+                    server.start();
+                    log.info(tlUI(Lang.BOOT_TIME, System.currentTimeMillis() - bootSince));
+                } catch (Throwable e) {
+                    log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
+                    Sentry.captureException(e);
+                    throw e;
+                }
+                setupShutdownHook();
+            });
+            guiManager.sync();
+        } catch (Throwable throwable) {
+            log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), throwable);
+            Sentry.captureException(throwable);
+            throw throwable;
         }
-        loadPlatform();
-        initGUI(args);
-        Thread.ofPlatform().name("Bootstrap").start(() -> {
-            guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
-            pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-            setupScriptEngine();
-            try {
-                log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
-                applicationContext = new AnnotationConfigApplicationContext();
-                applicationContext.register(AppConfig.class);
-                applicationContext.refresh();
-                server = applicationContext.getBean(PeerBanHelper.class);
-                server.start();
-                log.info(tlUI(Lang.BOOT_TIME, System.currentTimeMillis() - bootSince));
-            } catch (Exception e) {
-                log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
-                throw new RuntimeException(e);
-            }
-            setupShutdownHook();
-        });
-        guiManager.sync();
 
+    }
+
+    private static void setupSentry() {
+        Sentry.init(sentryOptions -> {
+            sentryOptions.setDsn("https://c42097bd57f945e98f745ad1838fe4f1@glitchtip.pbh-btn.com/1");
+            sentryOptions.setEnableExternalConfiguration(true); // Read DSN from sentry.properties
+            sentryOptions.setCacheDirPath(cacheDirectory.getAbsolutePath());
+            sentryOptions.setEnabled(mainConfig.getBoolean("privacy.analytics")); // Disable Sentry if analytics is disabled in config
+            sentryOptions.setDistinctId(mainConfig.getString("installation-id"));
+            sentryOptions.setServerName(mainConfig.getString("installation-id"));
+            sentryOptions.setEnvironment(meta.isSnapshotOrBeta() ? "development" : "production");
+            sentryOptions.setSendDefaultPii(false); // Do not track user information
+            sentryOptions.setAttachThreads(true);
+            sentryOptions.setPrintUncaughtStackTrace(true);
+            sentryOptions.setEnableUncaughtExceptionHandler(true);
+            sentryOptions.setProfilesSampleRate(1.0d); // TODO modify this value later
+            sentryOptions.setEnableUserInteractionTracing(false); // Do not tracker user behavior
+            sentryOptions.setRelease(meta.getVersion());
+            sentryOptions.setTag("os", System.getProperty("os.name"));
+            sentryOptions.setTag("osarch", System.getProperty("os.arch"));
+            sentryOptions.setTag("osversion", System.getProperty("os.version"));
+            sentryOptions.setTag("publisher", meta.getCompileUser() + "(" + meta.getCompileEmail() + ")");
+            sentryOptions.setTag("abbrev", meta.getAbbrev());
+            sentryOptions.addIntegration(
+                    new SendCachedEnvelopeFireAndForgetIntegration(
+                            new SendFireAndForgetEnvelopeSender(sentryOptions::getCacheDirPath)
+                    )
+            );
+            sentryOptions.addIgnoredExceptionForType(AddressNotFoundException.class);
+            sentryOptions.addIgnoredExceptionForType(JavalinBindException.class);
+
+        });
     }
 
     private static void loadPlatform() {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (os.startsWith("win")) {
             platform = new WindowsPlatform();
-            return;
+        } else {
+            platform = null;
         }
-        platform = null;
+        Sentry.setTag("platform", platform != null ? platform.getClass().getName() : "null");
     }
 
     private static void loadFlagsProperties() {
@@ -235,6 +285,7 @@ public class Main {
         }
 
         dataDirectory = new File(root);
+        cacheDirectory = new File(cacheDirectory, "cache");
         logsDirectory = new File(dataDirectory, "logs");
         configDirectory = new File(dataDirectory, "config");
         pluginDirectory = new File(dataDirectory, "plugins");
@@ -363,7 +414,9 @@ public class Main {
             var verInfo = info.getOperatingSystem().getVersionInfo();
             buildNumber = verInfo.getBuildNumber();
             codeName = verInfo.getCodeName();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            Sentry.captureException(e);
+            log.debug("Unable to get OS build number and code name", e);
         }
         userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
         return userAgent;
@@ -421,47 +474,6 @@ public class Main {
         return new String(chars);
     }
 
-//    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
-//        if (beanName == null) {
-//            beanName = decapitalize(clazz.getSimpleName());
-//        }
-//        if (applicationContext.containsBean(beanName)) {
-//            return;
-//        } else {
-//            String bn = decapitalize(clazz.getSimpleName());
-//            if (applicationContext.containsBean(bn)) {
-//                return;
-//            }
-//        }
-//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
-//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-//    }
-//
-//    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
-//        if (beanName == null) {
-//            beanName = decapitalize(clazz.getSimpleName());
-//        }
-//        if (applicationContext.containsBean(beanName)) {
-//            return;
-//        } else {
-//            String bn = decapitalize(clazz.getSimpleName());
-//            if (applicationContext.containsBean(bn)) {
-//                return;
-//            }
-//        }
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
-//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-//    }
-//
-//    public static void unregisterBean(String beanName) {
-//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-//        defaultListableBeanFactory.removeBeanDefinition(beanName);
-//    }
-
     private static void setupScriptEngine() {
         AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
         // ASM 性能优先
@@ -504,11 +516,13 @@ public class Main {
             AviatorEvaluator.addInstanceFunctions(StrUtil.uncapitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
+            Sentry.captureException(e);
         }
         try {
             AviatorEvaluator.addStaticFunctions(StrUtil.capitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
+            Sentry.captureException(e);
         }
     }
 

@@ -2,10 +2,11 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.simplereloadlib.ReloadManager;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.*;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.io.File;
 
@@ -13,6 +14,8 @@ import java.io.File;
 @ComponentScan(value = "com.ghostchu.peerbanhelper")
 @EnableScheduling
 @Slf4j
+@EnableTransactionManagement
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AppConfig {
     @Bean
     public BuildMeta buildMeta() {

@@ -1,0 +1,54 @@
+## @NAME PeerId 验证
+## @AUTHOR Test
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+## 验证 PeerId 和 ClientName 是否匹配
+## 使用 Aviator 内置函数
+
+if(peerId == nil || peerId == '' || clientName == nil || clientName == '') {
+    return false;
+}
+
+## qBittorrent 检查 (大小写敏感，检查多种形式)
+if(string.startsWith(clientName, 'qBittorrent') || string.startsWith(clientName, 'qbittorrent')) {
+    if(!string.startsWith(peerId, '-qB') && !string.startsWith(peerId, '-QB')) {
+        return 'PeerId 伪装检测: 客户端=' + clientName + ', PeerId=' + peerId + ', 期望前缀=-qB';
+    }
+    return false;
+}
+
+## Transmission 检查
+if(string.startsWith(clientName, 'Transmission') || string.startsWith(clientName, 'transmission')) {
+    if(!string.startsWith(peerId, '-TR') && !string.startsWith(peerId, '-tr')) {
+        return 'PeerId 伪装检测: 客户端=' + clientName + ', PeerId=' + peerId + ', 期望前缀=-TR';
+    }
+    return false;
+}
+
+## Deluge 检查
+if(string.startsWith(clientName, 'Deluge') || string.startsWith(clientName, 'deluge')) {
+    if(!string.startsWith(peerId, '-DE') && !string.startsWith(peerId, '-de')) {
+        return 'PeerId 伪装检测: 客户端=' + clientName + ', PeerId=' + peerId + ', 期望前缀=-DE';
+    }
+    return false;
+}
+
+## uTorrent 检查
+if(string.startsWith(clientName, 'uTorrent') || string.startsWith(clientName, 'utorrent')) {
+    if(!string.startsWith(peerId, '-UT') && !string.startsWith(peerId, '-ut')) {
+        return 'PeerId 伪装检测: 客户端=' + clientName + ', PeerId=' + peerId + ', 期望前缀=-UT';
+    }
+    return false;
+}
+
+## BitComet 检查
+if(string.startsWith(clientName, 'BitComet') || string.startsWith(clientName, 'bitcomet')) {
+    if(!string.startsWith(peerId, '-BC') && !string.startsWith(peerId, '-bc')) {
+        return 'PeerId 伪装检测: 客户端=' + clientName + ', PeerId=' + peerId + ', 期望前缀=-BC';
+    }
+    return false;
+}
+
+return false;

@@ -30,7 +30,13 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
     with:
-      image: ghostchu/peerbanhelper-snapshot:sha-$(git rev-parse --short ${{ github.sha }})
+      image: ghostchu/peerbanhelper-snapshot:sha-${{ github.sha }}
+  Build_FNOS:
+    name: Generate fnOS Package
+    needs: Build_Executable
+    uses: ./.github/workflows/build_fnos.yml
+    with:
+      image: ghostchu/peerbanhelper-snapshot:sha-${{ github.sha }}
   Build_DEB:
     name: Generate Debian Package
     needs: Build_Executable
@@ -41,7 +47,7 @@ jobs:
     uses: ./.github/workflows/build_pkg.yml
   Create_Torrent:
     name: Create Torrent
-    needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable ]
+    needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Build_FNOS ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -59,6 +65,10 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: spk-dist
+          path: build/media
+      - uses: actions/download-artifact@v7
+        with:
+          name: fnos-dist
           path: build/media
       - uses: actions/download-artifact@v7
         with:

@@ -27,6 +27,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +115,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         } catch (IOException e) {
             log.error("Internal server error, unable to create downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION), null));
         }
     }
@@ -142,6 +144,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         } catch (IOException e) {
             log.error("Internal server error, unable to update downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION), null));
         }
     }
@@ -176,6 +179,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         } catch (Exception e) {
             log.error("Validate downloader failed", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, e.getMessage(), null));
         }
     }
@@ -194,6 +198,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), null));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, e.getClass().getName() + ": " + e.getMessage(), null));
         }
 

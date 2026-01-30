@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -11,8 +10,10 @@ import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
+import io.sentry.Sentry;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.List;
@@ -79,8 +80,12 @@ public abstract class AbstractDownloader implements Downloader {
             if (result.status() == DownloaderLoginResult.Status.INCORRECT_CREDENTIAL)
                 failedLoginAttempts++;
             return result;
+        } catch (IOException e) { // 单独处理 IOException
+            failedLoginAttempts++;
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(e.getMessage()));
         } catch (Throwable e) {
             failedLoginAttempts++;
+            Sentry.captureException(e);
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(e.getMessage()));
         } finally {
             if (failedLoginAttempts >= 15) {
