@@ -302,9 +302,6 @@ public final class TextManager implements Reloadable {
                 }
             }
         }
-        if (translationComponent == null) {
-            return "null";
-        }
         if (translationComponent.getKey().isBlank()) {
             return "";
         }
