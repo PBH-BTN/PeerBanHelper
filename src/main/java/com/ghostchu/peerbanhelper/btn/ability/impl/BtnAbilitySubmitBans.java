@@ -93,7 +93,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     }
 
     private void submit() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_BANS_SYNC_SERVER), (task, callback) -> {
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_BANS_SYNC_SERVER), (task, callback) -> {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             int size = 0;
             int requests = 0;
@@ -107,7 +107,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             } while (page.hasNext());
             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, size, requests));
             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
-        }));
+        })).join();
     }
 
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {

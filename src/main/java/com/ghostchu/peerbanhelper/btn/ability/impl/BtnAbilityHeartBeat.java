@@ -67,13 +67,13 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     }
 
     private void sendHeartBeat() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_HEARTBEAT_SYNC_SERVER), (task, callback) -> {
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_HEARTBEAT_SYNC_SERVER), (task, callback) -> {
             if (multiIf) {
                 sendHeartBeatMultiIf();
             } else {
                 sendHeartBeatDefaultIf();
             }
-        }));
+        })).join();
     }
 
     private void sendHeartBeatDefaultIf() {

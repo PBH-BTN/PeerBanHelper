@@ -92,7 +92,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     }
 
     private void submit() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_SWARM_SYNC_SERVER), (task, callback) -> {
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_SWARM_SYNC_SERVER), (task, callback) -> {
             log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
             swarmDao.flushAll();
 
@@ -116,7 +116,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
             } while (page.hasNext());
             log.info(tlUI(Lang.BTN_SUBMITTED_SWARM, size, requests));
             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
-        }));
+        })).join();
     }
 
 

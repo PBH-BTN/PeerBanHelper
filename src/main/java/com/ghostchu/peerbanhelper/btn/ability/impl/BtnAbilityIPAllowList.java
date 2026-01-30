@@ -92,7 +92,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
     }
 
     private void updateRule() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_SYNC_SERVER), (task, callback) -> {
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_SYNC_SERVER), (task, callback) -> {
             String version = Objects.requireNonNullElse(ruleVersion, "initial");
             String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
             Request.Builder request = new Request.Builder()
@@ -124,7 +124,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                 setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
             }
-        }));
+        })).join();
     }
 
     /**

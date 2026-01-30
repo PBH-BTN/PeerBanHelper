@@ -137,14 +137,14 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
             if (dataRetentionTime <= 0) {
                 return;
             }
-            backgroundTaskManager.addTask(new FunctionalBackgroundTask(
+            backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
                     new TranslationComponent(Lang.MODULE_PEER_RECORDING_DELETING_EXPIRED_DATA),
                     (task, callback) -> {
                         log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANING_UP));
                         int deleted = peerRecordDao.getBaseMapper().delete(new LambdaQueryWrapper<PeerRecordEntity>().lt(PeerRecordEntity::getLastTimeSeen, OffsetDateTime.now().minus(dataRetentionTime, ChronoUnit.MILLIS)));
                         log.info(tlUI(Lang.PEER_RECORDING_SERVICE_CLEANED_UP, deleted));
                     }
-            ));
+            )).join();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
             Sentry.captureException(throwable);

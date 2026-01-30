@@ -160,7 +160,7 @@ public final class BtnNetwork implements Reloadable {
     }
 
     public synchronized void configBtnNetwork() {
-        backgroundTaskManager.addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_CONFIGURE_SYNC_SERVER), (task, callback) -> {
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_CONFIGURE_SYNC_SERVER), (task, callback) -> {
             String response;
             int statusCode;
             Request request = new Request.Builder()
@@ -253,7 +253,7 @@ public final class BtnNetwork implements Reloadable {
                 nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
                 Sentry.captureException(e);
             }
-        }));
+        })).join();
     }
 
     public void gatherAndSolveCaptchaBlocking(@NotNull Request.Builder requestBuilder, @NotNull String type) {

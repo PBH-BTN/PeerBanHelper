@@ -52,7 +52,7 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     }
 
     private void checkIfReconfigure() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_RECONFIGURE_SYNC_SERVER), (task, callback) -> {
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_RECONFIGURE_SYNC_SERVER), (task, callback) -> {
             Request request = new Request.Builder()
                     .url(btnNetwork.getConfigUrl())
                     .get()
@@ -84,7 +84,7 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, -1, e.getMessage()));
                 log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, e.getMessage()), e);
             }
-        }));
+        })).join();
     }
 
     @Override

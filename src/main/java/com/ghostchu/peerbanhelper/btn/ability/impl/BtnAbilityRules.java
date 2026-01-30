@@ -103,7 +103,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     }
 
     private void updateRule() {
-        btnNetwork.getBackgroundTaskManager().addTask(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_RULEES_SYNC_SERVER), (task, callback) -> {
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_RULEES_SYNC_SERVER), (task, callback) -> {
             String version;
             if (btnRule == null || btnRule.getVersion() == null) {
                 version = "initial";
@@ -145,7 +145,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                 setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
             }
-        }));
+        })).join();
     }
 
     @Override
