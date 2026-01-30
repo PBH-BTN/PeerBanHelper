@@ -62,7 +62,7 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
                         BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
                             id = task.id,
                             title = tl(lang, task.title),
-                            statusText = if (task.statusText != null) tl(lang, task.statusText!!) else null,
+                            statusText = tl(lang, task.statusText),
                             status = task.status,
                             barType = task.barType,
                             progress = task.progress,
