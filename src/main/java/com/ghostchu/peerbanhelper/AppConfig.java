@@ -14,8 +14,8 @@ import java.io.File;
 @ComponentScan(value = "com.ghostchu.peerbanhelper")
 @EnableScheduling
 @Slf4j
-@EnableTransactionManagement
-@EnableAspectJAutoProxy(proxyTargetClass = true)
+//@EnableTransactionManagement
+//@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AppConfig {
     @Bean
     public BuildMeta buildMeta() {
