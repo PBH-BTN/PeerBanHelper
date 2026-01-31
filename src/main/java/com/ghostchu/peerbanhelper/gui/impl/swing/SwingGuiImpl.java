@@ -17,9 +17,7 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.LogsTab;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.UnsupportedPlatformTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.SwingProgressDialog;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
@@ -182,18 +180,6 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         //macos?
         if (ExternalSwitch.parseBoolean("pbh.gui.macos-theme", true) && System.getProperty("os.name").contains("Mac")) {
             pbhFlatLafTheme = new MacOSLafTheme();
-        }
-        //PBHPlus?
-        if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", false) && ExchangeMap.PBH_PLUS_ACTIVATED) {
-            pbhFlatLafTheme = new PBHPlusTheme();
-        }
-//        // Snapshot?
-//        if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
-//            pbhFlatLafTheme = new SnapshotTheme();
-//        }
-        // Unsupported platform?
-        if (ExchangeMap.UNSUPPORTED_PLATFORM && ExternalSwitch.parseBoolean("pbh.gui.useIncompatiblePlatformTheme", false)) {
-            pbhFlatLafTheme = new UnsupportedPlatformTheme();
         }
         // Customized?
         if (ExternalSwitch.parse("pbh.gui.theme-light") != null && ExternalSwitch.parse("pbh.gui.theme-dark") != null) {
