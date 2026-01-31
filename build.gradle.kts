@@ -48,6 +48,10 @@ repositories {
 val flatlafVersion = "3.7"
 val ormliteVersion = "6.1"
 
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+}
+
 dependencyManagement {
     imports {
         mavenBom("com.baomidou:mybatis-plus-bom:3.5.15")
