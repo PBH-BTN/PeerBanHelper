@@ -3,7 +3,6 @@ plugins {
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
     id("com.install4j.gradle") version "12.0.2" apply false
-    id("io.sentry.jvm.gradle") version "6.0.0"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.3.0"
@@ -56,7 +55,9 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.3")
+    implementation("org.springframework:spring-context:7.0.3"){
+        exclude(group="commons-logging", module="commons-logging")
+    }
     // Database
     implementation("org.springframework:spring-tx:7.0.3")
     implementation("org.springframework:spring-jdbc:7.0.3")
@@ -72,9 +73,8 @@ dependencies {
     implementation("com.baomidou:mybatis-plus-annotation")
     implementation("com.baomidou:mybatis-plus-core")
     implementation("com.baomidou:mybatis-plus-extension")
-    implementation("com.baomidou:mybatis-plus-generator")
     implementation("com.baomidou:mybatis-plus-spring")
-    implementation("com.baomidou:mybatis-plus-jsqlparser")
+
     implementation("org.mybatis:mybatis-spring:4.0.0")
 
     // Annotations
@@ -101,15 +101,6 @@ dependencies {
     }
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
-    implementation("org.apache.james:apache-mime4j-dom:0.8.13") {
-        exclude(group = "commons-io", module = "commons-io")
-    }
-    implementation("org.apache.james:apache-mime4j-core:0.8.13") {
-        exclude(group = "commons-io", module = "commons-io")
-    }
-    implementation("org.apache.james:apache-mime4j-storage:0.8.13") {
-        exclude(group = "commons-io", module = "commons-io")
-    }
     // System monitoring
     implementation("com.github.oshi:oshi-core:6.9.2") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
@@ -132,7 +123,6 @@ dependencies {
     implementation("com.google.guava:guava:33.5.0-jre")
     implementation("com.github.seancfoley:ipaddress:5.5.1")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
-    implementation("org.apache.commons:commons-lang3:3.20.0")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
@@ -161,9 +151,6 @@ dependencies {
     // UPnP
     implementation("org.bitlet:weupnp:0.1.4")
 
-    // CSV
-    implementation("com.opencsv:opencsv:5.12.0")
-
     // Netty
     implementation("io.netty:netty-all:4.2.9.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
@@ -174,10 +161,14 @@ dependencies {
         exclude(group = "io.netty", module = "netty-codec-protobuf")
         exclude(group = "io.netty", module = "netty-codec-native-quic")
         exclude(group = "io.netty", module = "netty-codec-classes-quic")
+        exclude(group = "io.netty", module = "netty-codec-http3")
         exclude(group = "io.netty", module = "netty-codec-haproxy")
+        exclude(group = "io.netty", module = "netty-codec-marshalling")
         exclude(group = "io.netty", module = "netty-transport-sctp")
         exclude(group = "io.netty", module = "netty-transport-udt")
         exclude(group = "io.netty", module = "netty-transport-rxtx")
+
+
     }
 
     // SWT (provided scope - for compilation only)
