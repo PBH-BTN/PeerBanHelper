@@ -1,7 +1,6 @@
 package raccoonfink.deluge;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public final class Torrent implements Comparable<Torrent> {
     private final String m_key;
@@ -29,32 +28,32 @@ public final class Torrent implements Comparable<Torrent> {
     private final long m_uploadPayloadRate;
     private final State m_state;
 
-    public Torrent(final String key, final JSONObject data) {
+    public Torrent(final String key, final JsonObject data) {
         m_key = key;
-        m_distributedCopies = data.optDouble("distributed_copies");
-        m_downloadPayloadRate = data.optLong("download_payload_rate");
-        m_eta = data.optLong("eta");
-        m_autoManaged = data.optBoolean("is_auto_managed");
-        m_maxDownloadSpeed = data.optLong("max_download_speed");
-        m_maxUploadSpeed = data.optLong("max_upload_speed");
-        m_name = data.optString("name");
-        m_numPeers = data.optLong("num_peers");
-        m_numSeeds = data.optLong("num_seeds");
-        m_progress = data.optDouble("progress");
-        m_queue = data.optLong("queue");
-        m_ratio = data.optDouble("ratio");
-        m_savePath = data.optString("save_path");
-        m_seedsPeerRatio = data.optDouble("seeds_peer_ratio");
-        m_timeAdded = data.optDouble("time_added");
-        m_totalDone = data.optLong("total_done");
-        m_totalPeers = data.optLong("total_peers");
-        m_totalSeeds = data.optLong("total_seeds");
-        m_totalSize = data.optLong("total_size");
-        m_totalUploaded = data.optLong("total_uploaded");
-        m_trackerHost = data.optString("tracker_host");
-        m_uploadPayloadRate = data.optLong("upload_payload_rate");
+        m_distributedCopies = data.has("distributed_copies") ? data.get("distributed_copies").getAsDouble() : 0.0;
+        m_downloadPayloadRate = data.has("download_payload_rate") ? data.get("download_payload_rate").getAsLong() : 0L;
+        m_eta = data.has("eta") ? data.get("eta").getAsLong() : 0L;
+        m_autoManaged = data.has("is_auto_managed") && data.get("is_auto_managed").getAsBoolean();
+        m_maxDownloadSpeed = data.has("max_download_speed") ? data.get("max_download_speed").getAsLong() : 0L;
+        m_maxUploadSpeed = data.has("max_upload_speed") ? data.get("max_upload_speed").getAsLong() : 0L;
+        m_name = data.has("name") ? data.get("name").getAsString() : "";
+        m_numPeers = data.has("num_peers") ? data.get("num_peers").getAsLong() : 0L;
+        m_numSeeds = data.has("num_seeds") ? data.get("num_seeds").getAsLong() : 0L;
+        m_progress = data.has("progress") ? data.get("progress").getAsDouble() : 0.0;
+        m_queue = data.has("queue") ? data.get("queue").getAsLong() : 0L;
+        m_ratio = data.has("ratio") ? data.get("ratio").getAsDouble() : 0.0;
+        m_savePath = data.has("save_path") ? data.get("save_path").getAsString() : "";
+        m_seedsPeerRatio = data.has("seeds_peer_ratio") ? data.get("seeds_peer_ratio").getAsDouble() : 0.0;
+        m_timeAdded = data.has("time_added") ? data.get("time_added").getAsDouble() : 0.0;
+        m_totalDone = data.has("total_done") ? data.get("total_done").getAsLong() : 0L;
+        m_totalPeers = data.has("total_peers") ? data.get("total_peers").getAsLong() : 0L;
+        m_totalSeeds = data.has("total_seeds") ? data.get("total_seeds").getAsLong() : 0L;
+        m_totalSize = data.has("total_size") ? data.get("total_size").getAsLong() : 0L;
+        m_totalUploaded = data.has("total_uploaded") ? data.get("total_uploaded").getAsLong() : 0L;
+        m_trackerHost = data.has("tracker_host") ? data.get("tracker_host").getAsString() : "";
+        m_uploadPayloadRate = data.has("upload_payload_rate") ? data.get("upload_payload_rate").getAsLong() : 0L;
 
-        final String state = data.optString("state");
+        final String state = data.has("state") ? data.get("state").getAsString() : "";
         if ("Downloading Metadata".equals(state)) {
             m_state = State.Downloading_Metadata;
         } else if ("Checking Resume Data".equals(state)) {
@@ -164,32 +163,32 @@ public final class Torrent implements Comparable<Torrent> {
         return this.getName().compareTo(torrent.getName());
     }
 
-    public JSONObject toJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
-        ret.put("key", m_key);
-        ret.put("distributed_copies", m_distributedCopies);
-        ret.put("download_payload_rate", m_downloadPayloadRate);
-        ret.put("eta", m_eta);
-        ret.put("auto_managed", m_autoManaged);
-        ret.put("max_download_speed", m_maxDownloadSpeed);
-        ret.put("max_upload_speed", m_maxUploadSpeed);
-        ret.put("name", m_name);
-        ret.put("num_peers", m_numPeers);
-        ret.put("num_seeds", m_numSeeds);
-        ret.put("progress", m_progress);
-        ret.put("queue", m_queue);
-        ret.put("ratio", m_ratio);
-        ret.put("save_path", m_savePath);
-        ret.put("seeds_peer_ratio", m_seedsPeerRatio);
-        ret.put("time_added", m_timeAdded);
-        ret.put("total_done", m_totalDone);
-        ret.put("total_peers", m_totalPeers);
-        ret.put("total_seeds", m_totalSeeds);
-        ret.put("total_size", m_totalSize);
-        ret.put("total_uploaded", m_totalUploaded);
-        ret.put("tracker_host", m_trackerHost);
-        ret.put("upload_payload_rate", m_uploadPayloadRate);
-        ret.put("state", m_state);
+    public JsonObject toJSON() {
+        final JsonObject ret = new JsonObject();
+        ret.addProperty("key", m_key);
+        ret.addProperty("distributed_copies", m_distributedCopies);
+        ret.addProperty("download_payload_rate", m_downloadPayloadRate);
+        ret.addProperty("eta", m_eta);
+        ret.addProperty("auto_managed", m_autoManaged);
+        ret.addProperty("max_download_speed", m_maxDownloadSpeed);
+        ret.addProperty("max_upload_speed", m_maxUploadSpeed);
+        ret.addProperty("name", m_name);
+        ret.addProperty("num_peers", m_numPeers);
+        ret.addProperty("num_seeds", m_numSeeds);
+        ret.addProperty("progress", m_progress);
+        ret.addProperty("queue", m_queue);
+        ret.addProperty("ratio", m_ratio);
+        ret.addProperty("save_path", m_savePath);
+        ret.addProperty("seeds_peer_ratio", m_seedsPeerRatio);
+        ret.addProperty("time_added", m_timeAdded);
+        ret.addProperty("total_done", m_totalDone);
+        ret.addProperty("total_peers", m_totalPeers);
+        ret.addProperty("total_seeds", m_totalSeeds);
+        ret.addProperty("total_size", m_totalSize);
+        ret.addProperty("total_uploaded", m_totalUploaded);
+        ret.addProperty("tracker_host", m_trackerHost);
+        ret.addProperty("upload_payload_rate", m_uploadPayloadRate);
+        ret.addProperty("state", m_state.toString());
         return ret;
     }
 
