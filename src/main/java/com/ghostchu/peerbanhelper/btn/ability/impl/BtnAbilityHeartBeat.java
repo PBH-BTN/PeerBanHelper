@@ -9,13 +9,13 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import com.spotify.futures.CompletableFutures;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.json.JSONException;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -96,7 +96,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                 }
 
             }
-        } catch (final IOException | JSONException e) {
+        } catch (final Exception e) {
             lastResult = "default -> Failed: " + e.getClass().getName() + ": " + e.getMessage();
             setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_FAILED));
         }
@@ -171,7 +171,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                     result.put(ip, "Failed: No external IP returned");
                 }
             }
-        } catch (final IOException | JSONException e) {
+        } catch (final IOException | JsonSyntaxException e) {
             result.put(ip, "Failed: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }

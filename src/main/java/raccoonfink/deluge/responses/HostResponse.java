@@ -1,8 +1,8 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import raccoonfink.deluge.DelugeException;
 import raccoonfink.deluge.Host;
 
@@ -13,20 +13,19 @@ import java.util.List;
 public final class HostResponse extends DelugeResponse {
     private final List<Host> m_hosts = new ArrayList<>();
 
-    public HostResponse(final Integer httpResponseCode, final JSONObject response, final boolean singleResult) throws DelugeException {
+    public HostResponse(final Integer httpResponseCode, final JsonObject response, final boolean singleResult) throws DelugeException {
         super(httpResponseCode, response);
-        try {
-            final JSONArray result = response.getJSONArray("result");
-            if (singleResult) {
-                m_hosts.add(getHost(result));
-            } else {
-                for (int i = 0; i < result.length(); i++) {
-                    final JSONArray host = result.getJSONArray(i);
-                    m_hosts.add(getHost(host));
-                }
+        if (!response.has("result")) {
+            throw new DelugeException("Missing 'result' field in JSON response");
+        }
+        final JsonArray result = response.getAsJsonArray("result");
+        if (singleResult) {
+            m_hosts.add(getHost(result));
+        } else {
+            for (JsonElement element : result) {
+                final JsonArray host = element.getAsJsonArray();
+                m_hosts.add(getHost(host));
             }
-        } catch (final JSONException e) {
-            throw new DelugeException(e);
         }
     }
 
@@ -34,16 +33,23 @@ public final class HostResponse extends DelugeResponse {
         return Collections.unmodifiableList(m_hosts);
     }
 
-    private Host getHost(final JSONArray host) throws JSONException {
-        return new Host(host.getString(0), host.getString(1), host.getInt(2), host.getString(3), host.optString(4));
+    private Host getHost(final JsonArray host) {
+        String id = host.get(0).getAsString();
+        String hostname = host.get(1).getAsString();
+        int port = host.get(2).getAsInt();
+        String status = host.get(3).getAsString();
+        String version = host.size() > 4 ? host.get(4).getAsString() : null;
+        return new Host(id, hostname, port, status, version);
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
+    public JsonObject toResponseJSON() {
+        final JsonObject ret = super.toResponseJSON();
+        JsonArray resultArray = new JsonArray();
         for (final Host host : m_hosts) {
-            ret.append("result", host.toJSON());
+            resultArray.add(host.toJSON());
         }
+        ret.add("result", resultArray);
         return ret;
     }
 }

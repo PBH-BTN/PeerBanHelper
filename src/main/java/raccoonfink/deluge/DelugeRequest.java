@@ -1,8 +1,7 @@
 package raccoonfink.deluge;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,18 +9,19 @@ import java.util.List;
 public final class DelugeRequest {
     private final String m_method;
     private final List<Object> m_params;
+    private static final Gson gson = new Gson();
 
     public DelugeRequest(final String method, final Object... params) {
         m_method = method;
         m_params = Arrays.asList(params);
     }
 
-    public String toPostData(final int id) throws JSONException {
+    public String toPostData(final int id) {
         assert (id >= 0);
-        final JSONObject json = new JSONObject();
-        json.put("id", id);
-        json.put("method", m_method);
-        json.put("params", new JSONArray(m_params));
+        final JsonObject json = new JsonObject();
+        json.addProperty("id", id);
+        json.addProperty("method", m_method);
+        json.add("params", gson.toJsonTree(m_params));
         return json.toString();
     }
 }
