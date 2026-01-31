@@ -53,7 +53,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
             }
         }));
-        sched.scheduleWithFixedDelay(this::detectNICChange, 5, 5, TimeUnit.SECONDS);
+        sched.scheduleWithFixedDelay(this::detectNICChange, 5, 30, TimeUnit.SECONDS);
     }
 
     private void detectNICChange() {
