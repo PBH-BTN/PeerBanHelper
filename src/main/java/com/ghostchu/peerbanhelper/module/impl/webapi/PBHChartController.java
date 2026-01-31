@@ -29,7 +29,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -135,7 +134,7 @@ public final class PBHChartController extends AbstractFeatureModule {
                 }
                 SessionTimeRangeCounter counter = sessionDayBucket.computeIfAbsent(day, k -> new SessionTimeRangeCounter());
                 counter.getTotal().incrementAndGet();
-                if (StringUtils.isNotBlank(record.getLastFlags()) && !new PeerFlag(record.getLastFlags()).isLocalConnection()) {
+                if ((record.getLastFlags() != null && !record.getLastFlags().isBlank()) && !new PeerFlag(record.getLastFlags()).isLocalConnection()) {
                     counter.getIncoming().incrementAndGet();
                 }
             }

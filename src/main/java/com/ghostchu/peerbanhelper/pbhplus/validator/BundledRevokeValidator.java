@@ -3,10 +3,6 @@ package com.ghostchu.peerbanhelper.pbhplus.validator;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.google.common.hash.Hashing;
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,11 +12,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -38,27 +37,59 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
     }
 
     public boolean isRevoked(@NotNull License license) {
-        try (Reader reader = new InputStreamReader(Main.class.getResourceAsStream("/revoked-licenses.csv"), StandardCharsets.UTF_8)) {
-            HeaderColumnNameMappingStrategy<RevokedCSVItem> strategy = new HeaderColumnNameMappingStrategy<>();
-            strategy.setType(RevokedCSVItem.class);
-            CsvToBean<RevokedCSVItem> cb = new CsvToBeanBuilder<RevokedCSVItem>(reader)
-                    .withMappingStrategy(strategy)
-                    .withType(RevokedCSVItem.class)
-                    .build();
-            return cb.stream().anyMatch(item -> {
-                boolean result = false;
-                result = validateTrueShortCircuit(license.getLicenseTo(), item.getLicenseToHash(), result);
-                result = validateTrueShortCircuit(license.getDescription(), item.getDescriptionHash(), result);
-                result = validateTrueShortCircuit(license.getOrderId(), item.getOrderIdHash(), result);
-                result = validateTrueShortCircuit(license.getPaymentOrderId(), item.getPaymentOrderIdHash(), result);
-                result = validateTrueShortCircuit(license.getEmail(), item.getEmailHash(), result);
-                return result;
-            });
+        try (InputStream is = Main.class.getResourceAsStream("/revoked-licenses.csv")) {
+            if (is == null) {
+                return false;
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                String headerLine = reader.readLine();
+                if (headerLine == null) {
+                    return false;
+                }
+                String[] headers = headerLine.split(",");
+                Map<String, Integer> headerMap = new HashMap<>();
+                for (int i = 0; i < headers.length; i++) {
+                    headerMap.put(headers[i].trim(), i);
+                }
+
+                return reader.lines().anyMatch(line -> {
+                    if (line.trim().isEmpty()) {
+                        return false;
+                    }
+                    String[] columns = line.split(",", -1);
+                    RevokedCSVItem item = new RevokedCSVItem();
+                    item.setLicenseToHash(getColumnValue(columns, headerMap, "license_to_hash"));
+                    item.setDescriptionHash(getColumnValue(columns, headerMap, "description_hash"));
+                    item.setOrderIdHash(getColumnValue(columns, headerMap, "order_id_hash"));
+                    item.setPaymentOrderIdHash(getColumnValue(columns, headerMap, "payment_order_id_hash"));
+                    item.setEmailHash(getColumnValue(columns, headerMap, "email_hash"));
+
+                    boolean result = false;
+                    result = validateTrueShortCircuit(license.getLicenseTo(), item.getLicenseToHash(), result);
+                    result = validateTrueShortCircuit(license.getDescription(), item.getDescriptionHash(), result);
+                    result = validateTrueShortCircuit(license.getOrderId(), item.getOrderIdHash(), result);
+                    result = validateTrueShortCircuit(license.getPaymentOrderId(), item.getPaymentOrderIdHash(), result);
+                    result = validateTrueShortCircuit(license.getEmail(), item.getEmailHash(), result);
+                    return result;
+                });
+            }
         } catch (IOException e) {
             log.debug("Unable to validate license {} to check if it revoked locally: {}", license.getLicenseTo(), e.getMessage());
             Sentry.captureException(e);
             return false;
         }
+    }
+
+    private String getColumnValue(String[] columns, Map<String, Integer> headerMap, String columnName) {
+        Integer index = headerMap.get(columnName);
+        if (index != null && index < columns.length) {
+            String value = columns[index].trim();
+            if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
+                value = value.substring(1, value.length() - 1);
+            }
+            return value.isEmpty() ? null : value;
+        }
+        return null;
     }
 
     private boolean validateTrueShortCircuit(String unhashedValue, String compareTo, boolean anotherBoolean) {
@@ -78,19 +109,14 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
     @NoArgsConstructor
     @Data
     public static class RevokedCSVItem {
-        @CsvBindByName(column = "license_to_hash")
         @Nullable
         private String licenseToHash;
-        @CsvBindByName(column = "description_hash")
         @Nullable
         private String descriptionHash;
-        @CsvBindByName(column = "order_id_hash")
         @Nullable
         private String orderIdHash;
-        @CsvBindByName(column = "payment_order_id_hash")
         @Nullable
         private String paymentOrderIdHash;
-        @CsvBindByName(column = "email_hash")
         @Nullable
         private String emailHash;
     }
