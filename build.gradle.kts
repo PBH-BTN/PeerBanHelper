@@ -54,7 +54,7 @@ configurations.all {
 
 dependencyManagement {
     imports {
-        mavenBom("com.baomidou:mybatis-plus-bom:3.5.15")
+        mavenBom("com.baomidou:mybatis-plus-bom:3.5.16")
     }
 }
 dependencies {
@@ -104,7 +104,7 @@ dependencies {
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
     // System monitoring
-    implementation("com.github.oshi:oshi-core:6.9.2") {
+    implementation("com.github.oshi:oshi-core:6.9.3") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
@@ -136,7 +136,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.26")
+    implementation("ch.qos.logback:logback-classic:1.5.27")
     implementation("org.slf4j:jcl-over-slf4j:2.0.17")
 
     // Async utilities
