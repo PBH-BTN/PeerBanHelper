@@ -82,9 +82,9 @@ dependencies {
     implementation("org.mybatis:mybatis-spring:4.0.0")
 
     // Annotations
-    implementation("org.flywaydb:flyway-core:11.20.3")
-    implementation("org.flywaydb:flyway-mysql:11.20.3")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.3")
+    implementation("org.flywaydb:flyway-core:12.0.0")
+    implementation("org.flywaydb:flyway-mysql:12.0.0")
+    implementation("org.flywaydb:flyway-database-postgresql:12.0.0")
     compileOnly("org.jetbrains:annotations:26.0.2-1")
 
     // Core dependencies
