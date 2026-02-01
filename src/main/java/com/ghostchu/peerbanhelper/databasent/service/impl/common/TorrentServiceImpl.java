@@ -41,15 +41,15 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
     public synchronized @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
         TorrentEntity existing = queryByInfoHash(torrent.getInfoHash());
         if (existing != null) {
-            if (existing.getSize() <= 0 || existing.getPrivateTorrent() == null) { // 旧数据可能没有 privateTorrent 数据；获取元数据时，size 可能为 0
+            if (existing.getSize() <= 0 || existing.getPrivateTorrent() == null) {
                 existing.setSize(torrent.getSize());
                 existing.setPrivateTorrent(torrent.getPrivateTorrent());
-                torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(existing));
-                instanceCache.put(torrent.getInfoHash(), torrent);
+                baseMapper.insertOrUpdate(existing);
+                instanceCache.put(existing.getInfoHash(), existing);
             }
             return existing;
         } else {
-            torrentCreateNoTransactionTemplate.execute(_ -> baseMapper.insertOrUpdate(torrent));
+            baseMapper.insertOrUpdate(torrent);
             instanceCache.put(torrent.getInfoHash(), torrent);
             return torrent;
         }
@@ -58,7 +58,7 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
     @Override
     public @Nullable TorrentEntity queryByInfoHash(@NotNull String infoHash) {
         var cached = instanceCache.getIfPresent(infoHash);
-        if (cached != null) {
+        if (cached != null && cached.getId() != null) {
             return cached;
         }
         var entity = baseMapper.selectOne(new LambdaQueryWrapper<TorrentEntity>().eq(TorrentEntity::getInfoHash, infoHash)
