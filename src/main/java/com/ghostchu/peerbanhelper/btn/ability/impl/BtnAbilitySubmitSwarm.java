@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,6 @@ import okhttp3.Response;
 import okio.BufferedSink;
 import okio.GzipSink;
 import okio.Okio;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
