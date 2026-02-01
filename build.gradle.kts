@@ -104,7 +104,7 @@ dependencies {
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
     // System monitoring
-    implementation("com.github.oshi:oshi-core:6.9.2") {
+    implementation("com.github.oshi:oshi-core:6.9.3") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
