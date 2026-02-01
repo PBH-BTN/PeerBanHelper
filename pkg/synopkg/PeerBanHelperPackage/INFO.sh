@@ -4,7 +4,7 @@
 source /pkgscripts/include/pkg_util.sh
 
 package="peerbanhelper"
-version="@PBH_VERSION@-1"
+version="@PBH_VERSION@"
 displayname="PeerBanHelper"
 os_min_ver="7.2-64555"
 maintainer="PBH-BTN"
