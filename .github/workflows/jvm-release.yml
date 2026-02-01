@@ -84,7 +84,8 @@ jobs:
 
   Upload_SPK_To_Repo:
     name: Upload SPK to SPKRepo
-    if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+    #if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+    if: ${{ github.event_name == 'release' }}
     needs: Build_SPK
     runs-on: ubuntu-latest
     steps:
