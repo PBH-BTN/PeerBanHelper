@@ -54,7 +54,7 @@ configurations.all {
 
 dependencyManagement {
     imports {
-        mavenBom("com.baomidou:mybatis-plus-bom:3.5.15")
+        mavenBom("com.baomidou:mybatis-plus-bom:3.5.16")
     }
 }
 dependencies {
