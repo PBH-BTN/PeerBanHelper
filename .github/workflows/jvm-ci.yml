@@ -177,14 +177,14 @@ jobs:
           echo "Found SPK files to upload:"
           echo "$SPK_FILES"
           while IFS= read -r SPK_FILE; do
-            echo "Uploading: $SPK_FILE"
+            echo "Uploading: ${SPK_FILE}"
             curl --location --request POST "https://spk-repo.pbh-btn.com/api/packages" \
               --header "Content-Type: application/octet-stream" \
               --header "Authorization: Basic ${{ secrets.SPKREPO_BASIC_AUTH }}" \
               --header "Accept: */*" \
               --header "Connection: keep-alive" \
               --data-binary "@${SPK_FILE}"
-            echo "Upload completed for: $SPK_FILE"
+            echo "Upload completed for: ${SPK_FILE}"
           done <<< "$SPK_FILES"
   Build_Docker_Standalone:
     name: Build Standalone Docker Images
