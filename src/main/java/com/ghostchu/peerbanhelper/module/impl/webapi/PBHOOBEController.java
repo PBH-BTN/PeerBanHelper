@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -65,7 +66,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return;
         }
-        var downloaders = downloaderDiscovery.scan().join();
+        var downloaders = downloaderDiscovery.scan(List.of()).join();
         ctx.json(new StdResp(true, null, downloaders));
     }
 

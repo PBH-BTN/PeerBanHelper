@@ -34,6 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +91,25 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private void handleDownloaderScan(@NotNull Context ctx) {
-        var downloaders = downloaderDiscovery.scan().join();
+        List<Integer> addedLocalDownloaderPorts = downloaderManager.getDownloaders().stream()
+                .map(downloader -> {
+                    var endpoint = downloader.getEndpoint();
+                    URI uri = URI.create(endpoint);
+                    int port = uri.getPort();
+                    String host = uri.getHost();
+                    try {
+                       InetAddress addr = InetAddress.getByName(host);
+                       // check addr if is localhost
+                        if(addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isSiteLocalAddress()) {
+                            return port;
+                        }
+                    } catch (UnknownHostException e) {
+                        log.debug("Unknown host when scanning downloader: {}", host, e);
+                        return null;
+                    }
+                    return null;
+                }).toList();
+        var downloaders = downloaderDiscovery.scan(addedLocalDownloaderPorts).join();
         ctx.json(new StdResp(true, null, downloaders));
     }
 
@@ -304,7 +325,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
             config.addProperty("username", "REDACTED_IN_DEMO_MODE");
             config.addProperty("password", "REDACTED_IN_DEMO_MODE");
             var bAuth = config.getAsJsonObject("basicAuth");
-            if(bAuth != null) {
+            if (bAuth != null) {
                 bAuth.addProperty("user", "REDACTED_IN_DEMO_MODE");
                 bAuth.addProperty("pass", "REDACTED_IN_DEMO_MODE");
                 config.add("basicAuth", bAuth);
