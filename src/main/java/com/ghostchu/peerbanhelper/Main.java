@@ -30,6 +30,8 @@ import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
+import com.zaxxer.hikari.pool.HikariPool;
+import cordelia.client.TransmissionIOException;
 import io.javalin.util.JavalinBindException;
 import io.sentry.SendCachedEnvelopeFireAndForgetIntegration;
 import io.sentry.SendFireAndForgetEnvelopeSender;
@@ -45,7 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import oshi.SystemInfo;
+import raccoonfink.deluge.DelugeException;
 
+import javax.crypto.BadPaddingException;
+import javax.net.ssl.SSLHandshakeException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -197,6 +202,13 @@ public class Main {
             );
             sentryOptions.addIgnoredExceptionForType(AddressNotFoundException.class);
             sentryOptions.addIgnoredExceptionForType(JavalinBindException.class);
+            sentryOptions.addIgnoredExceptionForType(IOException.class);
+            sentryOptions.addIgnoredExceptionForType(OutOfMemoryError.class);
+            sentryOptions.addIgnoredExceptionForType(TransmissionIOException.class);
+            sentryOptions.addIgnoredExceptionForType(DelugeException.class);
+            sentryOptions.addIgnoredExceptionForType(SSLHandshakeException.class);
+            sentryOptions.addIgnoredExceptionForType(HikariPool.PoolInitializationException.class);
+            sentryOptions.addIgnoredExceptionForType(BadPaddingException.class);
 
         });
     }
