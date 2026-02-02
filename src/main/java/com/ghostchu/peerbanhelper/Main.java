@@ -58,11 +58,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.math.MathContext;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -202,14 +204,14 @@ public class Main {
             );
             sentryOptions.addIgnoredExceptionForType(AddressNotFoundException.class);
             sentryOptions.addIgnoredExceptionForType(JavalinBindException.class);
-            sentryOptions.addIgnoredExceptionForType(IOException.class);
             sentryOptions.addIgnoredExceptionForType(OutOfMemoryError.class);
             sentryOptions.addIgnoredExceptionForType(TransmissionIOException.class);
             sentryOptions.addIgnoredExceptionForType(DelugeException.class);
             sentryOptions.addIgnoredExceptionForType(SSLHandshakeException.class);
             sentryOptions.addIgnoredExceptionForType(HikariPool.PoolInitializationException.class);
             sentryOptions.addIgnoredExceptionForType(BadPaddingException.class);
-
+            sentryOptions.addIgnoredExceptionForType(TimeoutException.class);
+            sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
         });
     }
 
