@@ -224,7 +224,6 @@ public class PeerBanHelper implements Reloadable {
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
         List<Class<? extends FeatureModule>> moduleClasses = new ArrayList<>();
-        moduleClasses.add(PBHAsyncTaskController.class);
         moduleClasses.add(PBHGeneralController.class);
         moduleClasses.add(IPBlackList.class);
         moduleClasses.add(PeerIdBlacklist.class);
@@ -237,6 +236,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(BlockListController.class);
         moduleClasses.add(IPBlackRuleList.class);
         //moduleClasses.add(PTRBlacklist.class);
+        moduleClasses.add(PBHBackgroundTaskController.class);
         moduleClasses.add(PBHMetricsController.class);
         moduleClasses.add(PBHBanController.class);
         moduleClasses.add(PBHMetadataController.class);

@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.Pair;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +92,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     }
 
     private void submit() {
-        try {
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_SWARM_SYNC_SERVER), (task, callback) -> {
             log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
             swarmDao.flushAll();
 
@@ -115,12 +116,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
             } while (page.hasNext());
             log.info(tlUI(Lang.BTN_SUBMITTED_SWARM, size, requests));
             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
-        } catch (IllegalStateException ignored) {
-            // 子请求已处理报错信息
-        } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_UNKNOWN_ERROR), e);
-            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
-        }
+        })).join();
     }
 
 

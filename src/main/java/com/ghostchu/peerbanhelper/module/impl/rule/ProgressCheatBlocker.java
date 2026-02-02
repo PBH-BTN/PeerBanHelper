@@ -20,6 +20,8 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -38,7 +40,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
@@ -50,6 +51,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
@@ -93,6 +96,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private final Object cacheDBLoadingLock = new Object();
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private BackgroundTaskManager backgroundTaskManager;
 
 
     @Override
@@ -138,17 +143,23 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private void cleanDatabase() {
-        try {
-            log.debug("Cleaning up expired PCB data from database...");
-            long now = System.currentTimeMillis();
-            var ofd = OffsetDateTime.now().minus(persistDuration, ChronoUnit.MILLIS);
-            pcbRangeDao.cleanupDatabase(ofd);
-            pcbAddressDao.cleanupDatabase(ofd);
-            log.debug("Expired PCB data cleanup completed. Cost: {}ms", System.currentTimeMillis() - now);
-        } catch (Throwable e) {
-            log.error("Unable to remove expired data from database", e);
-            Sentry.captureException(e);
-        }
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
+                new TranslationComponent(Lang.MODULE_PCB_BGTASK_DELETING_EXPIRED_DATA),
+                (task, callback) -> {
+                    try {
+                        log.info(tlUI(Lang.MODULE_PCB_DELETING_EXPIRED_DATA));
+                        var ofd = OffsetDateTime.now().minus(persistDuration, ChronoUnit.MILLIS);
+                        long deleted = 0;
+                        deleted += pcbRangeDao.cleanupDatabase(ofd);
+                        deleted += pcbAddressDao.cleanupDatabase(ofd);
+                        log.info(tlUI(Lang.MODULE_PCB_DELETED_EXPIRED_DATA, deleted));
+                    } catch (Throwable e) {
+                        log.error("Unable to remove expired data from database", e);
+                        Sentry.captureException(e);
+                        throw e;
+                    }
+                }
+        )).join();
     }
 
     public void handleConfig(Context ctx) {
@@ -188,6 +199,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private void flushBackDatabaseAll() {
+
         transactionTemplate.execute(_ ->{
             for (Map.Entry<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> entry : cache.asMap().entrySet()) {
                 flushBackDatabase(entry.getValue().getKey(), entry.getValue().getRight());

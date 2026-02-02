@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.google.gson.JsonObject;
@@ -107,60 +108,63 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     }
 
     private void submit() {
-        if (!lock.tryLock()) {
-            return; // this is possible since we can send multiple requests
-        }
-        try {
-            log.info(tlUI(Lang.BTN_SUBMITTING_HISTORIES));
-            AtomicLong lastSubmitAt = new AtomicLong(getLastSubmitAtTimestamp());
-            List<LegacyBtnPeerHistory> btnPeers = generatePing(lastSubmitAt.get());
-            while (!btnPeers.isEmpty()) {
-                LegacyBtnPeerHistoryPing ping = new LegacyBtnPeerHistoryPing(
-                        System.currentTimeMillis(),
-                        btnPeers
-                );
-                byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
-                RequestBody body = createGzipRequestBody(jsonBytes);
-                Request.Builder request = new Request.Builder()
-                        .url(endpoint)
-                        .post(body)
-                        .header("Content-Encoding", "gzip");
-                if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "submit_history");
-                try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
-                    if (!response.isSuccessful()) {
-                        String responseBody = response.body().string();
-                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
-                        setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
-                        return;
-                    } else {
-                        log.info(tlUI(Lang.BTN_SUBMITTED_HISTORIES, ping.getPeers().size()));
-                        setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, ping.getPeers().size()));
-                    }
-                } catch (Exception e) {
-                    log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                    setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
-                    return;
-                }
+        if (lock.tryLock()) {
+            try {
+                btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_HISTORY_SYNC_SERVER), (task, callback) ->
+                {
 
-                var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
-                if (lastRecordAt >= lastSubmitAt.get()) {
-                    if (lastRecordAt == lastSubmitAt.get()) {
-                        lastRecordAt++; // avoid inf loop
+
+                    log.info(tlUI(Lang.BTN_SUBMITTING_HISTORIES));
+                    AtomicLong lastSubmitAt = new AtomicLong(getLastSubmitAtTimestamp());
+                    List<LegacyBtnPeerHistory> btnPeers = generatePing(lastSubmitAt.get());
+                    while (!btnPeers.isEmpty()) {
+                        LegacyBtnPeerHistoryPing ping = new LegacyBtnPeerHistoryPing(
+                                System.currentTimeMillis(),
+                                btnPeers
+                        );
+                        byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
+                        RequestBody body = createGzipRequestBody(jsonBytes);
+                        Request.Builder request = new Request.Builder()
+                                .url(endpoint)
+                                .post(body)
+                                .header("Content-Encoding", "gzip");
+                        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "submit_history");
+                        try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
+                            if (!response.isSuccessful()) {
+                                String responseBody = response.body().string();
+                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
+                                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
+                                return;
+                            } else {
+                                log.info(tlUI(Lang.BTN_SUBMITTED_HISTORIES, ping.getPeers().size()));
+                                setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, ping.getPeers().size()));
+                            }
+                        } catch (Exception e) {
+                            log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                            setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
+                            return;
+                        }
+
+                        var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
+                        if (lastRecordAt >= lastSubmitAt.get()) {
+                            if (lastRecordAt == lastSubmitAt.get()) {
+                                lastRecordAt++; // avoid inf loop
+                            }
+                            lastSubmitAt.set(lastRecordAt);
+                            writeLastSubmitAtTimestamp(lastRecordAt);
+                        } else {
+                            lastSubmitAt.set(System.currentTimeMillis());
+                            writeLastSubmitAtTimestamp(System.currentTimeMillis());
+                        }
+                        btnPeers = generatePing(lastSubmitAt.get());
                     }
-                    lastSubmitAt.set(lastRecordAt);
-                    writeLastSubmitAtTimestamp(lastRecordAt);
-                } else {
-                    lastSubmitAt.set(System.currentTimeMillis());
-                    writeLastSubmitAtTimestamp(System.currentTimeMillis());
-                }
-                btnPeers = generatePing(lastSubmitAt.get());
+                })).join();
+            } catch (Throwable e) {
+                log.error("Unable to submit peer histories", e);
+                setLastStatus(false, new TranslationComponent("Unknown Error: " + e.getClass().getName() + ": " + e.getMessage()));
+            } finally {
+                lock.unlock();
             }
-
-        } catch (Throwable e) {
-            log.error("Unable to submit peer histories", e);
-            setLastStatus(false, new TranslationComponent("Unknown Error: " + e.getClass().getName() + ": " + e.getMessage()));
-        } finally {
-            lock.unlock();
         }
     }
 
