@@ -122,7 +122,7 @@ dependencies {
     // Utilities
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("com.google.guava:guava:33.5.0-jre")
-    implementation("com.github.seancfoley:ipaddress:5.5.1")
+    implementation("com.github.seancfoley:ipaddress:5.6.1")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
 
     // Plugin framework
