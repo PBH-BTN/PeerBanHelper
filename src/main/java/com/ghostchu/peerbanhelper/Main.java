@@ -211,7 +211,7 @@ public class Main {
             sentryOptions.addIgnoredExceptionForType(HikariPool.PoolInitializationException.class);
             sentryOptions.addIgnoredExceptionForType(BadPaddingException.class);
             sentryOptions.addIgnoredExceptionForType(TimeoutException.class);
-            sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
+            sentryOptions.addIgnoredExceptionForType(IOException.class);
         });
     }
 
