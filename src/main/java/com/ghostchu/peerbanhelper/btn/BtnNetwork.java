@@ -91,7 +91,6 @@ public final class BtnNetwork implements Reloadable {
     private final HTTPUtil httpUtil;
     @Getter
     private final ModuleMatchCache moduleMatchCache;
-    @Getter
     private boolean enabled;
     private String powCaptchaEndpoint;
     private long nextConfigAttemptTime = 0;
@@ -123,6 +122,10 @@ public final class BtnNetwork implements Reloadable {
     public ReloadResult reloadModule() throws Exception {
         reloadConfig();
         return Reloadable.super.reloadModule();
+    }
+
+    public boolean isEnableBTN() {
+        return Main.getMainConfig().getBoolean("btn.enabled");
     }
 
     public synchronized void reloadConfig() {
