@@ -64,12 +64,18 @@
     >
       <a-input-password v-model="databaseModel.password" style="width: 250px" />
     </a-form-item>
+    <a-form-item v-if="databaseModel.type === 'mysql' || databaseModel.type === 'postgresql'">
+      <a-button :loading="testing" @click="handleTest">{{
+        t('page.oobe.advance.database.test')
+      }}</a-button>
+    </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">
 import { type DatabaseConfig, type DatabaseType, type Persist } from '@/api/model/config'
-import { Modal } from '@arco-design/web-vue'
-import { computed } from 'vue'
+import { TestDatabaseConnection } from '@/service/init'
+import { Message, Modal } from '@arco-design/web-vue'
+import { computed, ref } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 
@@ -89,5 +95,18 @@ const onDBTypeChanged = (v: string | number | boolean) => {
       //do nothing
     }
   })
+}
+const testing = ref(false)
+const handleTest = async () => {
+  try {
+    const testResult = await TestDatabaseConnection(databaseModel.value)
+    if (!testResult.success) throw new Error(testResult.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
+    return false
+  } finally {
+    testing.value = false
+  }
+  Message.success({ content: t('page.oobe.advance.addDatabase.test.success'), resetOnHover: true })
 }
 </script>

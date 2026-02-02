@@ -109,37 +109,9 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .get("/api/general/global", this::handleGlobalConfigRead, Role.USER_READ)
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
-                .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE)
-                .post("/api/general/testDatabaseConfig", this::handleDatabaseNtTest, Role.USER_WRITE);
+                .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
     }
 
-    private void handleDatabaseNtTest(@NotNull Context context) {
-        DatabaseNtConfigDTO dto = context.bodyAsClass(DatabaseNtConfigDTO.class);
-        ConfigurationSection section = new MemoryConfiguration();
-        section.set("type", dto.getType());
-        section.set("host", dto.getHost());
-        section.set("port", dto.getPort());
-        section.set("username", dto.getUsername());
-        section.set("password", dto.getPassword());
-        section.set("database", dto.getDatabase());
-        try {
-            var driver = switch (dto.getType()) {
-                case "h2" -> new H2DatabaseDriver(section);
-                case "mysql" -> new MySQLDatabaseDriver(section);
-                case "postgresql" -> new PostgresDatabaseDriver(section);
-                default -> new SQLiteDatabaseDriver(section);
-            };
-            try (var stat = driver.getDataSource().getConnection().createStatement()) {
-                boolean success = stat.execute("SELECT 1");
-                context.json(new StdResp(true, null, success));
-            } finally {
-                driver.close();
-            }
-        } catch (Exception e) {
-            context.status(HttpStatus.BAD_REQUEST);
-            context.json(new StdResp(false, e.getClass().getName() + ": " + e.getMessage(), null));
-        }
-    }
 
     private void handleRefreshNatStatus(@NotNull Context context) {
         Thread.ofVirtual().name("Refresh NAT Status").start(() -> bTStunManager.refreshNatType());

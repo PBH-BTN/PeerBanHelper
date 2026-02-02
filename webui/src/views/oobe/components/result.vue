@@ -40,7 +40,8 @@ const init = () => {
       id: uuid(),
       config: config.value.downloader.config
     },
-    btn: config.value.btn
+    btn: config.value.btn,
+    database: config.value.database
   })
     .then((res) => {
       if (res.success) {

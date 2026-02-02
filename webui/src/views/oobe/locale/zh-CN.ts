@@ -55,6 +55,13 @@ export default {
   'page.oobe.addDownloader.test': '测试下载器',
   'page.oobe.addDownloader.test.success': '测试成功',
 
+  'page.oobe.advance.title': '高级选项',
+  'page.oobe.advance.description':
+    '如果你是高级用户，或者你知道你在做什么，你可以调整下面的高级选项。否则，请直接点击下一步。',
+  'page.oobe.advance.known': '我知道我在做什么',
+  'page.oobe.advance.database.test': '测试数据库连接',
+  'page.oobe.advance.addDatabase.test.success': '数据库连接成功',
+
   'page.oobe.result.title': '初始化完成！',
   'page.oobe.result.title.error': '初始化失败',
   'page.oobe.result.description': '你已经完成了初始化，现在可以开始使用 PeerBanHelper 了！',

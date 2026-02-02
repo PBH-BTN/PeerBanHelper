@@ -64,7 +64,11 @@ const initConfig = ref<InitConfig>({
     app_id: null,
     app_secret: null
   },
-  valid: false
+  database: {
+    type: 'h2'
+  },
+  downloaderValid: false,
+  databaseValid: false
 })
 
 const componentList = oobeSteps.map((step) =>

@@ -110,7 +110,7 @@ const handleTest = async () => {
     testing.value = false
   }
   Message.success({ content: t('page.oobe.addDownloader.test.success'), resetOnHover: true })
-  config.value.valid = true
+  config.value.downloaderValid = true
 }
 const handleScanDownloader = async () => {
   try {
