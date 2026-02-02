@@ -132,7 +132,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     @Override
     public boolean isModuleEnabled() {
         if (super.isModuleEnabled()) {
-            return btnNetwork != null;
+            return btnNetwork != null && btnNetwork.isEnabled();
         }
         return false;
     }

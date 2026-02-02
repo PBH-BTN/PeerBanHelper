@@ -91,6 +91,7 @@ public final class BtnNetwork implements Reloadable {
     private final HTTPUtil httpUtil;
     @Getter
     private final ModuleMatchCache moduleMatchCache;
+    @Getter
     private boolean enabled;
     private String powCaptchaEndpoint;
     private long nextConfigAttemptTime = 0;
