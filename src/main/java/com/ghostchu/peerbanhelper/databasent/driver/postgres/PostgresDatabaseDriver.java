@@ -37,10 +37,9 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName("org.postgresql.Driver");
-        config.setMaximumPoolSize(section.getInt("pool.max-size"));
-        config.setMinimumIdle(section.getInt("pool.min-idle"));
-        config.setIdleTimeout(section.getLong("pool.idle-timeout-millis"));
-        config.setConnectionTimeout(30000);
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(1);
+        config.setIdleTimeout(600000);
 
         // PostgreSQL-specific optimizations
         config.addDataSourceProperty("ApplicationName", "PeerBanHelper");

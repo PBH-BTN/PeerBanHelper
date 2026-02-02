@@ -205,7 +205,3 @@ database:
   username: "peerbanhelper"
   password: "peerbanhelper"
   database: "peerbanhelper"
-  pool:
-    max-size: 10
-    min-idle: 5
-    idle-timeout-millis: 600000

@@ -32,13 +32,13 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         String database = section.getString("database");
         String username = section.getString("username");
         String password = section.getString("password");
-        config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC");
+        config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        config.setMaximumPoolSize(section.getInt("pool.max-size"));
-        config.setMinimumIdle(section.getInt("pool.min-idle"));
-        config.setIdleTimeout(section.getLong("pool.idle-timeout-millis"));
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(1);
+        config.setIdleTimeout(600000);
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
