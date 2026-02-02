@@ -146,7 +146,17 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	@Override
 	public void removeOutdatedData(OffsetDateTime beforeAt) {
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANING_UP));
-        var deleted = baseMapper.delete(new LambdaQueryWrapper<PeerConnectionMetricsEntity>().le(PeerConnectionMetricsEntity::getTimeframeAt, beforeAt));
+        long deleted = 0;
+        while (true) {
+            List<Object> list = baseMapper.selectObjs(new LambdaQueryWrapper<PeerConnectionMetricsEntity>()
+                    .select(PeerConnectionMetricsEntity::getId)
+                    .le(PeerConnectionMetricsEntity::getTimeframeAt, beforeAt)
+                    .last("LIMIT 1000"));
+            if (list.isEmpty()) {
+                break;
+            }
+            deleted += baseMapper.deleteBatchIds(list.stream().map(o -> (Long) o).toList());
+        }
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}
 

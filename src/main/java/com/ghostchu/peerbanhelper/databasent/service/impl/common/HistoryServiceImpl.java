@@ -58,7 +58,19 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
 
     @Override
     public int deleteExpiredLogs(int keepDays) {
-        return baseMapper.delete(new LambdaQueryWrapper<HistoryEntity>().le(HistoryEntity::getBanAt, OffsetDateTime.now().minusDays(keepDays)));
+        int deleted = 0;
+        OffsetDateTime thresholdDate = OffsetDateTime.now().minusDays(keepDays);
+        while (true) {
+            List<Object> list = baseMapper.selectObjs(new LambdaQueryWrapper<HistoryEntity>()
+                    .select(HistoryEntity::getId)
+                    .le(HistoryEntity::getBanAt, thresholdDate)
+                    .last("LIMIT 1000"));
+            if (list.isEmpty()) {
+                break;
+            }
+            deleted += baseMapper.deleteBatchIds(list.stream().map(o -> (Long) o).toList());
+        }
+        return deleted;
     }
 
     @Override
