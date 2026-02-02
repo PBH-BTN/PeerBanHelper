@@ -41,6 +41,16 @@ export default {
   'page.settings.tab.config.persist.banlist': 'Persist banlist',
   'page.settings.tab.config.persist.ban_logs_keep_days': 'Ban logs retention days',
 
+  'page.settings.tab.config.database.type': 'Database Type',
+  'page.settings.tab.config.database.type.changeWarning': 'Warning',
+  'page.settings.tab.config.database.type.changeWarningContent':
+    'Changing the database type will clear existing data. Incorrect database parameters may cause PeerBanHelper to fail to start. Please proceed with caution!',
+  'page.settings.tab.config.database.host': 'Host',
+  'page.settings.tab.config.database.port': 'Port',
+  'page.settings.tab.config.database.database': 'Database Name',
+  'page.settings.tab.config.database.username': 'Username',
+  'page.settings.tab.config.database.password': 'Password',
+
   'page.settings.tab.config.banlistRemapping.title': 'Banlist Remapping',
   'page.settings.tab.config.banlistRemapping.description':
     'When updating the banlist to downloaders, map a single banned IP address to a larger range to improve the efficiency of IP banning. Incorrect configuration may ban more unrelated peers.',

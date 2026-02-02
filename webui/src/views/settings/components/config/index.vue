@@ -45,7 +45,7 @@
           <a-divider />
           <lookup v-model="form.lookup" />
           <a-divider />
-          <persist v-model="form.persist" />
+          <persist v-model:persist="form.persist" v-model:database="form.database" />
           <a-divider />
           <banlistRemapping v-model="form.banlist_remapping" />
           <a-divider />
@@ -101,7 +101,8 @@ const form = reactive({
   privacy: {},
   proxy: {},
   performance: {},
-  resolvers: {}
+  resolvers: {},
+  database: {}
 } as Config)
 const { loading } = useRequest(GetConfig, {
   onSuccess: (data) => {

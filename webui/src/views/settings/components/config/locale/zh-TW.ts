@@ -42,6 +42,16 @@ export default {
   'page.settings.tab.config.persist.banlist': '持久化封禁列表',
   'page.settings.tab.config.persist.ban_logs_keep_days': '封禁日誌保留天數',
 
+  'page.settings.tab.config.database.type': '資料庫類型',
+  'page.settings.tab.config.database.type.changeWarning': '警告',
+  'page.settings.tab.config.database.type.changeWarningContent':
+    '更改資料庫類型將會清空現有資料，如果資料庫參數填寫有誤會導致 PeerBanHelper 無法啟動，請謹慎操作！',
+  'page.settings.tab.config.database.host': '位址',
+  'page.settings.tab.config.database.port': '連接埠',
+  'page.settings.tab.config.database.database': '資料庫名稱',
+  'page.settings.tab.config.database.username': '使用者名稱',
+  'page.settings.tab.config.database.password': '密碼',
+
   'page.settings.tab.config.banlistRemapping.title': '封禁列表重映射',
   'page.settings.tab.config.banlistRemapping.description':
     '在向下載器更新封禁列表時，將封禁的單個 IP 位址映射到一個更大的範圍，以便提高下載器對 IP 位址的封禁效能。錯誤的配置可能封禁更多的無關 Peers。',

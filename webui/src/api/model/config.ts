@@ -14,6 +14,7 @@ export interface Config {
   privacy: Privacy
   performance: Performance
   resolvers: Resolvers
+  database: DatabaseConfig
 }
 
 export interface Server {
@@ -106,4 +107,20 @@ export interface Privacy {
 
 export interface Performance {
   windows_ecoqos_api: boolean
+}
+
+export type DatabaseType = 'sqlite' | 'h2' | 'mysql' | 'postgresql'
+export type DatabaseConfig = EmbedDatabaseConfig | ExternalDatabaseConfig
+
+export interface EmbedDatabaseConfig {
+  type: 'sqlite' | 'h2'
+}
+
+export interface ExternalDatabaseConfig {
+  type: 'mysql' | 'postgresql'
+  host: string
+  port: number
+  database: string
+  username: string
+  password: string
 }
