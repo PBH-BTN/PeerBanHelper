@@ -12,7 +12,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class WindowsEcoQosAPI implements EcoQosAPI {
     @Override
-    public void apply() throws UnsupportedOperationException {
+    public void apply() {
         try {
             EcoMode ecoMode = new EcoMode();
             ecoMode.setPriority(6);
