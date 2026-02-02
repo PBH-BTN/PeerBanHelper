@@ -4,10 +4,15 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.postgres.PostgresDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.sqlite.SQLiteDatabaseDriver;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DatabaseNtConfigDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -29,6 +34,7 @@ import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
+import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +109,31 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .get("/api/general/global", this::handleGlobalConfigRead, Role.USER_READ)
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
-                .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+                .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE)
+                .post("/api/general/testDatabaseConfig", this::handleDatabaseNtTest, Role.USER_WRITE);
+    }
+
+    private void handleDatabaseNtTest(@NotNull Context context) throws Exception {
+        DatabaseNtConfigDTO dto = context.bodyAsClass(DatabaseNtConfigDTO.class);
+        ConfigurationSection section = new MemoryConfiguration();
+        section.set("type", dto.getType());
+        section.set("host", dto.getHost());
+        section.set("port", dto.getPort());
+        section.set("username", dto.getUsername());
+        section.set("password", dto.getPassword());
+        section.set("database", dto.getDatabase());
+        var driver = switch (dto.getType()) {
+            case "h2" -> new H2DatabaseDriver(section);
+            case "mysql" -> new MySQLDatabaseDriver(section);
+            case "postgresql" -> new PostgresDatabaseDriver(section);
+            default -> new SQLiteDatabaseDriver(section);
+        };
+        try (var stat = driver.getDataSource().getConnection().createStatement()) {
+            boolean success = stat.execute("SELECT 1");
+            context.json(new StdResp(true, null, success));
+        } finally {
+            driver.close();
+        }
     }
 
     private void handleRefreshNatStatus(@NotNull Context context) {
@@ -335,10 +365,10 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         switch (context.pathParam("configName")) {
             case "config" -> {
                 yamlConfiguration.load(Main.getMainConfigFile());
-                if(ExternalSwitch.parseBoolean("pbh.demoMode")){
+                if (ExternalSwitch.parseBoolean("pbh.demoMode")) {
                     yamlConfiguration.set("client", null);
-                    yamlConfiguration.set("btn.app-id","REDACTED_IN_DEMO_MODE");
-                    yamlConfiguration.set("btn.app-secret","REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("btn.app-id", "REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("btn.app-secret", "REDACTED_IN_DEMO_MODE");
                     yamlConfiguration.set("pbh-plus-key", "REDACTED_IN_DEMO_MODE");
                     yamlConfiguration.set("server.token", "REDACTED_IN_DEMO_MODE");
                     yamlConfiguration.set("installation-id", "Not Available In Demo Mode");

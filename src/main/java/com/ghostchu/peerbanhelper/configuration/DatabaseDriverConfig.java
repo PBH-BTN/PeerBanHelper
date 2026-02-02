@@ -73,6 +73,7 @@ public class DatabaseDriverConfig {
         return driver;
     }
 
+
     @Bean
     public PlatformTransactionManager transactionManager(@NotNull DatabaseDriver driver) {
         return new DataSourceTransactionManager(driver.getDataSource());
