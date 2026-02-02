@@ -47,7 +47,7 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
             if (list.isEmpty()) {
                 break;
             }
-            deleted += baseMapper.deleteBatchIds(list.stream().map(o -> (Long) o).toList());
+            deleted += baseMapper.deleteByIds(list.stream().map(o -> (Long) o).toList());
         }
         return deleted;
 	}

@@ -155,7 +155,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
             if (list.isEmpty()) {
                 break;
             }
-            deleted += baseMapper.deleteBatchIds(list.stream().map(o -> (Long) o).toList());
+            deleted += baseMapper.deleteByIds(list.stream().map(o -> (Long) o).toList());
         }
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}
