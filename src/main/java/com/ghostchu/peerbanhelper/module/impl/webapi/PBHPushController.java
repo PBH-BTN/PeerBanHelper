@@ -49,7 +49,7 @@ public final class PBHPushController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/api/push", this::handlePushProviderList, Role.USER_READ)
                 .put("/api/push", this::handlePushProviderPut, Role.USER_WRITE)
                 .patch("/api/push/{pushName}", ctx -> handlePushProviderPatch(ctx, ctx.pathParam("pushName")), Role.USER_WRITE)

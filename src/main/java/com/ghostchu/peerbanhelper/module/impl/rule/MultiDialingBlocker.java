@@ -55,7 +55,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
         Main.getReloadManager().register(this);

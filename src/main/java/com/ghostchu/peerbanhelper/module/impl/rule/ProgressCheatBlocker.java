@@ -113,7 +113,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ);
         registerScheduledTask(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);

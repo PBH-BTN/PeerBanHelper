@@ -51,7 +51,7 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalin().unsafe.routes
                 .post("/api/utilities/replaceTracker", this::handleReplaceTracker, Role.USER_WRITE)
         ;
     }

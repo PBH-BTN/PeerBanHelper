@@ -75,9 +75,9 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onEnable() {
         Main.getEventBus().register(this);
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalin().unsafe.routes
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
         trackedSwarmDao.resetTable();
         registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);

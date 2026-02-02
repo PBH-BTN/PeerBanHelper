@@ -20,6 +20,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.Javalin;
+import io.javalin.compression.CompressionStrategy;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
@@ -74,11 +75,12 @@ public final class JavalinWebContainer implements Reloadable {
             }
         };
         this.javalin = Javalin.create(c -> {
-                    c.http.gzipOnlyCompression();
-                    c.showJavalinBanner = false;
+            c.http.compressionStrategy = CompressionStrategy.GZIP;
+            c.startup.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
-                    c.useVirtualThreads = true;
-                    c.startupWatcherEnabled = false;
+            var state = c.getState$javalin();
+            state.concurrency.useVirtualThreads = true;
+            c.startup.startupWatcherEnabled = false;
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
                             || ExternalSwitch.parse("pbh.allowCors") != null
                     ) {
@@ -89,7 +91,7 @@ public final class JavalinWebContainer implements Reloadable {
                             staticFiles.hostedPath = "/";
                             staticFiles.directory = new File(Main.getDataDirectory(), "static").getPath();
                             staticFiles.location = Location.EXTERNAL;
-                            staticFiles.precompress = false;
+                            staticFiles.precompressMaxSize = -1;
                             staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                             //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
@@ -141,101 +143,102 @@ public final class JavalinWebContainer implements Reloadable {
                             staticFiles.hostedPath = "/";
                             staticFiles.directory = "/static";
                             staticFiles.location = Location.CLASSPATH;
-                            staticFiles.precompress = false;
+                            staticFiles.precompressMaxSize = -1;
                             staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                         });
 
                     }
-                })
-                .exception(IPAddressBannedException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.TOO_MANY_REQUESTS);
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ), null));
-                })
-                .exception(NotLoggedInException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.FORBIDDEN);
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
-                })
-                .exception(NeedInitException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.SEE_OTHER);
-                    ctx.header("Location", "/init");
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT), Map.of("location", "/init")));
-                })
-                .exception(IllegalArgumentException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.BAD_REQUEST);
-                    ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
-                })
-                .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.PAYMENT_REQUIRED);
-                    ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
-                })
-                .exception(BlockScannerException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.NOT_FOUND);
-                    ctx.header("Server", "nginx");
-                    ctx.result("404 not found");
-                    ctx.attribute("skipAfter", true);
-                })
-                .exception(DemoModeException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.BAD_REQUEST);
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.DEMO_MODE_OPERATION_NOT_PERMITTED), null));
-                })
-                .exception(Exception.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
-                    log.error("500 Internal Server Error", e);
-                    Sentry.captureException(e);
-                })
-                .beforeMatched(ctx -> {
-                    if (!securityCheck(ctx)) {
-                        throw new BlockScannerException();
-                    }
-                    if (ctx.routeRoles().isEmpty()) {
-                        return;
-                    }
-                    if (ctx.routeRoles().contains(Role.ANYONE)) {
-                        return;
-                    }
-                    if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
-                        if (!licenseManager.isFeatureEnabled("basic")) {
-                            throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
+            state.routes.exception(IPAddressBannedException.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.TOO_MANY_REQUESTS);
+                        ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ), null));
+                    })
+                    .exception(NotLoggedInException.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.FORBIDDEN);
+                        ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
+                    })
+                    .exception(NeedInitException.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.SEE_OTHER);
+                        ctx.header("Location", "/init");
+                        ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT), Map.of("location", "/init")));
+                    })
+                    .exception(IllegalArgumentException.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.BAD_REQUEST);
+                        ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
+                    })
+                    .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.PAYMENT_REQUIRED);
+                        ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
+                    })
+                    .exception(BlockScannerException.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.NOT_FOUND);
+                        ctx.header("Server", "nginx");
+                        ctx.result("404 not found");
+                        ctx.attribute("skipAfter", true);
+                    })
+                    .exception(DemoModeException.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.BAD_REQUEST);
+                        ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.DEMO_MODE_OPERATION_NOT_PERMITTED), null));
+                    })
+                    .exception(Exception.class, (e, ctx) -> {
+                        ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+                        ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
+                        log.error("500 Internal Server Error", e);
+                        Sentry.captureException(e);
+                    })
+                    .beforeMatched(ctx -> {
+                        if (!securityCheck(ctx)) {
+                            throw new BlockScannerException();
                         }
-                    }
-                    if (ctx.routeRoles().contains(Role.USER_WRITE)) {
-                        if (ExternalSwitch.parseBoolean("pbh.demoMode")) {
-                            throw new DemoModeException();
+                        if (ctx.routeRoles().isEmpty()) {
+                            return;
                         }
-                    }
-                    if (ctx.path().startsWith("/init")) {
-                        return;
-                    }
-                    if (token == null || token.isBlank()) {
-                        throw new NeedInitException();
-                    }
-                    String authenticated = ctx.sessionAttribute("authenticated");
-                    if (authenticated != null && authenticated.equals(token)) {
-                        return;
-                    }
-                    // 开始登陆验证
-                    if (!allowAttemptLogin(WebUtil.userIp(ctx), ctx.userAgent())) {
-                        throw new IPAddressBannedException();
-                    }
-                    TokenAuthResult tokenAuthResult = isContextAuthorized(ctx);
-                    if (tokenAuthResult == TokenAuthResult.SUCCESS) {
-                        var silentLoginSecret = ctx.queryParam("silentLogin");
-                        markLoginSuccess(WebUtil.userIp(ctx), ctx.userAgent(), SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI.equals(silentLoginSecret));
-                        return;
-                    }
-                    if (tokenAuthResult == TokenAuthResult.FAILED) {
-                        markLoginFailed(WebUtil.userIp(ctx), ctx.userAgent());
-                    }
-                    if (ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)) {
-                        throw new NotLoggedInException();
-                    }
-                })
-                .options("/*", ctx -> ctx.status(200))
-                .after(ctx -> {
-                    if (ctx.attribute("skipAfter") != null) return;
-                    ctx.header("Server", Main.getUserAgent());
-                });
+                        if (ctx.routeRoles().contains(Role.ANYONE)) {
+                            return;
+                        }
+                        if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
+                            if (!licenseManager.isFeatureEnabled("basic")) {
+                                throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
+                            }
+                        }
+                        if (ctx.routeRoles().contains(Role.USER_WRITE)) {
+                            if (ExternalSwitch.parseBoolean("pbh.demoMode")) {
+                                throw new DemoModeException();
+                            }
+                        }
+                        if (ctx.path().startsWith("/init")) {
+                            return;
+                        }
+                        if (token == null || token.isBlank()) {
+                            throw new NeedInitException();
+                        }
+                        String authenticated = ctx.sessionAttribute("authenticated");
+                        if (authenticated != null && authenticated.equals(token)) {
+                            return;
+                        }
+                        // 开始登陆验证
+                        if (!allowAttemptLogin(WebUtil.userIp(ctx), ctx.userAgent())) {
+                            throw new IPAddressBannedException();
+                        }
+                        TokenAuthResult tokenAuthResult = isContextAuthorized(ctx);
+                        if (tokenAuthResult == TokenAuthResult.SUCCESS) {
+                            var silentLoginSecret = ctx.queryParam("silentLogin");
+                            markLoginSuccess(WebUtil.userIp(ctx), ctx.userAgent(), SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI.equals(silentLoginSecret));
+                            return;
+                        }
+                        if (tokenAuthResult == TokenAuthResult.FAILED) {
+                            markLoginFailed(WebUtil.userIp(ctx), ctx.userAgent());
+                        }
+                        if (ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)) {
+                            throw new NotLoggedInException();
+                        }
+                    })
+                    .options("/*", ctx -> ctx.status(200))
+                    .after(ctx -> {
+                        if (ctx.attribute("skipAfter") != null) return;
+                        ctx.header("Server", Main.getUserAgent());
+                    });
+        });
+
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
     }
 
