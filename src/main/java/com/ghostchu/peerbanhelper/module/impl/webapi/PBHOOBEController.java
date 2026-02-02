@@ -9,11 +9,15 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DatabaseNtConfigDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.DownloaderDiscovery;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
@@ -27,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -150,8 +155,45 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             }
             conf.save(Main.getMainConfigFile());
         }
-
+        handleReloading(ctx);
     }
+
+    private void handleReloading(Context context) {
+        Main.setupConfiguration();
+        var result = Main.getReloadManager().reload();
+        List<ReloadEntryDTO> entryList = new ArrayList<>();
+        result.forEach((container, r) -> {
+            String entryName;
+            if (container.getReloadable() == null) {
+                entryName = container.getReloadableMethod().getDeclaringClass().getName() + "#" + container.getReloadableMethod().getName();
+            } else {
+                Reloadable reloadable = container.getReloadable().get();
+                if (reloadable == null) {
+                    entryName = "<invalid>";
+                } else {
+                    entryName = reloadable.getClass().getName();
+                }
+            }
+            entryList.add(new ReloadEntryDTO(entryName, r.getStatus().name()));
+        });
+
+
+        boolean success = true;
+        TranslationComponent message = new TranslationComponent(Lang.RELOAD_RESULT_SUCCESS);
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.SCHEDULED)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_SCHEDULED);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.REQUIRE_RESTART)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_REQUIRE_RESTART);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.EXCEPTION)) {
+            success = false;
+            message = new TranslationComponent(Lang.RELOAD_RESULT_FAILED);
+        }
+
+        context.json(new StdResp(success, tl(locale(context), message), entryList));
+    }
+
 
     private void handleDatabaseNtTest(@NotNull Context context) {
         DatabaseNtConfigDTO dto = context.bodyAsClass(DatabaseNtConfigDTO.class);
