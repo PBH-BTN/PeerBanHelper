@@ -44,7 +44,7 @@ public class DownloaderDiscovery {
 
     }
 
-    public CompletableFuture<List<DiscoveredDownloader>> scan(@NotNull List<Integer> excludePorts) {
+    public CompletableFuture<List<DiscoveredDownloader>> scan(@NotNull List<Integer> addedPorts) {
         return CompletableFuture.supplyAsync(() -> {
             List<DiscoveredDownloader> found = Collections.synchronizedList(new ArrayList<>());
             var listenConnections = systemInfo.getOperatingSystem().getInternetProtocolStats().getConnections()
@@ -53,7 +53,6 @@ public class DownloaderDiscovery {
                         var type = conn.getType();
                         return type.startsWith("tcp");
                     })
-                    .filter(conn -> !excludePorts.contains(conn.getLocalPort()))
                     .filter(conn -> conn.getState() == InternetProtocolStats.TcpState.LISTEN)
                     .toList();
             log.debug("Found {} listen connections: {}", listenConnections.size(), listenConnections);
@@ -64,7 +63,7 @@ public class DownloaderDiscovery {
                         try {
                             semaphore.acquire();
                             String inetAddress = IPAddressUtil.adaptIP(listenConnection.getLocalAddress());
-                            var scanResult = checkDownloader(inetAddress, listenConnection.getLocalPort(), listenConnection.getowningProcessId());
+                            var scanResult = checkDownloader(inetAddress, listenConnection.getLocalPort(), listenConnection.getowningProcessId(), addedPorts.contains(listenConnection.getLocalPort()) ? DiscoverStatus.ADDED : DiscoverStatus.NEW);
                             if (scanResult != null) {
                                 found.add(scanResult);
                             }
@@ -84,7 +83,7 @@ public class DownloaderDiscovery {
 
     @SuppressWarnings("HttpUrlsUsage")
     @Nullable
-    public DiscoveredDownloader checkDownloader(String host, int port, int pid) {
+    public DiscoveredDownloader checkDownloader(String host, int port, int pid, DiscoverStatus status) {
         Request request = new Request.Builder()
                 .url("http://" + host + ":" + port)
                 .get()
@@ -92,19 +91,21 @@ public class DownloaderDiscovery {
         try (Response response = httpClient.newCall(request).execute()) {
             var server = response.header("Server");
             if (server != null) { // check server
-                if (server.contains("Transmission")) return new DiscoveredDownloader(host, port, "transmission", pid);
+                if (server.contains("Transmission"))
+                    return new DiscoveredDownloader(host, port, "transmission", pid, status);
                 if (server.contains("PeerBanHelper-BiglyBT-Adapter"))
-                    return new DiscoveredDownloader(host, port, "biglybt", pid);
+                    return new DiscoveredDownloader(host, port, "biglybt", pid, status);
             }
             var auth = response.header("WWW-Authenticate");
             if (auth != null) {
                 if (auth.contains("BitComet Remote Login"))
-                    return new DiscoveredDownloader(host, port, "bitcomet", pid);
+                    return new DiscoveredDownloader(host, port, "bitcomet", pid, status);
             }
             var body = response.body().string();
             if (body.contains("BitComet Remote Access") || body.contains("BitComet WebUI"))
-                return new DiscoveredDownloader(host, port, "bitcomet", pid);
-            if (body.contains("qBittorrent WebUI")) return new DiscoveredDownloader(host, port, "qbittorrent", pid);
+                return new DiscoveredDownloader(host, port, "bitcomet", pid, status);
+            if (body.contains("qBittorrent WebUI"))
+                return new DiscoveredDownloader(host, port, "qbittorrent", pid, status);
             return null;
         } catch (Exception e) {
             log.debug("Failed to check downloader at {}:{} -> {}", host, port, e.getCause() + ":" + e.getMessage());
@@ -112,6 +113,10 @@ public class DownloaderDiscovery {
         }
     }
 
+    public enum DiscoverStatus {
+        NEW,
+        ADDED
+    }
 
     @AllArgsConstructor
     @Data
@@ -120,5 +125,6 @@ public class DownloaderDiscovery {
         private int port;
         private String type;
         private int pid;
+        private DiscoverStatus added;
     }
 }
