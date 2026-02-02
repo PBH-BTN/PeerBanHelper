@@ -132,7 +132,6 @@ public final class TextManager implements Reloadable {
             }
         } catch (IOException e) {
             log.debug("No bundled translations found for {}", locale);
-            Sentry.captureException(e);
         }
 
         // 尝试加载覆盖语言
