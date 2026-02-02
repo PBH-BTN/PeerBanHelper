@@ -69,8 +69,8 @@
 import { ClientTypeEnum } from '@/api/model/downloader'
 import type { InitConfig } from '@/api/model/oobe'
 import { SacnDownloader, TestDownloaderConfig } from '@/service/init'
+import GenerateUUID from '@/utils/uuid'
 import { Message, Modal } from '@arco-design/web-vue'
-import { v1 as uuid } from 'uuid'
 import { defineAsyncComponent, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import scanDownloaderModal from './scanDownloaderModal.vue'
@@ -99,7 +99,7 @@ const handleTest = async () => {
   config.value.downloader.config.endpoint.replace(/\/$/, '')
   try {
     const testResult = await TestDownloaderConfig({
-      id: uuid(),
+      id: await GenerateUUID(),
       config: config.value.downloader.config
     })
     if (!testResult.success) throw new Error(testResult.message)

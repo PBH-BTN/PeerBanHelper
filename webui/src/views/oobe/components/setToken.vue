@@ -51,21 +51,14 @@
 
 <script lang="ts" setup>
 import type { InitConfig } from '@/api/model/oobe'
+import GenerateUUID from '@/utils/uuid'
 import type { FieldRule } from '@arco-design/web-vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
 const generateToken = async () => {
-  config.value.token = await uuidFunc()
-}
-const uuidFunc = async () => {
-  if (crypto.randomUUID) {
-    return crypto.randomUUID()
-  } else {
-    const uuid = await import('uuid')
-    return uuid.v4()
-  }
+  config.value.token = await GenerateUUID()
 }
 </script>
 <style scoped>

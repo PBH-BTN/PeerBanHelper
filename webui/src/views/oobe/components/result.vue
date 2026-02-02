@@ -23,7 +23,7 @@
 import type { InitConfig } from '@/api/model/oobe'
 import { InitPBH } from '@/service/init'
 import { useEndpointStore } from '@/stores/endpoint'
-import { v1 as uuid } from 'uuid'
+import GenerateUUID from '@/utils/uuid'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
@@ -32,12 +32,12 @@ const loading = ref(true)
 const initSuccess = ref(false)
 const errorMsg = ref('')
 const { setAuthToken } = useEndpointStore()
-const init = () => {
+const init = async () => {
   loading.value = true
   InitPBH({
     token: config.value.token,
     downloader: {
-      id: uuid(),
+      id: await GenerateUUID(),
       config: config.value.downloader.config
     },
     btn: config.value.btn,
