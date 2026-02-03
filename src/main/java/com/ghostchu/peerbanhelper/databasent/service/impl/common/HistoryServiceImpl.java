@@ -61,14 +61,14 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         int deleted = 0;
         OffsetDateTime thresholdDate = OffsetDateTime.now().minusDays(keepDays);
         while (true) {
-            List<Object> list = baseMapper.selectObjs(new LambdaQueryWrapper<HistoryEntity>()
+            List<HistoryEntity> list = baseMapper.selectList(new LambdaQueryWrapper<HistoryEntity>()
                     .select(HistoryEntity::getId)
                     .le(HistoryEntity::getBanAt, thresholdDate)
                     .last("LIMIT 1000"));
             if (list.isEmpty()) {
                 break;
             }
-            deleted += baseMapper.deleteByIds(list.stream().map(o -> (Long) o).toList());
+            deleted += baseMapper.deleteByIds(list);
         }
         return deleted;
     }

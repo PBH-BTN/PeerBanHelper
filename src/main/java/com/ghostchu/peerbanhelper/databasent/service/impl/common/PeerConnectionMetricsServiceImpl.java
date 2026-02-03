@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
+import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDTO;
@@ -148,14 +149,14 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANING_UP));
         long deleted = 0;
         while (true) {
-            List<Object> list = baseMapper.selectObjs(new LambdaQueryWrapper<PeerConnectionMetricsEntity>()
+            List<PeerConnectionMetricsEntity> list = baseMapper.selectObjs(new LambdaQueryWrapper<PeerConnectionMetricsEntity>()
                     .select(PeerConnectionMetricsEntity::getId)
                     .le(PeerConnectionMetricsEntity::getTimeframeAt, beforeAt)
                     .last("LIMIT 1000"));
             if (list.isEmpty()) {
                 break;
             }
-            deleted += baseMapper.deleteByIds(list.stream().map(o -> (Long) o).toList());
+            deleted += baseMapper.deleteByIds(list);
         }
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}

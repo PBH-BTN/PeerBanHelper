@@ -40,14 +40,14 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
     public int cleanupDatabase(OffsetDateTime timestamp) {
         int deleted = 0;
         while (true) {
-            List<Object> list = baseMapper.selectObjs(new LambdaQueryWrapper<PCBRangeEntity>()
+            List<PCBRangeEntity> list = baseMapper.selectList(new LambdaQueryWrapper<PCBRangeEntity>()
                     .select(PCBRangeEntity::getId)
                     .lt(PCBRangeEntity::getLastTimeSeen, timestamp)
                     .last("LIMIT 1000"));
             if (list.isEmpty()) {
                 break;
             }
-            deleted += baseMapper.deleteByIds(list.stream().map(o -> (Long) o).toList());
+            deleted += baseMapper.deleteByIds(list);
         }
         return deleted;
 	}

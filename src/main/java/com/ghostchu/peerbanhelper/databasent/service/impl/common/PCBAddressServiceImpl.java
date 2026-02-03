@@ -42,14 +42,14 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
     public int cleanupDatabase(OffsetDateTime timestamp) {
         int deleted = 0;
         while (true) {
-            List<Object> list = baseMapper.selectObjs(new LambdaQueryWrapper<PCBAddressEntity>()
+            List<PCBAddressEntity> list = baseMapper.selectList(new LambdaQueryWrapper<PCBAddressEntity>()
                     .select(PCBAddressEntity::getId)
                     .lt(PCBAddressEntity::getLastTimeSeen, timestamp)
                     .last("LIMIT 1000"));
             if (list.isEmpty()) {
                 break;
             }
-            deleted += baseMapper.deleteByIds(list.stream().map(o -> (Long) o).toList());
+            deleted += baseMapper.deleteByIds(list);
         }
         return deleted;
 	}
