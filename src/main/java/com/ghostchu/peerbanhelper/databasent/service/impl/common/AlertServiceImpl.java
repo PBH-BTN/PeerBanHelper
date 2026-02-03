@@ -30,7 +30,18 @@ public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> impl
 
     @Override
     public int deleteOldAlerts(@NotNull OffsetDateTime before) {
-        return baseMapper.delete(new LambdaQueryWrapper<AlertEntity>().lt(AlertEntity::getCreateAt, before));
+        int deleted = 0;
+        while (true) {
+            List<AlertEntity> list = baseMapper.selectList(new LambdaQueryWrapper<AlertEntity>()
+                    .select(AlertEntity::getId)
+                    .le(AlertEntity::getCreateAt, before)
+                    .last("LIMIT 1000"));
+            if (list.isEmpty()) {
+                break;
+            }
+            deleted += baseMapper.deleteByIds(list);
+        }
+        return deleted;
     }
 
     @Override
