@@ -218,7 +218,7 @@ public class Main {
             sentryOptions.setAttachThreads(true);
             sentryOptions.setPrintUncaughtStackTrace(true);
             sentryOptions.setEnableUncaughtExceptionHandler(true);
-            sentryOptions.setProfilesSampleRate(1.0d); // TODO modify this value later
+            sentryOptions.setProfilesSampleRate(0.3d); // TODO modify this value later
             sentryOptions.setEnableUserInteractionTracing(false); // Do not tracker user behavior
             sentryOptions.setRelease(meta.getVersion());
             sentryOptions.setTag("os", System.getProperty("os.name"));
