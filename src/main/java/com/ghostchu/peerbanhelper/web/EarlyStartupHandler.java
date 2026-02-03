@@ -8,12 +8,12 @@ import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.event.Level;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.StringJoiner;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -38,15 +38,37 @@ public class EarlyStartupHandler implements Handler {
         }
     }
 
-    private String generateLogsHTML(){
-        StringJoiner joiner = new StringJoiner("<br/>");
-        var list = new ArrayList<>(JListAppender.ringDeque.stream().limit(100).toList());
-        Collections.reverse(list);
-        String template = "[%s] [%s/%s]: %s";
-        for (LogEntry entry : list) {
-            var date = MsgUtil.getTimeFormatter().format(new Date(entry.time()));
-            joiner.add( template.formatted(date, entry.thread(), entry.level(), entry.content()));
+    private String generateLogsHTML() {
+        var logs = new ArrayList<>(JListAppender.ringDeque.stream().limit(100).toList());
+        Collections.reverse(logs);
+
+        StringBuilder html = new StringBuilder("<div class='terminal'>");
+        for (LogEntry entry : logs) {
+            String timestamp = MsgUtil.getTimeFormatter().format(new Date(entry.time()));
+            String line = "[%s] [%s/%s]: %s".formatted(timestamp, entry.thread(), entry.level(), entry.content());
+            String cssClass = "log-line " + getLogClass(entry.level());
+            html.append("<div class='").append(cssClass).append("'>")
+                .append(escapeHtml(line))
+                .append("</div>");
         }
-        return joiner.toString();
+        html.append("</div>");
+        return html.toString();
+    }
+
+    private String getLogClass(Level level) {
+        return switch (level) {
+            case ERROR -> "log-error";
+            case WARN -> "log-warn";
+            case DEBUG -> "log-debug";
+            default -> "";
+        };
+    }
+
+    private String escapeHtml(String text) {
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
     }
 }
