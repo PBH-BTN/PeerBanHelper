@@ -110,22 +110,12 @@ public final class RuleSubController extends AbstractFeatureModule {
         return ipBlackRuleList != null;
     }
 
-    /**
-     * 返回模块不可用错误
-     */
-    private void moduleNotAvailable(Context ctx) {
-        ctx.status(HttpStatus.BAD_REQUEST);
-        ctx.json(new StdResp(false, tl(locale(ctx), Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null));
-    }
+
 
     /**
      * 查询检查间隔
      */
     private void getCheckInterval(Context ctx) {
-        if (!isModuleAvailable()) {
-            moduleNotAvailable(ctx);
-            return;
-        }
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS), ipBlackRuleList.getCheckInterval()));
     }
 
@@ -133,10 +123,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 修改检查间隔
      */
     private void changeCheckInterval(Context ctx) {
-        if (!isModuleAvailable()) {
-            moduleNotAvailable(ctx);
-            return;
-        }
         try {
             long interval = JsonUtil.readObject(ctx.body()).get("checkInterval").getAsLong();
             ipBlackRuleList.changeCheckInterval(interval);
@@ -151,10 +137,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 查询订阅规则日志
      */
     private void logs(Context ctx, String ruleId) {
-        if (!isModuleAvailable()) {
-            moduleNotAvailable(ctx);
-            return;
-        }
         try {
             Pageable pageable = new Pageable(ctx);
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), PBHPage.from(ipBlackRuleList.queryRuleSubLogs(ruleId, pageable))));
@@ -212,11 +194,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 启用/禁用订阅规则
      */
     private void switcher(Context ctx) throws SQLException, IOException {
-        if (!isModuleAvailable()) {
-            moduleNotAvailable(ctx);
-            return;
-        }
-
         String ruleId = ctx.pathParam("ruleId");
         boolean enabled;
         try {
@@ -254,10 +231,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 删除订阅规则
      */
     private void delete(Context ctx) throws IOException, SQLException {
-        if (!isModuleAvailable()) {
-            moduleNotAvailable(ctx);
-            return;
-        }
         String ruleId = ctx.pathParam("ruleId");
         deleteIpRule(ctx, ruleId);
     }
@@ -280,12 +253,7 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 保存订阅规则（新增/修改）
      */
     private void save(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {
-        if (!isModuleAvailable()) {
-            moduleNotAvailable(ctx);
-            return;
-        }
         saveIpRule(ctx, ruleId, isAdd);
-
     }
 
     private void saveIpRule(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {

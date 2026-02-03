@@ -351,6 +351,11 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 sj.add(ele.substring(1));
                 continue;
             }
+            if (ele.startsWith("//")) {
+                // add into sj but without double slash prefix
+                sj.add(ele.substring(2));
+                continue;
+            }
             try {
                 var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
@@ -384,14 +389,27 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             if (start == null || end == null) return null;
             return Map.entry(start.spanWithRange(end).coverWithPrefixBlock(), comment);
         } else {
-            // ip #end-line-comment
+            // ip #end-line-comment or ip //end-line-comment
             String ip;
-            if (ele.contains("#")) {
-                ip = ele.substring(0, ele.indexOf("#"));
-                String comment = null;
-                if (ele.contains("#")) {
-                    comment = ele.substring(ele.indexOf("#") + 1);
-                }
+            String comment = null;
+
+            // Check for // comment first (to avoid conflict with protocol://)
+            int doubleSlashIndex = ele.indexOf("//");
+            int hashIndex = ele.indexOf("#");
+
+            // Determine which comment delimiter appears first
+            int commentIndex = -1;
+            if (doubleSlashIndex != -1 && hashIndex != -1) {
+                commentIndex = Math.min(doubleSlashIndex, hashIndex);
+            } else if (doubleSlashIndex != -1) {
+                commentIndex = doubleSlashIndex;
+            } else if (hashIndex != -1) {
+                commentIndex = hashIndex;
+            }
+
+            if (commentIndex != -1) {
+                ip = ele.substring(0, commentIndex);
+                comment = ele.substring(commentIndex + (ele.charAt(commentIndex) == '#' ? 1 : 2));
                 return Map.entry(IPAddressUtil.getIPAddress(ip), Optional.ofNullable(comment).orElse(preReadComment));
             } else {
                 return Map.entry(IPAddressUtil.getIPAddress(ele), preReadComment);
