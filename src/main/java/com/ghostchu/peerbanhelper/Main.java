@@ -21,6 +21,7 @@ import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
@@ -123,6 +124,8 @@ public class Main {
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.1";
     private static PluginManager pluginManager;
     private static long bootSince;
+    @Getter
+    private static JavalinWebContainer webContainer;
 
     public static void main(String[] args) {
         try {
@@ -147,11 +150,12 @@ public class Main {
                 }
             }
             loadPlatform();
+            setupHttpServer();
+            pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
             initGUI(args);
             Thread.ofPlatform().name("Bootstrap").start(() -> {
                 try {
                     guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
-                    pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
                     setupScriptEngine();
                     log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
                     applicationContext = new AnnotationConfigApplicationContext();
@@ -174,6 +178,31 @@ public class Main {
             throw throwable;
         }
 
+    }
+
+    private static void setupHttpServer() {
+        webContainer = new JavalinWebContainer();
+        String token = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.token"));
+        String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("server.address"));
+        if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
+            host = null;
+        }
+        int httpdPort = ExternalSwitch.parseInt("pbh.port", Main.getMainConfig().getInt("server.http"));
+        try {
+            webContainer.setupJavalin();
+            webContainer.start(host, httpdPort, token);
+        } catch (JavalinBindException e) {
+            if (e.getMessage().contains("Port already in use")) {
+                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort));
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort), e);
+            } else if (e.getMessage().contains("require elevated privileges")) {
+                log.error(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES));
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES, httpdPort), e);
+            } else {
+                Sentry.captureException(e);
+                log.error("Unable to start Javalin http server", e);
+            }
+        }
     }
 
     private static void setupSentry() {

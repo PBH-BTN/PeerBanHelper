@@ -64,14 +64,7 @@ public final class SwtBrowserCanvas extends Canvas {
             try {
                 this.browser = new Browser(this.shell, SWT.NONE);
                 this.browser.setVisible(true);
-                try (var input = Main.class.getResourceAsStream("/placeholder.html")) {
-                    if (input != null) {
-                        this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
-                    }
-                } catch (Exception e) {
-                    log.debug("Cannot load placeholder.html", e);
-                    Sentry.captureException(e);
-                }
+                this.browser.setUrl(Main.getPbhServerAddress());
                 this.browserInitialized = true;
                 // 应用正确的大小
                 updateBrowserSize();

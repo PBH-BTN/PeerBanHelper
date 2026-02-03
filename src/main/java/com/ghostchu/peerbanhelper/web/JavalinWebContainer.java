@@ -3,15 +3,13 @@ package com.ghostchu.peerbanhelper.web;
 import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.SharedObject;
-import com.ghostchu.peerbanhelper.util.WebUtil;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
+import com.ghostchu.peerbanhelper.util.logger.JListAppender;
+import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.ghostchu.peerbanhelper.web.exception.*;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -21,6 +19,7 @@ import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
@@ -32,22 +31,25 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-@Component
 public final class JavalinWebContainer implements Reloadable {
-    private final Javalin javalin;
+    private Javalin javalin;
+    @Setter
+    private LicenseManager licenseManager;
     @Setter
     @Getter
     private String token;
@@ -59,20 +61,20 @@ public final class JavalinWebContainer implements Reloadable {
     @Getter
     private volatile boolean started;
     private boolean webuiAnalyticsEnabled;
+    private final AtomicReference<Handler> spaHandler = new AtomicReference<>(new EarlyStartupHandler());
+    private final JsonMapper gsonMapper = new JsonMapper() {
+        @Override
+        public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
+            return JsonUtil.standard().toJson(obj, type);
+        }
 
-    public JavalinWebContainer(LicenseManager licenseManager) {
-        reloadConfig();
-        JsonMapper gsonMapper = new JsonMapper() {
-            @Override
-            public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
-                return JsonUtil.standard().toJson(obj, type);
-            }
+        @Override
+        public <T> @NotNull T fromJsonString(@NotNull String json, @NotNull Type targetType) {
+            return JsonUtil.standard().fromJson(json, targetType);
+        }
+    };
 
-            @Override
-            public <T> @NotNull T fromJsonString(@NotNull String json, @NotNull Type targetType) {
-                return JsonUtil.standard().fromJson(json, targetType);
-            }
-        };
+    public void setupJavalin() {
         this.javalin = Javalin.create(c -> {
                     c.http.gzipOnlyCompression();
                     c.showJavalinBanner = false;
@@ -96,47 +98,7 @@ public final class JavalinWebContainer implements Reloadable {
                         c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
                     } else {
                         //c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
-                        c.spaRoot.addHandler("/", ctx -> {
-                            try (var in = this.getClass().getResourceAsStream("/static/index.html")) {
-                                if (in == null) {
-                                    ctx.status(HttpStatus.NOT_FOUND);
-                                    ctx.result("SPA index.html not found in classpath.");
-                                    return;
-                                }
-                                String data = new String(in.readAllBytes());
-                                if (webuiAnalyticsEnabled) {
-                                    data = data.replace("<title>PeerBanHelper</title>",
-                                                    """
-                                                    <title>PeerBanHelper</title>
-                                                    <script>
-                                                            window.beforeSendHandler = function(type, payload) {
-                                                                payload.hostname = "privacy-redacted.local";
-                                                                payload.referrer = "http://privacy-redacted.local";
-                                                                try {
-                                                                    if (payload.url.startsWith('http')) {
-                                                                        const urlObj = new URL(payload.url);
-                                                                        payload.url = "http://privacy-redacted.local" + urlObj.pathname + urlObj.search;
-                                                                    } else {
-                                                                        payload.url = "http://privacy-redacted.local" + (payload.url.startsWith('/') ? payload.url : '/' + payload.url);
-                                                                    }
-                                                                } catch (e) {
-                                                                    payload.url = payload.url.replace(/^https?:\\/\\/[^/]+/, 'http://0.0.0.0');
-                                                                }
-                                                                return payload;
-                                                            };
-                                                    </script>
-                                                    <script defer src="https://uma.pbh-btn.com/script.js"
-                                                    data-website-id="58076dc4-266e-4984-abb6-7c48afa22d4d"
-                                                    data-exclude-search="true"
-                                                    data-exclude-ip="true"
-                                                    data-exclude-token="true"
-                                                    data-before-send="beforeSendHandler"
-                                                    ></script>
-                                                    """);
-                                }
-                                ctx.html(data);
-                            }
-                        });
+                        c.spaRoot.addHandler("/", ctx -> spaHandler.get().handle(ctx));
                         c.staticFiles.add(staticFiles -> {
                             staticFiles.hostedPath = "/";
                             staticFiles.directory = "/static";
@@ -144,7 +106,6 @@ public final class JavalinWebContainer implements Reloadable {
                             staticFiles.precompress = false;
                             staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                         });
-
                     }
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
@@ -195,8 +156,10 @@ public final class JavalinWebContainer implements Reloadable {
                         return;
                     }
                     if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
-                        if (!licenseManager.isFeatureEnabled("basic")) {
-                            throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
+                        if (licenseManager != null) {
+                            if (!licenseManager.isFeatureEnabled("basic")) {
+                                throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
+                            }
                         }
                     }
                     if (ctx.routeRoles().contains(Role.USER_WRITE)) {
@@ -236,7 +199,53 @@ public final class JavalinWebContainer implements Reloadable {
                     if (ctx.attribute("skipAfter") != null) return;
                     ctx.header("Server", Main.getUserAgent());
                 });
-        //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+    }
+
+    public void setSpaHandlerToReady() {
+        this.spaHandler.set(this::handleSpaRequest);
+    }
+
+
+    private void handleSpaRequest(@NotNull Context ctx) throws IOException {
+        try (var in = this.getClass().getResourceAsStream("/static/index.html")) {
+            if (in == null) {
+                ctx.status(HttpStatus.NOT_FOUND);
+                ctx.result("SPA index.html not found in classpath.");
+                return;
+            }
+            String data = new String(in.readAllBytes());
+            if (webuiAnalyticsEnabled) {
+                data = data.replace("<title>PeerBanHelper</title>",
+                        """
+                                <title>PeerBanHelper</title>
+                                <script>
+                                        window.beforeSendHandler = function(type, payload) {
+                                            payload.hostname = "privacy-redacted.local";
+                                            payload.referrer = "http://privacy-redacted.local";
+                                            try {
+                                                if (payload.url.startsWith('http')) {
+                                                    const urlObj = new URL(payload.url);
+                                                    payload.url = "http://privacy-redacted.local" + urlObj.pathname + urlObj.search;
+                                                } else {
+                                                    payload.url = "http://privacy-redacted.local" + (payload.url.startsWith('/') ? payload.url : '/' + payload.url);
+                                                }
+                                            } catch (e) {
+                                                payload.url = payload.url.replace(/^https?:\\/\\/[^/]+/, 'http://0.0.0.0');
+                                            }
+                                            return payload;
+                                        };
+                                </script>
+                                <script defer src="https://uma.pbh-btn.com/script.js"
+                                data-website-id="58076dc4-266e-4984-abb6-7c48afa22d4d"
+                                data-exclude-search="true"
+                                data-exclude-ip="true"
+                                data-exclude-token="true"
+                                data-before-send="beforeSendHandler"
+                                ></script>
+                                """);
+            }
+            ctx.html(data);
+        }
     }
 
     private void reloadConfig() {
@@ -283,7 +292,6 @@ public final class JavalinWebContainer implements Reloadable {
         this.token = token;
         javalin.start(host, port);
         this.started = true;
-        Main.getEventBus().post(new WebServerStartedEvent());
     }
 
     public Javalin javalin() {

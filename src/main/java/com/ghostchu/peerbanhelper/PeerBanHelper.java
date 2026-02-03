@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
+import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
@@ -197,23 +198,27 @@ public class PeerBanHelper implements Reloadable {
 
 
     private void registerHttpServer() {
-        String token = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.token"));
-        String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("server.address"));
-        if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
-            host = null;
-        }
-        try {
-            webContainer.start(host, httpdPort, token);
-        } catch (JavalinBindException e) {
-            if (e.getMessage().contains("Port already in use")) {
-                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort));
-                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort), e);
-            } else if (e.getMessage().contains("require elevated privileges")) {
-                log.error(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES));
-                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES, httpdPort), e);
-            } else {
-                Sentry.captureException(e);
-                log.error("Unable to start Javalin http server", e);
+        webContainer.setSpaHandlerToReady();
+        Main.getEventBus().post(new WebServerStartedEvent());
+        if(false) {
+            String token = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.token"));
+            String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("server.address"));
+            if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
+                host = null;
+            }
+            try {
+                webContainer.start(host, httpdPort, token);
+            } catch (JavalinBindException e) {
+                if (e.getMessage().contains("Port already in use")) {
+                    log.error(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort));
+                    throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort), e);
+                } else if (e.getMessage().contains("require elevated privileges")) {
+                    log.error(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES));
+                    throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES, httpdPort), e);
+                } else {
+                    Sentry.captureException(e);
+                    log.error("Unable to start Javalin http server", e);
+                }
             }
         }
     }

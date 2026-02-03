@@ -856,3 +856,7 @@ BTN_CONFIGURE_SYNC_SERVER: "[BTN 网络] 获取配置文件并初始化"
 IPDB_DOWNLOAD_MMDB: "[GeoIPDB] 下载数据库: {}"
 IPDB_DOWNLOAD_MMDB_DESCRIPTION: "从远程服务器下载: {}"
 IPDB_DOWNLOAD_MMDB_FAILED_DESCRIPTION: "从远程服务器下载失败: {}"
+
+EARLY_STARTING_TITLE: "请等待 PeerBanHelper 启动"
+EARLY_STARTING_PAGE_TITLE: "PeerBanHelper 正在启动..."
+EARLY_STARTING_PAGE_DESCRIPTION: "我们正在准备必须的数据和组件，您可以在下方查看当前启动进度。一旦启动完成，页面将自动跳转至 WebUI..."
