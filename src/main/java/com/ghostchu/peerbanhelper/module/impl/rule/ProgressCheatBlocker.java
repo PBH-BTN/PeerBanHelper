@@ -16,10 +16,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.Pair;
-import com.ghostchu.peerbanhelper.util.TimeUtil;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -115,7 +112,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         reloadConfig();
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ);
-        registerScheduledTask(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        CommonUtil.getBgCleanupScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
         Main.getEventBus().register(this);
     }

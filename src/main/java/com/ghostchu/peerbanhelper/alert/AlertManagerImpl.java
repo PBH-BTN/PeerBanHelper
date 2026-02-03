@@ -41,7 +41,7 @@ public final class AlertManagerImpl implements AlertManager {
 
     @Subscribe
     public void init(PBHServerStartedEvent event) {
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
+        CommonUtil.getBgCleanupScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
     }
 
     private void cleanup() {

@@ -13,11 +13,13 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.install4j.runtime.installer.platform.win32.Common;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -74,7 +76,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
         reloadConfig();
         this.cleanupInterval = getConfig().getLong("cleanup-interval");
         this.dataFlushInterval = getConfig().getLong("data-flush-interval");
-        registerScheduledTask(this::cleanup, 0, this.cleanupInterval, TimeUnit.MILLISECONDS);
+        CommonUtil.getBgCleanupScheduler().scheduleWithFixedDelay(this::cleanup, 0, this.cleanupInterval, TimeUnit.MILLISECONDS);
         registerScheduledTask(this::flushData, 0, this.dataFlushInterval, TimeUnit.MILLISECONDS);
         Main.getReloadManager().register(this);
     }

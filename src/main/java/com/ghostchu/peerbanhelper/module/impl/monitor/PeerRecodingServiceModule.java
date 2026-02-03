@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
@@ -117,7 +118,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
         reloadConfig();
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
         long dataFlushInterval = getConfig().getLong("data-flush-interval", 20000);
-        registerScheduledTask(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
+        CommonUtil.getBgCleanupScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
         registerScheduledTask(this::flush, 0, dataFlushInterval, TimeUnit.MILLISECONDS);
     }
 

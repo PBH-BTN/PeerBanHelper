@@ -21,9 +21,15 @@ public final class CommonUtil {
 
     private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofPlatform()
             .name("CommonScheduler").factory());
+    private static final ScheduledExecutorService BG_CLEANUP_SCHEDULER = Executors.newScheduledThreadPool(1, Thread.ofPlatform()
+            .name("BgCleanupScheduler").factory());
 
     public static ScheduledExecutorService getScheduler() {
         return GENERAL_SCHEDULER;
+    }
+
+    public static ScheduledExecutorService getBgCleanupScheduler() {
+        return BG_CLEANUP_SCHEDULER;
     }
 
     public static void deleteFileOrDirectory(@NotNull File file) {
