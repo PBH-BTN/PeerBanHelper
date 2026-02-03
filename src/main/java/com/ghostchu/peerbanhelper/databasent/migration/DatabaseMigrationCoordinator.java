@@ -237,6 +237,7 @@ public class DatabaseMigrationCoordinator {
                 log.info("Deleted original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
             } else {
                 log.warn("Failed to delete original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
+                sqliteDbFile.deleteOnExit();
             }
 
         } catch (IOException e) {
