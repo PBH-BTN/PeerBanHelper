@@ -14,11 +14,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -85,6 +90,7 @@ public class DatabaseMigrationCoordinator {
         try {
             performMigration();
             markMigrationCompleted();
+            archiveSqliteDatabase();
             log.info("=".repeat(60));
             log.info(tlUI(Lang.DBNT_MIGRATOR_COMPLETED));
             log.info("=".repeat(60));
@@ -192,6 +198,51 @@ public class DatabaseMigrationCoordinator {
             log.debug("Created migration marker file: {}", migrationMarkerFile);
         } catch (Exception e) {
             log.warn("Failed to create migration marker file", e);
+        }
+    }
+
+    /**
+     * Archives the SQLite database file by compressing it to a ZIP file
+     * and deleting the original uncompressed file
+     */
+    private void archiveSqliteDatabase() {
+        if (!sqliteDbFile.exists()) {
+            log.debug("SQLite database file not found, skipping archival");
+            return;
+        }
+
+        File zipFile = new File(sqliteDbFile.getParentFile(),
+                                sqliteDbFile.getName() + ".zip");
+
+        log.info("Archiving SQLite database to: {}", zipFile.getAbsolutePath());
+
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos);
+             FileInputStream fis = new FileInputStream(sqliteDbFile)) {
+
+            ZipEntry zipEntry = new ZipEntry(sqliteDbFile.getName());
+            zos.putNextEntry(zipEntry);
+
+            byte[] buffer = new byte[8192];
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+
+            zos.closeEntry();
+            log.info("SQLite database archived successfully to: {}", zipFile.getAbsolutePath());
+
+            // Delete the original SQLite file
+            if (sqliteDbFile.delete()) {
+                log.info("Deleted original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
+            } else {
+                log.warn("Failed to delete original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
+            }
+
+        } catch (IOException e) {
+            log.error("Failed to archive SQLite database", e);
+            Sentry.captureException(e);
+            // Don't throw - archival failure shouldn't prevent application startup
         }
     }
 }
