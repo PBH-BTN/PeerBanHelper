@@ -22,7 +22,7 @@ public final class CommonUtil {
     private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofPlatform()
             .name("CommonScheduler").factory());
     private static final ScheduledExecutorService BG_CLEANUP_SCHEDULER = Executors.newScheduledThreadPool(1, Thread.ofPlatform()
-            .name("BgCleanupScheduler").factory());
+            .name("BgCleanupScheduler").factory()); // BG_CLEANUP_SCHEDULER 必须是单线程执行，并发将导致 [SQLITE_BUSY] database is lock
 
     public static ScheduledExecutorService getScheduler() {
         return GENERAL_SCHEDULER;
