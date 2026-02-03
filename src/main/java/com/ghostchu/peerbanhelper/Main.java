@@ -226,11 +226,6 @@ public class Main {
             sentryOptions.setTag("osversion", System.getProperty("os.version"));
             sentryOptions.setTag("publisher", meta.getCompileUser() + "(" + meta.getCompileEmail() + ")");
             sentryOptions.setTag("abbrev", meta.getAbbrev());
-            sentryOptions.addIntegration(
-                    new SendCachedEnvelopeFireAndForgetIntegration(
-                            new SendFireAndForgetEnvelopeSender(sentryOptions::getCacheDirPath)
-                    )
-            );
             sentryOptions.addIgnoredExceptionForType(AddressNotFoundException.class);
             sentryOptions.addIgnoredExceptionForType(JavalinBindException.class);
             sentryOptions.addIgnoredExceptionForType(OutOfMemoryError.class);
