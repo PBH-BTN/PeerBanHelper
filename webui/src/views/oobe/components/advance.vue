@@ -3,7 +3,7 @@
     <a-typography-text>{{ t('page.oobe.advance.description') }}</a-typography-text>
     <a-form :model="pageConfig">
       <a-form-item field="pageConfig.known" :label="t('page.oobe.advance.known')">
-        <a-switch v-model="pageConfig.known"></a-switch>
+        <a-switch v-model="pageConfig.known" @change="switchChange"></a-switch>
       </a-form-item>
     </a-form>
     <a-form
@@ -104,5 +104,12 @@ const handleTest = async () => {
   }
   Message.success({ content: t('page.oobe.advance.addDatabase.test.success'), resetOnHover: true })
   config.value.databaseValid = true
+}
+const switchChange = () => {
+  // 还原默认配置
+  if (!pageConfig.known) {
+    config.value.database = { type: 'sqlite' }
+    config.value.databaseValid = true
+  }
 }
 </script>

@@ -131,10 +131,14 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         }
         if (parser.has("database")) {
             JsonObject database = parser.get("database").getAsJsonObject();
+            boolean needRestart = false;
             String type = null;
             if (database.has("type")) {
                 type = database.get("type").getAsString();
                 conf.set("database.type", type);
+                if (!"sqlite".equals(type)) {
+                    needRestart = true;
+                }
             }
             if ("mysql".equals(type) || "postgresql".equals(type)) {
                 if (database.has("host")) {
@@ -154,8 +158,10 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                 }
             }
             conf.save(Main.getMainConfigFile());
+            if (needRestart) {
+                handleRestart(ctx);
+            }
         }
-        handleReloading(ctx);
     }
 
     private void handleReloading(Context context) {
@@ -194,6 +200,21 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         context.json(new StdResp(success, tl(locale(context), message), entryList));
     }
 
+    private void handleRestart(Context context) {
+        context.json(new StdResp(true, tl(locale(context), Lang.RELOAD_RESULT_REQUIRE_RESTART), null));
+        // Schedule restart in a separate thread to allow the response to be sent first
+        Thread restartThread = new Thread(() -> {
+            try {
+                // Give some time for the response to be sent
+                Thread.sleep(1000);
+                Main.restartApplication();
+            } catch (Exception e) {
+                log.error("Failed to restart application", e);
+            }
+        }, "RestartThread");
+        restartThread.setDaemon(false);
+        restartThread.start();
+    }
 
     private void handleDatabaseNtTest(@NotNull Context context) {
         DatabaseNtConfigDTO dto = context.bodyAsClass(DatabaseNtConfigDTO.class);

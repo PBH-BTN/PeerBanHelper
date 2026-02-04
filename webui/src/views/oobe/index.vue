@@ -1,5 +1,13 @@
 <template>
   <div class="oobe-container">
+    <div class="corner-button-wrapper">
+      <a-button class="corner-button" @click="toogleAdvanceSwitch">
+        {{ showHidden ? t('page.oobe.advance.advance.hide') : t('page.oobe.advance.advance.show') }}
+        <template #icon>
+          <icon-face-frown-fill />
+        </template>
+      </a-button>
+    </div>
     <a-steps :current="current" direction="vertical" class="oobe-steps">
       <a-step v-for="step of steps" :key="step.title" :description="step.description">{{
         step.title
@@ -38,13 +46,23 @@ import { oobeSteps } from './steps'
 
 const { t } = useI18n()
 const current = ref(1)
+const showHidden = ref(false)
 
 const steps = computed(() =>
-  oobeSteps.map((step) => ({
-    title: t(step.titleKey),
-    description: step.descriptionKey ? t(step.descriptionKey) : ''
-  }))
+  oobeSteps
+    .filter((step) => showHidden.value || !step.hidden)
+    .map((step) => ({
+      title: t(step.titleKey),
+      description: step.descriptionKey ? t(step.descriptionKey) : ''
+    }))
 )
+
+const toogleAdvanceSwitch = () => {
+  showHidden.value = !showHidden.value
+  if (!showHidden.value) {
+    initConfig.value.database = { type: 'sqlite' }
+  }
+}
 
 const initConfig = ref<InitConfig>({
   acceptPrivacy: false,
@@ -65,7 +83,7 @@ const initConfig = ref<InitConfig>({
     app_secret: null
   },
   database: {
-    type: 'h2'
+    type: 'sqlite'
   },
   downloaderValid: false,
   databaseValid: false
@@ -128,5 +146,22 @@ const onNext = () => {
   display: flex;
   justify-content: center;
   padding-top: 24px;
+}
+
+.corner-button-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 8px;
+  z-index: 100;
+}
+
+.corner-button {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.corner-button-wrapper:hover .corner-button {
+  opacity: 1;
 }
 </style>

@@ -34,8 +34,6 @@ import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.zaxxer.hikari.pool.HikariPool;
 import cordelia.client.TransmissionIOException;
 import io.javalin.util.JavalinBindException;
-import io.sentry.SendCachedEnvelopeFireAndForgetIntegration;
-import io.sentry.SendFireAndForgetEnvelopeSender;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -561,6 +559,52 @@ public class Main {
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
             Sentry.captureException(e);
+        }
+    }
+
+    // 重启应用程序
+    public static void restartApplication() {
+        try {
+            var javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+            if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")) {
+                javaBin += ".exe";
+            }
+
+            var classpath = System.getProperty("java.class.path");
+            var jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments().toArray(new String[0]);
+
+            // Build the command
+            var command = new java.util.ArrayList<String>();
+            command.add(javaBin);
+
+            for (var arg : jvmArgs) {
+                if (!arg.startsWith("-agentlib:jdwp") && !arg.startsWith("-Xrunjdwp")) {
+                    command.add(arg);
+                }
+            }
+
+            command.add("-cp");
+            command.add(classpath);
+            command.add(Main.class.getName());
+
+            // Add original startup arguments
+            if (startupArgs != null) {
+                command.addAll(Arrays.asList(startupArgs));
+            }
+
+            log.info("Restarting application with command: {}", String.join(" ", command));
+
+            // Start the new process
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            processBuilder.inheritIO();
+            processBuilder.directory(new File(System.getProperty("user.dir")));
+            processBuilder.start();
+
+            // Exit the current process
+            System.exit(0);
+        } catch (Exception e) {
+            log.error("Failed to restart application", e);
+            throw new RuntimeException("Failed to restart application", e);
         }
     }
 

@@ -54,6 +54,8 @@ export default {
   'page.oobe.addDownloader.test': 'Test downloader',
   'page.oobe.addDownloader.test.success': 'Test success',
 
+  'page.oobe.advance.advance.show': 'Show Advanced',
+  'page.oobe.advance.advance.hide': 'Hide Advanced',
   'page.oobe.advance.title': 'Advanced Options',
   'page.oobe.advance.description':
     'If you are an advanced user, or you know what you are doing, you can adjust the advanced options below. Otherwise, just click Next.',

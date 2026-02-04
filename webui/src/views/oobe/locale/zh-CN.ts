@@ -58,6 +58,8 @@ export default {
   'page.oobe.advance.title': '高级选项',
   'page.oobe.advance.description':
     '如果你是高级用户，或者你知道你在做什么，你可以调整下面的高级选项。否则，请直接点击下一步。',
+  'page.oobe.advance.advance.show': '显示高级选项',
+  'page.oobe.advance.advance.hide': '隐藏高级选项',
   'page.oobe.advance.known': '我知道我在做什么',
   'page.oobe.advance.database.test': '测试数据库连接',
   'page.oobe.advance.addDatabase.test.success': '数据库连接成功',

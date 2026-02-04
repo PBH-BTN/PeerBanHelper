@@ -24,8 +24,10 @@ import type { InitConfig } from '@/api/model/oobe'
 import { InitPBH } from '@/service/init'
 import { useEndpointStore } from '@/stores/endpoint'
 import GenerateUUID from '@/utils/uuid'
+import { Message } from '@arco-design/web-vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
 const loading = ref(true)
@@ -47,6 +49,10 @@ const init = async () => {
       if (res.success) {
         initSuccess.value = true
         setAuthToken(config.value.token)
+        Message.info({
+          content: res.message,
+          resetOnHover: true
+        })
       } else {
         errorMsg.value = res.message
       }

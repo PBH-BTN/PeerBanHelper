@@ -16,6 +16,7 @@ export interface BtnConfig {
 export interface OobeStepConfig {
   titleKey: string
   descriptionKey?: string
+  hidden?: boolean
   canNext?: (config: InitConfig) => boolean
   component: () => Promise<unknown>
 }
