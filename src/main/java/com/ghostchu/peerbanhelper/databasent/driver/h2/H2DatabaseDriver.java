@@ -44,9 +44,9 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
         config.setDriverClassName("org.h2.Driver");
-        config.setMaximumPoolSize(section.getInt("pool.max-size"));
-        config.setMinimumIdle(section.getInt("pool.min-idle"));
-        config.setIdleTimeout(section.getLong("pool.idle-timeout-millis"));
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(1);
+        config.setIdleTimeout(600000);
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-H2Pool").factory());
         return new HikariDataSource(config);
     }
