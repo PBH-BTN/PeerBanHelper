@@ -30,6 +30,7 @@ export const oobeSteps: OobeStepConfig[] = [
       }
       return true
     },
+    hidden: true,
     component: () => import('./components/advance.vue')
   },
   {

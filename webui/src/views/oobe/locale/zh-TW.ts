@@ -54,6 +54,8 @@ export default {
   'page.oobe.addDownloader.test': '測試下載器',
   'page.oobe.addDownloader.test.success': '測試成功',
 
+  'page.oobe.advance.advance.show': '顯示進階選項',
+  'page.oobe.advance.advance.hide': '隱藏進階選項',
   'page.oobe.advance.title': '進階選項',
   'page.oobe.advance.description':
     '如果你是進階使用者，或者你知道你在做什麼，你可以調整下面的進階選項。否則，請直接點擊下一步。',
