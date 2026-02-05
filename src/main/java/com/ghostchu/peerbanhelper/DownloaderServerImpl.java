@@ -329,13 +329,11 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     private void reApplyBanListForDownloaders() {
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            downloaderManager.forEach(downloader -> {
-                executor.submit(() -> {
-                    if (downloader.login().success()) {
-                        downloader.setBanList(banList.copyKeySet(), null, null, true);
-                    }
-                });
-            });
+            downloaderManager.forEach(downloader -> executor.submit(() -> {
+                if (downloader.login().success()) {
+                    downloader.setBanList(banList.copyKeySet(), null, null, true);
+                }
+            }));
         }
     }
 

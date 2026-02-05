@@ -246,9 +246,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(SessionAnalyseServiceModule.class);
         moduleClasses.add(PeerRecodingServiceModule.class);
         moduleClasses.add(AntiVampire.class);
-        moduleClasses.parallelStream().forEach(moduleClass -> {
-            moduleManager.register(moduleClass);
-        });
+        moduleClasses.parallelStream().forEach(moduleClass -> moduleManager.register(moduleClass));
     }
 
     @Deprecated(forRemoval = true)
