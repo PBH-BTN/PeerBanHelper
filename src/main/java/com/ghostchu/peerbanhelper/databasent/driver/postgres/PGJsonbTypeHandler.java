@@ -30,7 +30,7 @@ public class PGJsonbTypeHandler extends JacksonTypeHandler {
         try {
             return JsonUtil.standard().fromJson(json, type);
         } catch (JsonSyntaxException e) {
-            log.error("deserialize json: " + json + " to " + type + " error ", e);
+            log.error("deserialize json: {} to {} error ", json, type, e);
             throw new RuntimeException(e);
         }
     }

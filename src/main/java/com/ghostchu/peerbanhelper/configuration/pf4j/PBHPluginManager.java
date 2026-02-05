@@ -110,7 +110,7 @@ public class PBHPluginManager extends AbstractPluginManager {
         try {
             pluginPath = FileUtils.expandIfZip(pluginPath);
         } catch (Exception e) {
-            log.warn("Failed to unzip " + pluginPath, e);
+            log.warn("Failed to unzip {}", pluginPath, e);
             Sentry.captureException(e);
             return null;
         }
