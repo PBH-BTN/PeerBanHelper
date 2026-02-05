@@ -264,7 +264,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 desktop.browse(uri);
                 return true;
             } catch (Exception e) {
-                e.printStackTrace();
+                log.debug("Unable to open URI: {}, error: {}", uri, e.getMessage());
                 Sentry.captureException(e);
             }
         }

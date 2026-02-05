@@ -400,7 +400,7 @@ public class Main {
                 server.shutdown();
                 guiManager.close();
             } catch (Throwable th) {
-                th.printStackTrace();
+                log.debug("Unable to shutdown gracefully, exiting with error", th);
             }
         });
         shutdownThread.setDaemon(false);
