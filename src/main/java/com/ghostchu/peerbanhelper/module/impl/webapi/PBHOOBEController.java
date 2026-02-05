@@ -162,6 +162,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                 handleRestart(ctx);
             }
         }
+        handleReloading(ctx);
     }
 
     private void handleReloading(Context context) {
