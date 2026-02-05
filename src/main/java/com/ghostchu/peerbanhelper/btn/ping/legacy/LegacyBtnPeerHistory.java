@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.btn.ping.legacy;
 
-import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
+import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.util.InfoHashUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
@@ -42,20 +43,20 @@ public final class LegacyBtnPeerHistory {
     @SerializedName("peer_flag")
     private String peerFlag;
 
-    public static LegacyBtnPeerHistory from(PeerRecordEntity peer) {
+    public static LegacyBtnPeerHistory from(PeerRecordEntity peer, TorrentEntityDTO torrentEntityDTO) {
         LegacyBtnPeerHistory btnPeer = new LegacyBtnPeerHistory();
-        btnPeer.setIpAddress(peer.getAddress());
+        btnPeer.setIpAddress(peer.getAddress().getHostAddress());
         btnPeer.setPeerId(peer.getPeerId());
         btnPeer.setClientName(peer.getClientName());
-        String hashedId = InfoHashUtil.getHashedIdentifier(peer.getTorrent().getInfoHash());
+        String hashedId = InfoHashUtil.getHashedIdentifier(torrentEntityDTO.infoHash());
         btnPeer.setTorrentIdentifier(hashedId);
-        btnPeer.setTorrentSize(peer.getTorrent().getSize());
+        btnPeer.setTorrentSize(torrentEntityDTO.size());
         btnPeer.setDownloaded(peer.getDownloaded());
         btnPeer.setDownloadedOffset(peer.getDownloadedOffset());
         btnPeer.setUploaded(peer.getUploaded());
         btnPeer.setUploadedOffset(peer.getUploadedOffset());
-        btnPeer.setFirstTimeSeen(peer.getFirstTimeSeen());
-        btnPeer.setLastTimeSeen(peer.getLastTimeSeen());
+        btnPeer.setFirstTimeSeen(new Timestamp(peer.getFirstTimeSeen().toInstant().toEpochMilli()));
+        btnPeer.setLastTimeSeen(new Timestamp(peer.getLastTimeSeen().toInstant().toEpochMilli()));
         btnPeer.setPeerFlag(peer.getLastFlags() == null ? null : peer.getLastFlags());
         return btnPeer;
     }

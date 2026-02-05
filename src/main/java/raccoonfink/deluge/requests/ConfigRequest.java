@@ -1,9 +1,8 @@
 package raccoonfink.deluge.requests;
 
+import com.google.gson.JsonObject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 @NoArgsConstructor
 @Data
@@ -13,13 +12,13 @@ public class ConfigRequest {
 
     private Long maxUploadSpeed;
 
-    public JSONObject toRequestJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
+    public JsonObject toRequestJSON() {
+        final JsonObject ret = new JsonObject();
         if (maxDownloadSpeed != null) {
-            ret.put("max_download_speed", maxDownloadSpeed);
+            ret.addProperty("max_download_speed", maxDownloadSpeed);
         }
         if (maxUploadSpeed != null) {
-            ret.put("max_upload_speed", maxUploadSpeed);
+            ret.addProperty("max_upload_speed", maxUploadSpeed);
         }
         return ret;
     }

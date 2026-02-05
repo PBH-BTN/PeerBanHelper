@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.query;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.javalin.http.Context;
 import lombok.Data;
 
@@ -30,6 +31,10 @@ public final class Pageable {
 
     public long getZeroBasedPage() {
         return this.page - 1;
+    }
+
+    public <T> Page<T> toPage() {
+        return Page.of(page, size);
     }
 
 }

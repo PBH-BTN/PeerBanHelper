@@ -1,23 +1,21 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import raccoonfink.deluge.DelugeException;
 
 public class DelugeResponse {
 
     private final int m_id;
     private final int m_responseCode;
-    private final JSONObject m_result;
+    private final JsonObject m_result;
 
-    public DelugeResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public DelugeResponse(final Integer httpResponseCode, final JsonObject response) throws DelugeException {
         assert (httpResponseCode != null);
 
-        try {
-            m_id = response.getInt("id");
-        } catch (JSONException e) {
-            throw new DelugeException("Invalid 'id' field in JSON: " + response, e);
+        if (!response.has("id")) {
+            throw new DelugeException("Invalid 'id' field in JSON: " + response);
         }
+        m_id = response.get("id").getAsInt();
         m_responseCode = httpResponseCode;
         m_result = response;
     }
@@ -30,15 +28,15 @@ public class DelugeResponse {
         return m_responseCode;
     }
 
-    public JSONObject getResponseData() {
+    public JsonObject getResponseData() {
         return m_result;
     }
 
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
-        ret.put("id", getId());
-        ret.put("responseCode", getResponseCode());
-        ret.put("result", JSONObject.NULL);
+    public JsonObject toResponseJSON() {
+        final JsonObject ret = new JsonObject();
+        ret.addProperty("id", getId());
+        ret.addProperty("responseCode", getResponseCode());
+        ret.add("result", null);
         return ret;
     }
 }

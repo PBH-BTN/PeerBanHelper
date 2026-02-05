@@ -5,6 +5,7 @@ import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 public final class JsonUtil {
@@ -15,6 +16,7 @@ public final class JsonUtil {
             .serializeNulls()
             .registerTypeAdapter(Timestamp.class, TimestampTypeAdapter.INSTANCE)
             .registerTypeAdapter(TranslationComponent.class, TranslationComponentTypeAdapter.INSTANCE)
+            .registerTypeAdapter(OffsetDateTime.class, OffsetDateTimeTypeAdapter.INSTANCE)
             .disableHtmlEscaping()
             .create();
 
@@ -23,6 +25,7 @@ public final class JsonUtil {
             .setExclusionStrategies(new HiddenAnnotationExclusionStrategy())
             .registerTypeAdapter(Timestamp.class, TimestampTypeAdapter.INSTANCE)
             .registerTypeAdapter(TranslationComponent.class, TranslationComponentTypeAdapter.INSTANCE)
+            .registerTypeAdapter(OffsetDateTime.class, OffsetDateTimeTypeAdapter.INSTANCE)
             .disableHtmlEscaping()
             .create();
 

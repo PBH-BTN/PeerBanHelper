@@ -57,10 +57,10 @@
 <script setup lang="ts">
 import { ClientTypeEnum, type downloaderConfig } from '@/api/model/downloader'
 import { CreateDownloader, TestDownloaderConfig, UpdateDownloader } from '@/service/downloaders'
+import GenerateUUID from '@/utils/uuid'
 import { type Form, Message } from '@arco-design/web-vue'
 import { type Component, defineAsyncComponent, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { v1 as uuid } from 'uuid'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
 const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
@@ -83,7 +83,7 @@ const formMap: Record<ClientTypeEnum, Component> = {
 }
 
 const form = reactive({
-  id: uuid(),
+  id: '',
   config: {
     basicAuth: {},
     verifySsl: true,
@@ -92,13 +92,16 @@ const form = reactive({
   } as downloaderConfig
 })
 defineExpose({
-  showModal: (isNewItem: boolean, currentConfig?: { id: string; config: downloaderConfig }) => {
+  showModal: async (
+    isNewItem: boolean,
+    currentConfig?: { id: string; config: downloaderConfig }
+  ) => {
     newItem.value = isNewItem
     if (!isNewItem && currentConfig) {
       form.config = currentConfig.config
       form.id = currentConfig.id
     } else {
-      form.id = uuid()
+      form.id = await GenerateUUID()
       form.config = {
         basicAuth: {},
         verifySsl: true,

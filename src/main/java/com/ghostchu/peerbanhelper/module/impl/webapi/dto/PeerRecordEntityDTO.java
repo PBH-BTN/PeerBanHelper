@@ -2,11 +2,12 @@ package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
 import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
 
-import java.sql.Timestamp;
+import java.net.InetAddress;
+import java.time.OffsetDateTime;
 
 public record PeerRecordEntityDTO(
         Long id,
-        String address,
+        InetAddress address,
         Integer port,
         TorrentEntityDTO torrent,
         DownloaderBasicInfo downloader,
@@ -19,8 +20,8 @@ public record PeerRecordEntityDTO(
         long downloadedOffset,
         long downloadSpeed,
         String lastFlags,
-        Timestamp firstTimeSeen,
-        Timestamp lastTimeSeen
+        OffsetDateTime firstTimeSeen,
+        OffsetDateTime lastTimeSeen
 ) {
 
 }

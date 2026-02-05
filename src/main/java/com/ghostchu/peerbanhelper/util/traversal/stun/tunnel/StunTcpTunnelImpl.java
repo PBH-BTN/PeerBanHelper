@@ -11,12 +11,10 @@ import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunSocketTool;
 import com.ghostchu.peerbanhelper.util.traversal.stun.TcpStunClient;
 import com.sun.net.httpserver.HttpServer;
-import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.StandardSocketOptions;
 import java.util.concurrent.Executors;

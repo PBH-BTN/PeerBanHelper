@@ -54,6 +54,15 @@ export default {
   'page.oobe.addDownloader.test': 'Test downloader',
   'page.oobe.addDownloader.test.success': 'Test success',
 
+  'page.oobe.advance.advance.show': 'Show Advanced',
+  'page.oobe.advance.advance.hide': 'Hide Advanced',
+  'page.oobe.advance.title': 'Advanced Options',
+  'page.oobe.advance.description':
+    'If you are an advanced user, or you know what you are doing, you can adjust the advanced options below. Otherwise, just click Next.',
+  'page.oobe.advance.known': 'I know what I am doing',
+  'page.oobe.advance.database.test': 'Test database connection',
+  'page.oobe.advance.addDatabase.test.success': 'Database connection successful',
+
   'page.oobe.result.title': 'Initialization success!',
   'page.oobe.result.title.error': 'Initialization failed',
   'page.oobe.result.description':

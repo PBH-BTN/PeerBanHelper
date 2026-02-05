@@ -1,8 +1,9 @@
 package raccoonfink.deluge.responses;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.Getter;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
 import java.util.ArrayList;
@@ -12,9 +13,11 @@ import java.util.List;
 public final class DelugeListMethodsResponse extends DelugeResponse {
     private final List<String> delugeSupportedMethods = new ArrayList<>();
 
-    public DelugeListMethodsResponse(Integer httpResponseCode, JSONObject response) throws DelugeException {
+    public DelugeListMethodsResponse(Integer httpResponseCode, JsonObject response) throws DelugeException {
         super(httpResponseCode, response);
-        JSONArray jsonArray = response.getJSONArray("result");
-        jsonArray.forEach(object -> delugeSupportedMethods.add((String) object));
+        JsonArray jsonArray = response.getAsJsonArray("result");
+        for (JsonElement element : jsonArray) {
+            delugeSupportedMethods.add(element.getAsString());
+        }
     }
 }

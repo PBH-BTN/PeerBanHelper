@@ -30,7 +30,7 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
     with:
-      image: ghostchu/peerbanhelper-snapshot:sha-$(git rev-parse --short ${{ github.sha }})
+      image: ghostchu/peerbanhelper-snapshot:sha-${{ github.sha }}
   Build_DEB:
     name: Generate Debian Package
     needs: Build_Executable
@@ -153,6 +153,7 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
         cache-to: type=gha,mode=min
+
   Build_Docker_Standalone:
     name: Build Standalone Docker Images
     runs-on: ubuntu-latest

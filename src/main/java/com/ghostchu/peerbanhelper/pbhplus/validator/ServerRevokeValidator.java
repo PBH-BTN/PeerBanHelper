@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.hash.Hashing;
+import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -101,6 +102,7 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
             return result.isRevoked();
         } catch (Exception e) {
             log.debug("Failed to check license revoke for {}: {}", license.getLicenseTo(), e.getMessage());
+            Sentry.captureException(e);
             return false;
         }
     }

@@ -23,29 +23,36 @@
 import type { InitConfig } from '@/api/model/oobe'
 import { InitPBH } from '@/service/init'
 import { useEndpointStore } from '@/stores/endpoint'
-import { v1 as uuid } from 'uuid'
+import GenerateUUID from '@/utils/uuid'
+import { Message } from '@arco-design/web-vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
 const loading = ref(true)
 const initSuccess = ref(false)
 const errorMsg = ref('')
 const { setAuthToken } = useEndpointStore()
-const init = () => {
+const init = async () => {
   loading.value = true
   InitPBH({
     token: config.value.token,
     downloader: {
-      id: uuid(),
+      id: await GenerateUUID(),
       config: config.value.downloader.config
     },
-    btn: config.value.btn
+    btn: config.value.btn,
+    database: config.value.database
   })
     .then((res) => {
       if (res.success) {
         initSuccess.value = true
         setAuthToken(config.value.token)
+        Message.info({
+          content: res.message,
+          resetOnHover: true
+        })
       } else {
         errorMsg.value = res.message
       }

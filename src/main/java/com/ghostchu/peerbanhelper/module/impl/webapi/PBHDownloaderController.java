@@ -27,12 +27,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +91,25 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private void handleDownloaderScan(@NotNull Context ctx) {
-        var downloaders = downloaderDiscovery.scan().join();
+        List<Integer> addedLocalDownloaderPorts = downloaderManager.getDownloaders().stream()
+                .map(downloader -> {
+                    var endpoint = downloader.getEndpoint();
+                    URI uri = URI.create(endpoint);
+                    int port = uri.getPort();
+                    String host = uri.getHost();
+                    try {
+                       InetAddress addr = InetAddress.getByName(host);
+                       // check addr if is localhost
+                        if(addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isSiteLocalAddress()) {
+                            return port;
+                        }
+                    } catch (UnknownHostException e) {
+                        log.debug("Unknown host when scanning downloader: {}", host, e);
+                        return null;
+                    }
+                    return null;
+                }).toList();
+        var downloaders = downloaderDiscovery.scan(addedLocalDownloaderPorts).join();
         ctx.json(new StdResp(true, null, downloaders));
     }
 
@@ -114,6 +136,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         } catch (IOException e) {
             log.error("Internal server error, unable to create downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION), null));
         }
     }
@@ -142,6 +165,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         } catch (IOException e) {
             log.error("Internal server error, unable to update downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION), null));
         }
     }
@@ -176,6 +200,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         } catch (Exception e) {
             log.error("Validate downloader failed", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, e.getMessage(), null));
         }
     }
@@ -194,6 +219,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), null));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            Sentry.captureException(e);
             ctx.json(new StdResp(false, e.getClass().getName() + ": " + e.getMessage(), null));
         }
 
@@ -299,7 +325,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
             config.addProperty("username", "REDACTED_IN_DEMO_MODE");
             config.addProperty("password", "REDACTED_IN_DEMO_MODE");
             var bAuth = config.getAsJsonObject("basicAuth");
-            if(bAuth != null) {
+            if (bAuth != null) {
                 bAuth.addProperty("user", "REDACTED_IN_DEMO_MODE");
                 bAuth.addProperty("pass", "REDACTED_IN_DEMO_MODE");
                 config.add("basicAuth", bAuth);

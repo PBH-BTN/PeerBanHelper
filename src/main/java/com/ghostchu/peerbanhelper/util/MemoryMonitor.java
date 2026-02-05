@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import io.sentry.Sentry;
 import org.springframework.stereotype.Component;
 
 import javax.management.Notification;
@@ -83,6 +84,7 @@ public final class MemoryMonitor {
             }
         } catch (Throwable e) {
             e.printStackTrace();
+            Sentry.captureException(e);
         }
 
         if (maxHeapMB == 0) {

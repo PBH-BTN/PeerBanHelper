@@ -11,6 +11,7 @@ import {
   UpdateGlobalConfig
 } from '@/service/version'
 import networkFailRetryNotication from '@/utils/networkRetry'
+import { getClient as getSentryClient } from '@sentry/vue'
 import { useStorage } from '@vueuse/core'
 import { compare } from 'compare-versions'
 import mitt from 'mitt'
@@ -179,11 +180,20 @@ export const useEndpointStore = defineStore('endpoint', () => {
     }
   }
   // init
-  setEndpoint(endpoint.value, { retryOnNetWorkFail: true })
+  setEndpoint(endpoint.value, { retryOnNetWorkFail: true }).then((success) => {
+    if (success && serverManifest.value?.analytics) {
+      const client = getSentryClient()
+      if (client) {
+        client.getOptions().enabled = true
+      }
+    }
+  })
 
   setTimeout(async () => getPlusStatus())
   setTimeout(async () => setAccessToken(accessToken.value), 3000)
-  setTimeout(async () => getGlobalConfig())
+  setTimeout(async () => {
+    await getGlobalConfig()
+  })
   return {
     endpointSaved: readonly(endpoint),
     endpoint: computed(() => {

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -17,8 +18,8 @@ public final class BakedBanMetadata implements Serializable {
     private PeerWrapper peer;
     private String reverseLookup = "N/A";
     private String context;
-    private long banAt;
-    private long unbanAt;
+    private OffsetDateTime banAt;
+    private OffsetDateTime unbanAt;
     private String rule;
     private String description;
 

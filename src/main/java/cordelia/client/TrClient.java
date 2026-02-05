@@ -113,10 +113,10 @@ public final class TrClient {
             }
         } catch (JsonSyntaxException jsonSyntaxException) {
             log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, "<?>", jsonSyntaxException));
-            throw new IllegalStateException(jsonSyntaxException);
+            throw new TransmissionIOException("Invalid response", jsonSyntaxException);
         } catch (IOException e) {
             log.debug("Request Transmission JsonRPC failure", e);
-            throw new IllegalStateException(e);
+            throw new TransmissionIOException("IOException", e);
         }
     }
 

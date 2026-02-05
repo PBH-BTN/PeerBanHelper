@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.platform.impl.win32.common.Kernel32;
 import com.ghostchu.peerbanhelper.platform.impl.win32.common.PSAPI;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
+import io.sentry.Sentry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,7 @@ public class WindowsWorkingSetManager {
             
         } catch (Exception e) {
             logger.error("Error while empty working set", e);
+            Sentry.captureException(e);
             return false;
         }
     }
@@ -81,6 +83,7 @@ public class WindowsWorkingSetManager {
             
         } catch (Exception e) {
             logger.error("Unable to set working set size", e);
+            Sentry.captureException(e);
             return false;
         }
     }
@@ -117,17 +120,18 @@ public class WindowsWorkingSetManager {
             if (!autoResult) {
                 logger.warn("Failed to restore working set to auto management");
             }
-            
-            boolean overallResult = emptyResult; // 主要看清空操作是否成功
-            
-            if (!overallResult) {
+
+            // 主要看清空操作是否成功
+
+            if (!emptyResult) {
                 logger.warn("Failed to compress memory, empty working set failed");
             }
             
-            return overallResult;
+            return emptyResult;
             
         } catch (Exception e) {
             logger.error("Failed to working set", e);
+            Sentry.captureException(e);
             return false;
         }
     }

@@ -1,12 +1,12 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import raccoonfink.deluge.DelugeException;
 import raccoonfink.deluge.Statistics;
 import raccoonfink.deluge.Torrent;
 
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,31 +15,28 @@ public final class UIResponse extends DelugeResponse {
     private Statistics m_statistics;
     private final Set<Torrent> m_torrents = new TreeSet<>();
 
-    @SuppressWarnings("rawtypes")
-    public UIResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public UIResponse(final Integer httpResponseCode, final JsonObject response) throws DelugeException {
         super(httpResponseCode, response);
 
         if (response == null) {
             return;
         }
 
-        try {
-            final JSONObject result = response.getJSONObject("result");
-            m_connected = result.optBoolean("connected");
+        if (!response.has("result")) {
+            return;
+        }
 
-            m_statistics = new Statistics(result.getJSONObject("stats"));
+        final JsonObject result = response.getAsJsonObject("result");
+        m_connected = result.has("connected") && result.get("connected").getAsBoolean();
 
-            final JSONObject torrents = result.optJSONObject("torrents");
-            if (torrents != null) {
-                final Iterator it = torrents.keys();
-                while (it.hasNext()) {
-                    final String key = (String) it.next();
-                    m_torrents.add(new Torrent(key, torrents.getJSONObject(key)));
+        m_statistics = new Statistics(result.getAsJsonObject("stats"));
 
-                }
+        if (result.has("torrents") && !result.get("torrents").isJsonNull()) {
+            final JsonObject torrents = result.getAsJsonObject("torrents");
+            for (Map.Entry<String, JsonElement> entry : torrents.entrySet()) {
+                final String key = entry.getKey();
+                m_torrents.add(new Torrent(key, entry.getValue().getAsJsonObject()));
             }
-        } catch (final JSONException e) {
-            throw new DelugeException(e);
         }
     }
 
@@ -56,14 +53,14 @@ public final class UIResponse extends DelugeResponse {
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
-        ret.put("connected", m_connected);
-        ret.put("statistics", m_statistics.toJSON());
-        final JSONObject torrents = new JSONObject();
-        ret.put("torrents", torrents);
+    public JsonObject toResponseJSON() {
+        final JsonObject ret = super.toResponseJSON();
+        ret.addProperty("connected", m_connected);
+        ret.add("statistics", m_statistics.toJSON());
+        final JsonObject torrents = new JsonObject();
+        ret.add("torrents", torrents);
         for (final Torrent torrent : m_torrents) {
-            torrents.put(torrent.getKey(), torrent.toJSON());
+            torrents.add(torrent.getKey(), torrent.toJSON());
         }
         return ret;
     }

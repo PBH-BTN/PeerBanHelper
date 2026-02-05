@@ -38,7 +38,7 @@ public class TcpStunClient {
     /**
      * 获取NAT映射
      */
-    public MappingResult getMapping() throws IOException {
+    public MappingResult getMapping() {
         String firstServer = stunServerList.getFirst();
         while (true) {
             try {

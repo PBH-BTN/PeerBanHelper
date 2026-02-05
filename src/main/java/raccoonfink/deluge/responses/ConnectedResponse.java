@@ -1,22 +1,20 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import raccoonfink.deluge.DelugeException;
 
 public final class ConnectedResponse extends DelugeResponse {
     private final boolean m_connected;
 
-    public ConnectedResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public ConnectedResponse(final Integer httpResponseCode, final JsonObject response) throws DelugeException {
         super(httpResponseCode, response);
-        try {
-            m_connected = response.getBoolean("result");
-        } catch (final JSONException e) {
-            throw new DelugeException(e);
+        if (!response.has("result")) {
+            throw new DelugeException("Missing 'result' field in JSON response");
         }
+        m_connected = response.get("result").getAsBoolean();
     }
 
-    public ConnectedResponse(final Integer httpResponseCode, final JSONObject response, final boolean isConnected) throws DelugeException {
+    public ConnectedResponse(final Integer httpResponseCode, final JsonObject response, final boolean isConnected) throws DelugeException {
         super(httpResponseCode, response);
         m_connected = isConnected;
     }
@@ -27,9 +25,9 @@ public final class ConnectedResponse extends DelugeResponse {
 
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
-        ret.put("result", isConnected());
+    public JsonObject toResponseJSON() {
+        final JsonObject ret = super.toResponseJSON();
+        ret.addProperty("result", isConnected());
         return ret;
     }
 }

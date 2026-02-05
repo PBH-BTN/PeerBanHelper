@@ -96,6 +96,7 @@ import type { TableSortable } from '@arco-design/web-vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
+
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
@@ -181,10 +182,6 @@ const columns = [
     title: () => t('page.banlog.banlogTable.column.torrentName'),
     dataIndex: 'torrentName',
     slotName: 'torrentName',
-    sortable: {
-      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
-      sorter: true
-    },
     ellipsis: true,
     tooltip: true
   },
@@ -192,10 +189,6 @@ const columns = [
     title: () => t('page.banlog.banlogTable.column.torrentSize'),
     slotName: 'torrentSize',
     dataIndex: 'torrentSize',
-    sortable: {
-      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
-      sorter: true
-    },
     width: 120
   },
   {

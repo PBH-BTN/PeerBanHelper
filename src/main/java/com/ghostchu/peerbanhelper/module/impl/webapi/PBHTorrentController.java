@@ -1,9 +1,13 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.*;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
-import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
-import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
+import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
@@ -12,20 +16,17 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,21 +36,18 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 public final class PBHTorrentController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
-    private final TorrentDao torrentDao;
-    private final PeerRecordDao peerRecordDao;
-    private final HistoryDao historyDao;
+    private final TorrentService torrentService;
+    private final PeerRecordService peerRecordService;
+    private final HistoryService historyService;
     private final DownloaderManagerImpl downloaderManager;
-    private final RuleDao ruleDao;
-    private final ModuleDao moduleDao;
 
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
+    @Autowired
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentService torrentService, PeerRecordService peerRecordService, HistoryService historyService, DownloaderManagerImpl downloaderManager) {
         this.javalinWebContainer = javalinWebContainer;
-        this.torrentDao = torrentDao;
-        this.historyDao = historyDao;
-        this.peerRecordDao = peerRecordDao;
+        this.torrentService = torrentService;
+        this.historyService = historyService;
+        this.peerRecordService = peerRecordService;
         this.downloaderManager = downloaderManager;
-        this.ruleDao = ruleDao;
-        this.moduleDao = moduleDao;
     }
 
     @Override
@@ -78,40 +76,36 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                 .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS);
     }
 
-    private void handleBanHistory(Context ctx) throws SQLException {
-        var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
-        if (torrent.isEmpty()) {
+    private void handleBanHistory(Context ctx) {
+        var torrent = torrentService.queryByInfoHash(ctx.pathParam("infoHash"));
+        if (torrent == null) {
             ctx.status(404);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
             return;
         }
         Pageable pageable = new Pageable(ctx);
-        var t = torrent.get();
-        Page<HistoryEntity> page = historyDao.queryByPaging(
-                new Orderable(Map.of("banAt", false), ctx)
-                        .addMapping("torrent.name", "torrentName")
-                        .addMapping("torrent.infoHash", "torrentInfoHash")
-                        .addMapping("torrent.size", "torrentSize")
-                        .addMapping("module.name", "module")
-                        .addMapping("rule.rule", "rule")
-                        .addMapping("ip", "peerIp")
-                        .apply(
-                        historyDao.queryBuilder()
-                                .where()
-                                .eq("torrent_id", new SelectArg(t))
-                                .queryBuilder()
-                                .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                                .join(ruleDao.queryBuilder().setAlias("rule")
-                                                .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                                        , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
-                        )
-                , pageable);
-        var result = page.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
-        ctx.json(new StdResp(true, null, new Page<>(pageable, page.getTotal(), result)));
+        Orderable orderable = new Orderable(Map.of("ban_at", false), ctx)
+                .addRemapping("banAt", "ban_at")
+                .addRemapping("unbanAt", "unban_at")
+                .addRemapping("peerIp", "ip")
+                .addRemapping("peerPort", "port")
+                .addRemapping("peerId", "peer_id")
+                .addRemapping("peerClientName", "peer_client_name")
+                .addRemapping("peerUploaded", "peer_uploaded")
+                .addRemapping("peerDownloaded", "peer_downloaded")
+                .addRemapping("peerProgress", "peer_progress")
+                .addRemapping("torrentInfoHash", "torrent_info_hash")
+                .addRemapping("module", "module_name")
+                .addRemapping("rule", "rule_name")
+                .addRemapping("description", "description");
+
+        IPage<HistoryEntity> page = historyService.queryBanHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
+        var result = page.convert(r -> new BanLogDTO(locale(ctx), downloaderManager, r, TorrentEntityDTO.from(torrent)));
+        ctx.json(new StdResp(true, null, PBHPage.from(result)));
     }
 
 
-    private void handleTorrentQuery(Context ctx) throws SQLException {
+    private void handleTorrentQuery(Context ctx) {
         Pageable pageable = new Pageable(ctx);
 
         // 检查是否需要按计数字段排序
@@ -125,108 +119,83 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             if ("peerBanCount".equals(field) || "peerAccessCount".equals(field)) {
                 needsCountSort = true;
                 countSortField = field;
-                countSortAscending = parts.length < 2 || (!parts[1].equalsIgnoreCase("desc") && !parts[1].equalsIgnoreCase("descend"));
+                countSortAscending = parts.length < 2 || (!"desc".equalsIgnoreCase(parts[1]) && !"descend".equalsIgnoreCase(parts[1]));
                 break;
             }
         }
 
-        Page<TorrentEntity> torrentEntityPage;
-        QueryBuilder<TorrentEntity, Long> qb = torrentDao.queryBuilder();
-        // 添加搜索条件
-        if (ctx.queryParam("keyword") != null) {
-            qb.where()
-                    .like("name", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
-                    .or()
-                    .like("infoHash", new SelectArg("%" + ctx.queryParam("keyword") + "%"));
-        }
-        if (needsCountSort) {
-            // 使用 SQL 子查询进行排序
-            String subQueryTable = "peerBanCount".equals(countSortField) ? "history" : "peer_record";
-            String sortDirection = countSortAscending ? "ASC" : "DESC";
-            // 使用 orderByRaw 添加子查询排序
-            // 注意：使用实际表名 'torrents' 而不是别名 'torrent'
-            qb.orderByRaw("(SELECT COUNT(*) FROM " + subQueryTable +
-                    " WHERE " + subQueryTable + ".torrent_id = torrents.id) " + sortDirection);
-        } else {
-            // 普通排序（按数据库字段）
-            new Orderable(Map.of("id", false), ctx).apply(qb);
-        }
-        torrentEntityPage = torrentDao.queryByPaging(qb, pageable);
+        Page<TorrentEntity> pageRequest = pageable.toPage();
+        String keyword = ctx.queryParam("keyword");
 
-        // 构建结果列表（始终需要查询计数）
-        List<TorrentInfoDTO> infoList = new ArrayList<>();
-        for (TorrentEntity result : torrentEntityPage.getResults()) {
-            var peerBanCount = historyDao.queryBuilder()
-                    .where()
-                    .eq("torrent_id", result.getId())
-                    .countOf();
-            var peerAccessCount = peerRecordDao.queryBuilder()
-                    .where()
-                    .eq("torrent_id", result.getId())
-                    .countOf();
-            infoList.add(new TorrentInfoDTO(result.getInfoHash(), result.getName(), result.getSize(), peerBanCount, peerAccessCount));
-        }
-        ctx.json(new StdResp(true, null, new Page<>(pageable, torrentEntityPage.getTotal(), infoList)));
+        IPage<TorrentEntity> torrentEntityPage = torrentService.search(pageRequest, keyword,
+                new Orderable(Map.of("id", false), ctx)
+                        .addRemapping("infoHash", "info_hash")
+                , needsCountSort ? countSortField : null, countSortAscending);
+
+        // 批量查询计数 - 优化 N+1 查询问题
+        List<Long> torrentIds = torrentEntityPage.getRecords().stream()
+                .map(TorrentEntity::getId)
+                .toList();
+
+        Map<Long, Long> banCountMap = historyService.countByTorrentIds(torrentIds);
+        Map<Long, Long> accessCountMap = peerRecordService.countByTorrentIds(torrentIds);
+
+        var results = torrentEntityPage.convert(result -> {
+            long peerBanCount = banCountMap.getOrDefault(result.getId(), 0L);
+            long peerAccessCount = accessCountMap.getOrDefault(result.getId(), 0L);
+            return new TorrentInfoDTO(result.getInfoHash(), result.getName(), result.getSize() == null ? 0 : result.getSize(), peerBanCount, peerAccessCount);
+        });
+        ctx.json(new StdResp(true, null, PBHPage.from(results)));
     }
 
 
-    private void handleTorrentInfo(Context ctx) throws SQLException {
-        var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
-        if (torrent.isEmpty()) {
+    private void handleTorrentInfo(Context ctx) {
+        var torrent = torrentService.queryByInfoHash(ctx.pathParam("infoHash"));
+        if (torrent == null) {
             ctx.status(404);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
             return;
         }
-        var t = torrent.get();
-        var peerBanCount = historyDao.queryBuilder()
-                .where()
-                .eq("torrent_id", t.getId())
-                .countOf();
-        var peerAccessCount = peerRecordDao.queryBuilder()
-                .orderBy("lastTimeSeen", false)
-                .where()
-                .eq("torrent_id", t.getId())
-                .countOf();
-
-        ctx.json(new StdResp(true, null, new TorrentInfoDTO(t.getInfoHash(),
-                t.getName(), t.getSize(),
+        long peerBanCount = historyService.countHistoriesByTorrentId(torrent.getId());
+        long peerAccessCount = peerRecordService.countRecordsByTorrentId(torrent.getId());
+        ctx.json(new StdResp(true, null, new TorrentInfoDTO(torrent.getInfoHash(),
+                torrent.getName(), torrent.getSize(),
                 peerBanCount, peerAccessCount)));
     }
 
-    private void handleConnectHistory(Context ctx) throws SQLException {
-        var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
-        if (torrent.isEmpty()) {
+    private void handleConnectHistory(Context ctx) {
+        var torrent = torrentService.queryByInfoHash(ctx.pathParam("infoHash"));
+        if (torrent == null) {
             ctx.status(404);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
             return;
         }
         Pageable pageable = new Pageable(ctx);
-        var t = torrent.get();
-        var queryBuilder = new Orderable(Map.of("lastTimeSeen", false, "address", true, "port", true), ctx)
-                .addMapping("torrent.name", "torrentName")
-                .addMapping("torrent.infoHash", "torrentInfoHash")
-                .addMapping("torrent.size", "torrentSize")
-                .addMapping("ip", "peerIp")
-                .apply(peerRecordDao.queryBuilder().join(torrentDao.queryBuilder(), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
-        queryBuilder.where().eq("torrent_id", t);
-        Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
-        ctx.json(new StdResp(true, null,  Page.map(page, (entity)-> new PeerRecordEntityDTO(entity.getId(),
-                entity.getAddress(),
-                entity.getPort(),
-                TorrentEntityDTO.from(entity.getTorrent()),
-                downloaderManager.getDownloadInfo(entity.getDownloader()),
-                entity.getPeerId(),
-                entity.getClientName(),
-                entity.getUploaded(),
-                entity.getUploadedOffset(),
-                entity.getUploadSpeed(),
-                entity.getDownloaded(),
-                entity.getDownloadedOffset(),
-                entity.getDownloadSpeed(),
-                entity.getLastFlags(),
-                entity.getFirstTimeSeen(),
-                entity.getLastTimeSeen()
-        ))));
+        Orderable orderable = new Orderable(Map.of("last_time_seen", false, "address", true, "port", true), ctx)
+                .addRemapping("peerId", "peer_id")
+                .addRemapping("clientName", "client_name")
+                .addRemapping("firstTimeSeen", "first_time_seen")
+                .addRemapping("lastTimeSeen", "last_time_seen");
+        IPage<PeerRecordEntity> page = peerRecordService.queryAccessHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
+        var result = page.convert(entity ->
+                new PeerRecordEntityDTO(entity.getId(),
+                        entity.getAddress(),
+                        entity.getPort(),
+                        TorrentEntityDTO.from(torrent),
+                        downloaderManager.getDownloadInfo(entity.getDownloader()),
+                        entity.getPeerId(),
+                        entity.getClientName(),
+                        entity.getUploaded(),
+                        entity.getUploadedOffset(),
+                        entity.getUploadSpeed(),
+                        entity.getDownloaded(),
+                        entity.getDownloadedOffset(),
+                        entity.getDownloadSpeed(),
+                        entity.getLastFlags(),
+                        entity.getFirstTimeSeen(),
+                        entity.getLastTimeSeen()
+                ));
+        ctx.json(new StdResp(true, null, PBHPage.from(result)));
     }
 
     @Override

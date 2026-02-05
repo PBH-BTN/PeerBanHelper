@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
@@ -9,6 +10,7 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.SwingTray;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.common.eventbus.Subscribe;
+import io.sentry.Sentry;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
@@ -53,6 +55,7 @@ public class TrayMenu {
                 updateTrayMenus();
                 this.swingTrayDialog = tray;
             } catch (AWTException e) {
+                Sentry.captureException(e);
                 throw new RuntimeException(e);
             }
         }
@@ -63,7 +66,9 @@ public class TrayMenu {
             parent.setVisible(false);
             if (!persistFlagTrayMessageSent) {
                 persistFlagTrayMessageSent = true;
-                parent.getSwingGUI().createNotification(Level.INFO, tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
+                if (!ExternalSwitch.parseBoolean("pbh.gui.hide-tray-message", false)) {
+                    parent.getSwingGUI().createNotification(Level.INFO, tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
+                }
             }
         }
     }

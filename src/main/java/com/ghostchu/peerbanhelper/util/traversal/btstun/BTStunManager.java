@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProviderRegistry;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +53,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             try {
                 close();
             } catch (Exception e) {
+                Sentry.captureException(e);
                 throw new RuntimeException(e);
             }
         }));

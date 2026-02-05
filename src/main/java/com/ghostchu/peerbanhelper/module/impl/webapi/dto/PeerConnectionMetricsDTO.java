@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
-import com.ghostchu.peerbanhelper.database.table.PeerConnectionMetricsEntity;
+
+import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,12 +27,12 @@ public class PeerConnectionMetricsDTO {
     private long fromTrackerOrOther; // 来自 Tracker 或手动添加的 Peer 数量
     private long rc4Encrypted; // 启用 RC4 加密的 Peer 数量
     private long plainTextEncrypted; // 明文传输加密的 Peer 数量
-    private long utpSocket; // 使用 uTP 协议的 Peer 数量 
+    private long utpSocket; // 使用 uTP 协议的 Peer 数量
     private long tcpSocket; // 使用 TCP (BT) 协议的 Peer 数量
 
     public static PeerConnectionMetricsDTO from(@NotNull PeerConnectionMetricsEntity peerConnectionMetricsEntity){
         return new PeerConnectionMetricsDTO(
-                peerConnectionMetricsEntity.getTimeframeAt().getTime(),
+                peerConnectionMetricsEntity.getTimeframeAt().toInstant().toEpochMilli(),
                 peerConnectionMetricsEntity.getTotalConnections(),
                 peerConnectionMetricsEntity.getIncomingConnections(),
                 peerConnectionMetricsEntity.getRemoteRefuseTransferToClient(),
