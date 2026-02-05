@@ -32,11 +32,6 @@ public class PeerConnectionMetricsMigrator implements TableMigrator {
     }
 
     @Override
-    public int getMigrationOrder() {
-        return 100;
-    }
-
-    @Override
     public boolean isTableAvailable(Connection sqliteConnection) throws Exception {
         String query = "SELECT name FROM sqlite_master WHERE type='table' AND name='peer_connection_metrics'";
         try (var stmt = sqliteConnection.createStatement();

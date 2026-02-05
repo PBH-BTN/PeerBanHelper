@@ -40,11 +40,6 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
     }
 
     @Override
-    protected ExtensionFactory createExtensionFactory() {
-        return new SpringExtensionFactory(this);
-    }
-
-    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
