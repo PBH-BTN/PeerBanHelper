@@ -355,7 +355,7 @@ public final class MainConfigUpdateScript {
         for (String key : section.getKeys(false)) {
             ConfigurationSection downloader = section.getConfigurationSection(key);
             if (downloader != null) {
-                if (downloader.getString("type", "").equalsIgnoreCase("qBittorrent")) {
+                if ("qBittorrent".equalsIgnoreCase(downloader.getString("type", ""))) {
                     downloader.set("increment-ban", false);
                 }
             }
@@ -372,7 +372,7 @@ public final class MainConfigUpdateScript {
         for (String key : section.getKeys(false)) {
             ConfigurationSection downloader = section.getConfigurationSection(key);
             if (downloader != null) {
-                if (downloader.getString("type", "").equalsIgnoreCase("Transmission")) {
+                if ("Transmission".equalsIgnoreCase(downloader.getString("type", ""))) {
                     downloader.set("rpc-url", "/transmission/rpc");
                 }
             }
@@ -394,7 +394,7 @@ public final class MainConfigUpdateScript {
         for (String key : section.getKeys(false)) {
             ConfigurationSection downloader = section.getConfigurationSection(key);
             if (downloader != null) {
-                if (downloader.getString("type", "").equalsIgnoreCase("qBittorrent")) {
+                if ("qBittorrent".equalsIgnoreCase(downloader.getString("type", ""))) {
                     downloader.set("increment-ban", true);
                 }
             }

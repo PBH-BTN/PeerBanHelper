@@ -143,10 +143,10 @@ public final class BitComet extends AbstractDownloader {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, response.code() + " " + response.body().string()));
             }
             var loginResponse = JsonUtil.standard().fromJson(response.body().string(), BCLoginResponse.class);
-            if (loginResponse.getErrorCode().equalsIgnoreCase("PASSWORD_ERROR")) {
+            if ("PASSWORD_ERROR".equalsIgnoreCase(loginResponse.getErrorCode())) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
             }
-            if (!loginResponse.getErrorCode().equalsIgnoreCase("ok")) {
+            if (!"ok".equalsIgnoreCase(loginResponse.getErrorCode())) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
             }
             // 进行版本检查
@@ -320,7 +320,7 @@ public final class BitComet extends AbstractDownloader {
 
             Semaphore semaphore = new Semaphore(3);
             List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(taskListResponse.getTasks().stream()
-                    .filter(t -> t.getType().equals("BT"))
+                    .filter(t -> "BT".equals(t.getType()))
                     .map(torrent -> CompletableFuture.supplyAsync(() -> {
                         try {
                             semaphore.acquire();
@@ -498,9 +498,9 @@ public final class BitComet extends AbstractDownloader {
             var stream = peers.getPeers().stream();
 
             if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-                stream = stream.filter(dto -> dto.getGroup().equals("connected") // 2.10 正式版
-                        || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
-                        || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
+                stream = stream.filter(dto -> "connected".equals(dto.getGroup()) // 2.10 正式版
+                        || "connected_peers".equals(dto.getGroup()) // 2.11 Beta 1-2
+                        || "peers_connected".equals(dto.getGroup())); // 2.11 Beta 3
             }
             return stream.map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),

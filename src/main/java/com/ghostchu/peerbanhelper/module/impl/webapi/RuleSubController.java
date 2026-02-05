@@ -67,7 +67,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     public void onEnable() {
         // 初始化 IP 规则列表
         moduleManager.getModules().stream()
-                .filter(ele -> ele.getConfigName().equals("ip-address-blocker-rules"))
+                .filter(ele -> "ip-address-blocker-rules".equals(ele.getConfigName()))
                 .findFirst()
                 .ifPresent(ele -> ipBlackRuleList = (IPBlackRuleList) ele);
 

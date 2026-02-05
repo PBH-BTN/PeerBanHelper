@@ -41,11 +41,11 @@ public final class ProfileUpdateScript {
     @UpdateScript(version = 35)
     public void removeXunleiRules() {
         var peerIdList = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
-        peerIdList.removeIf(s -> s.equals("{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}"));
+        peerIdList.removeIf(s -> "{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}".equals(s));
         conf.set("module.peer-id-blacklist.banned-peer-id", peerIdList);
         var clientNameList = conf.getStringList("module.client-name-blacklist.banned-client-name");
-        clientNameList.removeIf(s -> s.equals("{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}"));
-        clientNameList.removeIf(s -> s.equals("{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}"));
+        clientNameList.removeIf(s -> "{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}".equals(s));
+        clientNameList.removeIf(s -> "{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}".equals(s));
         conf.set("module.client-name-blacklist.banned-client-name", clientNameList);
     }
 
@@ -202,8 +202,8 @@ public final class ProfileUpdateScript {
         for (String key : section.getKeys(false)) {
             var rule = section.getConfigurationSection(key);
             var url = rule.getString("url", "");
-            if (url.equals("https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt") ||
-                    url.equals("https://fastly.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt")) {
+            if ("https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt".equals(url) ||
+                    "https://fastly.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt".equals(url)) {
                 rule.set("url", "https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt");
             }
         }

@@ -119,7 +119,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
             if ("peerBanCount".equals(field) || "peerAccessCount".equals(field)) {
                 needsCountSort = true;
                 countSortField = field;
-                countSortAscending = parts.length < 2 || (!parts[1].equalsIgnoreCase("desc") && !parts[1].equalsIgnoreCase("descend"));
+                countSortAscending = parts.length < 2 || (!"desc".equalsIgnoreCase(parts[1]) && !"descend".equalsIgnoreCase(parts[1]));
                 break;
             }
         }

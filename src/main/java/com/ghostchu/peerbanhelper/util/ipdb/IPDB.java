@@ -217,7 +217,7 @@ public final class IPDB implements AutoCloseable {
             code = code.toLowerCase(Locale.ROOT).replace("-", "_");
             // 台湾、香港、澳门地区有一个独立 ISO 代码，需要手动处理一下保证符合所在地法律法规
             // 这坨代码已经改成一坨了，有时间得写个好点的 :(
-            if ((code.equals("zh_cn") || code.equals("zh_hk") || code.equals("zh_mo")) && (country.isoCode().equals("TW") || country.isoCode().equals("HK") || country.isoCode().equalsIgnoreCase("MO"))) {
+            if (("zh_cn".equals(code) || "zh_hk".equals(code) || "zh_mo".equals(code)) && ("TW".equals(country.isoCode()) || "HK".equals(country.isoCode()) || "MO".equalsIgnoreCase(country.isoCode()))) {
                 countryRegionName = "中国" + countryRegionName;
             }
             countryData.setName(countryRegionName);

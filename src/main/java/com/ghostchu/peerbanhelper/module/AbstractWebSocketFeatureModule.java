@@ -47,7 +47,7 @@ public abstract class AbstractWebSocketFeatureModule extends AbstractFeatureModu
             this.wsSessions.add(ctx);
 
             wsConfig.onMessage(ctx2 -> {
-                if (ctx2.message().equalsIgnoreCase("PING")) {
+                if ("PING".equalsIgnoreCase(ctx2.message())) {
                     ctx2.send("PONG");
                 }
             });

@@ -331,8 +331,8 @@ public final class BtnNetwork implements Reloadable {
                             .header("X-BTN-AppID", appId)
                             .header("X-BTN-AppSecret", appSecret)
                             .header("Authentication", "Bearer " + appId + "@" + appSecret); // For anonymous account
-                    if ((appId == null || appId.isBlank() || appId.equals("example-app-id"))
-                            || (appSecret == null || appSecret.isBlank() || appSecret.equals("example-app-secret"))) {
+                    if ((appId == null || appId.isBlank() || "example-app-id".equals(appId))
+                            || (appSecret == null || appSecret.isBlank() || "example-app-secret".equals(appSecret))) {
                         requestBuilder.header("X-BTN-InstallationID", getInstallationId());
 
                     }

@@ -93,7 +93,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         if (field == null) {
             throw new IllegalArgumentException("startAt cannot be null");
         }
-        if (field.equalsIgnoreCase("banAt")) {
+        if ("banAt".equalsIgnoreCase(field)) {
             if ("day".equals(type)) {
                 // 劫持单独处理以加快首屏请求
                 handlePeerBans(ctx);

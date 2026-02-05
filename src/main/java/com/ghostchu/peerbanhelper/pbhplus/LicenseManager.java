@@ -61,7 +61,7 @@ public class LicenseManager implements Reloadable {
             ExchangeMap.PBH_PLUS_ACTIVATED = true;
         } else {
             ExchangeMap.PBH_PLUS_ACTIVATED = false;
-            ExchangeMap.GUI_DISPLAY_FLAGS.removeIf(displayFlag -> displayFlag.getId().equals("pbh-plus"));
+            ExchangeMap.GUI_DISPLAY_FLAGS.removeIf(displayFlag -> "pbh-plus".equals(displayFlag.getId()));
         }
     }
 

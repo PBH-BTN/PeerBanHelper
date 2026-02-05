@@ -107,9 +107,9 @@ public class AboutWindow {
                     handleSpeedCommand(line);
                 } else if (line.startsWith("[f:") && line.contains(",b:")) {
                     handleColorCommand(line);
-                } else if (line.equals("[clear]")) {
+                } else if ("[clear]".equals(line)) {
                     contentItems.add(new ClearCommand());
-                } else if (line.equals("[window_maximized]")) { // 新增命令检测
+                } else if ("[window_maximized]".equals(line)) { // 新增命令检测
                     contentItems.add(new WindowMaximizedCommand());
                 } else {
                     for (Map.Entry<String, String> entry : replaces.entrySet()) {

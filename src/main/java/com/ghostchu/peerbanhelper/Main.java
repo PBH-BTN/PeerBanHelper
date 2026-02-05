@@ -140,7 +140,7 @@ public class Main {
             Sentry.setTag("locale", defLocaleTag);
             log.info("Current system language tag: {}", defLocaleTag);
             DEF_LOCALE = mainConfig.getString("language");
-            if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
+            if (DEF_LOCALE == null || "default".equalsIgnoreCase(DEF_LOCALE)) {
                 DEF_LOCALE = ExternalSwitch.parse("pbh.userLocale");
                 if (DEF_LOCALE == null) {
                     DEF_LOCALE = defLocaleTag;
@@ -181,7 +181,7 @@ public class Main {
         webContainer = new JavalinWebContainer();
         String token = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.token"));
         String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("server.address"));
-        if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
+        if ("0.0.0.0".equals(host) || "::".equals(host) || "localhost".equals(host)) {
             host = null;
         }
         int httpdPort = ExternalSwitch.parseInt("pbh.port", Main.getMainConfig().getInt("server.http"));
@@ -343,7 +343,7 @@ public class Main {
             configuration.load(file);
         } catch (IOException | InvalidConfigurationException e) {
             log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
-            if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+            if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> "nogui".equalsIgnoreCase(arg))) {
                 try {
                     log.error("Bad configuration:  {}", Files.readString(file.toPath()));
                 } catch (IOException ex) {
@@ -412,14 +412,14 @@ public class Main {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
-        if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
+        if (Arrays.stream(args).anyMatch(arg -> "swing".equalsIgnoreCase(arg))) {
             guiType = "swing";
-        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swt"))) {
+        } else if (Arrays.stream(args).anyMatch(arg -> "swt".equalsIgnoreCase(arg))) {
             guiType = "swt";
-        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("qt"))) {
+        } else if (Arrays.stream(args).anyMatch(arg -> "qt".equalsIgnoreCase(arg))) {
             guiType = "qt";
         }
-        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> "nogui".equalsIgnoreCase(arg))) {
             guiType = "console";
         }
 
