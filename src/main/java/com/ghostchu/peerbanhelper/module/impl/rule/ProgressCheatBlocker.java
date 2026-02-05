@@ -223,7 +223,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) throws SQLException {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         if (isHandShaking(peer)) {
             return handshaking();
         }

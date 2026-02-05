@@ -106,7 +106,7 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderLoginResult login0() throws IOException {
+    public DownloaderLoginResult login0() {
         RqSessionGet get = new RqSessionGet();
         TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
         String version = resp.getArgs().getVersion();

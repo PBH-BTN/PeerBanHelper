@@ -484,9 +484,8 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      *
      * @param ruleId 规则ID
      * @return 规则订阅日志
-     * @throws SQLException 查询异常
      */
-    public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) throws SQLException {
+    public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) {
         return (Page<RuleSubLogEntity>) ruleSubLogsDao.getLogs(pageable.toPage(), ruleId);
     }
 
@@ -495,9 +494,8 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      *
      * @param ruleId 规则ID
      * @return 规则订阅日志数量
-     * @throws SQLException 查询异常
      */
-    public long countRuleSubLogs(String ruleId) throws SQLException {
+    public long countRuleSubLogs(String ruleId) {
         return ruleSubLogsDao.countLogs(ruleId);
     }
 

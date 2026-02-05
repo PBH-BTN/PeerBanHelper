@@ -13,5 +13,5 @@ import java.util.Map;
 public interface BanListService extends IService<BanListEntity> {
     @NotNull Map<IPAddress, BanMetadata> readBanList();
 
-    int saveBanList(@NotNull BanList banlist) throws SQLException;
+    int saveBanList(@NotNull BanList banlist);
 }

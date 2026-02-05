@@ -16,7 +16,7 @@ public interface RuleFeatureModule extends FeatureModule {
      * @return 规则检查结果
      */
     @NotNull
-    CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) throws Exception;
+    CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader);
 
     /**
      * 指示模块的内部处理逻辑是否是线程安全的，如果线程不安全，PeerBanHelper 将在同步块中执行不安全的模块

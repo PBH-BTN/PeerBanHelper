@@ -85,7 +85,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         ));
     }
 
-    private void handleHistoryDateAccess(Context ctx) throws Exception {
+    private void handleHistoryDateAccess(Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String filter = Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0");
         String type = ctx.queryParam("type");

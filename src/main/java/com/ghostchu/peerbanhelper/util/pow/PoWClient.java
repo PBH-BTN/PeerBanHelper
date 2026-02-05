@@ -74,7 +74,7 @@ public class PoWClient implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         this.executor.close();
     }
 }

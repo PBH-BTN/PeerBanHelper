@@ -209,7 +209,7 @@ public final class RuleSubController extends AbstractFeatureModule {
 
     }
 
-    private void switchIpRule(Context ctx, String ruleId, boolean enabled) throws SQLException, IOException {
+    private void switchIpRule(Context ctx, String ruleId, boolean enabled) throws IOException {
         RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
@@ -235,7 +235,7 @@ public final class RuleSubController extends AbstractFeatureModule {
         deleteIpRule(ctx, ruleId);
     }
 
-    private void deleteIpRule(Context ctx, String ruleId) throws IOException, SQLException {
+    private void deleteIpRule(Context ctx, String ruleId) throws IOException {
         RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
@@ -256,7 +256,7 @@ public final class RuleSubController extends AbstractFeatureModule {
         saveIpRule(ctx, ruleId, isAdd);
     }
 
-    private void saveIpRule(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {
+    private void saveIpRule(Context ctx, String ruleId, boolean isAdd) throws IOException {
         SubInfoDTO subInfoDTO = ctx.bodyValidator(SubInfoDTO.class).get();
         if (isAdd) {
             ruleId = subInfoDTO.ruleId();
@@ -321,7 +321,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 查询订阅规则
      */
-    private StdResp get(Context ctx, String ruleId) throws SQLException {
+    private StdResp get(Context ctx, String ruleId) {
         String locale = locale(ctx);
         if (!isModuleAvailable()) {
             return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
@@ -332,7 +332,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 查询订阅规则列表
      */
-    private StdResp list(Context ctx) throws SQLException {
+    private StdResp list(Context ctx) {
         String locale = locale(ctx);
         if (!isModuleAvailable()) {
             return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);

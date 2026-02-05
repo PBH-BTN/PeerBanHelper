@@ -55,7 +55,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
         try {
             connectionMetricsTrackDao.syncPeers(downloader, torrent, peers);
-        } catch (SQLException | ExecutionException e) {
+        } catch (ExecutionException e) {
             log.warn("Failed to record torrent peers for session analyse", e);
             Sentry.captureException(e);
         }
@@ -82,22 +82,17 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     }
 
     private void flushData() {
-        try {
-            long deleted = 0;
-            connectionMetricsTrackDao.flushAll();
-            OffsetDateTime startOfToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
-            List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().ne(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
-            List<PeerConnectionMetricsEntity> aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
-            connectionMetricDao.saveAggregating(aggNotInTheDayList, true);
-            deleted += connectionMetricsTrackDao.deleteEntries(listNotInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
-            List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().eq(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
-            List<PeerConnectionMetricsEntity> aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
-            connectionMetricDao.saveAggregating(aggInTheDayList, false);
-            deleted += connectionMetricsTrackDao.deleteEntries(listInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
-        } catch (SQLException e) {
-            log.warn("Failed to flush session analyse data", e);
-            Sentry.captureException(e);
-        }
+        long deleted = 0;
+        connectionMetricsTrackDao.flushAll();
+        OffsetDateTime startOfToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
+        List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().ne(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
+        List<PeerConnectionMetricsEntity> aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
+        connectionMetricDao.saveAggregating(aggNotInTheDayList, true);
+        deleted += connectionMetricsTrackDao.deleteEntries(listNotInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
+        List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().eq(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
+        List<PeerConnectionMetricsEntity> aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
+        connectionMetricDao.saveAggregating(aggInTheDayList, false);
+        deleted += connectionMetricsTrackDao.deleteEntries(listInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
     }
 
     private void cleanup() {

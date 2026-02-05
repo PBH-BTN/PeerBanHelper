@@ -45,7 +45,7 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private int detectInitialVersion() throws SQLException {
+    private int detectInitialVersion() {
         // Check if downloader column exists in history table
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("PRAGMA table_info(history)")) {
@@ -142,7 +142,7 @@ public class SQLiteSchemaUpgrader {
         log.info("SQLite schema upgrade completed to version {}", v);
     }
 
-    private void upgradeToV3() throws SQLException {
+    private void upgradeToV3() {
         log.info("Upgrading to v3: Adding downloader column to history table");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("ALTER TABLE history ADD COLUMN downloader VARCHAR DEFAULT ''");
@@ -151,7 +151,7 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private void upgradeToV7() throws SQLException {
+    private void upgradeToV7() {
         log.info("Upgrading to v7: Recreating alert table");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("DROP TABLE IF EXISTS alert");
@@ -174,7 +174,7 @@ public class SQLiteSchemaUpgrader {
         upgradeToV7(); // Same as v7
     }
 
-    private void upgradeToV9() throws SQLException {
+    private void upgradeToV9() {
         log.info("Upgrading to v9: Adding privateTorrent column to torrents table");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("ALTER TABLE torrents ADD COLUMN privateTorrent BOOLEAN NULL");
@@ -183,7 +183,7 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private void upgradeToV10() throws SQLException {
+    private void upgradeToV10() {
         log.info("Upgrading to v10: Adding downloaderProgress column to history table");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("ALTER TABLE history ADD COLUMN downloaderProgress DOUBLE NULL");
@@ -192,7 +192,7 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private void upgradeToV11() throws SQLException {
+    private void upgradeToV11() {
         log.info("Upgrading to v11: Adding speed columns to peer_records table");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("ALTER TABLE peer_records ADD COLUMN uploadSpeed BIGINT NOT NULL DEFAULT 0");
@@ -202,7 +202,7 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private void upgradeToV15() throws SQLException {
+    private void upgradeToV15() {
         log.info("Upgrading to v15: Adding structuredData column to history table");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("ALTER TABLE history ADD COLUMN structuredData TEXT NOT NULL DEFAULT '{}'");
@@ -211,13 +211,13 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private void upgradeToV16() throws SQLException {
+    private void upgradeToV16() {
         log.info("Upgrading to v16: DownloaderName conversion (handled during migration)");
         // This upgrade involves data transformation, will be handled during migration
         // Original code converted downloader names using ConfigTransfer.downloaderNameToUUID
     }
 
-    private void upgradeToV19() throws SQLException {
+    private void upgradeToV19() {
         log.info("Upgrading to v19: Clearing banlist for IPAddress format change");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("DELETE FROM banlist");
@@ -226,7 +226,7 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private void upgradeToV20() throws SQLException {
+    private void upgradeToV20() {
         log.info("Upgrading to v20: Adding port column to peer_records table");
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("ALTER TABLE peer_records ADD COLUMN port INT NOT NULL DEFAULT 0");
