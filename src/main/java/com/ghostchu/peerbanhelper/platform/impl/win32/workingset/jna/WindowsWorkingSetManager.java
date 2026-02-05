@@ -120,14 +120,14 @@ public class WindowsWorkingSetManager {
             if (!autoResult) {
                 logger.warn("Failed to restore working set to auto management");
             }
-            
-            boolean overallResult = emptyResult; // 主要看清空操作是否成功
-            
-            if (!overallResult) {
+
+            // 主要看清空操作是否成功
+
+            if (!emptyResult) {
                 logger.warn("Failed to compress memory, empty working set failed");
             }
             
-            return overallResult;
+            return emptyResult;
             
         } catch (Exception e) {
             logger.error("Failed to working set", e);

@@ -461,42 +461,38 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 // 推送服务转回字典
                 case "push-notification" -> {
                     if ("".equals(path)) {
-                        Map<String, Object> pushMap = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(Map.class::cast)
                                 .collect(LinkedHashMap::new, (map, entry) -> {
                                     String name = (String) entry.remove("push_notification_name");
                                     map.put(name, entry);
                                 }, LinkedHashMap::putAll);
-                        val = pushMap;
                     }
                 }
                 // 对象列表转为字符串列表
                 case "banned-peer-id" -> {
                     if ("module.peer-id-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        val = bannedList;
                     }
                 }
                 case "banned-client-name" -> {
                     if ("module.client-name-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        val = bannedList;
                     }
                 }
                 case "ptr-rules" -> {
                     if ("module.ptr-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        val = bannedList;
                     }
                 }
             }
