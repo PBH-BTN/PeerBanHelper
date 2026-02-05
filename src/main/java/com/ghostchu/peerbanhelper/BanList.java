@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper;
 
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;

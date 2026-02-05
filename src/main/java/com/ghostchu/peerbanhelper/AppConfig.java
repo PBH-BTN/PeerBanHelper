@@ -2,11 +2,8 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.simplereloadlib.ReloadManager;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.*;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.io.File;
 

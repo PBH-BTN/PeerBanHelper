@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
-import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDTO;

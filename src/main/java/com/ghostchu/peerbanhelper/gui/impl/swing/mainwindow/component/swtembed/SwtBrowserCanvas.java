@@ -13,7 +13,6 @@ import org.eclipse.swt.widgets.Shell;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
 @Slf4j

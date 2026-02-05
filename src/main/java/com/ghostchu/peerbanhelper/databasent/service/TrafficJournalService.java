@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.util.List;
 

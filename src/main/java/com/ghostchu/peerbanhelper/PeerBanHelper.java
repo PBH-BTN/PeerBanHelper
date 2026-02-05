@@ -24,7 +24,6 @@ import com.ghostchu.peerbanhelper.util.umami.UmamiHelper;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import io.javalin.util.JavalinBindException;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;

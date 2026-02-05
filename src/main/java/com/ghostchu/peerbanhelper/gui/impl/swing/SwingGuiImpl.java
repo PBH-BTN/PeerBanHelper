@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.event.gui.PBHGuiElementPeriodUpdateEvent;
 import com.ghostchu.peerbanhelper.event.gui.PBHLookAndFeelNeedReloadEvent;
-import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
