@@ -66,29 +66,34 @@ class ScriptEngineManager(
         }
         if (returns is Number) {
             val i = returns.toInt()
-            if (i == 0) {
-                return null
-            } else if (i == 1) {
-                return CheckResult(
-                    javaClass,
-                    PeerAction.BAN,
-                    banDuration,
-                    TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns.toString()),
-                    StructuredData.create().add("script", script.name())
-                )
-            } else if (i == 2) {
-                return CheckResult(
-                    javaClass,
-                    PeerAction.SKIP,
-                    banDuration,
-                    TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns.toString()),
-                    StructuredData.create().add("script", script.name())
-                )
-            } else {
-                log.error(TextManager.tlUI(Lang.RULE_ENGINE_INVALID_RETURNS, script))
-                return null
+            when (i) {
+                0 -> {
+                    return null
+                }
+                1 -> {
+                    return CheckResult(
+                        javaClass,
+                        PeerAction.BAN,
+                        banDuration,
+                        TranslationComponent(Lang.USER_SCRIPT_RULE),
+                        TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns.toString()),
+                        StructuredData.create().add("script", script.name())
+                    )
+                }
+                2 -> {
+                    return CheckResult(
+                        javaClass,
+                        PeerAction.SKIP,
+                        banDuration,
+                        TranslationComponent(Lang.USER_SCRIPT_RULE),
+                        TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns.toString()),
+                        StructuredData.create().add("script", script.name())
+                    )
+                }
+                else -> {
+                    log.error(TextManager.tlUI(Lang.RULE_ENGINE_INVALID_RETURNS, script))
+                    return null
+                }
             }
         }
         if (returns is PeerAction) {
