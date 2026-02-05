@@ -201,19 +201,21 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleRestart(Context context) {
-        context.json(new StdResp(true, tl(locale(context), Lang.RELOAD_RESULT_REQUIRE_RESTART), null));
-        // Schedule restart in a separate thread to allow the response to be sent first
-        Thread restartThread = new Thread(() -> {
-            try {
-                // Give some time for the response to be sent
-                Thread.sleep(1000);
-                Main.restartApplication();
-            } catch (Exception e) {
-                log.error("Failed to restart application", e);
-            }
-        }, "RestartThread");
-        restartThread.setDaemon(false);
-        restartThread.start();
+        context.json(new StdResp(false, tl(locale(context), Lang.RELOAD_RESULT_REQUIRE_RESTART), null));
+        if (false) { // delay to v10.0
+            // Schedule restart in a separate thread to allow the response to be sent first
+            Thread restartThread = new Thread(() -> {
+                try {
+                    // Give some time for the response to be sent
+                    Thread.sleep(1000);
+                    Main.restartApplication();
+                } catch (Exception e) {
+                    log.error("Failed to restart application", e);
+                }
+            }, "RestartThread");
+            restartThread.setDaemon(false);
+            restartThread.start();
+        }
     }
 
     private void handleDatabaseNtTest(@NotNull Context context) {
