@@ -176,7 +176,6 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                 .addRemapping("clientName", "client_name")
                 .addRemapping("firstTimeSeen", "first_time_seen")
                 .addRemapping("lastTimeSeen", "last_time_seen");
-        ;
         IPage<PeerRecordEntity> page = peerRecordService.queryAccessHistoryByTorrentId(pageable.toPage(), torrent.getId(), orderable);
         var result = page.convert(entity ->
                 new PeerRecordEntityDTO(entity.getId(),

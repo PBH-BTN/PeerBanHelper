@@ -291,7 +291,7 @@ public class AboutWindow {
     private static class WindowMaximizedCommand {
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new AboutWindow(Map.of(
                 "{version}", "1.0.0",
                 "{username}", System.getProperty("user.name")

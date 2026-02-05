@@ -80,16 +80,12 @@ public final class SmtpPushProvider extends AbstractPushProvider {
         try {
             Encryption enc = Encryption.valueOf(config.getEncryption());
             switch (enc) {
-                case STARTTLS -> {
-                    props.put("mail.smtp.starttls.enable", "true");
-                }
+                case STARTTLS -> props.put("mail.smtp.starttls.enable", "true");
                 case ENFORCE_STARTTLS -> {
                     props.put("mail.smtp.starttls.enable", "true");
                     props.put("mail.smtp.starttls.required", "true");
                 }
-                case SSLTLS -> {
-                    props.put("mail.smtp.ssl.enable", "true");
-                }
+                case SSLTLS -> props.put("mail.smtp.ssl.enable", "true");
             }
         } catch (Exception e) {
             log.error("Unable to load mail encryption type: {}, it's valid?", config.getEncryption(), e);

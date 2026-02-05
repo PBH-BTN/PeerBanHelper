@@ -17,8 +17,8 @@ import java.nio.channels.FileChannel;
 @Slf4j
 public class AmsiScanner implements MalwareScanner {
     private boolean available;
-    private Pointer amsiContext;
-    private Pointer amsiSession;
+    private final Pointer amsiContext;
+    private final Pointer amsiSession;
 
     public AmsiScanner(String appName) {
         try {
