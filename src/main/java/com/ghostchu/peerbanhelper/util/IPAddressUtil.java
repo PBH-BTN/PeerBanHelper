@@ -34,20 +34,19 @@ public final class IPAddressUtil {
         if (ip.startsWith("[") && ip.endsWith("]")) {
             ip = ip.substring(1, ip.length() - 1);
         }
-        final String ipFinal = ip;
         try {
-            IPAddress ipAddress = new IPAddressString(ipFinal).toAddress();
+            IPAddress ipAddress = new IPAddressString(ip).toAddress();
             if (ipAddress.isIPv4Convertible()) {
                 ipAddress = ipAddress.toIPv4();
             }
             return ipAddress;
         } catch (AddressStringException e) {
-            log.error("Unable to get ipaddress from ip {}", ipFinal, e);
+            log.error("Unable to get ipaddress from ip {}", ip, e);
             Sentry.captureException(e);
             return INVALID_ADDRESS_MISSINGNO;
         } catch (Exception e) {
             Sentry.captureException(e);
-            log.error("Unable to get ipaddress from ip {} because an unknown error, returning default.", ipFinal, e);
+            log.error("Unable to get ipaddress from ip {} because an unknown error, returning default.", ip, e);
             return INVALID_ADDRESS_MISSINGNO;
         }
     }
