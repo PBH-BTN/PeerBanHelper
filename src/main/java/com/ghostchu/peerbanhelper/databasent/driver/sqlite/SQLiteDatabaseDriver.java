@@ -115,9 +115,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
             long timeSinceLastMaintenance = System.currentTimeMillis() - lastMaintenance;
 
             if (timeSinceLastMaintenance >= Duration.ofDays(vacuumIntervalDays).toMillis()) {
-                log.info("Performing SQLite database VACUUM (last maintenance: {} days ago)",
-                         Duration.ofMillis(timeSinceLastMaintenance).toDays());
-
+                log.debug("Performing SQLite VACUUM maintenance (last performed {} days ago)", timeSinceLastMaintenance / (1000 * 60 * 60 * 24));
                 try (Connection conn = getDataSource().getConnection();
                      var stmt = conn.createStatement()) {
                     stmt.execute("VACUUM");

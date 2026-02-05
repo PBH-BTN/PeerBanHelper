@@ -1,7 +1,9 @@
 package raccoonfink.deluge;
 
 import com.google.gson.JsonObject;
+import lombok.Data;
 
+@Data
 public final class Torrent implements Comparable<Torrent> {
     private final String m_key;
     private final double m_distributedCopies;

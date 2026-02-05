@@ -120,7 +120,6 @@ public class Main {
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 20;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.1";
-    private static PluginManager pluginManager;
     private static long bootSince;
     @Getter
     private static JavalinWebContainer webContainer;
