@@ -1,7 +1,6 @@
 package raccoonfink.deluge;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public final class Host {
     private final String m_id;
@@ -38,12 +37,14 @@ public final class Host {
         return m_version;
     }
 
-    public JSONObject toJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
-        ret.put("id", m_id);
-        ret.put("hostname", m_hostname);
-        ret.put("status", m_status);
-        ret.putOpt("version", m_version);
+    public JsonObject toJSON() {
+        final JsonObject ret = new JsonObject();
+        ret.addProperty("id", m_id);
+        ret.addProperty("hostname", m_hostname);
+        ret.addProperty("status", m_status.toString());
+        if (m_version != null) {
+            ret.addProperty("version", m_version);
+        }
         return ret;
     }
 

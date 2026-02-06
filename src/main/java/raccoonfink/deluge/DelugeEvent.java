@@ -1,15 +1,15 @@
 package raccoonfink.deluge;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public final class DelugeEvent {
 
-    public DelugeEvent(final JSONArray data) {
+    public DelugeEvent(final JsonArray data) {
     }
 
-    public JSONObject toJSON() {
-        return new JSONObject();
+    public JsonObject toJSON() {
+        return new JsonObject();
     }
 
 }

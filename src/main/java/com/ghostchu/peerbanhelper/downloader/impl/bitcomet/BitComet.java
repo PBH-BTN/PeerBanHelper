@@ -105,6 +105,9 @@ public final class BitComet extends AbstractDownloader {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(2);
         flags.add(DownloaderFeatureFlag.UNBAN_IP);
         flags.add(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
+        if (serverVersion.isGreaterThanOrEqualTo("2.20")) {
+            flags.add(DownloaderFeatureFlag.TRAFFIC_STATS);
+        }
         return flags;
     }
 
@@ -140,10 +143,10 @@ public final class BitComet extends AbstractDownloader {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, response.code() + " " + response.body().string()));
             }
             var loginResponse = JsonUtil.standard().fromJson(response.body().string(), BCLoginResponse.class);
-            if (loginResponse.getErrorCode().equalsIgnoreCase("PASSWORD_ERROR")) {
+            if ("PASSWORD_ERROR".equalsIgnoreCase(loginResponse.getErrorCode())) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
             }
-            if (!loginResponse.getErrorCode().equalsIgnoreCase("ok")) {
+            if (!"ok".equalsIgnoreCase(loginResponse.getErrorCode())) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
             }
             // 进行版本检查
@@ -276,28 +279,32 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public @NotNull List<Torrent> getTorrents() {
-        Map<String, String> requirements = new HashMap<>();
+        Map<String, Object> requirements = new HashMap<>();
         requirements.put("state_group", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
+        requirements.put("start", 0);
+        requirements.put("limit", Integer.MAX_VALUE - 1);
         return fetchTorrents(requirements, !config.isIgnorePrivate());
     }
 
     @Override
     public @NotNull List<Torrent> getAllTorrents() {
-        Map<String, String> requirements = new HashMap<>();
+        Map<String, Object> requirements = new HashMap<>();
         requirements.put("state_group", "ALL");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
+        requirements.put("start", 0);
+        requirements.put("limit", Integer.MAX_VALUE - 1);
         return fetchTorrents(requirements, true);
     }
 
 
-    public List<Torrent> fetchTorrents(Map<String, String> requirements, boolean includePrivate) {
+    public List<Torrent> fetchTorrents(Map<String, Object> requirements, boolean includePrivate) {
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(requirements), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint())
@@ -313,7 +320,7 @@ public final class BitComet extends AbstractDownloader {
 
             Semaphore semaphore = new Semaphore(3);
             List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(taskListResponse.getTasks().stream()
-                    .filter(t -> t.getType().equals("BT"))
+                    .filter(t -> "BT".equals(t.getType()))
                     .map(torrent -> CompletableFuture.supplyAsync(() -> {
                         try {
                             semaphore.acquire();
@@ -398,7 +405,9 @@ public final class BitComet extends AbstractDownloader {
         long totalUploaded = 0;
         long totalDownloaded = 0;
         Map<String, Object> body = new HashMap<>();
-        body.put("token_list", List.of("${G_TOTAL_DOWNLOAD_AUTO}", "${G_TOTAL_UPLOAD_AUTO}", "${G_SESSION_DOWNLOAD_AUTO}", "${G_SESSION_UPLOAD_AUTO}"));
+        body.put("token_list", List.of(
+                "${G_TOTAL_DOWNLOAD_AUTO}", "${G_TOTAL_UPLOAD_AUTO}", "${G_SESSION_DOWNLOAD_AUTO}", "${G_SESSION_UPLOAD_AUTO}",
+                "${G_TOTAL_DOWNLOAD_BYTE}", "${G_TOTAL_UPLOAD_BYTE}", "${G_SESSION_DOWNLOAD_BYTE}", "${G_SESSION_UPLOAD_BYTE}"));
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(body), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + BCEndpoint.GET_STATISTICS_LIST.getEndpoint())
@@ -412,10 +421,20 @@ public final class BitComet extends AbstractDownloader {
             }
             var valueList = JsonUtil.standard().fromJson(respBody, BCStatisticsValueListResponse.class);
             for (BCStatisticsValueListResponse.ValueListDTO valueListDTO : valueList.getValueList()) {
-                switch (valueListDTO.getToken()) {
-                    case "${G_TOTAL_DOWNLOAD_AUTO}" -> totalDownloaded = readHumanReadableValue(valueListDTO.getValue());
-                    case "${G_TOTAL_UPLOAD_AUTO}" -> totalUploaded = readHumanReadableValue(valueListDTO.getValue());
+                if (serverVersion.isGreaterThanOrEqualTo("2.20")) {
+                    switch (valueListDTO.getToken()) {
+                        case "${G_TOTAL_DOWNLOAD_BYTE}" -> totalDownloaded = Long.parseLong(valueListDTO.getValue());
+                        case "${G_TOTAL_UPLOAD_BYTE}" -> totalUploaded = Long.parseLong(valueListDTO.getValue());
+                    }
+                } else {
+                    switch (valueListDTO.getToken()) {
+                        case "${G_TOTAL_DOWNLOAD_AUTO}" ->
+                                totalDownloaded = readHumanReadableValue(valueListDTO.getValue());
+                        case "${G_TOTAL_UPLOAD_AUTO}" ->
+                                totalUploaded = readHumanReadableValue(valueListDTO.getValue());
+                    }
                 }
+
             }
         } catch (Exception e) {
             log.warn("Failed to fetch BitComet statistics", e);
@@ -479,9 +498,9 @@ public final class BitComet extends AbstractDownloader {
             var stream = peers.getPeers().stream();
 
             if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-                stream = stream.filter(dto -> dto.getGroup().equals("connected") // 2.10 正式版
-                        || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
-                        || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
+                stream = stream.filter(dto -> "connected".equals(dto.getGroup()) // 2.10 正式版
+                        || "connected_peers".equals(dto.getGroup()) // 2.11 Beta 1-2
+                        || "peers_connected".equals(dto.getGroup())); // 2.11 Beta 3
             }
             return stream.map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
@@ -697,7 +716,7 @@ public final class BitComet extends AbstractDownloader {
             var configResp = JsonUtil.standard().fromJson(json, BCConfigSetResponse.class);
             if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
                 log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT));
-                System.out.println(json);
+                //System.out.println(json);
                 throw new IllegalStateException("Failed to save BitComet BT Protocol Port: " + configResp.getErrorMessage());
             }
         } catch (Exception e) {

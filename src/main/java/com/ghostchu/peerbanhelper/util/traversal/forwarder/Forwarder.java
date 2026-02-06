@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
 import com.google.common.collect.BiMap;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
 

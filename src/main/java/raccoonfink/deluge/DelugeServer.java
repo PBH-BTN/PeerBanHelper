@@ -1,10 +1,10 @@
 package raccoonfink.deluge;
 
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 import raccoonfink.deluge.requests.ConfigRequest;
 import raccoonfink.deluge.responses.*;
 
@@ -36,7 +36,7 @@ public final class DelugeServer {
 
     public DelugeResponse makeRequest(final DelugeRequest delugeRequest) throws DelugeException {
         int connectionResponseCode;
-        JSONObject jsonResponse;
+        JsonObject jsonResponse;
 
         final String postData = delugeRequest.toPostData(m_counter++);
         //final String cookieHeader = getCookieHeader();
@@ -52,27 +52,23 @@ public final class DelugeServer {
             if (!resp.isSuccessful()) {
                 throw new DelugeException(resp.code() + " - " + resp.body().string());
             }
-            jsonResponse = new JSONObject(resp.body().string());
-        } catch (final IOException | JSONException e) {
+            jsonResponse = JsonParser.parseString(resp.body().string()).getAsJsonObject();
+        } catch (final IOException e) {
             throw new DelugeException(e);
         }
 
-        try {
-            if (jsonResponse.has("error") && !jsonResponse.isNull("error")) {
-                final JSONObject error = jsonResponse.getJSONObject("error");
-                final String message = error.optString("message");
-                final int code = error.optInt("code");
-                final StringBuilder builder = new StringBuilder("Error");
-                if (code >= 0) {
-                    builder.append(" ").append(code);
-                }
-                if (message != null) {
-                    builder.append(": ").append(message);
-                }
-                throw new DelugeException(builder.toString());
+        if (jsonResponse.has("error") && !jsonResponse.get("error").isJsonNull()) {
+            final JsonObject error = jsonResponse.getAsJsonObject("error");
+            final String message = error.has("message") ? error.get("message").getAsString() : null;
+            final int code = error.has("code") ? error.get("code").getAsInt() : -1;
+            final StringBuilder builder = new StringBuilder("Error");
+            if (code >= 0) {
+                builder.append(" ").append(code);
             }
-        } catch (final JSONException e) {
-            throw new DelugeException(e);
+            if (message != null) {
+                builder.append(": ").append(message);
+            }
+            throw new DelugeException(builder.toString());
         }
         return new DelugeResponse(connectionResponseCode, jsonResponse);
     }
@@ -159,7 +155,7 @@ public final class DelugeServer {
 
     public ConnectedResponse connect(final String id) throws DelugeException {
         final DelugeResponse response = makeRequest(new DelugeRequest("web.connect", id));
-        if (response.getResponseData().isNull("result")) {
+        if (!response.getResponseData().has("result") || response.getResponseData().get("result").isJsonNull()) {
             return new ConnectedResponse(response.getResponseCode(), response.getResponseData(), true);
         } else {
             return new ConnectedResponse(response.getResponseCode(), response.getResponseData());
@@ -168,7 +164,7 @@ public final class DelugeServer {
 
     public ConnectedResponse disconnect() throws DelugeException {
         final DelugeResponse response = makeRequest(new DelugeRequest("web.disconnect"));
-        if (response.getResponseData().isNull("result")) {
+        if (!response.getResponseData().has("result") || response.getResponseData().get("result").isJsonNull()) {
             return new ConnectedResponse(response.getResponseCode(), response.getResponseData(), false);
         } else {
             return new ConnectedResponse(response.getResponseCode(), response.getResponseData(), true);
@@ -221,7 +217,7 @@ public final class DelugeServer {
     }
 
     private boolean determineResponseError(DelugeResponse response) {
-        if (response.getResponseData().isNull("error")) {
+        if (!response.getResponseData().has("error") || response.getResponseData().get("error").isJsonNull()) {
             return false;
         }
         Object error = response.getResponseData().get("error");
@@ -233,8 +229,8 @@ public final class DelugeServer {
     }
 
     private void printError(DelugeResponse response) {
-        JSONObject object = response.getResponseData().getJSONObject("error");
-        log.info("Error when call Deluge RPC: message={}, code={}", object.getString("message"), object.getInt("code"));
+        JsonObject object = response.getResponseData().getAsJsonObject("error");
+        log.info("Error when call Deluge RPC: message={}, code={}", object.get("message").getAsString(), object.get("code").getAsInt());
     }
 }
 

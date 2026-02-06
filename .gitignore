@@ -65,3 +65,4 @@ webui/.eslintcache
 **/static
 debug.log
 package-lock.json
+cache/

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.pbhplus.backend;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.pbhplus.data.LicenseStatus;
 import com.ghostchu.peerbanhelper.pbhplus.validator.LicenseRevokeValidator;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,7 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
             }
         } catch (Exception e) {
             log.debug("Error checking revoked licenses: {}", e.getMessage(), e);
+            Sentry.captureException(e);
         }
     }
 
@@ -57,6 +59,7 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
             return revoked.contains(license);
         } catch (Exception e) {
             log.debug("Error checking revoked licenses: {}", e.getMessage(), e);
+            Sentry.captureException(e);
             return false;
         }
     }

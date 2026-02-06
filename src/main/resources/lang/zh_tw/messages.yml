@@ -800,3 +800,8 @@ BTN_ABILITY_IP_QUERY_DESCRIPTION: |
   PeerBanHelper 功能模組可以使用此服務提供的能力獲取有關特定 IP 位址在 BTN 上的活動概要。
 BTN_ABILITY_IP_QUERY_STATUS_OK: "查詢成功處理: {}"
 BTN_ABILITY_IP_QUERY_NOT_PROVIDED: "BTN IP 查詢功能能力在此 BTN 實例上不可用"
+MALWARE_SCANNER_DETECTED: "[防毒軟體] 電腦上的防毒軟體回報正在載入的 {} (位置: {}) 存在惡意軟體。為安全起見，PeerBanHelper 已取消並拒絕載入該內容。"
+PEER_RECORDING_SERVICE_CLEANING_UP: "[Peer 記錄服務] 正在清理過期的 Peer 記錄資料，請稍等..."
+PEER_RECORDING_SERVICE_CLEANED_UP: "[Peer 記錄服務] 已刪除 {} 條過期的 Peer 記錄資料"
+CONNECTION_METRICS_SERVICE_CLEANING_UP: "[Peer 連線分析服務] 正在清理過期的連線指標資料，請稍等..."
+CONNECTION_METRICS_SERVICE_CLEANED_UP: "[Peer 連線分析服務] 已刪除 {} 條過期的連線指標資料"

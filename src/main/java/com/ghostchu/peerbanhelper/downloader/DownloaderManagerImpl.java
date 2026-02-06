@@ -15,6 +15,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.JsonObject;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
@@ -192,6 +193,7 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
                 d.close();
             } catch (Exception e) {
                 log.error(tlUI(Lang.UNABLE_CLOSE_DOWNLOADER, d.getName()), e);
+                Sentry.captureException(e);
             }
         }
     }

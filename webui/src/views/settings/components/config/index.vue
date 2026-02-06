@@ -30,10 +30,13 @@
             </template>
           </a-form-item>
           <a-form-item
-            :label="t('page.settings.tab.config.privacy.errorReport')"
-            field="privacy.error_reporting"
+            :label="t('page.settings.tab.config.privacy.analytics')"
+            field="privacy.analytics"
           >
-            <a-switch v-model="form.privacy.error_reporting" />
+            <a-switch v-model="form.privacy.analytics" />
+            <template #extra>
+              {{ t('page.settings.tab.config.privacy.analytics.tips') }}
+            </template>
           </a-form-item>
           <a-divider />
           <webui v-model="form.server" />
@@ -42,7 +45,7 @@
           <a-divider />
           <lookup v-model="form.lookup" />
           <a-divider />
-          <persist v-model="form.persist" />
+          <persist v-model:persist="form.persist" v-model:database="form.database" />
           <a-divider />
           <banlistRemapping v-model="form.banlist_remapping" />
           <a-divider />
@@ -98,7 +101,8 @@ const form = reactive({
   privacy: {},
   proxy: {},
   performance: {},
-  resolvers: {}
+  resolvers: {},
+  database: {}
 } as Config)
 const { loading } = useRequest(GetConfig, {
   onSuccess: (data) => {

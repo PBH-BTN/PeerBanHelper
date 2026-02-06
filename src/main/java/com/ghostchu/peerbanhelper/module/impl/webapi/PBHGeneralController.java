@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import ch.qos.logback.core.util.TimeUtil;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -48,7 +47,6 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -108,6 +106,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
     }
 
+
     private void handleRefreshNatStatus(@NotNull Context context) {
         Thread.ofVirtual().name("Refresh NAT Status").start(() -> bTStunManager.refreshNatType());
         context.json(new StdResp(true, "Refreshing NAT Status", null));
@@ -130,6 +129,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("globalPaused", downloaderServer.isGlobalPaused());
+        data.put("analytics", Main.getMainConfig().getBoolean("privacy.analytics"));
         context.json(new StdResp(true, null, data));
     }
 
@@ -336,10 +336,10 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         switch (context.pathParam("configName")) {
             case "config" -> {
                 yamlConfiguration.load(Main.getMainConfigFile());
-                if(ExternalSwitch.parseBoolean("pbh.demoMode")){
+                if (ExternalSwitch.parseBoolean("pbh.demoMode")) {
                     yamlConfiguration.set("client", null);
-                    yamlConfiguration.set("btn.app-id","REDACTED_IN_DEMO_MODE");
-                    yamlConfiguration.set("btn.app-secret","REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("btn.app-id", "REDACTED_IN_DEMO_MODE");
+                    yamlConfiguration.set("btn.app-secret", "REDACTED_IN_DEMO_MODE");
                     yamlConfiguration.set("pbh-plus-key", "REDACTED_IN_DEMO_MODE");
                     yamlConfiguration.set("server.token", "REDACTED_IN_DEMO_MODE");
                     yamlConfiguration.set("installation-id", "Not Available In Demo Mode");
@@ -461,42 +461,38 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 // 推送服务转回字典
                 case "push-notification" -> {
                     if ("".equals(path)) {
-                        Map<String, Object> pushMap = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(Map.class::cast)
                                 .collect(LinkedHashMap::new, (map, entry) -> {
                                     String name = (String) entry.remove("push_notification_name");
                                     map.put(name, entry);
                                 }, LinkedHashMap::putAll);
-                        val = pushMap;
                     }
                 }
                 // 对象列表转为字符串列表
                 case "banned-peer-id" -> {
                     if ("module.peer-id-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        val = bannedList;
                     }
                 }
                 case "banned-client-name" -> {
                     if ("module.client-name-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        val = bannedList;
                     }
                 }
                 case "ptr-rules" -> {
                     if ("module.ptr-blacklist".equals(path)) {
-                        List<String> bannedList = ((List<?>) val).stream()
+                        val = ((List<?>) val).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
-                        val = bannedList;
                     }
                 }
             }

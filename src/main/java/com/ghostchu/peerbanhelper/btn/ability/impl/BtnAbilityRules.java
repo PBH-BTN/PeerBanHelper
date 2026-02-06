@@ -5,14 +5,15 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRuleset;
 import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.URLUtil;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
-import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import lombok.Getter;
@@ -33,18 +34,18 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final ScriptEngine scriptEngine;
+    private final ScriptEngineManager scriptEngineManager;
     private final boolean scriptExecute;
     private final boolean powCaptcha;
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
     @Getter
     private BtnRulesetParsed btnRule;
 
 
-    public BtnAbilityRules(BtnNetwork btnNetwork, MetadataDao metadataDao, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
+    public BtnAbilityRules(BtnNetwork btnNetwork, MetadataService metadataDao, ScriptEngineManager scriptEngineManager, JsonObject ability, boolean scriptExecute) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
-        this.scriptEngine = scriptEngine;
+        this.scriptEngineManager = scriptEngineManager;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
@@ -58,7 +59,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
             var cache = metadataDao.get("btn.ability.rules.cache");
             if (cache != null) {
                 BtnRuleset btnRuleset = JsonUtil.getGson().fromJson(cache, BtnRuleset.class);
-                this.btnRule = new BtnRulesetParsed(scriptEngine, btnRuleset, scriptExecute);
+                this.btnRule = new BtnRulesetParsed(scriptEngineManager, btnRuleset, scriptExecute);
             }
         } catch (Throwable ignored) {
         }
@@ -102,47 +103,49 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     }
 
     private void updateRule() {
-        String version;
-        if (btnRule == null || btnRule.getVersion() == null) {
-            version = "initial";
-        } else {
-            version = btnRule.getVersion();
-        }
-
-        String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
-        Request.Builder request = new Request.Builder()
-                .url(url)
-                .get();
-        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "rule_peer_identity");
-        try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
-            if (response.code() == 204) {
-                setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
-                return;
-            }
-            if (!response.isSuccessful()) {
-                String responseBody = response.body().string();
-                log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
-                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_RULEES_SYNC_SERVER), (task, callback) -> {
+            String version;
+            if (btnRule == null || btnRule.getVersion() == null) {
+                version = "initial";
             } else {
-                try {
-                    String responseBody = response.body().string();
-                    BtnRuleset btr = JsonUtil.getGson().fromJson(responseBody, BtnRuleset.class);
-                    this.btnRule = new BtnRulesetParsed(scriptEngine, btr, scriptExecute);
-                    Main.getEventBus().post(new BtnRuleUpdateEvent());
-                    metadataDao.set("btn.ability.rules.cache", JsonUtil.getGson().toJson(btr));
-                    log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
-                    setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
-                    btnNetwork.getModuleMatchCache().invalidateAll();
-                } catch (JsonSyntaxException e) {
-                    String responseBody = response.body().string();
-                    setLastStatus(false, new TranslationComponent("JsonSyntaxException: " + response.code() + " - " + responseBody));
-                    log.error("Unable to parse BtnRule as a valid Json object: {}-{}", response.code(), responseBody, e);
-                }
+                version = btnRule.getVersion();
             }
-        } catch (Exception e) {
-            log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
-            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
-        }
+
+            String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
+            Request.Builder request = new Request.Builder()
+                    .url(url)
+                    .get();
+            if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "rule_peer_identity");
+            try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
+                if (response.code() == 204) {
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
+                    return;
+                }
+                if (!response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
+                    setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
+                } else {
+                    try {
+                        String responseBody = response.body().string();
+                        BtnRuleset btr = JsonUtil.getGson().fromJson(responseBody, BtnRuleset.class);
+                        this.btnRule = new BtnRulesetParsed(scriptEngineManager, btr, scriptExecute);
+                        Main.getEventBus().post(new BtnRuleUpdateEvent());
+                        metadataDao.set("btn.ability.rules.cache", JsonUtil.getGson().toJson(btr));
+                        log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
+                        setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
+                        btnNetwork.getModuleMatchCache().invalidateAll();
+                    } catch (JsonSyntaxException e) {
+                        String responseBody = response.body().string();
+                        setLastStatus(false, new TranslationComponent("JsonSyntaxException: " + response.code() + " - " + responseBody));
+                        log.error("Unable to parse BtnRule as a valid Json object: {}-{}", response.code(), responseBody, e);
+                    }
+                }
+            } catch (Exception e) {
+                log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
+            }
+        })).join();
     }
 
     @Override

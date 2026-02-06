@@ -1,25 +1,26 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
+import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class SwarmTrackingModule extends AbstractFeatureModule implements MonitorFeatureModule {
     @Autowired
-    private TrackedSwarmDao trackedSwarmDao;
+    private TrackedSwarmService trackedSwarmDao;
     @Autowired
     private JavalinWebContainer javalinWebContainer;
 
@@ -78,29 +79,20 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
                 .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
         javalinWebContainer.javalin()
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
+        trackedSwarmDao.resetTable();
         registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
     }
 
     private void handleDetails(@NotNull Context context) {
         Pageable pageable = new Pageable(context);
-        try {
-            var page = trackedSwarmDao.queryByPaging(new Orderable(Map.of(), context).apply(trackedSwarmDao.queryBuilder()), pageable);
-            context.json(new StdResp(true, null, page));
-        } catch (SQLException e) {
-            log.error("Unable to retrieve tracked swarm data", e);
-            context.json(new StdResp(false, "Unable to retrieve tracked swarm data", null));
-        }
+        var page = trackedSwarmDao.page(pageable.toPage(), new Orderable(Map.of(), context).apply(new QueryWrapper<>()));
+        context.json(new StdResp(true, null, PBHPage.from(page)));
     }
 
     private void handleWebAPI(@NotNull Context context) {
         Map<String, Object> response = new HashMap<>();
-        try {
-            response.put("trackedSwarmSize", trackedSwarmDao.countOf());
-            context.json(response);
-        } catch (SQLException e) {
-            log.error("Unable to retrieve tracked swarm data", e);
-            context.status(500).json(new StdResp(false, "Unable to retrieve tracked swarm data", null));
-        }
+        response.put("trackedSwarmSize", trackedSwarmDao.count());
+        context.json(response);
     }
 
     /**
@@ -120,6 +112,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
                 trackedSwarmDao.syncPeers(downloader, torrent, peer);
             }
         } catch (ExecutionException e) {
+            Sentry.captureException(e);
             log.error("Unable update tracked peers in SQLite temporary table", e);
         }
     }

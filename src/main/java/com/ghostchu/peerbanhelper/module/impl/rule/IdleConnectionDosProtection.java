@@ -11,9 +11,12 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.net.HostAndPort;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -21,12 +24,16 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule implements Reloadable, BatchMonitorFeatureModule {
-    private final Map<HostAndPort, ConnectionInfo> idleConnections = new ConcurrentHashMap<>();
+    private final Cache<@NotNull HostAndPort, @NotNull ConnectionInfo> idleConnections = CacheBuilder.newBuilder()
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .softValues()
+            .build();
     private long banDuration;
     private long maxAllowedIdleTime;
     private long idleSpeedThreshold;
@@ -106,29 +113,34 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         // 如果速度够快，那么认为不是空闲连接
         if (peer.getUploadSpeed() > idleSpeedThreshold || peer.getDownloadSpeed() > idleSpeedThreshold) {
             //log.debug("Peer {} speed is above threshold, not idle", hostAndPort);
-            idleConnections.remove(hostAndPort);
+            idleConnections.invalidate(hostAndPort);
             return pass();
         }
         // 如果速度不够快，则从 map 里获取连接信息
-        ConnectionInfo info = idleConnections.getOrDefault(hostAndPort, new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), 0));
+        ConnectionInfo info;
+        try {
+            info = idleConnections.get(hostAndPort, ()->new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), 0));
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         long computedAvgUploadSpeed = (peer.getUploaded() - info.getUploaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
         long computedAvgDownloadSpeed = (peer.getDownloaded() - info.getDownloaded()) / (System.currentTimeMillis() - info.getIdleStartTime() + 1);
         double percentageChange = Math.abs(peer.getProgress() * 100.0d - info.getPercentage());
         if (computedAvgUploadSpeed > idleSpeedThreshold || computedAvgDownloadSpeed > idleSpeedThreshold) {
             //log.debug("Peer {} computed avg speed is above threshold, not idle", hostAndPort);
-            idleConnections.remove(hostAndPort);
+            idleConnections.invalidate(hostAndPort);
             return pass();
         }
         if (resetOnStatusChange && percentageChange >= minStatusChangePercentage) {
             //log.debug("Peer {} status changed by {}% in computing window, resetting idle timer", hostAndPort, percentageChange);
-            idleConnections.remove(hostAndPort);
+            idleConnections.invalidate(hostAndPort);
             return pass();
         }
         long alreadyIdled = System.currentTimeMillis() - info.getIdleStartTime();
         // 如果已经空闲时间超过最大允许时间，则封禁
         if (alreadyIdled > maxAllowedIdleTime) {
             //log.debug("Peer {} idle timed out", hostAndPort);
-            idleConnections.remove(hostAndPort);
+            idleConnections.invalidate(hostAndPort);
             return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                     new TranslationComponent(Lang.MODULE_ICDP_RULE_TITLE),
                     new TranslationComponent(Lang.MODULE_ICDP_RULE_DESCRIPTION, hostAndPort.toString()),
@@ -158,8 +170,8 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
                 .flatMap(Collection::stream)
                 .map(peer -> HostAndPort.fromParts(peer.getPeerAddress().getIp(), peer.getPeerAddress().getPort()))
                 .toList();
-        int count = idleConnections.size();
-        idleConnections.entrySet().removeIf(entry -> {
+        long count = idleConnections.size();
+        idleConnections.asMap().entrySet().removeIf(entry -> {
             var hostAndPort = entry.getKey();
             if (!allPeers.contains(hostAndPort)) {
                 entry.getValue().setNotHitCounter(entry.getValue().getNotHitCounter() + 1);
@@ -180,6 +192,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         private int notHitCounter;
     }
 
+    @Getter
     enum ProtectionMode {
         DETERMINED_BY_PEER_FLAGS(0),
         ALWAYS_SEEDING(1),
@@ -189,10 +202,6 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
 
         ProtectionMode(int code) {
             this.code = code;
-        }
-
-        public int getCode() {
-            return code;
         }
 
         public static ProtectionMode fromCode(int code) {

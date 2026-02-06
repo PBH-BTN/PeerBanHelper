@@ -1,11 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
-import com.ghostchu.peerbanhelper.database.table.AlertEntity;
+import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.AlertDTO;
-import com.ghostchu.peerbanhelper.util.query.Page;
-import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -14,8 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -24,7 +20,7 @@ public final class PBHAlertController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private AlertDao alertDao;
+    private AlertService alertDao;
 
     @Override
     public boolean isConfigurable() {
@@ -50,55 +46,45 @@ public final class PBHAlertController extends AbstractFeatureModule {
                 .delete("/api/alert/{id}", this::handleDelete, Role.USER_WRITE);
     }
 
-    private void handleAllRead(Context context) throws SQLException {
+    private void handleAllRead(Context context) {
         alertDao.markAllAsRead();
         context.json(new StdResp(true, "OK!", null));
     }
 
 
-    private void handleListing(Context ctx) throws SQLException {
+    private void handleListing(Context ctx) {
         ctx.status(200);
-        if (ctx.queryParam("unread") != null && Boolean.parseBoolean(ctx.queryParam("unread"))) {
-            ctx.json(new StdResp(true, null, alertDao.getUnreadAlertsUnPaged()
-                    .stream()
-                    .map(alert -> new AlertDTO(
-                            alert.getId(),
-                            alert.getCreateAt(),
-                            alert.getReadAt(),
-                            alert.getLevel(),
-                            alert.getIdentifier(),
-                            tl(locale(ctx), alert.getTitle()),
-                            tl(locale(ctx), alert.getContent())
-                    ))
-                    .toList()
-            ));
-        } else {
-            Page<AlertEntity> alerts = alertDao.queryByPaging(new Pageable(ctx));
-            var newAlerts = new Page<>(alerts.getPage(), alerts.getSize(), alerts.getTotal(),
-                    alerts.getResults().stream().map(alert -> new AlertDTO(
-                            alert.getId(),
-                            alert.getCreateAt(),
-                            alert.getReadAt(),
-                            alert.getLevel(),
-                            alert.getIdentifier(),
-                            tl(locale(ctx), alert.getTitle()),
-                            tl(locale(ctx), alert.getContent())
-                    )).toList());
-            ctx.json(new StdResp(true, null, newAlerts));
-        }
+        ctx.json(new StdResp(true, null, alertDao.getUnreadAlerts()
+                .stream()
+                .map(alert -> new AlertDTO(
+                        alert.getId(),
+                        alert.getCreateAt(),
+                        alert.getReadAt(),
+                        alert.getLevel(),
+                        alert.getIdentifier(),
+                        tl(locale(ctx), alert.getTitle()),
+                        tl(locale(ctx), alert.getContent())
+                ))
+                .toList()
+        ));
     }
 
-    private void handleRead(Context ctx) throws SQLException {
+    private void handleRead(Context ctx) {
         var id = Long.parseLong(ctx.pathParam("id"));
-        var entity = alertDao.queryForId(id);
-        entity.setReadAt(new Timestamp(System.currentTimeMillis()));
-        alertDao.update(entity);
+        var entity = alertDao.getById(id);
+        if (entity == null) {
+            ctx.status(404);
+            ctx.json(new StdResp(false, "Alert not exists or expired", null));
+            return;
+        }
+        entity.setReadAt(OffsetDateTime.now());
+        alertDao.save(entity);
         ctx.status(200);
         ctx.json(new StdResp(true, "OK", null));
     }
 
-    private void handleDelete(Context ctx) throws SQLException {
-        alertDao.deleteById(Long.parseLong(ctx.pathParam("id")));
+    private void handleDelete(Context ctx) {
+        alertDao.removeById(Long.parseLong(ctx.pathParam("id")));
         ctx.status(200);
         ctx.json(new StdResp(true, "OK", null));
     }

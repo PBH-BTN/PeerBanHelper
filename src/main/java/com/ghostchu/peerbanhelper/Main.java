@@ -13,12 +13,15 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
+import com.ghostchu.peerbanhelper.platform.Platform;
+import com.ghostchu.peerbanhelper.platform.impl.win32.WindowsPlatform;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
@@ -27,17 +30,25 @@ import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
+import com.zaxxer.hikari.pool.HikariPool;
+import cordelia.client.TransmissionIOException;
+import io.javalin.util.JavalinBindException;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
-import org.pf4j.PluginManager;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import oshi.SystemInfo;
+import raccoonfink.deluge.DelugeException;
 
+import javax.crypto.BadPaddingException;
+import javax.net.ssl.SSLHandshakeException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -45,15 +56,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.math.MathContext;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class Main {
+    @Getter
+    private static final UUID runtimeInstanceId = UUID.randomUUID();
     @Getter
     private static final EventBus eventBus = new EventBus();
     @Getter
@@ -61,6 +77,8 @@ public class Main {
     public static String DEF_LOCALE = Locale.getDefault().toLanguageTag().toLowerCase(Locale.ROOT).replace("-", "_");
     @Getter
     private static File dataDirectory;
+    @Getter
+    private static File cacheDirectory;
     @Getter
     private static File logsDirectory;
     @Getter
@@ -95,52 +113,136 @@ public class Main {
     private static String[] startupArgs;
     @Getter
     private static final long startupAt = System.currentTimeMillis();
+    @Nullable
+    @Getter
+    private static Platform platform;
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 20;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.1";
-    private static PluginManager pluginManager;
     private static long bootSince;
+    @Getter
+    private static JavalinWebContainer webContainer;
 
     public static void main(String[] args) {
-        bootSince = System.currentTimeMillis();
-        startupArgs = args;
-        System.setProperty("sun.net.useExclusiveBind", "false");
-        setupReloading();
-        setupConfDirectory(args);
-        loadFlagsProperties();
-        setupConfiguration();
-        meta = buildMeta();
-        setupLogback();
-        String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
-        log.info("Current system language tag: {}", defLocaleTag);
-        DEF_LOCALE = mainConfig.getString("language");
-        if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
-            DEF_LOCALE = ExternalSwitch.parse("pbh.userLocale");
-            if (DEF_LOCALE == null) {
-                DEF_LOCALE = defLocaleTag;
+        try {
+            bootSince = System.currentTimeMillis();
+            startupArgs = args;
+            System.setProperty("sun.net.useExclusiveBind", "false");
+            setupReloading();
+            setupConfDirectory(args);
+            loadFlagsProperties();
+            setupConfiguration();
+            meta = buildMeta();
+            setupLogback();
+            setupSentry();
+            String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+            Sentry.setTag("locale", defLocaleTag);
+            log.info("Current system language tag: {}", defLocaleTag);
+            DEF_LOCALE = mainConfig.getString("language");
+            if (DEF_LOCALE == null || "default".equalsIgnoreCase(DEF_LOCALE)) {
+                DEF_LOCALE = ExternalSwitch.parse("pbh.userLocale");
+                if (DEF_LOCALE == null) {
+                    DEF_LOCALE = defLocaleTag;
+                }
+            }
+            loadPlatform();
+            setupHttpServer();
+            pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
+            initGUI(args);
+            Thread.ofPlatform().name("Bootstrap").start(() -> {
+                try {
+                    guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
+                    setupScriptEngine();
+                    log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
+                    applicationContext = new AnnotationConfigApplicationContext();
+                    applicationContext.register(AppConfig.class);
+                    applicationContext.refresh();
+                    server = applicationContext.getBean(PeerBanHelper.class);
+                    server.start();
+                    log.info(tlUI(Lang.BOOT_TIME, System.currentTimeMillis() - bootSince));
+                } catch (Throwable e) {
+                    log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
+                    Sentry.captureException(e);
+                    throw e;
+                }
+                setupShutdownHook();
+            });
+            guiManager.sync();
+        } catch (Throwable throwable) {
+            log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), throwable);
+            Sentry.captureException(throwable);
+            throw throwable;
+        }
+
+    }
+
+    private static void setupHttpServer() {
+        webContainer = new JavalinWebContainer();
+        String token = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.token"));
+        String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("server.address"));
+        if ("0.0.0.0".equals(host) || "::".equals(host) || "localhost".equals(host)) {
+            host = null;
+        }
+        int httpdPort = ExternalSwitch.parseInt("pbh.port", Main.getMainConfig().getInt("server.http"));
+        try {
+            webContainer.setupJavalin();
+            webContainer.start(host, httpdPort, token);
+        } catch (JavalinBindException e) {
+            if (e.getMessage().contains("Port already in use")) {
+                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort));
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort), e);
+            } else if (e.getMessage().contains("require elevated privileges")) {
+                log.error(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES));
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES, httpdPort), e);
+            } else {
+                Sentry.captureException(e);
+                log.error("Unable to start Javalin http server", e);
             }
         }
-        initGUI(args);
-        Thread.ofPlatform().name("Bootstrap").start(() -> {
-            guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
-            pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-            setupScriptEngine();
-            try {
-                log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
-                applicationContext = new AnnotationConfigApplicationContext();
-                applicationContext.register(AppConfig.class);
-                applicationContext.refresh();
-                server = applicationContext.getBean(PeerBanHelper.class);
-                server.start();
-                log.info(tlUI(Lang.BOOT_TIME, System.currentTimeMillis() - bootSince));
-            } catch (Exception e) {
-                log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
-                throw new RuntimeException(e);
-            }
-            setupShutdownHook();
-        });
-        guiManager.sync();
+    }
 
+    private static void setupSentry() {
+        Sentry.init(sentryOptions -> {
+            sentryOptions.setDsn("https://c42097bd57f945e98f745ad1838fe4f1@glitchtip.pbh-btn.com/1");
+            sentryOptions.setEnableExternalConfiguration(true); // Read DSN from sentry.properties
+            sentryOptions.setCacheDirPath(cacheDirectory.getAbsolutePath());
+            sentryOptions.setEnabled(mainConfig.getBoolean("privacy.analytics")); // Disable Sentry if analytics is disabled in config
+            sentryOptions.setDistinctId(mainConfig.getString("installation-id"));
+            sentryOptions.setServerName(mainConfig.getString("installation-id"));
+            sentryOptions.setEnvironment(meta.isSnapshotOrBeta() ? "development" : "production");
+            sentryOptions.setSendDefaultPii(false); // Do not track user information
+            sentryOptions.setAttachThreads(true);
+            sentryOptions.setPrintUncaughtStackTrace(true);
+            sentryOptions.setEnableUncaughtExceptionHandler(true);
+            sentryOptions.setProfilesSampleRate(0.3d); // TODO modify this value later
+            sentryOptions.setEnableUserInteractionTracing(false); // Do not tracker user behavior
+            sentryOptions.setRelease(meta.getVersion());
+            sentryOptions.setTag("os", System.getProperty("os.name"));
+            sentryOptions.setTag("osarch", System.getProperty("os.arch"));
+            sentryOptions.setTag("osversion", System.getProperty("os.version"));
+            sentryOptions.setTag("publisher", meta.getCompileUser() + "(" + meta.getCompileEmail() + ")");
+            sentryOptions.setTag("abbrev", meta.getAbbrev());
+            sentryOptions.addIgnoredExceptionForType(AddressNotFoundException.class);
+            sentryOptions.addIgnoredExceptionForType(JavalinBindException.class);
+            sentryOptions.addIgnoredExceptionForType(OutOfMemoryError.class);
+            sentryOptions.addIgnoredExceptionForType(TransmissionIOException.class);
+            sentryOptions.addIgnoredExceptionForType(DelugeException.class);
+            sentryOptions.addIgnoredExceptionForType(SSLHandshakeException.class);
+            sentryOptions.addIgnoredExceptionForType(HikariPool.PoolInitializationException.class);
+            sentryOptions.addIgnoredExceptionForType(BadPaddingException.class);
+            sentryOptions.addIgnoredExceptionForType(TimeoutException.class);
+            sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
+        });
+    }
+
+    private static void loadPlatform() {
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        if (os.startsWith("win")) {
+            platform = new WindowsPlatform();
+        } else {
+            platform = null;
+        }
+        Sentry.setTag("platform", platform != null ? platform.getClass().getName() : "null");
     }
 
     private static void loadFlagsProperties() {
@@ -217,6 +319,7 @@ public class Main {
         }
 
         dataDirectory = new File(root);
+        cacheDirectory = new File(cacheDirectory, "cache");
         logsDirectory = new File(dataDirectory, "logs");
         configDirectory = new File(dataDirectory, "config");
         pluginDirectory = new File(dataDirectory, "plugins");
@@ -239,7 +342,7 @@ public class Main {
             configuration.load(file);
         } catch (IOException | InvalidConfigurationException e) {
             log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
-            if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+            if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> "nogui".equalsIgnoreCase(arg))) {
                 try {
                     log.error("Bad configuration:  {}", Files.readString(file.toPath()));
                 } catch (IOException ex) {
@@ -296,7 +399,7 @@ public class Main {
                 server.shutdown();
                 guiManager.close();
             } catch (Throwable th) {
-                th.printStackTrace();
+                log.debug("Unable to shutdown gracefully, exiting with error", th);
             }
         });
         shutdownThread.setDaemon(false);
@@ -308,14 +411,14 @@ public class Main {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
-        if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
+        if (Arrays.stream(args).anyMatch(arg -> "swing".equalsIgnoreCase(arg))) {
             guiType = "swing";
-        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swt"))) {
+        } else if (Arrays.stream(args).anyMatch(arg -> "swt".equalsIgnoreCase(arg))) {
             guiType = "swt";
-        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("qt"))) {
+        } else if (Arrays.stream(args).anyMatch(arg -> "qt".equalsIgnoreCase(arg))) {
             guiType = "qt";
         }
-        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> "nogui".equalsIgnoreCase(arg))) {
             guiType = "console";
         }
 
@@ -345,7 +448,9 @@ public class Main {
             var verInfo = info.getOperatingSystem().getVersionInfo();
             buildNumber = verInfo.getBuildNumber();
             codeName = verInfo.getCodeName();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            Sentry.captureException(e);
+            log.debug("Unable to get OS build number and code name", e);
         }
         userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
         return userAgent;
@@ -403,47 +508,6 @@ public class Main {
         return new String(chars);
     }
 
-//    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
-//        if (beanName == null) {
-//            beanName = decapitalize(clazz.getSimpleName());
-//        }
-//        if (applicationContext.containsBean(beanName)) {
-//            return;
-//        } else {
-//            String bn = decapitalize(clazz.getSimpleName());
-//            if (applicationContext.containsBean(bn)) {
-//                return;
-//            }
-//        }
-//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
-//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-//    }
-//
-//    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
-//        if (beanName == null) {
-//            beanName = decapitalize(clazz.getSimpleName());
-//        }
-//        if (applicationContext.containsBean(beanName)) {
-//            return;
-//        } else {
-//            String bn = decapitalize(clazz.getSimpleName());
-//            if (applicationContext.containsBean(bn)) {
-//                return;
-//            }
-//        }
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
-//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
-//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-//    }
-//
-//    public static void unregisterBean(String beanName) {
-//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-//        defaultListableBeanFactory.removeBeanDefinition(beanName);
-//    }
-
     private static void setupScriptEngine() {
         AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
         // ASM 性能优先
@@ -486,11 +550,59 @@ public class Main {
             AviatorEvaluator.addInstanceFunctions(StrUtil.uncapitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
+            Sentry.captureException(e);
         }
         try {
             AviatorEvaluator.addStaticFunctions(StrUtil.capitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
+            Sentry.captureException(e);
+        }
+    }
+
+    // 重启应用程序
+    public static void restartApplication() {
+        try {
+            var javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+            if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")) {
+                javaBin += ".exe";
+            }
+
+            var classpath = System.getProperty("java.class.path");
+            var jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments().toArray(new String[0]);
+
+            // Build the command
+            var command = new java.util.ArrayList<String>();
+            command.add(javaBin);
+
+            for (var arg : jvmArgs) {
+                if (!arg.startsWith("-agentlib:jdwp") && !arg.startsWith("-Xrunjdwp")) {
+                    command.add(arg);
+                }
+            }
+
+            command.add("-cp");
+            command.add(classpath);
+            command.add(Main.class.getName());
+
+            // Add original startup arguments
+            if (startupArgs != null) {
+                command.addAll(Arrays.asList(startupArgs));
+            }
+
+            log.info("Restarting application with command: {}", String.join(" ", command));
+
+            // Start the new process
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            processBuilder.inheritIO();
+            processBuilder.directory(new File(System.getProperty("user.dir")));
+            processBuilder.start();
+
+            // Exit the current process
+            System.exit(0);
+        } catch (Exception e) {
+            log.error("Failed to restart application", e);
+            throw new RuntimeException("Failed to restart application", e);
         }
     }
 

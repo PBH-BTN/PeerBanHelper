@@ -14,6 +14,7 @@ import java.text.StringCharacterIterator;
 public final class MsgUtil {
     private static final DecimalFormat df = new DecimalFormat("0.00%");
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat stf = new SimpleDateFormat("HH:mm:ss");
 
     public static String escapeSql(String sql){
         if(sql == null) return null;
@@ -117,6 +118,10 @@ public final class MsgUtil {
 
     public static SimpleDateFormat getDateFormatter() {
         return sdf;
+    }
+
+    public static SimpleDateFormat getTimeFormatter() {
+        return stf;
     }
 
     /**

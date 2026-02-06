@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.MIDIPlayer;
+import io.sentry.Sentry;
 import lombok.Cleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,9 +107,9 @@ public class AboutWindow {
                     handleSpeedCommand(line);
                 } else if (line.startsWith("[f:") && line.contains(",b:")) {
                     handleColorCommand(line);
-                } else if (line.equals("[clear]")) {
+                } else if ("[clear]".equals(line)) {
                     contentItems.add(new ClearCommand());
-                } else if (line.equals("[window_maximized]")) { // 新增命令检测
+                } else if ("[window_maximized]".equals(line)) { // 新增命令检测
                     contentItems.add(new WindowMaximizedCommand());
                 } else {
                     for (Map.Entry<String, String> entry : replaces.entrySet()) {
@@ -119,6 +120,7 @@ public class AboutWindow {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Sentry.captureException(e);
         }
     }
 
@@ -170,6 +172,7 @@ public class AboutWindow {
                 }
             } catch (BadLocationException ex) {
                 ex.printStackTrace();
+                Sentry.captureException(ex);
             }
         });
 
@@ -230,6 +233,7 @@ public class AboutWindow {
             textPane.setCaretPosition(doc.getLength());
         } catch (BadLocationException ex) {
             ex.printStackTrace();
+            Sentry.captureException(ex);
         } finally {
             cursorLock = false;
         }
@@ -252,6 +256,7 @@ public class AboutWindow {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            Sentry.captureException(ex);
         }
     }
 
@@ -286,7 +291,7 @@ public class AboutWindow {
     private static class WindowMaximizedCommand {
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new AboutWindow(Map.of(
                 "{version}", "1.0.0",
                 "{username}", System.getProperty("user.name")

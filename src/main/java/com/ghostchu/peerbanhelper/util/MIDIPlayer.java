@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sound.midi.MidiSystem;
@@ -59,6 +60,7 @@ public final class MIDIPlayer implements AutoCloseable {
                     midip.start();
             } catch (Exception e) {
                 log.error("Failed to play MIDI sequence", e);
+                Sentry.captureException(e);
             }
         }
     }

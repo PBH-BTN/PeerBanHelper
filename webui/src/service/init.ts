@@ -1,4 +1,5 @@
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
+import type { DatabaseConfig } from '@/api/model/config'
 import type { CreateDownloadRequest, ScanDownloaderInfo } from '@/api/model/downloader'
 import type { InitReq } from '@/api/model/init'
 import { useEndpointStore } from '@/stores/endpoint'
@@ -20,6 +21,22 @@ export async function TestDownloaderConfig(
 ): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()
   const url = new URL(urlJoin(endpointStore.endpoint, `/api/oobe/testDownloader`), location.href)
+  return fetch(url, { method: 'POST', headers: getCommonHeader(), body: JSON.stringify(req) }).then(
+    (res) => {
+      endpointStore.assertResponseLogin(res)
+      return res.json()
+    }
+  )
+}
+
+export async function TestDatabaseConnection(
+  req: DatabaseConfig
+): Promise<CommonResponseWithoutData> {
+  const endpointStore = useEndpointStore()
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `/api/oobe/testDatabaseConfig`),
+    location.href
+  )
   return fetch(url, { method: 'POST', headers: getCommonHeader(), body: JSON.stringify(req) }).then(
     (res) => {
       endpointStore.assertResponseLogin(res)

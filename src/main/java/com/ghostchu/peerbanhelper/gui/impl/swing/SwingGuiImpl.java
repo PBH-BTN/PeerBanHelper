@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.event.gui.PBHGuiElementPeriodUpdateEvent;
 import com.ghostchu.peerbanhelper.event.gui.PBHLookAndFeelNeedReloadEvent;
-import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
@@ -17,14 +16,13 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.LogsTab;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.UnsupportedPlatformTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.SwingProgressDialog;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.jthemedetecor.OsThemeDetector;
+import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -56,7 +54,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     public SwingGuiImpl(String[] args) {
         super(args);
-        this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
+        this.silentStart = Arrays.stream(args).anyMatch(s -> "silent".equalsIgnoreCase(s));
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("apple.awt.application.name", "PeerBanHelper");
         System.setProperty("apple.awt.application.appearance", "system");
@@ -147,7 +145,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             OsThemeDetector detector = OsThemeDetector.getDetector();
             detector.registerListener(this::updateTheme);
             updateTheme(detector.isDark());
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Sentry.captureException(e);
         }
         createMainWindow();
     }
@@ -180,18 +179,6 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         //macos?
         if (ExternalSwitch.parseBoolean("pbh.gui.macos-theme", true) && System.getProperty("os.name").contains("Mac")) {
             pbhFlatLafTheme = new MacOSLafTheme();
-        }
-        //PBHPlus?
-        if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", false) && ExchangeMap.PBH_PLUS_ACTIVATED) {
-            pbhFlatLafTheme = new PBHPlusTheme();
-        }
-//        // Snapshot?
-//        if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
-//            pbhFlatLafTheme = new SnapshotTheme();
-//        }
-        // Unsupported platform?
-        if (ExchangeMap.UNSUPPORTED_PLATFORM && ExternalSwitch.parseBoolean("pbh.gui.useIncompatiblePlatformTheme", false)) {
-            pbhFlatLafTheme = new UnsupportedPlatformTheme();
         }
         // Customized?
         if (ExternalSwitch.parse("pbh.gui.theme-light") != null && ExternalSwitch.parse("pbh.gui.theme-dark") != null) {
@@ -276,7 +263,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 desktop.browse(uri);
                 return true;
             } catch (Exception e) {
-                e.printStackTrace();
+                log.debug("Unable to open URI: {}, error: {}", uri, e.getMessage());
+                Sentry.captureException(e);
             }
         }
         return false;
@@ -334,6 +322,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             UIManager.setLookAndFeel(clazz.getName());
         } catch (Exception ex) {
             log.info("Failed to setup UI theme", ex);
+            Sentry.captureException(ex);
         }
         // FlatLaf.updateUI();
     }

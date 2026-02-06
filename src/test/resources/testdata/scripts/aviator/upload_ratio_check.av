@@ -1,0 +1,28 @@
+## @NAME 上传比例检查
+## @AUTHOR Test
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+## 检查上传/下载比例，识别异常的吸血行为
+## 如果下载量很大但上传量很小，可能是吸血客户端
+
+if(downloaded == nil || downloaded == 0) {
+    return false;
+}
+
+let ratio = 0.0;
+if(uploaded != nil && uploaded > 0) {
+    ratio = double(uploaded) / double(downloaded);
+}
+
+## 阈值从环境变量获取
+let minRatio = minRatioThreshold;
+let minDownloaded = minDownloadedThreshold;
+
+## 如果下载量超过阈值且比例过低，则封禁
+if(downloaded > minDownloaded && ratio < minRatio) {
+    return '吸血检测: 下载=' + downloaded + ' 上传=' + uploaded + ' 比例=' + ratio;
+}
+
+return false;

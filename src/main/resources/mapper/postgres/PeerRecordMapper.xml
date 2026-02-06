@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PeerRecordMapper">
+
+    <resultMap id="queryAddressTotalTraffic" type="com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic">
+        <result property="totalUploaded" column="uploaded_total"/>
+        <result property="totalDownloaded" column="downloaded_total"/>
+    </resultMap>
+
+    <select id="queryAddressTotalTraffic" resultMap="queryAddressTotalTraffic">
+        SELECT SUM(uploaded) as uploaded_total, SUM(downloaded) as downloaded_total
+        FROM peer_records
+        WHERE address = #{address}
+        GROUP BY address
+    </select>
+
+    <resultMap id="queryAddressTimeSeen" type="com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen">
+        <result property="firstTimeSeen" column="firstTimeSeen"/>
+        <result property="lastTimeSeen" column="lastTimeSeen"/>
+    </resultMap>
+
+    <select id="queryAddressTimeSeen" resultMap="queryAddressTimeSeen">
+        SELECT MIN(first_time_seen) as firstTimeSeen, MAX(last_time_seen) as lastTimeSeen
+        FROM peer_records
+        WHERE address = #{address}
+        GROUP BY address
+    </select>
+
+    <select id="queryAccessHistoryByIp" resultType="com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity">
+        SELECT * FROM peer_records
+        WHERE address = #{ip}
+        ORDER BY ${orderBySql}
+    </select>
+
+    <resultMap id="queryClientAnalyse" type="com.ghostchu.peerbanhelper.databasent.dto.ClientAnalyseResult">
+        <result property="peerId" column="peerId"/>
+        <result property="clientName" column="clientName"/>
+        <result property="uploaded" column="uploaded"/>
+        <result property="downloaded" column="downloaded"/>
+        <result property="count" column="ct"/>
+    </resultMap>
+
+    <select id="queryClientAnalyse" resultMap="queryClientAnalyse">
+        SELECT peer_id, client_name, SUM(uploaded) AS uploaded, SUM(downloaded) AS downloaded, COUNT(*) AS ct
+        FROM peer_records
+        WHERE first_time_seen >= #{startAt} AND last_time_seen &lt;= #{endAt} AND uploaded > 0 AND downloaded > 0
+        <if test="downloader != null">
+            AND downloader = #{downloader}
+        </if>
+        GROUP BY peer_id, client_name
+        ORDER BY ${orderBySql}
+    </select>
+
+    <!-- 批量统计Torrent的访问记录数量 -->
+    <select id="countByTorrentIds" resultType="com.ghostchu.peerbanhelper.databasent.dto.TorrentCount">
+        SELECT
+            torrent_id AS torrentId,
+            COUNT(*) AS count
+        FROM peer_records
+        WHERE torrent_id IN
+        <foreach collection="torrentIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY torrent_id
+    </select>
+
+    <select id="getDistinctIps" resultType="java.lang.String">
+        SELECT DISTINCT address
+        FROM peer_records
+        WHERE last_time_seen BETWEEN #{start} AND #{end}
+        <if test="downloader != null and downloader != ''">
+            AND downloader = #{downloader}
+        </if>
+    </select>
+</mapper>

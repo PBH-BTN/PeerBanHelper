@@ -1,25 +1,38 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.postgres.PostgresDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.driver.sqlite.SQLiteDatabaseDriver;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DatabaseNtConfigDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.DownloaderDiscovery;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -56,7 +69,9 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         webContainer.javalin()
                 .post("/api/oobe/init", this::handleOOBERequest, Role.ANYONE)
                 .post("/api/oobe/scanDownloader", this::handleOOBEScanDownloader, Role.ANYONE)
-                .post("/api/oobe/testDownloader", ctx -> validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject()), Role.ANYONE); // 指定 ANYONE，否则会被鉴权代码拉取鉴权
+                .post("/api/oobe/testDownloader", ctx -> validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject()), Role.ANYONE) // 指定 ANYONE，否则会被鉴权代码拉取鉴权
+                .post("/api/oobe/testDatabaseConfig", this::handleDatabaseNtTest, Role.ANYONE);
+
     }
 
     private void handleOOBEScanDownloader(@NotNull Context ctx) {
@@ -65,7 +80,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return;
         }
-        var downloaders = downloaderDiscovery.scan().join();
+        var downloaders = downloaderDiscovery.scan(List.of()).join();
         ctx.json(new StdResp(true, null, downloaders));
     }
 
@@ -113,6 +128,122 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             if (btn.has("app_secret") && !btn.get("app_secret").isJsonNull())
                 conf.set("btn.app-secret", btn.get("app_secret").getAsString());
             conf.save(Main.getMainConfigFile());
+        }
+        if (parser.has("database")) {
+            JsonObject database = parser.get("database").getAsJsonObject();
+            boolean needRestart = false;
+            String type = null;
+            if (database.has("type")) {
+                type = database.get("type").getAsString();
+                conf.set("database.type", type);
+                if (!"sqlite".equals(type)) {
+                    needRestart = true;
+                }
+            }
+            if ("mysql".equals(type) || "postgresql".equals(type)) {
+                if (database.has("host")) {
+                    conf.set("database.host", database.get("host").getAsString());
+                }
+                if (database.has("port")) {
+                    conf.set("database.port", database.get("port").getAsInt());
+                }
+                if (database.has("database")) {
+                    conf.set("database.database", database.get("database").getAsString());
+                }
+                if (database.has("username")) {
+                    conf.set("database.username", database.get("username").getAsString());
+                }
+                if (database.has("password")) {
+                    conf.set("database.password", database.get("password").getAsString());
+                }
+            }
+            conf.save(Main.getMainConfigFile());
+            if (needRestart) {
+                handleRestart(ctx);
+            }
+        }
+        handleReloading(ctx);
+    }
+
+    private void handleReloading(Context context) {
+        Main.setupConfiguration();
+        var result = Main.getReloadManager().reload();
+        List<ReloadEntryDTO> entryList = new ArrayList<>();
+        result.forEach((container, r) -> {
+            String entryName;
+            if (container.getReloadable() == null) {
+                entryName = container.getReloadableMethod().getDeclaringClass().getName() + "#" + container.getReloadableMethod().getName();
+            } else {
+                Reloadable reloadable = container.getReloadable().get();
+                if (reloadable == null) {
+                    entryName = "<invalid>";
+                } else {
+                    entryName = reloadable.getClass().getName();
+                }
+            }
+            entryList.add(new ReloadEntryDTO(entryName, r.getStatus().name()));
+        });
+
+
+        boolean success = true;
+        TranslationComponent message = new TranslationComponent(Lang.RELOAD_RESULT_SUCCESS);
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.SCHEDULED)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_SCHEDULED);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.REQUIRE_RESTART)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_REQUIRE_RESTART);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.EXCEPTION)) {
+            success = false;
+            message = new TranslationComponent(Lang.RELOAD_RESULT_FAILED);
+        }
+
+        context.json(new StdResp(success, tl(locale(context), message), entryList));
+    }
+
+    private void handleRestart(Context context) {
+        context.json(new StdResp(false, tl(locale(context), Lang.RELOAD_RESULT_REQUIRE_RESTART), null));
+        if (false) { // delay to v10.0
+            // Schedule restart in a separate thread to allow the response to be sent first
+            Thread restartThread = new Thread(() -> {
+                try {
+                    // Give some time for the response to be sent
+                    Thread.sleep(1000);
+                    Main.restartApplication();
+                } catch (Exception e) {
+                    log.error("Failed to restart application", e);
+                }
+            }, "RestartThread");
+            restartThread.setDaemon(false);
+            restartThread.start();
+        }
+    }
+
+    private void handleDatabaseNtTest(@NotNull Context context) {
+        DatabaseNtConfigDTO dto = context.bodyAsClass(DatabaseNtConfigDTO.class);
+        ConfigurationSection section = new MemoryConfiguration();
+        section.set("type", dto.getType());
+        section.set("host", dto.getHost());
+        section.set("port", dto.getPort());
+        section.set("username", dto.getUsername());
+        section.set("password", dto.getPassword());
+        section.set("database", dto.getDatabase());
+        try {
+            var driver = switch (dto.getType()) {
+                case "h2" -> new H2DatabaseDriver(section);
+                case "mysql" -> new MySQLDatabaseDriver(section);
+                case "postgresql" -> new PostgresDatabaseDriver(section);
+                default -> new SQLiteDatabaseDriver(section);
+            };
+            try (var stat = driver.getDataSource().getConnection().createStatement()) {
+                boolean success = stat.execute("SELECT 1");
+                context.json(new StdResp(true, null, success));
+            } finally {
+                driver.close();
+            }
+        } catch (Exception e) {
+            context.status(HttpStatus.BAD_REQUEST);
+            context.json(new StdResp(false, e.getClass().getName() + ": " + e.getMessage(), null));
         }
     }
 

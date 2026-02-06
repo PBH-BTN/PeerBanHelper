@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
@@ -47,7 +48,6 @@ public final class Transmission extends AbstractDownloader {
         this.config = config;
         this.client = new TrClient(httpUtil, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl());
         this.blocklistUrl = blocklistUrl;
-        log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
 
     @Override
