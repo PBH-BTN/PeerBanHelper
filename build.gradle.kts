@@ -5,7 +5,7 @@ plugins {
     id("com.install4j.gradle") version "12.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.3.0"
+    kotlin("plugin.lombok") version "2.3.10"
     id("io.freefair.lombok") version "9.2.0"
 }
 
