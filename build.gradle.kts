@@ -154,7 +154,7 @@ dependencies {
     implementation("org.bitlet:weupnp:0.1.4")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.9.Final") {
+    implementation("io.netty:netty-all:4.2.10.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")
