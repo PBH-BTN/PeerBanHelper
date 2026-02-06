@@ -100,7 +100,6 @@ public final class DNSLookupImpl implements Reloadable, DNSLookup {
                 return Optional.empty();
             } catch (TextParseException e) {
                 log.debug("PTR lookup failed for {}: {}", query, e.getMessage());
-                Sentry.captureException(e);
                 return Optional.empty();
             }
         }, Executors.newVirtualThreadPerTaskExecutor());

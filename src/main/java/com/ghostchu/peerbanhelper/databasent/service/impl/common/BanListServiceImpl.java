@@ -33,7 +33,6 @@ public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity
                     JsonUtil.tiny().fromJson(e.getMetadata(), BanMetadata.class)));
         } catch (Exception e) { // 可能因为 BanMetadata 有变动这里的数据会反序列化失败
             log.error("Unable to read stored banlist, skipping...", e);
-            Sentry.captureException(e);
         }
         return map;
     }
