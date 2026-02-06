@@ -1,15 +1,22 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
-import io.sentry.Sentry;
-import io.sentry.SentryEvent;
-import io.sentry.SentryLevel;
+import io.sentry.*;
 import io.sentry.protocol.Message;
+import io.sentry.protocol.SentryException;
+import io.sentry.protocol.SentryStackTrace;
+import io.sentry.protocol.SentryThread;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -85,12 +92,13 @@ public final class WatchDog implements AutoCloseable {
         Message message = new Message();
         message.setMessage("Detected dead-lock or long-time running thread, watchdog triggered.");
         SentryEvent event = new SentryEvent();
-        event.setMessage(message);
         event.setLevel(SentryLevel.WARNING);
+        event.setMessage(message);
         event.setTag("watchdog.name", name);
         event.setTag("watchdog.timeout", String.valueOf(timeout));
         event.setTag("watchdog.last_operation", lastOperation);
         event.setTag("watchdog.in_downloader_io", String.valueOf(isDownloaderIO));
+        event.setThreads(SentryUtils.getSentryThreads());
         Sentry.captureEvent(event);
         if (hungry != null) {
             hungry.run();
