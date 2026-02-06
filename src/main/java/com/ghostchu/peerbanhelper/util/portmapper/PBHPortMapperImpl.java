@@ -45,7 +45,6 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                                 gatewayDevice.deletePortMapping(mappedPort.getExternalPort(), mappedPort.getProtocol().name());
                             } catch (IOException | SAXException e) {
                                 log.debug("Unable to delete port mapping on shutdown", e);
-                                Sentry.captureException(e);
                             }
                         });
                     }
@@ -86,7 +85,6 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             } catch (IOException | SAXException | ParserConfigurationException e) {
                 log.error(tlUI(Lang.PORT_MAPPER_DISCOVER_IGD_FAILED), e);
                 log.error("Unable to discover UPnP gateways", e);
-                Sentry.captureException(e);
             }
         }
     }

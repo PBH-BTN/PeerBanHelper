@@ -284,7 +284,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                     result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
                                 }
                             } catch (IOException e) {
-                                Sentry.captureException(e);
                                 throw new RuntimeException(e);
                             } finally {
                                 moduleMatchCache.invalidateAll();
@@ -314,7 +313,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 try (Response response = client.newCall(request).execute()) {
                     return new DataUpdateResultDTO(response.code(), null, response.body().bytes());
                 } catch (Exception e) {
-                    Sentry.captureException(e);
                     throw new RuntimeException(e);
                 }
             }
@@ -364,7 +362,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
-                Sentry.captureException(e);
             } finally {
                 sj = new StringJoiner("\n");
             }

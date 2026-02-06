@@ -140,7 +140,6 @@ public final class JavalinWebContainer implements Reloadable {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
                     log.error("500 Internal Server Error", e);
-                    Sentry.captureException(e);
                 })
                 .beforeMatched(ctx -> {
                     if (!securityCheck(ctx)) {
