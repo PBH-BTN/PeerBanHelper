@@ -79,8 +79,9 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
             stmt.executeUpdate("PRAGMA synchronous = NORMAL");
             stmt.executeUpdate("PRAGMA journal_mode = WAL");
-            //stmt.executeUpdate("PRAGMA mmap_size = 0");
-
+            stmt.executeUpdate("PRAGMA mmap_size = 134217728");
+            stmt.executeUpdate("PRAGMA transaction_mode = IMMEDIATE");
+            stmt.executeUpdate("PRAGMA journal_size_limit = 67108864");
             //long softHeapLimit = ExternalSwitch.parseLong("pbh.database.sqliteSoftHeapLimitBytes", 33554432L);
             //stmt.executeUpdate("PRAGMA soft_heap_limit = " + softHeapLimit);
 
