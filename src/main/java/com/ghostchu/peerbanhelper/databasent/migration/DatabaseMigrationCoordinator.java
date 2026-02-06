@@ -215,6 +215,8 @@ public class DatabaseMigrationCoordinator {
                                 sqliteDbFile.getName() + ".zip");
 
         log.info("Archiving SQLite database to: {}", zipFile.getAbsolutePath());
+        log.info(tlUI(Lang.DBNT_MIGRATOR_ARCHIVING_LEGACY_TO, zipFile.getAbsolutePath()));
+
 
         try (FileOutputStream fos = new FileOutputStream(zipFile);
              ZipOutputStream zos = new ZipOutputStream(fos);
@@ -225,18 +227,26 @@ public class DatabaseMigrationCoordinator {
 
             byte[] buffer = new byte[8192];
             int length;
+            long totalBytes = sqliteDbFile.length();
+            long readBytes = 0;
+            long lastLogTime = System.currentTimeMillis();
+
             while ((length = fis.read(buffer)) > 0) {
                 zos.write(buffer, 0, length);
+                readBytes += length;
+                if (System.currentTimeMillis() - lastLogTime > 2000) {
+                    lastLogTime = System.currentTimeMillis();
+                    log.info(tlUI(Lang.DBNT_MIGRATOR_ARCHIVING_LEGACY_PROGRESS, (int) ((double) readBytes / totalBytes * 100)));
+                }
             }
 
             zos.closeEntry();
-            log.info("SQLite database archived successfully to: {}", zipFile.getAbsolutePath());
 
             // Delete the original SQLite file
             if (sqliteDbFile.delete()) {
-                log.info("Deleted original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
+                log.debug("Deleted original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
             } else {
-                log.warn("Failed to delete original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
+                log.debug("Failed to delete original SQLite database file: {}", sqliteDbFile.getAbsolutePath());
                 sqliteDbFile.deleteOnExit();
             }
 

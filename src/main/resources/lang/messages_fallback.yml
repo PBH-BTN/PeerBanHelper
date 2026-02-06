@@ -860,3 +860,6 @@ IPDB_DOWNLOAD_MMDB_FAILED_DESCRIPTION: "从远程服务器下载失败: {}"
 EARLY_STARTING_TITLE: "请等待 PeerBanHelper 启动"
 EARLY_STARTING_PAGE_TITLE: "PeerBanHelper 正在启动..."
 EARLY_STARTING_PAGE_DESCRIPTION: "正在准备必须的数据和组件，您可以在下方查看当前运行日志。一旦启动完成，页面将自动跳转至 WebUI..."
+
+DBNT_MIGRATOR_ARCHIVING_LEGACY_TO: "[数据升级] 请稍等，正在归档旧版数据库文件至 {}..."
+DBNT_MIGRATOR_ARCHIVING_LEGACY_PROGRESS: "[数据升级] 请稍等，正在归档旧版数据库文件: {}"
