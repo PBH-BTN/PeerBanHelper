@@ -124,8 +124,8 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
 
 
         ifNets.forEach(ip -> {
-            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, true, result, anySuccess), Executors.newVirtualThreadPerTaskExecutor()));
-            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, false, result, anySuccess), Executors.newVirtualThreadPerTaskExecutor()));
+            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, true, result, anySuccess)));
+            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, false, result, anySuccess)));
         });
         lastResult = "Waiting for all heartbeat requests to complete";
         try {

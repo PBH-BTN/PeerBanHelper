@@ -317,7 +317,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 }
             }
             throw new IllegalArgumentException("Invalid URL");
-        }, Executors.newVirtualThreadPerTaskExecutor());
+        });
     }
 
 
