@@ -25,8 +25,8 @@ jobs:
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
           mkdir -p jbr
-          wget https://cache-redirector.jetbrains.com/intellij-jbr/jbr-25.0.1-windows-x64-b285.56.zip -O jbr/jbr-25.0.1-windows-x64-b285.56.zip
-          (cd jbr && unzip jbr-25.0.1-windows-x64-b285.56.zip && mv jbr-25.0.1-windows-x64-b285.56 jre)
+          wget https://cache-redirector.jetbrains.com/intellij-jbr/jbr-25.0.2-windows-x64-b300.57.zip -O jbr/jbr-25.0.2-windows-x64-b300.57.zip
+          (cd jbr && unzip jbr-25.0.2-windows-x64-b300.57.zip && mv jbr-25.0.2-windows-x64-b300.57.zip jre)
           mv jbr/jre pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)
         # 上面那个文件名需要符合收集条件
