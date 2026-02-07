@@ -15,44 +15,38 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity> implements TorrentService {
-    private final TransactionTemplate torrentCreateNoTransactionTemplate;
     private final Cache<@NotNull String, @NotNull TorrentEntity> instanceCache = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .maximumSize(1000)
             .softValues()
             .build();
 
-
-    public TorrentServiceImpl(PlatformTransactionManager transactionManager) {
-        torrentCreateNoTransactionTemplate = new TransactionTemplate(transactionManager);
-        torrentCreateNoTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-    }
-
     @Override
     public synchronized @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
         TorrentEntity existing = queryByInfoHash(torrent.getInfoHash());
         if (existing != null) {
-            if (existing.getSize() <= 0 || existing.getPrivateTorrent() == null) {
-                existing.setSize(torrent.getSize());
-                existing.setPrivateTorrent(torrent.getPrivateTorrent());
-                baseMapper.insertOrUpdate(existing);
-                instanceCache.put(existing.getInfoHash(), existing);
+            // If existing record is complete, or invalidation won't help (incoming data has no value), return existing
+            // This restores the cache hit optimization for the majority of calls (torrent exists and is valid)
+            boolean existingIsComplete = (existing.getSize() != null && existing.getSize() > 0) && existing.getPrivateTorrent() != null;
+            boolean incomingIsPoor = (torrent.getSize() == null || torrent.getSize() <= 0) && torrent.getPrivateTorrent() == null;
+            if (existingIsComplete || incomingIsPoor) {
+                return existing;
             }
-            return existing;
-        } else {
-            baseMapper.insertOrUpdate(torrent);
-            instanceCache.put(torrent.getInfoHash(), torrent);
-            return torrent;
         }
+
+        baseMapper.upsert(torrent);
+        instanceCache.invalidate(torrent.getInfoHash());
+        TorrentEntity torrentEntity = queryByInfoHash(torrent.getInfoHash());
+        if (torrentEntity == null) {
+            throw new IllegalStateException("Failed to retrieve torrent after upsert: " + torrent.getInfoHash());
+        }
+        return torrentEntity;
     }
 
     @Override
