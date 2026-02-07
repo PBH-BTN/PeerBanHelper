@@ -101,7 +101,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
             if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "ip_allowlist");
             try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
                 if (response.code() == 204) {
-                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ruleVersion));
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ipMatcher.size()));
                     return;
                 }
                 String responseBody = response.body().string();
