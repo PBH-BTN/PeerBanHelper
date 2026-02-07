@@ -837,7 +837,7 @@ DBNT_FLYWAY_ERROR: "[数据库引擎] Flyway 初始化数据库架构失败，�
 
 MODULE_PCB_BGTASK_DELETING_EXPIRED_DATA: "[进度反作弊] 删除不需要的过期数据"
 MODULE_PCB_DELETING_EXPIRED_DATA: "[进度反作弊] 正在删除不需要的过期数据，请稍等..."
-MDOULE_PCB_DELETED_EXPIRED_DATA: "[进度反作弊] 已删除 {} 条不需要的过期数据"
+MODULE_PCB_DELETED_EXPIRED_DATA: "[进度反作弊] 已删除 {} 条不需要的过期数据"
 MODULE_PEER_RECORDING_DELETING_EXPIRED_DATA: "[Peer 跟踪记录服务] 删除不需要的过期数据"
 MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA: "[Peer 会话分析服务] 删除不需要的过期数据"
 MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA_LOG: "[Peer 会话分析服务] 正在删除不需要的过期数据，请稍等..."
