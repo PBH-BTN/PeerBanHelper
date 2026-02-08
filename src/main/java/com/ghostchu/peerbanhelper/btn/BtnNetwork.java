@@ -251,7 +251,7 @@ public final class BtnNetwork implements Reloadable {
                 configSuccess.set(true);
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
             } catch (Throwable e) {
-                log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage()), e);
+                log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage(), 600), e);
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
                 configSuccess.set(false);
                 nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
