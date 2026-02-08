@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.net.InetAddresses;
@@ -34,6 +35,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     private final boolean multiIf;
     private final boolean powCaptcha;
     private String lastResult = "No information";
+    private final ExecutorService executorService = Executors.newWorkStealingPool(16);
 
     public BtnAbilityHeartBeat(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
@@ -124,8 +126,8 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
 
 
         ifNets.forEach(ip -> {
-            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, true, result, anySuccess)));
-            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, false, result, anySuccess)));
+            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, true, result, anySuccess), Executors.newVirtualThreadPerTaskExecutor()));
+            futures.add(CompletableFuture.runAsync(() -> requestHeartbeat(ip, false, result, anySuccess), Executors.newVirtualThreadPerTaskExecutor()));
         });
         lastResult = "Waiting for all heartbeat requests to complete";
         try {
