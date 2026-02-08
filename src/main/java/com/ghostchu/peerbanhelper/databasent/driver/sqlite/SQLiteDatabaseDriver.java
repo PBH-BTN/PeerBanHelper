@@ -56,7 +56,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         // SQLite-specific connection properties
         config.addDataSourceProperty("journal_mode", "WAL");
         config.addDataSourceProperty("synchronous", "NORMAL");
-        config.addDataSourceProperty("busy_timeout", "30000");
+        config.addDataSourceProperty("busy_timeout", "60000");
 
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-SQLitePool").factory());
 
