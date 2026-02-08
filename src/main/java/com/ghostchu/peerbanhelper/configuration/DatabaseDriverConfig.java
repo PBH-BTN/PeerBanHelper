@@ -100,7 +100,6 @@ public class DatabaseDriverConfig {
     @Bean
     public SqlSessionFactory sqlSessionFactory(
             MybatisPlusInterceptor mpInterceptor,
-            MultiDbExplainInterceptor explainInterceptor, // 引入自定义拦截器
             SentryMyBatisInterceptor sentryMyBatisInterceptor,
             DatabaseDriver driver) throws Exception {
 
