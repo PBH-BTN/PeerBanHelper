@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface PeerRecordMapper extends BaseMapper<PeerRecordEntity> {
-    @Select("SELECT COUNT(DISTINCT address) FROM peer_records WHERE downloader = #{downloader} AND lastTimeSeen &gt;= #{startAt} AND firstTimeSeen &lt;= #{endAt}")
+    @Select("SELECT COUNT(DISTINCT address) FROM peer_records WHERE downloader = #{downloader} AND lastTimeSeen >= #{startAt} AND firstTimeSeen <= #{endAt}")
     long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt);
 
     IPAddressTotalTraffic queryAddressTotalTraffic(InetAddress address);
