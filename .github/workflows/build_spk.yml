@@ -14,6 +14,28 @@ jobs:
       - uses: actions/checkout@v6
       - id: java_info
         uses: YunaBraska/java-info-action@main
+      - name: Install dependencies
+        run: sudo apt-get install cifs-utils python3 python3-pip
+      - name: Read synopkg version
+        id: pkgscripts_info
+        run: |
+          PKGSCRIPTS_SHA=$(git ls-remote https://github.com/SynologyOpenSource/pkgscripts-ng.git refs/heads/DSM7.2 | cut -f1)
+          echo "pkgscripts_sha=$PKGSCRIPTS_SHA" >> $GITHUB_OUTPUT
+      - name: Restore synopkg cache
+        id: cache-synopkg-restore
+        uses: actions/cache/restore@v5
+        with:
+          path: /toolkit
+          key: synopkg-DSM7.2-${{ steps.pkgscripts_info.outputs.pkgscripts_sha }}
+      - name: Run deploy script
+        if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
+        run: sudo bash pkg/synopkg/deploy-env.sh
+      - name: Save synopkg cache
+        id: cache-synopkg-save
+        uses: actions/cache/save@v5
+        with:
+          path: /toolkit
+          key: ${{ steps.cache-synopkg-restore.outputs.cache-primary-key }}
       - name: Process version for SPK
         id: process_version
         run: |
