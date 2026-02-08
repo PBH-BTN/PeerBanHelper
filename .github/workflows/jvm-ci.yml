@@ -23,7 +23,7 @@ jobs:
     secrets: inherit
   Build_Portable:
     name: Generate Portable Version
-    needs: Build_Executable
+    needs: Build_Installers
     uses: ./.github/workflows/build_portable.yml
 #  Build_SPK:
 #    name: Generate Synology Package
