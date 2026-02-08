@@ -71,6 +71,11 @@ public final class JavalinWebContainer implements Reloadable {
         }
     };
 
+    public JavalinWebContainer() {
+        reloadConfig();
+        Main.getReloadManager().register(this);
+    }
+
     public void setupJavalin() {
         this.javalin = Javalin.create(c -> {
                     c.http.gzipOnlyCompression();
@@ -245,7 +250,7 @@ public final class JavalinWebContainer implements Reloadable {
     }
 
     private void reloadConfig() {
-        this.webuiAnalyticsEnabled = Main.getMainConfig().getBoolean("privacy.webui-analytics", true);
+        this.webuiAnalyticsEnabled = Main.getMainConfig().getBoolean("privacy.analytics", true);
     }
 
     @Override
