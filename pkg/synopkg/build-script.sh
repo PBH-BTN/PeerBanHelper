@@ -1,9 +1,10 @@
 #!/bin/bash
 
 cd /toolkit/pkgscripts-ng/
+./EnvDeploy -v 7.2 -p apollolake -D
 mkdir -p /toolkit/source
 
-cp -av pkg/synopkg/* /toolkit/source/
+cp -av /tmp/pbh-packages/* /toolkit/source/
 sed -i "s#@IMAGE@#${IMAGE}#g" /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
 #cat /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
 # Use SPK_VERSION for Synology package version (numeric format like 9.2.3-1234)
