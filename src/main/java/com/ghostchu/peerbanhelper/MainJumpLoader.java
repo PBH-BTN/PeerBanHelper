@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public final class MainJumpLoader {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         // Do something before real Main class
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {
             setupCharsets();
