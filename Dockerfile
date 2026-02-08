@@ -19,7 +19,6 @@ EXPOSE 9898
 ENV TZ=UTC
 WORKDIR /app
 VOLUME /tmp
-RUN apk add --no-cache eudev udev-init-scripts
 COPY --from=build build/build/libraries /app/libraries
 COPY --from=build build/build/libs/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH="/usr/lib/jvm/liberica25-container-jre/bin:${PATH}"
