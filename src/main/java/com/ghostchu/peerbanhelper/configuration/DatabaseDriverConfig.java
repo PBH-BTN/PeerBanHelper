@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
-import com.ghostchu.peerbanhelper.databasent.MultiDbExplainInterceptor;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicIPAddressTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.common.OffsetDateTimeTypeHandlerForwarder;
