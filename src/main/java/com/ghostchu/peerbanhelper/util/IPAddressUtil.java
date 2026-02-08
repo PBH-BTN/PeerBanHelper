@@ -42,7 +42,6 @@ public final class IPAddressUtil {
             return ipAddress;
         } catch (AddressStringException e) {
             log.error("Unable to get ipaddress from ip {}", ip, e);
-            Sentry.captureException(e);
             return INVALID_ADDRESS_MISSINGNO;
         } catch (Exception e) {
             Sentry.captureException(e);
