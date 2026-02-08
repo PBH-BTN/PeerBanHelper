@@ -211,6 +211,7 @@ public class Main {
             sentryOptions.setServerName(mainConfig.getString("installation-id"));
             sentryOptions.setEnvironment(meta.isSnapshotOrBeta() ? "development" : "production");
             sentryOptions.setSendDefaultPii(false); // Do not track user information
+            sentryOptions.setEnableDeduplication(true);
             sentryOptions.setAttachThreads(true);
             sentryOptions.setPrintUncaughtStackTrace(true);
             sentryOptions.setEnableUncaughtExceptionHandler(true);
