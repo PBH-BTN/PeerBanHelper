@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -173,7 +174,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private List<LegacyBtnPeerHistory> generatePing(long lastSubmitAt) {
         Pageable pageable = new Pageable(0, 5000);
         return peerRecordService.getPendingSubmitPeerRecords(pageable,
-                        OffsetDateTime.from(Instant.ofEpochMilli(lastSubmitAt))).getRecords().stream()
+                        TimeUtil.fromMillis(lastSubmitAt)).getRecords().stream()
                 .map(e -> {
                     TorrentEntityDTO dto = TorrentEntityDTO.from(torrentService.getById(e.getTorrentId()));
                     return LegacyBtnPeerHistory.from(e, dto);
