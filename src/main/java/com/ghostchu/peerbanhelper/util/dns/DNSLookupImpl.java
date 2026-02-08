@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.dns;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.xbill.DNS.*;
@@ -51,6 +52,7 @@ public final class DNSLookupImpl implements Reloadable, DNSLookup {
             bootComplete = true;
         } catch (Throwable e) {
             log.error("Unable to complete oshi DNS Servers lookup, DNSJAVA functions may not work properly", e);
+            Sentry.captureException(e);
             bootComplete = false;
         }
     }
@@ -96,7 +98,8 @@ public final class DNSLookupImpl implements Reloadable, DNSLookup {
                     return Optional.empty();
                 }
                 return Optional.empty();
-            } catch (TextParseException ignored) {
+            } catch (TextParseException e) {
+                log.debug("PTR lookup failed for {}: {}", query, e.getMessage());
                 return Optional.empty();
             }
         }, Executors.newVirtualThreadPerTaskExecutor());

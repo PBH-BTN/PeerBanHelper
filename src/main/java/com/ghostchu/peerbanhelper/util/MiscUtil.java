@@ -7,28 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
 
 public final class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
-    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    public static final SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");
-    public static final SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-
-    public static String formatDateOnly(long timestamp) {
-        return sdfDate.format(new Date(timestamp));
-    }
-
-    public static String formatDateTime(long timestamp) {
-        return sdf.format(new Date(timestamp));
-    }
-
-    public static String formatTimeOnly(long timestamp) {
-        return sdfTime.format(new Date(timestamp));
-    }
 
 
     public static void gzip(InputStream is, OutputStream os) throws IOException {
@@ -72,44 +58,6 @@ public final class MiscUtil {
         return files;
     }
 
-    public static ZoneOffset getSystemZoneOffset() {
-        return ZoneId.systemDefault().getRules().getOffset(Instant.now());
-    }
-
-    public static long getStartOfToday(long time) {
-//        Instant instant = Instant.now();
-//        ZoneId systemZone = ZoneId.systemDefault();
-//        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
-//        LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
-//        return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
-        ZoneId systemZone = ZoneId.systemDefault();
-        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.ofEpochMilli(time));
-        LocalDate date = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
-        return date.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
-    }
-
-    public static long getEndOfToday(long time) {
-        ZoneId systemZone = ZoneId.systemDefault();
-        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
-        // 转换为该时区的 LocalDateTime
-        LocalDateTime dateTime = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDateTime();
-        // 获取当天的结束
-        LocalDateTime dayEnd = dateTime.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
-        // 转换回时间戳
-        return dayEnd.toInstant(currentOffsetForMyZone).toEpochMilli();
-    }
-
-    public static long getStartOfHour(long time) {
-        ZoneId systemZone = ZoneId.systemDefault();
-        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
-        // 转换为该时区的 LocalDateTime
-        LocalDateTime dateTime = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDateTime();
-        // 获取当前小时的开始（分钟和秒置为0）
-        LocalDateTime hourStart = dateTime.withMinute(0).withSecond(0).withNano(0);
-        // 转换回时间戳
-        return hourStart.toInstant(currentOffsetForMyZone).toEpochMilli();
-    }
-
     public static boolean is64BitJVM() {
         // 优先检查 sun.arch.data.model（直接指明位数）
         String dataModel = System.getProperty("sun.arch.data.model");
@@ -127,6 +75,7 @@ public final class MiscUtil {
         return vmName.contains("64");
     }
 
+    @SafeVarargs
     public static <T> T[] concatAll(T[] first, T[]... rest) {
         int totalLength = first.length;
 

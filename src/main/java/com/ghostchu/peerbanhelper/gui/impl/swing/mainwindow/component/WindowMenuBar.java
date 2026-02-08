@@ -5,7 +5,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
-import com.ghostchu.peerbanhelper.database.table.AlertEntity;
+import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.AboutWindow;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.google.common.eventbus.Subscribe;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
 
@@ -136,6 +137,7 @@ public class WindowMenuBar {
                 Desktop.getDesktop().open(Main.getDataDirectory());
             } catch (IOException ex) {
                 log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
+                Sentry.captureException(ex);
             }
         });
         if (!ExternalSwitch.parseBoolean("pbh.app-v")) {

@@ -6,6 +6,8 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.function.Function;
 
 public final class TRPeer implements Peer {
@@ -25,7 +27,7 @@ public final class TRPeer implements Peer {
 
     @Override
     public String getPeerId() {
-        return backend.getPeer_id() == null ? "" : backend.getPeer_id();
+        return backend.getPeer_id() == null ? "" : new String(Base64.getDecoder().decode(backend.getPeer_id()), StandardCharsets.ISO_8859_1);
     }
 
     @Override

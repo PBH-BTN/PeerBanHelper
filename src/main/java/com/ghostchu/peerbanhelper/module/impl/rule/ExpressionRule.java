@@ -4,19 +4,22 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.WebUtil;
-import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskProgressBarType;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
-import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -26,6 +29,7 @@ import com.googlecode.aviator.exception.ExpressionSyntaxErrorException;
 import com.googlecode.aviator.exception.TimeoutException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.sentry.Sentry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -56,17 +60,17 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private final static String VERSION = "2";
     private final long maxScriptExecuteTime = 1500;
     private final JavalinWebContainer javalinWebContainer;
-    private final ScriptEngine scriptEngine;
+    private final ScriptEngineManager scriptEngineManager;
+    private final BackgroundTaskManager backgroundTaskManager;
     private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
-    private final ScriptStorageDao scriptStorageDao;
     private long banDuration;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
-    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngine scriptEngine, ScriptStorageDao scriptStorageDao) {
+    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngineManager scriptEngineManager, BackgroundTaskManager backgroundTaskManager) {
         super();
-        this.scriptEngine = scriptEngine;
+        this.scriptEngineManager = scriptEngineManager;
         this.javalinWebContainer = javalinWebContainer;
-        this.scriptStorageDao = scriptStorageDao;
+        this.backgroundTaskManager = backgroundTaskManager;
     }
 
 
@@ -77,6 +81,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             reloadConfig();
         } catch (Exception e) {
             log.error("Failed to load scripts", e);
+            Sentry.captureException(e);
         }
         javalinWebContainer.javalin()
                 .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
@@ -144,6 +149,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 }
             }catch (Exception e){
                 log.debug("Malware scan failed for pending to add script", e);
+                Sentry.captureException(e);
             }
         }
         Files.write(readFile.toPath(), content, StandardOpenOption.CREATE);
@@ -171,7 +177,10 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private File getIfAllowedScriptId(String scriptId) {
         if (scriptId.isBlank())
             throw new IllegalArgumentException("ScriptId cannot be null or blank");
-        if (!scriptId.endsWith(".av")) {
+        // 检查是否为支持的脚本类型
+        boolean supported = scriptEngineManager.getSupportedExtensions().stream()
+                .anyMatch(scriptId::endsWith);
+        if (!supported) {
             return null;
         }
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
@@ -184,7 +193,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
 
     private boolean isSafeNetworkEnvironment(Context context) {
         var value = ExternalSwitch.parse("pbh.please-disable-safe-network-environment-check-i-know-this-is-very-dangerous-and-i-may-lose-my-data-and-hacker-may-attack-me-via-this-endpoint-and-steal-my-data-or-destroy-my-computer-i-am-fully-responsible-for-this-action-and-i-will-not-blame-the-developer-for-any-loss");
-        if (value != null && value.equals("true")) {
+        if (value != null && "true".equals(value)) {
             return true;
         }
         var ip = IPAddressUtil.getIPAddress(context.ip());
@@ -214,7 +223,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             ));
         }
         var r = list.stream().skip(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).toList();
-        context.json(new StdResp(true, null, new Page<>(pageable, list.size(), r)));
+        context.json(new StdResp(true, null, new PBHPage<>(pageable.getPage(), pageable.getSize(), list.size(), r)));
     }
 
 
@@ -261,10 +270,10 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     }
 
     public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
-        return getCache().readCacheButWritePassOnly(this, script.expression().hashCode() + peer.getCacheKey(), () -> {
+        return getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
-                Map<String, Object> env = script.expression().newEnv();
+                Map<String, Object> env = script.newEnv();
                 env.put("torrent", torrent);
                 env.put("peer", peer);
                 env.put("downloader", downloader);
@@ -272,21 +281,14 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 env.put("server", getServer());
                 env.put("moduleInstance", this);
                 env.put("banDuration", banDuration);
-                env.put("persistStorage", scriptStorageDao);
                 env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
-                Object returns;
-                if (script.threadSafe()) {
-                    returns = script.expression().execute(env);
-                } else {
-                    synchronized (script.expression()) {
-                        returns = script.expression().execute(env);
-                    }
-                }
-                result = scriptEngine.handleResult(script, banDuration, returns);
+                Object returns = script.execute(env);
+                result = scriptEngineManager.handleResult(script, banDuration, returns);
             } catch (TimeoutException timeoutException) {
                 return pass();
             } catch (Exception ex) {
                 log.error(tlUI(Lang.RULE_ENGINE_ERROR, script.name()), ex);
+                Sentry.captureException(ex);
                 return pass();
             }
             if (result != null && result.action() != PeerAction.NO_ACTION) {
@@ -312,35 +314,61 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         scripts.clear();
         this.banDuration = getConfig().getLong("ban-duration", 0);
         initScripts();
-        log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
-        long start = System.currentTimeMillis();
-        try (var executor = Executors.newWorkStealingPool()) {
-            File scriptDir = new File(Main.getDataDirectory(), "scripts");
-            File[] scripts = scriptDir.listFiles();
-            if (scripts != null) {
-                for (File script : scripts) {
-                    executor.submit(() -> {
-                        try {
-                            if (!script.getName().endsWith(".av") || script.isHidden()) {
-                                return;
-                            }
-                            try {
-                                String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
-                                var compiledScript = scriptEngine.compileScript(script, script.getName(), scriptContent);
-                                if (compiledScript == null) return;
-                                this.scripts.add(compiledScript);
-                            } catch (Exception e) {
-                                log.error("Unable to load script file", e);
-                            }
-                        } catch (ExpressionSyntaxErrorException err) {
-                            log.error(tlUI(Lang.RULE_ENGINE_BAD_EXPRESSION), err);
+
+        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
+                new TranslationComponent(Lang.RULE_ENGINE_COMPILING),
+                (task, callback) -> {
+                    log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
+                    long start = System.currentTimeMillis();
+
+                    File scriptDir = new File(Main.getDataDirectory(), "scripts");
+                    File[] scriptFiles = scriptDir.listFiles();
+                    if (scriptFiles == null || scriptFiles.length == 0) {
+                        getCache().invalidateAll();
+                        log.info(tlUI(Lang.RULE_ENGINE_COMPILED, 0, System.currentTimeMillis() - start));
+                        return;
+                    }
+
+                    // Filter supported scripts first
+                    var supportedScripts = java.util.Arrays.stream(scriptFiles)
+                            .filter(f -> !f.isHidden())
+                            .filter(f -> scriptEngineManager.getSupportedExtensions().stream()
+                                    .anyMatch(ext -> f.getName().endsWith(ext)))
+                            .toList();
+
+                    task.setMax(supportedScripts.size());
+                    task.setCurrent(0);
+                    task.setBarType(BackgroundTaskProgressBarType.DETERMINATE);
+                    callback.accept(task);
+
+                    var completed = new java.util.concurrent.atomic.AtomicInteger(0);
+
+                    try (var executor = Executors.newWorkStealingPool()) {
+                        for (File script : supportedScripts) {
+                            executor.submit(() -> {
+                                try {
+                                    String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
+                                    var compiledScript = scriptEngineManager.compileScript(script, script.getName(), scriptContent);
+                                    if (compiledScript != null) {
+                                        this.scripts.add(compiledScript);
+                                    }
+                                } catch (ExpressionSyntaxErrorException err) {
+                                    log.error(tlUI(Lang.RULE_ENGINE_BAD_EXPRESSION), err);
+                                    Sentry.captureException(err);
+                                } catch (Exception e) {
+                                    log.error("Unable to load script file", e);
+                                    Sentry.captureException(e);
+                                } finally {
+                                    task.setCurrent(completed.incrementAndGet());
+                                    callback.accept(task);
+                                }
+                            });
                         }
-                    });
+                    }
+                    getCache().invalidateAll();
+                    log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
                 }
-            }
-        }
-        getCache().invalidateAll();
-        log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
+        )).join();
     }
 
     private void initScripts() throws IOException {

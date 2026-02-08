@@ -1,12 +1,14 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
+import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
@@ -42,12 +44,12 @@ public class DownloaderDiscovery {
 
     }
 
-    public CompletableFuture<List<DiscoveredDownloader>> scan() {
+    public CompletableFuture<List<DiscoveredDownloader>> scan(@NotNull List<Integer> addedPorts) {
         return CompletableFuture.supplyAsync(() -> {
             List<DiscoveredDownloader> found = Collections.synchronizedList(new ArrayList<>());
             var listenConnections = systemInfo.getOperatingSystem().getInternetProtocolStats().getConnections()
                     .stream()
-                    .filter(conn-> {
+                    .filter(conn -> {
                         var type = conn.getType();
                         return type.startsWith("tcp");
                     })
@@ -61,12 +63,13 @@ public class DownloaderDiscovery {
                         try {
                             semaphore.acquire();
                             String inetAddress = IPAddressUtil.adaptIP(listenConnection.getLocalAddress());
-                            var scanResult = checkDownloader(inetAddress, listenConnection.getLocalPort(), listenConnection.getowningProcessId());
+                            var scanResult = checkDownloader(inetAddress, listenConnection.getLocalPort(), listenConnection.getowningProcessId(), addedPorts.contains(listenConnection.getLocalPort()) ? DiscoverStatus.ADDED : DiscoverStatus.NEW);
                             if (scanResult != null) {
                                 found.add(scanResult);
                             }
                         } catch (Exception e) {
                             log.debug("Failed to get downloader information from {}:{}", listenConnection.getLocalAddress(), listenConnection.getLocalPort(), e);
+                            Sentry.captureException(e);
                         } finally {
                             semaphore.release();
                         }
@@ -78,10 +81,9 @@ public class DownloaderDiscovery {
     }
 
 
-
     @SuppressWarnings("HttpUrlsUsage")
     @Nullable
-    public DiscoveredDownloader checkDownloader(String host, int port, int pid) {
+    public DiscoveredDownloader checkDownloader(String host, int port, int pid, DiscoverStatus status) {
         Request request = new Request.Builder()
                 .url("http://" + host + ":" + port)
                 .get()
@@ -89,19 +91,21 @@ public class DownloaderDiscovery {
         try (Response response = httpClient.newCall(request).execute()) {
             var server = response.header("Server");
             if (server != null) { // check server
-                if (server.contains("Transmission")) return new DiscoveredDownloader(host, port, "transmission", pid);
+                if (server.contains("Transmission"))
+                    return new DiscoveredDownloader(host, port, "transmission", pid, status);
                 if (server.contains("PeerBanHelper-BiglyBT-Adapter"))
-                    return new DiscoveredDownloader(host, port, "biglybt", pid);
+                    return new DiscoveredDownloader(host, port, "biglybt", pid, status);
             }
             var auth = response.header("WWW-Authenticate");
             if (auth != null) {
                 if (auth.contains("BitComet Remote Login"))
-                    return new DiscoveredDownloader(host, port, "bitcomet", pid);
+                    return new DiscoveredDownloader(host, port, "bitcomet", pid, status);
             }
             var body = response.body().string();
             if (body.contains("BitComet Remote Access") || body.contains("BitComet WebUI"))
-                return new DiscoveredDownloader(host, port, "bitcomet", pid);
-            if (body.contains("qBittorrent WebUI")) return new DiscoveredDownloader(host, port, "qbittorrent", pid);
+                return new DiscoveredDownloader(host, port, "bitcomet", pid, status);
+            if (body.contains("qBittorrent WebUI"))
+                return new DiscoveredDownloader(host, port, "qbittorrent", pid, status);
             return null;
         } catch (Exception e) {
             log.debug("Failed to check downloader at {}:{} -> {}", host, port, e.getCause() + ":" + e.getMessage());
@@ -109,6 +113,10 @@ public class DownloaderDiscovery {
         }
     }
 
+    public enum DiscoverStatus {
+        NEW,
+        ADDED
+    }
 
     @AllArgsConstructor
     @Data
@@ -117,5 +125,6 @@ public class DownloaderDiscovery {
         private int port;
         private String type;
         private int pid;
+        private DiscoverStatus added;
     }
 }

@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
 import com.google.common.collect.EvictingQueue;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.event.Level;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,11 +60,20 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
                     seqNumber);
             logEntryDeque.add(postAccessLog);
         }
+        String messageBody = formattedMessage.trim();
+        if (formattedMessage.startsWith("[")) {
+            int splitIndex = messageBody.indexOf(": ");
+            if (splitIndex != -1) {
+                messageBody = messageBody.substring(splitIndex + 2);
+            } else {
+                messageBody = "";
+            }
+        }
         var rawLog = new LogEntry(
                 eventObject.getTimeStamp(),
                 eventObject.getThreadName(),
                 slf4jLevel,
-                formattedMessage.startsWith("[") ? StringUtils.substringAfter(formattedMessage.trim(), ": ") : formattedMessage.trim(),
+                messageBody,
                 seqNumber);
         ringDeque.add(rawLog);
         Main.getEventBus().post(new NewLogEntryCreatedEvent(rawLog));

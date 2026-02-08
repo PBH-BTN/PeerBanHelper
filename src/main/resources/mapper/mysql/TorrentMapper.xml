@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.TorrentMapper">
+    <insert id="upsert">
+        INSERT INTO torrents (info_hash, name, size, private_torrent)
+        VALUES (#{e.infoHash}, #{e.name}, #{e.size}, #{e.privateTorrent})
+        ON DUPLICATE KEY UPDATE
+        size = IF(size &lt;= 0, #{e.size}, size),
+        private_torrent = IF(private_torrent IS NULL, #{e.privateTorrent}, private_torrent)
+    </insert>
+</mapper>

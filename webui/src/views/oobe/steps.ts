@@ -19,8 +19,19 @@ export const oobeSteps: OobeStepConfig[] = [
   },
   {
     titleKey: 'page.oobe.steps.addDownloader.title',
-    canNext: (config) => config.valid,
+    canNext: (config) => config.downloaderValid,
     component: () => import('./components/addDownloader/index.vue')
+  },
+  {
+    titleKey: 'page.oobe.advance.title',
+    canNext: (config) => {
+      if (config.database.type === 'mysql' || config.database.type === 'postgresql') {
+        return config.databaseValid
+      }
+      return true
+    },
+    hidden: true,
+    component: () => import('./components/advance.vue')
   },
   {
     titleKey: 'page.oobe.steps.success.title',

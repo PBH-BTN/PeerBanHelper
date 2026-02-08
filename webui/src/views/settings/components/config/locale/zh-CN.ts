@@ -12,7 +12,9 @@ export default {
 
   'page.settings.tab.config.plus.button': '点击打开',
 
-  'page.settings.tab.config.privacy.errorReport': '启用错误报告',
+  'page.settings.tab.config.privacy.analytics': '启用遥测',
+  'page.settings.tab.config.privacy.analytics.tips':
+    '收集的匿名数据不包含隐私数据，仅用于改进软件质量，将不会传送给第三方',
 
   'page.settings.tab.config.server.title': 'WebUI',
   'page.settings.tab.config.server.port': '端口',
@@ -39,6 +41,15 @@ export default {
   'page.settings.tab.config.persist.title': '持久化',
   'page.settings.tab.config.persist.banlist': '持久化封禁列表',
   'page.settings.tab.config.persist.ban_logs_keep_days': '封禁日志保留天数',
+  'page.settings.tab.config.database.type': ' 数据库类型',
+  'page.settings.tab.config.database.type.changeWarning': '警告',
+  'page.settings.tab.config.database.type.changeWarningContent':
+    '更改数据库类型将会清空现有数据，如果数据库参数填写有误会导致PeerBanHelper无法启动，请谨慎操作！',
+  'page.settings.tab.config.database.host': '地址',
+  'page.settings.tab.config.database.port': '端口',
+  'page.settings.tab.config.database.database': '数据库名称',
+  'page.settings.tab.config.database.username': '用户名',
+  'page.settings.tab.config.database.password': '密码',
 
   'page.settings.tab.config.banlistRemapping.title': '封禁列表重映射',
   'page.settings.tab.config.banlistRemapping.description':

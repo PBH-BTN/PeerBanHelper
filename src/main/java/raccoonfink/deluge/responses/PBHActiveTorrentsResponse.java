@@ -1,13 +1,13 @@
 package raccoonfink.deluge.responses;
 
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
 import java.util.List;
@@ -16,12 +16,12 @@ import java.util.List;
 public final class PBHActiveTorrentsResponse extends DelugeResponse {
     private List<ActiveTorrentsResponseDTO> activeTorrents;
 
-    public PBHActiveTorrentsResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public PBHActiveTorrentsResponse(final Integer httpResponseCode, final JsonObject response) throws DelugeException {
         super(httpResponseCode, response);
-        if (response.isNull("result")) {
+        if (!response.has("result") || response.get("result").isJsonNull()) {
             return;
         }
-        JSONArray jsonArray = response.getJSONArray("result");
+        JsonArray jsonArray = response.getAsJsonArray("result");
         String resultJson = jsonArray.toString();
         this.activeTorrents = JsonUtil.getGson().fromJson(resultJson, new TypeToken<List<ActiveTorrentsResponseDTO>>() {
         }.getType());

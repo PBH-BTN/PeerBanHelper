@@ -53,6 +53,7 @@ public final class PBHMetadataController extends AbstractFeatureModule {
                 .filter(FeatureModule::isModuleEnabled)
                 .map(f -> new ModuleRecordDTO(f.getClass().getName(), f.getConfigName())).toList());
         data.put("installationId", Main.getMainConfig().getString("installation-id", "not-initialized"));
+        data.put("analytics", Main.getMainConfig().getBoolean("privacy.analytics"));
         ctx.json(new StdResp(true, null, data));
     }
 

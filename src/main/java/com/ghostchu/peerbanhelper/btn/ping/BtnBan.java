@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.btn.ping;
 
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.util.InfoHashUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,25 +52,25 @@ public final class BtnBan {
     @SerializedName("structured_data")
     private String structuredData;
 
-    public static BtnBan from(HistoryEntity historyEntity) {
+    public static BtnBan from(HistoryEntity historyEntity, TorrentEntityDTO torrentEntityDTO) {
         BtnBan btnBan = new BtnBan();
-        btnBan.setModule(historyEntity.getRule().getModule().getName());
-        btnBan.setRule(tlUI(historyEntity.getRule().getRule()));
+        btnBan.setModule(historyEntity.getModuleName());
+        btnBan.setRule(tlUI(historyEntity.getRuleName()));
         btnBan.setDescription(tlUI(historyEntity.getDescription()));
-        btnBan.setPeerIp(historyEntity.getIp());
+        btnBan.setPeerIp(historyEntity.getIp().getHostAddress());
         btnBan.setPeerPort(historyEntity.getPort());
         btnBan.setPeerId(historyEntity.getPeerId());
         btnBan.setPeerClientName(historyEntity.getPeerClientName());
-        btnBan.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(historyEntity.getTorrent().getInfoHash()));
-        btnBan.setTorrentIsPrivate(Boolean.TRUE.equals(historyEntity.getTorrent().getPrivateTorrent()));
-        btnBan.setTorrentSize(historyEntity.getTorrent().getSize());
+        btnBan.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(torrentEntityDTO.infoHash()));
+        btnBan.setTorrentIsPrivate(Boolean.TRUE.equals(torrentEntityDTO.privateTorrent()));// can be null
+        btnBan.setTorrentSize(torrentEntityDTO.size());
         btnBan.setFromPeerTraffic(historyEntity.getPeerDownloaded());
         btnBan.setToPeerTraffic(historyEntity.getPeerUploaded());
         btnBan.setPeerProgress(historyEntity.getPeerProgress());
         btnBan.setDownloaderProgress(historyEntity.getDownloaderProgress());
         btnBan.setPeerFlag(historyEntity.getFlags() == null ? null : historyEntity.getFlags());
-        btnBan.setBanAt(historyEntity.getBanAt());
-        btnBan.setStructuredData(historyEntity.getStructuredData());
+        btnBan.setBanAt(new Timestamp(historyEntity.getBanAt().toInstant().toEpochMilli()));
+        btnBan.setStructuredData(JsonUtil.standard().toJson(historyEntity.getStructuredData()));
         return btnBan;
     }
 }

@@ -1,13 +1,14 @@
 package com.ghostchu.peerbanhelper.btn.ping;
 
-import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
+import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.util.InfoHashUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.net.InetAddress;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -25,7 +26,7 @@ public class BtnSwarm {
     @SerializedName("downloader_progress")
     private double downloaderProgress;
     @SerializedName("peer_ip")
-    private String peerIp;
+    private InetAddress peerIp;
     @SerializedName("peer_port")
     private int peerPort;
     @SerializedName("peer_id")
@@ -43,9 +44,9 @@ public class BtnSwarm {
     @SerializedName("from_peer_traffic_offset")
     private long fromPeerTrafficOffset;
     @SerializedName("first_time_seen")
-    private Timestamp firstTimeSeen;
+    private OffsetDateTime firstTimeSeen;
     @SerializedName("last_time_seen")
-    private Timestamp lastTimeSeen;
+    private OffsetDateTime lastTimeSeen;
     @SerializedName("peer_last_flags")
     private String peerLastFlags;
     @SerializedName("upload_speed")

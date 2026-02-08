@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.portmapper;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
@@ -34,7 +35,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     private final Lock nicCheckChangeLock = new ReentrantLock();
 
     public PBHPortMapperImpl() {
-        Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
+        Thread.ofVirtual().name("PortMapperScanner").start(this::scanMappers);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 for (GatewayDevice gatewayDevice : getGatewayDevices()) {
@@ -51,7 +52,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
             }
         }));
-        sched.scheduleWithFixedDelay(this::detectNICChange, 5, 5, TimeUnit.SECONDS);
+        sched.scheduleWithFixedDelay(this::detectNICChange, 5, 30, TimeUnit.SECONDS);
     }
 
     private void detectNICChange() {
@@ -61,7 +62,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 if (!currentNics.equals(lastCheckedNics)) {
                     updateNICsList();
                     log.debug(tlUI(Lang.PORT_MAPPER_NIC_CHANGES_DETECTED));
-                    Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
+                    Thread.ofVirtual().name("PortMapperScanner").start(this::scanMappers);
                 }
             } finally {
                 nicCheckChangeLock.unlock();

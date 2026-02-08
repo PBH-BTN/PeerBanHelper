@@ -3,12 +3,13 @@ package com.ghostchu.peerbanhelper.btn.ability.impl;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
-import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
 import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
+import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
@@ -34,11 +35,11 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
     private final long randomInitialDelay;
     @Getter
     private final IPMatcher ipMatcher = new IPMatcher("btn-ip-denylist", "Empty IP Denylist", List.of(new DualIPv4v6AssociativeTries<>()));
-    private final MetadataDao metadataDao;
+    private final MetadataService metadataDao;
     private final boolean powCaptcha;
     private String ruleVersion = "initial";
 
-    public BtnAbilityIPDenyList(BtnNetwork btnNetwork, MetadataDao metadataDao, JsonObject ability) {
+    public BtnAbilityIPDenyList(BtnNetwork btnNetwork, MetadataService metadataDao, JsonObject ability) {
         this.btnNetwork = btnNetwork;
         this.metadataDao = metadataDao;
         this.interval = ability.get("interval").getAsLong();
@@ -91,38 +92,39 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
     }
 
     private void updateRule() {
-        String version = Objects.requireNonNullElse(ruleVersion, "initial");
-
-        String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
-        Request.Builder request = new Request.Builder()
-                .url(url)
-                .get();
-        if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "ip_denylist");
-        try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
-            if (response.code() == 204) {
-                setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ruleVersion));
-                return;
+        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_DENY_LIST_SYNC_SERVER), (task, callback) -> {
+            String version = Objects.requireNonNullElse(ruleVersion, "initial");
+            String url = URLUtil.appendUrl(endpoint, Map.of("rev", version));
+            Request.Builder request = new Request.Builder()
+                    .url(url)
+                    .get();
+            if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "ip_denylist");
+            try (Response response = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
+                if (response.code() == 204) {
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE_NO_CHANGES, version, ipMatcher.size()));
+                    return;
+                }
+                String responseBody = response.body().string();
+                if (!response.isSuccessful()) {
+                    log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
+                    setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
+                } else {
+                    DualIPv4v6AssociativeTries<String> associativeTries = new DualIPv4v6AssociativeTries<>();
+                    var loaded = stringToIPList(responseBody, associativeTries);
+                    this.ipMatcher.setData("BTN DenyList (Remote)", List.of(associativeTries));
+                    Main.getEventBus().post(new BtnRuleUpdateEvent());
+                    ruleVersion = response.header("X-BTN-ContentVersion", "unknown");
+                    metadataDao.set("btn.ability.ip_denylist.cache.version", ruleVersion);
+                    metadataDao.set("btn.ability.ip_denylist.cache.value", responseBody);
+                    log.info(tlUI(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
+                    btnNetwork.getModuleMatchCache().invalidateAll();
+                }
+            } catch (Exception e) {
+                log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
             }
-            String responseBody = response.body().string();
-            if (!response.isSuccessful()) {
-                log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
-                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
-            } else {
-                DualIPv4v6AssociativeTries<String> associativeTries = new DualIPv4v6AssociativeTries<>();
-                var loaded = stringToIPList(responseBody, associativeTries);
-                this.ipMatcher.setData("BTN DenyList (Remote)", List.of(associativeTries));
-                Main.getEventBus().post(new BtnRuleUpdateEvent());
-                ruleVersion = response.header("X-BTN-ContentVersion", "unknown");
-                metadataDao.set("btn.ability.ip_denylist.cache.version", ruleVersion);
-                metadataDao.set("btn.ability.ip_denylist.cache.value", responseBody);
-                log.info(tlUI(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
-                setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_DENYLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
-                btnNetwork.getModuleMatchCache().invalidateAll();
-            }
-        } catch (Exception e) {
-            log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
-            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
-        }
+        })).join();
     }
 
     /**

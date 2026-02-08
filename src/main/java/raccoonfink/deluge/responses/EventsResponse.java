@@ -1,8 +1,8 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import raccoonfink.deluge.DelugeEvent;
 import raccoonfink.deluge.DelugeException;
 
@@ -13,17 +13,13 @@ import java.util.List;
 public final class EventsResponse extends DelugeResponse {
     private final List<DelugeEvent> m_events = new ArrayList<>();
 
-    public EventsResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {
+    public EventsResponse(final Integer httpResponseCode, final JsonObject result) throws DelugeException {
         super(httpResponseCode, result);
 
-        if (!result.isNull("result")) {
-            try {
-                final JSONArray res = result.getJSONArray("result");
-                for (int i = 0; i < res.length(); i++) {
-                    m_events.add(new DelugeEvent(res.getJSONArray(i)));
-                }
-            } catch (final JSONException e) {
-                throw new DelugeException(e);
+        if (result.has("result") && !result.get("result").isJsonNull()) {
+            final JsonArray res = result.getAsJsonArray("result");
+            for (JsonElement element : res) {
+                m_events.add(new DelugeEvent(element.getAsJsonArray()));
             }
         }
     }
@@ -33,11 +29,13 @@ public final class EventsResponse extends DelugeResponse {
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
+    public JsonObject toResponseJSON() {
+        final JsonObject ret = super.toResponseJSON();
+        JsonArray resultArray = new JsonArray();
         for (final DelugeEvent ev : m_events) {
-            ret.append("result", ev.toJSON());
+            resultArray.add(ev.toJSON());
         }
+        ret.add("result", resultArray);
         return ret;
     }
 }

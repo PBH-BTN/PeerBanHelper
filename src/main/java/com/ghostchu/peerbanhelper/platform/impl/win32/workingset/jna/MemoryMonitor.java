@@ -46,11 +46,9 @@ public class MemoryMonitor {
         MemoryUsage heap = getHeapMemoryUsage();
         MemoryUsage nonHeap = getNonHeapMemoryUsage();
 
-        String sb = "内存使用情况:\n" +
+        return "内存使用情况:\n" +
                 "  堆内存: " + formatMemoryUsage(heap) + "\n" +
                 "  非堆内存: " + formatMemoryUsage(nonHeap);
-        
-        return sb;
     }
     
     /**

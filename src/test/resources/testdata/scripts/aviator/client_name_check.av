@@ -1,0 +1,29 @@
+## @NAME 客户端名称检查
+## @AUTHOR Test
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+## 检查客户端名称是否在黑名单中
+## 使用 Aviator 内置函数
+
+if(clientName == nil || clientName == '') {
+    return false;
+}
+
+## 黑名单客户端检查（使用 string.contains 内置函数）
+if(string.contains(clientName, 'xunlei') ||
+   string.contains(clientName, 'Xunlei') ||
+   string.contains(clientName, 'XunLei') ||
+   string.contains(clientName, 'XUNLEI') ||
+   string.contains(clientName, 'thunder') ||
+   string.contains(clientName, 'Thunder') ||
+   string.contains(clientName, 'THUNDER') ||
+   string.contains(clientName, 'baidu') ||
+   string.contains(clientName, 'Baidu') ||
+   string.contains(clientName, 'flashget') ||
+   string.contains(clientName, 'FlashGet')) {
+    return '检测到黑名单客户端: ' + clientName;
+}
+
+return false;

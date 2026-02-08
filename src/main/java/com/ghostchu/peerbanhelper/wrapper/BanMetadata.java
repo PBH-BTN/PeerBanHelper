@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -17,8 +18,8 @@ import java.io.Serializable;
 public class BanMetadata extends PeerMetadata implements Serializable {
     private String context;
     private String randomId;
-    private long banAt;
-    private long unbanAt;
+    private OffsetDateTime banAt;
+    private OffsetDateTime unbanAt;
     private boolean banForDisconnect;
     private boolean excludeFromReport;
     private boolean excludeFromDisplay;
@@ -26,7 +27,7 @@ public class BanMetadata extends PeerMetadata implements Serializable {
     private TranslationComponent description;
     private StructuredData<String, Object> structuredData;
 
-    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, Torrent torrent, Peer peer, TranslationComponent rule,
+    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, Torrent torrent, Peer peer, TranslationComponent rule,
                        TranslationComponent description, StructuredData<String, Object> structuredData) {
         super(downloader, torrent, peer);
         this.context = context;
@@ -41,7 +42,7 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.structuredData = structuredData;
     }
 
-    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
+    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
                        TranslationComponent description, StructuredData<String, Object> structuredData) {
         super(downloader, torrent, peer);
         this.context = context;

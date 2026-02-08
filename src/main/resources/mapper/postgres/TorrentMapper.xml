@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.TorrentMapper">
+    <insert id="upsert">
+        INSERT INTO torrents (info_hash, name, size, private_torrent)
+        VALUES (#{e.infoHash}, #{e.name}, #{e.size}, #{e.privateTorrent})
+        ON CONFLICT (info_hash) DO UPDATE SET
+        size = CASE WHEN torrents.size &lt;= 0 THEN #{e.size} ELSE torrents.size END,
+        private_torrent = CASE WHEN torrents.private_torrent IS NULL THEN #{e.privateTorrent} ELSE torrents.private_torrent END
+    </insert>
+</mapper>

@@ -1,17 +1,16 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import raccoonfink.deluge.DelugeException;
 
 public final class DeleteSessionResponse extends DelugeResponse {
     private final boolean m_sessionDeleted;
 
-    public DeleteSessionResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {
+    public DeleteSessionResponse(final Integer httpResponseCode, final JsonObject result) throws DelugeException {
         super(httpResponseCode, result);
 
-        if (result != null) {
-            m_sessionDeleted = result.optBoolean("result");
+        if (result != null && result.has("result")) {
+            m_sessionDeleted = result.get("result").getAsBoolean();
         } else {
             m_sessionDeleted = false;
         }
@@ -22,9 +21,9 @@ public final class DeleteSessionResponse extends DelugeResponse {
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
-        ret.put("result", isSessionDeleted());
+    public JsonObject toResponseJSON() {
+        final JsonObject ret = super.toResponseJSON();
+        ret.addProperty("result", isSessionDeleted());
         return ret;
     }
 }

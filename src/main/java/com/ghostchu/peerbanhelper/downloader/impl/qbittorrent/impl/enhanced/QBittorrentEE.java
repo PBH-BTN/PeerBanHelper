@@ -127,7 +127,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                         continue; // 当做不存在处理
                     }
                     // 一个 QB 本地化问题的 Workaround
-                    if (qbPeer.getPeerId() == null || qbPeer.getPeerId().equals("Unknown") || qbPeer.getPeerId().equals("未知")) {
+                    if (qbPeer.getPeerId() == null || "Unknown".equals(qbPeer.getPeerId()) || "未知".equals(qbPeer.getPeerId())) {
                         qbPeer.setPeerIdClient("");
                     }
                     if (qbPeer.getClientName() != null) {

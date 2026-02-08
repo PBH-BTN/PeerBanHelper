@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.configuration.pf4j;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
+import io.sentry.Sentry;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.*;
@@ -36,11 +37,6 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
 
     public PBHSpringPluginManager(List<Path> pluginsRoots) {
         super(pluginsRoots);
-    }
-
-    @Override
-    protected ExtensionFactory createExtensionFactory() {
-        return new SpringExtensionFactory(this);
     }
 
     @Override
@@ -97,6 +93,7 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
                 loadPluginFromPath(pluginPath);
             } catch (PluginRuntimeException e) {
                 log.error("Cannot load plugin '{}'", pluginPath, e);
+                Sentry.captureException(e);
             }
         }
 
@@ -118,6 +115,7 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
                     pluginWrapper.setPluginState(PluginState.FAILED);
                     pluginWrapper.setFailedException(e);
                     log.error("Unable to start plugin '{}'", getPluginLabel(pluginWrapper.getDescriptor()), e);
+                    Sentry.captureException(e);
                 } finally {
                     firePluginStateEvent(new PluginStateEvent(this, pluginWrapper, pluginState));
                 }
@@ -146,6 +144,7 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
                     firePluginStateEvent(new PluginStateEvent(this, pluginWrapper, pluginState));
                 } catch (Throwable e) {
                     log.error("Unable to stop plugin '{}'", getPluginLabel(pluginWrapper.getDescriptor()), e);
+                    Sentry.captureException(e);
                 }
             } else {
                 // do nothing
@@ -173,9 +172,11 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
                     }
                 }
             } catch (PluginRuntimeException e) {
+                Sentry.captureException(e);
                 throw e;
             } catch (Exception e) {
                 log.debug("Malware scan failed for plugin '{}': Unable to close scanner", pluginPath, e);
+                Sentry.captureException(e);
             }
         }
         return super.loadPluginFromPath(pluginPath);

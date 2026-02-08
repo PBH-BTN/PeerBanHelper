@@ -63,6 +63,7 @@ public final class HTTPUtil implements Reloadable {
         var client = newBuilder()
                 .followSslRedirects(true)
                 .followRedirects(true)
+                .dispatcher(new Dispatcher(Executors.newVirtualThreadPerTaskExecutor()))
                 .callTimeout(10, TimeUnit.SECONDS).build();
         Request cnNetworkCheck = new Request.Builder()
                 .url("https://www.qq.com/")

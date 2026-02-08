@@ -15,6 +15,10 @@ public final class TranslationComponentTypeAdapter extends TypeAdapter<Translati
 
     @Override
     public void write(JsonWriter out, TranslationComponent value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
         out.beginObject();
         out.name("key").value(value.getKey());
         out.name("params");
@@ -25,7 +29,7 @@ public final class TranslationComponentTypeAdapter extends TypeAdapter<Translati
                 // 如果是 TranslationComponent，递归调用 write 方法
                 TranslationComponentTypeAdapter.INSTANCE.write(out, (TranslationComponent) param);
             } else {
-                out.value(param.toString());
+                out.value(String.valueOf(param));
             }
         }
         out.endArray();  // 结束 JSON 数组

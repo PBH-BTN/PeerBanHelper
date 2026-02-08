@@ -21,6 +21,7 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
+import io.sentry.Sentry;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -107,6 +108,7 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
                 ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 ptr = Optional.empty();
+                Sentry.captureException(e);
             }
 //            } else {
 //                try {

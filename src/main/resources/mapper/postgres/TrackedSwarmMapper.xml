@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.TrackedSwarmMapper">
+    <select id="resetTable">
+        TRUNCATE TABLE tracked_swarm
+    </select>
+
+    <insert id="upsert" parameterType="com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity">
+        INSERT INTO tracked_swarm (ip, port, info_hash, torrent_is_private, torrent_size,
+                                   downloader, downloader_progress, peer_id, client_name,
+                                   peer_progress, uploaded, uploaded_offset, upload_speed,
+                                   downloaded, downloaded_offset, download_speed, last_flags,
+                                   first_time_seen, last_time_seen, download_speed_max, upload_speed_max)
+        VALUES (#{ip}, #{port}, #{infoHash}, #{torrentIsPrivate}, #{torrentSize}, #{downloader},
+                #{downloaderProgress}, #{peerId}, #{clientName}, #{peerProgress},
+                #{uploaded}, #{uploadedOffset}, #{uploadSpeed}, #{downloaded}, #{downloadedOffset},
+                #{downloadSpeed}, #{lastFlags}, #{firstTimeSeen}, #{lastTimeSeen}, #{downloadSpeedMax},
+                #{uploadSpeedMax})
+        ON CONFLICT (ip, port, info_hash, downloader) DO UPDATE SET
+            torrent_is_private = excluded.torrent_is_private,
+            torrent_size = excluded.torrent_size,
+            downloader_progress = excluded.downloader_progress,
+            peer_id = excluded.peer_id,
+            client_name = excluded.client_name,
+            peer_progress = excluded.peer_progress,
+            uploaded = excluded.uploaded,
+            uploaded_offset = excluded.uploaded_offset,
+            upload_speed = excluded.upload_speed,
+            downloaded = excluded.downloaded,
+            downloaded_offset = excluded.downloaded_offset,
+            download_speed = excluded.download_speed,
+            last_flags = excluded.last_flags,
+            first_time_seen = excluded.first_time_seen,
+            last_time_seen = excluded.last_time_seen,
+            download_speed_max = excluded.download_speed_max,
+            upload_speed_max = excluded.upload_speed_max
+    </insert>
+</mapper>

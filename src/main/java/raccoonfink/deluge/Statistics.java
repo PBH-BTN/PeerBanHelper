@@ -1,7 +1,6 @@
 package raccoonfink.deluge;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public final class Statistics {
 
@@ -17,18 +16,18 @@ public final class Statistics {
     private final int m_uploadProtocolRate;
     private final int m_uploadRate;
 
-    public Statistics(final JSONObject stats) {
-        m_dhtNodes = stats.optInt("dht_nodes");
-        m_downloadProtocolRate = stats.optInt("download_protocol_rate");
-        m_downloadRate = stats.optInt("download_rate");
-        m_freeSpace = stats.optInt("free_space");
-        m_incomingConnections = stats.optBoolean("has_incoming_connections");
-        m_maxDownload = stats.optDouble("max_download");
-        m_maxNumConnections = stats.optInt("max_num_connections");
-        m_maxUpload = stats.optDouble("max_upload");
-        m_numConnections = stats.optInt("num_connections");
-        m_uploadProtocolRate = stats.optInt("upload_protocol_rate");
-        m_uploadRate = stats.optInt("upload_rate");
+    public Statistics(final JsonObject stats) {
+        m_dhtNodes = stats.has("dht_nodes") ? stats.get("dht_nodes").getAsInt() : 0;
+        m_downloadProtocolRate = stats.has("download_protocol_rate") ? stats.get("download_protocol_rate").getAsInt() : 0;
+        m_downloadRate = stats.has("download_rate") ? stats.get("download_rate").getAsInt() : 0;
+        m_freeSpace = stats.has("free_space") ? stats.get("free_space").getAsInt() : 0;
+        m_incomingConnections = stats.has("has_incoming_connections") && stats.get("has_incoming_connections").getAsBoolean();
+        m_maxDownload = stats.has("max_download") ? stats.get("max_download").getAsDouble() : 0.0;
+        m_maxNumConnections = stats.has("max_num_connections") ? stats.get("max_num_connections").getAsInt() : 0;
+        m_maxUpload = stats.has("max_upload") ? stats.get("max_upload").getAsDouble() : 0.0;
+        m_numConnections = stats.has("num_connections") ? stats.get("num_connections").getAsInt() : 0;
+        m_uploadProtocolRate = stats.has("upload_protocol_rate") ? stats.get("upload_protocol_rate").getAsInt() : 0;
+        m_uploadRate = stats.has("upload_rate") ? stats.get("upload_rate").getAsInt() : 0;
     }
 
     public int getDHTNodes() {
@@ -75,19 +74,19 @@ public final class Statistics {
         return m_uploadRate;
     }
 
-    public JSONObject toJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
-        ret.put("dht_nodes", m_dhtNodes);
-        ret.put("download_protocol_rate", m_downloadProtocolRate);
-        ret.put("download_rate", m_downloadRate);
-        ret.put("free_space", m_freeSpace);
-        ret.put("incoming_connections", m_incomingConnections);
-        ret.put("max_download", m_maxDownload);
-        ret.put("max_num_connections", m_maxNumConnections);
-        ret.put("max_upload", m_maxUpload);
-        ret.put("num_connections", m_numConnections);
-        ret.put("upload_protocol_rate", m_uploadProtocolRate);
-        ret.put("upload_rate", m_uploadRate);
+    public JsonObject toJSON() {
+        final JsonObject ret = new JsonObject();
+        ret.addProperty("dht_nodes", m_dhtNodes);
+        ret.addProperty("download_protocol_rate", m_downloadProtocolRate);
+        ret.addProperty("download_rate", m_downloadRate);
+        ret.addProperty("free_space", m_freeSpace);
+        ret.addProperty("incoming_connections", m_incomingConnections);
+        ret.addProperty("max_download", m_maxDownload);
+        ret.addProperty("max_num_connections", m_maxNumConnections);
+        ret.addProperty("max_upload", m_maxUpload);
+        ret.addProperty("num_connections", m_numConnections);
+        ret.addProperty("upload_protocol_rate", m_uploadProtocolRate);
+        ret.addProperty("upload_rate", m_uploadRate);
         return ret;
     }
 }

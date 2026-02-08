@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed;
 
 import com.ghostchu.peerbanhelper.Main;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -12,7 +13,6 @@ import org.eclipse.swt.widgets.Shell;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
 @Slf4j
@@ -63,19 +63,14 @@ public final class SwtBrowserCanvas extends Canvas {
             try {
                 this.browser = new Browser(this.shell, SWT.NONE);
                 this.browser.setVisible(true);
-                try (var input = Main.class.getResourceAsStream("/placeholder.html")) {
-                    if (input != null) {
-                        this.browser.setText(new String(input.readAllBytes(), StandardCharsets.UTF_8));
-                    }
-                } catch (Exception e) {
-                    log.debug("Cannot load placeholder.html", e);
-                }
+                this.browser.setUrl(Main.getPbhServerAddress());
                 this.browserInitialized = true;
                 // 应用正确的大小
                 updateBrowserSize();
             } catch (SWTError e) {
                 this.browserInitialized = false;
                 log.debug("Cannot init SWT Browser", e);
+                Sentry.captureException(e);
             }
         });
     }

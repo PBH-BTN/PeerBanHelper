@@ -21,11 +21,12 @@ jobs:
           cp build/libs/PeerBanHelper.jar pkg/portable/PeerBanHelper/
           cp install4j/icon.ico pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
+          cp -r platform-natives/windows-x86_64/libraries pkg/portable/PeerBanHelper/
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
           mkdir -p jbr
-          wget https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk-25-windows-x64-b176.4.zip -O jbr/jbrsdk-25-windows-x64-b176.4.zip
-          (cd jbr && unzip jbrsdk-25-windows-x64-b176.4.zip && mv jbrsdk-25-windows-x64-b176.4 jre)
+          wget https://cache-redirector.jetbrains.com/intellij-jbr/jbr-25.0.2-windows-x64-b300.57.zip -O jbr/jbr-25.0.2-windows-x64-b300.57.zip
+          (cd jbr && unzip jbr-25.0.2-windows-x64-b300.57.zip && mv jbr-25.0.2-windows-x64-b300.57 jre)
           mv jbr/jre pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)
         # 上面那个文件名需要符合收集条件

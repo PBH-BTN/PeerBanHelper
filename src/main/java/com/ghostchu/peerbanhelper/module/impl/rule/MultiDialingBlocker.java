@@ -20,6 +20,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,11 +192,13 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                             huntingList.invalidate(torrentSubnetStr);
                         }
                     }
-                } catch (ExecutionException ignored) {
+                } catch (ExecutionException e) {
+                    Sentry.captureException(e);
                 }
             }
         } catch (Exception e) {
             log.error("shouldBanPeer exception", e);
+            Sentry.captureException(e);
         }
 
         return pass();

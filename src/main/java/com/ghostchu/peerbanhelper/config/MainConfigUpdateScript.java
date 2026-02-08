@@ -3,15 +3,15 @@ package com.ghostchu.peerbanhelper.config;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +35,29 @@ public final class MainConfigUpdateScript {
 //            conf.set("server.token", UUID.randomUUID().toString());
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
+    }
+
+    @UpdateScript(version = 43)
+    public void databaseTypeChange(YamlConfiguration bundle) {
+        var id = conf.getInt("database.type", -1);
+        if (id == -1) return;
+        switch (id) {
+            case 1 -> conf.set("database.type", "h2");
+            case 2, 10 -> conf.set("database.type", "mysql");
+            case 3, 11 -> conf.set("database.type", "postgresql");
+            default -> conf.set("database.type", "sqlite"); // 0 and other use sqlite
+        }
+    }
+
+
+    @UpdateScript(version = 42)
+    public void databaseSection(YamlConfiguration bundle) {
+        conf.set("database", bundle.get("database"));
+    }
+
+    @UpdateScript(version = 41)
+    public void privacyAnalytics(YamlConfiguration bundle) {
+        conf.set("privacy.analytics", bundle.get("privacy.analytics"));
     }
 
     @UpdateScript(version = 40)
@@ -67,9 +90,10 @@ public final class MainConfigUpdateScript {
             if (host.startsWith("172.")) {
                 try {
                     log.info("Updating endpoint for downloader {} for Synology DSM package upgrade from {} to {}.", key, endpoint, downloaderSection.getString("endpoint"));
-                    downloaderSection.set("endpoint", new URL(uri.getScheme(), "127.0.0.1", uri.getPort(), uri.getPath()).toString());
-                } catch (MalformedURLException e) {
+                    downloaderSection.set("endpoint", (new URI(uri.getScheme(), null, "127.0.0.1", uri.getPort(), uri.getPath(), null, null)).toString());
+                } catch (URISyntaxException e) {
                     log.error("Unable to update endpoint for downloader {} on Synology DSM: {}", key, e.getMessage());
+                    Sentry.captureException(e);
                 }
             }
         }
@@ -331,7 +355,7 @@ public final class MainConfigUpdateScript {
         for (String key : section.getKeys(false)) {
             ConfigurationSection downloader = section.getConfigurationSection(key);
             if (downloader != null) {
-                if (downloader.getString("type", "").equalsIgnoreCase("qBittorrent")) {
+                if ("qBittorrent".equalsIgnoreCase(downloader.getString("type", ""))) {
                     downloader.set("increment-ban", false);
                 }
             }
@@ -348,7 +372,7 @@ public final class MainConfigUpdateScript {
         for (String key : section.getKeys(false)) {
             ConfigurationSection downloader = section.getConfigurationSection(key);
             if (downloader != null) {
-                if (downloader.getString("type", "").equalsIgnoreCase("Transmission")) {
+                if ("Transmission".equalsIgnoreCase(downloader.getString("type", ""))) {
                     downloader.set("rpc-url", "/transmission/rpc");
                 }
             }
@@ -370,7 +394,7 @@ public final class MainConfigUpdateScript {
         for (String key : section.getKeys(false)) {
             ConfigurationSection downloader = section.getConfigurationSection(key);
             if (downloader != null) {
-                if (downloader.getString("type", "").equalsIgnoreCase("qBittorrent")) {
+                if ("qBittorrent".equalsIgnoreCase(downloader.getString("type", ""))) {
                     downloader.set("increment-ban", true);
                 }
             }

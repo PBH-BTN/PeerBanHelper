@@ -19,21 +19,28 @@ import java.util.concurrent.ScheduledExecutorService;
 @Slf4j
 public final class CommonUtil {
 
-    private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofPlatform().name("CommonScheduler").factory());
+    private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofPlatform()
+            .name("CommonScheduler").factory());
+    private static final ScheduledExecutorService BG_CLEANUP_SCHEDULER = Executors.newScheduledThreadPool(1, Thread.ofPlatform()
+            .name("BgCleanupScheduler").factory()); // BG_CLEANUP_SCHEDULER 必须是单线程执行，并发将导致 [SQLITE_BUSY] database is lock
 
     public static ScheduledExecutorService getScheduler() {
         return GENERAL_SCHEDULER;
     }
 
+    public static ScheduledExecutorService getBgCleanupScheduler() {
+        return BG_CLEANUP_SCHEDULER;
+    }
+
     public static void deleteFileOrDirectory(@NotNull File file) {
         // Traverse the file tree in depth-first fashion and delete each file/directory.
-        if(!file.exists()) return;
-        if(file.isFile()){
+        if (!file.exists()) return;
+        if (file.isFile()) {
             file.delete();
             return;
         }
-        try (var stream = Files.walk(file.toPath())){
-                    stream.sorted(Comparator.reverseOrder())
+        try (var stream = Files.walk(file.toPath())) {
+            stream.sorted(Comparator.reverseOrder())
                     .forEach(path -> {
                         try {
                             Files.delete(path);

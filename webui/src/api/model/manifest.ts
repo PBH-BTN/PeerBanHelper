@@ -19,6 +19,7 @@ export interface module {
 
 export interface mainfest {
   version: version
+  analytics: boolean
   modules: module[]
 }
 export interface GlobalConfig {

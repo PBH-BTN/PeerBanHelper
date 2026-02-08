@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.hash.Hashing;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +45,7 @@ public class LicenseManager implements Reloadable {
             } catch (Exception e) {
                 log.warn(tlUI(Lang.PBH_LICENSE_PARSE_FAILED, e.getClass().getName() + ": " + e.getMessage()), e);
                 keyIterator.remove();
+                Sentry.captureException(e);
             }
         }
         Main.getMainConfig().set("pbh-plus-key", keyTexts);
@@ -51,6 +53,7 @@ public class LicenseManager implements Reloadable {
             Main.getMainConfig().save(Main.getMainConfigFile());
         } catch (IOException e) {
             log.error("Unable to save main configuration file!", e);
+            Sentry.captureException(e);
         }
         licenseBackend.setLicenses(licenseList);
         if (isFeatureEnabled("basic")) {
@@ -58,7 +61,7 @@ public class LicenseManager implements Reloadable {
             ExchangeMap.PBH_PLUS_ACTIVATED = true;
         } else {
             ExchangeMap.PBH_PLUS_ACTIVATED = false;
-            ExchangeMap.GUI_DISPLAY_FLAGS.removeIf(displayFlag -> displayFlag.getId().equals("pbh-plus"));
+            ExchangeMap.GUI_DISPLAY_FLAGS.removeIf(displayFlag -> "pbh-plus".equals(displayFlag.getId()));
         }
     }
 

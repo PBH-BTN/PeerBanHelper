@@ -2,7 +2,8 @@ import type { InitReq } from './init'
 
 export interface InitConfig extends InitReq {
   acceptPrivacy: boolean
-  valid: boolean
+  downloaderValid: boolean
+  databaseValid: boolean
 }
 
 export interface BtnConfig {
@@ -15,6 +16,7 @@ export interface BtnConfig {
 export interface OobeStepConfig {
   titleKey: string
   descriptionKey?: string
+  hidden?: boolean
   canNext?: (config: InitConfig) => boolean
   component: () => Promise<unknown>
 }
