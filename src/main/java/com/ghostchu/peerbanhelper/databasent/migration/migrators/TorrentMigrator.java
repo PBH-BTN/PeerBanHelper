@@ -67,6 +67,7 @@ public class TorrentMigrator implements TableMigrator {
                         : null;
 
                 TorrentEntity entity = new TorrentEntity();
+                entity.setId(oldId);
                 entity.setInfoHash(infoHash);
                 entity.setName(name);
                 entity.setSize(size);
