@@ -79,13 +79,13 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
             Integer changes = writeTransactionTemplate.execute(status -> 
                 baseMapper.delete(new LambdaQueryWrapper<HistoryEntity>()
                     .le(HistoryEntity::getBanAt, thresholdDate)
-                    .last("LIMIT 300"))
+                    .last("LIMIT 150"))
             );
             if (changes == null || changes <= 0) {
                 break;
             }
             deleted += changes;
-            Thread.sleep(200);
+            Thread.sleep(300);
         }
         return deleted;
     }

@@ -43,12 +43,12 @@ public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> impl
             Integer changes = writeTransactionTemplate.execute(status -> 
                 baseMapper.delete(new LambdaQueryWrapper<AlertEntity>()
                     .le(AlertEntity::getCreateAt, before)
-                    .last("LIMIT 300"))
+                    .last("LIMIT 150"))
             );
             if (changes == null || changes <= 0) {
                 break;
             }
-            Thread.sleep(200);
+            Thread.sleep(300);
             deleted += changes;
         }
         return deleted;

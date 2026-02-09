@@ -51,13 +51,13 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
             Integer changes = writeTransactionTemplate.execute(status -> 
                 baseMapper.delete(new LambdaQueryWrapper<PCBRangeEntity>()
                     .lt(PCBRangeEntity::getLastTimeSeen, timestamp)
-                    .last("LIMIT 300"))
+                    .last("LIMIT 150"))
             );
             if (changes == null || changes <= 0) {
                 break;
             }
             deleted += changes;
-            Thread.sleep(200);
+            Thread.sleep(300);
         }
         return deleted;
 	}

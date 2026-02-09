@@ -166,7 +166,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
                 break;
             }
             deleted += changes;
-            Thread.sleep(200);
+            Thread.sleep(300);
         }
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}
