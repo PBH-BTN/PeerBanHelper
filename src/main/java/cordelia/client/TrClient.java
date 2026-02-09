@@ -135,13 +135,13 @@ public final class TrClient {
                 try (Response response = httpClient.newCall(request).execute()) {
                     String sessionId = response.header(Session.SESSION_ID);
                     if (sessionId == null) {
-                        throw new IllegalStateException("No session ID found in response headers");
+                        throw new IllegalStateException("No session ID found in response headers, check your credentials.");
                     }
                     sessionStore.set(new Session(sessionId));
                 }
             } catch (IOException e) {
                 log.error(tlUI(Lang.TRCLIENT_API_ERROR, e.getClass().getName()), e.getMessage());
-                throw new IllegalStateException(e);
+                throw new TransmissionIOException(e.getMessage());
             }
         }
         return sessionStore.get();
