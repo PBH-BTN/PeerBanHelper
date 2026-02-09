@@ -20,6 +20,8 @@ jobs:
         run: |
           mkdir -p /tmp/pbh-packages
           cp -av pkg/synopkg/* /tmp/pbh-packages
+          mkdir -p ~/toolkit
+          sudo ln -s ~/toolkit /toolkit
       - name: Read synopkg version
         id: pkgscripts_info
         run: |
@@ -29,7 +31,7 @@ jobs:
         id: cache-synopkg-restore
         uses: actions/cache/restore@v5
         with:
-          path: /toolkit
+          path: ~/toolkit
           key: synopkg-DSM7.2-${{ steps.pkgscripts_info.outputs.pkgscripts_sha }}
       - name: Run deploy script
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
@@ -38,7 +40,7 @@ jobs:
         id: cache-synopkg-save
         uses: actions/cache/save@v5
         with:
-          path: /toolkit
+          path: ~/toolkit
           key: ${{ steps.cache-synopkg-restore.outputs.cache-primary-key }}
       - name: Process version for SPK
         id: process_version
