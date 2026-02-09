@@ -69,7 +69,6 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         return baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("torrent_id", torrentId)));
     }
 
-    @SneakyThrows(InterruptedException.class)
     @Override
     public int deleteExpiredLogs(int keepDays) {
         int deleted = 0;
@@ -85,7 +84,6 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
                 break;
             }
             deleted += changes;
-            Thread.sleep(300);
         }
         return deleted;
     }

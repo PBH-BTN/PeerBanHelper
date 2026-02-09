@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.BanListService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -45,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
@@ -91,13 +93,14 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private final AlertManager alertManager;
     private final ExecutorService slaveWorkStealingService = Executors.newWorkStealingPool();
     private final ExecutorService mainWorkStealingService = Executors.newWorkStealingPool();
+    private final WriteTransactionTemplate transactionTemplate;
 
 
     public DownloaderServerImpl(BanList banList, DownloaderManagerImpl downloaderManager,
                                 @Qualifier("persistMetrics") BasicMetrics metrics,
                                 ModuleManagerImpl moduleManager, BanListService banListDao,
                                 DNSLookup dnsLookup, Laboratory laboratory,
-                                AlertManager alertManager) {
+                                AlertManager alertManager, WriteTransactionTemplate transactionTemplate) {
         this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.metrics = metrics;
@@ -106,6 +109,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.moduleManager = moduleManager;
         this.laboratory = laboratory;
         this.alertManager = alertManager;
+        this.transactionTemplate = transactionTemplate;
         Main.getReloadManager().register(this);
     }
 
@@ -174,6 +178,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         } catch (Exception e) {
             log.error(tlUI(Lang.SAVE_BANLIST_FAILED), e);
         }
+    }
+
+    private void beginTransactionBanWave(){
+        transactionTemplate.execute(_ ->{
+            banWave();
+            return null;
+        });
     }
 
     /**
@@ -731,7 +742,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             thread.setDaemon(true);
             return thread;
         });
-        BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+        BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::beginTransactionBanWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
     }
 
     @Override

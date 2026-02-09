@@ -42,7 +42,6 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
                 .eq(PCBRangeEntity::getRange, range));
 	}
 
-    @SneakyThrows(InterruptedException.class)
 	@Override
     public int cleanupDatabase(OffsetDateTime timestamp) {
         int deleted = 0;
@@ -57,7 +56,6 @@ public class PCBRangeServiceImpl extends ServiceImpl<PCBRangeMapper, PCBRangeEnt
                 break;
             }
             deleted += changes;
-            Thread.sleep(300);
         }
         return deleted;
 	}

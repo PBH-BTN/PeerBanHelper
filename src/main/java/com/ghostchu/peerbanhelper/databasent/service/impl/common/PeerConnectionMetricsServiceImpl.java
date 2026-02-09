@@ -150,7 +150,6 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 		return buffer;
 	}
 
-    @SneakyThrows(InterruptedException.class)
 	@Override
 	public void removeOutdatedData(OffsetDateTime beforeAt) {
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANING_UP));
@@ -166,7 +165,6 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
                 break;
             }
             deleted += changes;
-            Thread.sleep(300);
         }
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}

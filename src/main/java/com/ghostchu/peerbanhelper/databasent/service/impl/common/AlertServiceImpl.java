@@ -34,7 +34,6 @@ public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> impl
         return baseMapper.exists(new LambdaQueryWrapper<AlertEntity>().eq(AlertEntity::getIdentifier, identifier));
     }
 
-    @SneakyThrows(InterruptedException.class)
     @Override
     public int deleteOldAlerts(@NotNull OffsetDateTime before) {
         int deleted = 0;
@@ -48,7 +47,6 @@ public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> impl
             if (changes == null || changes <= 0) {
                 break;
             }
-            Thread.sleep(300);
             deleted += changes;
         }
         return deleted;

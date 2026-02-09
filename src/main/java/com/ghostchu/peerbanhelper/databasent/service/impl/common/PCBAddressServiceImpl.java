@@ -44,7 +44,6 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
                 .eq(PCBAddressEntity::getIp, ip));
 	}
 
-    @SneakyThrows(InterruptedException.class)
 	@Override
     public int cleanupDatabase(OffsetDateTime timestamp) {
         int deleted = 0;
@@ -59,7 +58,6 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
                 break;
             }
             deleted += changes;
-            Thread.sleep(300);
         }
         return deleted;
 	}
