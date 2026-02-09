@@ -37,6 +37,7 @@ jobs:
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         run: sudo bash pkg/synopkg/deploy-env.sh
       - name: Save synopkg cache
+        if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         id: cache-synopkg-save
         uses: actions/cache/save@v5
         with:
