@@ -122,27 +122,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @Subscribe
     public void onPeerUnBan(PeerUnbanEvent event) {
-        Set<Map.Entry<IPAddress, String>> deleteRange = new HashSet<>();
-        for (Map.Entry<IPAddress, BanMetadata> entry : event.getUnbannedPeers().entrySet()) {
-            var banMetadata = entry.getValue();
-            var peerIp = entry.getKey();
-            if (banMetadata.isBanForDisconnect()) {
-                continue;
-            }
-            IPAddress peerPrefix;
-            if (peerIp.isIPv4()) {
-                peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv4PrefixLength);
-            } else {
-                peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
-            }
-            cache.asMap().keySet().removeIf(key ->
-                    key.torrentId().equals(banMetadata.getTorrent().getId()) &&
-                            key.peerAddressIp().equals(peerIp.toInetAddress())
-            );
-            if (!banList.contains(peerPrefix)) {
-                deleteRange.add(new AbstractMap.SimpleEntry<>(peerPrefix, banMetadata.getTorrent().getId()));
-            }
-        }
         transactionTemplate.execute(_ -> {
             event.getUnbannedPeers().forEach((addr, meta) -> pcbAddressDao.deleteEntry(meta.getTorrent().getId(), addr.toInetAddress()));
             return null;
