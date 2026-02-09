@@ -1,9 +1,11 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.service.PCBRangeService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
@@ -22,6 +24,7 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -37,14 +40,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
-import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,7 +68,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     // oom 引发 soft-value 被垃圾回收，则可能导致其为 null
                     return;
                 }
-                if(!cacheBackFlushFlag.get()) return;
+                if (!cacheBackFlushFlag.get()) return;
                 flushBackDatabase(pair.getLeft(), pair.getRight());
             })
             .build();
@@ -92,9 +92,11 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private double fastPcbTestPercentage;
     private final Object cacheDBLoadingLock = new Object();
     @Autowired
-    private TransactionTemplate transactionTemplate;
+    private WriteTransactionTemplate transactionTemplate;
     @Autowired
     private BackgroundTaskManager backgroundTaskManager;
+    @Autowired
+    private BanList banList;
 
 
     @Override
@@ -120,23 +122,32 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @Subscribe
     public void onPeerUnBan(PeerUnbanEvent event) {
-        if (event.getBanMetadata().isBanForDisconnect()) {
-            return;
+        Set<Map.Entry<IPAddress, String>> deleteRange = new HashSet<>();
+        for (Map.Entry<IPAddress, BanMetadata> entry : event.getUnbannedPeers().entrySet()) {
+            var banMetadata = entry.getValue();
+            var peerIp = entry.getKey();
+            if (banMetadata.isBanForDisconnect()) {
+                continue;
+            }
+            IPAddress peerPrefix;
+            if (peerIp.isIPv4()) {
+                peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv4PrefixLength);
+            } else {
+                peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
+            }
+            cache.asMap().keySet().removeIf(key ->
+                    key.torrentId().equals(banMetadata.getTorrent().getId()) &&
+                            key.peerAddressIp().equals(peerIp.toInetAddress())
+            );
+            if (!banList.contains(peerPrefix)) {
+                deleteRange.add(new AbstractMap.SimpleEntry<>(peerPrefix, banMetadata.getTorrent().getId()));
+            }
         }
-        IPAddress peerPrefix;
-        IPAddress peerIp = event.getAddress();
-        if (peerIp.isIPv4()) {
-            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv4PrefixLength);
-        } else {
-            peerPrefix = IPAddressUtil.toPrefixBlockAndZeroHost(peerIp, ipv6PrefixLength);
-        }
-        cache.asMap().keySet().removeIf(key ->
-                key.torrentId().equals(event.getBanMetadata().getTorrent().getId()) &&
-                        key.peerAddressIp().equals(peerIp.toInetAddress())
-        );
-        int deletedRanges = pcbRangeDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerPrefix.toString());
-        int deletedAddresses = pcbAddressDao.deleteEntry(event.getBanMetadata().getTorrent().getId(), peerIp.toInetAddress());
-        log.debug("Cleaned up {} PCB range records and {} PCB address records on unban for torrent {} and ip {}", deletedRanges, deletedAddresses, event.getBanMetadata().getTorrent().getId(), peerIp);
+        transactionTemplate.execute(_ -> {
+            event.getUnbannedPeers().forEach((addr, meta) -> pcbAddressDao.deleteEntry(meta.getTorrent().getId(), addr.toInetAddress()));
+            return null;
+        });
+        log.debug("Deleted unbanned peers");
     }
 
     private void cleanDatabase() {
@@ -197,7 +208,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     private void flushBackDatabaseAll() {
 
-        transactionTemplate.execute(_ ->{
+        transactionTemplate.execute(_ -> {
             for (Map.Entry<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> entry : cache.asMap().entrySet()) {
                 flushBackDatabase(entry.getValue().getKey(), entry.getValue().getRight());
             }

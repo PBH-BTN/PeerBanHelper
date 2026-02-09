@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.BanListMapper;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.BanListService;
 import com.ghostchu.peerbanhelper.databasent.table.BanListEntity;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -13,7 +14,6 @@ import io.sentry.Sentry;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import java.util.Map;
 @Service
 public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity> implements BanListService {
     @Autowired
-    private TransactionTemplate transactionTemplate;
+    private WriteTransactionTemplate transactionTemplate;
 
     @Override
     public @NotNull Map<IPAddress, BanMetadata> readBanList() {

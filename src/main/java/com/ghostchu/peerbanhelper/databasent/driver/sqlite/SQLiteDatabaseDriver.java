@@ -78,7 +78,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-SQLitePool").factory());
         config.addDataSourceProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), SQLiteConfig.JournalMode.WAL);
         config.addDataSourceProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), SQLiteConfig.SynchronousMode.NORMAL);
-        config.addDataSourceProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),67108864);
+        config.addDataSourceProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),-1);
         config.addDataSourceProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 134217728);
         return config;
     }

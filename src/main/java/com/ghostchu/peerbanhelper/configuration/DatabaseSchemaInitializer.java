@@ -32,7 +32,7 @@ public class DatabaseSchemaInitializer {
             String repeatType = databaseDriver.getType().getRepeatType();
             // 1. Run Flyway Migration
             Flyway flyway = Flyway.configure()
-                    .dataSource(databaseDriver.getReadDataSource())
+                    .dataSource(databaseDriver.getWriteDataSource())
                     .locations("classpath:db/migration/" + migrationType)
                     .baselineOnMigrate(true)
                     .validateOnMigrate(ExternalSwitch.parseBoolean("dbnt.flyway.validateOnMigrate", true))
@@ -47,7 +47,7 @@ public class DatabaseSchemaInitializer {
             // Sort by filename to ensure deterministic execution order
             Arrays.sort(resources, Comparator.comparing(Resource::getFilename));
 
-            try (Connection conn = databaseDriver.getReadDataSource().getConnection()) {
+            try (Connection conn = databaseDriver.getWriteDataSource().getConnection()) {
                 for (Resource resource : resources) {
                     log.debug("Executing repeat script: {}", resource.getFilename());
                     ScriptUtils.executeSqlScript(conn, resource);

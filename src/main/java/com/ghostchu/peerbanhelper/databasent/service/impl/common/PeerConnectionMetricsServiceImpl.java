@@ -4,15 +4,19 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsMapper;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteDataSource;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import io.sentry.Sentry;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -28,6 +32,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Service
 @Slf4j
 public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnectionMetricsMapper, PeerConnectionMetricsEntity> implements PeerConnectionMetricsService {
+	@Autowired
+	private WriteTransactionTemplate writeTransactionTemplate;
 
 
 	@Override
@@ -80,6 +86,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	}
 
 	@Override
+	@WriteDataSource
 	public void saveAggregating(@NotNull List<PeerConnectionMetricsEntity> buffer, boolean overwrite) {
 		for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
             PeerConnectionMetricsEntity entityInDb = baseMapper.selectOne(new LambdaQueryWrapper<PeerConnectionMetricsEntity>().eq(PeerConnectionMetricsEntity::getTimeframeAt, peerConnectionMetricsEntity.getTimeframeAt()).eq(PeerConnectionMetricsEntity::getDownloader, peerConnectionMetricsEntity.getDownloader()));
@@ -143,19 +150,23 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 		return buffer;
 	}
 
+    @SneakyThrows(InterruptedException.class)
 	@Override
 	public void removeOutdatedData(OffsetDateTime beforeAt) {
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANING_UP));
         long deleted = 0;
         while (true) {
-            List<PeerConnectionMetricsEntity> list = baseMapper.selectObjs(new LambdaQueryWrapper<PeerConnectionMetricsEntity>()
-                    .select(PeerConnectionMetricsEntity::getId)
+            // 每次循环在独立事务中执行，完成后释放连接
+            Integer changes = writeTransactionTemplate.execute(status -> 
+                baseMapper.delete(new LambdaQueryWrapper<PeerConnectionMetricsEntity>()
                     .le(PeerConnectionMetricsEntity::getTimeframeAt, beforeAt)
-                    .last("LIMIT 1000"));
-            if (list.isEmpty()) {
+                    .last("LIMIT 300"))
+            );
+            if (changes == null || changes <= 0) {
                 break;
             }
-            deleted += baseMapper.deleteByIds(list);
+            deleted += changes;
+            Thread.sleep(200);
         }
 		log.info(tlUI(Lang.CONNECTION_METRICS_SERVICE_CLEANED_UP, deleted));
 	}

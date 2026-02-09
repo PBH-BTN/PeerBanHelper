@@ -6,10 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
 public final class PeerUnbanEvent {
-    private IPAddress address;
-    private BanMetadata banMetadata;
+    private final Map<IPAddress, BanMetadata> unbannedPeers;
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.impl.common.PeerRecordServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
@@ -28,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -46,7 +46,7 @@ public class PeerRecodingServiceModule extends AbstractFeatureModule implements 
     @Autowired
     private PeerRecordService peerRecordDao;
     @Autowired
-    private TransactionTemplate transactionTemplate;
+    private WriteTransactionTemplate transactionTemplate;
 
     @SuppressWarnings("NullableProblems")
     private final Cache<PeerRecordServiceImpl.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = CacheBuilder

@@ -3,9 +3,12 @@ package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
@@ -14,6 +17,9 @@ import java.util.List;
 
 @Service
 public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddressEntity> implements PCBAddressService {
+
+	@Autowired
+	private WriteTransactionTemplate writeTransactionTemplate;
 
 	@Override
 	public List<PCBAddressEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
@@ -38,18 +44,22 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
                 .eq(PCBAddressEntity::getIp, ip));
 	}
 
+    @SneakyThrows(InterruptedException.class)
 	@Override
     public int cleanupDatabase(OffsetDateTime timestamp) {
         int deleted = 0;
         while (true) {
-            List<PCBAddressEntity> list = baseMapper.selectList(new LambdaQueryWrapper<PCBAddressEntity>()
-                    .select(PCBAddressEntity::getId)
+            // 每次循环在独立事务中执行，完成后释放连接
+            Integer changes = writeTransactionTemplate.execute(status -> 
+                baseMapper.delete(new LambdaQueryWrapper<PCBAddressEntity>()
                     .lt(PCBAddressEntity::getLastTimeSeen, timestamp)
-                    .last("LIMIT 1000"));
-            if (list.isEmpty()) {
+                    .last("LIMIT 300"))
+            );
+            if (changes == null || changes <= 0) {
                 break;
             }
-            deleted += baseMapper.deleteByIds(list);
+            deleted += changes;
+            Thread.sleep(200);
         }
         return deleted;
 	}
