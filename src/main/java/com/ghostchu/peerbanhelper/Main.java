@@ -233,6 +233,7 @@ public class Main {
             sentryOptions.addIgnoredExceptionForType(BadPaddingException.class);
             sentryOptions.addIgnoredExceptionForType(TimeoutException.class);
             sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
+            sentryOptions.addIgnoredExceptionForType(IOException.class);
         });
     }
 
