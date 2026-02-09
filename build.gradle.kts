@@ -72,7 +72,7 @@ dependencies {
     implementation("com.h2database:h2:2.3.232")
     implementation("com.mysql:mysql-connector-j:9.6.0")
     implementation("org.postgresql:postgresql:42.7.9")
-    implementation("com.zaxxer:HikariCP:7.0.2")
+    implementation("com.alibaba:druid:1.2.23")
 
     // MyBatis-Plus Stuff
     implementation("com.baomidou:mybatis-plus-jsqlparser")

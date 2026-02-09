@@ -1,11 +1,10 @@
 package com.ghostchu.peerbanhelper.databasent.driver.sqlite;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -46,66 +45,63 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     protected @NotNull DataSource createReadDataSource() {
-        var config = createDefaultHikariConfig();
-        config.setMaximumPoolSize(Runtime.getRuntime().availableProcessors());
+        DruidDataSource dataSource = createDefaultDruidDataSource();
+        dataSource.setMaxActive(Runtime.getRuntime().availableProcessors());
+        
         SQLiteConfig sqLiteConfig = new SQLiteConfig();
         sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
         sqLiteConfig.setOpenMode(SQLiteOpenMode.FULLMUTEX);
-        config.addDataSourceProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), sqLiteConfig.getOpenModeFlags());
-        return new HikariDataSource(config);
+        
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
+            String.valueOf(sqLiteConfig.getOpenModeFlags()));
+        
+        return dataSource;
     }
 
     @Override
     protected @NotNull DataSource createWriteDataSource() {
-        var config = createDefaultHikariConfig();
-        config.setMaximumPoolSize(1);
+        DruidDataSource dataSource = createDefaultDruidDataSource();
+        dataSource.setMaxActive(1);
+        
         SQLiteConfig sqLiteConfig = new SQLiteConfig();
         sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
         sqLiteConfig.setOpenMode(SQLiteOpenMode.NOMUTEX);
-        config.addDataSourceProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), sqLiteConfig.getOpenModeFlags());
-        return new HikariDataSource(config);
+        
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
+            String.valueOf(sqLiteConfig.getOpenModeFlags()));
+        
+        return dataSource;
     }
 
-    private HikariConfig createDefaultHikariConfig(){
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
-        config.setDriverClassName("org.sqlite.JDBC");
-        config.setMaximumPoolSize(4);
-        config.setMinimumIdle(1);
-        config.setIdleTimeout(600000);
-        config.setConnectionTimeout(30000);
+    private DruidDataSource createDefaultDruidDataSource(){
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl("jdbc:sqlite:" + this.dbPath);
+        dataSource.setDriverClassName("org.sqlite.JDBC");
+        dataSource.setMaxActive(4);
+        dataSource.setMinIdle(1);
+        dataSource.setMaxWait(30000);
+        dataSource.setTimeBetweenEvictionRunsMillis(600000);
+        
+        // 连接池验证配置
+        dataSource.setValidationQuery("SELECT 1");
+        dataSource.setTestWhileIdle(true);
+        dataSource.setTestOnBorrow(false);
+        dataSource.setTestOnReturn(false);
+        
+        // 启用 fairQueuing FIFO - 使用公平锁
+        dataSource.setUseUnfairLock(false);
+        
         // SQLite-specific connection properties
-        config.setThreadFactory(Thread.ofVirtual().name("HikariCP-SQLitePool").factory());
-        config.addDataSourceProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), SQLiteConfig.JournalMode.WAL);
-        config.addDataSourceProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), SQLiteConfig.SynchronousMode.NORMAL);
-        config.addDataSourceProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),-1);
-        config.addDataSourceProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 134217728);
-        return config;
-    }
-
-    private void applyPragmaSettings(HikariDataSource dataSource) {
-        if (ExternalSwitch.parse("pbh.database.disableSQLitePragmaSettings") != null) {
-            log.info("SQLite PRAGMA settings are disabled by external switch");
-            return;
-        }
-
-        try (Connection conn = dataSource.getConnection();
-             var stmt = conn.createStatement()) {
-
-            stmt.executeUpdate("PRAGMA synchronous = NORMAL");
-            stmt.executeUpdate("PRAGMA journal_mode = WAL");
-            stmt.executeUpdate("PRAGMA mmap_size = 134217728");
-            stmt.executeUpdate("PRAGMA transaction_mode = IMMEDIATE");
-            stmt.executeUpdate("PRAGMA journal_size_limit = 67108864");
-            //long softHeapLimit = ExternalSwitch.parseLong("pbh.database.sqliteSoftHeapLimitBytes", 33554432L);
-            //stmt.executeUpdate("PRAGMA soft_heap_limit = " + softHeapLimit);
-
-            stmt.executeUpdate("PRAGMA OPTIMIZE");
-
-            log.debug("SQLite PRAGMA settings applied successfully");
-        } catch (SQLException e) {
-            log.warn("Failed to apply SQLite PRAGMA settings", e);
-        }
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), 
+            SQLiteConfig.JournalMode.WAL.getValue());
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), 
+            SQLiteConfig.SynchronousMode.NORMAL.getValue());
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(), 
+            String.valueOf(67108864));
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 
+            String.valueOf(134217728));
+        
+        return dataSource;
     }
 
     @Override

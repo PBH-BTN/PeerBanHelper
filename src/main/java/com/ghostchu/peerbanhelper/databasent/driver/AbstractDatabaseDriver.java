@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.databasent.driver;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,17 +19,17 @@ public abstract class AbstractDatabaseDriver implements DatabaseDriver {
 
     @Override
     public void close() throws Exception {
-        if (readDataSource instanceof HikariDataSource hikariDataSource) {
-            if (!hikariDataSource.isClosed())
-                hikariDataSource.close();
+        if (readDataSource instanceof DruidDataSource druidDataSource) {
+            if (!druidDataSource.isClosed())
+                druidDataSource.close();
         } else {
-            log.warn("Given DataSource is not an instance of HikariDataSource, cannot close it properly.");
+            log.warn("Given DataSource is not an instance of DruidDataSource, cannot close it properly.");
         }
-        if (writeDataSource instanceof HikariDataSource hikariDataSource) {
-            if (!hikariDataSource.isClosed())
-                hikariDataSource.close();
+        if (writeDataSource instanceof DruidDataSource druidDataSource) {
+            if (!druidDataSource.isClosed())
+                druidDataSource.close();
         } else {
-            log.warn("Given DataSource is not an instance of HikariDataSource, cannot close it properly.");
+            log.warn("Given DataSource is not an instance of DruidDataSource, cannot close it properly.");
         }
     }
 

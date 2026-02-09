@@ -180,13 +180,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         }
     }
 
-    private void beginTransactionBanWave(){
-        transactionTemplate.execute(_ ->{
-            banWave();
-            return null;
-        });
-    }
-
     /**
      * 启动新的一轮封禁序列
      */
@@ -742,7 +735,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             thread.setDaemon(true);
             return thread;
         });
-        BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::beginTransactionBanWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+        BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
     }
 
     @Override
