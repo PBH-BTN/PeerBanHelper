@@ -457,11 +457,11 @@ public final class IPDB implements AutoCloseable {
             this.isp = isp;
             this.net = net;
             this.province = province;
-            this.provinceCode = Long.parseLong(provinceCode.toString());
+            this.provinceCode = provinceCode != null ? Long.parseLong(provinceCode.toString()) : null;
             this.city = city;
-            this.cityCode = Long.parseLong(cityCode.toString());
+            this.cityCode = cityCode != null ?  Long.parseLong(cityCode.toString()) : null;
             this.districts = districts;
-            this.districtsCode = Long.parseLong(districtsCode.toString());
+            this.districtsCode = districtsCode != null ? Long.parseLong(districtsCode.toString()) : null;
         }
     }
 
