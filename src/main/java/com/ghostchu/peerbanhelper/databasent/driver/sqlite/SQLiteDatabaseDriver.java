@@ -22,6 +22,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     private final File dbFile;
     private final String dbPath;
     private final ConfigurationSection section;
+    private final DruidDataSource dataSource;
 
     public SQLiteDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
@@ -34,7 +35,9 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         }
         this.dbFile = new File(persistDir, "peerbanhelper-nt.db");
         this.dbPath = dbFile.getAbsolutePath();
-
+        DruidDataSource dataSource = createDefaultDruidDataSource();
+        dataSource.setMaxActive(Runtime.getRuntime().availableProcessors());
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -44,31 +47,11 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     protected @NotNull DataSource createReadDataSource() {
-        DruidDataSource dataSource = createDefaultDruidDataSource();
-        dataSource.setMaxActive(Runtime.getRuntime().availableProcessors());
-        
-        SQLiteConfig sqLiteConfig = new SQLiteConfig();
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.FULLMUTEX);
-        
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
-            String.valueOf(sqLiteConfig.getOpenModeFlags()));
-        
         return dataSource;
     }
 
     @Override
     protected @NotNull DataSource createWriteDataSource() {
-        DruidDataSource dataSource = createDefaultDruidDataSource();
-        dataSource.setMaxActive(1);
-        
-        SQLiteConfig sqLiteConfig = new SQLiteConfig();
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.NOMUTEX);
-        
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
-            String.valueOf(sqLiteConfig.getOpenModeFlags()));
-        
         return dataSource;
     }
 
