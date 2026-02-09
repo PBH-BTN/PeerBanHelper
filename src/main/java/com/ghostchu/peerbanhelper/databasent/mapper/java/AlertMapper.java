@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.databasent.mapper.java;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.jetbrains.annotations.NotNull;
 

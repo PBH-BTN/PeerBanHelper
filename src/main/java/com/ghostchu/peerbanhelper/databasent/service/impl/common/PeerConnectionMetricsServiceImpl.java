@@ -12,7 +12,6 @@ import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEnt
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerConnectionMetricsDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import io.sentry.Sentry;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

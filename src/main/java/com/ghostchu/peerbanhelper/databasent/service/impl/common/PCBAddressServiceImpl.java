@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper;
 import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

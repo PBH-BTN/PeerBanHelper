@@ -46,7 +46,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;

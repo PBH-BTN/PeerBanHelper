@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.databasent.migration;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.migration.migrators.*;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;

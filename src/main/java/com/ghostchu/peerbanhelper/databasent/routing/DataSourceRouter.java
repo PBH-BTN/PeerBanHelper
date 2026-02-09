@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.databasent.routing;
 
-import java.util.concurrent.Callable;
-
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.Callable;
 
 /**
  * 手动数据源路由 API，提供编程式的数据源切换能力

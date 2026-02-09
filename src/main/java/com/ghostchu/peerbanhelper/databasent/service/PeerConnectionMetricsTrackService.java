@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEnt
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 

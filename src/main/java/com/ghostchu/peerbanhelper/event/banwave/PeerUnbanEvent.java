@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
