@@ -53,7 +53,7 @@ public final class SwtBrowserCanvas extends Canvas {
         System.setProperty("org.eclipse.swt.browser.DefaultType", "edge");
     }
 
-    public void initBrowser() throws InterruptedException {
+    public void initBrowser() throws Exception {
         countDownLatch.await();
         display.syncExec(() -> {
             display.setData("org.eclipse.swt.internal.win32.Edge.useDarkPreferedColorScheme", Main.getGuiManager().isDarkMode());
