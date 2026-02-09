@@ -19,6 +19,7 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     private final String dbPath;
     private final ConfigurationSection section;
     private final AtomicBoolean requestCompactOnShutdown = new AtomicBoolean(false);
+    private final HikariDataSource dataSource;
 
     public H2DatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
@@ -31,6 +32,14 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         }
         this.dbFile = new File(persistDir, "peerbanhelper-nt");
         this.dbPath = dbFile.getAbsolutePath();
+          HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
+        config.setDriverClassName("org.h2.Driver");
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(1);
+        config.setIdleTimeout(600000);
+        config.setThreadFactory(Thread.ofVirtual().name("HikariCP-H2Pool").factory());
+        this.dataSource = new HikariDataSource(config);
     }
 
     @Override
@@ -39,21 +48,19 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource createDataSource() {
+    public @NotNull DataSource createWriteDataSource() {
         // Hikari CP SQLite DataSource implementation
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
-        config.setDriverClassName("org.h2.Driver");
-        config.setMaximumPoolSize(10);
-        config.setMinimumIdle(1);
-        config.setIdleTimeout(600000);
-        config.setThreadFactory(Thread.ofVirtual().name("HikariCP-H2Pool").factory());
-        return new HikariDataSource(config);
+        return dataSource;
+    }
+
+    @Override
+    protected @NotNull DataSource createReadDataSource() {
+        return dataSource;
     }
 
     @Override
     public void close() throws Exception {
-        try (Connection connection = getDataSource().getConnection()) {
+        try (Connection connection = getReadDataSource().getConnection()) {
             if (requestCompactOnShutdown.get()) {
                 connection.createStatement().execute("SHUTDOWN COMPACT");
             } else {

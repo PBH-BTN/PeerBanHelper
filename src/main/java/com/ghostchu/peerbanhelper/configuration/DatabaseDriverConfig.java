@@ -75,7 +75,7 @@ public class DatabaseDriverConfig {
 
     @Bean
     public PlatformTransactionManager transactionManager(@NotNull DatabaseDriver driver) {
-        return new DataSourceTransactionManager(driver.getDataSource());
+        return new DataSourceTransactionManager(driver.getReadDataSource());
     }
 
     @Bean
@@ -103,7 +103,7 @@ public class DatabaseDriverConfig {
             DatabaseDriver driver) throws Exception {
 
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
-        factoryBean.setDataSource(driver.getDataSource());
+        factoryBean.setDataSource(driver.getReadDataSource());
 
         List<Interceptor> interceptorList = new ArrayList<>();
         interceptorList.add(mpInterceptor);

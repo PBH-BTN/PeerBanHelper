@@ -12,20 +12,11 @@ import java.io.IOException;
 
 public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     private final ConfigurationSection section;
+    private final HikariDataSource dataSource;
 
     public MySQLDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         this.section = section;
-    }
-
-    @Override
-    public @NotNull DatabaseType getType() {
-        return DatabaseType.MYSQL;
-    }
-
-    @Override
-    public @NotNull DataSource createDataSource() {
-        // Hikari CP SQLite DataSource implementation
         HikariConfig config = new HikariConfig();
         String host = section.getString("host");
         int port = section.getInt("port");
@@ -43,6 +34,21 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-MySQLPool").factory());
-        return new HikariDataSource(config);
+        this.dataSource = new HikariDataSource(config);
+    }
+
+    @Override
+    public @NotNull DatabaseType getType() {
+        return DatabaseType.MYSQL;
+    }
+
+    @Override
+    protected @NotNull DataSource createReadDataSource() {
+        return dataSource;
+    }
+
+    @Override
+    protected @NotNull DataSource createWriteDataSource() {
+        return dataSource;
     }
 }

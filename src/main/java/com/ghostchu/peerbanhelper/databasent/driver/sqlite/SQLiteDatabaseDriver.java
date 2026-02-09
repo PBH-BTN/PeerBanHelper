@@ -9,6 +9,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteOpenMode;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -34,6 +36,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         }
         this.dbFile = new File(persistDir, "peerbanhelper-nt.db");
         this.dbPath = dbFile.getAbsolutePath();
+
     }
 
     @Override
@@ -42,30 +45,42 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource createDataSource() {
-        // Hikari CP SQLite DataSource implementation
+    protected @NotNull DataSource createReadDataSource() {
+        var config = createDefaultHikariConfig();
+        config.setMaximumPoolSize(Runtime.getRuntime().availableProcessors());
+        SQLiteConfig sqLiteConfig = new SQLiteConfig();
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.FULLMUTEX);
+        config.addDataSourceProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), sqLiteConfig.getOpenModeFlags());
+        return new HikariDataSource(config);
+    }
+
+    @Override
+    protected @NotNull DataSource createWriteDataSource() {
+        var config = createDefaultHikariConfig();
+        config.setMaximumPoolSize(1);
+        SQLiteConfig sqLiteConfig = new SQLiteConfig();
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.NOMUTEX);
+        config.addDataSourceProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), sqLiteConfig.getOpenModeFlags());
+        return new HikariDataSource(config);
+    }
+
+    private HikariConfig createDefaultHikariConfig(){
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
         config.setDriverClassName("org.sqlite.JDBC");
-
         config.setMaximumPoolSize(4);
         config.setMinimumIdle(1);
         config.setIdleTimeout(600000);
         config.setConnectionTimeout(30000);
-
         // SQLite-specific connection properties
-        config.addDataSourceProperty("journal_mode", "WAL");
-        config.addDataSourceProperty("synchronous", "NORMAL");
-        config.addDataSourceProperty("busy_timeout", "60000");
-
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-SQLitePool").factory());
-
-        HikariDataSource dataSource = new HikariDataSource(config);
-
-        // Apply PRAGMA settings
-        applyPragmaSettings(dataSource);
-
-        return dataSource;
+        config.addDataSourceProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), SQLiteConfig.JournalMode.WAL);
+        config.addDataSourceProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), SQLiteConfig.SynchronousMode.NORMAL);
+        config.addDataSourceProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),67108864);
+        config.addDataSourceProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 134217728);
+        return config;
     }
 
     private void applyPragmaSettings(HikariDataSource dataSource) {
@@ -117,7 +132,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
             if (timeSinceLastMaintenance >= Duration.ofDays(vacuumIntervalDays).toMillis()) {
                 log.debug("Performing SQLite VACUUM maintenance (last performed {} days ago)", timeSinceLastMaintenance / (1000 * 60 * 60 * 24));
-                try (Connection conn = getDataSource().getConnection();
+                try (Connection conn = getReadDataSource().getConnection();
                      var stmt = conn.createStatement()) {
                     stmt.execute("VACUUM");
 

@@ -9,7 +9,9 @@ import javax.sql.DataSource;
 
 @Slf4j
 public abstract class AbstractDatabaseDriver implements DatabaseDriver {
-    private DataSource dataSource;
+    private DataSource readDataSource;
+    private DataSource writeDataSource;
+
     @Override
     public @NotNull String getMapperXmlPath() {
         return "mapper/" + getType().getMapperType() + "/**/*.xml"; // H2 使用 MySQL 方言
@@ -17,7 +19,13 @@ public abstract class AbstractDatabaseDriver implements DatabaseDriver {
 
     @Override
     public void close() throws Exception {
-        if (dataSource instanceof HikariDataSource hikariDataSource) {
+        if (readDataSource instanceof HikariDataSource hikariDataSource) {
+            if (!hikariDataSource.isClosed())
+                hikariDataSource.close();
+        } else {
+            log.warn("Given DataSource is not an instance of HikariDataSource, cannot close it properly.");
+        }
+        if (writeDataSource instanceof HikariDataSource hikariDataSource) {
             if (!hikariDataSource.isClosed())
                 hikariDataSource.close();
         } else {
@@ -26,12 +34,23 @@ public abstract class AbstractDatabaseDriver implements DatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource getDataSource() {
-        if (dataSource != null) return dataSource;
-        dataSource = createDataSource();
-        return dataSource;
+    public @NotNull DataSource getReadDataSource() {
+        if (readDataSource != null) return readDataSource;
+        readDataSource = createReadDataSource();
+        return readDataSource;
+    }
+
+    @Override
+    public @NotNull DataSource getWriteDataSource() {
+        if (writeDataSource != null) return writeDataSource;
+        writeDataSource = createWriteDataSource();
+        return writeDataSource;
     }
 
     @NotNull
-    protected abstract DataSource createDataSource();
+    protected abstract DataSource createReadDataSource();
+
+
+    @NotNull
+    protected abstract DataSource createWriteDataSource();
 }

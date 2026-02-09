@@ -12,20 +12,11 @@ import java.io.IOException;
 
 public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
     private final ConfigurationSection section;
+    private final HikariDataSource dataSource;
 
     public PostgresDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         this.section = section;
-    }
-
-    @Override
-    public @NotNull DatabaseType getType() {
-        return DatabaseType.POSTGRES;
-    }
-
-    @Override
-    public @NotNull DataSource createDataSource() {
-        // Hikari CP PostgreSQL DataSource implementation
         HikariConfig config = new HikariConfig();
         String host = section.getString("host");
         int port = section.getInt("port");
@@ -48,6 +39,21 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
 
         config.setThreadFactory(Thread.ofVirtual().name("HikariCP-PostgresPool").factory());
 
-        return new HikariDataSource(config);
+        this.dataSource = new HikariDataSource(config);
+    }
+
+    @Override
+    public @NotNull DatabaseType getType() {
+        return DatabaseType.POSTGRES;
+    }
+
+    @Override
+    protected @NotNull DataSource createWriteDataSource() {
+        return dataSource;
+    }
+
+    @Override
+    protected @NotNull DataSource createReadDataSource() {
+        return dataSource;
     }
 }

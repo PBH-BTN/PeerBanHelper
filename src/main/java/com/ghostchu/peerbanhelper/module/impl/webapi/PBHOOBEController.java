@@ -235,7 +235,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                 case "postgresql" -> new PostgresDatabaseDriver(section);
                 default -> new SQLiteDatabaseDriver(section);
             };
-            try (var stat = driver.getDataSource().getConnection().createStatement()) {
+            try (var stat = driver.getReadDataSource().getConnection().createStatement()) {
                 boolean success = stat.execute("SELECT 1");
                 context.json(new StdResp(true, null, success));
             } finally {
