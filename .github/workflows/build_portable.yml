@@ -13,6 +13,10 @@ jobs:
         with:
           name: gradle-dist
           path: build/
+      - uses: actions/download-artifact@v7
+        with:
+          name: jre-dist
+          path: jre-dist/
       - name: Build Portable package
         id: build-portable
         run: |
@@ -24,10 +28,10 @@ jobs:
           cp -r platform-natives/windows-x86_64/libraries pkg/portable/PeerBanHelper/
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
-          mkdir -p jbr
-          wget https://cache-redirector.jetbrains.com/intellij-jbr/jbr-25.0.2-windows-x64-b300.57.zip -O jbr/jbr-25.0.2-windows-x64-b300.57.zip
-          (cd jbr && unzip jbr-25.0.2-windows-x64-b300.57.zip && mv jbr-25.0.2-windows-x64-b300.57 jre)
-          mv jbr/jre pkg/portable/PeerBanHelper/
+          mkdir -p jre
+          mv jre-dist/*/windows-amd64-25.0.2.tar.gz jre/jre.tar.gz
+          (cd jre && tar -zxvf jre.tar.gz && rm jre.tar.gz)
+          mv jre pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)
         # 上面那个文件名需要符合收集条件
         env:

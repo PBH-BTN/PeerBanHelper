@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.BanListService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -57,6 +58,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -90,13 +92,14 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private final AlertManager alertManager;
     private final ExecutorService slaveWorkStealingService = Executors.newWorkStealingPool();
     private final ExecutorService mainWorkStealingService = Executors.newWorkStealingPool();
+    private final WriteTransactionTemplate transactionTemplate;
 
 
     public DownloaderServerImpl(BanList banList, DownloaderManagerImpl downloaderManager,
                                 @Qualifier("persistMetrics") BasicMetrics metrics,
                                 ModuleManagerImpl moduleManager, BanListService banListDao,
                                 DNSLookup dnsLookup, Laboratory laboratory,
-                                AlertManager alertManager) {
+                                AlertManager alertManager, WriteTransactionTemplate transactionTemplate) {
         this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.metrics = metrics;
@@ -105,6 +108,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         this.moduleManager = moduleManager;
         this.laboratory = laboratory;
         this.alertManager = alertManager;
+        this.transactionTemplate = transactionTemplate;
         Main.getReloadManager().register(this);
     }
 
@@ -426,7 +430,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 metadata.add(v);
             }
         });
-        removeBan.forEach(this::unbanPeer);
+        unbanPeers(removeBan);
         long normalUnbanCount = metadata.stream().filter(meta -> !meta.isBanForDisconnect()).count();
         if (normalUnbanCount > 0) {
             log.info(tlUI(Lang.PEER_UNBAN_WAVE, normalUnbanCount));
@@ -666,13 +670,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     @Override
     public void scheduleUnBanPeer(@NotNull PeerAddress peer) {
-        unbanPeer(peer.getAddress());
+        unbanPeers(List.of(peer.getAddress()));
         scheduledBanListOperations.add(new ScheduledBanListOperation(false, peer));
     }
 
     @Override
     public void scheduleUnBanPeer(@NotNull IPAddress peer) {
-        unbanPeer(peer);
+        unbanPeers(List.of(peer));
         scheduledBanListOperations.add(new ScheduledBanListOperation(false, new PeerAddress(peer.toNormalizedString(), 0, peer.toNormalizedString())));
     }
 
@@ -680,16 +684,28 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     /**
      * 解除一个指定对等体
      *
-     * @param address 对等体 IP 地址
+     * @param addresses 对等体 IP 地址
      * @return 此对等体的封禁元数据；返回 null 代表此对等体没有被封禁
      */
-    private AssociativeAddressTrie.@Nullable AssociativeTrieNode<? extends IPAddress, BanMetadata> unbanPeer(@NotNull IPAddress address) {
-        var metadata = banList.remove(address);
-        if (metadata != null) {
-            metrics.recordPeerUnban(address, metadata.getValue());
-            Main.getEventBus().post(new PeerUnbanEvent(address, metadata.getValue()));
+    private List<AssociativeAddressTrie.@Nullable AssociativeTrieNode<? extends IPAddress, BanMetadata>> unbanPeers(List<IPAddress> addresses) {
+        List<AssociativeAddressTrie.@Nullable AssociativeTrieNode<? extends IPAddress, BanMetadata>> unbanned = new ArrayList<>();
+        for (IPAddress address : addresses) {
+            var meta = banList.remove(address);
+            if (meta != null) {
+                unbanned.add(meta);
+            }
         }
-        return metadata;
+        Map<IPAddress, BanMetadata> metadata = unbanned.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        AssociativeAddressTrie.AssociativeTrieNode::getKey,
+                        AssociativeAddressTrie.AssociativeTrieNode::getValue
+                ));
+        Main.getEventBus().post(new PeerUnbanEvent(metadata));
+        if (!unbanned.isEmpty()) {
+            unbanned.forEach(node -> metrics.recordPeerUnban(node.getKey(), node.getValue()));
+        }
+        return unbanned;
     }
 
     @Override

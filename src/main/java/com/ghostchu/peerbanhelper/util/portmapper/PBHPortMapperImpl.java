@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.util.portmapper;
 
 import com.ghostchu.peerbanhelper.text.Lang;
-import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;

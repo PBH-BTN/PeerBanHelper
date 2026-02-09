@@ -16,6 +16,10 @@ import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.postgres.PostgresDatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.sqlite.SQLiteDatabaseDriver;
+import com.ghostchu.peerbanhelper.databasent.routing.ReadOnlyTransactionTemplate;
+import com.ghostchu.peerbanhelper.databasent.routing.RoutingDataSource;
+import com.ghostchu.peerbanhelper.databasent.routing.SQLTypeDetectorInterceptor;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.text.Lang;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -74,8 +78,13 @@ public class DatabaseDriverConfig {
 
 
     @Bean
-    public PlatformTransactionManager transactionManager(@NotNull DatabaseDriver driver) {
-        return new DataSourceTransactionManager(driver.getDataSource());
+    public RoutingDataSource routingDataSource(@NotNull DatabaseDriver driver) {
+        return new RoutingDataSource(driver);
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(@NotNull RoutingDataSource routingDataSource) {
+        return new DataSourceTransactionManager(routingDataSource);
     }
 
     @Bean
@@ -100,14 +109,18 @@ public class DatabaseDriverConfig {
     public SqlSessionFactory sqlSessionFactory(
             MybatisPlusInterceptor mpInterceptor,
             SentryMyBatisInterceptor sentryMyBatisInterceptor,
+            SQLTypeDetectorInterceptor sqlTypeDetectorInterceptor,
+            RoutingDataSource routingDataSource,
             DatabaseDriver driver) throws Exception {
 
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
-        factoryBean.setDataSource(driver.getDataSource());
+        factoryBean.setDataSource(routingDataSource);
 
         List<Interceptor> interceptorList = new ArrayList<>();
         interceptorList.add(mpInterceptor);
         interceptorList.add(sentryMyBatisInterceptor);
+        // SQL 类型检测拦截器放在最后，作为兜底策略
+        interceptorList.add(sqlTypeDetectorInterceptor);
         factoryBean.setPlugins(interceptorList.toArray(new Interceptor[0]));
 
         factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler(), new OffsetDateTimeTypeHandlerForwarder());
@@ -122,5 +135,15 @@ public class DatabaseDriverConfig {
     @Bean
     public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager){
         return new TransactionTemplate(platformTransactionManager);
+    }
+
+    @Bean
+    public ReadOnlyTransactionTemplate readOnlyTransactionTemplate(PlatformTransactionManager platformTransactionManager){
+        return new ReadOnlyTransactionTemplate(platformTransactionManager);
+    }
+
+    @Bean
+    public WriteTransactionTemplate writeTransactionTemplate(PlatformTransactionManager platformTransactionManager){
+        return new WriteTransactionTemplate(platformTransactionManager);
     }
 }

@@ -9,11 +9,14 @@ import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
 import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper;
+import com.ghostchu.peerbanhelper.databasent.routing.ReadDataSource;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
@@ -26,6 +29,10 @@ import java.util.stream.Collectors;
 @Service
 public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity> implements HistoryService {
 
+    @Autowired
+    private WriteTransactionTemplate writeTransactionTemplate;
+
+    @ReadDataSource
     @Override
     public IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter) {
         if (filter != null && !filter.isEmpty()) {
@@ -35,22 +42,26 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         }
     }
 
+    @ReadDataSource
     @Override
     public long countHistoriesByTorrentId(@NotNull Long id) {
         return baseMapper.selectCount(new LambdaQueryWrapper<HistoryEntity>().eq(HistoryEntity::getTorrentId, id));
     }
 
+    @ReadDataSource
     @Override
     public long countHistoriesByIp(@NotNull InetAddress inetAddress) {
         return baseMapper.selectCount(new LambdaQueryWrapper<HistoryEntity>().eq(HistoryEntity::getIp, inetAddress));
     }
 
+    @ReadDataSource
     @Override
     public IPage<HistoryEntity> queryBanHistoryByIp(@NotNull Page<HistoryEntity> pageable, @NotNull InetAddress ip,
             @NotNull Orderable orderBy) {
         return baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("ip", ip)));
     }
 
+    @ReadDataSource
     @Override
     public IPage<HistoryEntity> queryBanHistoryByTorrentId(@NotNull Page<HistoryEntity> pageable, @NotNull Long torrentId, @NotNull Orderable orderBy) {
         return baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("torrent_id", torrentId)));
@@ -61,18 +72,21 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         int deleted = 0;
         OffsetDateTime thresholdDate = OffsetDateTime.now().minusDays(keepDays);
         while (true) {
-            List<HistoryEntity> list = baseMapper.selectList(new LambdaQueryWrapper<HistoryEntity>()
-                    .select(HistoryEntity::getId)
+            // 每次循环在独立事务中执行，完成后释放连接
+            Integer changes = writeTransactionTemplate.execute(status -> 
+                baseMapper.delete(new LambdaQueryWrapper<HistoryEntity>()
                     .le(HistoryEntity::getBanAt, thresholdDate)
-                    .last("LIMIT 1000"));
-            if (list.isEmpty()) {
+                    .last("LIMIT 150"))
+            );
+            if (changes == null || changes <= 0) {
                 break;
             }
-            deleted += baseMapper.deleteByIds(list);
+            deleted += changes;
         }
         return deleted;
     }
 
+    @ReadDataSource
     @Override
     public List<UniversalFieldNumResult> countField(@NotNull String field, double percentFilter,
                                                     @Nullable String downloader, @Nullable Integer substringLength) {
@@ -80,6 +94,7 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         return baseMapper.countField(mappedField, percentFilter, downloader, substringLength);
     }
 
+    @ReadDataSource
     @Override
     public List<UniversalFieldNumResult> sumField(@NotNull String field, double percentFilter,
                                                   @Nullable String downloader, @Nullable Integer substringLength) {
@@ -106,11 +121,13 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         };
     }
 
+    @ReadDataSource
     @Override
     public IPage<HistoryEntity> getBanLogs(Page<HistoryEntity> pageRequest, Orderable orderable) {
         return baseMapper.selectPage(pageRequest, orderable.apply(new QueryWrapper<>()));
     }
 
+    @ReadDataSource
     @Override
     public Map<Long, Long> countByTorrentIds(@NotNull List<Long> torrentIds) {
         if (torrentIds.isEmpty()) {
@@ -120,6 +137,7 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
         return counts.stream().collect(Collectors.toMap(TorrentCount::getTorrentId, TorrentCount::getCount));
     }
 
+    @ReadDataSource
     @Override
     public List<String> getDistinctIps(@NotNull OffsetDateTime start, @NotNull OffsetDateTime end, @Nullable String downloader) {
         return baseMapper.getDistinctIps(start, end, downloader);

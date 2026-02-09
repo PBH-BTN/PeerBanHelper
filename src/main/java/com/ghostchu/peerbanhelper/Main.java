@@ -31,7 +31,6 @@ import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
-import com.zaxxer.hikari.pool.HikariPool;
 import cordelia.client.TransmissionIOException;
 import io.javalin.util.JavalinBindException;
 import io.sentry.Sentry;
@@ -229,10 +228,10 @@ public class Main {
             sentryOptions.addIgnoredExceptionForType(TransmissionIOException.class);
             sentryOptions.addIgnoredExceptionForType(DelugeException.class);
             sentryOptions.addIgnoredExceptionForType(SSLHandshakeException.class);
-            sentryOptions.addIgnoredExceptionForType(HikariPool.PoolInitializationException.class);
             sentryOptions.addIgnoredExceptionForType(BadPaddingException.class);
             sentryOptions.addIgnoredExceptionForType(TimeoutException.class);
             sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
+            sentryOptions.addIgnoredExceptionForType(IOException.class);
         });
     }
 

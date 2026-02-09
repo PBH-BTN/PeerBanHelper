@@ -1,14 +1,7 @@
 #!/bin/bash
 
-mkdir -p /tmp/pbh-packages
-cp -av pkg/synopkg/* /tmp/pbh-packages
-mkdir -p /toolkit
-cd /toolkit || exit
-git clone https://github.com/SynologyOpenSource/pkgscripts-ng
-apt-get install cifs-utils python3 python3-pip
-cd /toolkit/pkgscripts-ng/ || exit
-git checkout DSM7.2
-./EnvDeploy -v 7.2 -p apollolake
+cd /toolkit/pkgscripts-ng/
+./EnvDeploy -v 7.2 -p apollolake -D
 mkdir -p /toolkit/source
 
 cp -av /tmp/pbh-packages/* /toolkit/source/

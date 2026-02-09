@@ -1,6 +1,7 @@
 export default {
   'settings.navbar.theme.toLight': '点击切换为亮色模式',
   'settings.navbar.theme.toDark': '点击切换为暗黑模式',
+  'settings.navbar.docs': '查看文档',
   'settings.open': '前往设置',
   'settings.language': '语言',
   'settings.globalPause': '全局暂停',

@@ -46,7 +46,7 @@ jobs:
 
   Build_Portable:
     name: Generate Portable Version
-    needs: Build_Executable
+    needs: Build_Installers
     uses: ./.github/workflows/build_portable.yml
 
   Empty_Old_S3_Files:

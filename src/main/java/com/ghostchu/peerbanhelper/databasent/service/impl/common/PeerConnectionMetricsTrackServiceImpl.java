@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsTrackMapper;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
@@ -18,10 +19,8 @@ import com.google.common.cache.RemovalListener;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
-import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConnectionMetricsTrackMapper, PeerConnectionMetricsTrackEntity> implements PeerConnectionMetricsTrackService {
     private final AtomicBoolean databaseBackFlushFlag = new AtomicBoolean(true);
     @Autowired
-    private TransactionTemplate transactionTemplate;
+    private WriteTransactionTemplate transactionTemplate;
 
     private final Cache<@NotNull CacheKey, @NotNull PeerConnectionMetricsTrackEntity> cache = CacheBuilder.newBuilder()
             .maximumSize(ExternalSwitch.parseInt("pbh.module.session-analyse-service-module.cache-size", 1000))

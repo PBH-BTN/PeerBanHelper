@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 public interface BanListService extends IService<BanListEntity> {

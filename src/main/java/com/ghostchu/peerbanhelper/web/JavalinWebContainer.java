@@ -6,7 +6,9 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
-import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.SharedObject;
+import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.*;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -70,6 +72,11 @@ public final class JavalinWebContainer implements Reloadable {
             return JsonUtil.standard().fromJson(json, targetType);
         }
     };
+
+    public JavalinWebContainer() {
+        reloadConfig();
+        Main.getReloadManager().register(this);
+    }
 
     public void setupJavalin() {
         this.javalin = Javalin.create(c -> {
@@ -245,7 +252,7 @@ public final class JavalinWebContainer implements Reloadable {
     }
 
     private void reloadConfig() {
-        this.webuiAnalyticsEnabled = Main.getMainConfig().getBoolean("privacy.webui-analytics", true);
+        this.webuiAnalyticsEnabled = Main.getMainConfig().getBoolean("privacy.analytics", true);
     }
 
     @Override

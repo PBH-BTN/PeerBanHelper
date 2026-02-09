@@ -1,20 +1,20 @@
 package com.ghostchu.peerbanhelper.databasent.driver.sqlite;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteOpenMode;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 
 @Slf4j
@@ -34,6 +34,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         }
         this.dbFile = new File(persistDir, "peerbanhelper-nt.db");
         this.dbPath = dbFile.getAbsolutePath();
+
     }
 
     @Override
@@ -42,55 +43,64 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource createDataSource() {
-        // Hikari CP SQLite DataSource implementation
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
-        config.setDriverClassName("org.sqlite.JDBC");
-
-        config.setMaximumPoolSize(4);
-        config.setMinimumIdle(1);
-        config.setIdleTimeout(600000);
-        config.setConnectionTimeout(30000);
-
-        // SQLite-specific connection properties
-        config.addDataSourceProperty("journal_mode", "WAL");
-        config.addDataSourceProperty("synchronous", "NORMAL");
-        config.addDataSourceProperty("busy_timeout", "30000");
-
-        config.setThreadFactory(Thread.ofVirtual().name("HikariCP-SQLitePool").factory());
-
-        HikariDataSource dataSource = new HikariDataSource(config);
-
-        // Apply PRAGMA settings
-        applyPragmaSettings(dataSource);
-
+    protected @NotNull DataSource createReadDataSource() {
+        DruidDataSource dataSource = createDefaultDruidDataSource();
+        dataSource.setMaxActive(Runtime.getRuntime().availableProcessors());
+        
+        SQLiteConfig sqLiteConfig = new SQLiteConfig();
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.FULLMUTEX);
+        
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
+            String.valueOf(sqLiteConfig.getOpenModeFlags()));
+        
         return dataSource;
     }
 
-    private void applyPragmaSettings(HikariDataSource dataSource) {
-        if (ExternalSwitch.parse("pbh.database.disableSQLitePragmaSettings") != null) {
-            log.info("SQLite PRAGMA settings are disabled by external switch");
-            return;
-        }
+    @Override
+    protected @NotNull DataSource createWriteDataSource() {
+        DruidDataSource dataSource = createDefaultDruidDataSource();
+        dataSource.setMaxActive(1);
+        
+        SQLiteConfig sqLiteConfig = new SQLiteConfig();
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
+        sqLiteConfig.setOpenMode(SQLiteOpenMode.NOMUTEX);
+        
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
+            String.valueOf(sqLiteConfig.getOpenModeFlags()));
+        
+        return dataSource;
+    }
 
-        try (Connection conn = dataSource.getConnection();
-             var stmt = conn.createStatement()) {
-
-            stmt.executeUpdate("PRAGMA synchronous = NORMAL");
-            stmt.executeUpdate("PRAGMA journal_mode = WAL");
-            stmt.executeUpdate("PRAGMA mmap_size = 134217728");
-            stmt.executeUpdate("PRAGMA transaction_mode = IMMEDIATE");
-            stmt.executeUpdate("PRAGMA journal_size_limit = 67108864");
-            //long softHeapLimit = ExternalSwitch.parseLong("pbh.database.sqliteSoftHeapLimitBytes", 33554432L);
-            //stmt.executeUpdate("PRAGMA soft_heap_limit = " + softHeapLimit);
-
-            stmt.executeUpdate("PRAGMA OPTIMIZE");
-
-            log.debug("SQLite PRAGMA settings applied successfully");
-        } catch (SQLException e) {
-            log.warn("Failed to apply SQLite PRAGMA settings", e);
-        }
+    private DruidDataSource createDefaultDruidDataSource(){
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl("jdbc:sqlite:" + this.dbPath);
+        dataSource.setDriverClassName("org.sqlite.JDBC");
+        dataSource.setMaxActive(4);
+        dataSource.setMinIdle(1);
+        dataSource.setMaxWait(30000);
+        dataSource.setTimeBetweenEvictionRunsMillis(600000);
+        
+        // 连接池验证配置
+        dataSource.setValidationQuery("SELECT 1");
+        dataSource.setTestWhileIdle(true);
+        dataSource.setTestOnBorrow(false);
+        dataSource.setTestOnReturn(false);
+        
+        // 启用 fairQueuing FIFO - 使用公平锁
+        dataSource.setUseUnfairLock(false);
+        
+        // SQLite-specific connection properties
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), 
+            SQLiteConfig.JournalMode.WAL.getValue());
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), 
+            SQLiteConfig.SynchronousMode.NORMAL.getValue());
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(), 
+            String.valueOf(67108864));
+        dataSource.addConnectionProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 
+            String.valueOf(134217728));
+        
+        return dataSource;
     }
 
     @Override
@@ -117,7 +127,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
             if (timeSinceLastMaintenance >= Duration.ofDays(vacuumIntervalDays).toMillis()) {
                 log.debug("Performing SQLite VACUUM maintenance (last performed {} days ago)", timeSinceLastMaintenance / (1000 * 60 * 60 * 24));
-                try (Connection conn = getDataSource().getConnection();
+                try (Connection conn = getReadDataSource().getConnection();
                      var stmt = conn.createStatement()) {
                     stmt.execute("VACUUM");
 

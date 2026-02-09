@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.databasent.migration;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.migration.migrators.*;
+import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
@@ -10,8 +11,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,12 +61,11 @@ public class DatabaseMigrationCoordinator {
     private PeerConnectionMetricsTrackService peerConnectionMetricsTrackService;
     @Autowired(required = false)
     private IPDBManager ipdbManager;
-
+    @Autowired
+    private WriteTransactionTemplate transactionTemplate;
 
     private final File sqliteDbFile;
     private final File migrationMarkerFile;
-    @Autowired
-    private PlatformTransactionManager platformTransactionManager;
 
     public DatabaseMigrationCoordinator() {
         File persistDir = new File(Main.getDataDirectory(), "persist");
@@ -125,7 +123,6 @@ public class DatabaseMigrationCoordinator {
         // Connect to SQLite database
         String jdbcUrl = "jdbc:sqlite:" + sqliteDbFile.getAbsolutePath();
         log.info(tlUI(Lang.DBNT_MIGRATOR_CONNECTING_SQLITE));
-        TransactionTemplate transactionTemplate = new TransactionTemplate(platformTransactionManager);
         try (Connection sqliteConnection = DriverManager.getConnection(jdbcUrl)) {
             // Upgrade SQLite schema to version 20
             SQLiteSchemaUpgrader upgrader = new SQLiteSchemaUpgrader(sqliteConnection);
