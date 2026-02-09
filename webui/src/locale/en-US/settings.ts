@@ -1,6 +1,7 @@
 export default {
   'settings.navbar.theme.toLight': 'Click to use light mode',
   'settings.navbar.theme.toDark': 'Click to use dark mode',
+  'settings.navbar.docs': 'View Docs',
   'settings.open': 'Goto Settings',
   'settings.language': 'Language',
   'settings.globalPause': 'Global Pause',

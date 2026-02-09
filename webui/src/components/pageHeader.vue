@@ -148,6 +148,18 @@
             </a-button>
           </a-tooltip>
           <alert />
+          <a-tooltip :content="t('settings.navbar.docs')">
+            <a-button
+              class="nav-btn"
+              type="outline"
+              shape="circle"
+              target="_blank"
+              status="normal"
+              href="https://docs.pbh-btn.com/"
+            >
+              <template #icon><icon-book /></template>
+            </a-button>
+          </a-tooltip>
           <a-button
             class="nav-btn"
             type="outline"
