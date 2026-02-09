@@ -75,9 +75,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleOOBEScanDownloader(@NotNull Context ctx) {
-        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
-            ctx.status(HttpStatus.FORBIDDEN);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
+        if(!ensureNotReinitialized(ctx)){
             return;
         }
         var downloaders = downloaderDiscovery.scan(List.of()).join();
@@ -85,9 +83,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleOOBERequest(Context ctx) throws IOException {
-        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
-            ctx.status(HttpStatus.FORBIDDEN);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
+        if(!ensureNotReinitialized(ctx)){
             return;
         }
         JsonObject parser = JsonParser.parseString(ctx.body()).getAsJsonObject();
@@ -166,6 +162,9 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleReloading(Context context) {
+        if(!ensureNotReinitialized(context)){
+            return;
+        }
         Main.setupConfiguration();
         var result = Main.getReloadManager().reload();
         List<ReloadEntryDTO> entryList = new ArrayList<>();
@@ -202,6 +201,9 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleRestart(Context context) {
+        if(!ensureNotReinitialized(context)){
+            return;
+        }
         context.json(new StdResp(false, tl(locale(context), Lang.RELOAD_RESULT_REQUIRE_RESTART), null));
         if (false) { // delay to v10.0
             // Schedule restart in a separate thread to allow the response to be sent first
@@ -220,6 +222,9 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleDatabaseNtTest(@NotNull Context context) {
+        if(!ensureNotReinitialized(context)){
+            return;
+        }
         DatabaseNtConfigDTO dto = context.bodyAsClass(DatabaseNtConfigDTO.class);
         ConfigurationSection section = new MemoryConfiguration();
         section.set("type", dto.getType());
@@ -249,9 +254,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
 
     // 从 PBHDownloaderController 抄过来的，堪虑合并
     public boolean validateDownloader(Context ctx, JsonObject draftDownloader) {
-        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
-            ctx.status(HttpStatus.FORBIDDEN);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
+        if(!ensureNotReinitialized(ctx)){
             return false;
         }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
@@ -282,6 +285,15 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, e.getMessage(), null));
             return false;
         }
+    }
+
+    private boolean ensureNotReinitialized(Context ctx) {
+        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
+            ctx.status(HttpStatus.FORBIDDEN);
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
+            return false;
+        }
+        return true;
     }
 
 
