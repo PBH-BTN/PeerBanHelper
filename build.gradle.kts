@@ -63,9 +63,11 @@ dependencies {
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
-    ///implementation("org.springframework:spring-tx:7.0.3")
+    implementation("org.springframework:spring-aop:7.0.3")
+    implementation("org.springframework:spring-tx:7.0.3")
     implementation("org.springframework:spring-jdbc:7.0.3")
-    //implementation("org.aspectj:aspectjweaver:1.9.25.1")
+    // Source: https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
+    implementation("org.aspectj:aspectjweaver:1.9.25.1")
     implementation("org.xerial:sqlite-jdbc:3.51.1.0")
     implementation("com.h2database:h2:2.3.232")
     implementation("com.mysql:mysql-connector-j:9.6.0")
