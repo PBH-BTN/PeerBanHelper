@@ -1,11 +1,11 @@
 plugins {
     java
     application
-    id("com.gorylenko.gradle-git-properties") version "2.5.4"
+    id("com.gorylenko.gradle-git-properties") version "2.5.6"
     id("com.install4j.gradle") version "12.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.3.0"
+    kotlin("plugin.lombok") version "2.3.10"
     id("io.freefair.lombok") version "9.2.0"
 }
 
@@ -136,7 +136,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.27")
+    implementation("ch.qos.logback:logback-classic:1.5.28")
     implementation("org.slf4j:jcl-over-slf4j:2.0.17")
 
     // Async utilities
@@ -154,7 +154,7 @@ dependencies {
     implementation("org.bitlet:weupnp:0.1.4")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.9.Final") {
+    implementation("io.netty:netty-all:4.2.10.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")

@@ -5,7 +5,7 @@ WORKDIR /webui
 RUN npm i -g pnpm && CI=1 pnpm i
 RUN pnpm run build
 
-FROM --platform=$BUILDPLATFORM eclipse-temurin:25.0.1_8-jdk-alpine AS build
+FROM --platform=$BUILDPLATFORM eclipse-temurin:25.0.2_10-jdk-alpine AS build
 RUN apk add git
 COPY . /build
 WORKDIR /build
