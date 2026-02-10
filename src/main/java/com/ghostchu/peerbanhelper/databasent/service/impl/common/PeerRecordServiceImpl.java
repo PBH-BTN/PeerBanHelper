@@ -130,7 +130,6 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         );
     }
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
     public synchronized PeerRecordEntity createIfNotExists(PeerRecordEntity data) {
         PeerRecordEntity existing = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
