@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
     public PostgresDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         this.section = section;
+        BeeDataSourceConfig config = new BeeDataSourceConfig();
         
         String host = section.getString("host");
         int port = section.getInt("port");
@@ -23,30 +25,29 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
         String username = section.getString("username");
         String password = section.getString("password");
 
-        BeeDataSource beeDataSource = new BeeDataSource();
-        beeDataSource.setJdbcUrl("jdbc:postgresql://" + host + ":" + port + "/" + database);
-        beeDataSource.setUsername(username);
-        beeDataSource.setPassword(password);
-        beeDataSource.setDriverClassName("org.postgresql.Driver");
-        beeDataSource.setMaxActive(10);
-        beeDataSource.setMaxWait(30000);
-        beeDataSource.setIntervalOfClearTimeout(600000L);
+        config.setJdbcUrl("jdbc:postgresql://" + host + ":" + port + "/" + database);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setDriverClassName("org.postgresql.Driver");
+        config.setMaxActive(10);
+        config.setMaxWait(30000);
+        config.setIntervalOfClearTimeout(600000L);
 
         // 连接池验证配置
-        beeDataSource.setAliveTestSql("SELECT 1");
+        config.setAliveTestSql("SELECT 1");
 
         // 启用公平排队 (FIFO)
-        beeDataSource.setFairMode(true);
+        config.setFairMode(true);
         
         // PostgreSQL 事务中 schema/catalog 变更支持
-        beeDataSource.setForceDirtyWhenSetSchema(true);
+        config.setForceDirtyWhenSetSchema(true);
 
         // PostgreSQL-specific optimizations
-        beeDataSource.addConnectionFactoryProperty("ApplicationName", "PeerBanHelper");
-        beeDataSource.addConnectionFactoryProperty("tcpKeepAlive", "true");
-        beeDataSource.addConnectionFactoryProperty("reWriteBatchedInserts", "true"); // Improve batch insert performance
+        config.addConnectionFactoryProperty("ApplicationName", "PeerBanHelper");
+        config.addConnectionFactoryProperty("tcpKeepAlive", "true");
+        config.addConnectionFactoryProperty("reWriteBatchedInserts", "true"); // Improve batch insert performance
 
-        this.dataSource = beeDataSource;
+        this.dataSource = new BeeDataSource(config);
     }
 
     @Override

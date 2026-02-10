@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -23,6 +24,7 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     public H2DatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         this.section = section;
+        BeeDataSourceConfig config = new BeeDataSourceConfig();
         File persistDir = new File(Main.getDataDirectory(), "persist");
         if (!persistDir.exists()) {
             if (!persistDir.mkdirs()) {
@@ -31,21 +33,20 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         }
         this.dbFile = new File(persistDir, "peerbanhelper-nt");
         this.dbPath = dbFile.getAbsolutePath();
-        
-        BeeDataSource beeDataSource = new BeeDataSource();
-        beeDataSource.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
-        beeDataSource.setDriverClassName("org.h2.Driver");
-        beeDataSource.setMaxActive(10);
-        beeDataSource.setMaxWait(30000);
-        beeDataSource.setIntervalOfClearTimeout(600000L);
-        
+
+        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
+        config.setDriverClassName("org.h2.Driver");
+        config.setMaxActive(10);
+        config.setMaxWait(30000);
+        config.setIntervalOfClearTimeout(600000L);
+
         // 连接池验证配置
-        beeDataSource.setAliveTestSql("SELECT 1");
-        
+        config.setAliveTestSql("SELECT 1");
+
         // 启用公平排队 (FIFO)
-        beeDataSource.setFairMode(true);
-        
-        this.dataSource = beeDataSource;
+        config.setFairMode(true);
+
+        this.dataSource = new BeeDataSource(config);
     }
 
     @Override
@@ -55,7 +56,6 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     public @NotNull DataSource createWriteDataSource() {
-        // Hikari CP SQLite DataSource implementation
         return dataSource;
     }
 

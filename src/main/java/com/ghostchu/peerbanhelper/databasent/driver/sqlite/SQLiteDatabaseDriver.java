@@ -10,6 +10,7 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteOpenMode;
+import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -73,30 +74,30 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     }
 
     private BeeDataSource createDefaultBeeDataSource(){
-        BeeDataSource dataSource = new BeeDataSource();
-        dataSource.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
-        dataSource.setDriverClassName("org.sqlite.JDBC");
-        dataSource.setMaxActive(4);
-        dataSource.setMaxWait(30000);
-        dataSource.setIntervalOfClearTimeout(600000L);
+        BeeDataSourceConfig config = new BeeDataSourceConfig();
+        config.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
+        config.setDriverClassName("org.sqlite.JDBC");
+        config.setMaxActive(4);
+        config.setMaxWait(30000);
+        config.setIntervalOfClearTimeout(600000L);
         
         // 连接池验证配置
-        dataSource.setAliveTestSql("SELECT 1");
+        config.setAliveTestSql("SELECT 1");
         
         // 启用公平排队 (FIFO)
-        dataSource.setFairMode(true);
+        config.setFairMode(true);
         
         // SQLite-specific connection properties
-        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), 
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(),
             SQLiteConfig.JournalMode.WAL.getValue());
-        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), 
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(),
             SQLiteConfig.SynchronousMode.NORMAL.getValue());
-        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(), 
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),
             String.valueOf(67108864));
-        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(),
             String.valueOf(134217728));
         
-        return dataSource;
+        return new BeeDataSource(config);
     }
 
     @Override
