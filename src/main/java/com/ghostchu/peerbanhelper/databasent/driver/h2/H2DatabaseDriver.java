@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.driver.h2;
 
-import com.alibaba.druid.pool.DruidDataSource;
+import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class H2DatabaseDriver extends AbstractDatabaseDriver {
@@ -19,7 +18,7 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     private final String dbPath;
     private final ConfigurationSection section;
     private final AtomicBoolean requestCompactOnShutdown = new AtomicBoolean(false);
-    private final DruidDataSource dataSource;
+    private final BeeDataSource dataSource;
 
     public H2DatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
@@ -33,31 +32,20 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         this.dbFile = new File(persistDir, "peerbanhelper-nt");
         this.dbPath = dbFile.getAbsolutePath();
         
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
-        druidDataSource.setDriverClassName("org.h2.Driver");
-        druidDataSource.setMaxActive(10);
-        druidDataSource.setMinIdle(1);
-        druidDataSource.setMaxWait(30000);
-        druidDataSource.setTimeBetweenEvictionRunsMillis(600000);
+        BeeDataSource beeDataSource = new BeeDataSource();
+        beeDataSource.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
+        beeDataSource.setDriverClassName("org.h2.Driver");
+        beeDataSource.setMaxActive(10);
+        beeDataSource.setMaxWait(30000);
+        beeDataSource.setIntervalOfClearTimeout(600000L);
         
         // 连接池验证配置
-        druidDataSource.setValidationQuery("SELECT 1");
-        druidDataSource.setTestWhileIdle(true);
-        druidDataSource.setTestOnBorrow(false);
-        druidDataSource.setTestOnReturn(false);
+        beeDataSource.setAliveTestSql("SELECT 1");
         
-        // 启用 fairQueuing FIFO - 使用公平锁
-        druidDataSource.setUseUnfairLock(false);
+        // 启用公平排队 (FIFO)
+        beeDataSource.setFairMode(true);
         
-        // 启用 Druid 监控和防火墙
-        try {
-            druidDataSource.setFilters("stat,wall");
-        } catch (SQLException e) {
-            throw new IOException("Failed to set Druid filters", e);
-        }
-        
-        this.dataSource = druidDataSource;
+        this.dataSource = beeDataSource;
     }
 
     @Override

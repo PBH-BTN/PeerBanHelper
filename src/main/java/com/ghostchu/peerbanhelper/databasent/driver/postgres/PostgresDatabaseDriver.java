@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.driver.postgres;
 
-import com.alibaba.druid.pool.DruidDataSource;
+import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -8,11 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.SQLException;
 
 public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
     private final ConfigurationSection section;
-    private final DruidDataSource dataSource;
+    private final BeeDataSource dataSource;
 
     public PostgresDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
@@ -24,38 +23,30 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
         String username = section.getString("username");
         String password = section.getString("password");
 
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setUrl("jdbc:postgresql://" + host + ":" + port + "/" + database);
-        druidDataSource.setUsername(username);
-        druidDataSource.setPassword(password);
-        druidDataSource.setDriverClassName("org.postgresql.Driver");
-        druidDataSource.setMaxActive(10);
-        druidDataSource.setMinIdle(1);
-        druidDataSource.setMaxWait(30000);
-        druidDataSource.setTimeBetweenEvictionRunsMillis(600000);
+        BeeDataSource beeDataSource = new BeeDataSource();
+        beeDataSource.setJdbcUrl("jdbc:postgresql://" + host + ":" + port + "/" + database);
+        beeDataSource.setUsername(username);
+        beeDataSource.setPassword(password);
+        beeDataSource.setDriverClassName("org.postgresql.Driver");
+        beeDataSource.setMaxActive(10);
+        beeDataSource.setMaxWait(30000);
+        beeDataSource.setIntervalOfClearTimeout(600000L);
 
         // 连接池验证配置
-        druidDataSource.setValidationQuery("SELECT 1");
-        druidDataSource.setTestWhileIdle(true);
-        druidDataSource.setTestOnBorrow(true);
-        druidDataSource.setTestOnReturn(false);
+        beeDataSource.setAliveTestSql("SELECT 1");
 
-        // 启用 fairQueuing FIFO - 使用公平锁
-        druidDataSource.setUseUnfairLock(false);
+        // 启用公平排队 (FIFO)
+        beeDataSource.setFairMode(true);
+        
+        // PostgreSQL 事务中 schema/catalog 变更支持
+        beeDataSource.setForceDirtyWhenSetSchema(true);
 
         // PostgreSQL-specific optimizations
-        druidDataSource.addConnectionProperty("ApplicationName", "PeerBanHelper");
-        druidDataSource.addConnectionProperty("tcpKeepAlive", "true");
-        druidDataSource.addConnectionProperty("reWriteBatchedInserts", "true"); // Improve batch insert performance
+        beeDataSource.addConnectionFactoryProperty("ApplicationName", "PeerBanHelper");
+        beeDataSource.addConnectionFactoryProperty("tcpKeepAlive", "true");
+        beeDataSource.addConnectionFactoryProperty("reWriteBatchedInserts", "true"); // Improve batch insert performance
 
-        // 启用 Druid 监控和防火墙
-        try {
-            druidDataSource.setFilters("stat,wall");
-        } catch (SQLException e) {
-            throw new IOException("Failed to set Druid filters", e);
-        }
-
-        this.dataSource = druidDataSource;
+        this.dataSource = beeDataSource;
     }
 
     @Override

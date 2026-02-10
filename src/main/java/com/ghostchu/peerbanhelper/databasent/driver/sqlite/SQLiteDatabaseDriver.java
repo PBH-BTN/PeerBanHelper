@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.driver.sqlite;
 
-import com.alibaba.druid.pool.DruidDataSource;
+import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
@@ -44,14 +44,14 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     protected @NotNull DataSource createReadDataSource() {
-        DruidDataSource dataSource = createDefaultDruidDataSource();
+        BeeDataSource dataSource = createDefaultBeeDataSource();
         dataSource.setMaxActive(Runtime.getRuntime().availableProcessors());
         
         SQLiteConfig sqLiteConfig = new SQLiteConfig();
         sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
         sqLiteConfig.setOpenMode(SQLiteOpenMode.FULLMUTEX);
         
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
+        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
             String.valueOf(sqLiteConfig.getOpenModeFlags()));
         
         return dataSource;
@@ -59,45 +59,41 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     protected @NotNull DataSource createWriteDataSource() {
-        DruidDataSource dataSource = createDefaultDruidDataSource();
+        BeeDataSource dataSource = createDefaultBeeDataSource();
         dataSource.setMaxActive(1);
         
         SQLiteConfig sqLiteConfig = new SQLiteConfig();
         sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
         sqLiteConfig.setOpenMode(SQLiteOpenMode.NOMUTEX);
         
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
+        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
             String.valueOf(sqLiteConfig.getOpenModeFlags()));
         
         return dataSource;
     }
 
-    private DruidDataSource createDefaultDruidDataSource(){
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:sqlite:" + this.dbPath);
+    private BeeDataSource createDefaultBeeDataSource(){
+        BeeDataSource dataSource = new BeeDataSource();
+        dataSource.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
         dataSource.setDriverClassName("org.sqlite.JDBC");
         dataSource.setMaxActive(4);
-        dataSource.setMinIdle(1);
         dataSource.setMaxWait(30000);
-        dataSource.setTimeBetweenEvictionRunsMillis(600000);
+        dataSource.setIntervalOfClearTimeout(600000L);
         
         // 连接池验证配置
-        dataSource.setValidationQuery("SELECT 1");
-        dataSource.setTestWhileIdle(true);
-        dataSource.setTestOnBorrow(false);
-        dataSource.setTestOnReturn(false);
+        dataSource.setAliveTestSql("SELECT 1");
         
-        // 启用 fairQueuing FIFO - 使用公平锁
-        dataSource.setUseUnfairLock(false);
+        // 启用公平排队 (FIFO)
+        dataSource.setFairMode(true);
         
         // SQLite-specific connection properties
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), 
+        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(), 
             SQLiteConfig.JournalMode.WAL.getValue());
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), 
+        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(), 
             SQLiteConfig.SynchronousMode.NORMAL.getValue());
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(), 
+        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(), 
             String.valueOf(67108864));
-        dataSource.addConnectionProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 
+        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(), 
             String.valueOf(134217728));
         
         return dataSource;

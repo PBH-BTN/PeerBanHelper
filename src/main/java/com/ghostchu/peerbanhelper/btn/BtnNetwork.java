@@ -94,6 +94,7 @@ public final class BtnNetwork implements Reloadable {
     private boolean enabled;
     private String powCaptchaEndpoint;
     private long nextConfigAttemptTime = 0;
+    private final long RETRY_PERIOD_SECONDS = 600;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
                       MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
@@ -157,7 +158,7 @@ public final class BtnNetwork implements Reloadable {
         }
         if (enabled) {
             scheduler = Executors.newScheduledThreadPool(2);
-            scheduler.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, 600, TimeUnit.SECONDS);
+            scheduler.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, RETRY_PERIOD_SECONDS, TimeUnit.SECONDS);
         } else {
             scheduler = null;
         }
@@ -175,7 +176,7 @@ public final class BtnNetwork implements Reloadable {
                 statusCode = resp.code();
                 response = resp.body().string();
                 if (!resp.isSuccessful()) {
-                    log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600));
+                    log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, RETRY_PERIOD_SECONDS));
                     configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, statusCode, response);
                     return;
                 }
@@ -251,10 +252,10 @@ public final class BtnNetwork implements Reloadable {
                 configSuccess.set(true);
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
             } catch (Throwable e) {
-                log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage()), e);
+                log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage(), RETRY_PERIOD_SECONDS), e);
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
                 configSuccess.set(false);
-                nextConfigAttemptTime = System.currentTimeMillis() + 600 * 1000;
+                nextConfigAttemptTime = System.currentTimeMillis() + RETRY_PERIOD_SECONDS * 1000;
                 Sentry.captureException(e);
             }
         })).join();
