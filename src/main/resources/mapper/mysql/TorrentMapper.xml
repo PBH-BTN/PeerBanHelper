@@ -5,7 +5,7 @@
         INSERT INTO torrents (info_hash, name, size, private_torrent)
         VALUES (#{e.infoHash}, #{e.name}, #{e.size}, #{e.privateTorrent})
         ON DUPLICATE KEY UPDATE
-        size = IF(size &lt;= 0, #{e.size}, size),
-        private_torrent = IF(private_torrent IS NULL, #{e.privateTorrent}, private_torrent)
+        size = CASE WHEN size &lt;= 0 THEN #{e.size} ELSE size END,
+        private_torrent = CASE WHEN private_torrent IS NULL THEN #{e.privateTorrent} ELSE private_torrent END;
     </insert>
 </mapper>
