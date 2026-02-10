@@ -11,7 +11,7 @@ import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
-import com.ghostchu.peerbanhelper.module.impl.monitor.PeerRecodingServiceModule;
+import com.ghostchu.peerbanhelper.module.impl.monitor.PeerRecordingServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
@@ -243,7 +243,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(PBHAutoStunController.class);
         moduleClasses.add(IdleConnectionDosProtection.class);
         moduleClasses.add(SessionAnalyseServiceModule.class);
-        moduleClasses.add(PeerRecodingServiceModule.class);
+        moduleClasses.add(PeerRecordingServiceModule.class);
         moduleClasses.add(AntiVampire.class);
         moduleClasses.parallelStream().forEach(moduleClass -> moduleManager.register(moduleClass));
     }

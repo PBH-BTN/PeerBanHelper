@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class PeerRecodingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
+public class PeerRecordingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     private final AtomicBoolean databaseBackFlushFlag = new AtomicBoolean(true);
     @Autowired
     private PeerRecordService peerRecordDao;
