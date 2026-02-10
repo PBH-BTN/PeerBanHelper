@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.driver;
 
-import com.alibaba.druid.pool.DruidDataSource;
+import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -19,17 +19,17 @@ public abstract class AbstractDatabaseDriver implements DatabaseDriver {
 
     @Override
     public void close() throws Exception {
-        if (readDataSource instanceof DruidDataSource druidDataSource) {
-            if (!druidDataSource.isClosed())
-                druidDataSource.close();
+        if (readDataSource instanceof BeeDataSource beeDataSource) {
+            if (!beeDataSource.isClosed())
+                beeDataSource.close();
         } else {
-            log.warn("Given DataSource is not an instance of DruidDataSource, cannot close it properly.");
+            log.warn("Given DataSource is not an instance of BeeDataSource, cannot close it properly.");
         }
-        if (writeDataSource instanceof DruidDataSource druidDataSource) {
-            if (!druidDataSource.isClosed())
-                druidDataSource.close();
+        if (writeDataSource instanceof BeeDataSource beeDataSource) {
+            if (!beeDataSource.isClosed())
+                beeDataSource.close();
         } else {
-            log.warn("Given DataSource is not an instance of DruidDataSource, cannot close it properly.");
+            log.warn("Given DataSource is not an instance of BeeDataSource, cannot close it properly.");
         }
     }
 
