@@ -701,7 +701,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                         AssociativeAddressTrie.AssociativeTrieNode::getKey,
                         AssociativeAddressTrie.AssociativeTrieNode::getValue
                 ));
-        Main.getEventBus().post(new PeerUnbanEvent(metadata));
+        if (!metadata.isEmpty()) {
+            Main.getEventBus().post(new PeerUnbanEvent(metadata));
+        }
         if (!unbanned.isEmpty()) {
             unbanned.forEach(node -> metrics.recordPeerUnban(node.getKey(), node.getValue()));
         }
