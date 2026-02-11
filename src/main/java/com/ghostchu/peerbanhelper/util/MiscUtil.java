@@ -106,7 +106,7 @@ public final class MiscUtil {
         }
     }
 
-    public static boolean removeBeeCPShutdownHook(Object dataSource) {
+    public static void removeBeeCPShutdownHook(Object dataSource) {
         try {
             Class<?> dataSourceClass = dataSource.getClass();
             Field poolField = dataSourceClass.getDeclaredField("pool");
@@ -122,6 +122,5 @@ public final class MiscUtil {
         } catch (Throwable t) {
             t.printStackTrace();
         }
-        return false;
     }
 }
