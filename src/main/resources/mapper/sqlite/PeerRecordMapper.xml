@@ -93,63 +93,63 @@
         ON CONFLICT(address, port, torrent_id, downloader) DO UPDATE SET
 
         uploaded = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen THEN peer_records.uploaded
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen THEN peer_records.uploaded
         WHEN (excluded.uploaded - peer_records.uploaded_offset) &lt; 0
         THEN peer_records.uploaded + excluded.uploaded
         ELSE peer_records.uploaded + excluded.uploaded - peer_records.uploaded_offset
         END,
 
         downloaded = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen THEN peer_records.downloaded
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen THEN peer_records.downloaded
         WHEN (excluded.downloaded - peer_records.downloaded_offset) &lt; 0
         THEN peer_records.downloaded + excluded.downloaded
         ELSE peer_records.downloaded + excluded.downloaded - peer_records.downloaded_offset
         END,
 
         uploaded_offset = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.uploaded_offset
         ELSE excluded.uploaded
         END,
 
         downloaded_offset = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.downloaded_offset
         ELSE excluded.downloaded
         END,
 
         upload_speed = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.upload_speed
         ELSE excluded.upload_speed
         END,
 
         download_speed = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.download_speed
         ELSE excluded.download_speed
         END,
 
         peer_id = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.peer_id
         ELSE excluded.peer_id
         END,
 
         client_name = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.client_name
         ELSE excluded.client_name
         END,
 
         last_flags = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.last_flags
         ELSE excluded.last_flags
         END,
 
         last_time_seen = CASE
-        WHEN excluded.last_time_seen &lt;= peer_records.last_time_seen
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.last_time_seen
         ELSE excluded.last_time_seen
         END;
