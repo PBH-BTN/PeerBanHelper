@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.sqlite.SQLiteConfig;
-import org.sqlite.SQLiteOpenMode;
 import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
@@ -25,6 +24,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     private final File dbFile;
     private final String dbPath;
     private final ConfigurationSection section;
+    private final BeeDataSource dataSource;
 
     public SQLiteDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
@@ -38,6 +38,8 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         this.dbFile = new File(persistDir, "peerbanhelper-nt.db");
         this.dbPath = dbFile.getAbsolutePath();
 
+        this.dataSource = createDefaultBeeDataSource();
+        removeBeeCPShutdownHook(this.dataSource);
     }
 
     @Override
@@ -47,31 +49,11 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
     @Override
     protected @NotNull DataSource createReadDataSource() {
-        BeeDataSource dataSource = createDefaultBeeDataSource();
-        dataSource.setMaxActive(Runtime.getRuntime().availableProcessors());
-        
-        SQLiteConfig sqLiteConfig = new SQLiteConfig();
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.FULLMUTEX);
-        
-        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
-            String.valueOf(sqLiteConfig.getOpenModeFlags()));
-        removeBeeCPShutdownHook(dataSource);
         return dataSource;
     }
 
     @Override
     protected @NotNull DataSource createWriteDataSource() {
-        BeeDataSource dataSource = createDefaultBeeDataSource();
-        dataSource.setMaxActive(1);
-        
-        SQLiteConfig sqLiteConfig = new SQLiteConfig();
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.OPEN_URI);
-        sqLiteConfig.setOpenMode(SQLiteOpenMode.NOMUTEX);
-        
-        dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
-            String.valueOf(sqLiteConfig.getOpenModeFlags()));
-        removeBeeCPShutdownHook(dataSource);
         return dataSource;
     }
 
@@ -79,7 +61,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         BeeDataSourceConfig config = new BeeDataSourceConfig();
         config.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
         config.setDriverClassName("org.sqlite.JDBC");
-        config.setMaxActive(4);
+        config.setMaxActive(10);
         config.setMaxWait(30000);
         config.setIntervalOfClearTimeout(600000L);
         
