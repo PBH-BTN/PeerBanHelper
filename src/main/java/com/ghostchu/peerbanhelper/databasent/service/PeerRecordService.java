@@ -27,8 +27,6 @@ public interface PeerRecordService extends IService<PeerRecordEntity> {
 
     @NotNull Page<PeerRecordEntity> getPendingSubmitPeerRecords(@NotNull Pageable pageable, @NotNull OffsetDateTime afterThan);
 
-    PeerRecordEntity createIfNotExists(PeerRecordEntity data);
-
     long countRecordsByIp(@NotNull InetAddress inetAddress);
 
     IPAddressTotalTraffic queryAddressTotalTraffic(@NotNull InetAddress inet);

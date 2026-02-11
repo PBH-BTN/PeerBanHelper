@@ -54,7 +54,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
 
     @Override
     @WriteDataSource
-    public void flushToDatabase(BatchHandleTasks t) {
+    public synchronized void flushToDatabase(BatchHandleTasks t) {
         var torrent = t.torrent;
         var peer = t.peer;
         var downloader = t.downloader;
@@ -88,7 +88,15 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
                 timestamp,
                 peerGeoIp
         );
-        PeerRecordEntity databaseSnapshot = createIfNotExists(currentSnapshot);
+        PeerRecordEntity databaseSnapshot = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
+                .eq(PeerRecordEntity::getAddress, currentSnapshot.getAddress())
+                .eq(PeerRecordEntity::getTorrentId, currentSnapshot.getTorrentId())
+                .eq(PeerRecordEntity::getDownloader, currentSnapshot.getDownloader())
+                .last("limit 1")
+        );
+        if (databaseSnapshot == null) {
+            databaseSnapshot = currentSnapshot;
+        }
         if (databaseSnapshot.getLastTimeSeen().isAfter(timestamp)) {
             return;
         }
@@ -128,22 +136,6 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
                         .isNull(PeerRecordEntity::getLastTimeSeen)
                         .orderByAsc(PeerRecordEntity::getLastTimeSeen)
         );
-    }
-
-    @Override
-    public synchronized PeerRecordEntity createIfNotExists(PeerRecordEntity data) {
-        PeerRecordEntity existing = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
-                .eq(PeerRecordEntity::getAddress, data.getAddress())
-                .eq(PeerRecordEntity::getTorrentId, data.getTorrentId())
-                .eq(PeerRecordEntity::getDownloader, data.getDownloader())
-                .last("limit 1")
-        );
-        if (existing == null) {
-            baseMapper.insertOrUpdate(data);
-            return data;
-        } else {
-            return existing;
-        }
     }
 
     @Override
