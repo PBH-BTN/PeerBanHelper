@@ -56,7 +56,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         BeeDataSourceConfig config = new BeeDataSourceConfig();
         config.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
         config.setDriverClassName("org.sqlite.JDBC");
-        config.setMaxActive(10);
+        config.setMaxActive(1);
         config.setMaxWait(30000);
         config.setIntervalOfClearTimeout(600000L);
         
@@ -71,6 +71,8 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
             SQLiteConfig.JournalMode.WAL.getValue());
         config.addConnectionFactoryProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(),
             SQLiteConfig.SynchronousMode.NORMAL.getValue());
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.getPragmaName(),
+            String.valueOf(60000));
         config.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),
             String.valueOf(67108864));
         config.addConnectionFactoryProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(),
