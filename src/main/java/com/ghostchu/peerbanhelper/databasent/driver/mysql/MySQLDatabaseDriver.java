@@ -10,6 +10,8 @@ import org.stone.beecp.BeeDataSourceConfig;
 import javax.sql.DataSource;
 import java.io.IOException;
 
+import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
+
 public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     private final ConfigurationSection section;
     private final BeeDataSource dataSource;
@@ -45,6 +47,7 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         config.addConnectionFactoryProperty("prepStmtCacheSqlLimit", "2048");
 
         this.dataSource = new BeeDataSource(config);
+        removeBeeCPShutdownHook(this.dataSource);
     }
 
     @Override

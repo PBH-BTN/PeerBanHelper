@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,5 +104,24 @@ public final class MiscUtil {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    public static boolean removeBeeCPShutdownHook(Object dataSource) {
+        try {
+            Class<?> dataSourceClass = dataSource.getClass();
+            Field poolField = dataSourceClass.getDeclaredField("pool");
+            poolField.setAccessible(true);
+            Object poolObj = poolField.get(dataSource);
+
+            Class<?> poolClass = poolObj.getClass();
+            Field hookField = poolClass.getDeclaredField("exitHook");
+            hookField.setAccessible(true);
+            Thread hookObj = (Thread) hookField.get(poolObj);
+
+            Runtime.getRuntime().removeShutdownHook(hookObj);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return false;
     }
 }

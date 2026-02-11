@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.time.Duration;
 
+import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
+
 @Slf4j
 public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     private final File dbFile;
@@ -54,7 +56,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         
         dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
             String.valueOf(sqLiteConfig.getOpenModeFlags()));
-        
+        removeBeeCPShutdownHook(dataSource);
         return dataSource;
     }
 
@@ -69,7 +71,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         
         dataSource.addConnectionFactoryProperty(SQLiteConfig.Pragma.OPEN_MODE.getPragmaName(), 
             String.valueOf(sqLiteConfig.getOpenModeFlags()));
-        
+        removeBeeCPShutdownHook(dataSource);
         return dataSource;
     }
 
@@ -96,7 +98,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
             String.valueOf(67108864));
         config.addConnectionFactoryProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(),
             String.valueOf(134217728));
-        
+
         return new BeeDataSource(config);
     }
 

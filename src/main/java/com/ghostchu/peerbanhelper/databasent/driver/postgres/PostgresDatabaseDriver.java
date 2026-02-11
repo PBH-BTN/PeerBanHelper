@@ -10,6 +10,8 @@ import org.stone.beecp.BeeDataSourceConfig;
 import javax.sql.DataSource;
 import java.io.IOException;
 
+import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
+
 public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
     private final ConfigurationSection section;
     private final BeeDataSource dataSource;
@@ -48,6 +50,7 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
         config.addConnectionFactoryProperty("reWriteBatchedInserts", "true"); // Improve batch insert performance
 
         this.dataSource = new BeeDataSource(config);
+        removeBeeCPShutdownHook(this.dataSource);
     }
 
     @Override
