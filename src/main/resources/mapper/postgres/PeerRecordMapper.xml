@@ -90,7 +90,7 @@
         #{e.lastFlags}, #{e.firstTimeSeen}, #{e.lastTimeSeen},
         #{e.peerGeoIp, typeHandler=com.ghostchu.peerbanhelper.databasent.driver.common.JsonTypeHandlerForwarder}
         )
-        ON CONFLICT (address, port, torrent_id, downloader) DO UPDATE SET
+        ON CONFLICT (address, torrent_id, downloader) DO UPDATE SET
 
         uploaded = CASE
         WHEN #{e.lastTimeSeen} &lt; peer_records.last_time_seen THEN peer_records.uploaded
