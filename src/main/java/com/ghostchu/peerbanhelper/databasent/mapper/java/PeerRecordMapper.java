@@ -33,4 +33,6 @@ public interface PeerRecordMapper extends BaseMapper<PeerRecordEntity> {
     List<String> getDistinctIps(@Param("start") java.time.OffsetDateTime start,
                                 @Param("end") java.time.OffsetDateTime end,
                                 @Param("downloader") String downloader);
+
+    int upsert(@Param("e") PeerRecordEntity entity);
 }

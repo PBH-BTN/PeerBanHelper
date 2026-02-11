@@ -50,7 +50,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    public synchronized void flushToDatabase(BatchHandleTasks t) {
+    public void flushToDatabase(BatchHandleTasks t) {
         var torrent = t.torrent;
         var peer = t.peer;
         var downloader = t.downloader;
@@ -65,7 +65,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         InetAddress inet = peer.getAddress().getAddress().toInetAddress();
         var lazyLoader = ipdbManager.queryIPDB(inet).geoData();
         var peerGeoIp = lazyLoader.get();
-        PeerRecordEntity currentSnapshot = new PeerRecordEntity(
+        baseMapper.upsert(new PeerRecordEntity(
                 null,
                 inet,
                 peer.toPeerAddress().getPort(),
@@ -73,48 +73,17 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
                 downloader,
                 peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
                 peer.getClientName(),
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
+                peer.getUploaded(),
+                peer.getUploaded(),
+                peer.getUploadSpeed(),
+                peer.getDownloaded(),
+                peer.getDownloaded(),
+                peer.getDownloadSpeed(),
                 peer.getFlags(),
                 timestamp,
                 timestamp,
                 peerGeoIp
-        );
-        PeerRecordEntity databaseSnapshot = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
-                .eq(PeerRecordEntity::getAddress, currentSnapshot.getAddress())
-                .eq(PeerRecordEntity::getPort, currentSnapshot.getPort())
-                .eq(PeerRecordEntity::getTorrentId, currentSnapshot.getTorrentId())
-                .eq(PeerRecordEntity::getDownloader, currentSnapshot.getDownloader())
-        );
-        if (databaseSnapshot == null) {
-            databaseSnapshot = currentSnapshot;
-        }
-        if (databaseSnapshot.getLastTimeSeen().isAfter(timestamp)) {
-            return;
-        }
-        long downloadedIncremental = peer.getDownloaded() - databaseSnapshot.getDownloadedOffset();
-        long uploadedIncremental = peer.getUploaded() - databaseSnapshot.getUploadedOffset();
-        if (downloadedIncremental < 0 || uploadedIncremental < 0) {
-            databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + peer.getDownloaded());
-            databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + peer.getUploaded());
-        } else {
-            databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + downloadedIncremental);
-            databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + uploadedIncremental);
-        }
-        // 更新 offset，转换为增量数据
-        databaseSnapshot.setDownloadedOffset(peer.getDownloaded());
-        databaseSnapshot.setUploadedOffset(peer.getUploaded());
-        databaseSnapshot.setDownloadSpeed(peer.getDownloadSpeed());
-        databaseSnapshot.setUploadSpeed(peer.getUploadSpeed());
-        databaseSnapshot.setPeerId(currentSnapshot.getPeerId());
-        databaseSnapshot.setClientName(currentSnapshot.getClientName());
-        databaseSnapshot.setLastFlags(currentSnapshot.getLastFlags());
-        databaseSnapshot.setLastTimeSeen(currentSnapshot.getLastTimeSeen());
-        baseMapper.insertOrUpdate(databaseSnapshot);
+        ));
     }
 
     @Override
