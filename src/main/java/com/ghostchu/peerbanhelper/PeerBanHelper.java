@@ -182,6 +182,7 @@ public class PeerBanHelper implements Reloadable {
         // place some clean code here
         downloaderServer.close();
         this.moduleManager.unregisterAll();
+        CommonUtil.getScheduler().shutdown();
         if (btnNetwork != null) {
             try {
                 btnNetwork.close();
