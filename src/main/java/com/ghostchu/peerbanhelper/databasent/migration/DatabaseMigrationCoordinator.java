@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.databasent.migration;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.migration.migrators.*;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
@@ -11,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public class DatabaseMigrationCoordinator {
     @Autowired(required = false)
     private IPDBManager ipdbManager;
     @Autowired
-    private WriteTransactionTemplate transactionTemplate;
+    private TransactionTemplate transactionTemplate;
 
     private final File sqliteDbFile;
     private final File migrationMarkerFile;

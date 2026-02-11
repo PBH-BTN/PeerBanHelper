@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.databasent.driver.sqlite;
 
-import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
@@ -9,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.sqlite.SQLiteConfig;
+import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
@@ -48,12 +48,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    protected @NotNull DataSource createReadDataSource() {
-        return dataSource;
-    }
-
-    @Override
-    protected @NotNull DataSource createWriteDataSource() {
+    protected @NotNull DataSource createDataSource() {
         return dataSource;
     }
 
@@ -108,7 +103,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
             if (timeSinceLastMaintenance >= Duration.ofDays(vacuumIntervalDays).toMillis()) {
                 log.debug("Performing SQLite VACUUM maintenance (last performed {} days ago)", timeSinceLastMaintenance / (1000 * 60 * 60 * 24));
-                try (Connection conn = getReadDataSource().getConnection();
+                try (Connection conn = getDataSource().getConnection();
                      var stmt = conn.createStatement()) {
                     stmt.execute("VACUUM");
 

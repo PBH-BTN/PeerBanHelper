@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
 import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerRecordMapper;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteDataSource;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
@@ -24,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -53,7 +50,6 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    @WriteDataSource
     public synchronized void flushToDatabase(BatchHandleTasks t) {
         var torrent = t.torrent;
         var peer = t.peer;

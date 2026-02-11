@@ -1,11 +1,11 @@
 package com.ghostchu.peerbanhelper.databasent.driver.h2;
 
-import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
@@ -58,18 +58,13 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource createWriteDataSource() {
-        return dataSource;
-    }
-
-    @Override
-    protected @NotNull DataSource createReadDataSource() {
+    public @NotNull DataSource createDataSource() {
         return dataSource;
     }
 
     @Override
     public void close() throws Exception {
-        try (Connection connection = getReadDataSource().getConnection()) {
+        try (Connection connection = getDataSource().getConnection()) {
             if (requestCompactOnShutdown.get()) {
                 connection.createStatement().execute("SHUTDOWN COMPACT");
             } else {

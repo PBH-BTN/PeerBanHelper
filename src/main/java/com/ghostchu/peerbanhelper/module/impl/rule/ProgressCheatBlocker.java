@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.service.PCBRangeService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
@@ -39,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -92,7 +92,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private double fastPcbTestPercentage;
     private final Object cacheDBLoadingLock = new Object();
     @Autowired
-    private WriteTransactionTemplate transactionTemplate;
+    private TransactionTemplate transactionTemplate;
     @Autowired
     private BackgroundTaskManager backgroundTaskManager;
     @Autowired

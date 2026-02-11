@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.databasent.driver.postgres;
 
-import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.stone.beecp.BeeDataSource;
 import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
@@ -59,12 +59,7 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    protected @NotNull DataSource createWriteDataSource() {
-        return dataSource;
-    }
-
-    @Override
-    protected @NotNull DataSource createReadDataSource() {
+    protected @NotNull DataSource createDataSource() {
         return dataSource;
     }
 }
