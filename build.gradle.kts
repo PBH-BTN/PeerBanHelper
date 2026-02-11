@@ -1,7 +1,7 @@
 plugins {
     java
     application
-    id("com.gorylenko.gradle-git-properties") version "2.5.5"
+    id("com.gorylenko.gradle-git-properties") version "2.5.7"
     id("com.install4j.gradle") version "12.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
