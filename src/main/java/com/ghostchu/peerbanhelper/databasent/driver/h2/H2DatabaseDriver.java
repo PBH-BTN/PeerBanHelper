@@ -67,8 +67,7 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         try (Connection connection = getDataSource().getConnection()) {
             if (requestCompactOnShutdown.get()) {
                 connection.createStatement().execute("SHUTDOWN COMPACT");
-            } else {
-                connection.createStatement().execute("SHUTDOWN");
+                return;
             }
         }
         super.close();
