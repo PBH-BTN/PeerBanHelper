@@ -137,6 +137,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     @Override
     public void close() {
+        BAN_WAVE_SERVICE.shutdownNow();
         this.metrics.close();
         saveBanList();
     }

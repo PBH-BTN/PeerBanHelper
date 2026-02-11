@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
@@ -67,6 +68,8 @@ public class PeerBanHelper implements Reloadable {
     private UmamiHelper telemetry;
     @Autowired
     private DatabaseDriver databaseDriver;
+    @Autowired(required = false)
+    private BtnNetwork btnNetwork;
 
     public PeerBanHelper() {
         reloadConfig();
@@ -179,6 +182,14 @@ public class PeerBanHelper implements Reloadable {
         // place some clean code here
         downloaderServer.close();
         this.moduleManager.unregisterAll();
+        if (btnNetwork != null) {
+            try {
+                btnNetwork.close();
+            } catch (Exception e) {
+                log.warn("Unable to safe shutdown btnNetwork", e);
+                Sentry.captureException(e);
+            }
+        }
         try {
             downloaderManager.close();
         } catch (Exception e) {
