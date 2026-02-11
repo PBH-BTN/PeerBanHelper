@@ -90,9 +90,9 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         );
         PeerRecordEntity databaseSnapshot = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
                 .eq(PeerRecordEntity::getAddress, currentSnapshot.getAddress())
+                .eq(PeerRecordEntity::getPort, currentSnapshot.getPort())
                 .eq(PeerRecordEntity::getTorrentId, currentSnapshot.getTorrentId())
                 .eq(PeerRecordEntity::getDownloader, currentSnapshot.getDownloader())
-                .last("limit 1")
         );
         if (databaseSnapshot == null) {
             databaseSnapshot = currentSnapshot;
