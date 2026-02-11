@@ -93,24 +93,65 @@
         ON CONFLICT (address, port, torrent_id, downloader) DO UPDATE SET
 
         uploaded = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen THEN peer_records.uploaded
         WHEN (#{e.uploaded} - peer_records.uploaded_offset) &lt; 0
         THEN peer_records.uploaded + #{e.uploaded}
         ELSE peer_records.uploaded + #{e.uploaded} - peer_records.uploaded_offset
         END,
-        uploaded_offset = #{e.uploaded},
 
         downloaded = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen THEN peer_records.downloaded
         WHEN (#{e.downloaded} - peer_records.downloaded_offset) &lt; 0
         THEN peer_records.downloaded + #{e.downloaded}
         ELSE peer_records.downloaded + #{e.downloaded} - peer_records.downloaded_offset
         END,
-        downloaded_offset = #{e.downloaded},
 
-        upload_speed = #{e.uploadSpeed},
-        download_speed = #{e.downloadSpeed},
-        peer_id = #{e.peerId},
-        client_name = #{e.clientName},
-        last_flags = #{e.lastFlags},
-        last_time_seen = #{e.lastTimeSeen};
+        uploaded_offset = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.uploaded_offset
+        ELSE #{e.uploaded}
+        END,
+
+        downloaded_offset = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.downloaded_offset
+        ELSE #{e.downloaded}
+        END,
+
+        upload_speed = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.upload_speed
+        ELSE #{e.uploadSpeed}
+        END,
+
+        download_speed = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.download_speed
+        ELSE #{e.downloadSpeed}
+        END,
+
+        peer_id = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.peer_id
+        ELSE #{e.peerId}
+        END,
+
+        client_name = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.client_name
+        ELSE #{e.clientName}
+        END,
+
+        last_flags = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.last_flags
+        ELSE #{e.lastFlags}
+        END,
+
+        last_time_seen = CASE
+        WHEN #{e.lastTimeSeen} &lt;= peer_records.last_time_seen
+        THEN peer_records.last_time_seen
+        ELSE #{e.lastTimeSeen}
+        END;
     </insert>
 </mapper>

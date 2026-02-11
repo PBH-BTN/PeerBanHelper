@@ -93,24 +93,65 @@
         ON DUPLICATE KEY UPDATE
 
         uploaded = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen THEN uploaded
         WHEN (#{e.uploaded} - uploaded_offset) &lt; 0
         THEN uploaded + #{e.uploaded}
         ELSE uploaded + #{e.uploaded} - uploaded_offset
         END,
-        uploaded_offset = #{e.uploaded},
 
         downloaded = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen THEN downloaded
         WHEN (#{e.downloaded} - downloaded_offset) &lt; 0
         THEN downloaded + #{e.downloaded}
         ELSE downloaded + #{e.downloaded} - downloaded_offset
         END,
-        downloaded_offset = #{e.downloaded},
 
-        upload_speed = #{e.uploadSpeed},
-        download_speed = #{e.downloadSpeed},
-        peer_id = #{e.peerId},
-        client_name = #{e.clientName},
-        last_flags = #{e.lastFlags},
-        last_time_seen = #{e.lastTimeSeen};
+        uploaded_offset = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN uploaded_offset
+        ELSE #{e.uploaded}
+        END,
+
+        downloaded_offset = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN downloaded_offset
+        ELSE #{e.downloaded}
+        END,
+
+        upload_speed = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN upload_speed
+        ELSE #{e.uploadSpeed}
+        END,
+
+        download_speed = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN download_speed
+        ELSE #{e.downloadSpeed}
+        END,
+
+        peer_id = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN peer_id
+        ELSE #{e.peerId}
+        END,
+
+        client_name = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN client_name
+        ELSE #{e.clientName}
+        END,
+
+        last_flags = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN last_flags
+        ELSE #{e.lastFlags}
+        END,
+
+        last_time_seen = CASE
+        WHEN #{e.lastTimeSeen} &lt;= last_time_seen
+        THEN last_time_seen
+        ELSE #{e.lastTimeSeen}
+        END;
     </insert>
 </mapper>
