@@ -44,11 +44,11 @@
     "vue-echarts": "^8.0.1",
     "vue-i18n": "^11.2.2",
     "vue-request": "^2.0.4",
-    "vue-router": "^4.6.4"
+    "vue-router": "^5.0.0"
   },
   "devDependencies": {
     "@arco-plugins/vite-vue": "^1.4.6",
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^10.0.0",
     "@rushstack/eslint-patch": "^1.15.0",
     "@tsconfig/node24": "^24.0.3",
     "@types/lodash": "^4.17.21",
@@ -57,7 +57,7 @@
     "@typescript-eslint/parser": "^8.50.0",
     "@vitejs/plugin-vue": "^6.0.3",
     "@vue/tsconfig": "^0.8.1",
-    "eslint": "9.39.2",
+    "eslint": "10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.6.2",
     "husky": "^9.1.7",
