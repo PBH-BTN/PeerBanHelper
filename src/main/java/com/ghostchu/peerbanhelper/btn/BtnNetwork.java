@@ -357,7 +357,9 @@ public final class BtnNetwork implements Reloadable {
     public void close() {
         log.info(tlUI(Lang.BTN_SHUTTING_DOWN));
         backgroundTaskManager.shutdown();
-        scheduler.shutdown();
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
         abilities.values().forEach(BtnAbility::unload);
         abilities.clear();
     }
