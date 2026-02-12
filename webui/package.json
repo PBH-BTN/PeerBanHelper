@@ -17,7 +17,7 @@
     "pre-commit-check": "lint-staged"
   },
   "dependencies": {
-    "@arco-design/web-vue": "2.56.3",
+    "@arco-design/web-vue": "2.57.0",
     "@dzangolab/flag-icon-css": "^3.4.5",
     "@formatjs/intl-durationformat": "^0.10.0",
     "@guolao/vue-monaco-editor": "^1.6.0",
