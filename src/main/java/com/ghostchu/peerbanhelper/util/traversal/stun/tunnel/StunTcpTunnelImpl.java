@@ -57,7 +57,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         var outerResult = mappingResult.outerAddress();
         log.debug("STUN CreateMapping: Inter address: {}, Outer address: {}", interResult, outerResult);
         try {
-            if (Main.getMainConfig().getBoolean("stun.availableTest", true)) {
+            if (Main.getMainConfig().getBoolean("stun.available-test", true)) {
                 var testPass = testMapping(interResult, outerResult);
                 if (!testPass) {
                     stunListener.onNotApplicable(new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_TEST_FAILED));

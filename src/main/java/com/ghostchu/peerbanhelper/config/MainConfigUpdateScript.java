@@ -37,6 +37,13 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 44)
+    public void availableTestRename(YamlConfiguration bundle) {
+        var test = conf.getBoolean("stun.availableTest", bundle.getBoolean("stun.availableTest"));
+        conf.set("stun.available-test", test);
+        conf.set("stun.availableTest", null);
+    }
+
     @UpdateScript(version = 43)
     public void databaseTypeChange(YamlConfiguration bundle) {
         var id = conf.getInt("database.type", -1);
