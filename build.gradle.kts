@@ -1,7 +1,7 @@
 plugins {
     java
     application
-    id("com.gorylenko.gradle-git-properties") version "2.5.6"
+    id("com.gorylenko.gradle-git-properties") version "2.5.7"
     id("com.install4j.gradle") version "12.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
@@ -64,12 +64,12 @@ dependencies {
     }
     // Database
     ///implementation("org.springframework:spring-tx:7.0.3")
-    implementation("org.springframework:spring-jdbc:7.0.3")
+    implementation("org.springframework:spring-jdbc:7.0.4")
     //implementation("org.aspectj:aspectjweaver:1.9.25.1")
     implementation("org.xerial:sqlite-jdbc:3.51.1.0")
     implementation("com.h2database:h2:2.3.232")
     implementation("com.mysql:mysql-connector-j:9.6.0")
-    implementation("org.postgresql:postgresql:42.7.9")
+    implementation("org.postgresql:postgresql:42.7.10")
     implementation("com.zaxxer:HikariCP:7.0.2")
 
     // MyBatis-Plus Stuff
@@ -136,7 +136,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.28")
+    implementation("ch.qos.logback:logback-classic:1.5.29")
     implementation("org.slf4j:jcl-over-slf4j:2.0.17")
 
     // Async utilities
