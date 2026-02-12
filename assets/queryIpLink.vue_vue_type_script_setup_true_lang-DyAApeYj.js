@@ -1,0 +1,1 @@
+import{f as o,j as r,l as n,p as s,k as a}from"./libs-BUQTu6zj.js";const l=["href"],c=o({__name:"queryIpLink",props:{ip:{},style:{type:[Boolean,null,String,Object,Array],default:()=>{}}},setup(e){return(t,i)=>(a(),r("a",{style:s([{"text-decoration":"none",cursor:"pointer"},e.style]),href:`ipHistory?ip=${e.ip}`},[n(t.$slots,"default")],12,l))}});export{c as _};
