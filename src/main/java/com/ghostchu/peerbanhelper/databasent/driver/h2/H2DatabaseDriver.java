@@ -36,8 +36,9 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         this.dbFile = new File(persistDir, "peerbanhelper-nt");
         this.dbPath = dbFile.getAbsolutePath();
 
-        config.setJdbcUrl("jdbc:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
-        config.setDriverClassName("org.h2.Driver");
+        config.setJdbcUrl("jdbc:p6spy:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
+        //config.setDriverClassName("org.h2.Driver");
+        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
         config.setMaxActive(10);
         config.setMaxWait(30000);
         config.setIntervalOfClearTimeout(600000L);

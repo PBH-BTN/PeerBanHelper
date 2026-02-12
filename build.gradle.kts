@@ -186,7 +186,7 @@ dependencies {
     implementation("io.sentry:sentry-logback")
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-
+    implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
     testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")

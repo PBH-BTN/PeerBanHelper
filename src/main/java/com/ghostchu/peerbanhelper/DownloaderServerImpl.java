@@ -20,10 +20,7 @@ import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.WatchDog;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
@@ -743,27 +740,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     }
 
     private void watchDogHungry() {
-        StringBuilder threadDump = new StringBuilder(System.lineSeparator());
-        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
-            threadDump.append(MsgUtil.threadInfoToString(threadInfo));
-        }
-        threadDump.append("\n\n");
-        var deadLockedThreads = threadMXBean.findDeadlockedThreads();
-        var monitorDeadlockedThreads = threadMXBean.findMonitorDeadlockedThreads();
-        if (deadLockedThreads != null) {
-            threadDump.append("Deadlocked Threads:\n");
-            for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(deadLockedThreads)) {
-                threadDump.append(MsgUtil.threadInfoToString(threadInfo));
-            }
-        }
-        if (monitorDeadlockedThreads != null) {
-            threadDump.append("Monitor Deadlocked Threads:\n");
-            for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(monitorDeadlockedThreads)) {
-                threadDump.append(MsgUtil.threadInfoToString(threadInfo));
-            }
-        }
-        log.info(threadDump.toString());
+        log.error(MiscUtil.getAllThreadTrace());
         registerBanWaveTimer();
         Main.getGuiManager().createNotification(Level.WARN, tlUI(Lang.BAN_WAVE_WATCH_DOG_TITLE), tlUI(Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION));
     }

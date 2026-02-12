@@ -54,12 +54,12 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
     private BeeDataSource createDefaultBeeDataSource(){
         BeeDataSourceConfig config = new BeeDataSourceConfig();
-        config.setJdbcUrl("jdbc:sqlite:" + this.dbPath);
-        config.setDriverClassName("org.sqlite.JDBC");
+        config.setJdbcUrl("jdbc:p6spy:sqlite:" + this.dbPath);
+        //config.setDriverClassName("org.sqlite.JDBC");
+        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
         config.setMaxActive(1);
         config.setMaxWait(30000);
         config.setIntervalOfClearTimeout(600000L);
-        
         // 连接池验证配置
         config.setAliveTestSql("SELECT 1");
         

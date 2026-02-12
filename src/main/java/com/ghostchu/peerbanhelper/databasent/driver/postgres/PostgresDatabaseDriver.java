@@ -27,10 +27,11 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
         String username = section.getString("username");
         String password = section.getString("password");
 
-        config.setJdbcUrl("jdbc:postgresql://" + host + ":" + port + "/" + database);
+        config.setJdbcUrl("jdbc:p6spy:postgresql://" + host + ":" + port + "/" + database);
         config.setUsername(username);
         config.setPassword(password);
-        config.setDriverClassName("org.postgresql.Driver");
+        //config.setDriverClassName("org.postgresql.Driver");
+        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
         config.setMaxActive(10);
         config.setMaxWait(30000);
         config.setIntervalOfClearTimeout(600000L);

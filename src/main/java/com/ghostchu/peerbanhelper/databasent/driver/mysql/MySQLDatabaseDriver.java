@@ -27,10 +27,11 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         String username = section.getString("username");
         String password = section.getString("password");
 
-        config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
+        config.setJdbcUrl("jdbc:p6spy:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
         config.setUsername(username);
         config.setPassword(password);
-        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        //config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
         config.setMaxActive(10);
         config.setMaxWait(30000);
         config.setIntervalOfClearTimeout(600000L);
