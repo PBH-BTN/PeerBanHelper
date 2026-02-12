@@ -22,6 +22,8 @@ jobs:
           mkdir -p pkg/deb/usr/lib/peerbanhelper
           mv build/libraries pkg/deb/usr/lib/peerbanhelper/
           cp build/libs/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper/
+          cp src/main/resources/config.yml pkg/deb/etc/peerbanhelper/config.yml
+          cp src/main/resources/profile.yml pkg/deb/etc/peerbanhelper/profile.yml
           cd pkg && dpkg -b deb peerbanhelper_${{ env.PBH_VERSION }}_all.deb
         # 上面那个文件名需要符合收集条件
         env:
