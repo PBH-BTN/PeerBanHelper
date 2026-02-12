@@ -244,7 +244,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v6.19.2
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
         with:
           context: .
@@ -281,7 +281,7 @@ jobs:
             type=sha
       - name: Build and push Aliyun ACR
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v6.19.2
         with:
           context: .
           file: ./Dockerfile-Release
