@@ -1,4 +1,4 @@
-config-version: 38
+config-version: 44
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -151,7 +151,7 @@ stun:
     - "stun.l.google.com:3478"
   # 启用可用性测试
   # Enable available test
-  availableTest: true
+  available-test: true
 
 # 自动 STUN 打洞
 auto-stun:
@@ -170,3 +170,38 @@ auto-stun:
   use-friendly-loopback-mapping: true
   # 启用该功能的下载器列表
   downloaders: [ ]
+
+# 封禁列表重映射 - BanList Remapping
+# 将封禁的单个 IP 地址映射到一个更大的范围，以便提高下载器对 IP 地址的封禁效率。错误的配置可能封禁更多的无关 Peers
+# Map a single banned IP address to a larger range to improve the efficiency of IP banning in downloaders. Incorrect configuration may ban more unrelated peers.
+banlist-remapping:
+  # IPv4 地址重映射设置 - IPv4 Address Remapping Settings
+  ipv4:
+    enabled: false
+    # Prefix Length，将会使用该长度将主机地址置为0，并生成对应的 CIDR 表达式
+    # Prefix Length, the host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression
+    remap-range: 30
+  ipv6:
+    enabled: true
+    # Prefix Length，将会使用该长度将主机地址置为0，并生成对应的 CIDR 表达式
+    # Prefix Length, the host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression
+    remap-range: 60
+# 隐私设置 - Privacy Settings
+privacy:
+  # 允许向 PBH-BTN 发送匿名统计信息，以便改进 PeerBanHelper 质量，此数据不包含任何个人信息
+  # Allow to send anonymous statistics to PBH-BTN to improve PeerBanHelper quality, this data do not contain any personal information
+  analytics: true
+
+# 数据库设置
+database:
+  # 支持：
+  # sqlite - 嵌入式 SQLite 数据库，适用于大多数用户（默认）
+  # h2 - 嵌入式 H2 数据库
+  # mysql - 远程 MySQL/MariaDB 数据库
+  # postgresql - 远程 PostgreSQL 数据库
+  type: "sqlite"
+  host: "localhost"
+  port: 5432
+  username: "peerbanhelper"
+  password: "peerbanhelper"
+  database: "peerbanhelper"

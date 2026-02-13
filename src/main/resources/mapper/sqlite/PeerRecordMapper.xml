@@ -130,6 +130,12 @@
         ELSE excluded.download_speed
         END,
 
+        port = CASE
+        WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
+        THEN peer_records.port
+        ELSE excluded.port
+        END;
+
         peer_id = CASE
         WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.peer_id

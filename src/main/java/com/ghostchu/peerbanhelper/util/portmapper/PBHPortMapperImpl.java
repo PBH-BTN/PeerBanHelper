@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.portmapper;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 import org.bitlet.weupnp.GatewayDevice;
@@ -71,7 +72,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     private void scanMappers() {
         synchronized (discoverLock) {
-            if(gatewayDiscover != null ){
+            if (gatewayDiscover != null || !Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
                 return;
             }
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
@@ -119,6 +120,9 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     @Override
     public Collection<GatewayDevice> getGatewayDevices() {
+        if (gatewayDiscover == null) {
+            return List.of();
+        }
         if (gatewayDiscover.getValidGateway() == null) {
             scanMappers();
         }

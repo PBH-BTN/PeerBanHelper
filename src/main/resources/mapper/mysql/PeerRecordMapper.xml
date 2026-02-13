@@ -130,6 +130,12 @@
         ELSE #{e.downloadSpeed}
         END,
 
+        port = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN port
+        ELSE #{e.port}
+        END,
+
         peer_id = CASE
         WHEN #{e.lastTimeSeen} &lt; last_time_seen
         THEN peer_id
