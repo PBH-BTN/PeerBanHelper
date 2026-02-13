@@ -28,7 +28,7 @@ public class TorrentServiceImpl extends ServiceImpl<TorrentMapper, TorrentEntity
             .build();
 
     @Override
-    public synchronized @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
+    public @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {
         TorrentEntity existing = queryByInfoHash(torrent.getInfoHash());
         if (existing != null) {
             // If existing record is complete, or invalidation won't help (incoming data has no value), return existing

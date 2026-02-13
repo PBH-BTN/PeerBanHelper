@@ -91,6 +91,7 @@ public final class WatchDog implements AutoCloseable {
         event.setTag("watchdog.timeout", String.valueOf(timeout));
         event.setTag("watchdog.last_operation", lastOperation);
         event.setTag("watchdog.in_downloader_io", String.valueOf(isDownloaderIO));
+        event.setExtra("stacktrace", MiscUtil.getAllThreadTrace());
         event.setThreads(SentryUtils.getSentryThreads());
         Sentry.captureEvent(event);
         if (hungry != null) {

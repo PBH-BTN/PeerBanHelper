@@ -3,12 +3,12 @@ package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.AlertMapper;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> implements AlertService {
     @Autowired
-    private WriteTransactionTemplate writeTransactionTemplate;
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public @NotNull List<AlertEntity> getUnreadAlerts() {
@@ -38,7 +38,7 @@ public class AlertServiceImpl extends ServiceImpl<AlertMapper, AlertEntity> impl
         int deleted = 0;
         while (true) {
             // 每次循环在独立事务中执行，完成后释放连接
-            Integer changes = writeTransactionTemplate.execute(status -> 
+            Integer changes = transactionTemplate.execute(status ->
                 baseMapper.delete(new LambdaQueryWrapper<AlertEntity>()
                     .le(AlertEntity::getCreateAt, before)
                     .last("LIMIT 150"))

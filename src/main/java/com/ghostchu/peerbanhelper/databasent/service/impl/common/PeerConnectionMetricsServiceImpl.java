@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsMapper;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteDataSource;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteTransactionTemplate;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
@@ -17,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -32,7 +31,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnectionMetricsMapper, PeerConnectionMetricsEntity> implements PeerConnectionMetricsService {
 	@Autowired
-	private WriteTransactionTemplate writeTransactionTemplate;
+	private TransactionTemplate transactionTemplate;
 
 
 	@Override
@@ -85,7 +84,6 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
 	}
 
 	@Override
-	@WriteDataSource
 	public void saveAggregating(@NotNull List<PeerConnectionMetricsEntity> buffer, boolean overwrite) {
 		for (PeerConnectionMetricsEntity peerConnectionMetricsEntity : buffer) {
             PeerConnectionMetricsEntity entityInDb = baseMapper.selectOne(new LambdaQueryWrapper<PeerConnectionMetricsEntity>().eq(PeerConnectionMetricsEntity::getTimeframeAt, peerConnectionMetricsEntity.getTimeframeAt()).eq(PeerConnectionMetricsEntity::getDownloader, peerConnectionMetricsEntity.getDownloader()));
@@ -155,7 +153,7 @@ public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnection
         long deleted = 0;
         while (true) {
             // 每次循环在独立事务中执行，完成后释放连接
-            Integer changes = writeTransactionTemplate.execute(status -> 
+            Integer changes = transactionTemplate.execute(status ->
                 baseMapper.delete(new LambdaQueryWrapper<PeerConnectionMetricsEntity>()
                     .le(PeerConnectionMetricsEntity::getTimeframeAt, beforeAt)
                     .last("LIMIT 300"))

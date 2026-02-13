@@ -1,7 +1,7 @@
 plugins {
     java
     application
-    id("com.gorylenko.gradle-git-properties") version "2.5.5"
+    id("com.gorylenko.gradle-git-properties") version "2.5.7"
     id("com.install4j.gradle") version "12.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.3.2"
+version = "9.3.3"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -68,10 +68,10 @@ dependencies {
     implementation("org.springframework:spring-jdbc:7.0.3")
     // Source: https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
     implementation("org.aspectj:aspectjweaver:1.9.25.1")
-    implementation("org.xerial:sqlite-jdbc:3.51.1.0")
+    implementation("org.xerial:sqlite-jdbc:3.51.2.0")
     implementation("com.h2database:h2:2.3.232")
     implementation("com.mysql:mysql-connector-j:9.6.0")
-    implementation("org.postgresql:postgresql:42.7.9")
+    implementation("org.postgresql:postgresql:42.7.10")
     implementation("com.github.chris2018998:beecp:5.2.0")
 
     // MyBatis-Plus Stuff
@@ -138,7 +138,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.27")
+    implementation("ch.qos.logback:logback-classic:1.5.29")
     implementation("org.slf4j:jcl-over-slf4j:2.0.17")
 
     // Async utilities
@@ -181,12 +181,12 @@ dependencies {
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0.2")
 
-    implementation(platform("io.sentry:sentry-bom:8.31.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.32.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-
+    implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
     testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")

@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
 import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerRecordMapper;
-import com.ghostchu.peerbanhelper.databasent.routing.WriteDataSource;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerRecordEntity;
@@ -24,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -53,7 +50,6 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     }
 
     @Override
-    @WriteDataSource
     public void flushToDatabase(BatchHandleTasks t) {
         var torrent = t.torrent;
         var peer = t.peer;
@@ -69,7 +65,7 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
         InetAddress inet = peer.getAddress().getAddress().toInetAddress();
         var lazyLoader = ipdbManager.queryIPDB(inet).geoData();
         var peerGeoIp = lazyLoader.get();
-        PeerRecordEntity currentSnapshot = new PeerRecordEntity(
+        baseMapper.upsert(new PeerRecordEntity(
                 null,
                 inet,
                 peer.toPeerAddress().getPort(),
@@ -77,40 +73,17 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
                 downloader,
                 peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
                 peer.getClientName(),
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
+                peer.getUploaded(),
+                peer.getUploaded(),
+                peer.getUploadSpeed(),
+                peer.getDownloaded(),
+                peer.getDownloaded(),
+                peer.getDownloadSpeed(),
                 peer.getFlags(),
                 timestamp,
                 timestamp,
                 peerGeoIp
-        );
-        PeerRecordEntity databaseSnapshot = createIfNotExists(currentSnapshot);
-        if (databaseSnapshot.getLastTimeSeen().isAfter(timestamp)) {
-            return;
-        }
-        long downloadedIncremental = peer.getDownloaded() - databaseSnapshot.getDownloadedOffset();
-        long uploadedIncremental = peer.getUploaded() - databaseSnapshot.getUploadedOffset();
-        if (downloadedIncremental < 0 || uploadedIncremental < 0) {
-            databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + peer.getDownloaded());
-            databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + peer.getUploaded());
-        } else {
-            databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + downloadedIncremental);
-            databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + uploadedIncremental);
-        }
-        // 更新 offset，转换为增量数据
-        databaseSnapshot.setDownloadedOffset(peer.getDownloaded());
-        databaseSnapshot.setUploadedOffset(peer.getUploaded());
-        databaseSnapshot.setDownloadSpeed(peer.getDownloadSpeed());
-        databaseSnapshot.setUploadSpeed(peer.getUploadSpeed());
-        databaseSnapshot.setPeerId(currentSnapshot.getPeerId());
-        databaseSnapshot.setClientName(currentSnapshot.getClientName());
-        databaseSnapshot.setLastFlags(currentSnapshot.getLastFlags());
-        databaseSnapshot.setLastTimeSeen(currentSnapshot.getLastTimeSeen());
-        baseMapper.insertOrUpdate(databaseSnapshot);
+        ));
     }
 
     @Override
@@ -128,22 +101,6 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
                         .isNull(PeerRecordEntity::getLastTimeSeen)
                         .orderByAsc(PeerRecordEntity::getLastTimeSeen)
         );
-    }
-
-    @Override
-    public synchronized PeerRecordEntity createIfNotExists(PeerRecordEntity data) {
-        PeerRecordEntity existing = baseMapper.selectOne(new LambdaQueryWrapper<PeerRecordEntity>()
-                .eq(PeerRecordEntity::getAddress, data.getAddress())
-                .eq(PeerRecordEntity::getTorrentId, data.getTorrentId())
-                .eq(PeerRecordEntity::getDownloader, data.getDownloader())
-                .last("limit 1")
-        );
-        if (existing == null) {
-            baseMapper.insertOrUpdate(data);
-            return data;
-        } else {
-            return existing;
-        }
     }
 
     @Override

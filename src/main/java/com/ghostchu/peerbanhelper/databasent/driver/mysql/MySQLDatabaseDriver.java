@@ -1,13 +1,16 @@
 package com.ghostchu.peerbanhelper.databasent.driver.mysql;
 
-import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.stone.beecp.BeeDataSource;
+import org.stone.beecp.BeeDataSourceConfig;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+
+import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
 
 public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     private final ConfigurationSection section;
@@ -16,34 +19,36 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     public MySQLDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         this.section = section;
+        BeeDataSourceConfig config = new BeeDataSourceConfig();
         
         String host = section.getString("host");
         int port = section.getInt("port");
         String database = section.getString("database");
         String username = section.getString("username");
         String password = section.getString("password");
-        
-        BeeDataSource beeDataSource = new BeeDataSource();
-        beeDataSource.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
-        beeDataSource.setUsername(username);
-        beeDataSource.setPassword(password);
-        beeDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        beeDataSource.setMaxActive(10);
-        beeDataSource.setMaxWait(30000);
-        beeDataSource.setIntervalOfClearTimeout(600000L);
+
+        config.setJdbcUrl("jdbc:p6spy:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
+        config.setUsername(username);
+        config.setPassword(password);
+        //config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
+        config.setMaxActive(10);
+        config.setMaxWait(30000);
+        config.setIntervalOfClearTimeout(600000L);
         
         // 连接池验证配置
-        beeDataSource.setAliveTestSql("SELECT 1");
+        config.setAliveTestSql("SELECT 1");
         
         // 启用公平排队 (FIFO)
-        beeDataSource.setFairMode(true);
+        config.setFairMode(true);
         
         // MySQL 优化参数
-        beeDataSource.addConnectionFactoryProperty("cachePrepStmts", "true");
-        beeDataSource.addConnectionFactoryProperty("prepStmtCacheSize", "250");
-        beeDataSource.addConnectionFactoryProperty("prepStmtCacheSqlLimit", "2048");
-        
-        this.dataSource = beeDataSource;
+        config.addConnectionFactoryProperty("cachePrepStmts", "true");
+        config.addConnectionFactoryProperty("prepStmtCacheSize", "250");
+        config.addConnectionFactoryProperty("prepStmtCacheSqlLimit", "2048");
+
+        this.dataSource = new BeeDataSource(config);
+        removeBeeCPShutdownHook(dataSource);
     }
 
     @Override
@@ -52,12 +57,7 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     }
 
     @Override
-    protected @NotNull DataSource createReadDataSource() {
-        return dataSource;
-    }
-
-    @Override
-    protected @NotNull DataSource createWriteDataSource() {
+    protected @NotNull DataSource createDataSource() {
         return dataSource;
     }
 }

@@ -57,15 +57,6 @@ public class IPDBManager {
             boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
                     databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), hTTPUtil, backgroundTaskManager);
-            Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().name("IPDB Shutdown Worker").unstarted(() -> {
-                try {
-                    if (ipdb != null) {
-                        ipdb.close();
-                    }
-                } catch (Exception e) {
-                    Sentry.captureException(e);
-                }
-            }));
         } catch (Exception e) {
             log.info(tlUI(Lang.IPDB_INVALID), e);
             Sentry.captureException(e);
@@ -94,8 +85,11 @@ public class IPDBManager {
         }
     }
 
-    public record IPDBResponse(
-            LazyLoad<IPGeoData> geoData
-    ) {
+    public void close() {
+        if (ipdb != null) {
+            ipdb.close();
+        }
     }
+
+    public record IPDBResponse(LazyLoad<IPGeoData> geoData) { }
 }

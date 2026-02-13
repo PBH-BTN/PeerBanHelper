@@ -72,4 +72,92 @@
             AND downloader = #{downloader}
         </if>
     </select>
+
+    <insert id="upsert">
+        INSERT INTO peer_records (
+        address, port, torrent_id, downloader,
+        peer_id, client_name,
+        uploaded, uploaded_offset, upload_speed,
+        downloaded, downloaded_offset, download_speed,
+        last_flags, first_time_seen, last_time_seen,
+        peer_geoip
+        )
+        VALUES (
+        #{e.address}, #{e.port}, #{e.torrentId}, #{e.downloader},
+        #{e.peerId}, #{e.clientName},
+        #{e.uploaded}, #{e.uploadedOffset}, #{e.uploadSpeed},
+        #{e.downloaded}, #{e.downloadedOffset}, #{e.downloadSpeed},
+        #{e.lastFlags}, #{e.firstTimeSeen}, #{e.lastTimeSeen},
+        #{e.peerGeoIp, typeHandler=com.ghostchu.peerbanhelper.databasent.driver.common.JsonTypeHandlerForwarder}
+        )
+        ON DUPLICATE KEY UPDATE
+
+        uploaded = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen THEN uploaded
+        WHEN (#{e.uploaded} - uploaded_offset) &lt; 0
+        THEN uploaded + #{e.uploaded}
+        ELSE uploaded + #{e.uploaded} - uploaded_offset
+        END,
+
+        downloaded = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen THEN downloaded
+        WHEN (#{e.downloaded} - downloaded_offset) &lt; 0
+        THEN downloaded + #{e.downloaded}
+        ELSE downloaded + #{e.downloaded} - downloaded_offset
+        END,
+
+        uploaded_offset = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN uploaded_offset
+        ELSE #{e.uploaded}
+        END,
+
+        downloaded_offset = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN downloaded_offset
+        ELSE #{e.downloaded}
+        END,
+
+        upload_speed = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN upload_speed
+        ELSE #{e.uploadSpeed}
+        END,
+
+        download_speed = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN download_speed
+        ELSE #{e.downloadSpeed}
+        END,
+
+        port = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN port
+        ELSE #{e.port}
+        END,
+
+        peer_id = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN peer_id
+        ELSE #{e.peerId}
+        END,
+
+        client_name = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN client_name
+        ELSE #{e.clientName}
+        END,
+
+        last_flags = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN last_flags
+        ELSE #{e.lastFlags}
+        END,
+
+        last_time_seen = CASE
+        WHEN #{e.lastTimeSeen} &lt; last_time_seen
+        THEN last_time_seen
+        ELSE #{e.lastTimeSeen}
+        END;
+    </insert>
 </mapper>

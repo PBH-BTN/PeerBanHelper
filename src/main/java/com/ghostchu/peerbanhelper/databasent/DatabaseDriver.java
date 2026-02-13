@@ -9,9 +9,7 @@ public interface DatabaseDriver {
 
     @NotNull String getMapperXmlPath();
 
-    @NotNull DataSource getReadDataSource();
+    @NotNull DataSource getDataSource();
 
     void close() throws Exception;
-
-    @NotNull DataSource getWriteDataSource();
 }

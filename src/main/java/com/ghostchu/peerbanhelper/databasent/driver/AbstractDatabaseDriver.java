@@ -1,17 +1,15 @@
 package com.ghostchu.peerbanhelper.databasent.driver;
 
-import org.stone.beecp.BeeDataSource;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.stone.beecp.BeeDataSource;
 
 import javax.sql.DataSource;
 
 @Slf4j
 public abstract class AbstractDatabaseDriver implements DatabaseDriver {
-    private DataSource readDataSource;
-    private DataSource writeDataSource;
-
+    private DataSource dataSource;
     @Override
     public @NotNull String getMapperXmlPath() {
         return "mapper/" + getType().getMapperType() + "/**/*.xml"; // H2 使用 MySQL 方言
@@ -19,13 +17,7 @@ public abstract class AbstractDatabaseDriver implements DatabaseDriver {
 
     @Override
     public void close() throws Exception {
-        if (readDataSource instanceof BeeDataSource beeDataSource) {
-            if (!beeDataSource.isClosed())
-                beeDataSource.close();
-        } else {
-            log.warn("Given DataSource is not an instance of BeeDataSource, cannot close it properly.");
-        }
-        if (writeDataSource instanceof BeeDataSource beeDataSource) {
+        if (dataSource instanceof BeeDataSource beeDataSource) {
             if (!beeDataSource.isClosed())
                 beeDataSource.close();
         } else {
@@ -34,23 +26,12 @@ public abstract class AbstractDatabaseDriver implements DatabaseDriver {
     }
 
     @Override
-    public @NotNull DataSource getReadDataSource() {
-        if (readDataSource != null) return readDataSource;
-        readDataSource = createReadDataSource();
-        return readDataSource;
-    }
-
-    @Override
-    public @NotNull DataSource getWriteDataSource() {
-        if (writeDataSource != null) return writeDataSource;
-        writeDataSource = createWriteDataSource();
-        return writeDataSource;
+    public @NotNull DataSource getDataSource() {
+        if (dataSource != null) return dataSource;
+        dataSource = createDataSource();
+        return dataSource;
     }
 
     @NotNull
-    protected abstract DataSource createReadDataSource();
-
-
-    @NotNull
-    protected abstract DataSource createWriteDataSource();
+    protected abstract DataSource createDataSource();
 }
