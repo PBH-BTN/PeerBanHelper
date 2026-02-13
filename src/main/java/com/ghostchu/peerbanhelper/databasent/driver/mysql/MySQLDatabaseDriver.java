@@ -48,7 +48,7 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         config.addConnectionFactoryProperty("prepStmtCacheSqlLimit", "2048");
 
         this.dataSource = new BeeDataSource(config);
-        removeBeeCPShutdownHook(this.dataSource);
+        removeBeeCPShutdownHook(dataSource);
     }
 
     @Override

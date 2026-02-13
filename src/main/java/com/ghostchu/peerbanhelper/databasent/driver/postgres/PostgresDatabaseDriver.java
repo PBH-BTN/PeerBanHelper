@@ -51,7 +51,7 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
         config.addConnectionFactoryProperty("reWriteBatchedInserts", "true"); // Improve batch insert performance
 
         this.dataSource = new BeeDataSource(config);
-        removeBeeCPShutdownHook(this.dataSource);
+        removeBeeCPShutdownHook(dataSource);
     }
 
     @Override

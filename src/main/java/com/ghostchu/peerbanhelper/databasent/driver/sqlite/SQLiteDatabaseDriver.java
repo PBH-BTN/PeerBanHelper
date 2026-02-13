@@ -29,6 +29,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     public SQLiteDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         this.section = section;
+        BeeDataSourceConfig config = new BeeDataSourceConfig();
         File persistDir = new File(Main.getDataDirectory(), "persist");
         if (!persistDir.exists()) {
             if (!persistDir.mkdirs()) {
@@ -38,8 +39,32 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
         this.dbFile = new File(persistDir, "peerbanhelper-nt.db");
         this.dbPath = dbFile.getAbsolutePath();
 
-        this.dataSource = createDefaultBeeDataSource();
-        removeBeeCPShutdownHook(this.dataSource);
+        config.setJdbcUrl("jdbc:p6spy:sqlite:" + this.dbPath);
+        //config.setDriverClassName("org.sqlite.JDBC");
+        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
+        config.setMaxActive(1);
+        config.setMaxWait(30000);
+        config.setIntervalOfClearTimeout(600000L);
+        // 连接池验证配置
+        config.setAliveTestSql("SELECT 1");
+
+        // 启用公平排队 (FIFO)
+        config.setFairMode(true);
+
+        // SQLite-specific connection properties
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(),
+                SQLiteConfig.JournalMode.WAL.getValue());
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(),
+                SQLiteConfig.SynchronousMode.NORMAL.getValue());
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.getPragmaName(),
+                String.valueOf(60000));
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),
+                String.valueOf(67108864));
+        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(),
+                String.valueOf(134217728));
+
+        this.dataSource = new BeeDataSource(config);
+        removeBeeCPShutdownHook(dataSource);
     }
 
     @Override
@@ -50,35 +75,6 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     @Override
     protected @NotNull DataSource createDataSource() {
         return dataSource;
-    }
-
-    private BeeDataSource createDefaultBeeDataSource(){
-        BeeDataSourceConfig config = new BeeDataSourceConfig();
-        config.setJdbcUrl("jdbc:p6spy:sqlite:" + this.dbPath);
-        //config.setDriverClassName("org.sqlite.JDBC");
-        config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
-        config.setMaxActive(1);
-        config.setMaxWait(30000);
-        config.setIntervalOfClearTimeout(600000L);
-        // 连接池验证配置
-        config.setAliveTestSql("SELECT 1");
-        
-        // 启用公平排队 (FIFO)
-        config.setFairMode(true);
-        
-        // SQLite-specific connection properties
-        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_MODE.getPragmaName(),
-            SQLiteConfig.JournalMode.WAL.getValue());
-        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.SYNCHRONOUS.getPragmaName(),
-            SQLiteConfig.SynchronousMode.NORMAL.getValue());
-        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.getPragmaName(),
-            String.valueOf(60000));
-        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.JOURNAL_SIZE_LIMIT.getPragmaName(),
-            String.valueOf(67108864));
-        config.addConnectionFactoryProperty(SQLiteConfig.Pragma.MMAP_SIZE.getPragmaName(),
-            String.valueOf(134217728));
-
-        return new BeeDataSource(config);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         config.setFairMode(true);
 
         this.dataSource = new BeeDataSource(config);
-        removeBeeCPShutdownHook(this.dataSource);
+        removeBeeCPShutdownHook(dataSource);
     }
 
     @Override
