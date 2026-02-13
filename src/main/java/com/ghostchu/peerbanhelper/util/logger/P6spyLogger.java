@@ -25,7 +25,7 @@ public class P6spyLogger extends FormattedLogger {
     public void logSQL(int connectionId, String now, long elapsed, Category category, String prepared, String sql, String url) {
         //super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);
         if(category == Category.OUTAGE){
-            log.warn("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, sql, MiscUtil.getAllThreadTrace());
+            log.warn("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, prepared, MiscUtil.getAllThreadTrace());
             SentryEvent event = new SentryEvent();
             Message msg = new Message();
             msg.setMessage("SQL Outage/Slow Query: "+sql);
