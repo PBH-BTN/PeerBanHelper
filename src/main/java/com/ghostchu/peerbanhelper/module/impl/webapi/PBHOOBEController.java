@@ -27,6 +27,7 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +67,9 @@ public final class PBHOOBEController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
+        if (isInitialized(null)) {
+            return;
+        }
         webContainer.javalin()
                 .post("/api/oobe/init", this::handleOOBERequest, Role.ANYONE)
                 .post("/api/oobe/scanDownloader", this::handleOOBEScanDownloader, Role.ANYONE)
@@ -75,7 +79,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleOOBEScanDownloader(@NotNull Context ctx) {
-        if(!ensureNotInitialized(ctx)){
+        if (isInitialized(ctx)) {
             return;
         }
         var downloaders = downloaderDiscovery.scan(List.of()).join();
@@ -83,7 +87,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleOOBERequest(Context ctx) throws IOException {
-        if(!ensureNotInitialized(ctx)){
+        if (isInitialized(ctx)) {
             return;
         }
         JsonObject parser = JsonParser.parseString(ctx.body()).getAsJsonObject();
@@ -162,7 +166,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleReloading(Context context) {
-        if(!ensureNotInitialized(context)){
+        if (isInitialized(context)) {
             return;
         }
         Main.setupConfiguration();
@@ -201,7 +205,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleRestart(Context context) {
-        if(!ensureNotInitialized(context)){
+        if (isInitialized(context)) {
             return;
         }
         context.json(new StdResp(false, tl(locale(context), Lang.RELOAD_RESULT_REQUIRE_RESTART), null));
@@ -222,7 +226,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleDatabaseNtTest(@NotNull Context context) {
-        if(!ensureNotInitialized(context)){
+        if (isInitialized(context)) {
             return;
         }
         DatabaseNtConfigDTO dto = context.bodyAsClass(DatabaseNtConfigDTO.class);
@@ -254,7 +258,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
 
     // 从 PBHDownloaderController 抄过来的，堪虑合并
     public boolean validateDownloader(Context ctx, JsonObject draftDownloader) {
-        if(!ensureNotInitialized(ctx)){
+        if (isInitialized(ctx)) {
             return false;
         }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
@@ -287,13 +291,15 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         }
     }
 
-    private boolean ensureNotInitialized(Context ctx) {
+    private boolean isInitialized(@Nullable Context ctx) {
         if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
-            ctx.status(HttpStatus.FORBIDDEN);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
-            return false;
+            if (ctx != null) {
+                ctx.status(HttpStatus.FORBIDDEN);
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
 
