@@ -181,7 +181,7 @@ public class PeerBanHelper implements Reloadable {
     public void shutdown() {
         // place some clean code here
         downloaderServer.close();
-        this.moduleManager.unregisterAll();
+        moduleManager.unregisterAll();
         CommonUtil.getScheduler().shutdown();
         if (btnNetwork != null) {
             try {
@@ -201,6 +201,12 @@ public class PeerBanHelper implements Reloadable {
             databaseDriver.close();
         } catch (Exception e) {
             log.warn("Unable to safe shutdown database driver", e);
+            Sentry.captureException(e);
+        }
+        try {
+            iPDBManager.close();
+        } catch (Exception e) {
+            log.warn("Unable to safe shutdown ipdb manager", e);
             Sentry.captureException(e);
         }
         Main.getReloadManager().unregister(this);
