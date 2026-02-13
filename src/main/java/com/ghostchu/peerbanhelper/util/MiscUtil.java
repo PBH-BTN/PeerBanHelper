@@ -34,13 +34,17 @@ public final class MiscUtil {
         if (deadLockedThreads != null) {
             threadDump.append("Deadlocked Threads:\n");
             for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(deadLockedThreads)) {
-                threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+                if (threadInfo != null) {
+                    threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+                }
             }
         }
         if (monitorDeadlockedThreads != null) {
             threadDump.append("Monitor Deadlocked Threads:\n");
             for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(monitorDeadlockedThreads)) {
-                threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+                if (threadInfo != null) {
+                    threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+                }
             }
         }
         return threadDump.toString();
