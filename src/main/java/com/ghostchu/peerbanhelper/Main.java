@@ -202,7 +202,7 @@ public class Main {
 
     private static void setupSentry() {
         Sentry.init(sentryOptions -> {
-            sentryOptions.setDsn("https://ca1d50ff6c96410f916febf500cc1b54@glitchtip.pbh-btn.com/5");
+            sentryOptions.setDsn(ExternalSwitch.parse("sentry.dsn", "https://ca1d50ff6c96410f916febf500cc1b54@glitchtip.pbh-btn.com/5"));
             sentryOptions.setEnableExternalConfiguration(true); // Read DSN from sentry.properties
             sentryOptions.setCacheDirPath(cacheDirectory.getAbsolutePath());
             sentryOptions.setEnabled(mainConfig.getBoolean("privacy.analytics")); // Disable Sentry if analytics is disabled in config
@@ -214,7 +214,7 @@ public class Main {
             sentryOptions.setAttachThreads(true);
             sentryOptions.setPrintUncaughtStackTrace(true);
             sentryOptions.setEnableUncaughtExceptionHandler(true);
-            sentryOptions.setProfilesSampleRate(0.1d); // TODO modify this value later
+            sentryOptions.setProfilesSampleRate(ExternalSwitch.parseDouble("sentry.samplerate", 0.1d)); // TODO modify this value later
             sentryOptions.setEnableUserInteractionTracing(false); // Do not tracker user behavior
             sentryOptions.setRelease(meta.getVersion());
             sentryOptions.setTag("os", System.getProperty("os.name"));
