@@ -134,7 +134,7 @@
         WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
         THEN peer_records.port
         ELSE excluded.port
-        END;
+        END,
 
         peer_id = CASE
         WHEN excluded.last_time_seen &lt; peer_records.last_time_seen
