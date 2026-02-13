@@ -12,5 +12,5 @@ WHERE EXISTS (
 );
 
 
-ALTER TABLE peer_records DROP INDEX;
+ALTER TABLE peer_records DROP CONSTRAINT IF EXISTS idx_peer_records_unique;
 ALTER TABLE peer_records ADD CONSTRAINT idx_peer_records_unique UNIQUE (address, torrent_id, downloader);
