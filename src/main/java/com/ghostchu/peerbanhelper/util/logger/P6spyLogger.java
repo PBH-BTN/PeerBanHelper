@@ -22,7 +22,7 @@ public class P6spyLogger extends FormattedLogger {
     public void logSQL(int connectionId, String now, long elapsed, Category category, String prepared, String sql, String url) {
         //super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);
         if(category == Category.OUTAGE){
-            log.error("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, sql, MiscUtil.getAllThreadTrace());;
+            log.warn("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, sql, MiscUtil.getAllThreadTrace());;
         }
         log.debug("[P6Spy] {} | {} | took {} ms | {}", now, category.getName(), elapsed, sql);
     }
