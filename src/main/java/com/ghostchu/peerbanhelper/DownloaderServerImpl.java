@@ -135,7 +135,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             BAN_WAVE_SERVICE.shutdown();
         }
         this.metrics.close();
-    }
         saveBanList();
     }
 
