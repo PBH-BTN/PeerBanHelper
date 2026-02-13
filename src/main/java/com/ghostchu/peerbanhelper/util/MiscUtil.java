@@ -148,7 +148,7 @@ public final class MiscUtil {
 
             Runtime.getRuntime().removeShutdownHook(hookObj);
         } catch (Throwable t) {
-            t.printStackTrace();
+            log.warn("Failed to remove BeeCP shutdown hook", t);
         }
     }
 }
