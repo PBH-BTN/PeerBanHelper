@@ -33,8 +33,8 @@ public class P6spyLogger extends FormattedLogger {
             event.setTag("category", category.getName());
             event.setExtra("elapsed_ms", elapsed);
             event.setExtra("timestamp", now);
-            event.setExtra("sql", sql);
             event.setExtra("prepared", prepared);
+            event.setExtra("stacktrace", MiscUtil.getAllThreadTrace());
             event.setThreads(SentryUtils.getSentryThreads());
             Sentry.captureEvent(event);
         }
