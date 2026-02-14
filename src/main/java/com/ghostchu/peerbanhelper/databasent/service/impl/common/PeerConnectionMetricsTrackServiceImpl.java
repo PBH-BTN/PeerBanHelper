@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConnectionMetricsTrackMapper, PeerConnectionMetricsTrackEntity> implements PeerConnectionMetricsTrackService {
-    private final AtomicBoolean databaseBackFlushFlag = new AtomicBoolean(true);
     @Autowired
     private TransactionTemplate transactionTemplate;
 
@@ -40,7 +39,7 @@ public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConne
                 var v = notification.getValue();
                 //noinspection ConstantValue
                 if (v != null) {
-                    baseMapper.insertOrUpdate(v);
+                    baseMapper.upsert(v);
                 }
             })
             .softValues()
@@ -52,7 +51,9 @@ public class PeerConnectionMetricsTrackServiceImpl extends ServiceImpl<PeerConne
     @Override
     public void flushAll() {
         transactionTemplate.execute(_->{
-            baseMapper.insertOrUpdate(cache.asMap().values());
+            for (PeerConnectionMetricsTrackEntity value : cache.asMap().values()) {
+                baseMapper.upsert(value);
+            }
             return null;
         });
     }

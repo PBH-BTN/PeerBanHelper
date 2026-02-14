@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsTrackMapper">
-
+    <insert id="upsert" parameterType="com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity">
+        INSERT INTO peer_connection_metrics_track (timeframe_at, downloader, torrent_id, address, port,
+                                                   peer_id, client_name, last_flags)
+        VALUES (#{timeframeAt}, #{downloader}, #{torrentId}, #{address}, #{port},
+                #{peerId}, #{clientName}, #{lastFlags}) ON DUPLICATE KEY
+        UPDATE peer_id = #{peerId},
+            client_name = #{clientName},
+            lastFlags = #{lastFlags}
+    </insert>
 </mapper>
