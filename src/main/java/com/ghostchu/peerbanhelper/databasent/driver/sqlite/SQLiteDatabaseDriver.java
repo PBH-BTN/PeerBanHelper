@@ -80,9 +80,9 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     @Override
     public void close() throws Exception {
         // Perform VACUUM if needed (based on last maintenance time)
-        if (ExternalSwitch.parse("pbh.database.disableSQLiteVacuum") == null) {
-            performVacuumIfNeeded();
-        }
+//        if (ExternalSwitch.parse("pbh.database.disableSQLiteVacuum") == null) {
+//            performVacuumIfNeeded();
+//        }
         super.close();
     }
 
