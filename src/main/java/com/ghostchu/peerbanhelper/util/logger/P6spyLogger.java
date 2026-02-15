@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class P6spyLogger extends FormattedLogger {
     public static final EvictingQueue<@NotNull String> sqlRingQueue = EvictingQueue.create(ExternalSwitch.parseInt("pbh.p6spy.ringqueue.size", 50));
-    public static final EvictingQueue<@NotNull String> writeSqlRingQueue = EvictingQueue.create(ExternalSwitch.parseInt("pbh.p6spy.writeringqueue.size", 20));
+    public static final EvictingQueue<@NotNull String> writeSqlRingQueue = EvictingQueue.create(ExternalSwitch.parseInt("pbh.p6spy.writeringqueue.size", 30));
 
     @Override
     public void logException(Exception e) {
@@ -45,7 +45,7 @@ public class P6spyLogger extends FormattedLogger {
             log.warn("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, prepared, MiscUtil.getAllThreadTrace());
             SentryEvent event = new SentryEvent();
             Message msg = new Message();
-            msg.setMessage("SQL Outage/Slow Query: " + prepared);
+            msg.setMessage("(testing)SQL Outage/Slow Query: " + prepared);
             event.setMessage(msg);
             event.setTag("category", category.getName());
             event.setExtra("elapsed_ms", elapsed);
