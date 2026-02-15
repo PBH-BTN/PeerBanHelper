@@ -47,14 +47,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public final class IPDB implements AutoCloseable {
-    private final long updateInterval = 3888000000L; // 45天
-    private final File directory;
     private final File mmdbCityFile;
     private final File mmdbASNFile;
     private final boolean autoUpdate;
     private final File mmdbGeoCNFile;
     private final OkHttpClient httpClient;
-    private final HTTPUtil httpUtil;
     private final BackgroundTaskManager backgroundTaskManager;
     @Getter
     private DatabaseReader mmdbCity;
@@ -67,13 +64,12 @@ public final class IPDB implements AutoCloseable {
 //        this.dataFolder = dataFolder;
 //        this.accountId = accountId;
 //        this.licenseKey = licenseKey;
-        this.directory = new File(dataFolder, "geoip");
-        this.directory.mkdirs();
+        File directory = new File(dataFolder, "geoip");
+        directory.mkdirs();
         this.mmdbCityFile = new File(directory, "GeoIP-City.mmdb");
         this.mmdbASNFile = new File(directory, "GeoIP-ASN.mmdb");
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
-        this.httpUtil = httpUtil;
         this.backgroundTaskManager = backgroundTaskManager;
 //        this.userAgent = userAgent;
         this.httpClient = httpUtil.addProgressTracker(httpUtil.newBuilder()
@@ -334,6 +330,8 @@ public final class IPDB implements AutoCloseable {
         if (!autoUpdate) {
             return false;
         }
+        // 45天
+        long updateInterval = 3888000000L;
         return System.currentTimeMillis() - target.lastModified() > updateInterval;
     }
 

@@ -52,8 +52,6 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryService historyDao;
     private final PeerRecordService peerRecordDao;
-    private final ActiveMonitoringModule activeMonitoringModule;
-    private final Laboratory laboratory;
     private final DNSLookup dnsLookup;
     private final DownloaderManagerImpl downloaderManager;
     private final TorrentService torrentDao;
@@ -70,8 +68,6 @@ public final class PBHPeerController extends AbstractFeatureModule {
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
-        this.activeMonitoringModule = activeMonitoringModule;
-        this.laboratory = laboratory;
         this.dnsLookup = dnsLookup;
         this.downloaderManager = downloaderManager;
         this.torrentDao = torrentDao;

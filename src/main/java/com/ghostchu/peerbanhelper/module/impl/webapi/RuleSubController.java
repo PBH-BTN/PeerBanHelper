@@ -193,7 +193,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 启用/禁用订阅规则
      */
-    private void switcher(Context ctx) throws SQLException, IOException {
+    private void switcher(Context ctx) throws IOException {
         String ruleId = ctx.pathParam("ruleId");
         boolean enabled;
         try {
@@ -230,7 +230,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 删除订阅规则
      */
-    private void delete(Context ctx) throws IOException, SQLException {
+    private void delete(Context ctx) throws IOException {
         String ruleId = ctx.pathParam("ruleId");
         deleteIpRule(ctx, ruleId);
     }
@@ -252,7 +252,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 保存订阅规则（新增/修改）
      */
-    private void save(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {
+    private void save(Context ctx, String ruleId, boolean isAdd) throws IOException {
         saveIpRule(ctx, ruleId, isAdd);
     }
 

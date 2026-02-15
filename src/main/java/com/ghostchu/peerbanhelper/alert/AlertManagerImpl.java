@@ -30,12 +30,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class AlertManagerImpl implements AlertManager {
     private final AlertService alertDao;
     private final PushManagerImpl pushManager;
-    private final DatabaseDriver databaseDriver;
 
-    public AlertManagerImpl(AlertService alertDao, PushManagerImpl pushManager, DatabaseDriver databaseDriver) {
+    public AlertManagerImpl(AlertService alertDao, PushManagerImpl pushManager) {
         this.alertDao = alertDao;
         this.pushManager = pushManager;
-        this.databaseDriver = databaseDriver;
         Main.getEventBus().register(this);
     }
 

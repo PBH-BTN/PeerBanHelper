@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
@@ -66,8 +65,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private ModuleMatchCache moduleMatchCache;
     @Autowired
     private ModuleManagerImpl moduleManager;
-    @Autowired
-    private PeerBanHelper peerBanHelper;
     @Autowired
     private DownloaderServer downloaderServer;
     @Autowired

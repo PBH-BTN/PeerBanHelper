@@ -1,47 +1,14 @@
 package com.cdnbye.core.nat;
 
+import lombok.Getter;
+
 import java.net.InetSocketAddress;
 import java.util.Random;
 
+@Getter
 public class StunMessage {
 
     private byte[] transactionId;
-
-    public byte[] getTransactionId() {
-        return transactionId;
-    }
-
-    public StunMessageType getType() {
-        return type;
-    }
-
-    public int getMagicCookie() {
-        return magicCookie;
-    }
-
-    public InetSocketAddress getMappedAddress() {
-        return mappedAddress;
-    }
-
-    public InetSocketAddress getResponseAddress() {
-        return responseAddress;
-    }
-
-    public InetSocketAddress getSourceAddress() {
-        return sourceAddress;
-    }
-
-    public InetSocketAddress getChangedAddress() {
-        return changedAddress;
-    }
-
-    public StunChangeRequest getChangeRequest() {
-        return changeRequest;
-    }
-
-    public StunErrorCode getErrorCode() {
-        return errorCode;
-    }
 
     private StunMessageType type = StunMessageType.BindingRequest;
     private int magicCookie;

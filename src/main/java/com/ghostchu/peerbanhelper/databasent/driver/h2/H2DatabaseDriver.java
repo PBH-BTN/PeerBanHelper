@@ -17,15 +17,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
 
 public class H2DatabaseDriver extends AbstractDatabaseDriver {
-    private final File dbFile;
-    private final String dbPath;
-    private final ConfigurationSection section;
     private final AtomicBoolean requestCompactOnShutdown = new AtomicBoolean(false);
     private final BeeDataSource dataSource;
 
     public H2DatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
-        this.section = section;
         BeeDataSourceConfig config = new BeeDataSourceConfig();
         File persistDir = new File(Main.getDataDirectory(), "persist");
         if (!persistDir.exists()) {
@@ -33,10 +29,10 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
                 throw new IOException("Unable to create persist directory at " + persistDir.getAbsolutePath() + ", permission denied?");
             }
         }
-        this.dbFile = new File(persistDir, "peerbanhelper-nt");
-        this.dbPath = dbFile.getAbsolutePath();
+        File dbFile = new File(persistDir, "peerbanhelper-nt");
+        String dbPath = dbFile.getAbsolutePath();
 
-        config.setJdbcUrl("jdbc:p6spy:h2:" + this.dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
+        config.setJdbcUrl("jdbc:p6spy:h2:" + dbPath + ";MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=60000;RETENTION_TIME=5000;MAX_LOG_SIZE=8");
         //config.setDriverClassName("org.h2.Driver");
         config.setDriverClassName("com.p6spy.engine.spy.P6SpyDriver");
         config.setMaxActive(10);

@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.databasent.driver.sqlite;
 
-import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
@@ -23,12 +22,10 @@ import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
 public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
     private final File dbFile;
     private final String dbPath;
-    private final ConfigurationSection section;
     private final BeeDataSource dataSource;
 
     public SQLiteDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
-        this.section = section;
         BeeDataSourceConfig config = new BeeDataSourceConfig();
         File persistDir = new File(Main.getDataDirectory(), "persist");
         if (!persistDir.exists()) {

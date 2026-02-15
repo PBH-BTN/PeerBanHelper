@@ -62,7 +62,6 @@ public final class BiglyBT extends AbstractDownloader {
     private final OkHttpClient httpClient;
     private final Config config;
     private final String connectorPayload;
-    private Semver semver = new Semver("0.0.0");
 
     public BiglyBT(String uuid, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(uuid, alertManager, natAddressProvider);
@@ -195,9 +194,9 @@ public final class BiglyBT extends AbstractDownloader {
                     MetadataCallbackBean metadataCallbackBean = JsonUtil.standard().fromJson(resp.body().string(), MetadataCallbackBean.class);
                     // 验证版本号
                     var version = metadataCallbackBean.getPluginVersion();
-                    this.semver = new Semver(version);
+                    Semver semver = new Semver(version);
                     // 检查是否大于等于 1.2.8
-                    if (this.semver.isLowerThan("1.3.0")) {
+                    if (semver.isLowerThan("1.3.0")) {
                         return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
                     }
                     RequestBody requestBody = RequestBody.create(connectorPayload, MediaType.get("application/json"));

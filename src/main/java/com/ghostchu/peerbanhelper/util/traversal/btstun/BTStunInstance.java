@@ -40,7 +40,6 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     private final PBHPortMapper portMapper;
     private final BTStunManager manager;
     private final BanList banList;
-    private final Laboratory laboratory;
     private final IPDBManager ipdb;
     @Getter
     private StunTcpTunnel tunnel;
@@ -55,7 +54,6 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         this.portMapper = portMapper;
         this.downloader = downloader;
         this.manager = manager;
-        this.laboratory = laboratory;
         this.ipdb = ipdb;
         if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT)) {
             throw new IllegalArgumentException(tlUI(Lang.AUTOSTUN_DOWNLOADER_NOT_SUPPORT_LIVE_UPDATE_PORT, downloader.getName()));
@@ -80,15 +78,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         }
         log.info(tlUI(Lang.BTSTUN_RESTART, downloader.getName()));
         this.tunnel = new StunTcpTunnelImpl(portMapper, this);
-        try {
-            this.tunnel.createMapping(ExternalSwitch.parseInt("pbh.btstun.localPort." + downloader.getId(), 0));
-        } catch (IOException e) {
-            log.warn(tlUI(Lang.BTSTUN_UNABLE_START, downloader.getName()), e);
-            try {
-                tunnel.close();
-            } catch (Exception ignored) {
-            }
-        }
+        this.tunnel.createMapping(ExternalSwitch.parseInt("pbh.btstun.localPort." + downloader.getId(), 0));
     }
 
     @Override

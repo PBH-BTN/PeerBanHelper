@@ -1,35 +1,19 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder.table;
 
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.concurrent.atomic.LongAdder;
 
+@Getter
 public class ConnectionStatistics {
     private final LongAdder toUpstreamBytes = new LongAdder();
     private final LongAdder toDownstreamBytes = new LongAdder();
     private long establishedAt;
     private long lastActivityAt;
+    @Setter
     private IPGeoData ipGeoData;
-
-    public LongAdder getToUpstreamBytes() {
-        return toUpstreamBytes;
-    }
-
-    public LongAdder getToDownstreamBytes() {
-        return toDownstreamBytes;
-    }
-
-    public long getEstablishedAt() {
-        return establishedAt;
-    }
-
-    public long getLastActivityAt() {
-        return lastActivityAt;
-    }
-
-    public IPGeoData getIpGeoData() {
-        return ipGeoData;
-    }
 
     public void setEstablishedAt() {
         this.establishedAt = System.currentTimeMillis();
@@ -47,7 +31,4 @@ public class ConnectionStatistics {
         this.lastActivityAt = lastActivityAt;
     }
 
-    public void setIpGeoData(IPGeoData ipGeoData) {
-        this.ipGeoData = ipGeoData;
-    }
 }

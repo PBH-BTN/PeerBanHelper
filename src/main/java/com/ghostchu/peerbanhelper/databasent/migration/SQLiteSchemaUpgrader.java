@@ -169,7 +169,7 @@ public class SQLiteSchemaUpgrader {
         }
     }
 
-    private void upgradeToV8() throws SQLException {
+    private void upgradeToV8() {
         log.info("Upgrading to v8: Recreating alert table again");
         upgradeToV7(); // Same as v7
     }

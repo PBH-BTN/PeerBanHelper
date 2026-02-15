@@ -193,7 +193,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
 
     private boolean isSafeNetworkEnvironment(Context context) {
         var value = ExternalSwitch.parse("pbh.please-disable-safe-network-environment-check-i-know-this-is-very-dangerous-and-i-may-lose-my-data-and-hacker-may-attack-me-via-this-endpoint-and-steal-my-data-or-destroy-my-computer-i-am-fully-responsible-for-this-action-and-i-will-not-blame-the-developer-for-any-loss");
-        if (value != null && "true".equals(value)) {
+        if ("true".equals(value)) {
             return true;
         }
         var ip = IPAddressUtil.getIPAddress(context.ip());

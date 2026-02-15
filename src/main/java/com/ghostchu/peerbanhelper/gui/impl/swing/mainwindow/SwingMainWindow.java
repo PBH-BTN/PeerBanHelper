@@ -37,6 +37,7 @@ public final class SwingMainWindow extends JFrame {
     @Getter
     private final TrayMenu trayMenu;
     private JPanel mainPanel;
+    @Getter
     private JTabbedPane tabbedPane;
 
     private PBHGuiBridge bridge;
@@ -209,7 +210,4 @@ public final class SwingMainWindow extends JFrame {
         // TODO: place custom component creation code here
     }
 
-    public JTabbedPane getTabbedPane() {
-        return tabbedPane;
-    }
 }
