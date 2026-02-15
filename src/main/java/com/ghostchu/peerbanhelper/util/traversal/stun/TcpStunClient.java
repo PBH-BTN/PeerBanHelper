@@ -52,11 +52,13 @@ public class TcpStunClient {
                     try {
                         Thread.sleep(10000); // 等待10秒后重试
                     } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
+                        break;
                     }
                 }
             }
         }
+        Thread.currentThread().interrupt();
+        throw new RuntimeException("Application is closing");
     }
 
     private String getCurrentServer() {
