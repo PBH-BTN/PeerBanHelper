@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.math.MathContext;
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.file.Files;
@@ -239,6 +240,7 @@ public class Main {
             sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
             sentryOptions.addIgnoredExceptionForType(IOException.class);
             sentryOptions.addIgnoredExceptionForType(SocketException.class);
+            sentryOptions.addIgnoredExceptionForType(ConnectException.class);
         });
     }
 
