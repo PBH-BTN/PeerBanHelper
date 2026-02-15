@@ -197,7 +197,7 @@ public final class BiglyBT extends AbstractDownloader {
                     Semver semver = new Semver(version);
                     // 检查是否大于等于 1.2.8
                     if (semver.isLowerThan("1.3.0")) {
-                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.3.0"));
                     }
                     RequestBody requestBody = RequestBody.create(connectorPayload, MediaType.get("application/json"));
                     Request setConnectorRequest = new Request.Builder()
