@@ -8,6 +8,6 @@
                 #{peerId}, #{clientName}, #{lastFlags}) ON DUPLICATE KEY
         UPDATE peer_id = #{peerId},
             client_name = #{clientName},
-            lastFlags = #{lastFlags}
+            last_flags = #{lastFlags}
     </insert>
 </mapper>
