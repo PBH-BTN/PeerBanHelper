@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
@@ -219,6 +220,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         pbh.put("release", release);
         pbh.put("uptime", (System.currentTimeMillis() - Main.getStartupAt()) / 1000);
         pbh.put("data_dir", Main.getDataDirectory().getAbsolutePath());
+        pbh.put("database_type", DatabaseDriverConfig.databaseDriver.getType().name());
         //pbh.put("gui_available", Main.getGuiManager().isGuiAvailable());
         //pbh.put("default_locale", Main.DEF_LOCALE);
         return pbh;
