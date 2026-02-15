@@ -59,6 +59,7 @@ import java.math.MathContext;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
@@ -241,6 +242,7 @@ public class Main {
             sentryOptions.addIgnoredExceptionForType(IOException.class);
             sentryOptions.addIgnoredExceptionForType(SocketException.class);
             sentryOptions.addIgnoredExceptionForType(ConnectException.class);
+            sentryOptions.addIgnoredExceptionForType(UnknownHostException.class);
         });
     }
 
