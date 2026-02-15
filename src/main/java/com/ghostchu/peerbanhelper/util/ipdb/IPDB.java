@@ -268,17 +268,35 @@ public final class IPDB implements AutoCloseable {
 
     private void loadMMDB() throws IOException {
         this.languageTag = List.of(Main.DEF_LOCALE, "en");
-        this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
-                .locales(List.of(Main.DEF_LOCALE, "en"))
-                .fileMode(Reader.FileMode.MEMORY_MAPPED)
-                .withCache(new MaxMindNodeCache())
-                .build();
-        this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
-                .locales(List.of(Main.DEF_LOCALE, "en"))
-                .fileMode(Reader.FileMode.MEMORY_MAPPED)
-                .withCache(new MaxMindNodeCache())
-                .build();
-        this.geoCN = new Reader(mmdbGeoCNFile, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache());
+        try {
+            this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
+                    .locales(List.of(Main.DEF_LOCALE, "en"))
+                    .fileMode(Reader.FileMode.MEMORY_MAPPED)
+                    .withCache(new MaxMindNodeCache())
+                    .build();
+        } catch (InvalidDatabaseException exception) {
+            mmdbCityFile.delete();
+            mmdbCityFile.deleteOnExit();
+            log.error("Unable to load GeoIP City database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        }
+        try {
+            this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
+                    .locales(List.of(Main.DEF_LOCALE, "en"))
+                    .fileMode(Reader.FileMode.MEMORY_MAPPED)
+                    .withCache(new MaxMindNodeCache())
+                    .build();
+        } catch (InvalidDatabaseException exception) {
+            mmdbASNFile.delete();
+            mmdbASNFile.deleteOnExit();
+            log.error("Unable to load GeoIP ASN database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        }
+        try {
+            this.geoCN = new Reader(mmdbGeoCNFile, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache());
+        } catch (InvalidDatabaseException exception) {
+            mmdbGeoCNFile.delete();
+            mmdbGeoCNFile.deleteOnExit();
+            log.error("Unable to load GeoCN database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        }
     }
 
     private void updateMMDB(String databaseName, File target) {
@@ -459,7 +477,7 @@ public final class IPDB implements AutoCloseable {
             this.province = province;
             this.provinceCode = provinceCode != null ? Long.parseLong(provinceCode.toString()) : null;
             this.city = city;
-            this.cityCode = cityCode != null ?  Long.parseLong(cityCode.toString()) : null;
+            this.cityCode = cityCode != null ? Long.parseLong(cityCode.toString()) : null;
             this.districts = districts;
             this.districtsCode = districtsCode != null ? Long.parseLong(districtsCode.toString()) : null;
         }
