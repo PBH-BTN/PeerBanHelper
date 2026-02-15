@@ -229,7 +229,6 @@ public class Main {
             sentryOptions.setTag("osversion", System.getProperty("os.version"));
             sentryOptions.setTag("publisher", meta.getCompileUser() + "(" + meta.getCompileEmail() + ")");
             sentryOptions.setTag("abbrev", meta.getAbbrev());
-            sentryOptions.setTag("databasetype", DatabaseDriverConfig.databaseDriver.getType().name());
             sentryOptions.addIgnoredExceptionForType(AddressNotFoundException.class);
             sentryOptions.addIgnoredExceptionForType(JavalinBindException.class);
             sentryOptions.addIgnoredExceptionForType(OutOfMemoryError.class);
