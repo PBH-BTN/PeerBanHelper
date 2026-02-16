@@ -45,9 +45,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class HTTPUtil implements Reloadable {
     @Getter
     private static SSLContext ignoreSslContext;
+    @Getter
     private Proxy.Type proxyType;
-    private @Nullable String proxyHost;
-    private int proxyPort;
     private final List<Pattern> proxyBypasses = Collections.synchronizedList(new ArrayList<>());
     private Proxy proxyInstance;
     private final NetworkReachability networkReachability = new NetworkReachability();
@@ -99,8 +98,8 @@ public final class HTTPUtil implements Reloadable {
             case 2 -> Proxy.Type.SOCKS;
             default -> Proxy.Type.DIRECT;
         };
-        this.proxyHost = Main.getMainConfig().getString("proxy.host", "127.0.0.1");
-        this.proxyPort = Main.getMainConfig().getInt("proxy.port", 7890);
+        @Nullable String proxyHost = Main.getMainConfig().getString("proxy.host", "127.0.0.1");
+        int proxyPort = Main.getMainConfig().getInt("proxy.port", 7890);
         proxyBypasses.clear();
         for (String proxy : Main.getMainConfig().getString("proxy.non-proxy-hosts", "").split("\\|")) {
             if (!proxy.isEmpty()) {
@@ -116,10 +115,6 @@ public final class HTTPUtil implements Reloadable {
         } else {
             this.proxyInstance = new Proxy(proxyType, InetSocketAddress.createUnresolved(proxyHost, proxyPort));
         }
-    }
-
-    public Proxy.Type getProxyType() {
-        return proxyType;
     }
 
     @SneakyThrows

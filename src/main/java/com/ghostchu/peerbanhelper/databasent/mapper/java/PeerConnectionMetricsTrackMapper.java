@@ -4,4 +4,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 
 public interface PeerConnectionMetricsTrackMapper extends BaseMapper<PeerConnectionMetricsTrackEntity> {
+    void upsert(PeerConnectionMetricsTrackEntity entity);
 }

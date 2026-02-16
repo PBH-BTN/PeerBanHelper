@@ -6,6 +6,8 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +28,7 @@ public class PBHGuiBridge {
 
     public Optional<URI> getWebUiUrl(){
         if(javalinWebContainer.isStarted()){
-            return Optional.of(URI.create("http://127.0.0.1:" +javalinWebContainer.javalin().port() + "?token=" + javalinWebContainer.getToken()));
+            return Optional.of(URI.create("http://127.0.0.1:" +javalinWebContainer.javalin().port() + "?token=" + URLEncoder.encode(javalinWebContainer.getToken(), StandardCharsets.UTF_8)));
         }else{
             return  Optional.empty();
         }

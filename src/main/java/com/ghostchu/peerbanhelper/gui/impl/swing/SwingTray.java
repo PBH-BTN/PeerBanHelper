@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
+import lombok.Getter;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -11,6 +13,7 @@ public final class SwingTray {
 
     private final JDialog jDialog;
     private final JPopupMenu jPopupMenu;
+    @Getter
     private final TrayIcon trayIcon;
 
     public SwingTray(TrayIcon trayIcon, Consumer<MouseEvent> clickCallback, Consumer<MouseEvent> rightClickCallback) {
@@ -58,10 +61,6 @@ public final class SwingTray {
                 jPopupMenu.add(ele);
             }
         });
-    }
-
-    public TrayIcon getTrayIcon() {
-        return trayIcon;
     }
 
     public JDialog getjDialog() {

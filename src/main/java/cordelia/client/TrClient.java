@@ -56,7 +56,7 @@ public final class TrClient {
     public TrClient(HTTPUtil httpUtil, String url, String user, String password, boolean verifySSL) {
         this.url = url;
         // Note: For simplicity, we're not implementing cookie handling for now
-        
+
         OkHttpClient.Builder builder = httpUtil.newBuilder()
                 .proxy(Proxy.NO_PROXY)
                 .connectionPool(new ConnectionPool(24, 5, TimeUnit.MINUTES))
@@ -70,7 +70,7 @@ public final class TrClient {
                     return chain.proceed(requestBuilder.build());
                 })
                 .authenticator((route, response) -> {
-                    if(HTTPUtil.responseCount(response) > 1) {
+                    if (HTTPUtil.responseCount(response) > 1) {
                         return null;
                     }
                     String credential = Credentials.basic(user, password == null ? "" : password);
@@ -84,28 +84,31 @@ public final class TrClient {
     }
 
     public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req) {
-        return execute(req, null);
+        return execute(req, null, false);
     }
 
-    public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag) {
+    public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag, boolean retried) {
         try {
             RequestBody requestBody = RequestBody.create(
-                JsonUtil.getGson().toJson(req.toReq(tag)),
-                MediaType.get("application/json")
+                    JsonUtil.getGson().toJson(req.toReq(tag)),
+                    MediaType.get("application/json")
             );
-            
+
             Request request = new Request.Builder()
                     .url(url)
                     .post(requestBody)
                     .header(Session.SESSION_ID, session(false).id())
                     .build();
-            
+
             try (Response response = httpClient.newCall(request).execute()) {
                 if (response.code() == 409) {
                     session(true); // force renew
-                    throw new IllegalStateException("Session invalid, re-created, please try again.");
+                    if (retried) {
+                        throw new IllegalStateException("Session invalid, re-created, but retry still failed, please try again.");
+                    } else {
+                        return execute(req, tag, true);
+                    }
                 }
-                
                 String responseBody = response.body().string();
                 RawResponse raw = om.fromJson(responseBody, RawResponse.class);
                 String json = om.toJson(raw.getArguments());
@@ -131,7 +134,7 @@ public final class TrClient {
                         .url(url)
                         .get()
                         .build();
-                
+
                 try (Response response = httpClient.newCall(request).execute()) {
                     String sessionId = response.header(Session.SESSION_ID);
                     if (sessionId == null) {

@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public final class QBittorrentEEPeer implements Peer {
     @SerializedName("client")
     private String client;
+    @Getter
     @SerializedName("connection")
     private String connection;
     @SerializedName("dl_speed")
@@ -97,14 +98,6 @@ public final class QBittorrentEEPeer implements Peer {
     @Override
     public boolean isHandshaking() {
         return dlSpeed <= 0 && upSpeed <= 0;
-    }
-
-    public String getConnection() {
-        return connection;
-    }
-
-    public void setPeerAddress(PeerAddress peerAddress) {
-        this.peerAddress = peerAddress;
     }
 
     @Override

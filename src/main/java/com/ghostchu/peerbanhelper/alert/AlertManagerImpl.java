@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.alert;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
@@ -30,12 +29,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class AlertManagerImpl implements AlertManager {
     private final AlertService alertDao;
     private final PushManagerImpl pushManager;
-    private final DatabaseDriver databaseDriver;
 
-    public AlertManagerImpl(AlertService alertDao, PushManagerImpl pushManager, DatabaseDriver databaseDriver) {
+    public AlertManagerImpl(AlertService alertDao, PushManagerImpl pushManager) {
         this.alertDao = alertDao;
         this.pushManager = pushManager;
-        this.databaseDriver = databaseDriver;
         Main.getEventBus().register(this);
     }
 

@@ -33,7 +33,6 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     private final Map<Downloader, BTStunInstance> perDownloaderStun = Collections.synchronizedMap(new HashMap<>());
     private final DownloaderManager downloaderManager;
     private final PBHPortMapper pBHPortMapper;
-    private final DownloaderServer downloaderServer;
     private final NatAddressProviderRegistry natAddressProviderRegistry;
     private final BanList banList;
     private final Laboratory laboratory;
@@ -46,8 +45,9 @@ public class BTStunManager implements AutoCloseable, Reloadable {
         this.banList = banList;
         this.downloaderManager = downloaderManager;
         this.pBHPortMapper = pBHPortMapper;
-        this.downloaderServer = downloaderServer;
         this.natAddressProviderRegistry = natAddressProviderRegistry;
+        this.laboratory = laboratory;
+        this.iPDBManager = iPDBManager;
         load();
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
             try {
@@ -58,8 +58,6 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             }
         }));
         Main.getEventBus().register(this);
-        this.laboratory = laboratory;
-        this.iPDBManager = iPDBManager;
     }
 
     private void load() {

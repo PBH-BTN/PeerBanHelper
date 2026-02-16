@@ -1,24 +1,13 @@
 package com.cdnbye.core.nat;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class StunChangeRequest {
 
-    public boolean isChangeIp() {
-        return changeIp;
-    }
-
-    public boolean isChangePort() {
-        return changePort;
-    }
-
     private boolean changeIp;
-
-    public void setChangeIp(boolean changeIp) {
-        this.changeIp = changeIp;
-    }
-
-    public void setChangePort(boolean changePort) {
-        this.changePort = changePort;
-    }
 
     private boolean changePort;
 

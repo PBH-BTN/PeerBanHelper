@@ -7,6 +7,7 @@ import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
+import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.event.program.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
@@ -55,7 +56,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.math.MathContext;
+import java.net.ConnectException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
@@ -214,7 +218,10 @@ public class Main {
             sentryOptions.setAttachThreads(true);
             sentryOptions.setPrintUncaughtStackTrace(true);
             sentryOptions.setEnableUncaughtExceptionHandler(true);
-            sentryOptions.setProfilesSampleRate(ExternalSwitch.parseDouble("sentry.samplerate", 0.1d)); // TODO modify this value later
+            sentryOptions.setSampleRate(ExternalSwitch.parseDouble("sentry.samplerate", 0.1d));
+            sentryOptions.setProfilesSampleRate(ExternalSwitch.parseDouble("sentry.profilessamplerate", 0.1d));
+            sentryOptions.setTracesSampleRate(ExternalSwitch.parseDouble("sentry.tracesamplerate", 0.1d));
+            sentryOptions.setProfileSessionSampleRate(ExternalSwitch.parseDouble("sentry.profilesessionsamplerate", 0.1d));
             sentryOptions.setEnableUserInteractionTracing(false); // Do not tracker user behavior
             sentryOptions.setRelease(meta.getVersion());
             sentryOptions.setTag("os", System.getProperty("os.name"));
@@ -232,6 +239,9 @@ public class Main {
             sentryOptions.addIgnoredExceptionForType(TimeoutException.class);
             sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
             sentryOptions.addIgnoredExceptionForType(IOException.class);
+            sentryOptions.addIgnoredExceptionForType(SocketException.class);
+            sentryOptions.addIgnoredExceptionForType(ConnectException.class);
+            sentryOptions.addIgnoredExceptionForType(UnknownHostException.class);
         });
     }
 
