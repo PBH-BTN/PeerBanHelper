@@ -8,17 +8,19 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
 import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.Queues;
 import lombok.Getter;
 import org.slf4j.event.Level;
 
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class JListAppender extends AppenderBase<ILoggingEvent> {
 
-    public static final EvictingQueue<LogEntry> logEntryDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200));
+    public static final Queue<LogEntry> logEntryDeque = Queues.synchronizedQueue(EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200)));
     public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(true);
-    public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100));
+    public static final Queue<LogEntry> ringDeque =  Queues.synchronizedQueue(EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100)));
     @Getter
     private static final AtomicLong seq = new AtomicLong(0);
     private PatternLayout layout;
