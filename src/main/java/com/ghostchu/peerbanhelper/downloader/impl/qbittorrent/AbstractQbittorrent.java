@@ -51,6 +51,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final QBittorrentConfig config;
     protected final Cache<String, TorrentProperties> torrentPropertiesCache;
     protected final ExecutorService parallelService = Executors.newWorkStealingPool();
+    protected Semver lastSemver = new Semver("0.0.0");
 
     public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(id, alertManager, natAddressProvider);
@@ -124,12 +125,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (response.isSuccessful() && isLoggedIn()) {
-                    updatePreferences();
-                    Semver semver = getDownloaderVersion();
-                    if (semver.isGreaterThanOrEqualTo(new Semver("4.5.0")) || ExternalSwitch.parseBoolean("pbh.downloader.qBittorrent.bypassVersionCheck", false)) {
+                    updateAndApplyMetadataIfRequired();
+                    if (lastSemver.isGreaterThanOrEqualTo(new Semver("4.5.0")) || ExternalSwitch.parseBoolean("pbh.downloader.qBittorrent.bypassVersionCheck", false)) {
                         return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
                     } else {
-                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_VERSION_INCOMPATIBLE, semver.toString(), ">= 4.5.0"));
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_VERSION_INCOMPATIBLE, lastSemver.toString(), ">= 4.5.0"));
                     }
                 }
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, response.body().string()));
@@ -150,7 +150,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 if (versionStr.startsWith("v")) {
                     versionStr = versionStr.substring(1);
                 }
-                return new Semver(versionStr);
+                return new Semver(normalizeVersion(versionStr), Semver.SemverType.LOOSE);
             } else {
                 throw new IllegalStateException("Failed to get qBittorrent version: statusCode=" + response.code());
             }
@@ -209,13 +209,21 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     return false;
                 }
                 boolean loggedIn = !info.getLibtorrent().isBlank();
-                if (loggedIn && getLastStatus() != DownloaderLastStatus.HEALTHY) {
-                    updatePreferences();
+                if (loggedIn) {
+                    updateAndApplyMetadataIfRequired();
                 }
                 return loggedIn;
             }
         } catch (Exception e) {
             return false;
+        }
+    }
+
+
+    public void updateAndApplyMetadataIfRequired() {
+        if (getLastStatus() != DownloaderLastStatus.HEALTHY) {
+            updatePreferences();
+            this.lastSemver = getDownloaderVersion();
         }
     }
 
@@ -294,7 +302,18 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     @Override
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS, DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
+        List<DownloaderFeatureFlag> flags = new ArrayList<>();
+        flags.add(DownloaderFeatureFlag.UNBAN_IP);
+        flags.add(DownloaderFeatureFlag.TRAFFIC_STATS);
+        flags.add(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
+        if ((lastSemver.isGreaterThanOrEqualTo("5.3.0")
+                || lastSemver.isGreaterThanOrEqualTo("5.3.0-alpha1")
+                || lastSemver.isEqualTo("5.2.0-beta1")
+                || ExternalSwitch.parseBoolean("pbh.downloader.qBittorrent.ignoreRangeBanIpCondition", false))
+                && ExternalSwitch.parseBoolean("pbh.downloader.qBittorrent.enableRangeBanIp", true)) {
+            flags.add(DownloaderFeatureFlag.RANGE_BAN_IP);
+        }
+        return flags;
     }
 
     @Override
@@ -597,9 +616,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         Map<String, StringJoiner> banTasks = new HashMap<>();
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
-            joiner.add(p.getPeer().getRawIp());
-            // todo change this with compatibility check after qbiitorrent merge it
-            // joiner.add(remapBanListAddress(p.getPeer().getAddress().getAddress()).toNormalizedString());
+            if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
+                joiner.add(remapBanListAddress(p.getPeer().getAddress().getAddress()).toNormalizedString());
+            } else {
+                joiner.add(p.getPeer().getRawIp());
+            }
             banTasks.put(p.getTorrent().getHash(), joiner);
         });
         banTasks.forEach((hash, peers) -> {
@@ -630,31 +651,34 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     protected void setBanListFull(Collection<IPAddress> bannedAddresses) {
         // todo change this with compatibility check after qbiitorrent merge it
-//        String banStr = bannedAddresses.stream()
-//                .map(ipAddr -> remapBanListAddress(ipAddr).toNormalizedString())
-//                .distinct()
-//                .collect(Collectors.joining("\n"));
-
-        StringJoiner joiner = new StringJoiner("\n");
-        bannedAddresses.stream().distinct().forEach(ipAddr -> {
-            joiner.add(ipAddr.toNormalizedString());
-            if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
-                inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
-                if (ipv6 != null) {
-                    joiner.add(ipv6.toNormalizedString());
+        String banStr;
+        if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
+            banStr = bannedAddresses.stream()
+                    .map(ipAddr -> remapBanListAddress(ipAddr).toNormalizedString())
+                    .distinct()
+                    .collect(Collectors.joining("\n"));
+        } else {
+            StringJoiner joiner = new StringJoiner("\n");
+            bannedAddresses.stream().distinct().forEach(ipAddr -> {
+                joiner.add(ipAddr.toNormalizedString());
+                if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
+                    inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
+                    if (ipv6 != null) {
+                        joiner.add(ipv6.toNormalizedString());
+                    }
                 }
-            }
-            if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
-                Address ipv4 = ipAddr.toIPv4();
-                if (ipv4 != null) {
-                    joiner.add(ipv4.toNormalizedString());
+                if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
+                    Address ipv4 = ipAddr.toIPv4();
+                    if (ipv4 != null) {
+                        joiner.add(ipv4.toNormalizedString());
+                    }
                 }
-            }
-        });
-
+            });
+            banStr = joiner.toString();
+        }
 
         FormBody formBody = new FormBody.Builder()
-                .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))
+                .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", banStr)))
                 .build();
 
         try {
@@ -725,6 +749,30 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @NotNull
+    private String normalizeVersion(@NotNull String unprocessed) {
+        unprocessed = unprocessed.trim();
+        StringBuilder sb = new StringBuilder();
+        StringBuilder suffix = new StringBuilder();
+        boolean reachSuffix = false;
+        for (char c : unprocessed.toCharArray()) {
+            if (!reachSuffix && (Character.isDigit(c) || c == '.')) {
+                sb.append(c);
+            } else {
+                reachSuffix = true;
+                suffix.append(c);
+            }
+        }
+        if (suffix.isEmpty()) {
+            return sb.toString();
+        }
+        String suffixStr = suffix.toString();
+        if (suffixStr.startsWith("-") || suffixStr.startsWith("+")) {
+            return sb + suffixStr;
+        }
+        return sb + "-" + suffixStr;
     }
 
     @Override

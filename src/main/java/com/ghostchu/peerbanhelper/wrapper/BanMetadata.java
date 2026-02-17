@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -57,4 +59,19 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.structuredData = structuredData;
     }
 
+    @Override
+    public String toString() {
+        return "BanMetadata{" +
+                "context='" + context + '\'' +
+                ", randomId='" + randomId + '\'' +
+                ", banAt=" + banAt +
+                ", unbanAt=" + unbanAt +
+                ", banForDisconnect=" + banForDisconnect +
+                ", excludeFromReport=" + excludeFromReport +
+                ", excludeFromDisplay=" + excludeFromDisplay +
+                ", rule=" + tlUI(rule) +
+                ", description=" + tlUI(description) +
+                ", structuredData=" + structuredData +
+                '}';
+    }
 }

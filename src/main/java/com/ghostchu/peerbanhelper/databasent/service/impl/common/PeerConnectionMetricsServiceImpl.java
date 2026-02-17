@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
@@ -29,7 +28,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Service
 @Slf4j
-public class PeerConnectionMetricsServiceImpl extends ServiceImpl<PeerConnectionMetricsMapper, PeerConnectionMetricsEntity> implements PeerConnectionMetricsService {
+public class PeerConnectionMetricsServiceImpl extends AbstractCommonService<PeerConnectionMetricsMapper, PeerConnectionMetricsEntity> implements PeerConnectionMetricsService {
 	@Autowired
 	private TransactionTemplate transactionTemplate;
 

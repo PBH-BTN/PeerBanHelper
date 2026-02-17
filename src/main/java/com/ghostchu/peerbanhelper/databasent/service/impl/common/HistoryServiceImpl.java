@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
 import com.ghostchu.peerbanhelper.databasent.dto.TorrentCount;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
@@ -26,7 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity> implements HistoryService {
+public class HistoryServiceImpl extends AbstractCommonService<HistoryMapper, HistoryEntity> implements HistoryService {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -52,7 +51,7 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
 
     @Override
     public IPage<HistoryEntity> queryBanHistoryByIp(@NotNull Page<HistoryEntity> pageable, @NotNull InetAddress ip,
-            @NotNull Orderable orderBy) {
+                                                    @NotNull Orderable orderBy) {
         return baseMapper.selectPage(pageable, orderBy.apply(new QueryWrapper<HistoryEntity>().eq("ip", ip)));
     }
 
@@ -62,22 +61,9 @@ public class HistoryServiceImpl extends ServiceImpl<HistoryMapper, HistoryEntity
     }
 
     @Override
-    public int deleteExpiredLogs(int keepDays) {
-        int deleted = 0;
+    public long deleteExpiredLogs(int keepDays) {
         OffsetDateTime thresholdDate = OffsetDateTime.now().minusDays(keepDays);
-        while (true) {
-            // 每次循环在独立事务中执行，完成后释放连接
-            Integer changes = transactionTemplate.execute(status ->
-                baseMapper.delete(new LambdaQueryWrapper<HistoryEntity>()
-                    .le(HistoryEntity::getBanAt, thresholdDate)
-                    .last("LIMIT 150"))
-            );
-            if (changes == null || changes <= 0) {
-                break;
-            }
-            deleted += changes;
-        }
-        return deleted;
+        return splitBatchDelete(new LambdaQueryWrapper<HistoryEntity>().le(HistoryEntity::getBanAt, thresholdDate));
     }
 
     @Override

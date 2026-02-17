@@ -15,5 +15,5 @@ public interface PCBAddressService extends IService<PCBAddressEntity> {
 
     int deleteEntry(@NotNull String torrentId, @NotNull InetAddress ip);
 
-    int cleanupDatabase(OffsetDateTime timestamp);
+    long cleanupDatabase(OffsetDateTime timestamp);
 }

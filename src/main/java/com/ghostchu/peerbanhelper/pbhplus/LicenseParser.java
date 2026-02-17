@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
@@ -40,6 +41,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class LicenseParser {
     public static final String OFFICIAL_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCHxgRTk+Zx/pkN8rpK+Lbr1/f1meapIRDJIgBiSfFy4xdbmDF8wE9PJhdM+3peThz9dJQlt6dkeduIVp65rGS9oZdj7gO5YKtUCDir4NgGQGe1p2C41Xv6RiOXObLmF+ubAJILsimwtDyJT8IysEh9hgaZWnvRXT8JX9wB0Ti2rwIDAQAB";
+    @Getter
     private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
     private final String hardwareUUIDHash;
 
@@ -111,10 +113,6 @@ public class LicenseParser {
         var encrypted = (RSAUtils.encryptByPrivateKey(JsonUtil.standard().toJson(key).getBytes(StandardCharsets.UTF_8),
                 Base64.getEncoder().encodeToString(getLocalKeyPair().getKey().getEncoded())));
         return Base64.getEncoder().encodeToString(encrypted);
-    }
-
-    public Map.Entry<PrivateKey, PublicKey> getLocalKeyPair() {
-        return localKeyPair;
     }
 
     private Map.Entry<PrivateKey, PublicKey> loadLocalKeyPair() throws Exception {

@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.BanListMapper;
 import com.ghostchu.peerbanhelper.databasent.service.BanListService;
@@ -9,6 +8,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import inet.ipaddr.IPAddress;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @Service
-public class BanListServiceImpl extends ServiceImpl<BanListMapper, BanListEntity> implements BanListService {
+public class BanListServiceImpl extends AbstractCommonService<BanListMapper, BanListEntity> implements BanListService {
     @Autowired
     private TransactionTemplate transactionTemplate;
 

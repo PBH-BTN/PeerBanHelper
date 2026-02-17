@@ -50,9 +50,7 @@ public final class BitComet extends AbstractDownloader {
     private final OkHttpClient httpClient;
     private final Config config;
     private String deviceToken;
-    private String serverId;
     private Semver serverVersion;
-    private String serverName;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
     public BitComet(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
@@ -108,6 +106,7 @@ public final class BitComet extends AbstractDownloader {
         if (serverVersion.isGreaterThanOrEqualTo("2.20")) {
             flags.add(DownloaderFeatureFlag.TRAFFIC_STATS);
         }
+        flags.add(DownloaderFeatureFlag.RANGE_BAN_IP);
         return flags;
     }
 
@@ -184,9 +183,9 @@ public final class BitComet extends AbstractDownloader {
                 }
                 var deviceTokenResult = JsonUtil.standard().fromJson(deviceTokenResponse.body().string(), BCDeviceTokenResult.class);
                 this.deviceToken = deviceTokenResult.getDeviceToken();
-                this.serverId = deviceTokenResult.getServerId();
+                String serverId = deviceTokenResult.getServerId();
                 this.serverVersion = new Semver(deviceTokenResult.getVersion(), Semver.SemverType.LOOSE);
-                this.serverName = deviceTokenResult.getServerName();
+                String serverName = deviceTokenResult.getServerName();
                 if (queryNeedReConfigureIpFilter()) {
                     enableIpFilter();
                 }

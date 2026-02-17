@@ -1,10 +1,19 @@
 package com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna;
 
+import lombok.Getter;
+
 /**
  * 工作集管理相关异常
  */
+@Getter
 public class WorkingSetException extends Exception {
-    
+
+    /**
+     * -- GETTER --
+     *  获取Windows错误代码
+     *
+     * @return Windows错误代码，如果没有则返回0
+     */
     private final int errorCode;
     
     /**
@@ -38,13 +47,5 @@ public class WorkingSetException extends Exception {
         super(message + " (错误代码: " + errorCode + ")");
         this.errorCode = errorCode;
     }
-    
-    /**
-     * 获取Windows错误代码
-     * 
-     * @return Windows错误代码，如果没有则返回0
-     */
-    public int getErrorCode() {
-        return errorCode;
-    }
+
 }

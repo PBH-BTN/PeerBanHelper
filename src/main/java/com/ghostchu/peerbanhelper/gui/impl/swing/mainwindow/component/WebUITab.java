@@ -16,13 +16,11 @@ import java.awt.*;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 public class WebUITab implements WindowTab {
-    private final SwingMainWindow parent;
     private final JPanel webuiPanel;
     private SwtBrowserCanvas webBrowser;
     private PBHGuiBridge bridge;
 
     public WebUITab(SwingMainWindow parent) {
-        this.parent = parent;
         this.webuiPanel = new JPanel(new BorderLayout());
         parent.getTabbedPane().addTab(tlUI(Lang.GUI_TABBED_WEBUI), webuiPanel);
         Main.getEventBus().register(this);

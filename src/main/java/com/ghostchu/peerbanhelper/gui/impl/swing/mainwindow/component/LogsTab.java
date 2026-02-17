@@ -13,8 +13,6 @@ import java.awt.*;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 public class LogsTab implements WindowTab {
-    private final SwingMainWindow parent;
-    private final JPanel tabbedPaneLogs;
     @Getter
     private final JList<LogEntry> loggerTextList;
 
@@ -22,9 +20,8 @@ public class LogsTab implements WindowTab {
     private final JScrollPane loggerScrollPane;
 
     public LogsTab(SwingMainWindow parent) {
-        this.parent = parent;
         loggerScrollPane = new JScrollPane();
-        tabbedPaneLogs = new JPanel();
+        JPanel tabbedPaneLogs = new JPanel();
         tabbedPaneLogs.setLayout(new BorderLayout(0, 0));
         parent.getTabbedPane().addTab("Logs", tabbedPaneLogs);
         tabbedPaneLogs.add(loggerScrollPane, BorderLayout.CENTER);
