@@ -87,7 +87,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:11.20.3")
     implementation("org.flywaydb:flyway-mysql:11.20.3")
     implementation("org.flywaydb:flyway-database-postgresql:11.20.3")
-    compileOnly("org.jetbrains:annotations:26.0.2-1")
+    compileOnly("org.jetbrains:annotations:26.1.0")
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
