@@ -200,6 +200,88 @@ jobs:
         with:
           asset_paths: '["build/media/PeerBanHelper_*", "build/media/peerbanhelper_*", "build/media/peerbanhelper-*", "build/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
 
+  Publish_Changelog:
+    name: Publish Changelog to Forum
+    continue-on-error: true
+    if: github.event_name == 'release'
+    needs: Upload_Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if release body is empty
+        id: check_body
+        run: |
+          BODY="${{ github.event.release.body }}"
+          if [[ -z "$(echo "$BODY" | tr -d '[:space:]')" ]]; then
+            echo "Release body is empty, skipping changelog publication"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "Release body found, will publish changelog"
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Ensure jq is installed
+        if: steps.check_body.outputs.skip != 'true'
+        run: which jq || (sudo apt-get update && sudo apt-get install -y jq)
+      - name: Prepare and send changelog to forum
+        if: steps.check_body.outputs.skip != 'true'
+        run: |
+          # Escape title and body for JSON using jq
+          TITLE=$(echo '${{ github.event.release.name }}' | jq -Rs .)
+          BODY=$(echo '${{ github.event.release.body }}' | jq -Rs .)
+          
+          # Build JSON payload
+          JSON_PAYLOAD=$(cat <<EOF
+          {
+            "data": {
+              "type": "discussions",
+              "attributes": {
+                "title": $TITLE,
+                "content": $BODY
+              },
+              "relationships": {
+                "tags": {
+                  "data": [
+                    {
+                      "type": "tags",
+                      "id": "5"
+                    },
+                    {
+                      "type": "tags",
+                      "id": "25"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+          EOF
+          )
+          
+          echo "Sending changelog to forum API..."
+          echo "JSON Payload:"
+          echo "$JSON_PAYLOAD" | jq .
+          
+          # Send POST request with retry
+          RESPONSE=$(curl --retry 3 --retry-delay 2 --retry-connrefused \
+            -i -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Token ${{ secrets.FLARUM_BBS_API_KEY }}" \
+            -d "$JSON_PAYLOAD" \
+            https://bbs.pbh-btn.com/api/discussions)
+          
+          echo "API Response:"
+          echo "$RESPONSE"
+          
+          # Extract and check HTTP status code
+          HTTP_CODE=$(echo "$RESPONSE" | grep -i "^HTTP" | tail -1 | awk '{print $2}')
+          echo "HTTP Status Code: $HTTP_CODE"
+          
+          if [[ "$HTTP_CODE" =~ ^2[0-9]{2}$ ]]; then
+            echo "✓ Changelog published successfully"
+          else
+            echo "⚠ API returned non-2xx status code: $HTTP_CODE"
+            echo "This is a warning only, workflow will continue"
+          fi
+
   Build_Docker:
     name: Build Docker Image
     if: github.event_name != 'workflow_dispatch'

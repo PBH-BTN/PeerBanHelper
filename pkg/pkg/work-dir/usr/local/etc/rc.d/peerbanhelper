@@ -15,7 +15,7 @@ export JAVA_VERSION=${JAVA_VERSION:-21}
 : ${peerbanhelper_user:="root"}
 : ${peerbanhelper_dir:="/usr/local/var/db/peerbanhelper"}
 : ${peerbanhelper_classpath:="/usr/local/lib/peerbanhelper/PeerBanHelper.jar"}
-: ${peerbanhelper_jvm_flags:="-XX:ZCollectionInterval=60 --enable-native-access=ALL-UNNAMED -XX:+UseCompactObjectHeaders -Djdk.attach.allowAttachSelf=true -Dpbh.release=freebsd -Dpbh.datadir=${peerbanhelper_dir} -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dsun.net.useExclusiveBind=false -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -Dconsole.encoding=UTF-8"}
+: ${peerbanhelper_jvm_flags:="-XX:SoftMaxHeapSize=386M --enable-native-access=ALL-UNNAMED -XX:+UseCompactObjectHeaders -Djdk.attach.allowAttachSelf=true -Dpbh.release=freebsd -Dpbh.datadir=${peerbanhelper_dir} -XX:MaxRAMPercentage=85.0 -XX:+UseZGC -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dsun.net.useExclusiveBind=false -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -Dconsole.encoding=UTF-8"}
 : ${peerbanhelper_command:="/usr/local/bin/java ${peerbanhelper_jvm_flags} -jar ${peerbanhelper_classpath}"}
 
 command="/usr/sbin/daemon"

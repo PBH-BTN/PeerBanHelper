@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -263,7 +264,9 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public @NotNull List<Torrent> getTorrents() {
-        return fetchTorrents(List.of(BiglyBTDownloadStateConst.ST_DOWNLOADING, BiglyBTDownloadStateConst.ST_SEEDING, BiglyBTDownloadStateConst.ST_ERROR), !config.isIgnorePrivate());
+        return fetchTorrents(List.of(BiglyBTDownloadStateConst.ST_DOWNLOADING, BiglyBTDownloadStateConst.ST_SEEDING, BiglyBTDownloadStateConst.ST_ERROR), !config.isIgnorePrivate())
+                .stream().filter(t->t.getRtDownloadSpeed() > 0 || t.getRtUploadSpeed() > 0)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override

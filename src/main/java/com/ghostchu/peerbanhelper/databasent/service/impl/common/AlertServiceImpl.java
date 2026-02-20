@@ -34,7 +34,7 @@ public class AlertServiceImpl extends AbstractCommonService<AlertMapper, AlertEn
 
     @Override
     public long deleteOldAlerts(@NotNull OffsetDateTime before) {
-        return splitBatchDelete(new LambdaQueryWrapper<AlertEntity>().le(AlertEntity::getCreateAt, before));
+        return splitBatchDelete(new LambdaQueryWrapper<AlertEntity>().select(AlertEntity::getId).le(AlertEntity::getCreateAt, before));
     }
 
     @Override

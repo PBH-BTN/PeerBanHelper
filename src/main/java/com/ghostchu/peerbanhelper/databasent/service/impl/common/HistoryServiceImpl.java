@@ -63,7 +63,7 @@ public class HistoryServiceImpl extends AbstractCommonService<HistoryMapper, His
     @Override
     public long deleteExpiredLogs(int keepDays) {
         OffsetDateTime thresholdDate = OffsetDateTime.now().minusDays(keepDays);
-        return splitBatchDelete(new LambdaQueryWrapper<HistoryEntity>().le(HistoryEntity::getBanAt, thresholdDate));
+        return splitBatchDelete(new LambdaQueryWrapper<HistoryEntity>().select(HistoryEntity::getId).le(HistoryEntity::getBanAt, thresholdDate));
     }
 
     @Override

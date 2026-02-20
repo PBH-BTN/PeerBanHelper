@@ -44,6 +44,6 @@ public class PCBAddressServiceImpl extends AbstractCommonService<PCBAddressMappe
 
 	@Override
     public long cleanupDatabase(OffsetDateTime timestamp) {
-        return splitBatchDelete(new LambdaQueryWrapper<PCBAddressEntity>().lt(PCBAddressEntity::getLastTimeSeen, timestamp));
+        return splitBatchDelete(new LambdaQueryWrapper<PCBAddressEntity>().select(PCBAddressEntity::getId).lt(PCBAddressEntity::getLastTimeSeen, timestamp));
 	}
 }

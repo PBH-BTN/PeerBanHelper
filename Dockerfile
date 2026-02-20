@@ -22,4 +22,4 @@ VOLUME /tmp
 COPY --from=build build/build/libraries /app/libraries
 COPY --from=build build/build/libs/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH="/usr/lib/jvm/liberica25-container-jre/bin:${PATH}"
-ENTRYPOINT ["sh", "-c", "java -XX:+UseCompactObjectHeaders -XX:ZCollectionInterval=60 --enable-native-access=ALL-UNNAMED -Djdk.attach.allowAttachSelf=true -Dsun.net.useExclusiveBind=false -Dpbh.release=docker -Djava.awt.headless=true -XX:+UseZGC -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -XX:MaxRAMPercentage=85.0 -jar PeerBanHelper.jar"]
+ENTRYPOINT ["sh", "-c", "java -XX:+UseCompactObjectHeaders -XX:SoftMaxHeapSize=386M --enable-native-access=ALL-UNNAMED -Djdk.attach.allowAttachSelf=true -Dsun.net.useExclusiveBind=false -Dpbh.release=docker -Djava.awt.headless=true -XX:+UseZGC -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -XX:MaxRAMPercentage=85.0 -jar PeerBanHelper.jar"]

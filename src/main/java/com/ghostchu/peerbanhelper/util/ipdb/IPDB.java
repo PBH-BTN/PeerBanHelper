@@ -114,6 +114,9 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
+        if(geoCN == null) {
+            return;
+        }
         try {
             CNLookupResult cnLookupResult = geoCN.get(address, CNLookupResult.class);
             if (cnLookupResult == null) {
@@ -168,6 +171,9 @@ public final class IPDB implements AutoCloseable {
     }
 
     private IPGeoData.NetworkData queryNetwork(InetAddress address) {
+        if(mmdbASN == null) {
+            return null;
+        }
         try {
             IPGeoData.NetworkData networkData = new IPGeoData.NetworkData();
             AsnResponse asnResponse = mmdbASN.asn(address);
@@ -182,6 +188,9 @@ public final class IPDB implements AutoCloseable {
 
 
     private IPGeoData.CityData queryCity(InetAddress address) {
+        if(mmdbCity == null) {
+            return null;
+        }
         try {
             IPGeoData.CityData cityData = new IPGeoData.CityData();
             //IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
@@ -203,6 +212,9 @@ public final class IPDB implements AutoCloseable {
     }
 
     private IPGeoData.CountryData queryCountry(InetAddress address) {
+        if(mmdbCity == null) {
+            return null;
+        }
         try {
             IPGeoData.CountryData countryData = new IPGeoData.CountryData();
             CountryResponse countryResponse = mmdbCity.country(address);
@@ -227,6 +239,9 @@ public final class IPDB implements AutoCloseable {
 
 
     private IPGeoData.ASData queryAS(InetAddress address) {
+        if(mmdbASN == null) {
+            return null;
+        }
         try {
             IPGeoData.ASData asData = new IPGeoData.ASData();
             AsnResponse asnResponse = mmdbASN.asn(address);
