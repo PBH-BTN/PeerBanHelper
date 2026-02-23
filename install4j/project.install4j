@@ -236,7 +236,7 @@ return console.askOkCancel(message, true);
               </formComponent>
             </formComponents>
           </screen>
-          <screen name="Unsupport platform check" id="338" beanClass="com.install4j.runtime.beans.screens.DefaultInfoScreen" rollbackBarrierExitCode="0" backButton="hidden" finishScreen="true">
+          <screen name="Unsupport platform check" id="338" beanClass="com.install4j.runtime.beans.screens.DefaultInfoScreen" enabled="false" rollbackBarrierExitCode="0" backButton="hidden" finishScreen="true">
             <condition>List&lt;String&gt; unsupportedWindows = List.of("Windows 95","Windows 98","Windows 2000", "Windows ME", "Windows XP", "Windows Vista", "Windows 7", "Windows 8", "Windows 8.1");
 
 String osName = System.getProperty("os.name");
@@ -262,9 +262,9 @@ ${i18n:unsupported-os}</property>
                   <property name="textSource" type="enum" class="com.install4j.runtime.beans.screens.components.TextSource" value="DIRECT" />
                 </serializedBean>
                 <externalParametrizationPropertyNames>
-                  <propertyName>textSource</propertyName>
                   <propertyName>displayedText</propertyName>
                   <propertyName>displayedTextFile</propertyName>
+                  <propertyName>textSource</propertyName>
                   <propertyName>variableName</propertyName>
                 </externalParametrizationPropertyNames>
               </formComponent>
@@ -1910,6 +1910,13 @@ return true;</property>
         <entry filesetId="320" />
       </exclude>
       <jreBundle jreBundleSource="none" />
+    </windows>
+    <windows name="Windows x64 (Win7 Compatible)" id="344" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_win7_${compiler:sys.version}" architecture="64">
+      <excludedComponents>
+        <component id="326" />
+        <component id="327" />
+      </excludedComponents>
+      <jreBundle jdkProviderId="Liberica" release="25/25.0.2+12" overrideJdkRelease="true" />
     </windows>
     <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}">
       <exclude>
