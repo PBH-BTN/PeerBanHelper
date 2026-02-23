@@ -87,7 +87,7 @@ public final class SwingMainWindow extends JFrame {
                 && ExternalSwitch.parseBoolean("pbh.swingui.webuiTab", true)) {
 
             try { // SWT possible be null here on unsupported platform
-                boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
+                boolean isWindows = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
                 if (isWindows) { // SWT 检测到不支持的系统直接就把 JVM 轰飞了，需要先检测系统版本
                     var buildNumber = new oshi.SystemInfo().getOperatingSystem().getVersionInfo().getBuildNumber();
                     if (Long.parseLong(buildNumber) > 14393) {
