@@ -18,8 +18,9 @@ start "" "%JAVAW_EXEC%"^
  -Djdk.attach.allowAttachSelf=true^
  -XX:MaxRAMPercentage=85.0^
  -XX:SoftMaxHeapSize=386M^
- -XX:+UseZGC^
- -XX:ZUncommitDelay=1^
+ -XX:+UseG1GC^
+ -XX:G1PeriodicGCInterval=60000^
+ -XX:MaxHeapFreeRatio=10^
  -Xss512k^
  -XX:+UseStringDeduplication^
  -XX:-ShrinkHeapInSteps^
