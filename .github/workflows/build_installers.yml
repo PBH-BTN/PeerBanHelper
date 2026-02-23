@@ -42,9 +42,20 @@ jobs:
           path: |
             build/media/*
         id: project
-      - name: Upload generated jres
+      - name: Copy JBR Bundles
+        id: jbr_bundles
+        run: |
+          dir="${1:-$HOME/.cache/install4j/v11/cached_jres/generated}"
+          find "$dir" -type f -name 'windows-amd64-*.tar.gz' -printf '%T@ %p\n' \
+            | sort -nr | cut -d' ' -f2- \
+            | while IFS= read -r f; do
+                if tar -xOzf "$f" lib/classlist 2>/dev/null | grep -q 'com/jetbrains/exported/JBRApi'; then
+                  echo "jbr_path=$(realpath "$f")" >> $GITHUB_OUTPUT
+                  break
+                fi
+              done
+      - name: Upload JBR Bundles
         uses: actions/upload-artifact@v6
         with:
-          name: jre-dist
-          path: |
-            ~/.cache/install4j/v11/cached_jres/generated/**/*.tar.gz
+          name: jbr-dist
+          path: ${{ steps.jbr_bundles.outputs.jbr_path }}

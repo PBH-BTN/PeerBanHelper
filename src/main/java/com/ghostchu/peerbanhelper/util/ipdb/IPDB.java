@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
+import com.maxmind.db.Reader;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
@@ -27,9 +28,7 @@ import okio.Okio;
 import org.jetbrains.annotations.NotNull;
 import org.tukaani.xz.XZInputStream;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -432,7 +431,8 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void validateMMDB(File tmp) throws IOException {
-        try(var reader = new Reader(tmp, NoCache.getInstance())) {
+        try (InputStream is = new FileInputStream(tmp);
+             var reader = new Reader(is, NoCache.getInstance())) {
             log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().databaseType());
         }
     }

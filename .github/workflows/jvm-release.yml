@@ -210,7 +210,10 @@ jobs:
       - name: Check if release body is empty
         id: check_body
         run: |
-          BODY="${{ github.event.release.body }}"
+          BODY=$(cat <<'EOFBODY'
+          ${{ github.event.release.body }}
+          EOFBODY
+          )
           if [[ -z "$(echo "$BODY" | tr -d '[:space:]')" ]]; then
             echo "Release body is empty, skipping changelog publication"
             echo "skip=true" >> $GITHUB_OUTPUT
@@ -224,9 +227,15 @@ jobs:
       - name: Prepare and send changelog to forum
         if: steps.check_body.outputs.skip != 'true'
         run: |
-          # Escape title and body for JSON using jq
-          TITLE=$(echo '${{ github.event.release.name }}' | jq -Rs .)
-          BODY=$(echo '${{ github.event.release.body }}' | jq -Rs .)
+          # Escape title and body for JSON using jq with heredoc to avoid shell expansion
+          TITLE=$(cat <<'EOFTITLE' | jq -Rs .
+          ${{ github.event.release.name }}
+          EOFTITLE
+          )
+          BODY=$(cat <<'EOFBODY' | jq -Rs .
+          ${{ github.event.release.body }}
+          EOFBODY
+          )
           
           # Build JSON payload
           JSON_PAYLOAD=$(cat <<EOF
