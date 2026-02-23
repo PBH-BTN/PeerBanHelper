@@ -45,7 +45,8 @@ jobs:
       - name: Copy JBR Bundles
         id: jbr_bundles
         run: |
-          find "~/.cache/install4j/v11/cached_jres/generated" -type f -name 'windows-amd64-*.tar.gz' -printf '%T@ %p\n' \
+          dir="${1:-$HOME/.cache/install4j/v11/cached_jres/generated}"
+          find "$dir" -type f -name 'windows-amd64-*.tar.gz' -printf '%T@ %p\n' \
             | sort -nr | cut -d' ' -f2- \
             | while IFS= read -r f; do
                 if tar -xOzf "$f" lib/classlist 2>/dev/null | grep -q 'com/jetbrains/exported/JBRApi'; then
