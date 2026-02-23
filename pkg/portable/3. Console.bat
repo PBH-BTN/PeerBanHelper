@@ -19,7 +19,8 @@ set "JAVA_EXEC=%JAVA_BIN%\java.exe"
  -XX:SoftMaxHeapSize=386M^
  -XX:+UseG1GC^
  -XX:G1PeriodicGCInterval=60000^
- -XX:MaxHeapFreeRatio=10^
+ -XX:MaxHeapFreeRatio=15^
+ -XX:MinHeapFreeRatio=5^
  -Xss512k^
  -XX:+UseStringDeduplication^
  -XX:-ShrinkHeapInSteps^
