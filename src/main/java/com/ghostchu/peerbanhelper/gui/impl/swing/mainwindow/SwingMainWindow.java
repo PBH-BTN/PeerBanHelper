@@ -97,7 +97,7 @@ public final class SwingMainWindow extends JFrame {
                     tabs.add(new WebUITab(this));
                 }
             } catch (Exception e) {
-                log.error("Unable to create WebUITab or PerfProfilerTab,", e);
+                log.error("Unable to create WebUITab or PerfProfilerTab", e);
                 Sentry.captureException(e);
             }
         } else {

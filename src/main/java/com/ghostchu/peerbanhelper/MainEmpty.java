@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper;
 
-import oshi.SystemInfo;
 
 public final class MainEmpty {
     public static void main(String[] args) {

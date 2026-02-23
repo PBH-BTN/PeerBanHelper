@@ -9,7 +9,7 @@ import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import oshi.SystemInfo;
+
 
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
