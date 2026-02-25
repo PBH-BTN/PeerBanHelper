@@ -90,15 +90,19 @@ const testLoading = ref(false)
 const form = ref({ config: {} } as PushConfig)
 const oldName = ref('')
 
+const defaultConfigMap: Partial<Record<PushType, Record<string, unknown>>> = {
+  [PushType.Ntfy]: {
+    server_url: 'https://ntfy.sh',
+    topic: '',
+    token: ''
+  }
+}
+
 watch(
   () => form.value.type,
   (newType) => {
-    if (newItem.value && newType === PushType.Ntfy) {
-      form.value.config = {
-        server_url: 'https://ntfy.sh',
-        topic: '',
-        token: ''
-      }
+    if (newItem.value && newType in defaultConfigMap) {
+      form.value.config = { ...defaultConfigMap[newType]! } as unknown as PushConfig['config']
     }
   }
 )

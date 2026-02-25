@@ -88,8 +88,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
                 .post(RequestBody.create(stripMarkdown(content), MediaType.parse("text/plain")));
 
         if (title != null && !title.isEmpty()) {
-            String encodedTitle = "=?UTF-8?B?" + java.util.Base64.getEncoder().encodeToString(title.getBytes(java.nio.charset.StandardCharsets.UTF_8)) + "?=";
-            requestBuilder.header("Title", encodedTitle);
+            requestBuilder.header("Title", title);
         }
 
         if (config.getToken() != null && !config.getToken().isBlank()) {
@@ -98,12 +97,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
 
         try (Response response = this.httpClient.newCall(requestBuilder.build()).execute()) {
             if (!response.isSuccessful()) {
-                var body = response.body();
-                var bodyStr = body != null ? body.string() : "(empty)";
-                if (bodyStr.length() > 256) {
-                    bodyStr = bodyStr.substring(0, 256) + "...";
-                }
-                throw new IllegalStateException("HTTP Failed while sending push messages to Ntfy: " + response.code() + " " + bodyStr);
+                throw new IllegalStateException("HTTP Failed while sending push messages to Ntfy: " + response.code());
             }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to send push message to Ntfy", e);
