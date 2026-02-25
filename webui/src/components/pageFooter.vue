@@ -14,17 +14,6 @@
               </a-badge>
             </a>
             <div v-else>{{ serverVersion?.version }}</div>
-            <br />
-            <a-button
-              v-if="endpointStore.plusStatus?.enabledFeatures.includes('paid')"
-              class="plus-button"
-              type="outline"
-              size="mini"
-              @click="plusInfo?.showModal()"
-            >
-              <icon-heart-fill />
-              &nbsp;PBH Plus
-            </a-button>
             <div v-if="serverVersion?.commit">
               (<a-link
                 :href="`https://github.com/Ghost-chu/PeerBanHelper/commit/${serverVersion?.commit}`"
@@ -42,6 +31,15 @@
               >)
             </div></a-space
           >
+        </a-descriptions-item>
+        <a-descriptions-item
+          v-if="endpointStore.plusStatus?.enabledFeatures.includes('paid')"
+          :span="3"
+        >
+          <a-button class="plus-button" type="outline" size="mini" @click="plusInfo?.showModal()">
+            <icon-heart-fill />
+            &nbsp;PBH Plus
+          </a-button>
         </a-descriptions-item>
       </a-descriptions>
     </a-col>

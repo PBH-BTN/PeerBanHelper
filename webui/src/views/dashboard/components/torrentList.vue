@@ -62,48 +62,51 @@
     :loading="!loading && !data"
     :bordered="true"
     hoverable
+    :data="data?.data"
     :virtual-list-props="useVirtualList"
   >
-    <a-list-item v-for="record in data?.data" :key="record.id" action-layout="vertical">
-      <a-list-item-meta style="width: 100%">
-        <template #title>
-          <div style="margin-bottom: 8px">{{ record.name }}</div>
-        </template>
-        <template #description>
-          <a-space direction="vertical" fill>
-            <a-space>
-              {{ getColumnTitle('speed') }}:
-              <span class="green"
-                ><icon-arrow-up /> {{ formatFileSize(record.rtUploadSpeed) }}/s</span
-              >
-              <span class="red"
-                ><icon-arrow-down /> {{ formatFileSize(record.rtDownloadSpeed) }}/s</span
-              >
+    <template #item="{ item: record, index }">
+      <a-list-item :key="index" action-layout="vertical">
+        <a-list-item-meta style="width: 100%">
+          <template #title>
+            <div style="margin-bottom: 8px">{{ record.name }}</div>
+          </template>
+          <template #description>
+            <a-space direction="vertical" fill>
+              <a-space>
+                {{ getColumnTitle('speed') }}:
+                <span class="green"
+                  ><icon-arrow-up /> {{ formatFileSize(record.rtUploadSpeed) }}/s</span
+                >
+                <span class="red"
+                  ><icon-arrow-down /> {{ formatFileSize(record.rtDownloadSpeed) }}/s</span
+                >
+              </a-space>
+              <a-space> {{ getColumnTitle('size') }}: {{ formatFileSize(record.size) }}</a-space>
+              <a-space>
+                {{ getColumnTitle('progress') }}:
+                <a-progress :percent="record.progress" size="mini" />
+                <a-typography-text>{{ (record.progress * 100).toFixed(2) }}%</a-typography-text>
+              </a-space>
             </a-space>
-            <a-space> {{ getColumnTitle('size') }}: {{ formatFileSize(record.size) }}</a-space>
-            <a-space>
-              {{ getColumnTitle('progress') }}:
-              <a-progress :percent="record.progress" size="mini" />
-              <a-typography-text>{{ (record.progress * 100).toFixed(2) }}%</a-typography-text>
-            </a-space>
-          </a-space>
-        </template>
-      </a-list-item-meta>
+          </template>
+        </a-list-item-meta>
 
-      <template #actions>
-        <a-button size="small" @click="handleCopy(record.hash)">
-          {{ getColumnTitle('hash') }} ({{
-            t('page.rule_management.ruleSubscribe.column.clickToCopy')
-          }})
-        </a-button>
-        <a-button
-          size="small"
-          @click="() => peerList?.showModal(downloader, record.id, record.name)"
-        >
-          {{ getColumnTitle('peer') }} ({{ t('page.dashboard.torrentList.column.view') }})
-        </a-button>
-      </template>
-    </a-list-item>
+        <template #actions>
+          <a-button size="small" @click="handleCopy(record.hash)">
+            {{ getColumnTitle('hash') }} ({{
+              t('page.rule_management.ruleSubscribe.column.clickToCopy')
+            }})
+          </a-button>
+          <a-button
+            size="small"
+            @click="() => peerList?.showModal(downloader, record.id, record.name)"
+          >
+            {{ getColumnTitle('peer') }} ({{ t('page.dashboard.torrentList.column.view') }})
+          </a-button>
+        </template>
+      </a-list-item>
+    </template>
   </a-list>
 
   <peerListModal ref="peerList" />
