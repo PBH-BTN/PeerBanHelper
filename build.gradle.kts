@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.7"
-    id("com.install4j.gradle") version "12.0.2" apply false
+    id("com.install4j.gradle") version "12.0.3" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.3.10"
@@ -59,13 +59,13 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.4"){
+    implementation("org.springframework:spring-context:7.0.5"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
-    implementation("org.springframework:spring-aop:7.0.4")
-    implementation("org.springframework:spring-tx:7.0.4")
-    implementation("org.springframework:spring-jdbc:7.0.4")
+    implementation("org.springframework:spring-aop:7.0.5")
+    implementation("org.springframework:spring-tx:7.0.5")
+    implementation("org.springframework:spring-jdbc:7.0.5")
     // Source: https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
     implementation("org.aspectj:aspectjweaver:1.9.25.1")
     implementation("org.xerial:sqlite-jdbc:3.51.2.0")
@@ -138,7 +138,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.31")
+    implementation("ch.qos.logback:logback-classic:1.5.32")
     implementation("org.slf4j:jcl-over-slf4j:2.0.17")
 
     // Async utilities
@@ -179,7 +179,7 @@ dependencies {
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.132.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:12.0.2")
+    compileOnly("com.install4j:install4j-runtime:12.0.3")
 
     implementation(platform("io.sentry:sentry-bom:8.33.0")) //import bom
     implementation("io.sentry:sentry")
