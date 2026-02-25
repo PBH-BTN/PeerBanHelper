@@ -51,7 +51,7 @@ public final class PersistMetrics implements BasicMetrics {
             int keepDays = Main.getMainConfig().getInt("persist.ban-logs-keep-days");
             if (keepDays > 0) {
                 try {
-                    int deletes = historyDao.deleteExpiredLogs(keepDays);
+                    long deletes = historyDao.deleteExpiredLogs(keepDays);
                     log.info(tlUI(Lang.CLEANED_BANLOGS, deletes));
                 } catch (Exception e) {
                     log.error("Unable to cleanup expired banlogs", e);

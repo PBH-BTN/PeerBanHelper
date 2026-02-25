@@ -55,7 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.math.MathContext;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
@@ -202,7 +202,7 @@ public class Main {
 
     private static void setupSentry() {
         Sentry.init(sentryOptions -> {
-            sentryOptions.setDsn(ExternalSwitch.parse("sentry.dsn", "https://ca1d50ff6c96410f916febf500cc1b54@glitchtip.pbh-btn.com/5"));
+            sentryOptions.setDsn(ExternalSwitch.parse("sentry.dsn", "https://8c37f36e8a0244279b1142e4b82eb81a@glitchtip.pbh-btn.com/1"));
             sentryOptions.setEnableExternalConfiguration(true); // Read DSN from sentry.properties
             sentryOptions.setCacheDirPath(cacheDirectory.getAbsolutePath());
             sentryOptions.setEnabled(mainConfig.getBoolean("privacy.analytics")); // Disable Sentry if analytics is disabled in config
@@ -214,7 +214,10 @@ public class Main {
             sentryOptions.setAttachThreads(true);
             sentryOptions.setPrintUncaughtStackTrace(true);
             sentryOptions.setEnableUncaughtExceptionHandler(true);
-            sentryOptions.setProfilesSampleRate(ExternalSwitch.parseDouble("sentry.samplerate", 0.1d)); // TODO modify this value later
+            sentryOptions.setSampleRate(ExternalSwitch.parseDouble("sentry.samplerate", 0.2d));
+            sentryOptions.setProfilesSampleRate(ExternalSwitch.parseDouble("sentry.profilessamplerate", 0.2d));
+            sentryOptions.setTracesSampleRate(ExternalSwitch.parseDouble("sentry.tracesamplerate", 0.2d));
+            sentryOptions.setProfileSessionSampleRate(ExternalSwitch.parseDouble("sentry.profilesessionsamplerate", 0.2d));
             sentryOptions.setEnableUserInteractionTracing(false); // Do not tracker user behavior
             sentryOptions.setRelease(meta.getVersion());
             sentryOptions.setTag("os", System.getProperty("os.name"));
@@ -232,6 +235,10 @@ public class Main {
             sentryOptions.addIgnoredExceptionForType(TimeoutException.class);
             sentryOptions.addIgnoredExceptionForType(SocketTimeoutException.class);
             sentryOptions.addIgnoredExceptionForType(IOException.class);
+            sentryOptions.addIgnoredExceptionForType(SocketException.class);
+            sentryOptions.addIgnoredExceptionForType(ConnectException.class);
+            sentryOptions.addIgnoredExceptionForType(UnknownHostException.class);
+            sentryOptions.addIgnoredExceptionForType(NoRouteToHostException.class);
         });
     }
 

@@ -44,7 +44,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
     }
 
     @Override
-    public void createMapping(int localPort) throws IOException {
+    public void createMapping(int localPort) {
         startedAt = System.currentTimeMillis();
         if (localPort == 0) {
             localPort = MiscUtil.randomAvailablePort();

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,6 +51,7 @@ public class CommonDataCollector {
         pbh.put("release", release);
         pbh.put("gui_available", Main.getGuiManager().isGuiAvailable());
         pbh.put("default_locale", Main.DEF_LOCALE);
+        pbh.put("database_type", DatabaseDriverConfig.databaseDriver.getType().name());
         return pbh;
     }
 

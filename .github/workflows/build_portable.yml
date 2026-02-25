@@ -15,8 +15,8 @@ jobs:
           path: build/
       - uses: actions/download-artifact@v7
         with:
-          name: jre-dist
-          path: jre-dist/
+          name: jbr-dist
+          path: jbr-dist/
       - name: Build Portable package
         id: build-portable
         run: |
@@ -29,7 +29,7 @@ jobs:
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
           mkdir -p jre
-          mv jre-dist/*/windows-amd64-25.0.2.tar.gz jre/jre.tar.gz
+          mv jbr-dist/windows-amd64-*.tar.gz jre/jre.tar.gz
           (cd jre && tar -zxvf jre.tar.gz && rm jre.tar.gz)
           mv jre pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)

@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
+import lombok.Getter;
+
+@Getter
 public enum BCEndpoint {
     USER_LOGIN("/api/webui/login"),
     GET_DEVICE_TOKEN("/api/device_token/get"),
@@ -33,7 +36,4 @@ public enum BCEndpoint {
         this.endpoint = endpoint;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
 }

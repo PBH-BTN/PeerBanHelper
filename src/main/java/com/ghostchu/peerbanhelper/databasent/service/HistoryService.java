@@ -17,7 +17,7 @@ import java.util.Map;
 public interface HistoryService extends IService<HistoryEntity> {
     IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter);
 
-    int deleteExpiredLogs(int keepDays);
+    long deleteExpiredLogs(int keepDays);
 
     long countHistoriesByTorrentId(@NotNull Long id);
 

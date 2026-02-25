@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt.network;
 
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Setter
 public final class BiglyBTTorrent implements Torrent {
+    @Getter
     private List<List<String>> trackers;
     private boolean privateTorrent;
     private double progress;
@@ -77,7 +79,4 @@ public final class BiglyBTTorrent implements Torrent {
         return privateTorrent;
     }
 
-    public List<List<String>> getTrackers() {
-        return trackers;
-    }
 }

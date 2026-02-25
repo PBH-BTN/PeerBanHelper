@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.util.pow;
 
+import lombok.Getter;
+
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 
@@ -7,7 +9,9 @@ import java.security.SecureRandom;
  * PoW 无交互验证码（服务端）
  */
 public class PoWServer {
+    @Getter
     private final byte[] challenge;
+    @Getter
     private final int difficultyBits; // e.g., 20 bits = leading 2.5 bytes of zero
     private final String algorithm;
 
@@ -16,14 +20,6 @@ public class PoWServer {
         this.challenge = new byte[32];
         this.algorithm = algorithm;
         new SecureRandom().nextBytes(this.challenge);
-    }
-
-    public byte[] getChallenge() {
-        return challenge;
-    }
-
-    public int getDifficultyBits() {
-        return difficultyBits;
     }
 
     public boolean verify(byte[] nonce) throws Exception {

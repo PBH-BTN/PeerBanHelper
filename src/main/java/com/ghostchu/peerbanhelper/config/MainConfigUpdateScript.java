@@ -37,6 +37,14 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 45)
+    public void ipv6remapping(YamlConfiguration bundle) {
+        int prefixLength = conf.getInt("banlist-remapping.ipv6.remap-range");
+        if (prefixLength == 60) {
+            conf.set("banlist-remapping.ipv6.remap-range", 52);
+        }
+    }
+
     @UpdateScript(version = 44)
     public void availableTestRename(YamlConfiguration bundle) {
         var test = conf.getBoolean("stun.availableTest", bundle.getBoolean("stun.availableTest"));

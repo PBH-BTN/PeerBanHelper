@@ -13,12 +13,10 @@ import java.io.IOException;
 import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
 
 public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
-    private final ConfigurationSection section;
     private final BeeDataSource dataSource;
 
     public PostgresDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
-        this.section = section;
         BeeDataSourceConfig config = new BeeDataSourceConfig();
         
         String host = section.getString("host");

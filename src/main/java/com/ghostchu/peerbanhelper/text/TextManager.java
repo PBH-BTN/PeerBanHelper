@@ -32,16 +32,15 @@ public final class TextManager implements Reloadable {
     private final LanguageFilesManagerImpl languageFilesManager = new LanguageFilesManagerImpl();
     private final Set<String> availableLanguages = new LinkedHashSet<>();
     private final Set<String> loadedLanguages = ConcurrentHashMap.newKeySet();
-    private final File langDirectory;
     private final File overrideDirectory;
     @Getter
     private final YamlConfiguration fallbackConfig;
 
     public TextManager() {
-        this.langDirectory = new File(Main.getDataDirectory(), "lang");
+        File langDirectory = new File(Main.getDataDirectory(), "lang");
         this.overrideDirectory = new File(langDirectory, "overrides");
-        if (!this.langDirectory.exists()) {
-            this.langDirectory.mkdirs();
+        if (!langDirectory.exists()) {
+            langDirectory.mkdirs();
         }
         if (!this.overrideDirectory.exists()) {
             this.overrideDirectory.mkdirs();

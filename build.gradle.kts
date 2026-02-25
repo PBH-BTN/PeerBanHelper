@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.3.3"
+version = "9.3.7"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -184,6 +184,8 @@ dependencies {
     implementation(platform("io.sentry:sentry-bom:8.33.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
+    implementation("io.sentry:sentry-jdbc")
+
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("p6spy:p6spy:3.9.1")
@@ -193,6 +195,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.21.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
+
 }
 
 tasks.test {

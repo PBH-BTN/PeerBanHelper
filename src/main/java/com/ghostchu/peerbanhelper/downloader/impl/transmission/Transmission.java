@@ -18,7 +18,6 @@ import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
 import cordelia.rpc.types.Fields;
-import cordelia.rpc.types.Status;
 import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -95,7 +94,7 @@ public final class Transmission extends AbstractDownloader {
 
     @Override
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS ,DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
+        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS, DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
     }
 
     @Override
@@ -168,7 +167,7 @@ public final class Transmission extends AbstractDownloader {
         return rsp.getArgs().getTorrents().stream()
                 .filter(t -> {
                     if (onlyActiveTorrent) {
-                        return t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING;
+                        return t.getRateDownload() > 0 || t.getRateUpload() > 0 || t.getPeersConnected() > 0;
                     }
                     return true;
                 })

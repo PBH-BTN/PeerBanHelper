@@ -166,10 +166,6 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     }
 
     private void handleReloading(Context context) {
-        if (isInitialized(context)) {
-            return;
-        }
-        Main.setupConfiguration();
         var result = Main.getReloadManager().reload();
         List<ReloadEntryDTO> entryList = new ArrayList<>();
         result.forEach((container, r) -> {

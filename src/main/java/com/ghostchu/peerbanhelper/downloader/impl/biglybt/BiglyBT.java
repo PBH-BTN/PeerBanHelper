@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -62,7 +63,6 @@ public final class BiglyBT extends AbstractDownloader {
     private final OkHttpClient httpClient;
     private final Config config;
     private final String connectorPayload;
-    private Semver semver = new Semver("0.0.0");
 
     public BiglyBT(String uuid, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(uuid, alertManager, natAddressProvider);
@@ -106,7 +106,8 @@ public final class BiglyBT extends AbstractDownloader {
         return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS,
                 DownloaderFeatureFlag.UNBAN_IP,
                 DownloaderFeatureFlag.TRAFFIC_STATS,
-                DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
+                DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT,
+                DownloaderFeatureFlag.RANGE_BAN_IP);
     }
 
     @Override
@@ -195,10 +196,10 @@ public final class BiglyBT extends AbstractDownloader {
                     MetadataCallbackBean metadataCallbackBean = JsonUtil.standard().fromJson(resp.body().string(), MetadataCallbackBean.class);
                     // 验证版本号
                     var version = metadataCallbackBean.getPluginVersion();
-                    this.semver = new Semver(version);
+                    Semver semver = new Semver(version);
                     // 检查是否大于等于 1.2.8
-                    if (this.semver.isLowerThan("1.3.0")) {
-                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
+                    if (semver.isLowerThan("1.3.0")) {
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.3.0"));
                     }
                     RequestBody requestBody = RequestBody.create(connectorPayload, MediaType.get("application/json"));
                     Request setConnectorRequest = new Request.Builder()
@@ -263,7 +264,9 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public @NotNull List<Torrent> getTorrents() {
-        return fetchTorrents(List.of(BiglyBTDownloadStateConst.ST_DOWNLOADING, BiglyBTDownloadStateConst.ST_SEEDING, BiglyBTDownloadStateConst.ST_ERROR), !config.isIgnorePrivate());
+        return fetchTorrents(List.of(BiglyBTDownloadStateConst.ST_DOWNLOADING, BiglyBTDownloadStateConst.ST_SEEDING, BiglyBTDownloadStateConst.ST_ERROR), !config.isIgnorePrivate())
+                .stream().filter(t->t.getRtDownloadSpeed() > 0 || t.getRtUploadSpeed() > 0)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override

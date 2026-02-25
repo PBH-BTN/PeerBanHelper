@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.lab;
 
 import com.ghostchu.peerbanhelper.Main;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class Laboratory {
     // can be 0,1,2,3,4
+    @Getter
     private final int experimentalGroup;
     private final YamlConfiguration labConfig;
     private final File labConfigFile;
@@ -93,10 +95,6 @@ public class Laboratory {
         } catch (IOException e) {
             log.info("Unable to save laboratory configuration", e);
         }
-    }
-
-    public int getExperimentalGroup() {
-        return experimentalGroup;
     }
 
     public boolean isExperimentalGroup(List<Integer> group) {

@@ -15,5 +15,5 @@ public interface PCBRangeService extends IService<PCBRangeEntity> {
 
 	int deleteEntry(@NotNull String torrentId,  @NotNull String range);
 
-    int cleanupDatabase(OffsetDateTime timestamp);
+    long cleanupDatabase(OffsetDateTime timestamp);
 }

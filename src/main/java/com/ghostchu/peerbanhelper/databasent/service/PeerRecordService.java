@@ -46,4 +46,6 @@ public interface PeerRecordService extends IService<PeerRecordEntity> {
     List<String> getDistinctIps(@NotNull java.time.OffsetDateTime startAt,
                                 @NotNull java.time.OffsetDateTime endAt,
                                 @Nullable String downloader);
+
+    long cleanup(@NotNull OffsetDateTime before);
 }

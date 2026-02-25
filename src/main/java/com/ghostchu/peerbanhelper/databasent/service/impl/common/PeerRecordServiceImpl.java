@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.dto.ClientAnalyseResult;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;
@@ -35,7 +34,7 @@ import static com.ghostchu.peerbanhelper.util.TimeUtil.zeroOffsetDateTime;
 
 @Slf4j
 @Service
-public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRecordEntity> implements PeerRecordService {
+public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMapper, PeerRecordEntity> implements PeerRecordService {
     @Autowired
     private TorrentService torrentDao;
     @Autowired
@@ -162,6 +161,13 @@ public class PeerRecordServiceImpl extends ServiceImpl<PeerRecordMapper, PeerRec
     @Override
     public List<String> getDistinctIps(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt, @Nullable String downloader) {
         return baseMapper.getDistinctIps(startAt, endAt, downloader);
+    }
+
+    @Override
+    public long cleanup(@NotNull OffsetDateTime before) {
+        return splitBatchDelete(new LambdaQueryWrapper<PeerRecordEntity>()
+                .select(PeerRecordEntity::getId)
+                .lt(PeerRecordEntity::getLastTimeSeen, before));
     }
 
 

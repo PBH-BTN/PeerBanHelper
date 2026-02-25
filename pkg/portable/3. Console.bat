@@ -13,12 +13,14 @@ set "JAVA_EXEC=%JAVA_BIN%\java.exe"
 :: ============================================================
 "%JAVA_EXEC%"^
  -XX:+UseCompactObjectHeaders^
- -XX:ZCollectionInterval=60^
  --enable-native-access=ALL-UNNAMED^
  -Djdk.attach.allowAttachSelf=true^
  -XX:MaxRAMPercentage=85.0^
- -XX:+UseZGC^
- -XX:ZUncommitDelay=1^
+ -XX:SoftMaxHeapSize=386M^
+ -XX:+UseG1GC^
+ -XX:G1PeriodicGCInterval=60000^
+ -XX:MaxHeapFreeRatio=15^
+ -XX:MinHeapFreeRatio=5^
  -Xss512k^
  -XX:+UseStringDeduplication^
  -XX:-ShrinkHeapInSteps^

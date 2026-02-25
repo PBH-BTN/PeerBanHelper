@@ -14,7 +14,7 @@ public interface AlertService extends IService<AlertEntity> {
 
     boolean identifierAlertExistsIncludeRead(@NotNull String identifier);
 
-    int deleteOldAlerts(@NotNull OffsetDateTime before);
+    long deleteOldAlerts(@NotNull OffsetDateTime before);
 
     void markAllAsRead();
 

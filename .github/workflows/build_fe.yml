@@ -43,7 +43,7 @@ jobs:
         run: pnpm run build
         env:
           GIT_HASH: ${{ github.sha }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_DSN: ${{ secrets.WEBUI_SENTRY_DSN }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6

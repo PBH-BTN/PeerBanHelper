@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -27,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
-public class TrackedSwarmServiceImpl extends ServiceImpl<TrackedSwarmMapper, TrackedSwarmEntity> implements TrackedSwarmService {
+public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmMapper, TrackedSwarmEntity> implements TrackedSwarmService {
     @Autowired
     private TransactionTemplate transactionTemplate;
     private final Cache<@NotNull CacheKey, @NotNull TrackedSwarmEntity> cache = CacheBuilder.newBuilder()

@@ -1,22 +1,11 @@
 package com.cdnbye.core.nat;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class StunErrorCode {
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getReasonText() {
-        return reasonText;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public void setReasonText(String reasonText) {
-        this.reasonText = reasonText;
-    }
 
     private int code;
     private String reasonText;

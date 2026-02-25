@@ -46,14 +46,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public final class IPDB implements AutoCloseable {
-    private final long updateInterval = 3888000000L; // 45天
-    private final File directory;
     private final File mmdbCityFile;
     private final File mmdbASNFile;
     private final boolean autoUpdate;
     private final File mmdbGeoCNFile;
     private final OkHttpClient httpClient;
-    private final HTTPUtil httpUtil;
     private final BackgroundTaskManager backgroundTaskManager;
     @Getter
     private DatabaseReader mmdbCity;
@@ -66,13 +63,12 @@ public final class IPDB implements AutoCloseable {
 //        this.dataFolder = dataFolder;
 //        this.accountId = accountId;
 //        this.licenseKey = licenseKey;
-        this.directory = new File(dataFolder, "geoip");
-        this.directory.mkdirs();
+        File directory = new File(dataFolder, "geoip");
+        directory.mkdirs();
         this.mmdbCityFile = new File(directory, "GeoIP-City.mmdb");
         this.mmdbASNFile = new File(directory, "GeoIP-ASN.mmdb");
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
-        this.httpUtil = httpUtil;
         this.backgroundTaskManager = backgroundTaskManager;
 //        this.userAgent = userAgent;
         this.httpClient = httpUtil.addProgressTracker(httpUtil.newBuilder()
@@ -117,6 +113,9 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
+        if(geoCN == null) {
+            return;
+        }
         try {
             CNLookupResult cnLookupResult = geoCN.get(address, CNLookupResult.class);
             if (cnLookupResult == null) {
@@ -171,6 +170,9 @@ public final class IPDB implements AutoCloseable {
     }
 
     private IPGeoData.NetworkData queryNetwork(InetAddress address) {
+        if(mmdbASN == null) {
+            return null;
+        }
         try {
             IPGeoData.NetworkData networkData = new IPGeoData.NetworkData();
             AsnResponse asnResponse = mmdbASN.asn(address);
@@ -185,6 +187,9 @@ public final class IPDB implements AutoCloseable {
 
 
     private IPGeoData.CityData queryCity(InetAddress address) {
+        if(mmdbCity == null) {
+            return null;
+        }
         try {
             IPGeoData.CityData cityData = new IPGeoData.CityData();
             //IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
@@ -206,6 +211,9 @@ public final class IPDB implements AutoCloseable {
     }
 
     private IPGeoData.CountryData queryCountry(InetAddress address) {
+        if(mmdbCity == null) {
+            return null;
+        }
         try {
             IPGeoData.CountryData countryData = new IPGeoData.CountryData();
             CountryResponse countryResponse = mmdbCity.country(address);
@@ -230,6 +238,9 @@ public final class IPDB implements AutoCloseable {
 
 
     private IPGeoData.ASData queryAS(InetAddress address) {
+        if(mmdbASN == null) {
+            return null;
+        }
         try {
             IPGeoData.ASData asData = new IPGeoData.ASData();
             AsnResponse asnResponse = mmdbASN.asn(address);
@@ -268,17 +279,35 @@ public final class IPDB implements AutoCloseable {
 
     private void loadMMDB() throws IOException {
         this.languageTag = List.of(Main.DEF_LOCALE, "en");
-        this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
-                .locales(List.of(Main.DEF_LOCALE, "en"))
-                .fileMode(Reader.FileMode.MEMORY_MAPPED)
-                .withCache(new MaxMindNodeCache())
-                .build();
-        this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
-                .locales(List.of(Main.DEF_LOCALE, "en"))
-                .fileMode(Reader.FileMode.MEMORY_MAPPED)
-                .withCache(new MaxMindNodeCache())
-                .build();
-        this.geoCN = new Reader(mmdbGeoCNFile, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache());
+        try {
+            this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
+                    .locales(List.of(Main.DEF_LOCALE, "en"))
+                    .fileMode(Reader.FileMode.MEMORY_MAPPED)
+                    .withCache(new MaxMindNodeCache())
+                    .build();
+        } catch (InvalidDatabaseException exception) {
+            mmdbCityFile.delete();
+            mmdbCityFile.deleteOnExit();
+            log.error("Unable to load GeoIP City database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        }
+        try {
+            this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
+                    .locales(List.of(Main.DEF_LOCALE, "en"))
+                    .fileMode(Reader.FileMode.MEMORY_MAPPED)
+                    .withCache(new MaxMindNodeCache())
+                    .build();
+        } catch (InvalidDatabaseException exception) {
+            mmdbASNFile.delete();
+            mmdbASNFile.deleteOnExit();
+            log.error("Unable to load GeoIP ASN database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        }
+        try {
+            this.geoCN = new Reader(mmdbGeoCNFile, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache());
+        } catch (InvalidDatabaseException exception) {
+            mmdbGeoCNFile.delete();
+            mmdbGeoCNFile.deleteOnExit();
+            log.error("Unable to load GeoCN database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        }
     }
 
     private void updateMMDB(String databaseName, File target) {
@@ -315,6 +344,8 @@ public final class IPDB implements AutoCloseable {
         if (!autoUpdate) {
             return false;
         }
+        // 45天
+        long updateInterval = 3888000000L;
         return System.currentTimeMillis() - target.lastModified() > updateInterval;
     }
 
@@ -459,7 +490,7 @@ public final class IPDB implements AutoCloseable {
             this.province = province;
             this.provinceCode = provinceCode != null ? Long.parseLong(provinceCode.toString()) : null;
             this.city = city;
-            this.cityCode = cityCode != null ?  Long.parseLong(cityCode.toString()) : null;
+            this.cityCode = cityCode != null ? Long.parseLong(cityCode.toString()) : null;
             this.districts = districts;
             this.districtsCode = districtsCode != null ? Long.parseLong(districtsCode.toString()) : null;
         }

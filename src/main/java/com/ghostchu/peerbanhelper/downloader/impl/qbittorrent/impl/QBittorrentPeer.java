@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public final class QBittorrentPeer implements Peer {
     @SerializedName("client")
     private String client;
+    @Getter
     @SerializedName("connection")
     private String connection;
     @SerializedName("dl_speed")
@@ -96,11 +98,4 @@ public final class QBittorrentPeer implements Peer {
         return upSpeed <= 0 && dlSpeed <= 0;
     }
 
-    public void setPeerAddress(PeerAddress peerAddress) {
-        this.peerAddress = peerAddress;
-    }
-
-    public String getConnection() {
-        return connection;
-    }
 }

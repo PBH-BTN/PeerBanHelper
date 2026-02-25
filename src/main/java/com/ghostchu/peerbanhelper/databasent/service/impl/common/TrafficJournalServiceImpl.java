@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.TrafficJournalMapper;
 import com.ghostchu.peerbanhelper.databasent.service.TrafficJournalService;
@@ -22,7 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
-public class TrafficJournalServiceImpl extends ServiceImpl<TrafficJournalMapper, TrafficJournalEntity> implements TrafficJournalService {
+public class TrafficJournalServiceImpl extends AbstractCommonService<TrafficJournalMapper, TrafficJournalEntity> implements TrafficJournalService {
     @Override
     public void updateData(@NotNull String downloader, long overallDownloaded, long overallUploaded, long overallDownloadedProtocol, long overallUploadedProtocol) {
         OffsetDateTime timestamp = TimeUtil.getStartOfHour(System.currentTimeMillis());

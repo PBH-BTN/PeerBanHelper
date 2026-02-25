@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service.impl.common;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
@@ -15,7 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
-public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddressEntity> implements PCBAddressService {
+public class PCBAddressServiceImpl extends AbstractCommonService<PCBAddressMapper, PCBAddressEntity> implements PCBAddressService {
 
 	@Autowired
 	private TransactionTemplate transactionTemplate;
@@ -44,20 +43,7 @@ public class PCBAddressServiceImpl extends ServiceImpl<PCBAddressMapper, PCBAddr
 	}
 
 	@Override
-    public int cleanupDatabase(OffsetDateTime timestamp) {
-        int deleted = 0;
-        while (true) {
-            // 每次循环在独立事务中执行，完成后释放连接
-            Integer changes = transactionTemplate.execute(status ->
-                baseMapper.delete(new LambdaQueryWrapper<PCBAddressEntity>()
-                    .lt(PCBAddressEntity::getLastTimeSeen, timestamp)
-                    .last("LIMIT 150"))
-            );
-            if (changes == null || changes <= 0) {
-                break;
-            }
-            deleted += changes;
-        }
-        return deleted;
+    public long cleanupDatabase(OffsetDateTime timestamp) {
+        return splitBatchDelete(new LambdaQueryWrapper<PCBAddressEntity>().select(PCBAddressEntity::getId).lt(PCBAddressEntity::getLastTimeSeen, timestamp));
 	}
 }

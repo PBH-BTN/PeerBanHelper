@@ -10,6 +10,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -26,6 +27,7 @@ public final class SwtBrowserCanvas extends Canvas {
     private boolean browserInitialized = false;
 
     public SwtBrowserCanvas() {
+
         // 在 JVM 启动时设置 Hi-DPI 支持
         this.setupHiDPISupport();
         this.swtEventLoop = this.createEventLoop();

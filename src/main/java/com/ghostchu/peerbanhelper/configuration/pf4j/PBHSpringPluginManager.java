@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import io.sentry.Sentry;
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginState;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
+@Getter
 @Slf4j
 public class PBHSpringPluginManager extends SpringPluginManager implements ApplicationContextAware {
     private ApplicationContext applicationContext;
@@ -44,10 +46,6 @@ public class PBHSpringPluginManager extends SpringPluginManager implements Appli
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    public ApplicationContext getApplicationContext() {
-        return applicationContext;
     }
 
     /**
