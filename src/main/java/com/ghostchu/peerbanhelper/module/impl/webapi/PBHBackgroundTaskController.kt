@@ -37,8 +37,7 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     override fun getConfigName(): String = "webapi-background-tasks"
 
     override fun onEnable() {
-        webContainer.javalin()
-            .ws("/api/tasks/stream", this::handleTaskStream, Role.USER_READ)
+        webContainer.javalinRouter().ws("/api/tasks/stream", this::handleTaskStream, Role.USER_READ)
 
         backgroundTaskManager.addStatusListener(statusListener)
     }

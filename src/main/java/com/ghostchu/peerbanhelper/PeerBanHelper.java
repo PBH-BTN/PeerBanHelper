@@ -104,9 +104,9 @@ public class PeerBanHelper implements Reloadable {
         Main.getGuiManager().onPBHFullyStarted(this);
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
-                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://127.0.0.1:" + webContainer.javalin().port()));
+                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://127.0.0.1:" + webContainer.getJavalin().port()));
             }
-            Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
+            Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.getJavalin().port());
         }
         runTestCode();
         telemetry.sendBootEvent();

@@ -86,7 +86,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     public void onEnable() {
         reloadConfig();
         Main.getReloadManager().register(this);
-        javalinWebContainer.javalin()
+        javalinWebContainer.javalinRouter()
                 .get("/api/modules/btn", this::status, Role.USER_READ);
         Main.getEventBus().register(this);
     }
