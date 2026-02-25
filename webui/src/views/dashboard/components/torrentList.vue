@@ -57,13 +57,7 @@
     </template>
   </a-table>
 
-  <a-list
-    v-else
-    :loading="!loading && !data"
-    :bordered="true"
-    hoverable
-    :virtual-list-props="useVirtualList"
-  >
+  <a-list v-else :loading="!loading && !data" :bordered="true" hoverable>
     <a-list-item v-for="record in data?.data" :key="record.id" action-layout="vertical">
       <a-list-item-meta style="width: 100%">
         <template #title>
