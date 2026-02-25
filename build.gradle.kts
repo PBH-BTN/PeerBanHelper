@@ -59,13 +59,13 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.4"){
+    implementation("org.springframework:spring-context:7.0.5"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
-    implementation("org.springframework:spring-aop:7.0.4")
-    implementation("org.springframework:spring-tx:7.0.4")
-    implementation("org.springframework:spring-jdbc:7.0.4")
+    implementation("org.springframework:spring-aop:7.0.5")
+    implementation("org.springframework:spring-tx:7.0.5")
+    implementation("org.springframework:spring-jdbc:7.0.5")
     // Source: https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
     implementation("org.aspectj:aspectjweaver:1.9.25.1")
     implementation("org.xerial:sqlite-jdbc:3.51.2.0")
