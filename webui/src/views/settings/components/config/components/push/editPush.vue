@@ -64,6 +64,9 @@
             <a-radio :value="PushType.Gotify">{{
               t('page.settings.tab.config.push.form.type.' + PushType.Gotify)
             }}</a-radio>
+            <a-radio :value="PushType.Ntfy">{{
+              t('page.settings.tab.config.push.form.type.' + PushType.Ntfy)
+            }}</a-radio>
           </a-grid>
         </a-radio-group>
       </a-form-item>
@@ -121,6 +124,9 @@ const formMap: Record<PushType, Component> = {
   ),
   [PushType.Gotify]: defineAsyncComponent(
     () => import('@/views/settings/components/config/components/push/forms/gotifyForm.vue')
+  ),
+  [PushType.Ntfy]: defineAsyncComponent(
+    () => import('@/views/settings/components/config/components/push/forms/ntfyForm.vue')
   )
 }
 

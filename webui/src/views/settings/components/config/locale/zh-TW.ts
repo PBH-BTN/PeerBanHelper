@@ -125,6 +125,7 @@ export default {
   'page.settings.tab.config.push.form.type.bark': 'Bark',
   'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
   'page.settings.tab.config.push.form.type.gotify': 'Gotify',
+  'page.settings.tab.config.push.form.type.ntfy': 'Ntfy',
 
   'page.settings.tab.config.push.form.stmp.host': '主機',
   'page.settings.tab.config.push.form.stmp.port': '埠號',
@@ -150,6 +151,10 @@ export default {
 
   'page.settings.tab.config.push.form.gotify.endpoint': '端點',
   'page.settings.tab.config.push.form.gotify.priority': '優先級',
+
+  'page.settings.tab.config.push.form.ntfy.server_url': '伺服器地址',
+  'page.settings.tab.config.push.form.ntfy.topic': '主題',
+  'page.settings.tab.config.push.form.ntfy.token': '訪問令牌',
 
   'page.settings.tab.config.push.form.action.ok': '確定',
   'page.settings.tab.config.push.form.action.cancel': '取消',
