@@ -63,16 +63,15 @@ dependencies {
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
-    implementation("org.springframework:spring-aop:7.0.5")
+    implementation("com.github.chris2018998:beecp:5.2.1")
     implementation("org.springframework:spring-tx:7.0.5")
     implementation("org.springframework:spring-jdbc:7.0.5")
-    // Source: https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
-    implementation("org.aspectj:aspectjweaver:1.9.25.1")
     implementation("org.xerial:sqlite-jdbc:3.51.2.0")
     implementation("com.h2database:h2:2.3.232")
-    implementation("com.mysql:mysql-connector-j:9.6.0")
     implementation("org.postgresql:postgresql:42.7.10")
-    implementation("com.github.chris2018998:beecp:5.2.1")
+    implementation("com.mysql:mysql-connector-j:9.6.0") {
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+    }
 
     // MyBatis-Plus Stuff
     implementation("com.baomidou:mybatis-plus-jsqlparser")
@@ -171,8 +170,6 @@ dependencies {
         exclude(group = "io.netty", module = "netty-transport-sctp")
         exclude(group = "io.netty", module = "netty-transport-udt")
         exclude(group = "io.netty", module = "netty-transport-rxtx")
-
-
     }
 
     // SWT (provided scope - for compilation only)
