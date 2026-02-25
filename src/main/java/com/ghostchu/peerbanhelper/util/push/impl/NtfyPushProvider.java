@@ -81,15 +81,19 @@ public final class NtfyPushProvider extends AbstractPushProvider {
         if (topic == null || topic.isBlank()) {
             throw new IllegalStateException("Ntfy topic cannot be empty");
         }
-        var url = parsedUrl.newBuilder().addPathSegment(topic).build();
+
+        // Use JSON body instead of headers to avoid OkHttp's ASCII-only header validation
+        // which rejects non-ASCII characters (e.g. Chinese) in the Title header
+        JsonObject jsonBody = new JsonObject();
+        jsonBody.addProperty("topic", topic);
+        jsonBody.addProperty("message", stripMarkdown(content));
+        if (title != null && !title.isEmpty()) {
+            jsonBody.addProperty("title", title);
+        }
 
         Request.Builder requestBuilder = new Request.Builder()
-                .url(url)
-                .post(RequestBody.create(stripMarkdown(content), MediaType.parse("text/plain")));
-
-        if (title != null && !title.isEmpty()) {
-            requestBuilder.header("Title", title);
-        }
+                .url(parsedUrl)
+                .post(RequestBody.create(jsonBody.toString(), MediaType.parse("application/json")));
 
         if (config.getToken() != null && !config.getToken().isBlank()) {
             requestBuilder.header("Authorization", "Bearer " + config.getToken());
