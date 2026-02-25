@@ -14,7 +14,7 @@
     <a-input v-model="model.topic" />
   </a-form-item>
   <a-form-item field="config.token" :label="t('page.settings.tab.config.push.form.ntfy.token')">
-    <a-input v-model="model.token" allow-clear />
+    <a-input-password v-model="model.token" allow-clear />
   </a-form-item>
 </template>
 <script setup lang="ts">
@@ -23,7 +23,4 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<NtfyConfig>({ required: true })
-if (model.value.server_url === undefined) model.value.server_url = 'https://ntfy.sh'
-if (model.value.topic === undefined) model.value.topic = ''
-if (model.value.token === undefined) model.value.token = ''
 </script>

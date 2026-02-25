@@ -20,11 +20,13 @@ public final class NtfyPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
     private final HTTPUtil httpUtil;
+    private final okhttp3.OkHttpClient httpClient;
 
     public NtfyPushProvider(String name, Config config, HTTPUtil httpUtil) {
         this.name = name;
         this.config = config;
         this.httpUtil = httpUtil;
+        this.httpClient = httpUtil.newBuilder().build();
     }
 
     @Override
@@ -66,27 +68,42 @@ public final class NtfyPushProvider extends AbstractPushProvider {
 
     @Override
     public boolean push(String title, String content) {
-        var serverUrl = config.getServerUrl().replaceAll("/+$", "");
+        var serverUrl = config.getServerUrl();
+        if (serverUrl == null || serverUrl.isBlank()) {
+            throw new IllegalStateException("Ntfy server URL cannot be empty");
+        }
+        serverUrl = serverUrl.replaceAll("/+$", "");
         var parsedUrl = HttpUrl.parse(serverUrl);
         if (parsedUrl == null) {
             throw new IllegalStateException("Invalid ntfy server URL: " + serverUrl);
         }
-        var url = parsedUrl.newBuilder().addPathSegment(config.getTopic()).build();
+        var topic = config.getTopic();
+        if (topic == null || topic.isBlank()) {
+            throw new IllegalStateException("Ntfy topic cannot be empty");
+        }
+        var url = parsedUrl.newBuilder().addPathSegment(topic).build();
 
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url)
-                .post(RequestBody.create(stripMarkdown(content), MediaType.parse("text/plain")))
-                .header("Title", title);
+                .post(RequestBody.create(stripMarkdown(content), MediaType.parse("text/plain")));
+
+        if (title != null && !title.isEmpty()) {
+            String encodedTitle = "=?UTF-8?B?" + java.util.Base64.getEncoder().encodeToString(title.getBytes(java.nio.charset.StandardCharsets.UTF_8)) + "?=";
+            requestBuilder.header("Title", encodedTitle);
+        }
 
         if (config.getToken() != null && !config.getToken().isBlank()) {
             requestBuilder.header("Authorization", "Bearer " + config.getToken());
         }
 
-        try (Response response = httpUtil.newBuilder().build().newCall(requestBuilder.build()).execute()) {
+        try (Response response = this.httpClient.newCall(requestBuilder.build()).execute()) {
             if (!response.isSuccessful()) {
                 var body = response.body();
                 var bodyStr = body != null ? body.string() : "(empty)";
-                throw new IllegalStateException("HTTP Failed while sending push messages to Ntfy: " + bodyStr);
+                if (bodyStr.length() > 256) {
+                    bodyStr = bodyStr.substring(0, 256) + "...";
+                }
+                throw new IllegalStateException("HTTP Failed while sending push messages to Ntfy: " + response.code() + " " + bodyStr);
             }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to send push message to Ntfy", e);

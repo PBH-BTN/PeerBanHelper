@@ -78,7 +78,7 @@
 import { PushType, type PushConfig } from '@/api/model/push'
 import { CreatePushChannel, TestPushChannel, UpdatePushChannel } from '@/service/push'
 import { Message, type Form } from '@arco-design/web-vue'
-import { defineAsyncComponent, ref, type Component } from 'vue'
+import { defineAsyncComponent, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -89,6 +89,20 @@ const testLoading = ref(false)
 
 const form = ref({ config: {} } as PushConfig)
 const oldName = ref('')
+
+watch(
+  () => form.value.type,
+  (newType) => {
+    if (newItem.value && newType === PushType.Ntfy) {
+      form.value.config = {
+        server_url: 'https://ntfy.sh',
+        topic: '',
+        token: ''
+      }
+    }
+  }
+)
+
 defineExpose({
   showModal: (isNewItem: boolean, currentConfig?: PushConfig) => {
     newItem.value = isNewItem
