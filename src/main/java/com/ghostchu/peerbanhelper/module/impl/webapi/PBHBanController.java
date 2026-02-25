@@ -76,7 +76,7 @@ public final class PBHBanController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.javalinRouter()
                 .get("/api/bans", this::handleBans, Role.USER_READ)
                 .get("/api/bans/logs", this::handleLogs, Role.USER_READ)
                 .get("/api/bans/ranks", this::handleRanks, Role.USER_READ)

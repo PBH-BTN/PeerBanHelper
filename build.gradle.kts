@@ -91,7 +91,7 @@ dependencies {
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
-    implementation("io.javalin:javalin:6.7.0")
+    implementation("io.javalin:javalin:7.0.0")
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.0.2")
     // Expression engine

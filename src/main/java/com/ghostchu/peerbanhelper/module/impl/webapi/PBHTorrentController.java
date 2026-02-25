@@ -68,7 +68,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         javalinWebContainer
-                .javalin()
+                .javalinRouter()
                 //.get("/api/torrent", this::handleTorrentQuery, Role.USER_READ)
                 .get("/api/torrent/query", this::handleTorrentQuery, Role.USER_READ)
                 .get("/api/torrent/{infoHash}", this::handleTorrentInfo, Role.USER_READ)

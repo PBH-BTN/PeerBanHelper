@@ -26,7 +26,7 @@ public class PBHGuiBridge {
 
     public Optional<URI> getWebUiUrl(){
         if(javalinWebContainer.isStarted()){
-            return Optional.of(URI.create("http://127.0.0.1:" +javalinWebContainer.javalin().port() + "?token=" + javalinWebContainer.getToken()));
+            return Optional.of(URI.create("http://127.0.0.1:" + javalinWebContainer.getJavalin().port() + "?token=" + javalinWebContainer.getToken()));
         }else{
             return  Optional.empty();
         }
