@@ -6,7 +6,7 @@ import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
+import oshi.SystemInfoFFM;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import java.lang.management.ManagementFactory;
@@ -24,7 +24,7 @@ public class CommonDataCollector {
     @Autowired
     private StunManager bTStunManager;
     @Autowired
-    private SystemInfo systemInfo;
+    private SystemInfoFFM systemInfo;
 
     public Map<String, Object> generatePbhData() {
         long compile_time = 0;

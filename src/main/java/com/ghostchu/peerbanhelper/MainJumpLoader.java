@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
-import oshi.SystemInfo;
+import oshi.SystemInfoFFM;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -17,7 +17,7 @@ public final class MainJumpLoader {
             System.setProperty("sun.net.useExclusiveBind", "false"); // 修复 AutoSTUN 端口问题
             boolean setupCharsets = true;
             try {
-                String buildNumber = new SystemInfo().getOperatingSystem().getVersionInfo().getBuildNumber();
+                String buildNumber = new SystemInfoFFM().getOperatingSystem().getVersionInfo().getBuildNumber();
                 if (Long.parseLong(buildNumber) < 17134) { // 17134: Windows 10 1803
                     setupCharsets = false;
                 }
