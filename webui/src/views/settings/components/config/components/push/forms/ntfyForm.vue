@@ -23,4 +23,5 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<NtfyConfig>({ required: true })
+if (model.value.server_url === undefined) model.value.server_url = 'https://ntfy.sh'
 </script>
