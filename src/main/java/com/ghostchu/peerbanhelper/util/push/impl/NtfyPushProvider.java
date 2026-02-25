@@ -97,7 +97,15 @@ public final class NtfyPushProvider extends AbstractPushProvider {
 
         try (Response response = this.httpClient.newCall(requestBuilder.build()).execute()) {
             if (!response.isSuccessful()) {
-                throw new IllegalStateException("HTTP Failed while sending push messages to Ntfy: " + response.code());
+                String errorBody = "";
+                if (response.body() != null) {
+                    try {
+                        errorBody = response.body().string();
+                    } catch (java.io.IOException e) {
+                        errorBody = "[Failed to read response body: " + e.getMessage() + "]";
+                    }
+                }
+                throw new IllegalStateException("HTTP Failed while sending push messages to Ntfy: " + response.code() + " " + errorBody);
             }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to send push message to Ntfy", e);
