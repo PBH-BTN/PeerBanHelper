@@ -178,6 +178,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             context.header("Content-Disposition", "attachment; filename=\"" + finalHprof.getName() + "\"");
             context.header("Content-Length", String.valueOf(finalHprof.length()));
             context.header("Content-Type", "application/octet-stream");
+            context.disableCompression();
             var stream = new FileInputStream(finalHprof); // 这个 stream 将由 Jetty 关闭，不要手动关闭流，否则报错 stream closed
             context.result(stream);
         }
