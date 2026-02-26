@@ -25,7 +25,7 @@ jobs:
       - name: Run tests
         run: ./gradlew test
       - name: Upload test results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         name: Download WebUI Files
         with:
           name: webui-dist
@@ -57,7 +57,7 @@ jobs:
         env:
           JAVA_SENTRY_DSN: ${{ secrets.JAVA_SENTRY_DSN }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: gradle-dist
           path: |
