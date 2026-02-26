@@ -154,6 +154,8 @@ export default {
   'page.settings.tab.config.push.form.ntfy.server_url': '服务器地址',
   'page.settings.tab.config.push.form.ntfy.topic': '主题',
   'page.settings.tab.config.push.form.ntfy.token': '访问令牌',
+  'page.settings.tab.config.push.form.ntfy.priority': '优先级',
+  'page.settings.tab.config.push.form.ntfy.tags': '标签',
 
   'page.settings.tab.config.push.form.action.ok': '确定',
   'page.settings.tab.config.push.form.action.cancel': '取消',

@@ -16,6 +16,16 @@
   <a-form-item field="config.token" :label="t('page.settings.tab.config.push.form.ntfy.token')">
     <a-input-password v-model="model.token" allow-clear />
   </a-form-item>
+  <a-form-item
+    field="config.priority"
+    :label="t('page.settings.tab.config.push.form.ntfy.priority')"
+    required
+  >
+    <a-input-number v-model="model.priority" :min="0" :max="5" />
+  </a-form-item>
+  <a-form-item field="config.tags" :label="t('page.settings.tab.config.push.form.ntfy.tags')">
+    <a-input v-model="model.tags" />
+  </a-form-item>
 </template>
 <script setup lang="ts">
 import { type NtfyConfig } from '@/api/model/push'

@@ -159,6 +159,8 @@ export default {
   'page.settings.tab.config.push.form.ntfy.server_url': 'Server URL',
   'page.settings.tab.config.push.form.ntfy.topic': 'Topic',
   'page.settings.tab.config.push.form.ntfy.token': 'Access Token',
+  'page.settings.tab.config.push.form.ntfy.priority': 'Priority',
+  'page.settings.tab.config.push.form.ntfy.tags': 'Tags',
 
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',

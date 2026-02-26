@@ -75,6 +75,8 @@ export interface NtfyConfig {
   server_url: string
   topic: string
   token?: string
+  priority?: number
+  tags?: string
 }
 
 export type PushConfig = {
