@@ -99,19 +99,16 @@ public final class JavalinWebContainer implements Reloadable {
                     staticFiles.directory = new File(Main.getDataDirectory(), "static").getPath();
                     staticFiles.location = Location.EXTERNAL;
                     staticFiles.precompressMaxSize = -1;
-                    staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
-                    //staticFiles.headers.put("Cache-Control", "no-cache");
                 });
                 c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
             } else {
-                //c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                 c.spaRoot.addHandler("/", ctx -> spaHandler.get().handle(ctx));
                 c.staticFiles.add(staticFiles -> {
                     staticFiles.hostedPath = "/";
                     staticFiles.directory = "/static";
                     staticFiles.location = Location.CLASSPATH;
                     staticFiles.precompressMaxSize = -1;
-                    staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
+                    staticFiles.skipFileFunction = req -> "/".equals(req.getRequestURI());
                 });
             }
         });
