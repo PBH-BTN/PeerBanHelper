@@ -14,8 +14,8 @@ import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 public final class NtfyPushProvider extends AbstractPushProvider {
 
@@ -72,22 +72,19 @@ public final class NtfyPushProvider extends AbstractPushProvider {
 
     @Override
     public boolean push(String title, String content) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("title", title);
-        map.put("message", content);
 
         RequestBody requestBody = RequestBody.create(
-                JsonUtil.getGson().toJson(map),
-                MediaType.parse("application/json")
+                content,
+                MediaType.parse("text/plain; charset=utf-8")
         );
 
-
+        String encodedTitle = "=?UTF-8?B?" + Base64.getEncoder().encodeToString(title.getBytes(StandardCharsets.UTF_8)) + "?=";
 
         Request request = new Request.Builder()
                 .url(config.getServerUrl() + "/" + config.getTopic())
                 .post(requestBody)
-                .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + config.getToken())
+                .header("Title", encodedTitle)
                 .header("Priority", String.valueOf(config.getPriority()))
                 .header("Tags", config.getTags())
                 .header("Icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png")

@@ -21,7 +21,7 @@
     :label="t('page.settings.tab.config.push.form.ntfy.priority')"
     required
   >
-    <a-input-number v-model="model.priority" :min="0" :max="5" />
+    <a-input-number v-model="model.priority" :min="1" :max="5" />
   </a-form-item>
   <a-form-item field="config.tags" :label="t('page.settings.tab.config.push.form.ntfy.tags')">
     <a-input v-model="model.tags" />
@@ -34,4 +34,5 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 const model = defineModel<NtfyConfig>({ required: true })
 if (model.value.server_url === undefined) model.value.server_url = 'https://ntfy.sh'
+if (model.value.priority === undefined) model.value.priority = 3
 </script>

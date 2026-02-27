@@ -75,7 +75,7 @@ export interface NtfyConfig {
   server_url: string
   topic: string
   token?: string
-  priority?: number
+  priority: number
   tags?: string
 }
 
