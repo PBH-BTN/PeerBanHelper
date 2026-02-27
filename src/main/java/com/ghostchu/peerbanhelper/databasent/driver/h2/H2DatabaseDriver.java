@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
-
 public class H2DatabaseDriver extends AbstractDatabaseDriver {
     private final AtomicBoolean requestCompactOnShutdown = new AtomicBoolean(false);
     private final BeeDataSource dataSource;
@@ -45,8 +43,10 @@ public class H2DatabaseDriver extends AbstractDatabaseDriver {
         // 启用公平排队 (FIFO)
         config.setFairMode(true);
 
-        this.dataSource = new BeeDataSource(config);
-        removeBeeCPShutdownHook(dataSource);
+        // 手动关闭连接池
+        config.setRegisterJvmHook(false);
+
+        dataSource = new BeeDataSource(config);
     }
 
     @Override

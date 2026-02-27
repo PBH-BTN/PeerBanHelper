@@ -10,8 +10,6 @@ import org.stone.beecp.BeeDataSourceConfig;
 import javax.sql.DataSource;
 import java.io.IOException;
 
-import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
-
 public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     private final BeeDataSource dataSource;
 
@@ -39,14 +37,16 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         
         // 启用公平排队 (FIFO)
         config.setFairMode(true);
+
+        // 手动关闭连接池
+        config.setRegisterJvmHook(false);
         
         // MySQL 优化参数
         config.addConnectionFactoryProperty("cachePrepStmts", "true");
         config.addConnectionFactoryProperty("prepStmtCacheSize", "250");
         config.addConnectionFactoryProperty("prepStmtCacheSqlLimit", "2048");
 
-        this.dataSource = new BeeDataSource(config);
-        removeBeeCPShutdownHook(dataSource);
+        dataSource = new BeeDataSource(config);
     }
 
     @Override

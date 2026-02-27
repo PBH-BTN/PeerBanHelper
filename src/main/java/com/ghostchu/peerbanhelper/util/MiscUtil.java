@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -135,24 +134,6 @@ public final class MiscUtil {
             return localPort;
         } catch (Exception e) {
             return 0;
-        }
-    }
-
-    public static void removeBeeCPShutdownHook(Object dataSource) {
-        try {
-            Class<?> dataSourceClass = dataSource.getClass();
-            Field poolField = dataSourceClass.getDeclaredField("pool");
-            poolField.setAccessible(true);
-            Object poolObj = poolField.get(dataSource);
-
-            Class<?> poolClass = poolObj.getClass();
-            Field hookField = poolClass.getDeclaredField("exitHook");
-            hookField.setAccessible(true);
-            Thread hookObj = (Thread) hookField.get(poolObj);
-
-            Runtime.getRuntime().removeShutdownHook(hookObj);
-        } catch (Throwable t) {
-            log.warn("Failed to remove BeeCP shutdown hook", t);
         }
     }
 }
