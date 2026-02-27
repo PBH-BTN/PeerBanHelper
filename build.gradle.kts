@@ -63,7 +63,7 @@ dependencies {
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
-    implementation("com.github.chris2018998:beecp:5.2.1")
+    implementation("com.github.chris2018998:beecp:5.2.2")
     implementation("org.springframework:spring-tx:7.0.5")
     implementation("org.springframework:spring-jdbc:7.0.5")
     implementation("org.xerial:sqlite-jdbc:3.51.2.0")
