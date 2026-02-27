@@ -46,7 +46,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.WEBUI_SENTRY_DSN }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: webui-dist
           path: webui/dist

@@ -62,7 +62,7 @@ jobs:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: installer-dist
           path: build/media
@@ -91,7 +91,7 @@ jobs:
       - uses: actions/checkout@v6
       - id: java_info
         uses: YunaBraska/java-info-action@main
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: spk-dist
           path: build/media
@@ -131,31 +131,31 @@ jobs:
       statuses: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: gradle-dist
           path: build/
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: installer-dist
           path: build/media
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: spk-dist
           path: build/media
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: deb-dist
           path: build/media
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: portable-dist
           path: build/media
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: freebsd-pkg-13.4-dist
           path: build/media
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: freebsd-pkg-14.1-dist
           path: build/media
@@ -187,7 +187,7 @@ jobs:
           -w "https://github.com/${{ github.repository }}/releases/download/${{ steps.set_version.outputs.version }}/PeerBanHelper_Installers.tar.gz" \
           -o peerbanhelper.torrent \
           "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: torrent-dist
           path: |
@@ -307,7 +307,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: gradle-dist
           path: build

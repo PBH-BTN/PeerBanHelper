@@ -63,7 +63,7 @@ jobs:
           SPK_VERSION: ${{ steps.process_version.outputs.spk_version }}
           IMAGE: ${{ inputs.image }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: spk-dist
           path: |
