@@ -45,13 +45,11 @@ import java.util.StringTokenizer;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import lombok.extern.slf4j.Slf4j;
 import org.xml.sax.SAXException;
 
 /**
  * Handles the discovery of GatewayDevices, via the {@link org.bitlet.weupnp.GatewayDiscover#discover()} method.
  */
-@Slf4j
 public class GatewayDiscover {
 
     /**
@@ -146,12 +144,8 @@ public class GatewayDiscover {
                         GatewayDevice gatewayDevice = parseMSearchReply(receivedData);
 
                         gatewayDevice.setLocalAddress(ip);
-                        try {
-                            gatewayDevice.loadDescription();
-                        } catch (Exception e) {
-                            log.debug("Unable to load description for device at " + gatewayDevice.getLocation(), e);
-                            continue;
-                        }
+                        gatewayDevice.loadDescription();
+
                         // verify that the search type is among the requested ones
                         if (Arrays.asList(searchTypes).contains(gatewayDevice.getSt())) {
                             synchronized (devices) {
