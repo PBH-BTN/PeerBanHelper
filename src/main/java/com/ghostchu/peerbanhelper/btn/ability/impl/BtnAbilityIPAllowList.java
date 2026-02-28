@@ -143,7 +143,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                 }
         });
         for (UnbanPeerTask unbanPeer : unbanPeers) {
-            btnNetwork.getServer().getBanList().remove(unbanPeer.getIpAddress());
+            btnNetwork.getServer().scheduleUnBanPeer(unbanPeer.getIpAddress());
             log.info(tlUI(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_PEER, unbanPeer.getBanMetadata(), unbanPeer.getResult().comment()));
         }
     }
