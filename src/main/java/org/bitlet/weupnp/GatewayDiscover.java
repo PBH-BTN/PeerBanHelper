@@ -101,10 +101,17 @@ public class GatewayDiscover {
     private class SendDiscoveryThread extends Thread {
         InetAddress ip;
         String searchMessage;
+        long delay;
 
         SendDiscoveryThread(InetAddress localIP, String searchMessage) {
             this.ip = localIP;
             this.searchMessage = searchMessage;
+        }
+
+        SendDiscoveryThread(InetAddress localIP, String searchMessage, long delay) {
+            this.ip = localIP;
+            this.searchMessage = searchMessage;
+            this.delay = delay;
         }
 
         @Override
@@ -113,6 +120,7 @@ public class GatewayDiscover {
             DatagramSocket ssdp = null;
 
             try {
+                Thread.sleep(delay);
                 // Create socket bound to specified local address
                 ssdp = new DatagramSocket(new InetSocketAddress(ip, 0));
 
@@ -243,6 +251,10 @@ public class GatewayDiscover {
                 SendDiscoveryThread thread = new SendDiscoveryThread(ip, searchMessage);
                 threads.add(thread);
                 thread.start();
+                // 提高成功率
+                SendDiscoveryThread thread_delay = new SendDiscoveryThread(ip, searchMessage, timeout/2);
+                threads.add(thread_delay);
+                thread_delay.start();
             }
 
             // wait for all search threads to finish

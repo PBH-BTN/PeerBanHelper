@@ -78,6 +78,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             try {
                 updateNICsList();
                 gatewayDiscover = new GatewayDiscover();
+                gatewayDiscover.setTimeout(1000 * 6);
                 gatewayDiscover.discover();
                 log.info(tlUI(Lang.PORTMAPPER_SCANNED, gatewayDiscover.getAllGateways().size()));
             } catch (IOException | SAXException | ParserConfigurationException e) {
