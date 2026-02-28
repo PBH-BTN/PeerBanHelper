@@ -150,7 +150,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
 
     @Data
     @AllArgsConstructor
-    public static class UnbanPeerTask {
+    private static class UnbanPeerTask {
         private IPAddress ipAddress;
         private BanMetadata banMetadata;
         private MatchResult result;
