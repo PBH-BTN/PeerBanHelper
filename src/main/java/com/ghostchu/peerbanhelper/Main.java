@@ -43,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import oshi.SystemInfoFFM;
+import oshi.SystemInfo;
 import raccoonfink.deluge.DelugeException;
 
 import javax.crypto.BadPaddingException;
@@ -451,7 +451,7 @@ public class Main {
         String buildNumber = "unknown";
         String codeName = "";
         try {
-            SystemInfoFFM info = new SystemInfoFFM();
+            SystemInfo info = new SystemInfo();
             var verInfo = info.getOperatingSystem().getVersionInfo();
             buildNumber = verInfo.getBuildNumber();
             codeName = verInfo.getCodeName();

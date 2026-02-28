@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
-import oshi.SystemInfoFFM;
+import oshi.SystemInfo;
 
 import java.net.UnknownHostException;
 import java.time.Duration;
@@ -23,11 +23,11 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Component
 public final class DNSLookupImpl implements Reloadable, DNSLookup {
-    private final SystemInfoFFM systemInfo;
+    private final SystemInfo systemInfo;
     private volatile ExtendedResolver resolver;
     private volatile boolean bootComplete = false;
 
-    public DNSLookupImpl(SystemInfoFFM systemInfo) {
+    public DNSLookupImpl(SystemInfo systemInfo) {
         this.systemInfo = systemInfo;
         reloadConfig();
         Main.getReloadManager().register(this);

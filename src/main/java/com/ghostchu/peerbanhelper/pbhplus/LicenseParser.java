@@ -14,7 +14,7 @@ import com.google.gson.JsonParser;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfoFFM;
+import oshi.SystemInfo;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -45,7 +45,7 @@ public class LicenseParser {
     private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
     private final String hardwareUUIDHash;
 
-    public LicenseParser(SystemInfoFFM systemInfo) throws Exception {
+    public LicenseParser(SystemInfo systemInfo) throws Exception {
         String hardwareUUID = systemInfo.getHardware().getComputerSystem().getHardwareUUID();
         this.hardwareUUIDHash = Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString().substring(0, 10);
         localKeyPair = loadLocalKeyPair();

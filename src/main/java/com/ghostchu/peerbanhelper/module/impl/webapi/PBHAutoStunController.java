@@ -22,7 +22,7 @@ import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfoFFM;
+import oshi.SystemInfo;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -36,9 +36,9 @@ public class PBHAutoStunController extends AbstractFeatureModule {
     private final StunManager stunManager;
     private final BTStunManager bTStunManager;
     private final DownloaderManager downloaderManager;
-    private final SystemInfoFFM systemInfo;
+    private final SystemInfo systemInfo;
 
-    public PBHAutoStunController(JavalinWebContainer javalinWebContainer, StunManager stunManager, BTStunManager bTStunManager, DownloaderManager downloaderManager, SystemInfoFFM systemInfo) {
+    public PBHAutoStunController(JavalinWebContainer javalinWebContainer, StunManager stunManager, BTStunManager bTStunManager, DownloaderManager downloaderManager, SystemInfo systemInfo) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.stunManager = stunManager;

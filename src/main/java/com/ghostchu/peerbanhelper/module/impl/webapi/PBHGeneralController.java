@@ -33,7 +33,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfoFFM;
+import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import javax.management.MBeanServer;
@@ -72,7 +72,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private HTTPUtil hTTPUtil;
     @Autowired
-    private SystemInfoFFM systemInfo;
+    private SystemInfo systemInfo;
 
     @Override
     public boolean isConfigurable() {
@@ -224,7 +224,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         return pbh;
     }
 
-    private Map<String, Object> generateSystemData(Context context, SystemInfoFFM systemInfo) {
+    private Map<String, Object> generateSystemData(Context context, SystemInfo systemInfo) {
 
         Map<String, Object> os = new LinkedHashMap<>();
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
