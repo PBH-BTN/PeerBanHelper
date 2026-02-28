@@ -32,8 +32,8 @@ package org.bitlet.weupnp;
  * using the specified <tt>protocol</tt> to be redirected to port
  * <tt>internalPort</tt> of <tt>internalClient</tt>.
  *
- * @see org.wetorrent.upnp.GatewayDevice
- * @see org.wetorrent.upnp.GatewayDevice#getExternalIPAddress()
+ * @see org.bitlet.weupnp.GatewayDevice
+ * @see org.bitlet.weupnp.GatewayDevice#getExternalIPAddress()
  */
 public class PortMappingEntry {
 
@@ -125,7 +125,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the internal host this mapping is associated with
-     * @return the {@link internalClient}
+     * @return the {@param internalClient}
      */
     public String getInternalClient() {
         return internalClient;
