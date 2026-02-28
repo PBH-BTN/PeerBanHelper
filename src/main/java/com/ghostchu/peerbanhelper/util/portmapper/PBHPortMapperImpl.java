@@ -28,6 +28,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class PBHPortMapperImpl implements PBHPortMapper {
     private GatewayDiscover gatewayDiscover = null;
+    private boolean isShutdown = false;
     private final Object discoverLock = new Object();
     private final List<MappedPort> mappedPorts = Collections.synchronizedList(new ArrayList<>());
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1);
@@ -35,7 +36,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     private final Lock nicCheckChangeLock = new ReentrantLock();
 
     public PBHPortMapperImpl() {
-        Thread.ofVirtual().name("PortMapperScanner").start(this::scanMappers);
+        sched.scheduleWithFixedDelay(this::detectNICChange, 0, 30, TimeUnit.SECONDS);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 for (GatewayDevice gatewayDevice : getGatewayDevices()) {
@@ -52,7 +53,6 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
             }
         }));
-        sched.scheduleWithFixedDelay(this::detectNICChange, 5, 30, TimeUnit.SECONDS);
     }
 
     private void detectNICChange() {
@@ -72,14 +72,14 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     private void scanMappers() {
         synchronized (discoverLock) {
-            if (gatewayDiscover != null || !Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
+            if (isShutdown || !Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
                 return;
             }
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
             try {
                 updateNICsList();
                 gatewayDiscover = new GatewayDiscover();
-                gatewayDiscover.setTimeout(1000 * 15);
+                gatewayDiscover.setTimeout(1000 * 6);
                 gatewayDiscover.discover();
                 log.info(tlUI(Lang.PORTMAPPER_SCANNED, gatewayDiscover.getAllGateways().size()));
             } catch (IOException | SAXException | ParserConfigurationException e) {
@@ -120,13 +120,15 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     @Override
     public Collection<GatewayDevice> getGatewayDevices() {
-        if (gatewayDiscover == null) {
-            return List.of();
+        synchronized (discoverLock) {
+            if (gatewayDiscover == null) {
+                return List.of();
+            }
+            if (gatewayDiscover.getValidGateway() == null) {
+                scanMappers();
+            }
+            return List.copyOf(gatewayDiscover.getAllGateways().values());
         }
-        if (gatewayDiscover.getValidGateway() == null) {
-            scanMappers();
-        }
-        return List.copyOf(gatewayDiscover.getAllGateways().values());
     }
 
     @Override
@@ -184,5 +186,9 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
         }, Executors.newVirtualThreadPerTaskExecutor());
     }
 
-
+    @Override
+    public void close() {
+        isShutdown = true;
+        sched.shutdown();
+    }
 }

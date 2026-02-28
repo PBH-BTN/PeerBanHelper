@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.btn.ability.impl;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
@@ -8,12 +9,19 @@ import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.rule.MatchResult;
+import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
+import io.sentry.Sentry;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
@@ -83,6 +91,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
     public void load() {
         try {
             loadCacheFile();
+            unbanAllowedBannedPeers();
             setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_CACHE, ruleVersion, ipMatcher.size()));
         } catch (Exception e) {
             log.error(tlUI(Lang.BTN_ABILITY_IP_ALLOWLIST_LOAD_FAILED_FROM_CACHE), e);
@@ -123,8 +132,48 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
             } catch (Exception e) {
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                 setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
+            } finally {
+                unbanAllowedBannedPeers();
             }
         })).join();
+    }
+
+    private void unbanAllowedBannedPeers() {
+        List<UnbanPeerTask> unbanPeers = new ArrayList<>();
+        btnNetwork.getServer().getBanList().forEach((ip, meta) -> {
+            try {
+                var matchResult = ipMatcher.match(ip.toNormalizedString());
+                if (matchResult.result() == MatchResultEnum.TRUE) {
+                    unbanPeers.add(new UnbanPeerTask(ip, meta, matchResult));
+                }
+            } catch (Exception e) {
+                log.debug("Error while matching IP {} against allowlist, skipping unban check for this IP. Error: {}", ip.toNormalizedString(), e.getMessage());
+                Sentry.captureException(e);
+            }
+        });
+        for (UnbanPeerTask unbanPeer : unbanPeers) {
+            btnNetwork.getServer().scheduleUnBanPeer(unbanPeer.getIpAddress());
+            btnNetwork.getAlertManager().publishAlert(false,
+                    AlertLevel.INFO,
+                    "btn-allowlist-unbanned-peer-"+unbanPeer.getIpAddress().toNormalizedString()+UUID.randomUUID().toString(),
+                    new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_TITLE),
+                    new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION,
+                            unbanPeer.getIpAddress().toNormalizedString(),
+                            unbanPeer.getBanMetadata().getBanAt().toString(),
+                            unbanPeer.getBanMetadata().getRule(),
+                            unbanPeer.getBanMetadata().getDescription(),
+                            unbanPeer.getResult().comment())
+                    );
+            log.info(tlUI(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_PEER, unbanPeer.getBanMetadata(), unbanPeer.getResult().comment()));
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class UnbanPeerTask {
+        private IPAddress ipAddress;
+        private BanMetadata banMetadata;
+        private MatchResult result;
     }
 
     /**

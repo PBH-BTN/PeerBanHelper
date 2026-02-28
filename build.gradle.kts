@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.3.7"
+version = "9.3.8"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -151,9 +151,6 @@ dependencies {
     // JNA
     implementation("net.java.dev.jna:jna:5.18.1")
     implementation("net.java.dev.jna:jna-platform:5.18.1")
-
-    // UPnP
-    implementation("org.bitlet:weupnp:0.1.4")
 
     // Netty
     implementation("io.netty:netty-all:4.2.10.Final") {

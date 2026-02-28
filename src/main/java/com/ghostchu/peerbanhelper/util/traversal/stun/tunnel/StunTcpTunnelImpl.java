@@ -185,6 +185,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         if (localPort > 0) {
             pbhPortMapper.unmapPort(localPort, Protocol.TCP);
         }
+        pbhPortMapper.close();
         if (keepAliveSocket != null && !keepAliveSocket.isClosed()) {
             try {
                 keepAliveSocket.close();
