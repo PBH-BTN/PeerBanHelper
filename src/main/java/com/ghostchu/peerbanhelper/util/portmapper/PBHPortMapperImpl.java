@@ -35,7 +35,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     private final Lock nicCheckChangeLock = new ReentrantLock();
 
     public PBHPortMapperImpl() {
-        Thread.ofVirtual().name("PortMapperScanner").start(this::scanMappers);
+        sched.scheduleWithFixedDelay(this::detectNICChange, 0, 30, TimeUnit.SECONDS);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 for (GatewayDevice gatewayDevice : getGatewayDevices()) {
@@ -52,7 +52,6 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
             }
         }));
-        sched.scheduleWithFixedDelay(this::detectNICChange, 5, 30, TimeUnit.SECONDS);
     }
 
     private void detectNICChange() {
@@ -72,7 +71,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     private void scanMappers() {
         synchronized (discoverLock) {
-            if (gatewayDiscover != null || !Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
+            if (!Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
                 return;
             }
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
@@ -120,13 +119,15 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     @Override
     public Collection<GatewayDevice> getGatewayDevices() {
-        if (gatewayDiscover == null) {
-            return List.of();
+        synchronized (discoverLock) {
+            if (gatewayDiscover == null) {
+                return List.of();
+            }
+            if (gatewayDiscover.getValidGateway() == null) {
+                scanMappers();
+            }
+            return List.copyOf(gatewayDiscover.getAllGateways().values());
         }
-        if (gatewayDiscover.getValidGateway() == null) {
-            scanMappers();
-        }
-        return List.copyOf(gatewayDiscover.getAllGateways().values());
     }
 
     @Override
