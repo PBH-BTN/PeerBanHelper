@@ -112,7 +112,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 AtomicBoolean anySuccess = new AtomicBoolean(false);
                 for (UPnP.Gateway device : gateways) {
                     executor.submit(() -> {
-                        if (device.map(port, port, protocol.name(), description)) {
+                        if (device.map(port, protocol.name())) {
                             log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPED_NEW, device.localIP(), port, protocol.name(), device.ip()));
                             anySuccess.set(true);
                         }
