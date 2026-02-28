@@ -28,6 +28,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class PBHPortMapperImpl implements PBHPortMapper {
     private GatewayDiscover gatewayDiscover = null;
+    private boolean isShutdown = false;
     private final Object discoverLock = new Object();
     private final List<MappedPort> mappedPorts = Collections.synchronizedList(new ArrayList<>());
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1);
@@ -71,7 +72,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     private void scanMappers() {
         synchronized (discoverLock) {
-            if (!Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
+            if (isShutdown || !Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
                 return;
             }
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
@@ -185,5 +186,9 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
         }, Executors.newVirtualThreadPerTaskExecutor());
     }
 
-
+    @Override
+    public void close() {
+        isShutdown = true;
+        sched.shutdown();
+    }
 }
