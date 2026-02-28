@@ -1,13 +1,13 @@
 package com.ghostchu.peerbanhelper.util.portmapper;
 
-import org.bitlet.weupnp.GatewayDevice;
+import com.sshtools.porter.UPnP;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public interface PBHPortMapper {
-    Collection<GatewayDevice> getGatewayDevices();
+    Collection<UPnP.Gateway> getGatewayDevices();
 
     CompletableFuture<@NotNull Boolean> mapPort(int port, Protocol protocol, String description);
 

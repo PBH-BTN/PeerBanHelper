@@ -737,7 +737,7 @@ POW_CAPTCHA_SERVER_VERIFY_FAILED: "Captcha verification failed, please try again
 BGTASK_TITLE_EMPTY: "Unnamed background task"
 BGTASK_WEBSOCKET_TASK_NOT_FOUND: "The specified background task was not found, the task may have ended"
 
-PORT_MAPPER_PORT_MAPPED_NEW: "[PortMapper] Created a port mapping on the gateway of network interface {} for local port {}/{}, gateway address: {} ({} - {} {} {})"
+PORT_MAPPER_PORT_MAPPED_NEW: "[PortMapper] Created a port mapping on the gateway of network interface {} for local port {}/{}, gateway address: {}"
 AUTOSTUN_DOWNLOADER_TUNNEL_TEST_FAILED: "NAT1 tunnel test failed, your network environment may not support the AutoSTUN feature, for more information, please consult the PeerBanHelper online documentation"
 AUTOSTUN_DOWNLOADER_TUNNEL_ERRORED: "Unexpected error: {}"
 AUTOSTUN_DOWNLOADER_HOST_NOT_LAN_ADDRESS: "Given downloader IP address {} is not a LAN address"
