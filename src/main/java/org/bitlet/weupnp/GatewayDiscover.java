@@ -147,6 +147,9 @@ public class GatewayDiscover {
                         }
                     } catch (SocketTimeoutException ste) {
                         waitingPacket = false;
+                    } catch (Exception e) {
+                        // Handles the case of weird devices that respond to the query but then do not give a
+                        // valid xml url
                     }
                 }
 
