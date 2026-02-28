@@ -2,11 +2,15 @@ package com.ghostchu.peerbanhelper.util.portmapper;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.sshtools.porter.UPnP;
 import lombok.extern.slf4j.Slf4j;
+import org.bitlet.weupnp.GatewayDevice;
+import org.bitlet.weupnp.GatewayDiscover;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.*;
@@ -23,14 +27,32 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public final class PBHPortMapperImpl implements PBHPortMapper {
-    private UPnP.Discovery gatewayDiscover = null;
+    private GatewayDiscover gatewayDiscover = null;
     private final Object discoverLock = new Object();
+    private final List<MappedPort> mappedPorts = Collections.synchronizedList(new ArrayList<>());
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1);
     private final List<String> lastCheckedNics = new ArrayList<>();
     private final Lock nicCheckChangeLock = new ReentrantLock();
 
     public PBHPortMapperImpl() {
-        sched.scheduleWithFixedDelay(this::detectNICChange, 0, 30, TimeUnit.SECONDS);
+        Thread.ofVirtual().name("PortMapperScanner").start(this::scanMappers);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                for (GatewayDevice gatewayDevice : getGatewayDevices()) {
+                    for (MappedPort mappedPort : List.copyOf(mappedPorts)) {
+                        executor.submit(() -> {
+                            try {
+                                gatewayDevice.deletePortMapping(mappedPort.getExternalPort(), mappedPort.getProtocol().name());
+                            } catch (IOException | SAXException e) {
+                                log.debug("Unable to delete port mapping on shutdown", e);
+                            }
+                        });
+                    }
+                }
+
+            }
+        }));
+        sched.scheduleWithFixedDelay(this::detectNICChange, 5, 30, TimeUnit.SECONDS);
     }
 
     private void detectNICChange() {
@@ -50,16 +72,20 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     private void scanMappers() {
         synchronized (discoverLock) {
-            if (!Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
+            if (gatewayDiscover != null || !Main.getMainConfig().getBoolean("auto-stun.enabled", false)) {
                 return;
             }
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
-            updateNICsList();
-            if (gatewayDiscover != null) {
-                gatewayDiscover.close();
+            try {
+                updateNICsList();
+                gatewayDiscover = new GatewayDiscover();
+                gatewayDiscover.setTimeout(1000 * 15);
+                gatewayDiscover.discover();
+                log.info(tlUI(Lang.PORTMAPPER_SCANNED, gatewayDiscover.getAllGateways().size()));
+            } catch (IOException | SAXException | ParserConfigurationException e) {
+                log.error(tlUI(Lang.PORT_MAPPER_DISCOVER_IGD_FAILED), e);
+                log.error("Unable to discover UPnP gateways", e);
             }
-            gatewayDiscover = new UPnP.DiscoveryBuilder().withSoTimeout(1000 * 6).build();
-            log.info(tlUI(Lang.PORTMAPPER_SCANNED, gatewayDiscover.gateways().size()));
         }
     }
 
@@ -93,11 +119,14 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
     }
 
     @Override
-    public Collection<UPnP.Gateway> getGatewayDevices() {
+    public Collection<GatewayDevice> getGatewayDevices() {
         if (gatewayDiscover == null) {
             return List.of();
         }
-        return gatewayDiscover.gateways();
+        if (gatewayDiscover.getValidGateway() == null) {
+            scanMappers();
+        }
+        return List.copyOf(gatewayDiscover.getAllGateways().values());
     }
 
     @Override
@@ -110,13 +139,18 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             }
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 AtomicBoolean anySuccess = new AtomicBoolean(false);
-                for (UPnP.Gateway device : gateways) {
+                for (GatewayDevice device : gateways) {
                     executor.submit(() -> {
-                        if (device.map(port, protocol.name())) {
-                            log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPED_NEW, device.localIP(), port, protocol.name(), device.ip()));
-                            anySuccess.set(true);
+                        try {
+                            if (device.addPortMapping(port, port, device.getLocalAddress().getHostAddress(), protocol.name(), description)) {
+                                log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPED_NEW, device.getLocalAddress(), port, protocol.name(), device.getExternalIPAddress(), device.getFriendlyName(), device.getManufacturer(), device.getModelName(), device.getModelNumber()));
+                                anySuccess.set(true);
+                            }
+                        } catch (IOException | SAXException e) {
+                            log.debug("Unable to add portMapping on port-mapping", e);
                         }
                     });
+                    mappedPorts.add(new MappedPort(protocol, port));
                 }
                 return anySuccess.get();
             }
@@ -133,12 +167,17 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             }
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 AtomicBoolean anySuccess = new AtomicBoolean(false);
-                for (UPnP.Gateway device : gateways) {
+                for (GatewayDevice device : gateways) {
                     executor.submit(() -> {
-                        if (device.unmap(port, protocol.name())) {
-                            anySuccess.set(true);
+                        try {
+                            if (device.deletePortMapping(port, protocol.name())) {
+                                anySuccess.set(true);
+                            }
+                        } catch (IOException | SAXException e) {
+                            log.debug("Unable to delete portMapping on port-mapping", e);
                         }
                     });
+                    mappedPorts.add(new MappedPort(protocol, port));
                 }
                 return anySuccess.get();
             }

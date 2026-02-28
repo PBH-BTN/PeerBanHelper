@@ -736,7 +736,7 @@ POW_CAPTCHA_SERVER_VERIFY_FAILED: "驗證碼驗證失敗，請重試"
 BGTASK_TITLE_EMPTY: "未命名後台任務"
 BGTASK_WEBSOCKET_TASK_NOT_FOUND: "未找到指定的後台任務，任務可能已結束"
 
-PORT_MAPPER_PORT_MAPPED_NEW: "[PortMapper] 已在網卡 {} 的閘道器上為本機埠 {}/{} 建立了一個埠映射，閘道器地址: {}"
+PORT_MAPPER_PORT_MAPPED_NEW: "[PortMapper] 已在網卡 {} 的閘道器上為本機埠 {}/{} 建立了一個埠映射，閘道器地址: {} ({} - {} {} {})"
 AUTOSTUN_DOWNLOADER_TUNNEL_TEST_FAILED: "NAT1 通道測試失敗，您的網路環境可能不支援 AutoSTUN 功能，有關更多資訊，請查閱 PeerBanHelper 線上文件"
 AUTOSTUN_DOWNLOADER_TUNNEL_ERRORED: "預期外錯誤: {}"
 AUTOSTUN_DOWNLOADER_HOST_NOT_LAN_ADDRESS: "給定的下載器 IP 位址 {} 為非 LAN 位址"
