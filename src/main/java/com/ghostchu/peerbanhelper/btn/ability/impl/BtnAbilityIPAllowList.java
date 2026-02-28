@@ -10,7 +10,9 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
@@ -119,12 +121,23 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                     log.info(tlUI(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
                     setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_LOADED_FROM_REMOTE, ruleVersion, loaded));
                     btnNetwork.getModuleMatchCache().invalidateAll();
+                    unbanBannedPeers();
                 }
             } catch (Exception e) {
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                 setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
             }
         })).join();
+    }
+
+    private void unbanBannedPeers() {
+        btnNetwork.getServer().getBanList().forEach((ip, meta) -> {
+            var matchResult = ipMatcher.match(ip.toNormalizedString());
+            if (matchResult.result() == MatchResultEnum.TRUE) {
+                btnNetwork.getServer().scheduleUnBanPeer(ip);
+                log.info(tlUI(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_PEER, meta, tlUI(matchResult.comment())));
+            }
+        });
     }
 
     /**
