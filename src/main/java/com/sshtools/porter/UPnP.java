@@ -363,7 +363,7 @@ public final class UPnP {
          * @throws UncheckedIOException on serious error
          */
         public boolean map(int port, String protocol) {
-            return map(port, port, protocol);
+            return map(port, port, protocol, "DFT");
         }
 
         /**
@@ -374,10 +374,11 @@ public final class UPnP {
          * @param internalPort port number
          * @param externalPort port number
          * @param protocol     protocol
+         * @param description  description
          * @return mapped
          * @throws UncheckedIOException on serious error
          */
-        public boolean map(int internalPort, int externalPort, String protocol) {
+        public boolean map(int internalPort, int externalPort, String protocol, String description) {
             if (internalPort < 0 || internalPort > 65535 || externalPort < 0 || externalPort > 65535) {
                 throw new IllegalArgumentException();
             }
@@ -393,7 +394,7 @@ public final class UPnP {
     
                 var response = cmd("AddPortMapping",
                         Map.of("NewInternalClient", localIp.getHostAddress(), "NewExternalPort", externalPort,
-                                "NewInternalPort", internalPort, "NewPortMappingDescription", "DFT", "NewRemoteHost", "",
+                                "NewInternalPort", internalPort, "NewPortMappingDescription", description, "NewRemoteHost", "",
                                 "NewProtocol", protocol, "NewEnabled", 1, "NewLeaseDuration", 0));
                 var ok = response.get("errorCode") == null;
                 if (ok && shutdownHooks) {
