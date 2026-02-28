@@ -23,6 +23,7 @@ import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.staticfiles.JavalinStaticResourceHandler;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
@@ -93,6 +94,7 @@ public final class JavalinWebContainer implements Reloadable {
             ) {
                 c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
             }
+            c.resourceHandler(new JavalinStaticResourceHandler());
             if (Main.getMainConfig().getBoolean("server.external-webui", false)) {
                 c.staticFiles.add(staticFiles -> {
                     staticFiles.hostedPath = "/";
