@@ -13,4 +13,5 @@ public interface PBHPortMapper {
 
     CompletableFuture<@NotNull Boolean> unmapPort(int port, Protocol protocol);
 
+    void close();
 }
