@@ -852,3 +852,14 @@ EARLY_STARTING_PAGE_DESCRIPTION: "Preparing necessary data and components, you c
 
 DBNT_MIGRATOR_ARCHIVING_LEGACY_TO: "[Data Upgrade] Please wait, archiving legacy database file to {}..."
 DBNT_MIGRATOR_ARCHIVING_LEGACY_PROGRESS: "[Data Upgrade] Please wait, archiving legacy database file: {}%"
+BTN_ABILITY_ALLOW_LIST_UNBAN_PEER: "[BTN Network] Unblock Peer in Allowlist: {}, BTN server provides remark information: {}"
+BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_TITLE: "[BTN Network] Banned Peer unblocked due to Allowlist"
+BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
+  An IP address associated with a peer in your current PeerBanHelper installation has been unbanned by the BTN network because it is on the BTN Allowlist.
+  
+  **IP Address:** {}
+  **Banned At:** {}
+  **Ban Rule:** {}
+  **Ban Description:** {}
+  
+  **The BTN server returned the following information for your reference:** {}

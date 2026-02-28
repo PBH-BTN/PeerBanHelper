@@ -17,17 +17,7 @@
       <variable name="startupFlagPlatformNoGUI" value="-XX:+UseCompactObjectHeaders -XX:SoftMaxHeapSize=386M -Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseG1GC -XX:G1PeriodicGCInterval=60000 -XX:MaxHeapFreeRatio=15 -XX:MinHeapFreeRatio=5 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
       <variable name="jvmOptionsFile" value="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideWindows="true" valueWindows="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideMacos="true" valueMacos="${user.home}/Library/Application Support/PeerBanHelper" overrideUnix="true" valueUnix="${user.home}/.config/PeerBanHelper" />
     </variables>
-    <jreBundles jdkProviderId="JBR" release="25/25.0.2-b329.66">
-      <modules>
-        <module name="java.base" />
-        <module name="java.desktop" />
-        <module name="java.sql.rowset" />
-        <module name="jdk.unsupported" />
-        <module name="java.net.http" />
-        <module name="java.management" />
-        <module name="jdk.management" />
-      </modules>
-    </jreBundles>
+    <jreBundles jdkProviderId="JBR" release="25/25.0.2-b329.66" />
   </application>
   <files keepModificationTimes="true">
     <filesets>
