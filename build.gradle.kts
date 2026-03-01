@@ -112,7 +112,7 @@ dependencies {
     // Markdown
     implementation("org.commonmark:commonmark:0.27.1")
     // Compression
-    implementation("org.tukaani:xz:1.11")
+    implementation("org.tukaani:xz:1.12")
     // DNS
     implementation("dnsjava:dnsjava:3.6.4")
     // UI - FlatLaf
