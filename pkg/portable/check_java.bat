@@ -29,6 +29,7 @@ if exist "%~dp0jre\bin\java.exe" (
     ) else (
         echo %MSG_INVALID_JAVA_HOME%
         echo [Error] JAVA_HOME = "%JAVA_HOME%"
+        pause
         exit /b 1
     )
 ) else (
@@ -41,6 +42,7 @@ if exist "%~dp0jre\bin\java.exe" (
     :: No Java in PATH
     echo %MSG_NOT_FOUND_1%
     echo %MSG_NOT_FOUND_2%
+    pause
     exit /b 1
 )
 
