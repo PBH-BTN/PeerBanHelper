@@ -21,7 +21,7 @@
     :label="t('page.settings.tab.config.push.form.ntfy.priority')"
     required
   >
-    <a-input-number v-model="model.priority" :min="1" :max="5" />
+    <a-select v-model="model.priority" :options="'12345'.split('').map(Number)" />
   </a-form-item>
   <a-form-item field="config.tags" :label="t('page.settings.tab.config.push.form.ntfy.tags')">
     <a-input v-model="model.tags" />
