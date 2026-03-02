@@ -29,8 +29,7 @@ if exist "%~dp0jre\bin\java.exe" (
     ) else (
         echo %MSG_INVALID_JAVA_HOME%
         echo [Error] JAVA_HOME = "%JAVA_HOME%"
-        pause
-        exit /b 1
+        pause & exit /b 1
     )
 ) else (
     for /f "delims=" %%i in ('where.exe java.exe 2^>nul') do (
@@ -42,8 +41,7 @@ if exist "%~dp0jre\bin\java.exe" (
     :: No Java in PATH
     echo %MSG_NOT_FOUND_1%
     echo %MSG_NOT_FOUND_2%
-    pause
-    exit /b 1
+    pause & exit /b 1
 )
 
 :CHECK_VER
@@ -74,8 +72,7 @@ setlocal enabledelayedexpansion
 set "MSG_VERSION_LOW_DISPLAY=!MSG_VERSION_LOW:{VER}=%MAJOR_VER%!"
 if !MAJOR_VER! LSS %REQ_VER% (
     echo !MSG_VERSION_LOW_DISPLAY!
-    pause
-    exit /b 1
+    pause & exit /b 1
 )
 endlocal
 
@@ -84,5 +81,4 @@ exit /b 0
 
 :ERROR_PARSE
 echo %MSG_PARSE_FAILED%
-pause
-exit /b 1
+pause & exit /b 1
