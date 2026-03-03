@@ -67,7 +67,7 @@ dependencies {
     implementation("org.springframework:spring-tx:7.0.5")
     implementation("org.springframework:spring-jdbc:7.0.5")
     implementation("org.xerial:sqlite-jdbc:3.51.2.0")
-    implementation("com.h2database:h2:2.3.232")
+    implementation("com.h2database:h2:2.4.240")
     implementation("org.postgresql:postgresql:42.7.10")
     implementation("com.mysql:mysql-connector-j:9.6.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
