@@ -7,7 +7,9 @@
     "org.flywaydb:flyway-core",
     "org.flywaydb:flyway-mysql",
     "org.flywaydb:flyway-database-postgresql",
-    "com.h2database:h2"
+    "com.h2database:h2",
+
+    "@arco-design/web-vue"
   ],
   "baseBranchPatterns": [
     "dev"
