@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.3.7"
+version = "9.3.8"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -90,7 +90,7 @@ dependencies {
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
-    implementation("io.javalin:javalin:7.0.0")
+    implementation("io.javalin:javalin:7.0.1")
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.0.2")
     // Expression engine
@@ -105,14 +105,14 @@ dependencies {
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
     // System monitoring
-    implementation("com.github.oshi:oshi-core:6.9.3") {
+    implementation("com.github.oshi:oshi-core:6.10.0") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
     // Markdown
     implementation("org.commonmark:commonmark:0.27.1")
     // Compression
-    implementation("org.tukaani:xz:1.11")
+    implementation("org.tukaani:xz:1.12")
     // DNS
     implementation("dnsjava:dnsjava:3.6.4")
     // UI - FlatLaf
@@ -175,7 +175,7 @@ dependencies {
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0.3")
 
-    implementation(platform("io.sentry:sentry-bom:8.33.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.34.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")

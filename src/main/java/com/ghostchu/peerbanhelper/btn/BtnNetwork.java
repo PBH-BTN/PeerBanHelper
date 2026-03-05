@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.btn;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.*;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
@@ -65,6 +66,8 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private final BackgroundTaskManager backgroundTaskManager;
     @Getter
+    private final AlertManager alertManager;
+    @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
     @Getter
@@ -98,7 +101,7 @@ public final class BtnNetwork implements Reloadable {
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
                       MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
-                      PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager) {
+                      PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager) {
         this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
         this.scriptEngineManager = scriptEngineManager;
@@ -110,6 +113,7 @@ public final class BtnNetwork implements Reloadable {
         this.torrentDao = torrentService;
         this.systemInfo = systemInfo;
         this.backgroundTaskManager = backgroundTaskManager;
+        this.alertManager = alertManager;
         Main.getReloadManager().register(this);
         Main.getEventBus().register(this);
     }
