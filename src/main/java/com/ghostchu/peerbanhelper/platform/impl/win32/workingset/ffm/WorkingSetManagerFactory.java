@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.platform.impl.win32.workingset.jna;
+package com.ghostchu.peerbanhelper.platform.impl.win32.workingset.ffm;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
