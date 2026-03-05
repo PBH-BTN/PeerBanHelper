@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModul
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
+import com.ghostchu.peerbanhelper.platform.mtr.MtrOptions;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -166,6 +167,11 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
+
+
+        System.out.println("MTR Supported: " + Main.getPlatform().getMtrTool().isSupported(InetAddress.ofLiteral("58.216.33.162")));
+       var result = Main.getPlatform().getMtrTool().trace(InetAddress.ofLiteral("58.216.33.162"), MtrOptions.defaults());
+       System.out.println(result);
     }
 
 
