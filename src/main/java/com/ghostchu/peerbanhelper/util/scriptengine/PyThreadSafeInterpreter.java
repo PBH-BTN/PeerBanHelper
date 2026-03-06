@@ -113,8 +113,10 @@ public class PyThreadSafeInterpreter implements Interpreter {
     }
 
     public void shutdown() {
-        try {
+        try (final Lock _ = getLock()) {
             close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             executor.shutdownNow();
         }
