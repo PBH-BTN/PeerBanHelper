@@ -25,13 +25,10 @@ class PyCompiledScript(
 
     override fun execute(env: MutableMap<String, Any>): Any? {
         interpreter?.lock.use { _ ->
-            for (entry in env.entries) {
-                interpreter?.set(entry.key, entry.value)
-            }
-            interpreter?.set("result", false)
             interpreter?.set("compiled_code", compiledCode)
-            interpreter?.exec("exec(compiled_code)")
-            return interpreter?.getValue("result")
+            interpreter?.set("env", env)
+            interpreter?.exec("context=dict(env)\n" + "exec(compiled_code,context)")
+            return interpreter?.getValue("context.get('result')")
         }
     }
 
