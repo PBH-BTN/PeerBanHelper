@@ -101,7 +101,7 @@ public class PyThreadSafeInterpreter implements Interpreter {
 
     @Override
     public Interpreter attach(boolean shareGlobals) {
-        return null;
+        throw new UnsupportedOperationException("PySafeInterpreter does not support attach");
     }
 
     @Override
@@ -113,8 +113,11 @@ public class PyThreadSafeInterpreter implements Interpreter {
     }
 
     public void shutdown() {
-        close();
-        executor.shutdownNow();
+        try {
+            close();
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     public Lock getLock() {

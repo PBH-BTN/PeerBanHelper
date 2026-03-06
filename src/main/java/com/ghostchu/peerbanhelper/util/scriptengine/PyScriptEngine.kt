@@ -1,13 +1,8 @@
 package com.ghostchu.peerbanhelper.util.scriptengine
 
 import com.ghostchu.peerbanhelper.Main
-import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule
-import com.ghostchu.peerbanhelper.module.CheckResult
-import com.ghostchu.peerbanhelper.module.PeerAction
 import com.ghostchu.peerbanhelper.text.Lang
 import com.ghostchu.peerbanhelper.text.TextManager
-import com.ghostchu.peerbanhelper.text.TranslationComponent
-import com.ghostchu.peerbanhelper.wrapper.StructuredData
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
@@ -16,82 +11,6 @@ import java.io.StringReader
 
 @Component
 class PyScriptEngine : ScriptEngine {
-
-    fun handleResult(script: CompiledScript, banDuration: Long, returns: Any?): CheckResult? {
-        if (returns is Boolean) {
-            if (returns) {
-                return CheckResult(
-                    javaClass, PeerAction.BAN, banDuration,
-                    TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), "true"),
-                    StructuredData.create().add("script", script.name())
-                )
-            }
-            return null
-        }
-        if (returns is Number) {
-            val i = returns.toInt()
-            if (i == 0) {
-                return null
-            } else if (i == 1) {
-                return CheckResult(
-                    javaClass,
-                    PeerAction.BAN,
-                    banDuration,
-                    TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns.toString()),
-                    StructuredData.create().add("script", script.name())
-                )
-            } else if (i == 2) {
-                return CheckResult(
-                    javaClass,
-                    PeerAction.SKIP,
-                    banDuration,
-                    TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns.toString()),
-                    StructuredData.create().add("script", script.name())
-                )
-            } else {
-                log.error(TextManager.tlUI(Lang.RULE_ENGINE_INVALID_RETURNS, script))
-                return null
-            }
-        }
-        if (returns is PeerAction) {
-            return CheckResult(
-                javaClass,
-                returns,
-                banDuration,
-                TranslationComponent(Lang.USER_SCRIPT_RULE),
-                TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns.name),
-                StructuredData.create().add("script", script.name())
-            )
-        }
-        if (returns is String) {
-            if (returns.isBlank()) {
-                return OK_CHECK_RESULT
-            } else if (returns.startsWith("@")) {
-                return CheckResult(
-                    javaClass, PeerAction.SKIP, banDuration,
-                    TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    TranslationComponent(returns.substring(1)), StructuredData.create().add("script", script.name())
-                )
-            } else {
-                return CheckResult(
-                    javaClass,
-                    PeerAction.BAN,
-                    banDuration,
-                    TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), returns),
-                    StructuredData.create().add("script", script.name())
-                )
-            }
-        }
-        if (returns is CheckResult) {
-            return returns
-        }
-        log.error(TextManager.tlUI(Lang.RULE_ENGINE_INVALID_RETURNS, script.name()))
-        return null
-    }
 
     fun checkMalware(scriptContent: String, scriptPath: String?): Boolean {
         val platform = Main.getPlatform()
@@ -179,14 +98,5 @@ class PyScriptEngine : ScriptEngine {
 
     companion object {
         private val log = LoggerFactory.getLogger(PyScriptEngine::class.java)
-
-        val OK_CHECK_RESULT: CheckResult = CheckResult(
-            AbstractRuleFeatureModule::class.java,
-            PeerAction.NO_ACTION,
-            0,
-            TranslationComponent("N/A"),
-            TranslationComponent("Check passed"),
-            StructuredData.create().add("status", "pass")
-        )
     }
 }

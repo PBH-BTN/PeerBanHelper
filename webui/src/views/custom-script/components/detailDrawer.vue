@@ -31,7 +31,7 @@
           <a-form-item :label="t('page.rule.custom-script.detail.form.type')" field="fileType">
             <a-radio-group v-model="form.fileType" type="button">
               <a-radio value="av">AviatorScript</a-radio>
-              <a-radio value="py">Python 2</a-radio>
+              <a-radio value="py">Python 3</a-radio>
             </a-radio-group>
           </a-form-item>
           <a-form-item
