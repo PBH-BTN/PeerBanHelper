@@ -17,7 +17,7 @@ else:
 
     # 阈值从环境变量获取
     min_ratio = float(minRatioThreshold)
-    min_downloaded = long(minDownloadedThreshold)
+    min_downloaded = int(minDownloadedThreshold)
 
     # 如果下载量超过阈值且比例过低，则封禁
     if downloaded > min_downloaded and ratio < min_ratio:

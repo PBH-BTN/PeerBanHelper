@@ -8,26 +8,14 @@ import com.ghostchu.peerbanhelper.text.Lang
 import com.ghostchu.peerbanhelper.text.TextManager
 import com.ghostchu.peerbanhelper.text.TranslationComponent
 import com.ghostchu.peerbanhelper.wrapper.StructuredData
-import org.python.core.PyCode
-import org.python.util.PythonInterpreter
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.File
 import java.io.StringReader
-import java.util.*
 
 @Component
 class PyScriptEngine : ScriptEngine {
-    private val interpreter: PythonInterpreter
-
-    init {
-        val props = Properties()
-        props["python.import.site"] = "false"
-        props["python.cachedir.skip"] = "true"
-        PythonInterpreter.initialize(System.getProperties(), props, arrayOfNulls(0))
-        this.interpreter = PythonInterpreter()
-    }
 
     fun handleResult(script: CompiledScript, banDuration: Long, returns: Any?): CheckResult? {
         if (returns is Boolean) {
@@ -161,26 +149,29 @@ class PyScriptEngine : ScriptEngine {
                     }
                 }
                 // 编译 Python 脚本
-                val compiledCode: PyCode = interpreter.compile(scriptContent, file?.name ?: fallbackName)
-                return PyCompiledScript(
-                    file,
-                    name,
-                    author,
-                    cacheable,
-                    threadSafe,
-                    version,
-                    scriptContent,
-                    compiledCode,
-                    interpreter
-                )
+                PySafeInterpreter().use { interpreter ->
+                    interpreter.set("script_content", scriptContent)
+                    interpreter.set("filename", file?.name ?: fallbackName)
+                    val compiledCode: Any = interpreter.getValue("compile(script_content, filename, 'exec')")
+                    return PyCompiledScript(
+                        file,
+                        name,
+                        author,
+                        cacheable,
+                        threadSafe,
+                        version,
+                        scriptContent,
+                        compiledCode
+                    )
+                }
             }
-        } catch (e: Exception) {
+        } catch (e: Error) {
             log.warn("Python Script Engine unable to compile the script: {}", fallbackName, e)
             return null
         }
     }
 
-    override fun getEngineName(): String = "Jython"
+    override fun getEngineName(): String = "Jep"
 
     override fun getFileExtension(): String = ".py"
 

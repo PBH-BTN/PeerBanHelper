@@ -95,9 +95,8 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:5.0.2")
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
-
-    // Python script engine (Jython)
-    implementation("org.python:jython-standalone:2.7.4")
+    // Python script engine (Jep)
+    implementation("org.ninia:jep:4.3.1")
 
     // System theme detector
     implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1") {

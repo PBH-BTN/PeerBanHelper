@@ -45,7 +45,7 @@ class PyScriptEngineTest {
         @Test
         @DisplayName("应返回正确的引擎名称")
         void shouldReturnCorrectEngineName() {
-            assertEquals("Jython", engine.getEngineName());
+            assertEquals("Jep", engine.getEngineName());
         }
 
         @Test
@@ -137,7 +137,8 @@ class PyScriptEngineTest {
             env.put("action", "none");
 
             Object result = compiled.execute(env);
-            assertEquals(0, result);
+            assertTrue(result instanceof Long);
+            assertEquals(0, (long) result);
         }
 
         @Test
@@ -151,7 +152,8 @@ class PyScriptEngineTest {
             env.put("action", "ban");
 
             Object result = compiled.execute(env);
-            assertEquals(1, result);
+            assertTrue(result instanceof Long);
+            assertEquals(1, (long) result);
         }
 
         @Test
@@ -165,7 +167,8 @@ class PyScriptEngineTest {
             env.put("action", "skip");
 
             Object result = compiled.execute(env);
-            assertEquals(2, result);
+            assertTrue(result instanceof Long);
+            assertEquals(2, (long) result);
         }
     }
 
@@ -817,9 +820,12 @@ class PyScriptEngineTest {
             }
 
             // 验证结果
-            assertEquals(1, results[0]); // ban
-            assertEquals(2, results[1]); // skip
-            assertEquals(0, results[2]); // none
+            assertTrue(results[0] instanceof Long);
+            assertTrue(results[1] instanceof Long);
+            assertTrue(results[2] instanceof Long);
+            assertEquals(1, (long) results[0]); // ban
+            assertEquals(2, (long) results[1]); // skip
+            assertEquals(0, (long) results[2]); // none
         }
     }
 }
