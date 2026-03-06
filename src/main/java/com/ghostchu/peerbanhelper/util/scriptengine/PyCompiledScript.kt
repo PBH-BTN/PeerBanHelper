@@ -11,7 +11,8 @@ class PyCompiledScript(
     private val _threadSafe: Boolean,
     private val _version: String?,
     private val _script: String?,
-    private val compiledCode: Any?
+    private val compiledCode: Any?,
+    private val interpreter: PyThreadSafeInterpreter?
 ) : CompiledScript {
 
     override fun file(): File? = _file
@@ -23,14 +24,14 @@ class PyCompiledScript(
     override fun script(): String? = _script
 
     override fun execute(env: MutableMap<String, Any>): Any? {
-        PySafeInterpreter().use { interpreter ->
+        interpreter?.lock.use { _ ->
             for (entry in env.entries) {
-                interpreter.set(entry.key, entry.value)
+                interpreter?.set(entry.key, entry.value)
             }
-            interpreter.set("result", false)
-            interpreter.set("compiled_code", compiledCode)
-            interpreter.eval("eval(compiled_code)")
-            return interpreter.getValue("result")
+            interpreter?.set("result", false)
+            interpreter?.set("compiled_code", compiledCode)
+            interpreter?.exec("exec(compiled_code)")
+            return interpreter?.getValue("result")
         }
     }
 

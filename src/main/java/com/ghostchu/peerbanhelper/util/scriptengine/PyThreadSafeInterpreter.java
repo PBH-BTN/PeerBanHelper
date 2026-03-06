@@ -8,16 +8,16 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class PySafeInterpreter implements Interpreter {
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final Interpreter interpreter;
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor((r) -> {
+public class PyThreadSafeInterpreter implements Interpreter {
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Interpreter interpreter;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor((r) -> {
         Thread t = new Thread(r, "py-interpreter-thread");
         t.setDaemon(false);
         return t;
     });
 
-    static {
+    public PyThreadSafeInterpreter() {
         try {
             interpreter = executor.submit(SharedInterpreter::new).get();
         } catch (InterruptedException e) {
@@ -26,10 +26,6 @@ public class PySafeInterpreter implements Interpreter {
         } catch (ExecutionException e) {
             throw new RuntimeException("Failed to initialize Python interpreter", e.getCause());
         }
-    }
-
-    public PySafeInterpreter() {
-        lock.lock();
     }
 
     private <T> T submitToInterpreter(Callable<T> task) throws JepException {
@@ -44,7 +40,6 @@ public class PySafeInterpreter implements Interpreter {
             switch (c) {
                 case JepException jepException -> throw jepException;
                 case RuntimeException runtimeException -> throw runtimeException;
-                case Error error -> throw error;
                 case null, default -> throw new RuntimeException(c);
             }
         }
@@ -110,7 +105,24 @@ public class PySafeInterpreter implements Interpreter {
     }
 
     @Override
-    public void close() {
-        lock.unlock();
+    public void close() throws JepException {
+        submitToInterpreter(() -> {
+            interpreter.close();
+            return null;
+        });
+    }
+
+    public Lock getLock() {
+        return new Lock();
+    }
+
+    public class Lock implements AutoCloseable {
+        public Lock () {
+            lock.lock();
+        }
+        @Override
+        public void close() throws Exception {
+            lock.unlock();
+        }
     }
 }

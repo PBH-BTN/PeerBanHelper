@@ -115,7 +115,7 @@ public class Main {
     @Nullable
     private static Platform platform;
 
-    public static Platform getPlatform() {
+    public static @Nullable Platform getPlatform() {
         return platform;
     }
     private static String userAgent;

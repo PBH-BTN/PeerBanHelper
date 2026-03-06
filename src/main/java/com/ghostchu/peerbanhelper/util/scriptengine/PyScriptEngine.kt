@@ -125,6 +125,7 @@ class PyScriptEngine : ScriptEngine {
             return null
         }
         try {
+            val interpreter = PyThreadSafeInterpreter()
             BufferedReader(StringReader(scriptContent)).use { reader ->
                 var name = fallbackName
                 var author = "Unknown"
@@ -149,7 +150,7 @@ class PyScriptEngine : ScriptEngine {
                     }
                 }
                 // 编译 Python 脚本
-                PySafeInterpreter().use { interpreter ->
+                interpreter.lock.use { _ ->
                     interpreter.set("script_content", scriptContent)
                     interpreter.set("filename", file?.name ?: fallbackName)
                     val compiledCode: Any = interpreter.getValue("compile(script_content, filename, 'exec')")
@@ -161,11 +162,12 @@ class PyScriptEngine : ScriptEngine {
                         threadSafe,
                         version,
                         scriptContent,
-                        compiledCode
+                        compiledCode,
+                        interpreter
                     )
                 }
             }
-        } catch (e: Error) {
+        } catch (e: Exception) {
             log.warn("Python Script Engine unable to compile the script: {}", fallbackName, e)
             return null
         }
