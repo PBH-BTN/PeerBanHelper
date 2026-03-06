@@ -60,4 +60,9 @@ interface CompiledScript {
      * 获取脚本的哈希码（用于缓存）
      */
     fun scriptHashCode(): Int
+
+    /**
+     * 关闭脚本
+     */
+    fun close()
 }

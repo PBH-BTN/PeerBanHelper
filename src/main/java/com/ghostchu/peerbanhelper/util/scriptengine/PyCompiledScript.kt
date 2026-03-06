@@ -42,4 +42,8 @@ class PyCompiledScript(
     override fun scriptHashCode(): Int {
         return _script?.hashCode() ?: 0
     }
+
+    override fun close() {
+        interpreter?.shutdown()
+    }
 }
