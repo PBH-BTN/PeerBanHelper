@@ -27,11 +27,12 @@ public class PyThreadSafeInterpreter implements Interpreter {
         // 设置 Jep jni 文件位置
         try {
             Process p = Runtime.getRuntime().exec(new String[]{"python" ,"-c", CHECK_SCRIPT});
-            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String ret = in.readLine();
-            if (ret != null && !ret.trim().isEmpty()) {
-                log.debug("Found libjep path: {}", ret);
-                MainInterpreter.setJepLibraryPath(ret);
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                String ret = in.readLine();
+                if (ret != null && !ret.trim().isEmpty()) {
+                    log.debug("Found libjep path: {}", ret);
+                    MainInterpreter.setJepLibraryPath(ret);
+                }
             }
         } catch (Exception e) {
             // 失败时保持静默
