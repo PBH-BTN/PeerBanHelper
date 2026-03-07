@@ -25,10 +25,7 @@ class PyCompiledScript(
 
     override fun execute(env: MutableMap<String, Any>): Any? {
         interpreter?.lock.use { _ ->
-            interpreter?.set("compiled_code", compiledCode)
-            interpreter?.set("env", env)
-            interpreter?.exec("context=dict(env)\n" + "exec(compiled_code,context)")
-            return interpreter?.getValue("context.get('result')")
+            return interpreter?.invoke("shouldBanPeer",env)
         }
     }
 

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.scriptengine
 import com.ghostchu.peerbanhelper.Main
 import com.ghostchu.peerbanhelper.text.Lang
 import com.ghostchu.peerbanhelper.text.TextManager
+import jep.python.PyCallable
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
@@ -70,9 +71,8 @@ class PyScriptEngine : ScriptEngine {
                 }
                 // 编译 Python 脚本
                 interpreter.lock.use { _ ->
-                    interpreter.set("script_content", scriptContent)
-                    interpreter.set("filename", file?.name ?: fallbackName)
-                    val compiledCode: Any = interpreter.getValue("compile(script_content, filename, 'exec')")
+                    interpreter.exec(scriptContent)
+                    val compiledCode: PyCallable = interpreter.getValue("shouldBanPeer") as PyCallable
                     return PyCompiledScript(
                         file,
                         name,
