@@ -2,12 +2,17 @@ package com.ghostchu.peerbanhelper.util.scriptengine;
 
 import jep.Interpreter;
 import jep.JepException;
+import jep.MainInterpreter;
 import jep.SharedInterpreter;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
+@Slf4j
 public class PyThreadSafeInterpreter implements Interpreter {
     private final ReentrantLock lock = new ReentrantLock();
     private final Interpreter interpreter;
@@ -16,6 +21,23 @@ public class PyThreadSafeInterpreter implements Interpreter {
         t.setDaemon(false);
         return t;
     });
+    private final static String CHECK_SCRIPT = "import site,pathlib; print('\\n'.join([str(f.absolute()) for p in site.getsitepackages() for n in ('libjep.jnilib','libjep.so','jep.dll') for f in (pathlib.Path(p)/'jep').glob(n)]))";
+
+    static {
+        // 设置 Jep jni 文件位置
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"python" ,"-c", CHECK_SCRIPT});
+            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String ret = in.readLine();
+            if (ret != null && !ret.trim().isEmpty()) {
+                log.debug("Found libjep path: {}", ret);
+                MainInterpreter.setJepLibraryPath(ret);
+            }
+        } catch (Exception e) {
+            // 失败时保持静默
+            log.debug("Failed to search libjep path", e);
+        }
+    }
 
     public PyThreadSafeInterpreter() {
         try {
