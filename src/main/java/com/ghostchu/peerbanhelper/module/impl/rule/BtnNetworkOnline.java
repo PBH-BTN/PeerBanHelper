@@ -270,7 +270,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                 env.put("moduleInstance", this);
                 env.put("btnNetwork", btnNetwork);
                 env.put("banDuration", banDuration);
-                env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
+                env.put("kvStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
                 Object returns = script.execute(env);
                 result = scriptEngineManager.handleResult(script, banDuration, returns);
             } catch (TimeoutException timeoutException) {

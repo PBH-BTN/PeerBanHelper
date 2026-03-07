@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.util.scriptengine
 import com.ghostchu.peerbanhelper.Main
 import com.ghostchu.peerbanhelper.text.Lang
 import com.ghostchu.peerbanhelper.text.TextManager
-import jep.python.PyCallable
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
@@ -72,7 +71,7 @@ class PyScriptEngine : ScriptEngine {
                 // 编译 Python 脚本
                 interpreter.lock.use { _ ->
                     interpreter.exec(scriptContent)
-                    val compiledCode: PyCallable = interpreter.getValue("shouldBanPeer") as PyCallable
+                    interpreter.invoke("shouldBanPeer", null_env)
                     return PyCompiledScript(
                         file,
                         name,
@@ -81,7 +80,7 @@ class PyScriptEngine : ScriptEngine {
                         threadSafe,
                         version,
                         scriptContent,
-                        compiledCode,
+                        null,
                         interpreter
                     )
                 }
@@ -98,5 +97,15 @@ class PyScriptEngine : ScriptEngine {
 
     companion object {
         private val log = LoggerFactory.getLogger(PyScriptEngine::class.java)
+        private val null_env: MutableMap<String?, Any?> = hashMapOf(
+            "torrent" to null,
+            "peer" to null,
+            "downloader" to null,
+            "cacheable" to null,
+            "server" to null,
+            "moduleInstance" to null,
+            "btnNetwork" to null,
+            "banDuration" to null,
+            "ramStorage" to null)
     }
 }
