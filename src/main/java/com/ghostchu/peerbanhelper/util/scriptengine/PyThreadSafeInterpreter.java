@@ -21,7 +21,7 @@ public class PyThreadSafeInterpreter implements Interpreter {
         t.setDaemon(false);
         return t;
     });
-    private final static String CHECK_SCRIPT = "import site,pathlib; print('\\n'.join([str(f.absolute()) for p in site.getsitepackages() for n in ('libjep.jnilib','libjep.so','jep.dll') for f in (pathlib.Path(p)/'jep').glob(n)]))";
+    private final static String CHECK_SCRIPT = "import site,pathlib; print('\\n'.join([str(f.absolute()) for p in [site.getusersitepackages()]+site.getsitepackages() for n in ('libjep.jnilib','libjep.so','jep.dll') for f in (pathlib.Path(p)/'jep').glob(n)]))";
 
     static {
         // 设置 Jep jni 文件位置
