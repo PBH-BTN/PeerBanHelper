@@ -179,8 +179,6 @@ public class DatabaseMigrationCoordinator {
         migrators.add(new TrafficJournalMigrator(trafficJournalService));
         migrators.add(new RuleSubInfoMigrator(ruleSubInfoService));
         migrators.add(new RuleSubLogMigrator(ruleSubLogService));
-        migrators.add(new PCBAddressMigrator(pcbAddressService));
-        migrators.add(new PCBRangeMigrator(pcbRangeService));
         migrators.add(new PeerConnectionMetricsMigrator(peerConnectionMetricsService));
         migrators.add(new PeerConnectionMetricsTrackMigrator(peerConnectionMetricsTrackService));
         migrators.add(new AlertMigrator(alertService));
