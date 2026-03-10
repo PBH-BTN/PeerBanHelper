@@ -1,4 +1,6 @@
 export default {
+  'page.rule_management.netType.description':
+    'Peers from the following network types will be banned',
   'page.rule_management.netType.wideband': 'Broadband',
   'page.rule_management.netType.baseStation': 'Base Station',
   'page.rule_management.netType.governmentAndEnterpriseLine': 'Government & Enterprise Network',
