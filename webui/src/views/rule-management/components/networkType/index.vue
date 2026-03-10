@@ -1,13 +1,18 @@
 <template>
   <a-space direction="vertical" fill size="large">
     <a-space style="display: flex; justify-content: space-between; padding: 0 4rem 2rem 4rem" fill>
-      <a-typography-text style="font-size: 1.2em">
-        {{
-          t('page.rule_management.generic.description', {
-            type: t('page.rule_management.' + type)
-          })
-        }}
-      </a-typography-text>
+      <a-space direction="vertical">
+        <a-typography-text style="font-size: 1.2em">
+          {{
+            t('page.rule_management.generic.description', {
+              type: t('page.rule_management.' + type)
+            })
+          }}
+        </a-typography-text>
+        <a-typography-text>
+          {{ t('page.rule_management.netType.description') }}
+        </a-typography-text></a-space
+      >
       <AsyncMethod v-slot="{ run, loading: saveLoading }" once :async-fn="handleSave">
         <a-button type="primary" :loading="saveLoading" @click="run">
           <template #icon>
