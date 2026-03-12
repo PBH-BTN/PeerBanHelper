@@ -874,3 +874,4 @@ BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
   **封禁描述:** {}  
   
   **BTN 服务器返回以下信息供您参考:** {}
+MODULE_IP_BLACKLIST_SUB_TURNED_OFF: "IP 订阅规则模块当前处于禁用状态，请先启用。操作已取消。"

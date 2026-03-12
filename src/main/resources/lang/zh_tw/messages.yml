@@ -862,3 +862,4 @@ BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
   **封鎖描述：** {}
   
   **BTN 伺服器回傳以下資訊供您參考：** {}
+MODULE_IP_BLACKLIST_SUB_TURNED_OFF: "IP 訂閱規則模組目前處於停用狀態，請先啟用。操作已取消。"
