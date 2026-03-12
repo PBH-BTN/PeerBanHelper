@@ -133,6 +133,11 @@ export const useEndpointStore = defineStore('endpoint', () => {
       return false
     }
   }
+
+  const refreshManifest = async () => {
+    serverManifest.value = await getManifest(endpoint.value)
+  }
+
   const setAccessToken = async (value: string) => {
     accessToken.value = value
     try {
@@ -189,6 +194,10 @@ export const useEndpointStore = defineStore('endpoint', () => {
     }
   })
 
+  const isModuleEnabled = (moduleName: string) => {
+    return serverManifest.value?.modules.some((module) => module.configName === moduleName)
+  }
+
   setTimeout(async () => getPlusStatus())
   setTimeout(async () => setAccessToken(accessToken.value), 3000)
   setTimeout(async () => {
@@ -216,6 +225,8 @@ export const useEndpointStore = defineStore('endpoint', () => {
     plusStatus,
     setPlusKey,
     getPlusStatus,
+    isModuleEnabled,
+    refreshManifest,
     emitter: emitter,
     assertResponseLogin: (res: Response) => {
       if (res.status === 403) {

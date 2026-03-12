@@ -65,7 +65,6 @@ export default {
   'page.settings.tab.profile.module.progressCheatBlocker.ipv6prefixlength': 'IPv6 前綴長度',
   'page.settings.tab.profile.module.progressCheatBlocker.ipprefixLength.tips':
     '來自同一子網的 IP 視為同一使用者',
-  'page.settings.tab.profile.module.progressCheatBlocker.banDuration': '封禁持續時間',
   'page.settings.tab.profile.module.progressCheatBlocker.enablePersist': '啟用持久化記錄',
   'page.settings.tab.profile.module.progressCheatBlocker.enablePersist.tips':
     '啟用此功能可能增加磁碟 I/O 並可能影響性能，嵌入式裝置上甚至可能帶來快閃記憶體磨損',

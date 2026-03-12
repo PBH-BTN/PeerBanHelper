@@ -12,6 +12,7 @@ import configLocale from '@/views/settings/locale/en-US'
 import alertLocale from './en-US/alert'
 import copierLocale from './en-US/copier'
 import plusLocale from './en-US/plus'
+import routerLocale from './en-US/router'
 import settingsLocale from './en-US/settings'
 
 export default {
@@ -82,5 +83,6 @@ export default {
   ...configLocale,
   ...alertLocale,
   ...copierLocale,
-  ...scriptLocale
+  ...scriptLocale,
+  ...routerLocale
 }

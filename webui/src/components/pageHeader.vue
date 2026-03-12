@@ -37,19 +37,33 @@
             </a-space>
           </a>
         </a-menu-item>
-        <template v-if="!disableMenu">
+        <template v-if="!hideMenu">
           <template v-for="router in routers.filter((r) => !r!.meta?.hide)" :key="router.name">
             <a-sub-menu v-if="router.children">
               <template v-if="router.meta?.icon" #icon>
                 <component :is="router.meta?.icon" />
               </template>
               <template #title>{{ t(String(router.meta?.label)) }}</template>
-              <a-menu-item v-for="child in router.children" :key="child.name">
-                <template v-if="child.meta?.icon" #icon>
-                  <component :is="child.meta?.icon" />
-                </template>
-                {{ t(String(child.meta?.label)) }}
-              </a-menu-item>
+              <a-tooltip
+                v-for="child in router.children"
+                :key="child.name"
+                :content="
+                  resolveDisabled(child.meta).value.tips
+                    ? t(resolveDisabled(child.meta).value.tips)
+                    : undefined
+                "
+                :disabled="!resolveDisabled(child.meta).value.tips"
+              >
+                <a-menu-item
+                  :key="child.name"
+                  :disabled="resolveDisabled(child.meta).value.disabled"
+                >
+                  <template v-if="child.meta?.icon" #icon>
+                    <component :is="child.meta?.icon" />
+                  </template>
+                  {{ t(String(child.meta?.label)) }}
+                </a-menu-item>
+              </a-tooltip>
             </a-sub-menu>
             <a-menu-item v-else :key="router.name">
               <template v-if="router.meta?.icon" #icon>
@@ -62,7 +76,7 @@
       </a-menu>
     </template>
     <template #extra>
-      <div v-if="!disableMenu" style="display: flex; gap: 12px; margin-top: 5px">
+      <div v-if="!hideMenu" style="display: flex; gap: 12px; margin-top: 5px">
         <a-dropdown
           v-if="mobileLayout === 0"
           position="bl"
@@ -85,12 +99,24 @@
                 {{ t(String(router.meta?.label)) }}
                 <template #content>
                   <template v-for="child in router.children" :key="child.name">
-                    <a-doption :value="child">
-                      <template v-if="child.meta?.icon" #icon>
-                        <component :is="child.meta?.icon" />
-                      </template>
-                      {{ t(String(child.meta?.label)) }}
-                    </a-doption>
+                    <a-tooltip
+                      :content="
+                        resolveDisabled(child.meta).value.tips
+                          ? t(resolveDisabled(child.meta).value.tips)
+                          : undefined
+                      "
+                      :disabled="!resolveDisabled(child.meta).value.tips"
+                    >
+                      <a-doption
+                        :value="child"
+                        :disabled="resolveDisabled(child.meta).value.disabled"
+                      >
+                        <template v-if="child.meta?.icon" #icon>
+                          <component :is="child.meta?.icon" />
+                        </template>
+                        {{ t(String(child.meta?.label)) }}
+                      </a-doption>
+                    </a-tooltip>
                   </template>
                 </template>
               </a-dsubmenu>
@@ -177,15 +203,15 @@
 </template>
 <script setup lang="ts">
 import { LOCALE_OPTIONS } from '@/locale'
-import { useViewRoute } from '@/router'
+import { useViewRoute, type DisabledState } from '@/router'
 import { useDarkStore } from '@/stores/dark'
 import { useEndpointStore } from '@/stores/endpoint'
 import useLocale from '@/stores/locale'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { useDark, useToggle } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect, type ComputedRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, type RouteMeta } from 'vue-router'
 import alert from './alert.vue'
 import autoUpdateBtn from './autoUpdateBtn.vue'
 import globalPauseBtn from './globalPauseBtn.vue'
@@ -220,16 +246,40 @@ const props = withDefaults(
     disableMenu: false
   }
 )
-const endpointStore = useEndpointStore()
 
-endpointStore.emitter.on('open-settings-modal', () => {
+const { emitter } = useEndpointStore()
+emitter.on('open-settings-modal', () => {
   settingsModalRef.value?.showModal()
 })
+
+const ENABLED: DisabledState = { disabled: false, tips: '' }
+
+const resolvedDisabled = new Map<RouteMeta, ComputedRef<DisabledState>>()
+function resolveDisabled(meta: RouteMeta | undefined): ComputedRef<DisabledState> {
+  if (!meta) return computed(() => ENABLED)
+  if (resolvedDisabled.has(meta)) return resolvedDisabled.get(meta)!
+  const d = meta.disabled
+  let result: ComputedRef<DisabledState>
+  if (d === undefined) {
+    result = computed(() => ENABLED)
+  } else if (typeof d !== 'function') {
+    result = computed(() => d)
+  } else {
+    const asyncState = ref<DisabledState>(ENABLED)
+    watchEffect(async () => {
+      const v = d()
+      asyncState.value = v instanceof Promise ? await v : v
+    })
+    result = computed(() => asyncState.value)
+  }
+  resolvedDisabled.set(meta, result)
+  return result
+}
 
 const [routers, currentName, goto] = useViewRoute()
 const route = useRoute()
 const disableAutoUpdate = computed(() => props.disableAutoUpdate || !!route.meta.disableAutoUpdate)
-const disableMenu = computed(() => props.disableMenu || !!route.meta.disableMenu)
+const hideMenu = computed(() => props.disableMenu || !!route.meta.disableMenu)
 const selectedKeys = computed(() => [currentName.value])
 
 const mobileLayout = useResponsiveState(
