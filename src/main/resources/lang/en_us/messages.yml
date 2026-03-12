@@ -863,4 +863,3 @@ BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
   **Ban Description:** {}
   
   **The BTN server returned the following information for your reference:** {}
-MODULE_IP_BLACKLIST_SUB_TURNED_OFF: "IP Blacklist Subscription Module currently is disabled, please enable it first. Operation cancelled."

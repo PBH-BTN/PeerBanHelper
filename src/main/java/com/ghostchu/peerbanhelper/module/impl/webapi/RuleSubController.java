@@ -110,6 +110,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     }
 
 
+
     /**
      * 查询检查间隔
      */
@@ -255,12 +256,6 @@ public final class RuleSubController extends AbstractFeatureModule {
     }
 
     private void saveIpRule(Context ctx, String ruleId, boolean isAdd) throws IOException {
-        String locale = locale(ctx);
-        if (!isModuleAvailable()) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale, Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null));
-            return;
-        }
         SubInfoDTO subInfoDTO = ctx.bodyValidator(SubInfoDTO.class).get();
         if (isAdd) {
             ruleId = subInfoDTO.ruleId();
@@ -328,7 +323,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     private StdResp get(Context ctx, String ruleId) {
         String locale = locale(ctx);
         if (!isModuleAvailable()) {
-            return new StdResp(false, tl(locale, Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null);
+            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
         }
         return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
     }
@@ -339,7 +334,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     private StdResp list(Context ctx) {
         String locale = locale(ctx);
         if (!isModuleAvailable()) {
-            return new StdResp(false, tl(locale, Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null);
+            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
         }
         List<String> keys = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
         List<RuleSubInfoEntity> data = new ArrayList<>(keys.size());
