@@ -137,7 +137,20 @@ public final class JavalinWebContainer implements Reloadable {
                 .exception(BlockScannerException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.NOT_FOUND);
                     ctx.header("Server", "nginx");
-                    ctx.result("404 not found");
+                    ctx.result("""
+                            <html>
+                            <head><title>404 Not Found</title></head>
+                            <body>
+                            <center><h1>404 Not Found</h1></center>
+                            <hr><center>nginx</center>
+                            </body>
+                            </html>
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->""");
                     ctx.attribute("skipAfter", true);
                 })
                 .exception(DemoModeException.class, (e, ctx) -> {
