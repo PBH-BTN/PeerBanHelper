@@ -115,7 +115,7 @@ export default {
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '规则订阅',
   'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
-    '启用来自 BTN 网络的规则，仅在 config.yml 中配置了 BTN 服务器时生效',
+    '启用此功能可以订阅远程规则',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置请前往{link}页面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '规则订阅',

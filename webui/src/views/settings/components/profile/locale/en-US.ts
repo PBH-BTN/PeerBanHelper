@@ -125,7 +125,7 @@ export default {
 
   'page.settings.tab.profile.module.ruleSubscribe.title': 'Rule subscribe',
   'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
-    'Enable the network rules from BTN server, only works when you configured BTN server in config.yml',
+    'Enable this feature allows you to subscribe to remote rules',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe':
     'For other configurations, please go to the {link} page',
