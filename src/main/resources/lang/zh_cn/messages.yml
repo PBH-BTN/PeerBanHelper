@@ -869,3 +869,4 @@ BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
   **封禁描述:** {}  
   
   **BTN 服务器返回以下信息供您参考:** {}
+WEBAPI_ROUTE_NOT_EXISTS: "指定的路由不可用或不存在，对应的功能模块是否开启？路由：{} {}"

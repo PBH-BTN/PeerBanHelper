@@ -24,6 +24,7 @@ import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+import io.javalin.router.EndpointNotFound;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.Setter;
@@ -143,6 +144,10 @@ public final class JavalinWebContainer implements Reloadable {
                     ctx.status(HttpStatus.BAD_REQUEST);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.DEMO_MODE_OPERATION_NOT_PERMITTED), null));
                 })
+                .exception(EndpointNotFound.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.METHOD_NOT_ALLOWED);
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_ROUTE_NOT_EXISTS, ctx.method(), ctx.path()), null));
+                })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
@@ -210,6 +215,9 @@ public final class JavalinWebContainer implements Reloadable {
 
 
     private void handleSpaRequest(@NotNull Context ctx) throws IOException {
+        if (ctx.path().startsWith("/api")) {
+            throw new EndpointNotFound(ctx.method(), ctx.path());
+        }
         try (var in = this.getClass().getResourceAsStream("/static/index.html")) {
             if (in == null) {
                 ctx.status(HttpStatus.NOT_FOUND);

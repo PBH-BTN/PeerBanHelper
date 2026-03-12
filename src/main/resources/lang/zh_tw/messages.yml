@@ -862,3 +862,4 @@ BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
   **封鎖描述：** {}
   
   **BTN 伺服器回傳以下資訊供您參考：** {}
+WEBAPI_ROUTE_NOT_EXISTS: "指定的路由不可用或不存在，對應的功能模組是否開啟？路由：{} {}"
