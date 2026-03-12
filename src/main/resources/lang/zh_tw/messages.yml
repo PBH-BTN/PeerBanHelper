@@ -559,7 +559,7 @@ BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
   **封鎖描述：** {}
   
   **BTN 伺服器回傳以下資訊供您參考：** {}
-MODULE_IP_BLACKLIST_SUB_TURNED_OFF: "IP 訂閱規則模組目前處於停用狀態，請先啟用。操作已取消。"
+WEBAPI_ROUTE_NOT_EXISTS: "指定的路由不可用或不存在，對應的功能模組是否開啟？路由：{} {}"
 IP_BLACKLIST_CITY_RULE: "城市規則: {}"
 DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT: "無法保存 {} 的監聽埠！{}"
 DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT: "無法獲取 {} 的監聽埠！{}"

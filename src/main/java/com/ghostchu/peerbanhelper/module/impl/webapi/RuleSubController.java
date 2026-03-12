@@ -68,47 +68,42 @@ public final class RuleSubController extends AbstractFeatureModule {
         moduleManager.getModules().stream()
                 .filter(ele -> "ip-address-blocker-rules".equals(ele.getConfigName()))
                 .findFirst()
-                .ifPresent(ele -> ipBlackRuleList = (IPBlackRuleList) ele);
+                .ifPresent(ele -> {
+                    ipBlackRuleList = (IPBlackRuleList) ele;
+                    // 注册路由
+                    webContainer.javalin()
+                            // 查询检查间隔
+                            .get("/api/sub/interval", this::getCheckInterval, Role.USER_READ)
+                            // 修改检查间隔
+                            .patch("/api/sub/interval", this::changeCheckInterval, Role.USER_WRITE)
+                            // 新增订阅规则
+                            .put("/api/sub/rule", ctx -> save(ctx, null, true), Role.USER_WRITE)
+                            // 更新订阅规则
+                            .post("/api/sub/rule/{ruleId}/update", ctx -> ctx.json(update(ctx, ctx.pathParam("ruleId"))), Role.USER_WRITE)
+                            // 查询订阅规则
+                            .get("/api/sub/rule/{ruleId}", ctx -> ctx.json(get(ctx, ctx.pathParam("ruleId"))), Role.USER_READ)
+                            // 修改订阅规则
+                            .post("/api/sub/rule/{ruleId}", ctx -> save(ctx, ctx.pathParam("ruleId"), false), Role.USER_WRITE)
+                            // 删除订阅规则
+                            .delete("/api/sub/rule/{ruleId}", this::delete, Role.USER_WRITE)
+                            // 启用/禁用订阅规则
+                            .patch("/api/sub/rule/{ruleId}", this::switcher, Role.USER_WRITE)
+                            // 查询订阅规则列表
+                            .get("/api/sub/rules", ctx -> ctx.json(list(ctx)), Role.USER_READ)
+                            // 手动更新全部订阅规则
+                            .post("/api/sub/rules/update", ctx -> ctx.json(updateAll(ctx)), Role.USER_WRITE)
+                            // 查询全部订阅规则更新日志
+                            .get("/api/sub/logs", ctx -> logs(ctx, null), Role.USER_READ)
+                            // 查询订阅规则更新日志
+                            .get("/api/sub/logs/{ruleId}", ctx -> logs(ctx, ctx.pathParam("ruleId")), Role.USER_READ);
+                });
 
-        // 注册路由
-        webContainer.javalin()
-                // 查询检查间隔
-                .get("/api/sub/interval", this::getCheckInterval, Role.USER_READ)
-                // 修改检查间隔
-                .patch("/api/sub/interval", this::changeCheckInterval, Role.USER_WRITE)
-                // 新增订阅规则
-                .put("/api/sub/rule", ctx -> save(ctx, null, true), Role.USER_WRITE)
-                // 更新订阅规则
-                .post("/api/sub/rule/{ruleId}/update", ctx -> ctx.json(update(ctx, ctx.pathParam("ruleId"))), Role.USER_WRITE)
-                // 查询订阅规则
-                .get("/api/sub/rule/{ruleId}", ctx -> ctx.json(get(ctx, ctx.pathParam("ruleId"))), Role.USER_READ)
-                // 修改订阅规则
-                .post("/api/sub/rule/{ruleId}", ctx -> save(ctx, ctx.pathParam("ruleId"), false), Role.USER_WRITE)
-                // 删除订阅规则
-                .delete("/api/sub/rule/{ruleId}", this::delete, Role.USER_WRITE)
-                // 启用/禁用订阅规则
-                .patch("/api/sub/rule/{ruleId}", this::switcher, Role.USER_WRITE)
-                // 查询订阅规则列表
-                .get("/api/sub/rules", ctx -> ctx.json(list(ctx)), Role.USER_READ)
-                // 手动更新全部订阅规则
-                .post("/api/sub/rules/update", ctx -> ctx.json(updateAll(ctx)), Role.USER_WRITE)
-                // 查询全部订阅规则更新日志
-                .get("/api/sub/logs", ctx -> logs(ctx, null), Role.USER_READ)
-                // 查询订阅规则更新日志
-                .get("/api/sub/logs/{ruleId}", ctx -> logs(ctx, ctx.pathParam("ruleId")), Role.USER_READ);
+
     }
 
     @Override
     public void onDisable() {
     }
-
-    /**
-     * 检查对应类型的模块是否可用
-     */
-    private boolean isModuleAvailable() {
-        return ipBlackRuleList != null;
-    }
-
 
     /**
      * 查询检查间隔
@@ -121,9 +116,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 修改检查间隔
      */
     private void changeCheckInterval(Context ctx) {
-        if (!isModuleAvailable()) {
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null));
-        }
         try {
             long interval = JsonUtil.readObject(ctx.body()).get("checkInterval").getAsLong();
             ipBlackRuleList.changeCheckInterval(interval);
@@ -153,12 +145,7 @@ public final class RuleSubController extends AbstractFeatureModule {
      */
     private StdResp updateAll(Context ctx) {
         String locale = locale(ctx);
-        if (!isModuleAvailable()) {
-            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
-        }
-
         AtomicReference<StdResp> result = new AtomicReference<>();
-
         ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream()
                 .map(k -> updateIpRule(locale, k))
                 .filter(ele -> !ele.success())
@@ -174,9 +161,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      */
     private StdResp update(Context ctx, String ruleId) {
         String locale = locale(ctx);
-        if (!isModuleAvailable()) {
-            return new StdResp(false, tl(locale, Lang.RULE_SUB_API_INTERNAL_ERROR, "Module for type '" + "' is not available"), null);
-        }
         return updateIpRule(locale, ruleId);
     }
 
@@ -258,12 +242,6 @@ public final class RuleSubController extends AbstractFeatureModule {
     }
 
     private void saveIpRule(Context ctx, String ruleId, boolean isAdd) throws IOException {
-        String locale = locale(ctx);
-        if (!isModuleAvailable()) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale, Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null));
-            return;
-        }
         SubInfoDTO subInfoDTO = ctx.bodyValidator(SubInfoDTO.class).get();
         if (isAdd) {
             ruleId = subInfoDTO.ruleId();
@@ -330,9 +308,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      */
     private StdResp get(Context ctx, String ruleId) {
         String locale = locale(ctx);
-        if (!isModuleAvailable()) {
-            return new StdResp(false, tl(locale, Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null);
-        }
         return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
     }
 
@@ -341,9 +316,6 @@ public final class RuleSubController extends AbstractFeatureModule {
      */
     private StdResp list(Context ctx) {
         String locale = locale(ctx);
-        if (!isModuleAvailable()) {
-            return new StdResp(false, tl(locale, Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null);
-        }
         List<String> keys = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
         List<RuleSubInfoEntity> data = new ArrayList<>(keys.size());
         for (String s : keys) {

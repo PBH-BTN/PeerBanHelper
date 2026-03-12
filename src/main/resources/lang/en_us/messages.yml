@@ -559,7 +559,7 @@ BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION: |
   **Ban Description:** {}
   
   **The BTN server returned the following information for your reference:** {}
-MODULE_IP_BLACKLIST_SUB_TURNED_OFF: "IP Blacklist Subscription Module currently is disabled, please enable it first. Operation cancelled."
+WEBAPI_ROUTE_NOT_EXISTS: "Given route not available or not exists, Is that feature module enabled? Route: {} {}"
 IP_BLACKLIST_CITY_RULE: "City Rule: {}"
 DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT: "Failed to save port for {}! {}"
 DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT: "Unable to read port of downloader {}! {}"
