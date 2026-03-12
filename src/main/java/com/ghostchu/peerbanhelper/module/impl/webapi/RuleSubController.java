@@ -121,6 +121,9 @@ public final class RuleSubController extends AbstractFeatureModule {
      * 修改检查间隔
      */
     private void changeCheckInterval(Context ctx) {
+        if (!isModuleAvailable()) {
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.MODULE_IP_BLACKLIST_SUB_TURNED_OFF), null));
+        }
         try {
             long interval = JsonUtil.readObject(ctx.body()).get("checkInterval").getAsLong();
             ipBlackRuleList.changeCheckInterval(interval);
