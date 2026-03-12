@@ -167,7 +167,7 @@ public final class JavalinWebContainer implements Reloadable {
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
-                    if (!securityCheck(ctx)) {
+                    if (!securityCheck(ctx) && ExternalSwitch.parseBoolean("pbh.web.securityCheck.blockScanner", true)) {
                         throw new BlockScannerException();
                     }
                     if (ctx.routeRoles().isEmpty()) {
