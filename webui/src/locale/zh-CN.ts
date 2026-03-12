@@ -12,6 +12,7 @@ import configLocale from '@/views/settings/locale/zh-CN'
 import alertLocale from './zh-CN/alert'
 import copierLocale from './zh-CN/copier'
 import plusLocale from './zh-CN/plus'
+import routerLocale from './zh-CN/router'
 import settingsLocale from './zh-CN/settings'
 
 export default {
@@ -83,5 +84,6 @@ export default {
   ...configLocale,
   ...alertLocale,
   ...copierLocale,
-  ...scriptLocale
+  ...scriptLocale,
+  ...routerLocale
 }

@@ -12,6 +12,7 @@ import configLocale from '@/views/settings/locale/zh-TW'
 import alertLocale from './zh-TW/alert'
 import copierLocale from './zh-TW/copier'
 import plusLocale from './zh-TW/plus'
+import routerLocale from './zh-TW/router'
 import settingsLocale from './zh-TW/settings'
 
 export default {
@@ -83,5 +84,6 @@ export default {
   ...configLocale,
   ...alertLocale,
   ...copierLocale,
-  ...scriptLocale
+  ...scriptLocale,
+  ...routerLocale
 }

@@ -1,4 +1,5 @@
 import { genIconComponent } from '@/components/iconFont'
+import { useEndpointStore } from '@/stores/endpoint'
 import BanList from '@/views/banlist/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
@@ -9,7 +10,7 @@ import {
   IconStorage,
   IconWifi
 } from '@arco-design/web-vue/es/icon'
-import { computed, h } from 'vue'
+import { computed, h, type Component } from 'vue'
 import {
   createRouter,
   createWebHistory,
@@ -18,6 +19,28 @@ import {
   type RouteRecordRaw
 } from 'vue-router'
 import Dashboard from '../views/dashboard/index.vue'
+
+export interface DisabledState {
+  disabled: boolean
+  tips: string
+}
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    label?: string
+    needLogin?: boolean
+    hide?: boolean
+    disableAutoUpdate?: boolean
+    disableMenu?: boolean
+    icon?: Component
+    disabled?: DisabledState | (() => DisabledState) | (() => Promise<DisabledState>)
+  }
+}
+const checkModuleEnable = (moduleName: string) => () => ({
+  disabled: !useEndpointStore().isModuleEnabled(moduleName),
+  tips: `router.module.disable.${moduleName}`
+})
+
 export const routerOptions: RouteRecordRaw[] = [
   {
     path: '/dashboard',
@@ -90,7 +113,8 @@ export const routerOptions: RouteRecordRaw[] = [
         meta: {
           label: 'page.rule_management.ruleSubscribe.title',
           icon: () => h(IconCloud),
-          needLogin: true
+          needLogin: true,
+          disabled: checkModuleEnable('ip-address-blocker-rules')
         },
         component: SubscribeManagement
       },
@@ -110,7 +134,8 @@ export const routerOptions: RouteRecordRaw[] = [
         meta: {
           label: 'page.rule_management.ip',
           icon: genIconComponent('icon-IP'),
-          needLogin: true
+          needLogin: true,
+          disabled: checkModuleEnable('ip-address-blocker')
         },
         component: GenericBlackList,
         props: { type: 'ip' }
@@ -121,7 +146,8 @@ export const routerOptions: RouteRecordRaw[] = [
         meta: {
           label: 'page.rule_management.port',
           icon: genIconComponent('icon-dituleiduankou'),
-          needLogin: true
+          needLogin: true,
+          disabled: checkModuleEnable('ip-address-blocker')
         },
         component: GenericBlackList,
         props: { type: 'port' }
@@ -132,7 +158,8 @@ export const routerOptions: RouteRecordRaw[] = [
         meta: {
           label: 'page.rule_management.asn',
           icon: () => h(IconStorage),
-          needLogin: true
+          needLogin: true,
+          disabled: checkModuleEnable('ip-address-blocker')
         },
         component: GenericBlackList,
         props: { type: 'asn' }
@@ -143,7 +170,8 @@ export const routerOptions: RouteRecordRaw[] = [
         meta: {
           label: 'page.rule_management.region',
           icon: () => h(IconLocation),
-          needLogin: true
+          needLogin: true,
+          disabled: checkModuleEnable('ip-address-blocker')
         },
         component: GenericBlackList,
         props: { type: 'region' }
@@ -154,7 +182,8 @@ export const routerOptions: RouteRecordRaw[] = [
         meta: {
           label: 'page.rule_management.city',
           icon: genIconComponent('icon-city'),
-          needLogin: true
+          needLogin: true,
+          disabled: checkModuleEnable('ip-address-blocker')
         },
         component: GenericBlackList,
         props: { type: 'city' }
@@ -165,7 +194,8 @@ export const routerOptions: RouteRecordRaw[] = [
         meta: {
           label: 'page.rule_management.netType',
           icon: () => h(IconWifi),
-          needLogin: true
+          needLogin: true,
+          disabled: checkModuleEnable('ip-address-blocker')
         },
         component: () => import('@/views/rule-management/components/networkType/index.vue')
       }
