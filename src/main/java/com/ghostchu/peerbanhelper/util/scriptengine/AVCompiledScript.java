@@ -27,4 +27,9 @@ public record AVCompiledScript(File file, String name, String author, boolean ca
     public int scriptHashCode() {
         return expression.hashCode();
     }
+
+    @Override
+    public void close() {
+
+    }
 }
