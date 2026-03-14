@@ -65,6 +65,7 @@ export default {
   'page.settings.tab.profile.module.progressCheatBlocker.ipv6prefixlength': 'IPv6 前綴長度',
   'page.settings.tab.profile.module.progressCheatBlocker.ipprefixLength.tips':
     '來自同一子網的 IP 視為同一使用者',
+  'page.settings.tab.profile.module.progressCheatBlocker.useGlobalBanTime': '使用全域封禁時間',
   'page.settings.tab.profile.module.progressCheatBlocker.enablePersist': '啟用持久化記錄',
   'page.settings.tab.profile.module.progressCheatBlocker.enablePersist.tips':
     '啟用此功能可能增加磁碟 I/O 並可能影響性能，嵌入式裝置上甚至可能帶來快閃記憶體磨損',
@@ -113,8 +114,7 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全域封禁時間',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '規則訂閱',
-  'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
-    '啟用來自 BTN 網路的規則，僅在 config.yml 中配置了 BTN 服務器時生效',
+  'page.settings.tab.profile.module.ruleSubscribe.enable.tips': '啟用此功能可以訂閱遠程規則',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全域封禁時間',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置請前往{link}頁面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '規則訂閱',
