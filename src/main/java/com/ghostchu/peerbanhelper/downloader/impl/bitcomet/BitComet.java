@@ -474,11 +474,10 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
-
         Map<String, Object> requirements = new HashMap<>();
         requirements.put("groups", peerGroupsFilter);
         requirements.put("task_id", torrent.getId());
-        requirements.put("max_count", String.valueOf(Integer.MAX_VALUE)); // 获取全量列表，因为我们需要检查所有 Peers
+        requirements.put("max_count", 0); // 获取全量列表，因为我们需要检查所有 Peers
 
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(requirements), MediaType.get("application/json"));
         Request request = new Request.Builder()
