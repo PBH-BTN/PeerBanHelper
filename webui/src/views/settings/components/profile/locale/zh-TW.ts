@@ -114,7 +114,7 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全域封禁時間',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '規則訂閱',
-  'page.settings.tab.profile.module.ruleSubscribe.enable.tips': '啟用此功能可以訂閱遠程規則',
+  'page.settings.tab.profile.module.ruleSubscribe.enable.tips': '啟用此功能可以訂閱遠端規則',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全域封禁時間',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置請前往{link}頁面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '規則訂閱',
