@@ -493,15 +493,12 @@ public final class BitComet extends AbstractDownloader {
             if (peers.getPeers() == null) {
                 return Collections.emptyList();
             }
-            var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null); // 2.10 的一些版本没有 group 字段
-            var stream = peers.getPeers().stream();
-
-            if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-                stream = stream.filter(dto ->
-                         "peers_connected".equals(dto.getGroup())
-                        || "ltseeds_connected".equals(dto.getGroup())
-                );
-            }
+            var stream = peers.getPeers()
+                    .stream()
+                    .filter(dto ->
+                            "peers_connected".equals(dto.getGroup())
+                                    || "ltseeds_connected".equals(dto.getGroup())
+                    );
             return stream.map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
 
