@@ -474,7 +474,7 @@ public final class BitComet extends AbstractDownloader {
     @Override
     public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         Map<String, Object> requirements = new HashMap<>();
-        requirements.put("groups", List.of("peers_connected")); // 2.11 Beta 3 可以限制获取哪一类 Peers，注意下面仍需要检查，因为旧版本不支持
+        requirements.put("groups", List.of("peers_connected", "ltseeds_connected"));
         requirements.put("task_id", torrent.getId());
         requirements.put("max_count", String.valueOf(Integer.MAX_VALUE)); // 获取全量列表，因为我们需要检查所有 Peers
 
@@ -493,15 +493,8 @@ public final class BitComet extends AbstractDownloader {
             if (peers.getPeers() == null) {
                 return Collections.emptyList();
             }
-            var stream = peers.getPeers()
-                    .stream()
-                    .filter(dto ->
-                            "peers_connected".equals(dto.getGroup())
-                                    || "ltseeds_connected".equals(dto.getGroup())
-                    );
-            return stream.map(peer -> new PeerImpl(
+            return  peers.getPeers().stream().map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
-
                     ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),
