@@ -24,6 +24,7 @@ import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+import io.javalin.router.EndpointNotFound;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.Setter;
@@ -136,12 +137,29 @@ public final class JavalinWebContainer implements Reloadable {
                 .exception(BlockScannerException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.NOT_FOUND);
                     ctx.header("Server", "nginx");
-                    ctx.result("404 not found");
+                    ctx.result("""
+                            <html>
+                            <head><title>404 Not Found</title></head>
+                            <body>
+                            <center><h1>404 Not Found</h1></center>
+                            <hr><center>nginx</center>
+                            </body>
+                            </html>
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->
+                            <!-- a padding to disable MSIE and Chrome friendly error page -->""");
                     ctx.attribute("skipAfter", true);
                 })
                 .exception(DemoModeException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.DEMO_MODE_OPERATION_NOT_PERMITTED), null));
+                })
+                .exception(EndpointNotFound.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.METHOD_NOT_ALLOWED);
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_ROUTE_NOT_EXISTS, ctx.method(), ctx.path()), null));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -149,7 +167,7 @@ public final class JavalinWebContainer implements Reloadable {
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
-                    if (!securityCheck(ctx)) {
+                    if (!securityCheck(ctx) && ExternalSwitch.parseBoolean("pbh.web.securityCheck.blockScanner", true)) {
                         throw new BlockScannerException();
                     }
                     if (ctx.routeRoles().isEmpty()) {
@@ -210,6 +228,9 @@ public final class JavalinWebContainer implements Reloadable {
 
 
     private void handleSpaRequest(@NotNull Context ctx) throws IOException {
+        if (ctx.path().startsWith("/api")) {
+            throw new EndpointNotFound(ctx.method(), ctx.path());
+        }
         try (var in = this.getClass().getResourceAsStream("/static/index.html")) {
             if (in == null) {
                 ctx.status(HttpStatus.NOT_FOUND);

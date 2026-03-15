@@ -78,7 +78,7 @@ public final class PBHAlertController extends AbstractFeatureModule {
             return;
         }
         entity.setReadAt(OffsetDateTime.now());
-        alertDao.save(entity);
+        alertDao.saveOrUpdate(entity);
         ctx.status(200);
         ctx.json(new StdResp(true, "OK", null));
     }

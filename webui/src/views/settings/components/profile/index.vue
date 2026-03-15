@@ -150,6 +150,7 @@
 <script setup lang="ts">
 import { type Profile } from '@/api/model/profile'
 import { GetProfile, SaveProfile } from '@/service/settings'
+import { useEndpointStore } from '@/stores/endpoint'
 import { formatMilliseconds } from '@/utils/time'
 import { Message } from '@arco-design/web-vue'
 import { reactive, ref } from 'vue'
@@ -213,6 +214,7 @@ const submitConfig = async () => {
   try {
     const data = await SaveProfile(form)
     if (data.success) {
+      useEndpointStore().refreshManifest()
       Message.success(data.message)
     } else {
       Message.error(data.message)

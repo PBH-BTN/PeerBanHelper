@@ -1,4 +1,5 @@
 export default {
+  'page.rule_management.netType.description': '下列網絡類型的 Peer 將會被封禁',
   'page.rule_management.netType.wideband': '寬帶',
   'page.rule_management.netType.baseStation': '基站',
   'page.rule_management.netType.governmentAndEnterpriseLine': '政企專線',

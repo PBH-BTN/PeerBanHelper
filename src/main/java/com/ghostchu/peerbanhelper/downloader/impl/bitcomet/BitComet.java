@@ -52,6 +52,7 @@ public final class BitComet extends AbstractDownloader {
     private String deviceToken;
     private Semver serverVersion;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
+    private final List<String> peerGroupsFilter = List.of("peers_connected", "ltseeds_connected");
 
     public BitComet(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(id, alertManager, natAddressProvider);
@@ -143,7 +144,7 @@ public final class BitComet extends AbstractDownloader {
             }
             var loginResponse = JsonUtil.standard().fromJson(response.body().string(), BCLoginResponse.class);
             if ("PASSWORD_ERROR".equalsIgnoreCase(loginResponse.getErrorCode())) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED, loginResponse));
             }
             if (!"ok".equalsIgnoreCase(loginResponse.getErrorCode())) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
@@ -474,9 +475,9 @@ public final class BitComet extends AbstractDownloader {
     @Override
     public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         Map<String, Object> requirements = new HashMap<>();
-        requirements.put("groups", List.of("peers_connected")); // 2.11 Beta 3 可以限制获取哪一类 Peers，注意下面仍需要检查，因为旧版本不支持
+        requirements.put("groups", peerGroupsFilter);
         requirements.put("task_id", torrent.getId());
-        requirements.put("max_count", String.valueOf(Integer.MAX_VALUE)); // 获取全量列表，因为我们需要检查所有 Peers
+        requirements.put("max_count", 0); // 获取全量列表，因为我们需要检查所有 Peers
 
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(requirements), MediaType.get("application/json"));
         Request request = new Request.Builder()
@@ -493,23 +494,18 @@ public final class BitComet extends AbstractDownloader {
             if (peers.getPeers() == null) {
                 return Collections.emptyList();
             }
-            var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null); // 2.10 的一些版本没有 group 字段
-            var stream = peers.getPeers().stream();
-
-            if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-                stream = stream.filter(dto -> "connected".equals(dto.getGroup()) // 2.10 正式版
-                        || "connected_peers".equals(dto.getGroup()) // 2.11 Beta 1-2
-                        || "peers_connected".equals(dto.getGroup())); // 2.11 Beta 3
-            }
+            var stream = peers.getPeers()
+                    .stream()
+                    .filter(dto -> peerGroupsFilter.contains(dto.getGroup()));
             return stream.map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
 
                     ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),
-                    peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
+                    peer.getDlSize(),
                     peer.getUpRate(),
-                    peer.getUpSize() != null ? peer.getUpSize() : -1, // 兼容 2.10
+                    peer.getUpSize(),
                     peer.getPermillage() / 1000.0d, null,
                     peer.getDlRate() <= 0 && peer.getUpRate() <= 0)
             ).collect(Collectors.toList());
