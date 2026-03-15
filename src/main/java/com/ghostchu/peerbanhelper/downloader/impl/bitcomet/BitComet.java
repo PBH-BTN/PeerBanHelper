@@ -143,7 +143,7 @@ public final class BitComet extends AbstractDownloader {
             }
             var loginResponse = JsonUtil.standard().fromJson(response.body().string(), BCLoginResponse.class);
             if ("PASSWORD_ERROR".equalsIgnoreCase(loginResponse.getErrorCode())) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED, loginResponse));
             }
             if (!"ok".equalsIgnoreCase(loginResponse.getErrorCode())) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, loginResponse));
@@ -497,9 +497,10 @@ public final class BitComet extends AbstractDownloader {
             var stream = peers.getPeers().stream();
 
             if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-                stream = stream.filter(dto -> "connected".equals(dto.getGroup()) // 2.10 正式版
-                        || "connected_peers".equals(dto.getGroup()) // 2.11 Beta 1-2
-                        || "peers_connected".equals(dto.getGroup())); // 2.11 Beta 3
+                stream = stream.filter(dto ->
+                         "peers_connected".equals(dto.getGroup())
+                        || "ltseeds_connected".equals(dto.getGroup())
+                );
             }
             return stream.map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
@@ -507,9 +508,9 @@ public final class BitComet extends AbstractDownloader {
                     ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),
-                    peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
+                    peer.getDlSize(),
                     peer.getUpRate(),
-                    peer.getUpSize() != null ? peer.getUpSize() : -1, // 兼容 2.10
+                    peer.getUpSize(),
                     peer.getPermillage() / 1000.0d, null,
                     peer.getDlRate() <= 0 && peer.getUpRate() <= 0)
             ).collect(Collectors.toList());
