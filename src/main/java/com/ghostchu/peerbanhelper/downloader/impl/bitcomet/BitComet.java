@@ -52,6 +52,7 @@ public final class BitComet extends AbstractDownloader {
     private String deviceToken;
     private Semver serverVersion;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
+    private final List<String> peerGroupsFilter = List.of("peers_connected", "ltseeds_connected");
 
     public BitComet(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(id, alertManager, natAddressProvider);
@@ -473,8 +474,9 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+
         Map<String, Object> requirements = new HashMap<>();
-        requirements.put("groups", List.of("peers_connected", "ltseeds_connected"));
+        requirements.put("groups", peerGroupsFilter);
         requirements.put("task_id", torrent.getId());
         requirements.put("max_count", String.valueOf(Integer.MAX_VALUE)); // 获取全量列表，因为我们需要检查所有 Peers
 
@@ -493,8 +495,12 @@ public final class BitComet extends AbstractDownloader {
             if (peers.getPeers() == null) {
                 return Collections.emptyList();
             }
-            return  peers.getPeers().stream().map(peer -> new PeerImpl(
+            var stream = peers.getPeers()
+                    .stream()
+                    .filter(dto -> peerGroupsFilter.contains(dto.getGroup()));
+            return stream.map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
+
                     ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),
