@@ -84,7 +84,6 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 log.info(tlUI(Lang.PORTMAPPER_SCANNED, gatewayDiscover.getAllGateways().size()));
             } catch (IOException | SAXException | ParserConfigurationException e) {
                 log.error(tlUI(Lang.PORT_MAPPER_DISCOVER_IGD_FAILED), e);
-                log.error("Unable to discover UPnP gateways", e);
             }
         }
     }

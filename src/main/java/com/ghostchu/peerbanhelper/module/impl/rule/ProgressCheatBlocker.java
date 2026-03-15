@@ -353,7 +353,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             );
 
             if ((rewind > rewindMaximumDifference && isUploadingToPeer(peer))) {
-                if (peer.getProgress() > 0.0d) { // 满足等待时间或者 Peer 进度大于 0% (Peer 已更新 BIT_FIELD)
+                if (peer.getProgress() > 0.0d || isBanDelayWindowExpired(rangeEntity, addressEntity)) { // 满足等待时间或者 Peer 进度大于 0% (Peer 已更新 BIT_FIELD)
                     addressEntity.setRewindCounter(addressEntity.getRewindCounter() + 1);
                     rangeEntity.setRewindCounter(rangeEntity.getRewindCounter() + 1);
                     resetBanDelayWindow(rangeEntity, addressEntity);
@@ -364,6 +364,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                                     percent(lastReportProgress),
                                     percent(rewind),
                                     percent(rewindMaximumDifference)), structuredData.add("type", "rewindProgress"));
+                } else {
+                    if (!isBanDelayWindowScheduled(rangeEntity, addressEntity)) {
+                        scheduleBanDelayWindow(rangeEntity, addressEntity);
+                    }
                 }
             }
         }

@@ -739,6 +739,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
+                    log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), response.code() + " " + response.body().string()));
                     throw new IllegalStateException("Request failed with code: " + response.code());
                 }
                 String responseBody = response.body().string();
@@ -747,6 +748,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 return preferences.getListenPort();
             }
         } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), e.getClass().getName() + ": " + e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
