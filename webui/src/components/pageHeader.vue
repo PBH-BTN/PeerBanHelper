@@ -52,7 +52,10 @@
                     ? t(resolveDisabled(child.meta).value.tips)
                     : undefined
                 "
-                :disabled="!resolveDisabled(child.meta).value.tips || !resolveDisabled(child.meta).value.disabled"
+                :disabled="
+                  !resolveDisabled(child.meta).value.tips ||
+                  !resolveDisabled(child.meta).value.disabled
+                "
               >
                 <a-menu-item
                   :key="child.name"
@@ -105,7 +108,10 @@
                           ? t(resolveDisabled(child.meta).value.tips)
                           : undefined
                       "
-                      :disabled="!resolveDisabled(child.meta).value.tips || !resolveDisabled(child.meta).value.disabled"
+                      :disabled="
+                        !resolveDisabled(child.meta).value.tips ||
+                        !resolveDisabled(child.meta).value.disabled
+                      "
                     >
                       <a-doption
                         :value="child"
