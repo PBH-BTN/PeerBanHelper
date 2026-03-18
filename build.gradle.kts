@@ -170,7 +170,7 @@ dependencies {
     }
 
     // SWT (provided scope - for compilation only)
-    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.132.0")
+    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.133.0")
 
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0.3")
