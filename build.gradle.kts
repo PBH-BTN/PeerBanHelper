@@ -5,7 +5,7 @@ plugins {
     id("com.install4j.gradle") version "12.0.3" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.3.10"
+    kotlin("plugin.lombok") version "2.3.20"
     id("io.freefair.lombok") version "9.2.0"
 }
 
@@ -45,7 +45,7 @@ repositories {
     }
 }
 
-val flatlafVersion = "3.7"
+val flatlafVersion = "3.7.1"
 val ormliteVersion = "6.1"
 
 configurations.all {
@@ -59,14 +59,14 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.5"){
+    implementation("org.springframework:spring-context:7.0.6"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
     implementation("com.github.chris2018998:beecp:5.2.2")
-    implementation("org.springframework:spring-tx:7.0.5")
-    implementation("org.springframework:spring-jdbc:7.0.5")
-    implementation("org.xerial:sqlite-jdbc:3.51.2.0")
+    implementation("org.springframework:spring-tx:7.0.6")
+    implementation("org.springframework:spring-jdbc:7.0.6")
+    implementation("org.xerial:sqlite-jdbc:3.51.3.0")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.10")
     implementation("com.mysql:mysql-connector-j:9.6.0") {
@@ -116,14 +116,14 @@ dependencies {
     // DNS
     implementation("dnsjava:dnsjava:3.6.4")
     // UI - FlatLaf
-    implementation("com.formdev:flatlaf-extras:3.7")
+    implementation("com.formdev:flatlaf-extras:3.7.1")
     implementation("com.formdev:flatlaf:$flatlafVersion")
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
     // Utilities
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("com.google.guava:guava:33.5.0-jre")
-    implementation("com.github.seancfoley:ipaddress:5.6.1")
+    implementation("com.github.seancfoley:ipaddress:5.6.2")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
 
     // Plugin framework
