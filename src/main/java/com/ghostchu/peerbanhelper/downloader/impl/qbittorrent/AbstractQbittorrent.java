@@ -267,7 +267,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
                 try (Response response = httpClient.newCall(request).execute()) {
                     if (!response.isSuccessful()) {
-                        throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, response.code(), response.body() != null ? response.body().string() : "null"));
+                        throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, response.code(), response.body().string()));
                     }
                     String responseBody = response.body().string();
                     List<QBittorrentTorrent> pageTorrents = JsonUtil.getGson().fromJson(responseBody, new TypeToken<List<QBittorrentTorrent>>() {
@@ -326,7 +326,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT, torrent.getHash(), response.code(), response.body() != null ? response.body().string() : "null"));
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT, torrent.getHash(), response.code(), response.body().string()));
                 }
                 String responseBody = response.body().string();
                 List<QBittorrentTorrentTrackers> qbTorrentTrackers = JsonUtil.getGson().fromJson(responseBody, new TypeToken<List<QBittorrentTorrentTrackers>>() {
@@ -417,7 +417,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
                     throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + response.code());
                 }
             }
@@ -550,7 +550,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, response.code(), response.body() != null ? response.body().string() : "null"));
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, response.code(), response.body().string()));
                 }
                 String responseBody = response.body().string();
                 QBittorrentMainData mainData = JsonUtil.getGson().fromJson(responseBody, QBittorrentMainData.class);
@@ -571,7 +571,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body() != null ? response.body().string() : "null"));
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body().string()));
                 }
                 String responseBody = response.body().string();
                 JsonObject object = JsonParser.parseString(responseBody).getAsJsonObject();
@@ -638,7 +638,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
                 try (Response response = httpClient.newCall(request).execute()) {
                     if (!response.isSuccessful()) {
-                        log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                        log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
                         throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + response.code());
                     }
                 }
@@ -690,7 +690,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
                     throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + response.code());
                 }
             }
@@ -719,7 +719,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                    log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
                     throw new IllegalStateException("Save qBittorrent BTProtocolPort failed: statusCode=" + response.code());
                 }
             }

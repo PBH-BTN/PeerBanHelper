@@ -128,7 +128,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
         if (powCaptcha) btnNetwork.gatherAndSolveCaptchaBlocking(request, "submit_bans");
         try (Response resp = btnNetwork.getHttpClient().newCall(request.build()).execute()) {
             if (!resp.isSuccessful()) { // 检查2xx状态码
-                String responseBody = resp.body() != null ? resp.body().string() : "";
+                String responseBody = resp.body().string();
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.code() + " - " + responseBody));
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody));
                 throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody)));

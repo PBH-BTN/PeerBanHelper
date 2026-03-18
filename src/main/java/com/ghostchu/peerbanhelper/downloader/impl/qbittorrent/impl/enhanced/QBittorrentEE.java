@@ -103,7 +103,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
             
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body() != null ? response.body().string() : "null"));
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body().string()));
                 }
                 
                 String responseBody = response.body().string();
@@ -239,7 +239,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     
                     try (Response response = httpClient.newCall(request).execute()) {
                         if (!response.isSuccessful()) {
-                            log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                            log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
                             throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + response.code());
                         }
                     }
@@ -268,7 +268,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                 
                 try (Response response = httpClient.newCall(request).execute()) {
                     if (!response.isSuccessful()) {
-                        log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                        log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
                         throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + response.code());
                     }
                 }
