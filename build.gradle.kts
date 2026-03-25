@@ -152,7 +152,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.18.1")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.10.Final") {
+    implementation("io.netty:netty-all:4.2.11.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")
