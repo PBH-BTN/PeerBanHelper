@@ -4,8 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: sha256-p9jYcEi0IEiHBS4URspAuc4sT1cMrsjrxxA9lhW+gzQ=
-
 patchedDependencies:
   vue-request@2.0.4:
     hash: a0013a8bdb361bbd3fd0a2a0c34418ae466b51e43079895b6666a63fdb8ef34d
@@ -23,7 +21,7 @@ importers:
         version: 3.4.5
       '@formatjs/intl-durationformat':
         specifier: ^0.10.1
-        version: 0.10.2
+        version: 0.10.3
       '@guolao/vue-monaco-editor':
         specifier: ^1.6.0
         version: 1.6.0(monaco-editor@0.55.1)(vue@3.5.30(typescript@5.9.3))
@@ -554,14 +552,17 @@ packages:
     resolution: {integrity: sha512-bIZEUzOI1jkhviX2cp5vNyXQc6olzb2ohewQubuYlMXZ2Q/XjBO0x0XhGPvc9fjSIiUN0vw+0hq53BJ4eQSJKQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@formatjs/ecma402-abstract@3.1.2':
-    resolution: {integrity: sha512-ApPcse35dtr+snmBbDtnBkc9bvAZCxr9DDzgUR3nXiHZgpwU+85g1Mz0KRqjh7kIgJ6rgIQLQVqYx56rf58XZg==}
+  '@formatjs/bigdecimal@0.2.0':
+    resolution: {integrity: sha512-GeaxHZbUoYvHL9tC5eltHLs+1zU70aPw0s7LwqgktIzF5oMhNY4o4deEtusJMsq7WFJF3Ye2zQEzdG8beVk73w==}
+
+  '@formatjs/ecma402-abstract@3.2.0':
+    resolution: {integrity: sha512-dHnqHgBo6GXYGRsepaE1wmsC2etaivOWd5VaJstZd+HI2zR3DCUjbDVZRtoPGkkXZmyHvBwrdEUuqfvzhF/DtQ==}
 
   '@formatjs/fast-memoize@3.1.1':
     resolution: {integrity: sha512-CbNbf+tlJn1baRnPkNePnBqTLxGliG6DDgNa/UtV66abwIjwsliPMOt0172tzxABYzSuxZBZfcp//qI8AvBWPg==}
 
-  '@formatjs/intl-durationformat@0.10.2':
-    resolution: {integrity: sha512-V0SPTsS1uywC2vUg/A144LilUVXPmlbTJb1kc1sCR6VnihMO6odPvD21DtQQnjLbsWVPWEce2UkUKe3gte1Cpw==}
+  '@formatjs/intl-durationformat@0.10.3':
+    resolution: {integrity: sha512-xRS3GaOlsQLwz0n56SvaddwEnl2NLPKBvYg2M32ak/27dodmVxFJz3j7Nqj7EwKyHTu3f/e+BeoKPrIDUSXTuQ==}
 
   '@formatjs/intl-localematcher@0.8.2':
     resolution: {integrity: sha512-q05KMYGJLyqFNFtIb8NhWLF5X3aK/k0wYt7dnRFuy6aLQL+vUwQ1cg5cO4qawEiINybeCPXAWlprY2mSBjSXAQ==}
@@ -1361,9 +1362,6 @@ packages:
       supports-color:
         optional: true
 
-  decimal.js@10.6.0:
-    resolution: {integrity: sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==}
-
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
@@ -2095,6 +2093,10 @@ packages:
 
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
+    engines: {node: '>=8.6'}
+
+  picomatch@2.3.2:
+    resolution: {integrity: sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==}
     engines: {node: '>=8.6'}
 
   picomatch@4.0.2:
@@ -3081,17 +3083,19 @@ snapshots:
       '@eslint/core': 1.1.0
       levn: 0.4.1
 
-  '@formatjs/ecma402-abstract@3.1.2':
+  '@formatjs/bigdecimal@0.2.0': {}
+
+  '@formatjs/ecma402-abstract@3.2.0':
     dependencies:
+      '@formatjs/bigdecimal': 0.2.0
       '@formatjs/fast-memoize': 3.1.1
       '@formatjs/intl-localematcher': 0.8.2
-      decimal.js: 10.6.0
 
   '@formatjs/fast-memoize@3.1.1': {}
 
-  '@formatjs/intl-durationformat@0.10.2':
+  '@formatjs/intl-durationformat@0.10.3':
     dependencies:
-      '@formatjs/ecma402-abstract': 3.1.2
+      '@formatjs/ecma402-abstract': 3.2.0
       '@formatjs/intl-localematcher': 0.8.2
 
   '@formatjs/intl-localematcher@0.8.2':
@@ -3674,7 +3678,7 @@ snapshots:
   anymatch@3.1.3:
     dependencies:
       normalize-path: 3.0.0
-      picomatch: 2.3.1
+      picomatch: 2.3.2
     optional: true
 
   argparse@2.0.1: {}
@@ -3973,8 +3977,6 @@ snapshots:
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
-
-  decimal.js@10.6.0: {}
 
   deep-is@0.1.4: {}
 
@@ -4750,6 +4752,9 @@ snapshots:
 
   picomatch@2.3.1: {}
 
+  picomatch@2.3.2:
+    optional: true
+
   picomatch@4.0.2: {}
 
   picomatch@4.0.3: {}
@@ -4867,7 +4872,7 @@ snapshots:
 
   readdirp@3.6.0:
     dependencies:
-      picomatch: 2.3.1
+      picomatch: 2.3.2
     optional: true
 
   readdirp@5.0.0: {}
