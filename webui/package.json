@@ -23,7 +23,7 @@
     "@guolao/vue-monaco-editor": "^1.6.0",
     "@octokit/core": "^7.0.6",
     "@octokit/request-error": "^7.1.0",
-    "@sentry/vue": "^10.40.0",
+    "@sentry/vue": "^10.45.0",
     "@vueuse/core": "^14",
     "antlr4": "^4.13.2",
     "compare-versions": "^6.1.1",
