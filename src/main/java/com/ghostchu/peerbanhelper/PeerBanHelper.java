@@ -263,6 +263,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(SessionAnalyseServiceModule.class);
         moduleClasses.add(PeerRecordingServiceModule.class);
         moduleClasses.add(AntiVampire.class);
+        moduleClasses.add(PBHPluginController.class);
         moduleClasses.forEach(moduleClass -> moduleManager.register(moduleClass)); // 不要并行加载，会破坏依赖关系
     }
 
