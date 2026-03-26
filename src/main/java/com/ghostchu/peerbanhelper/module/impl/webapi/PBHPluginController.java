@@ -124,6 +124,7 @@ public class PBHPluginController extends AbstractFeatureModule {
             });
             default -> throw new IllegalArgumentException("OperatePluginDTO not supported.");
         }
+        context.json(new StdResp(true, null, result));
     }
 
     private void listPlugins(@NotNull Context context) {
