@@ -3,10 +3,7 @@ package com.ghostchu.peerbanhelper.util;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -21,7 +18,7 @@ import java.util.zip.GZIPOutputStream;
 public final class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
 
-    public static String getAllThreadTrace(){
+    public static String getAllThreadTrace() {
         StringBuilder threadDump = new StringBuilder(System.lineSeparator());
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
@@ -57,6 +54,17 @@ public final class MiscUtil {
             gzipOs.write(buffer, 0, bytesRead);
         }
         gzipOs.close();
+    }
+
+    @NotNull
+    public static String throwableToString(@NotNull Throwable t) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream();
+             PrintStream ps = new PrintStream(os)) {
+            t.printStackTrace(ps);
+            return os.toString();
+        } catch (IOException e) {
+            return "Failed to convert throwable to string: " + e.getMessage();
+        }
     }
 
     /**

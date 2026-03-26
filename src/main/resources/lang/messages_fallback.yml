@@ -562,3 +562,5 @@ WEBAPI_ROUTE_NOT_EXISTS: "指定的路由不可用或不存在，对应的功能
 IP_BLACKLIST_CITY_RULE: "城市规则: {}"
 DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT: "无法保存 {} 的监听端口！{}"
 DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT: "无法获取 {} 的监听端口！{}"
+WEBAPI_PLUGIN_OPERATION_COMPLETED: "操作已完成"
+WEBAPI_PLUGIN_LOAD_FROM_UNSAFE_LOCATION: "拒绝加载：加载插件的文件系统位置不安全，传入的插件路径必须位于插件目录内，从其他位置加载插件是不被允许的"
