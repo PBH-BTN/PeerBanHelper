@@ -152,7 +152,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.18.1")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.10.Final") {
+    implementation("io.netty:netty-all:4.2.11.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")
@@ -175,7 +175,7 @@ dependencies {
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:12.0.3")
 
-    implementation(platform("io.sentry:sentry-bom:8.36.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.37.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
@@ -188,7 +188,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
 
 }
 
