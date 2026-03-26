@@ -101,7 +101,7 @@ public class PBHPluginController extends AbstractFeatureModule {
                         return;
                     }
                     var value = pluginManager.loadPlugin(pathObj);
-                    result.add(new PluginOperateResultDTO(path, value,  tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
+                    result.add(new PluginOperateResultDTO(path, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
                 } catch (Exception e) {
                     result.add(new PluginOperateResultDTO(path, null, MiscUtil.throwableToString(e)));
                 }
@@ -109,7 +109,7 @@ public class PBHPluginController extends AbstractFeatureModule {
             case "unload" -> dto.getIdentifiers().forEach(id -> {
                 try {
                     var value = pluginManager.unloadPlugin(id);
-                    result.add(new PluginOperateResultDTO(id, value,  tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
+                    result.add(new PluginOperateResultDTO(id, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
                 } catch (Exception e) {
                     result.add(new PluginOperateResultDTO(id, null, MiscUtil.throwableToString(e)));
                 }
@@ -180,7 +180,6 @@ public class PBHPluginController extends AbstractFeatureModule {
             if (plugin.getFailedException() != null) {
                 // 打印异常堆栈跟踪到内存文本
                 this.errorMessage = MiscUtil.throwableToString(plugin.getFailedException());
-                ;
             }
             PluginDescriptor descriptor = plugin.getDescriptor();
             this.version = descriptor.getVersion();
@@ -195,6 +194,10 @@ public class PBHPluginController extends AbstractFeatureModule {
             Plugin pluginInstance = plugin.getPlugin();
             if (pluginInstance instanceof PBHPlugin pplug) {
                 this.displayName = tl(locale, pplug.getPluginDisplayName());
+                var desc = pplug.getPluginDescription();
+                if (desc != null) {
+                    this.description = tl(locale, pplug.getPluginDescription());
+                }
                 this.menus.addAll(pplug.getPluginMenu().stream().map(menu -> new PBHPluginMenuDTO(locale, menu)).toList());
             }
         }
