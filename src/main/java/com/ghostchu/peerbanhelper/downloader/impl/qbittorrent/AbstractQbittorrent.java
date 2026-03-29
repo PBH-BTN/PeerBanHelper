@@ -554,7 +554,13 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 }
                 String responseBody = response.body().string();
                 QBittorrentMainData mainData = JsonUtil.getGson().fromJson(responseBody, QBittorrentMainData.class);
-                return new DownloaderStatistics(mainData.getServerState().getAlltimeUl(), mainData.getServerState().getAlltimeDl());
+                var ul = mainData.getServerState().getAlltimeUl();
+                var dl = mainData.getServerState().getAlltimeDl();
+                if (ul == 0 && dl == 0) {
+                    // downloader maybe not ready
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, getName()));
+                }
+                return new DownloaderStatistics(ul, dl);
             }
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -589,16 +595,6 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     }
                     if (s.contains(".onion") || s.contains(".i2p")) {
                         continue;
-                    }
-                    // 一个 QB 本地化问题的 Workaround
-                    if (qbPeer.getPeerId() == null || "Unknown".equals(qbPeer.getPeerId()) || "未知".equals(qbPeer.getPeerId())) {
-                        qbPeer.setPeerIdClient("");
-                    }
-                    if (qbPeer.getClientName() != null) {
-                        if (qbPeer.getClientName().startsWith("Unknown [") && qbPeer.getClientName().endsWith("]")) {
-                            String mid = qbPeer.getClientName().substring("Unknown [".length(), qbPeer.getClientName().length() - 1);
-                            qbPeer.setClient(mid);
-                        }
                     }
                     qbPeer.getPeerAddress().setRawIp(s);
                     qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
