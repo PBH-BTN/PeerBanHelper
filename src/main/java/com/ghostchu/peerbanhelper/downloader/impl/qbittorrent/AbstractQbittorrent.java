@@ -558,7 +558,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 var dl = mainData.getServerState().getAlltimeDl();
                 if (ul == 0 && dl == 0) {
                     // downloader maybe not ready
-                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, getName()));
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, getName(), "not ready (alltimeUl=0, alltimeDl=0)"));
                 }
                 return new DownloaderStatistics(ul, dl);
             }
