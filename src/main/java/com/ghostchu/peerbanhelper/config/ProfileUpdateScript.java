@@ -25,6 +25,18 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 38)
+    public void addUnknownRules() {
+        List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
+        bannedPeerIds.add("{\"method\":\"EQUALS\",\"content\":\"Unknown\"}");
+        bannedPeerIds.add("{\"method\":\"EQUALS\",\"content\":\"未知\"}");
+        conf.set("module.peer-id-blacklist.banned-peer-id", bannedPeerIds);
+
+        List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");
+        bannedClientNames.add("{\"method\":\"STARTS_WITH\",\"content\":\"Unknown [\"}");
+        conf.set("module.client-name-blacklist.banned-client-name", bannedClientNames);
+    }
+
     @UpdateScript(version = 37)
     public void analyseModulesCacheStuff(YamlConfiguration bundled) {
         conf.set("module.peer-analyse-service.swarm-tracking.data-flush-interval", bundled.get("module.peer-analyse-service.swarm-tracking.data-flush-interval"));
