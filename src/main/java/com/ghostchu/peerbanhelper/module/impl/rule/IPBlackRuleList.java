@@ -356,7 +356,13 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
                     count.getAndIncrement();
-                    ips.put(parsedIp.getKey(), parsedIp.getValue());
+                    var exists = ips.get(parsedIp.getKey());
+                    if (exists == null) { // 合并注释
+                        ips.put(parsedIp.getKey(), parsedIp.getValue());
+                    } else {
+                        ips.put(parsedIp.getKey(), exists + "\n" + parsedIp.getValue());
+                    }
+
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
