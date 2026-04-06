@@ -613,7 +613,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
             if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
-                joiner.add(remapBanListAddress(p.getPeer().getAddress().getAddress()).toNormalizedString());
+                remapBanListAddress(p.getPeer().getAddress().getAddress()).forEach(ip->joiner.add(ip.toNormalizedString()));
             } else {
                 joiner.add(p.getPeer().getRawIp());
             }
@@ -650,7 +650,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         String banStr;
         if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
             banStr = bannedAddresses.stream()
-                    .map(ipAddr -> remapBanListAddress(ipAddr).toNormalizedString())
+                    .flatMap(ipAddr -> remapBanListAddress(ipAddr).stream().map(IPAddress::toNormalizedString))
                     .distinct()
                     .collect(Collectors.joining("\n"));
         } else {

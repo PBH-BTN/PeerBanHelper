@@ -141,7 +141,7 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     @NotNull
-    public IPAddress remapBanListAddress(@NotNull IPAddress banAddress) {
+    public List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress) {
         return IPAddressUtil.remapBanListAddress(banAddress);
     }
 

@@ -136,13 +136,21 @@ public final class IPAddressUtil {
 
         if (body.isIPv4()) { // 如果是 IPV4，则为其生成 IPV6 映射地址，并映射 PrefixLength
             IPAddress instance = body.toIPv6();
-            if (prefixLength != null) instance.toPrefixBlock(prefixLength + 96);
+            if (prefixLength != null) {
+                if (prefixLength > 32)
+                    throw new IllegalArgumentException("Invalid prefix length for IPv4 address: " + address);
+                instance.toPrefixBlock(prefixLength + 96);
+            }
             addrs.add(instance);
             return addrs;
         }
         if (body.isIPv6() && body.isIPv4Convertible()) { // 如果是 IPV6 且可以映射 IPV4，则为其生成原始 IPV4 地址，映射 PrefixLength
             IPAddress instance = body.toIPv4();
-            if (prefixLength != null) instance.toPrefixBlock(prefixLength - 96);
+            if (prefixLength != null) {
+                if (prefixLength < 32)
+                    throw new IllegalArgumentException("Invalid prefix length for IPv6 address: " + address);
+                instance.toPrefixBlock(prefixLength - 96);
+            }
             return addrs;
         }
         return addrs;
