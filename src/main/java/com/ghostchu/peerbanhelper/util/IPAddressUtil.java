@@ -67,11 +67,6 @@ public final class IPAddressUtil {
         }
     }
 
-    @NotNull
-    public static IPAddress toPrefixBlockAndZeroHost(IPAddress ipAddress, int length) {
-        return ipAddress.withoutPrefixLength().toPrefixBlock(length).toZeroHost();
-    }
-
     public static String adaptIP(byte[] localAddress) throws UnknownHostException {
         if (localAddress.length == 0) {
             // 空地址，默认使用IPv4回环地址
@@ -124,19 +119,19 @@ public final class IPAddressUtil {
         if (banAddress.isIPv4() && ipv4RemappingEnabled) {
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= v4RemapRange)
                 return banAddress.toPrefixBlock();
-            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, v4RemapRange);
+            return banAddress.toPrefixBlock(v4RemapRange);
         }
         if (banAddress.isIPv6()) {
             if (isIPV4MappedIPV6Address && ExternalSwitch.parseBoolean("pbh.ipAddressUtil.handleIPV4MappedIPV6Address", true)) {
                 // 特殊的 IPv4-mapped IPv6 address
                 if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= v4RemapV6Range)
                     return banAddress.toPrefixBlock();
-                return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, v4RemapV6Range);
+                return banAddress.toPrefixBlock(v4RemapV6Range);
             } else if (ipv6RemappingEnabled) { // 如果是常规 IPV6 则需要走配置文件判断
                 // 常规 IPV6 地址
                 if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= v6RemapRange)
                     return banAddress.toPrefixBlock();
-                return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, v6RemapRange);
+                return banAddress.toPrefixBlock(v6RemapRange);
             }
         }
         return banAddress.toPrefixBlock();
