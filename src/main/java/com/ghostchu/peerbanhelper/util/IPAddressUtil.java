@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.util;
 
-import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
@@ -116,28 +115,15 @@ public final class IPAddressUtil {
     public static IPAddress remapBanListAddress(@NotNull IPAddress banAddress) {
         boolean ipv4RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
-        int v4RemapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
-        int v6RemapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
-        int v4RemapV6Range = v4RemapRange + 96;
-        boolean isIPV4MappedIPV6Address = banAddress.isIPv6() && banAddress.isIPv4Convertible(); // IPv4-mapped IPv6 address
-
         if (banAddress.isIPv4() && ipv4RemappingEnabled) {
-            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= v4RemapRange)
-                return banAddress.toPrefixBlock();
-            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, v4RemapRange);
+            int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange) return banAddress.toPrefixBlock();
+            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, remapRange);
         }
-        if (banAddress.isIPv6()) {
-            if (isIPV4MappedIPV6Address && ExternalSwitch.parseBoolean("pbh.ipAddressUtil.handleIPV4MappedIPV6Address", true)) {
-                // 特殊的 IPv4-mapped IPv6 address
-                if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= v4RemapV6Range)
-                    return banAddress.toPrefixBlock();
-                return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, v4RemapV6Range);
-            } else if (ipv6RemappingEnabled) { // 如果是常规 IPV6 则需要走配置文件判断
-                // 常规 IPV6 地址
-                if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= v6RemapRange)
-                    return banAddress.toPrefixBlock();
-                return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, v6RemapRange);
-            }
+        if (banAddress.isIPv6() && ipv6RemappingEnabled) {
+            int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange) return banAddress.toPrefixBlock();
+            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, remapRange);
         }
         return banAddress.toPrefixBlock();
     }
