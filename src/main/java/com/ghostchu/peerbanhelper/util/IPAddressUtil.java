@@ -68,11 +68,6 @@ public final class IPAddressUtil {
         }
     }
 
-    @NotNull
-    public static IPAddress toPrefixBlockAndZeroHost(IPAddress ipAddress, int length) {
-        return ipAddress.withoutPrefixLength().toPrefixBlock(length).toZeroHost();
-    }
-
     public static String adaptIP(byte[] localAddress) throws UnknownHostException {
         if (localAddress.length == 0) {
             // 空地址，默认使用IPv4回环地址
