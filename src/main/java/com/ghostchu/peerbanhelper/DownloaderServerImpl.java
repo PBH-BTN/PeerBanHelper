@@ -506,7 +506,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getId())) {
                     alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getId(),
                             new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
-                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getId(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getId(), peer.getPeerAddress().getAddress().toCompressedString()));
                 }
             }
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"), StructuredData.create().add("type", "ignoredAddresses"));
@@ -577,7 +577,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 if (addr.isIPv4Convertible()) {
                     addr = addr.toIPv4();
                 }
-                var addrStr = addr.toNormalizedString();
+                var addrStr = addr.toCompressedString();
                 return (addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal());
             }
         }
@@ -674,7 +674,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Override
     public void scheduleUnBanPeer(@NotNull IPAddress peer) {
         unbanPeers(List.of(peer));
-        scheduledBanListOperations.add(new ScheduledBanListOperation(false, new PeerAddress(peer.toNormalizedString(), 0, peer.toNormalizedString())));
+        scheduledBanListOperations.add(new ScheduledBanListOperation(false, new PeerAddress(peer.toCompressedString(), 0, peer.toCompressedString())));
     }
 
 

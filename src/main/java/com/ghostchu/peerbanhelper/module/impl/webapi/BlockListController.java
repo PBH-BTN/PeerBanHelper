@@ -48,9 +48,9 @@ public final class BlockListController extends AbstractFeatureModule {
         
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : remappedIps) {
-            String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
-            String end = ipAddress.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
-            builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toNormalizedString()).append("\n");
+            String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toCompressedString();
+            String end = ipAddress.toPrefixBlock().getUpper().withoutPrefixLength().toCompressedString();
+            builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toCompressedString()).append("\n");
         }
         ctx.result(builder.toString());
     }
@@ -65,8 +65,8 @@ public final class BlockListController extends AbstractFeatureModule {
         StringBuilder builder = new StringBuilder();
         for (IPAddress addr : remappedIps) {
             String ruleName = UUID.randomUUID().toString().replace("-", "");
-            String start = addr.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
-            String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
+            String start = addr.toPrefixBlock().getLower().withoutPrefixLength().toCompressedString();
+            String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toCompressedString();
             builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
         }
         var result = builder.toString();
@@ -87,7 +87,7 @@ public final class BlockListController extends AbstractFeatureModule {
         
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : remappedIps) {
-            builder.append(ipAddress.toPrefixBlock().toNormalizedString()).append("\n");
+            builder.append(ipAddress.toPrefixBlock().toCompressedString()).append("\n");
         }
         ctx.result(builder.toString());
     }

@@ -131,7 +131,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             if (bannedAddr.contains(finalPeerAddress)) {
                 reference.set(new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, finalPeerAddress.toString(),
                         finalPeerAddress.toString(), bannedAddr.toString(), addressType),
-                        StructuredData.create().add("relatedBannedAddress", bannedAddr.toNormalizedString())));
+                        StructuredData.create().add("relatedBannedAddress", bannedAddr.toCompressedString())));
             }
         });
         var result = reference.get();

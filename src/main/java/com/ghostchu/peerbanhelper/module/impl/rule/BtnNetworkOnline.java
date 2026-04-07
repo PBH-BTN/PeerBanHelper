@@ -195,7 +195,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             return pass();
         }
         BtnAbilityIPDenyList denyList = (BtnAbilityIPDenyList) abilityObject;
-        var result = denyList.getIpMatcher().match(peer.getPeerAddress().getAddress().toNormalizedString());
+        var result = denyList.getIpMatcher().match(peer.getPeerAddress().getAddress().toCompressedString());
         if (result.result() == MatchResultEnum.TRUE) {
             return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                     new TranslationComponent(Lang.BTN_ABILITY_IP_DENYLIST_RULE, result.comment()),
@@ -212,7 +212,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             return pass();
         }
         BtnAbilityIPAllowList allowList = (BtnAbilityIPAllowList) abilityObject;
-        var result = allowList.getIpMatcher().match(peer.getPeerAddress().getAddress().toNormalizedString());
+        var result = allowList.getIpMatcher().match(peer.getPeerAddress().getAddress().toCompressedString());
         if (result.result() == MatchResultEnum.TRUE) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0,
                     new TranslationComponent(Lang.BTN_ABILITY_IP_ALLOWLIST_RULE, result.comment()),
@@ -483,7 +483,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         BtnAbilityIPAllowList allowList = (BtnAbilityIPAllowList) allowListAbilityModule;
         List<IPAddress> pendingUnban = new ArrayList<>();
         banList.forEach((ipAddress, _) -> {
-            var result = allowList.getIpMatcher().match(ipAddress.toNormalizedString());
+            var result = allowList.getIpMatcher().match(ipAddress.toCompressedString());
             if (result.result() == MatchResultEnum.TRUE) {
                 pendingUnban.add(ipAddress);
             }

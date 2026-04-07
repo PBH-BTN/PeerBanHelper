@@ -263,7 +263,7 @@ public final class PBHChartController extends AbstractFeatureModule {
                     try {
                         String determindIp = ip;
                         if (IPAddressUtil.getIPAddress(determindIp).isPrefixed()) {
-                            determindIp = IPAddressUtil.getIPAddress(determindIp).toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
+                            determindIp = IPAddressUtil.getIPAddress(determindIp).toPrefixBlock().getLower().withoutPrefixLength().toCompressedString();
                         }
                         IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(determindIp));
                         String isp = "N/A";

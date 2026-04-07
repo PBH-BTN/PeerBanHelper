@@ -613,7 +613,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
             if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
-                remapBanListAddress(p.getPeer().getAddress().getAddress()).forEach(ip->joiner.add(ip.toNormalizedString()));
+                remapBanListAddress(p.getPeer().getAddress().getAddress()).forEach(ip->joiner.add(ip.toCompressedString()));
             } else {
                 joiner.add(p.getPeer().getRawIp());
             }
@@ -656,17 +656,17 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         } else {
             StringJoiner joiner = new StringJoiner("\n");
             bannedAddresses.stream().distinct().forEach(ipAddr -> {
-                joiner.add(ipAddr.toNormalizedString());
+                joiner.add(ipAddr.toCompressedString());
                 if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
                     inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
                     if (ipv6 != null) {
-                        joiner.add(ipv6.toNormalizedString());
+                        joiner.add(ipv6.toCompressedString());
                     }
                 }
                 if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
                     Address ipv4 = ipAddr.toIPv4();
                     if (ipv4 != null) {
-                        joiner.add(ipv4.toNormalizedString());
+                        joiner.add(ipv4.toCompressedString());
                     }
                 }
             });

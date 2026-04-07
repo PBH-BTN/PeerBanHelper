@@ -104,7 +104,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleBtnQueryIFrame(@NotNull Context ctx) {
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
         var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
-        String ip = ipAddress.toNormalizedString();
+        String ip = ipAddress.toCompressedString();
         if (btnNetwork == null) {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_NETWORK_NOT_ENABLED), null));
             return;
@@ -130,7 +130,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         // 转换 IP 格式到 PBH 统一内部格式
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
         var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
-        String ip = ipAddress.toNormalizedString();
+        String ip = ipAddress.toCompressedString();
 
         if (btnNetwork == null) {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.BTN_NETWORK_NOT_ENABLED), null));
