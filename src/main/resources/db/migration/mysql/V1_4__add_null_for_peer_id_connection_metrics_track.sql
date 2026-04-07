@@ -1,0 +1,1 @@
+ALTER TABLE peer_connection_metrics_track MODIFY COLUMN peer_id VARCHAR(255) NULL;
