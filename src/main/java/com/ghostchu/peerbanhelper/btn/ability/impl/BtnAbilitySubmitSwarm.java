@@ -92,31 +92,38 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     }
 
     private void submit() {
-        btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_SWARM_SYNC_SERVER), (task, callback) -> {
-            log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
-            swarmDao.flushAll();
+        try {
+            btnNetwork.getBackgroundTaskManager().addTaskAsync(new FunctionalBackgroundTask(new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_SWARM_SYNC_SERVER), (task, callback) -> {
+                log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
+                swarmDao.flushAll();
 
-            int size = 0;
-            int requests = 0;
-            Page<TrackedSwarmEntity> page = new Page<>(1, 1000); // 每页处理 100 条
-            do {
-                var pair = getMemCursor();
-                long lastTimeSeen = pair.getLeft();
-                long id = pair.getRight();
-                var result = swarmDao.page(page, new LambdaQueryWrapper<TrackedSwarmEntity>()
-                        .ge(TrackedSwarmEntity::getLastTimeSeen, java.time.OffsetDateTime.ofInstant(Instant.ofEpochMilli(lastTimeSeen), ZoneId.systemDefault()))
-                        .gt(TrackedSwarmEntity::getId, id)
-                        .orderByAsc(TrackedSwarmEntity::getLastTimeSeen, TrackedSwarmEntity::getId)
-                );
-                if (result.getRecords().isEmpty()) break;
-                var resultPair = createSubmitRequest(result.getRecords());
-                setMemCursor(resultPair.getLeft(), resultPair.getRight());
-                requests++;
-                size += result.getRecords().size();
-            } while (page.hasNext());
-            log.info(tlUI(Lang.BTN_SUBMITTED_SWARM, size, requests));
-            setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
-        })).join();
+                int size = 0;
+                int requests = 0;
+                Page<TrackedSwarmEntity> page = new Page<>(1, 1000); // 每页处理 100 条
+                do {
+                    var pair = getMemCursor();
+                    long lastTimeSeen = pair.getLeft();
+                    long id = pair.getRight();
+                    var result = swarmDao.page(page, new LambdaQueryWrapper<TrackedSwarmEntity>()
+                            .ge(TrackedSwarmEntity::getLastTimeSeen, java.time.OffsetDateTime.ofInstant(Instant.ofEpochMilli(lastTimeSeen), ZoneId.systemDefault()))
+                            .gt(TrackedSwarmEntity::getId, id)
+                            .orderByAsc(TrackedSwarmEntity::getLastTimeSeen, TrackedSwarmEntity::getId)
+                    );
+                    if (result.getRecords().isEmpty()) break;
+                    var resultPair = createSubmitRequest(result.getRecords());
+                    setMemCursor(resultPair.getLeft(), resultPair.getRight());
+                    requests++;
+                    size += result.getRecords().size();
+                } while (page.hasNext());
+                log.info(tlUI(Lang.BTN_SUBMITTED_SWARM, size, requests));
+                setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
+            })).join();
+        } catch (IllegalStateException ignored) {
+            // 子请求已处理报错信息
+        } catch (Throwable e) {
+            log.error(tlUI(Lang.BTN_UNKNOWN_ERROR), e);
+            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
+        }
     }
 
 
