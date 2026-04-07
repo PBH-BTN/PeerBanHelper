@@ -650,7 +650,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         String banStr;
         if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
             banStr = bannedAddresses.stream()
-                    .flatMap(ipAddr -> remapBanListAddress(ipAddr).stream().map(IPAddress::toNormalizedString))
+                    .flatMap(ipAddr -> remapBanListAddress(ipAddr).stream().map(IPAddress::toCompressedString))
                     .distinct()
                     .collect(Collectors.joining("\n"));
         } else {

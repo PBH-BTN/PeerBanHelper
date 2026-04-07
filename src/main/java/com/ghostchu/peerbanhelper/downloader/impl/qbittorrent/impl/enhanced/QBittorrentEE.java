@@ -243,7 +243,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         @Override
         public void setBanListFull(Collection<IPAddress> peerAddresses) {
             StringJoiner joiner = new StringJoiner("\n");
-            peerAddresses.stream().map(IPAddress::toNormalizedString).distinct().forEach(joiner::add);
+            peerAddresses.stream().map(IPAddress::toCompressedString).distinct().forEach(joiner::add);
             
             FormBody formBody = new FormBody.Builder()
                     .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString())))
