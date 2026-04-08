@@ -115,13 +115,13 @@ public final class IPAddressUtil {
         boolean ipv6RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
         if (banAddress.isIPv4() && ipv4RemappingEnabled) {
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
-            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange)
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
         if (banAddress.isIPv6() && ipv6RemappingEnabled) {
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
-            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange)
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
