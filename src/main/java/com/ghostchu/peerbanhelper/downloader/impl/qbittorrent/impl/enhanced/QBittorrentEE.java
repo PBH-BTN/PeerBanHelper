@@ -215,11 +215,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
             Map<String, StringJoiner> banTasks = new HashMap<>();
             added.forEach(p -> {
                 StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
-                if (qbtEE.getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
-                    qbtEE.remapBanListAddress(p.getPeer().getAddress().getAddress()).forEach(ip->joiner.add(ip.toCompressedString()));
-                } else {
-                    joiner.add(p.getPeer().getRawIp());
-                }
+                joiner.add(p.getPeer().getRawIp());
                 banTasks.put(p.getTorrent().getHash(), joiner);
             });
             banTasks.forEach((hash, peers) -> {
