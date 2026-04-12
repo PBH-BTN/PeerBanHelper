@@ -22,7 +22,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.vdurmont.semver4j.Semver;
-import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -228,7 +227,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -613,7 +612,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
             if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
-                remapBanListAddress(p.getPeer().getAddress().getAddress()).forEach(ip->joiner.add(ip.toCompressedString()));
+                remapBanListAddress(p.getPeer().getAddress().getAddress()).forEach(ip -> joiner.add(ip.toCompressedString()));
             } else {
                 joiner.add(p.getPeer().getRawIp());
             }
@@ -645,31 +644,18 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         });
     }
 
-    protected void setBanListFull(Collection<IPAddress> bannedAddresses) {
+    protected void setBanListFull(Collection<BanMetadata> bannedAddresses) {
         // todo change this with compatibility check after qbiitorrent merge it
         String banStr;
         if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
             banStr = bannedAddresses.stream()
-                    .flatMap(ipAddr -> remapBanListAddress(ipAddr).stream().map(IPAddress::toCompressedString))
+                    .map(banMetadata -> banMetadata.getPeer().getAddress())
+                    .flatMap(ipAddr -> remapBanListAddress(ipAddr.getAddress()).stream().map(IPAddress::toCompressedString))
                     .distinct()
                     .collect(Collectors.joining("\n"));
         } else {
             StringJoiner joiner = new StringJoiner("\n");
-            bannedAddresses.stream().distinct().forEach(ipAddr -> {
-                joiner.add(ipAddr.toCompressedString());
-                if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
-                    inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
-                    if (ipv6 != null) {
-                        joiner.add(ipv6.toCompressedString());
-                    }
-                }
-                if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
-                    Address ipv4 = ipAddr.toIPv4();
-                    if (ipv4 != null) {
-                        joiner.add(ipv4.toCompressedString());
-                    }
-                }
-            });
+            bannedAddresses.stream().map(meta -> meta.getPeer().getRawIp()).forEach(joiner::add);
             banStr = joiner.toString();
         }
 

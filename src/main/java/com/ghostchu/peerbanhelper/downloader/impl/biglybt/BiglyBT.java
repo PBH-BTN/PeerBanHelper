@@ -255,7 +255,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -467,8 +467,9 @@ public final class BiglyBT extends AbstractDownloader {
         }
     }
 
-    private void setBanListFull(Collection<IPAddress> peerAddresses) {
+    private void setBanListFull(Collection<BanMetadata> peerAddresses) {
         BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream()
+                .map(meta->meta.getPeer().getAddress().getAddress())
                 .flatMap(ipaddr -> remapBanListAddress(ipaddr).stream().map(Address::toCompressedString))
                 .distinct().toList(), false);
         RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));

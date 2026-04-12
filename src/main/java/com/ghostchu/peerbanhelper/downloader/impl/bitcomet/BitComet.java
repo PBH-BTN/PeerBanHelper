@@ -515,15 +515,16 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && !removed.isEmpty()) {
             unbanPeers(removed.stream().map(meta -> meta.getPeer().getAddress().toString()).toList());
         }
         setBanListFull(fullList);
     }
 
-    private void setBanListFull(Collection<IPAddress> peerAddresses) {
+    private void setBanListFull(Collection<BanMetadata> peerAddresses) {
         String banStr = peerAddresses.stream()
+                .map(meta->meta.getPeer().getAddress().getAddress())
                 .flatMap(ipAddr -> remapBanListAddress(ipAddr).stream().map(IPAddress::toCompressedString))
                 .collect(Collectors.joining("\n"));
         operateBanListLegacy("replace", banStr);
