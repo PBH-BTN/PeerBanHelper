@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.AbstractQbittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPreferences;
@@ -14,6 +15,7 @@ import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.FormBody;
@@ -25,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -35,7 +38,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
     public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(id, config, alertManager, httpUtil, natAddressProvider);
         if (config.isUseShadowBan()) {
-            this.banHandler = new BanHandlerShadowBan(httpClient, config.getName(), apiEndpoint);
+            this.banHandler = new BanHandlerShadowBan(this, httpClient, config.getName(), apiEndpoint);
         } else {
             this.banHandler = new BanHandlerNormal(this);
         }
@@ -174,9 +177,11 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         private final OkHttpClient httpClient;
         private final String name;
         private final String apiEndpoint;
+        private final QBittorrentEE qbtEE;
         private Boolean shadowBanEnabled = false; // 缓存 shadowBan 开关状态
 
-        public BanHandlerShadowBan(OkHttpClient httpClient, String name, String apiEndpoint) {
+        public BanHandlerShadowBan(QBittorrentEE qbtEE, OkHttpClient httpClient, String name, String apiEndpoint) {
+            this.qbtEE = qbtEE;
             this.httpClient = httpClient;
             this.name = name;
             this.apiEndpoint = apiEndpoint;
@@ -242,11 +247,33 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
         @Override
         public void setBanListFull(Collection<IPAddress> peerAddresses) {
-            StringJoiner joiner = new StringJoiner("\n");
-            peerAddresses.stream().map(IPAddress::toCompressedString).distinct().forEach(joiner::add);
-            
+            String banStr;
+            if (qbtEE.getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
+                banStr = peerAddresses.stream()
+                        .flatMap(ipAddr -> qbtEE.remapBanListAddress(ipAddr).stream().map(IPAddress::toCompressedString))
+                        .distinct()
+                        .collect(Collectors.joining("\n"));
+            } else {
+                StringJoiner joiner = new StringJoiner("\n");
+                peerAddresses.stream().distinct().forEach(ipAddr -> {
+                    joiner.add(ipAddr.toCompressedString());
+                    if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
+                        inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
+                        if (ipv6 != null) {
+                            joiner.add(ipv6.toCompressedString());
+                        }
+                    }
+                    if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
+                        Address ipv4 = ipAddr.toIPv4();
+                        if (ipv4 != null) {
+                            joiner.add(ipv4.toCompressedString());
+                        }
+                    }
+                });
+                banStr = joiner.toString();
+            }
             FormBody formBody = new FormBody.Builder()
-                    .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString())))
+                    .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", banStr)))
                     .build();
             
             try {
