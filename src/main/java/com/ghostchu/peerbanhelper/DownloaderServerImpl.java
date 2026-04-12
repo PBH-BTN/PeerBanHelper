@@ -334,7 +334,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             downloaderManager.forEach(downloader -> {
                 futures.add(CompletableFuture.runAsync(() -> {
                     if (downloader.login().success()) {
-                        downloader.setBanList(banList.copyValues(), null, null, true);
+                        downloader.setBanList(banList.copyKeySet(), null, null, true);
                     }
                 }));
             });
@@ -406,7 +406,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             } else {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.message());
             }
-            downloader.setBanList(banList.copyValues(), added, removed, applyFullList);
+            downloader.setBanList(banList.copyKeySet(), added, removed, applyFullList);
         } catch (Throwable th) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint()), th);
             downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_EXCEPTION, th.getClass().getName() + ": " + th.getMessage()));

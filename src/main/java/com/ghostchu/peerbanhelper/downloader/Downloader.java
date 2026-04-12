@@ -129,7 +129,7 @@ public interface Downloader extends AutoCloseable {
      * @param removed       移除列表
      * @param applyFullList 强制应用全量列表
      */
-    void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
+    void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
 
     /**
      * 获取客户端最后一次请求的状态

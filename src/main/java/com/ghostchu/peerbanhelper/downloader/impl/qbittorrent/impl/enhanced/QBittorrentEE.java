@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.AbstractQbittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPreferences;
@@ -26,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -37,7 +35,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
     public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(id, config, alertManager, httpUtil, natAddressProvider);
         if (config.isUseShadowBan()) {
-            this.banHandler = new BanHandlerShadowBan(this, httpClient, config.getName(), apiEndpoint);
+            this.banHandler = new BanHandlerShadowBan(httpClient, config.getName(), apiEndpoint);
         } else {
             this.banHandler = new BanHandlerNormal(this);
         }
@@ -87,7 +85,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
 
     @Override
-    public void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             banHandler.setBanListIncrement(added);
         } else {
@@ -144,7 +142,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
         void setBanListIncrement(Collection<BanMetadata> added);
 
-        void setBanListFull(Collection<BanMetadata> peerAddresses);
+        void setBanListFull(Collection<IPAddress> peerAddresses);
     }
 
     public static class BanHandlerNormal implements BanHandler {
@@ -166,7 +164,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<BanMetadata> peerAddresses) {
+        public void setBanListFull(Collection<IPAddress> peerAddresses) {
             downloader.setBanListFull(peerAddresses);
         }
     }
@@ -176,11 +174,9 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         private final OkHttpClient httpClient;
         private final String name;
         private final String apiEndpoint;
-        private final QBittorrentEE qBittorrentEE;
         private Boolean shadowBanEnabled = false; // 缓存 shadowBan 开关状态
 
-        public BanHandlerShadowBan(QBittorrentEE qBittorrentEE, OkHttpClient httpClient, String name, String apiEndpoint) {
-            this.qBittorrentEE = qBittorrentEE;
+        public BanHandlerShadowBan(OkHttpClient httpClient, String name, String apiEndpoint) {
             this.httpClient = httpClient;
             this.name = name;
             this.apiEndpoint = apiEndpoint;
@@ -245,22 +241,12 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<BanMetadata> peerAddresses) {
-            String banStr;
-            if (qBittorrentEE.getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
-                banStr = peerAddresses.stream()
-                        .map(banMetadata -> banMetadata.getPeer().getAddress())
-                        .flatMap(ipAddr -> qBittorrentEE.remapBanListAddress(ipAddr.getAddress()).stream().map(IPAddress::toCompressedString))
-                        .distinct()
-                        .collect(Collectors.joining("\n"));
-            } else {
-                StringJoiner joiner = new StringJoiner("\n");
-                peerAddresses.stream().map(meta -> meta.getPeer().getRawIp()).forEach(joiner::add);
-                banStr = joiner.toString();
-            }
+        public void setBanListFull(Collection<IPAddress> peerAddresses) {
+            StringJoiner joiner = new StringJoiner("\n");
+            peerAddresses.stream().map(IPAddress::toCompressedString).distinct().forEach(joiner::add);
             
             FormBody formBody = new FormBody.Builder()
-                    .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", banStr)))
+                    .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString())))
                     .build();
             
             try {

@@ -45,7 +45,7 @@ public class BanList {
 
     @Nullable
     public AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata> remove(@NotNull PeerAddress address) {
-        return remove(address.getAddress());
+       return remove(address.getAddress());
     }
 
     @Nullable
@@ -97,7 +97,7 @@ public class BanList {
 
     @NotNull
     public Set<IPAddress> copyKeySet() {
-        Set<IPAddress> ipAddresses = new HashSet<>(delegate.size());
+        Set<IPAddress> ipAddresses = new HashSet<>();
         try {
             lock.readLock().lock();
             delegate.forEach(ipAddresses::add);
@@ -108,15 +108,15 @@ public class BanList {
     }
 
     @NotNull
-    public List<BanMetadata> copyValues() {
-        List<BanMetadata> metadata = new ArrayList<>(delegate.size());
+    public List<IPAddress> copyValues() {
+        List<IPAddress> ipAddresses = new ArrayList<>();
         try {
             lock.readLock().lock();
-            delegate.nodeIterator(false).forEachRemaining(node -> metadata.add(node.getValue()));
+            delegate.forEach(ipAddresses::add);
         } finally {
             lock.readLock().unlock();
         }
-        return metadata;
+        return ipAddresses;
     }
 
     public boolean contains(@NotNull PeerAddress address) {
@@ -162,7 +162,7 @@ public class BanList {
     public void addAll(@NotNull Map<IPAddress, BanMetadata> map) {
         try {
             lock.writeLock().lock();
-            map.forEach((k, v) -> delegate.put(k.toPrefixBlock(), v));
+            map.forEach((k,v)-> delegate.put(k.toPrefixBlock(), v));
         } finally {
             lock.writeLock().unlock();
         }
