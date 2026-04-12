@@ -15,7 +15,6 @@ import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.FormBody;
@@ -216,7 +215,11 @@ public final class QBittorrentEE extends AbstractQbittorrent {
             Map<String, StringJoiner> banTasks = new HashMap<>();
             added.forEach(p -> {
                 StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
-                joiner.add(p.getPeer().getRawIp());
+                if (qbtEE.getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
+                    qbtEE.remapBanListAddress(p.getPeer().getAddress().getAddress()).forEach(ip->joiner.add(ip.toCompressedString()));
+                } else {
+                    joiner.add(p.getPeer().getRawIp());
+                }
                 banTasks.put(p.getTorrent().getHash(), joiner);
             });
             banTasks.forEach((hash, peers) -> {
@@ -246,34 +249,15 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<IPAddress> peerAddresses) {
-            String banStr;
-            if (qbtEE.getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
-                banStr = peerAddresses.stream()
-                        .flatMap(ipAddr -> qbtEE.remapBanListAddress(ipAddr).stream().map(IPAddress::toCompressedString))
-                        .distinct()
-                        .collect(Collectors.joining("\n"));
-            } else {
-                StringJoiner joiner = new StringJoiner("\n");
-                peerAddresses.stream().distinct().forEach(ipAddr -> {
-                    joiner.add(ipAddr.toCompressedString());
-                    if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
-                        inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
-                        if (ipv6 != null) {
-                            joiner.add(ipv6.toCompressedString());
-                        }
-                    }
-                    if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
-                        Address ipv4 = ipAddr.toIPv4();
-                        if (ipv4 != null) {
-                            joiner.add(ipv4.toCompressedString());
-                        }
-                    }
-                });
-                banStr = joiner.toString();
-            }
+        public void setBanListFull(Collection<IPAddress> bannedAddresses) {
+            boolean supportRangeBan = qbtEE.getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP);
+            String banStr = bannedAddresses.stream()
+                    .flatMap(ipAddr -> qbtEE.remapBanListAddress(ipAddr, supportRangeBan).stream().map(IPAddress::toCompressedString))
+                    .distinct()
+                    .collect(Collectors.joining("\n"));
+
             FormBody formBody = new FormBody.Builder()
-                    .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", banStr)))
+                    .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", banStr)))
                     .build();
             
             try {

@@ -110,9 +110,14 @@ public final class IPAddressUtil {
 
     @NotNull
     public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress) {
+        return remapBanListAddress(banAddress, true);
+    }
+
+    @NotNull
+    public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress, boolean supportRangeBan) {
         banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
-        boolean ipv4RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
-        boolean ipv6RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
+        boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
+        boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
         if (banAddress.isIPv4() && ipv4RemappingEnabled) {
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
@@ -125,7 +130,7 @@ public final class IPAddressUtil {
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
-        return List.of(banAddress);
+        return generateRemappedPairIfPossible(banAddress);
     }
 
     private static List<IPAddress> generateRemappedPairIfPossible(IPAddress address) {

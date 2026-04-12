@@ -646,32 +646,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     protected void setBanListFull(Collection<IPAddress> bannedAddresses) {
-        // todo change this with compatibility check after qbiitorrent merge it
-        String banStr;
-        if (getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP)) {
-            banStr = bannedAddresses.stream()
-                    .flatMap(ipAddr -> remapBanListAddress(ipAddr).stream().map(IPAddress::toCompressedString))
-                    .distinct()
-                    .collect(Collectors.joining("\n"));
-        } else {
-            StringJoiner joiner = new StringJoiner("\n");
-            bannedAddresses.stream().distinct().forEach(ipAddr -> {
-                joiner.add(ipAddr.toCompressedString());
-                if (ipAddr.isIPv4() && ipAddr.isIPv6Convertible()) {
-                    inet.ipaddr.Address ipv6 = ipAddr.toIPv6();
-                    if (ipv6 != null) {
-                        joiner.add(ipv6.toCompressedString());
-                    }
-                }
-                if (ipAddr.isIPv6() && ipAddr.isIPv4Convertible()) {
-                    Address ipv4 = ipAddr.toIPv4();
-                    if (ipv4 != null) {
-                        joiner.add(ipv4.toCompressedString());
-                    }
-                }
-            });
-            banStr = joiner.toString();
-        }
+        boolean supportRangeBan = getFeatureFlags().contains(DownloaderFeatureFlag.RANGE_BAN_IP);
+        String banStr = bannedAddresses.stream()
+                .flatMap(ipAddr -> remapBanListAddress(ipAddr, supportRangeBan).stream().map(IPAddress::toCompressedString))
+                .distinct()
+                .collect(Collectors.joining("\n"));
 
         FormBody formBody = new FormBody.Builder()
                 .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", banStr)))
