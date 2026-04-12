@@ -18,7 +18,7 @@ public class BasicIPAddressTypeHandler extends BaseTypeHandler<IPAddress> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, IPAddress parameter, JdbcType jdbcType) throws SQLException {
-        ps.setString(i, parameter.toNormalizedString());
+        ps.setString(i, parameter.toCompressedString());
     }
 
     @Override

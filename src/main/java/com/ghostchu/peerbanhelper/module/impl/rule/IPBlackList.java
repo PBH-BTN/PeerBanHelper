@@ -214,7 +214,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         UserIPTestResult testResult = new UserIPTestResult(
                 lower.toFullString(),
                 upper.toFullString(),
-                ipAddress.toNormalizedString(),
+                ipAddress.toCompressedString(),
                 ipAddress.getCount().toString());
         context.json(new StdResp(true, null, testResult));
         saveConfig();
@@ -308,7 +308,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
             for (IPAddress ra : ips) {
                 if (ra.equals(pa) || ra.contains(pa)) {
                     return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_CIDR_RULE, ra.toString()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, ra.toString()),
-                            StructuredData.create().add("type", "ip").add("rule", ra.toNormalizedString()));
+                            StructuredData.create().add("type", "ip").add("rule", ra.toCompressedString()));
                 }
             }
             try {

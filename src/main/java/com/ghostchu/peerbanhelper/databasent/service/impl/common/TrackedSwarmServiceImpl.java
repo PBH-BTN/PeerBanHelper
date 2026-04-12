@@ -51,7 +51,7 @@ public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmM
     @Override
     public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull Peer peer) throws ExecutionException {
         CacheKey cacheKey = new CacheKey(
-                peer.getPeerAddress().getAddress().toNormalizedString(),
+                peer.getPeerAddress().getAddress().toCompressedString(),
                 peer.getPeerAddress().getPort(),
                 torrent.getHash(),
                 downloader.getId()

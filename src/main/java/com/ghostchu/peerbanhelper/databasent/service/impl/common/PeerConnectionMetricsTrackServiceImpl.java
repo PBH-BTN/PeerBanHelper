@@ -76,7 +76,7 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
                     TimeUtil.getStartOfToday(System.currentTimeMillis()),
                     downloader.getId(),
                     torrentEntity.getId(),
-                    peer.getPeerAddress().getAddress().toNormalizedString(),
+                    peer.getPeerAddress().getAddress().toCompressedString(),
                     peer.getPeerAddress().getPort()
             );
             PeerConnectionMetricsTrackEntity trackEntity = cache.get(cacheKey, () -> {

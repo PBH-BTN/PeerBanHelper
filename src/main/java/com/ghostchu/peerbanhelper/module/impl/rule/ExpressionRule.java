@@ -288,7 +288,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 return pass();
             } catch (Exception ex) {
                 log.error(tlUI(Lang.RULE_ENGINE_ERROR, script.name()), ex);
-                Sentry.captureException(ex);
+                //Sentry.captureException(ex);
                 return pass();
             }
             if (result != null && result.action() != PeerAction.NO_ACTION) {

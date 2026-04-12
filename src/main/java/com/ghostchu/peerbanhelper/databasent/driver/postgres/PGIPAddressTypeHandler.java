@@ -17,7 +17,7 @@ public class PGIPAddressTypeHandler extends BaseTypeHandler<IPAddress> {
     public void setNonNullParameter(PreparedStatement ps, int i, IPAddress parameter, JdbcType jdbcType) throws SQLException {
         PGobject pgObject = new PGobject();
         pgObject.setType("inet");
-        pgObject.setValue(parameter.toNormalizedString());
+        pgObject.setValue(parameter.toCompressedString());
         ps.setObject(i, pgObject);
     }
 

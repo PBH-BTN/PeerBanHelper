@@ -142,12 +142,12 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
         List<UnbanPeerTask> unbanPeers = new ArrayList<>();
         btnNetwork.getServer().getBanList().forEach((ip, meta) -> {
             try {
-                var matchResult = ipMatcher.match(ip.toNormalizedString());
+                var matchResult = ipMatcher.match(ip.toCompressedString());
                 if (matchResult.result() == MatchResultEnum.TRUE) {
                     unbanPeers.add(new UnbanPeerTask(ip, meta, matchResult));
                 }
             } catch (Exception e) {
-                log.debug("Error while matching IP {} against allowlist, skipping unban check for this IP. Error: {}", ip.toNormalizedString(), e.getMessage());
+                log.debug("Error while matching IP {} against allowlist, skipping unban check for this IP. Error: {}", ip.toCompressedString(), e.getMessage());
                 Sentry.captureException(e);
             }
         });
@@ -155,10 +155,10 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
             btnNetwork.getServer().scheduleUnBanPeer(unbanPeer.getIpAddress());
             btnNetwork.getAlertManager().publishAlert(false,
                     AlertLevel.INFO,
-                    "btn-allowlist-unbanned-peer-"+unbanPeer.getIpAddress().toNormalizedString()+UUID.randomUUID().toString(),
+                    "btn-allowlist-unbanned-peer-"+unbanPeer.getIpAddress().toCompressedString()+UUID.randomUUID().toString(),
                     new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_TITLE),
                     new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION,
-                            unbanPeer.getIpAddress().toNormalizedString(),
+                            unbanPeer.getIpAddress().toCompressedString(),
                             unbanPeer.getBanMetadata().getBanAt().toString(),
                             unbanPeer.getBanMetadata().getRule(),
                             unbanPeer.getBanMetadata().getDescription(),

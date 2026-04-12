@@ -14,6 +14,8 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 /**
@@ -66,11 +68,6 @@ public final class IPAddressUtil {
         }
     }
 
-    @NotNull
-    public static IPAddress toPrefixBlockAndZeroHost(IPAddress ipAddress, int length) {
-        return ipAddress.withoutPrefixLength().toPrefixBlock(length).toZeroHost();
-    }
-
     public static String adaptIP(byte[] localAddress) throws UnknownHostException {
         if (localAddress.length == 0) {
             // 空地址，默认使用IPv4回环地址
@@ -112,19 +109,38 @@ public final class IPAddressUtil {
     }
 
     @NotNull
-    public static IPAddress remapBanListAddress(@NotNull IPAddress banAddress) {
-        boolean ipv4RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
-        boolean ipv6RemappingEnabled = Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
+    public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress) {
+        return remapBanListAddress(banAddress, true);
+    }
+
+    @NotNull
+    public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress, boolean supportRangeBan) {
+        banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
+        boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
+        boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
         if (banAddress.isIPv4() && ipv4RemappingEnabled) {
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
-            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange) return banAddress.toPrefixBlock();
-            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, remapRange);
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
+                return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
+            return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
         if (banAddress.isIPv6() && ipv6RemappingEnabled) {
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
-            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() >= remapRange) return banAddress.toPrefixBlock();
-            return IPAddressUtil.toPrefixBlockAndZeroHost(banAddress, remapRange);
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
+                return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
+            return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
-        return banAddress.toPrefixBlock();
+        return generateRemappedPairIfPossible(banAddress);
+    }
+
+    private static List<IPAddress> generateRemappedPairIfPossible(IPAddress address) {
+        List<IPAddress> addrs = new ArrayList<>(2);
+        addrs.add(address);
+        if (address.isIPv4()) { // 如果是 IPV4，则为其生成 IPV6 映射地址
+            addrs.add(address.toIPv6());
+        } else if (address.isIPv6() && address.isIPv4Convertible()) { // 如果是 IPV6 且可以映射 IPV4，则为其生成原始 IPV4 地址
+            addrs.add(address.toIPv4());
+        }
+        return addrs;
     }
 }
