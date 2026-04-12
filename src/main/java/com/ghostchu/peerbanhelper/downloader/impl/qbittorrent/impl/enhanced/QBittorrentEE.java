@@ -257,7 +257,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     .collect(Collectors.joining("\n"));
 
             FormBody formBody = new FormBody.Builder()
-                    .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", banStr)))
+                    .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", banStr)))
                     .build();
             
             try {
