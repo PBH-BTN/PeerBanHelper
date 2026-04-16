@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
-public class PCBAddressServiceImpl extends AbstractCommonService<PCBAddressMapper, PCBAddressEntity> implements PCBAddressService {
+public class PCBAddressServiceImpl extends AbstractCanDirtyCommonService<PCBAddressMapper, PCBAddressEntity> implements PCBAddressService {
 
 	@Autowired
 	private TransactionTemplate transactionTemplate;

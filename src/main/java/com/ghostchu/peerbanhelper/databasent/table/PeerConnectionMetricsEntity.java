@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
@@ -14,14 +16,16 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "peer_connection_metrics", autoResultMap = true)
-public final class PeerConnectionMetricsEntity implements Serializable {
+public final class PeerConnectionMetricsEntity extends AbstractCanDirtyEntity implements Serializable, CanDirty {
     @Serial
     private static final long serialVersionUID = 1L;
+    private transient boolean dirty;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -63,6 +67,29 @@ public final class PeerConnectionMetricsEntity implements Serializable {
     private long utpSocket;
     @TableField(value = "tcp_socket")
     private long tcpSocket;
+
+    public PeerConnectionMetricsEntity(Long id, OffsetDateTime timeframeAt, String downloader, long totalConnections, long incomingConnections, long remoteRefuseTransferToClient, long remoteAcceptTransferToClient, long localRefuseTransferToPeer, long localAcceptTransferToPeer, long localNotInterested, long questionStatus, long optimisticUnchoke, long fromDHT, long fromPEX, long fromLSD, long fromTrackerOrOther, long rc4Encrypted, long plainTextEncrypted, long utpSocket, long tcpSocket) {
+        this.id = id;
+        this.timeframeAt = timeframeAt;
+        this.downloader = downloader;
+        this.totalConnections = totalConnections;
+        this.incomingConnections = incomingConnections;
+        this.remoteRefuseTransferToClient = remoteRefuseTransferToClient;
+        this.remoteAcceptTransferToClient = remoteAcceptTransferToClient;
+        this.localRefuseTransferToPeer = localRefuseTransferToPeer;
+        this.localAcceptTransferToPeer = localAcceptTransferToPeer;
+        this.localNotInterested = localNotInterested;
+        this.questionStatus = questionStatus;
+        this.optimisticUnchoke = optimisticUnchoke;
+        this.fromDHT = fromDHT;
+        this.fromPEX = fromPEX;
+        this.fromLSD = fromLSD;
+        this.fromTrackerOrOther = fromTrackerOrOther;
+        this.rc4Encrypted = rc4Encrypted;
+        this.plainTextEncrypted = plainTextEncrypted;
+        this.utpSocket = utpSocket;
+        this.tcpSocket = tcpSocket;
+    }
 
     public void merge(@NotNull PeerConnectionMetricsEntity appender) {
         this.totalConnections += appender.totalConnections;

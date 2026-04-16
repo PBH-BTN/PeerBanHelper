@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class PCBRangeServiceImpl extends AbstractCommonService<PCBRangeMapper, PCBRangeEntity> implements PCBRangeService {
+public class PCBRangeServiceImpl extends AbstractCanDirtyCommonService<PCBRangeMapper, PCBRangeEntity> implements PCBRangeService {
 
 	@Autowired
 	private TransactionTemplate transactionTemplate;

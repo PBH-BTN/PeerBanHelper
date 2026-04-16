@@ -4,20 +4,24 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ghostchu.peerbanhelper.databasent.table.AbstractCanDirtyEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName("tracked_swarm")
-public final class TrackedSwarmEntity { // 需要创建为临时表
+public final class TrackedSwarmEntity extends AbstractCanDirtyEntity implements Serializable { // 需要创建为临时表
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @TableField(value = "ip")

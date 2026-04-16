@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
@@ -13,12 +15,13 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "pcb_range", autoResultMap = true)
-public final class PCBRangeEntity implements Serializable {
+public final class PCBRangeEntity extends AbstractCanDirtyEntity implements Serializable, CanDirty {
     @Serial
     private static final long serialVersionUID = 1L;
 
