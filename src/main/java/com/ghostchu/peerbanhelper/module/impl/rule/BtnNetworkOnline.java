@@ -436,7 +436,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     private CheckResult checkIpRule(BtnRulesetParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
         IPAddress pa = peer.getPeerAddress().getAddress();
         if (pa == null) return null;
-        if (pa.isIPv4Convertible()) {
+        if (pa.isIPv4Convertible()) { // TODO: Future IP Protocol
             pa = pa.toIPv4();
         }
         for (String category : rule.getIpRules().keySet()) {
@@ -458,7 +458,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     private CheckResult checkIpRuleException(LegacyBtnExceptionRuleParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
         IPAddress pa = peer.getPeerAddress().getAddress();
         if (pa == null) return null;
-        if (pa.isIPv4Convertible()) {
+        if (pa.isIPv4Convertible()) {  // TODO: Future IP Protocol
             pa = pa.toIPv4();
         }
         for (String category : rule.getIpRules().keySet()) {

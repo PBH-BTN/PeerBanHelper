@@ -382,8 +382,10 @@ public final class JavalinWebContainer implements Reloadable {
         }
         if (ipAddr.isIPv4()) {
             ipAddr = ipAddr.toPrefixBlock(24);
-        } else {
+        } else if (ipAddr.isIPv6()) {
             ipAddr = ipAddr.toPrefixBlock(50);
+        } else {
+            throw new UnsupportedOperationException("Unsupported IP Protocol");
         }
         return ipAddr;
     }
