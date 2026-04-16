@@ -38,7 +38,7 @@ public final class IPAddressUtil {
         }
         try {
             IPAddress ipAddress = new IPAddressString(ip).toAddress();
-            if (ipAddress.isIPv4Convertible()) {  // TODO: Future IP Protocol
+            if (ipAddress.isIPv4Convertible()) {
                 ipAddress = ipAddress.toIPv4();
             }
             return ipAddress;
@@ -115,7 +115,7 @@ public final class IPAddressUtil {
 
     @NotNull
     public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress, boolean supportRangeBan) {
-        banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6(); // TODO: Future IP Protocol support
+        banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
         boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
         if (banAddress.isIPv4() && ipv4RemappingEnabled) {
@@ -133,7 +133,7 @@ public final class IPAddressUtil {
         return generateRemappedPairIfPossible(banAddress);
     }
 
-    private static List<IPAddress> generateRemappedPairIfPossible(IPAddress address) { // TODO: Future IP support
+    private static List<IPAddress> generateRemappedPairIfPossible(IPAddress address) {
         List<IPAddress> addrs = new ArrayList<>(2);
         addrs.add(address);
         if (address.isIPv4()) { // 如果是 IPV4，则为其生成 IPV6 映射地址

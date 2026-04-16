@@ -222,10 +222,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         IPAddress peerIp = peer.getPeerAddress().getAddress();
         if (peerIp.isIPv4()) {
             peerPrefix = peerIp.toPrefixBlock(ipv4PrefixLength);
-        } else if (peerIp.isIPv6()){
-            peerPrefix = peerIp.toPrefixBlock(ipv6PrefixLength);
         } else {
-            throw new UnsupportedOperationException("Unsupported IP Protocol");
+            peerPrefix = peerIp.toPrefixBlock(ipv6PrefixLength);
         }
         String peerPrefixString = peerPrefix.toString();
         var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
