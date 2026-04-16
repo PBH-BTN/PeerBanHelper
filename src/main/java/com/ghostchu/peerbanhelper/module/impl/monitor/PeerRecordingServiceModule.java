@@ -12,15 +12,14 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -33,31 +32,28 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
 public class PeerRecordingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
-    private final AtomicBoolean databaseBackFlushFlag = new AtomicBoolean(true);
     @Autowired
     private PeerRecordService peerRecordDao;
     @Autowired
     private TransactionTemplate transactionTemplate;
 
     @SuppressWarnings("NullableProblems")
-    private final Cache<PeerRecordServiceImpl.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = CacheBuilder
-            .newBuilder()
-            .expireAfterWrite(ExternalSwitch.parseLong("pbh.module.peerRecordingServiceModule.diskWriteCache.timeout", 180000), TimeUnit.MILLISECONDS)
-            .maximumSize(ExternalSwitch.parseInt("pbh.module.peerRecordingServiceModule.diskWriteCache.size", 3500))
-            .removalListener((RemovalListener<PeerRecordServiceImpl.BatchHandleTasks, Object>) notification -> {
-                //noinspection ConstantValue
-                if (notification.getValue() == null) return; // OOM could be null
-                if (!databaseBackFlushFlag.get()) return;
-                backFlushDatabase(notification.getKey());
-            })
-            .build();
+    private final PBHCache<PeerRecordServiceImpl.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = new PBHCache<>(
+            ExternalSwitch.parseInt("pbh.module.peerRecordingServiceModule.diskWriteCache.size", 3500),
+            ExternalSwitch.parseLong("pbh.module.peerRecordingServiceModule.diskWriteCache.timeout", 180000),
+            null,
+            false,
+            false,
+            false,
+            this::batchFlushDatabase
+    );
 
     private long dataRetentionTime;
     @Autowired
@@ -74,6 +70,13 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
 
     private void backFlushDatabase(PeerRecordServiceImpl.BatchHandleTasks key) {
         peerRecordDao.flushToDatabase(key);
+    }
+
+    private void batchFlushDatabase(Stream<Pair<PeerRecordServiceImpl.BatchHandleTasks, Object>> stream) {
+        transactionTemplate.execute(_ -> {
+            stream.forEach(pair -> backFlushDatabase(pair.getLeft()));
+            return null;
+        });
     }
 
 
@@ -153,9 +156,10 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
 
     @Override
     public void onDisable() {
-        flush();
-        databaseBackFlushFlag.set(false);
-        diskWriteCache.invalidateAll();
-        databaseBackFlushFlag.set(true);
+        try {
+            diskWriteCache.close();
+        } catch (Exception e) {
+            log.warn("Unable to close peer recording cache instance", e);
+        }
     }
 }

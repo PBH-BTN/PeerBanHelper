@@ -101,7 +101,11 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
-        trackedSwarmDao.flushAll();
+        try {
+            trackedSwarmDao.closeCache();
+        } catch (Exception e) {
+            log.warn("Unable to close tracked swarm cache instance", e);
+        }
     }
 
     @Override
