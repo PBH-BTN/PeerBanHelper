@@ -21,7 +21,11 @@ public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends Ca
     @Override
     public boolean saveOrUpdateIfDirty(T t) {
         if(t != null && t.isDirty()){
-            return this.saveOrUpdate(t);
+            boolean success = this.saveOrUpdate(t);
+            if(success){
+                t.setDirty(false);
+            }
+            return success;
         }
         return false;
     }
