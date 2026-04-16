@@ -116,18 +116,17 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             if (bannedMeta.isBanForDisconnect()) {
                 return;
             }
-            if (finalPeerAddress.isIPv4() != bannedAddr.isIPv4()) { // TODO: Future IP Protocol support
+            if (finalPeerAddress.isIPv4() != bannedAddr.isIPv4()) {
                 return;
             }
             String addressType = "UNKNOWN";
             if (bannedAddr.isIPv4()) {
                 addressType = "IPv4/" + ipv4Prefix;
                 bannedAddr = bannedAddr.toPrefixBlock(ipv4Prefix);
-            }else if (bannedAddr.isIPv6()) {
+            }
+            if (bannedAddr.isIPv6()) {
                 addressType = "IPv6/" + ipv6Prefix;
                 bannedAddr = bannedAddr.toPrefixBlock(ipv6Prefix);
-            }else{
-                throw new UnsupportedOperationException("Unsupported IP Protocol");
             }
             if (bannedAddr.contains(finalPeerAddress)) {
                 reference.set(new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, finalPeerAddress.toString(),

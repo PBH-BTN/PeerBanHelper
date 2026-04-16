@@ -149,15 +149,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
         String torrentId = torrent.getId();
         IPAddress peerAddress = peer.getPeerAddress().getAddress();
         String peerIpStr = peerAddress.toString();
-        IPAddress peerSubnet;
-        if(peerAddress.isIPv4()){
-            peerSubnet = peerAddress.toPrefixBlock(subnetMaskLength);
-        } else if (peerAddress.isIPv6()){
-            peerSubnet = peerAddress.toPrefixBlock(subnetMaskV6Length);
-        }else{
-            throw new UnsupportedOperationException("Unsupported IP Protocol");
-        }
-
+        IPAddress peerSubnet = peerAddress.isIPv4() ? peerAddress.toPrefixBlock(subnetMaskLength) : peerAddress.toPrefixBlock(subnetMaskV6Length);
         try {
             long currentTimestamp = System.currentTimeMillis();
 
@@ -170,10 +162,9 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
             int tolerateNum = Integer.MAX_VALUE;
             if (peerSubnet.isIPv4()) {
                 tolerateNum = tolerateNumV4;
-            }else if (peerSubnet.isIPv6()) {
+            }
+            if (peerSubnet.isIPv6()) {
                 tolerateNum = tolerateNumV6;
-            }else {
-                throw new UnsupportedOperationException("Unsupported IP Protocol");
             }
             if (subnetPeers.size() > tolerateNum) {
                 // 落库

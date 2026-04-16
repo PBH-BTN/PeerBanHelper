@@ -574,7 +574,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 || peer.getFlags().isFromPEX()) {
             if (!peer.isHandshaking()) {
                 var addr = peer.getPeerAddress().getAddress();
-                if (addr.isIPv4Convertible()) { // TODO: Future IP Protocol
+                if (addr.isIPv4Convertible()) {
                     addr = addr.toIPv4();
                 }
                 var addrStr = addr.toCompressedString();
