@@ -44,7 +44,6 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
     @Autowired
     private TransactionTemplate transactionTemplate;
 
-    @SuppressWarnings("NullableProblems")
     private final PBHCache<PeerRecordServiceImpl.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = new PBHCache<>(
             ExternalSwitch.parseInt("pbh.module.peerRecordingServiceModule.diskWriteCache.size", 3500),
             ExternalSwitch.parseLong("pbh.module.peerRecordingServiceModule.diskWriteCache.timeout", 180000),
