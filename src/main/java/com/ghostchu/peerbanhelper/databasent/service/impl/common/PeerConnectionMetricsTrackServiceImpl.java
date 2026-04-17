@@ -46,12 +46,7 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
 
     @Override
     public void flushAll() {
-        transactionTemplate.execute(_->{
-            for (PeerConnectionMetricsTrackEntity value : cache.asMap().values()) {
-                baseMapper.upsert(value);
-            }
-            return null;
-        });
+        batchFlushDatabase(cache.asMap().entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())));
     }
 
     @Override
