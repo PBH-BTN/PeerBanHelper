@@ -51,7 +51,7 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
         builder.removalListener(this);
         this.delegate = builder.build();
         this.cleanupTask = CommonUtil.getScheduler().scheduleAtFixedRate(delegate::cleanUp, 5, 5, TimeUnit.MINUTES);
-        this.callbackTask = CommonUtil.getScheduler().scheduleAtFixedRate(this::flushPendingRemovals, 1, 1, TimeUnit.MINUTES);
+        this.callbackTask = CommonUtil.getScheduler().scheduleAtFixedRate(this::flushPendingRemovals, 1, 1, TimeUnit.SECONDS);
     }
 
     @Override
