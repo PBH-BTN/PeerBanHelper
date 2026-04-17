@@ -105,6 +105,7 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
             trackEntity.setPeerId(peer.getPeerId());
             trackEntity.setClientName(peer.getClientName());
             trackEntity.setLastFlags(peer.getFlags() == null ? null : peer.getFlags().getLtStdString());
+            baseMapper.insertOrUpdate(trackEntity);
         }
     }
 
