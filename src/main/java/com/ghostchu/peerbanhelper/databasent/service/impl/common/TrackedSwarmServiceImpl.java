@@ -38,6 +38,10 @@ public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmM
             this::batchFlushDatabase
     );
 
+    public TrackedSwarmServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
+
 
     @Override
     public @NotNull Page<TrackedSwarmEntity> getPendingSubmitTrackedPeers(@NotNull Pageable pageable, long idAfterThan) {

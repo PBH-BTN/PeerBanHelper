@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -39,6 +40,10 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
     private TorrentService torrentDao;
     @Autowired
     private IPDBManager ipdbManager;
+
+    public PeerRecordServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader) {

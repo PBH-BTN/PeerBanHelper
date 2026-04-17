@@ -29,11 +29,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Service
 @Slf4j
 public class PeerConnectionMetricsServiceImpl extends AbstractCommonService<PeerConnectionMetricsMapper, PeerConnectionMetricsEntity> implements PeerConnectionMetricsService {
-	@Autowired
-	private TransactionTemplate transactionTemplate;
+
+    public PeerConnectionMetricsServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
 
-	@Override
+    @Override
     public long getGlobalTotalConnectionsCount(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt) {
 		long total = 0;
 		try {

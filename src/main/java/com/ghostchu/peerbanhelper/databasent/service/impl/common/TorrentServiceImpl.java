@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +26,10 @@ public class TorrentServiceImpl extends AbstractCommonService<TorrentMapper, Tor
             .maximumSize(1000)
             .softValues()
             .build();
+
+    public TorrentServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public @NotNull TorrentEntity createIfNotExists(@NotNull TorrentEntity torrent) {

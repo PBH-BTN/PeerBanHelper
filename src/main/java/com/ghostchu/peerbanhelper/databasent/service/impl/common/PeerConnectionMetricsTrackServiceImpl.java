@@ -26,8 +26,6 @@ import java.util.stream.Stream;
 
 @Service
 public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService<PeerConnectionMetricsTrackMapper, PeerConnectionMetricsTrackEntity> implements PeerConnectionMetricsTrackService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     private final PBHCache<@NotNull CacheKey, @NotNull PeerConnectionMetricsTrackEntity> cache = new PBHCache<>(
             ExternalSwitch.parseInt("pbh.module.session-analyse-service-module.cache-size", 1000),
@@ -41,6 +39,10 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
 
     @Autowired
     private TorrentService torrentService;
+
+    public PeerConnectionMetricsTrackServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public void flushAll() {

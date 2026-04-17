@@ -17,10 +17,11 @@ import java.util.List;
 @Service
 public class PCBRangeServiceImpl extends AbstractCanDirtyCommonService<PCBRangeMapper, PCBRangeEntity> implements PCBRangeService {
 
-	@Autowired
-	private TransactionTemplate transactionTemplate;
+    public PCBRangeServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
-	@Override
+    @Override
 	public List<PCBRangeEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
         return baseMapper.selectList(new LambdaQueryWrapper<PCBRangeEntity>()
                 .eq(PCBRangeEntity::getTorrentId, torrentId)

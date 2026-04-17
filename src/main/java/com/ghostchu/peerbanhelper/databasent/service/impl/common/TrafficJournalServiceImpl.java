@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -22,6 +23,10 @@ import java.util.List;
 
 @Service
 public class TrafficJournalServiceImpl extends AbstractCommonService<TrafficJournalMapper, TrafficJournalEntity> implements TrafficJournalService {
+    public TrafficJournalServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
+
     @Override
     public void updateData(@NotNull String downloader, long overallDownloaded, long overallUploaded, long overallDownloadedProtocol, long overallUploadedProtocol) {
         OffsetDateTime timestamp = TimeUtil.getStartOfHour(System.currentTimeMillis());

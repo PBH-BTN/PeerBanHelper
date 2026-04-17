@@ -5,11 +5,18 @@ import com.ghostchu.peerbanhelper.databasent.service.CommonCanDirtyService;
 import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.BatchResult;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
 @Slf4j
 public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends CanDirty> extends AbstractCommonService<M,T> implements CommonCanDirtyService<T> {
+
+    public AbstractCanDirtyCommonService(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public boolean saveOrUpdateIfDirtyWithIdRefill(T t) {
@@ -25,7 +32,9 @@ public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends Ca
 
     @Override
     public List<BatchResult> saveOrUpdateIfDirty(List<T> t) {
-        var dirtyElements = t.stream().filter(CanDirty::isDirty).toList();
-        return this.baseMapper.insertOrUpdate(dirtyElements, 1000);
+        return transactionTemplate.execute((status)->{
+            var dirtyElements = t.stream().filter(CanDirty::isDirty).toList();
+            return this.baseMapper.insertOrUpdate(dirtyElements, 1000);
+        });
     }
 }
