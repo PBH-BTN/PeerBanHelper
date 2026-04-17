@@ -56,4 +56,80 @@ public final class PCBAddressEntity extends AbstractCanDirtyEntity implements Se
     private OffsetDateTime fastPcbTestExecuteAt;
     @TableField(value = "last_torrent_completed_size")
     private long lastTorrentCompletedSize;
+
+    public void setId(Long id) {
+        this.id = id;
+        setDirty(true);
+    }
+
+    public void setIp(InetAddress ip) {
+        this.ip = ip;
+        setDirty(true);
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+        setDirty(true);
+    }
+
+    public void setTorrentId(String torrentId) {
+        this.torrentId = torrentId;
+        setDirty(true);
+    }
+
+    public void setLastReportProgress(double lastReportProgress) {
+        this.lastReportProgress = lastReportProgress;
+        setDirty(true);
+    }
+
+    public void setLastReportUploaded(long lastReportUploaded) {
+        this.lastReportUploaded = lastReportUploaded;
+        setDirty(true);
+    }
+
+    public void setTrackingUploadedIncreaseTotal(long trackingUploadedIncreaseTotal) {
+        this.trackingUploadedIncreaseTotal = trackingUploadedIncreaseTotal;
+        setDirty(true);
+    }
+
+    public void setRewindCounter(int rewindCounter) {
+        this.rewindCounter = rewindCounter;
+        setDirty(true);
+    }
+
+    public void setProgressDifferenceCounter(int progressDifferenceCounter) {
+        this.progressDifferenceCounter = progressDifferenceCounter;
+        setDirty(true);
+    }
+
+    public void setFirstTimeSeen(OffsetDateTime firstTimeSeen) {
+        this.firstTimeSeen = firstTimeSeen;
+        setDirty(true);
+    }
+
+    public void setLastTimeSeen(OffsetDateTime lastTimeSeen) {
+        this.lastTimeSeen = lastTimeSeen;
+        setDirty(true);
+    }
+
+    public void setDownloader(String downloader) {
+        this.downloader = downloader;
+        setDirty(true);
+    }
+
+    public void setBanDelayWindowEndAt(OffsetDateTime banDelayWindowEndAt) {
+        this.banDelayWindowEndAt = banDelayWindowEndAt;
+        setDirty(true);
+    }
+
+    public void setFastPcbTestExecuteAt(OffsetDateTime fastPcbTestExecuteAt) {
+        this.fastPcbTestExecuteAt = fastPcbTestExecuteAt;
+        setDirty(true);
+    }
+
+    public void setLastTorrentCompletedSize(long lastTorrentCompletedSize) {
+        this.lastTorrentCompletedSize = lastTorrentCompletedSize;
+        setDirty(true);
+    }
+
 }
