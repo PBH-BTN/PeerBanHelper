@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.CommonDataCollector;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class UmamiHelper {
+public class UmamiHelper implements ReportGenerator {
     private final String umamiUrl = "https://uma.pbh-btn.com/api/send";
     private final String websiteId = "f9ed8c46-5d57-4ae5-ab45-227658dffb41";
     private final CommonDataCollector dataCollector;
@@ -81,6 +82,11 @@ public class UmamiHelper {
         data.put("system", dataCollector.generateSystemData());
         data.put("networking", dataCollector.generateNetworkStats());
         return data;
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("umamiUrl", umamiUrl, "websiteId", websiteId, "dataCollector", dataCollector, "dataCreate", createData());
     }
 
 

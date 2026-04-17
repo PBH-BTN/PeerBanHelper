@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.event.banwave.PeerBanEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.iohandler.*;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
@@ -35,6 +36,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -45,7 +47,7 @@ import java.util.concurrent.atomic.LongAdder;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressProvider {
+public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressProvider, ReportGenerator {
     private final int proxyPort;
     private final String proxyHost;
     private final String upstreamHost;
@@ -160,6 +162,26 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         if (downstreamChannel != null) {
             downstreamChannel.close();
         }
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("proxyPort", proxyPort);
+        map.put("proxyHost", proxyHost);
+        map.put("upstreamHost", upstreamHost);
+        map.put("upstreamPort", upstreamPort);
+        map.put("connectionMap", connectionMap.entrySet());
+        map.put("connectionStats",  connectionStats.entrySet());
+        map.put("downstreamChannelMap", downstreamChannelMap.entrySet());
+        map.put("connectionHandled",  connectionHandled.sum());
+        map.put("connectionFailed",   connectionFailed.sum());
+        map.put("connectionBlocked",    connectionBlocked.sum());
+        map.put("connectionRejected",     connectionRejected.sum());
+        map.put("totalToUpstream", totalToUpstream.sum());
+        map.put("totalToDownstream", totalToDownstream.sum());
+        map.put("ioHandler", ioHandler.getClass().getName());
+        return map;
     }
 
     @ChannelHandler.Sharable

@@ -20,6 +20,8 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.meter.CacheStatsMeter;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -53,7 +55,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
+public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
     private final AtomicBoolean cacheBackFlushFlag = new AtomicBoolean(true);
     @SuppressWarnings("NullableProblems")
     private final Cache<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
@@ -98,6 +100,30 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     @Autowired
     private BanList banList;
 
+
+    public ProgressCheatBlocker(CacheStatsMeter meter){
+        meter.register("ProgressCheatBlocker-cache", cache);
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("cacheBackFlushFlag", cacheBackFlushFlag.get());
+        map.put("cache", cache.asMap());
+        map.put("torrentMinimumSize", torrentMinimumSize);
+        map.put("blockExcessiveClients", blockExcessiveClients);
+        map.put("excessiveThreshold", excessiveThreshold);
+        map.put("maximumDifference", maximumDifference);
+        map.put("rewindMaximumDifference", rewindMaximumDifference);
+        map.put("ipv4PrefixLength", ipv4PrefixLength);
+        map.put("ipv6PrefixLength", ipv6PrefixLength);
+        map.put("banDuration", banDuration);
+        map.put("persistDuration", persistDuration);
+        map.put("maxWaitDuration", maxWaitDuration);
+        map.put("fastPcbTestBlockingDuration", fastPcbTestBlockingDuration);
+        map.put("fastPcbTestPercentage", fastPcbTestPercentage);
+        return map;
+    }
 
     @Override
     public @NotNull String getName() {

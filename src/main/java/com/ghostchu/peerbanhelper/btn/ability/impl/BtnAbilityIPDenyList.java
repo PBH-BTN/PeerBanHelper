@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
@@ -194,5 +195,17 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
     @Override
     public void unload() {
 
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of(
+                "interval", interval,
+                "endpoint", endpoint,
+                "randomInitialDelay", randomInitialDelay,
+                "ruleVersion", ruleVersion,
+                "powCaptcha", powCaptcha,
+                "ipMatcher", ipMatcher.metadata()
+        );
     }
 }

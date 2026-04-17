@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -37,7 +38,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 
-public final class IPBlackList extends AbstractRuleFeatureModule implements Reloadable {
+public final class IPBlackList extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
     private Set<IPAddress> ips;
     private Set<Integer> ports;
     private Set<Long> asns;
@@ -374,6 +375,12 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
             }
         }
         return pass();
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("ips", ips, "ports", ports, "asns", asns, "regions", regions, "networkType", networkType,
+                 "cities", cities, "banDuration", banDuration);
     }
 
     public record UserIPTestResult(

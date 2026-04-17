@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Component
-public class BanList {
+public class BanList implements ReportGenerator {
     private final DualIPv4v6AssociativeTries<BanMetadata> delegate = new DualIPv4v6AssociativeTries<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -199,5 +200,10 @@ public class BanList {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("delegate", delegate);
     }
 }

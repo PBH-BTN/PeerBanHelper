@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -32,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Component
-public final class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
+public final class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
     @Autowired
     private PeerBanHelper peerBanHelper;
     private int ipv4Prefix;
@@ -139,4 +140,8 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
 
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("ipv4Prefix", ipv4Prefix, "ipv6Prefix", ipv6Prefix, "banDuration", banDuration);
+    }
 }

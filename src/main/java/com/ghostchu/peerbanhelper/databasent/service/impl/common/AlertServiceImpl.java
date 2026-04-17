@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.AlertMapper;
 import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
+import com.ghostchu.peerbanhelper.util.observable.ReportManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,11 +13,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AlertServiceImpl extends AbstractCommonService<AlertMapper, AlertEntity> implements AlertService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Override
     public @NotNull List<AlertEntity> getUnreadAlerts() {

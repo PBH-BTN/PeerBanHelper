@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskProgressBarType;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
@@ -56,7 +57,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public final class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
+public final class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
     private final static String VERSION = "2";
     private final long maxScriptExecuteTime = 1500;
     private final JavalinWebContainer javalinWebContainer;
@@ -72,7 +73,6 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         this.javalinWebContainer = javalinWebContainer;
         this.backgroundTaskManager = backgroundTaskManager;
     }
-
 
     @Override
     public void onEnable() {
@@ -369,6 +369,12 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                     log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
                 }
         )).join();
+    }
+
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("VERSION", VERSION, "banDuration", banDuration, "scripts", scripts);
     }
 
     private void initScripts() throws IOException {

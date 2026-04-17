@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.util.traversal.stun.tunnel;
 
-public interface StunTcpTunnel extends AutoCloseable {
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
+
+public interface StunTcpTunnel extends AutoCloseable, ReportGenerator {
     void createMapping(int localPort);
 
     boolean isValid();

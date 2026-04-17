@@ -10,6 +10,8 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.meter.CacheStatsMeter;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -36,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public final class MultiDialingBlocker extends AbstractRuleFeatureModule implements Reloadable {
+public final class MultiDialingBlocker extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
     // 计算缓存容量
     private static final int TORRENT_PEER_MAX_NUM = 1024;
     private static final int PEER_MAX_NUM_PER_SUBNET = 16;
@@ -51,6 +53,12 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
     private long banDuration;
     private int tolerateNumV4;
     private int tolerateNumV6;
+
+    public MultiDialingBlocker(CacheStatsMeter cacheStatsMeter){
+        cacheStatsMeter.register("MultiDialingBlocker-subnetCounter", subnetCounter);
+        cacheStatsMeter.register("MultiDialingBlocker-huntingList", huntingList);
+        cacheStatsMeter.register("MultiDialingBlocker-cache", cache);
+    }
 
     @Override
     public void onEnable() {
@@ -204,6 +212,25 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
         return pass();
     }
 
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+            Map<String, Object> map = new HashMap<>();
+            map.put("TORRENT_PEER_MAX_NUM", TORRENT_PEER_MAX_NUM);
+            map.put("PEER_MAX_NUM_PER_SUBNET", PEER_MAX_NUM_PER_SUBNET);
+            map.put("subnetMaskLength", subnetMaskLength);
+            map.put("subnetMaskV6Length", subnetMaskV6Length);
+            map.put("cacheLifespan", cacheLifespan);
+            map.put("keepHunting", keepHunting);
+            map.put("keepHuntingTime", keepHuntingTime);
+            map.put("banDuration", banDuration);
+            map.put("tolerateNumV4", tolerateNumV4);
+            map.put("tolerateNumV6", tolerateNumV6);
+            map.put("subnetCounter", subnetCounter.asMap().entrySet());
+            map.put("huntingList", huntingList.asMap().entrySet());
+            return map;
+    }
+
+
     // 是否已从数据库恢复追猎名单，持久化用的，目前没用
     private static volatile boolean cacheRecovered = false;
     // 所有peer的连接记录 torrentId+ip : createTime
@@ -237,6 +264,8 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
             cacheRecovered = true;
         }
     }
+
+
 
     public record HuntingTarget(
             String hashSubnet,

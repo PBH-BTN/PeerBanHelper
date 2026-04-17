@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.web.exception.*;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -46,7 +47,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public final class JavalinWebContainer implements Reloadable {
+public final class JavalinWebContainer implements Reloadable, ReportGenerator {
     private Javalin javalin;
     @Setter
     private LicenseManager licenseManager;
@@ -406,6 +407,12 @@ public final class JavalinWebContainer implements Reloadable {
 
     private Cache<@NotNull IPAddress, @NotNull AtomicInteger> fail2Ban() {
         return FAIL2BAN;
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("FAIL2BAN", FAIL2BAN, "LOGIN_SESSION_TIMETABLE", LOGIN_SESSION_TIMETABLE, "blockUserAgent",blockUserAgent,
+                "started", started, "webuiAnalyticsEnabled", webuiAnalyticsEnabled);
     }
 
     public record AcceptLanguages(String code, float prefer) implements Comparable<AcceptLanguages> {

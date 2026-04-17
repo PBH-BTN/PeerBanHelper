@@ -1,8 +1,9 @@
 package com.ghostchu.peerbanhelper.btn.ability;
 
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 
-public abstract class AbstractBtnAbility implements BtnAbility {
+public abstract class AbstractBtnAbility implements BtnAbility, ReportGenerator {
     private boolean lastStatus;
     private long lastStatusAt;
     private TranslationComponent lastMessage;

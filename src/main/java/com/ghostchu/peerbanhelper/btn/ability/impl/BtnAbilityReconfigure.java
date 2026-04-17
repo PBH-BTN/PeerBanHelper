@@ -5,12 +5,14 @@ import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -90,5 +92,14 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     @Override
     public void unload() {
 
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of(
+                "interval", interval,
+                "randomInitialDelay", randomInitialDelay,
+                "version", version
+        );
     }
 }

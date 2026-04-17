@@ -15,6 +15,8 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
+import com.ghostchu.peerbanhelper.util.observable.ReportManager;
 import com.ghostchu.peerbanhelper.util.pow.PoWClient;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
@@ -53,7 +55,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 // 特别注意：该类不允许静态初始化任何内容
-public final class BtnNetwork implements Reloadable {
+public final class BtnNetwork implements Reloadable, ReportGenerator {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
 
@@ -67,6 +69,7 @@ public final class BtnNetwork implements Reloadable {
     private final BackgroundTaskManager backgroundTaskManager;
     @Getter
     private final AlertManager alertManager;
+    private final ReportManager reportManager;
     @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
@@ -101,7 +104,8 @@ public final class BtnNetwork implements Reloadable {
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
                       MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
-                      PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager) {
+                      PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager,
+                      ReportManager reportManager) {
         this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
         this.scriptEngineManager = scriptEngineManager;
@@ -114,6 +118,8 @@ public final class BtnNetwork implements Reloadable {
         this.systemInfo = systemInfo;
         this.backgroundTaskManager = backgroundTaskManager;
         this.alertManager = alertManager;
+        this.reportManager = reportManager;
+        this.reportManager.register("BtnNetwork", this);
         Main.getReloadManager().register(this);
         Main.getEventBus().register(this);
     }
@@ -249,6 +255,9 @@ public final class BtnNetwork implements Reloadable {
                 abilities.values().forEach(a -> {
                     try {
                         a.load();
+                        if (a instanceof ReportGenerator generator) {
+                            reportManager.register("BtnAbility-" + a.getName(), generator);
+                        }
                     } catch (Exception e) {
                         log.error(tlUI(Lang.UNABLE_LOAD_BTN_ABILITY, a.getClass().getSimpleName()), e);
                     }
@@ -295,6 +304,23 @@ public final class BtnNetwork implements Reloadable {
             log.error("Unable to gather or solve PoW Captcha", e);
             Sentry.captureException(e);
         }
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        var map = new HashMap<String, Object>();
+        map.put("configSuccess", configSuccess.get());
+        map.put("configResult", configResult);
+        map.put("scriptExecute", scriptExecute);
+        map.put("configUrl", configUrl);
+        map.put("submit", submit);
+        map.put("appId", appId);
+        map.put("appSecret", "<censored>");
+        map.put("enabled", enabled);
+        map.put("powCaptchaEndpoint", powCaptchaEndpoint);
+        map.put("nextConfigAttemptTime", nextConfigAttemptTime);
+        map.put("retryPeriodSeconds", RETRY_PERIOD_SECONDS);
+        return map;
     }
 
     @AllArgsConstructor

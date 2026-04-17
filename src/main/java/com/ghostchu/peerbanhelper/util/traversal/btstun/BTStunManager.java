@@ -102,7 +102,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
             log.debug("Downloader does not support live update of BT protocol port: {}", downloader.getId());
             return false;
         }
-        var instance = new BTStunInstance(banList, pBHPortMapper, downloader, this, laboratory, iPDBManager);
+        var instance = new BTStunInstance(banList, pBHPortMapper, downloader, this, iPDBManager);
         perDownloaderStun.put(downloader, instance);
         natAddressProviderRegistry.add(instance);
         return true;

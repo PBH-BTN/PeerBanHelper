@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
+import com.ghostchu.peerbanhelper.util.observable.ReportManager;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.portmapper.Protocol;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
@@ -17,6 +19,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.StandardSocketOptions;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class StunTcpTunnelImpl implements StunTcpTunnel {
+public class StunTcpTunnelImpl implements StunTcpTunnel, ReportGenerator {
     private final StunListener stunListener;
     private final ScheduledExecutorService keepAliveService = Executors.newScheduledThreadPool(1, runnable -> Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").unstarted(runnable));
     private final AtomicBoolean valid = new AtomicBoolean(false);
@@ -192,5 +196,11 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
             } catch (IOException ignored) {
             }
         }
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("valid", valid.get(), "testHost", testHost, "startedAt", startedAt,
+                "lastSuccessHeartbeatAt", lastSuccessHeartbeatAt, "localPort", localPort);
     }
 }

@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.lab;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -11,12 +12,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class Laboratory {
+public class Laboratory implements ReportGenerator {
     // can be 0,1,2,3,4
     @Getter
     private final int experimentalGroup;
@@ -117,5 +119,10 @@ public class Laboratory {
 
     public boolean isEnabled() {
         return labConfig.getBoolean("enabled");
+    }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("activatedExperiments", Arrays.stream(Experiments.values()).filter(exp->isExperimentActivated(exp.getExperiment())).toList());
     }
 }

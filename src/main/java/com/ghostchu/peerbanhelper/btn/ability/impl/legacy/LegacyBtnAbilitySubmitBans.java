@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
@@ -158,4 +159,13 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
         };
     }
 
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of(
+                "interval", interval,
+                "endpoint", endpoint,
+                "randomInitialDelay", randomInitialDelay,
+                "lastReport", lastReport
+        );
+    }
 }

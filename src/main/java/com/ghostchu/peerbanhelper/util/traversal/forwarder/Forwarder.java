@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
 import com.google.common.collect.BiMap;
@@ -7,7 +8,7 @@ import com.google.common.collect.BiMap;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
-public interface Forwarder extends AutoCloseable, NatAddressProvider {
+public interface Forwarder extends AutoCloseable, NatAddressProvider, ReportGenerator {
     void start();
 
     long getEstablishedConnections();

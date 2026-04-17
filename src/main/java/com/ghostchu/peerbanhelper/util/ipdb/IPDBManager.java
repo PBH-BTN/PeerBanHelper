@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
+import com.ghostchu.peerbanhelper.util.meter.CacheStatsMeter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.sentry.Sentry;
@@ -38,9 +39,10 @@ public class IPDBManager {
     @Nullable
     private IPDB ipdb = null;
 
-    public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory, BackgroundTaskManager backgroundTaskManager) {
+    public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory, BackgroundTaskManager backgroundTaskManager, CacheStatsMeter cacheStatsMeter) {
         this.hTTPUtil = hTTPUtil;
         this.backgroundTaskManager = backgroundTaskManager;
+        cacheStatsMeter.register("IPDBManager-geoIpCache", geoIpCache);
         if (laboratory.isExperimentActivated(Experiments.ASYNC_IPDB_SETUP.getExperiment())) {
             CompletableFuture.runAsync(this::setupIPDB);
         } else {

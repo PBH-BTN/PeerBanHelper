@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -16,11 +17,15 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
+import java.util.Map;
 
 @Component
-public final class AntiVampire extends AbstractRuleFeatureModule implements Reloadable {
+public final class AntiVampire extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
     private long banDuration;
     private boolean xunleiPreset;
+
+
+
 
     @Override
     public @NotNull String getName() {
@@ -111,4 +116,8 @@ public final class AntiVampire extends AbstractRuleFeatureModule implements Relo
         return null;
     }
 
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("banDuration", banDuration, "xunleiPreset", xunleiPreset);
+    }
 }

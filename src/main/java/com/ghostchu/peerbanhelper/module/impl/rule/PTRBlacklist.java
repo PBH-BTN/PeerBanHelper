@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
@@ -33,15 +34,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Component
-public final class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadable {
+public final class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
     private List<Rule> ptrRules;
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
     private DNSLookup dnsLookup;
     private long banDuration;
-    @Autowired
-    private Laboratory laboratory;
 
     @Override
     public @NotNull String getName() {
@@ -129,4 +128,8 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
         }, true);
     }
 
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("ptrRules", ptrRules, "banDuration", banDuration);
+    }
 }

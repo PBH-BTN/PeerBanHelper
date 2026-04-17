@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.postprocessor.PostProcessor;
 import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.util.URLUtil;
+import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.sentry.Sentry;
@@ -26,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public final class TextManager implements Reloadable {
+public final class TextManager implements Reloadable, ReportGenerator {
     public static final TextManager INSTANCE_HOLDER = new TextManager();
     public final Set<PostProcessor> postProcessors = new LinkedHashSet<>();
     private final LanguageFilesManagerImpl languageFilesManager = new LanguageFilesManagerImpl();
@@ -346,4 +347,11 @@ public final class TextManager implements Reloadable {
         }
         return components;
     }
+
+    @Override
+    public Map<String, Object> createReportJsonObject() {
+        return Map.of("portProcessors", postProcessors, "languageFilesManager", languageFilesManager,
+                "availableLanguages", availableLanguages, "loadedLanguages", loadedLanguages);
+    }
+
 }
