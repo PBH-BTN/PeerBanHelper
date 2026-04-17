@@ -12,7 +12,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.google.gson.JsonObject;
@@ -152,17 +151,5 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     @Override
     public void unload() {
 
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "interval", interval,
-                "endpoint", endpoint,
-                "randomInitialDelay", randomInitialDelay,
-                "scriptExecute", scriptExecute,
-                "powCaptcha", powCaptcha,
-                "btnRule", btnRule
-        );
     }
 }

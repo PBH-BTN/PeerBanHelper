@@ -17,7 +17,6 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.sentry.Sentry;
@@ -29,13 +28,12 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class SessionAnalyseServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule, ReportGenerator {
+public class SessionAnalyseServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
     private PeerConnectionMetricsTrackService connectionMetricsTrackDao;
     @Autowired
@@ -117,13 +115,5 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
         flushData();
     }
 
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "cleanupInterval", cleanupInterval,
-                "dataRetentionTime", dataRetentionTime,
-                "dataFlushInterval", dataFlushInterval
-        );
-    }
 
 }

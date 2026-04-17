@@ -12,7 +12,6 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
@@ -167,18 +166,6 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                     );
             log.info(tlUI(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_PEER, unbanPeer.getBanMetadata(), unbanPeer.getResult().comment()));
         }
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "interval", interval,
-                "endpoint", endpoint,
-                "randomInitialDelay", randomInitialDelay,
-                "ruleVersion", ruleVersion,
-                "powCaptcha", powCaptcha,
-                "ipMatcher", ipMatcher.metadata()
-        );
     }
 
     @Data

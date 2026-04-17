@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
@@ -87,15 +86,6 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
     @Override
     public void unload() {
 
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "endpoint", endpoint,
-                "powCaptcha", powCaptcha,
-                "iframeReport", iframeEndpoint
-        );
     }
 
     @AllArgsConstructor

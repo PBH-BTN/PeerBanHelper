@@ -19,7 +19,6 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.SharedObject;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.rule.*;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
@@ -52,7 +51,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 
-public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
+public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
     private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"), StructuredData.create().add("status", "btn_manager_not_initialized"));
     private long banDuration;
     @Autowired
@@ -66,6 +65,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
     @Autowired
     private BanList banList;
+
 
     @Override
     public @NotNull String getName() {
@@ -490,11 +490,5 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         });
         pendingUnban.forEach(ip -> banList.remove(ip));
     }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("banDuration", banDuration, "allowScript", allowScript);
-    }
-
 
 }

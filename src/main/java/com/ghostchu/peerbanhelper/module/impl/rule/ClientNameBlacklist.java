@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
@@ -32,7 +31,7 @@ import java.util.Map;
 @Slf4j
 @Getter
 @Component
-public final class ClientNameBlacklist extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
+public final class ClientNameBlacklist extends AbstractRuleFeatureModule implements Reloadable {
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;
@@ -107,8 +106,4 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
     }
 
 
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("banDuration", banDuration);
-    }
 }

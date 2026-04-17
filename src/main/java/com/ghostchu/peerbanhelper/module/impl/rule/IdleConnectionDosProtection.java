@@ -11,8 +11,6 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.meter.CacheStatsMeter;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -34,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
-public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule implements Reloadable, BatchMonitorFeatureModule, ReportGenerator {
+public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule implements Reloadable, BatchMonitorFeatureModule {
     private final Cache<@NotNull HostAndPort, @NotNull ConnectionInfo> idleConnections = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .softValues()
@@ -45,10 +43,6 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
     private boolean resetOnStatusChange;
     private double minStatusChangePercentage;
     private ProtectionMode protectionMode;
-
-    public IdleConnectionDosProtection(CacheStatsMeter cacheMeter){
-        cacheMeter.register("IdleConnectionDosProtection-idleConnections", idleConnections);
-    }
 
     @Override
     public @NotNull String getName() {
@@ -189,16 +183,6 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
             return entry.getValue().getNotHitCounter() > 5;
         });
         //log.debug("Removed {} disconnected connections.", count - idleConnections.size());
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("banDuration", banDuration, "maxAllowedIdleTime", maxAllowedIdleTime,
-                "idleSpeedThreshold", idleSpeedThreshold,
-                "resetOnStatusChange", resetOnStatusChange,
-                "minStatusChangePercentage", minStatusChangePercentage,
-                "protectionMode", protectionMode,
-                "idleConnections", idleConnections.asMap());
     }
 
     @Data

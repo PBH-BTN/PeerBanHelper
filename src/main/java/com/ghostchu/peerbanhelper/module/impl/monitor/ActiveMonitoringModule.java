@@ -16,7 +16,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.sentry.Sentry;
@@ -27,14 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule, ReportGenerator {
+public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
     private TrafficJournalService trafficJournalDao;
     @Autowired
@@ -107,12 +105,12 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             try {
                 if (downloader.login().success()) {
                     var speedLimiter = downloader.getSpeedLimiter();
-                    if (speedLimiter == null) continue;
-                    if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
+                    if(speedLimiter == null) continue;
+                    if(!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
                     DownloaderSpeedLimiter newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
-                    if (Main.getMeta().isSnapshotOrBeta()) {
+                    if(Main.getMeta().isSnapshotOrBeta()) {
                         log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload()) + "/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload()) + "/s", calculatedData));
                     }
                 }
@@ -153,6 +151,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
 
+
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
@@ -163,14 +162,5 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     @Override
     public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
 
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("dailyTrafficCapping", dailyTrafficCapping,
-                "useTrafficSlidingCapping", useTrafficSlidingCapping,
-                "maxTrafficAllowedInWindowPeriod", maxTrafficAllowedInWindowPeriod,
-                "trafficSlidingCappingMaxSpeed", trafficSlidingCappingMaxSpeed,
-                "trafficSlidingCappingMinSpeed", trafficSlidingCappingMinSpeed);
     }
 }

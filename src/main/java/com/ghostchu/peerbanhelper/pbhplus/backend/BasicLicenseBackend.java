@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.pbhplus.backend;
 
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.pbhplus.data.LicenseStatus;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +12,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Component
-public class BasicLicenseBackend implements LicenseBackend, ReportGenerator {
+public class BasicLicenseBackend implements LicenseBackend {
     protected final Map<String, License> licenses = Collections.synchronizedMap(new LinkedHashMap<>());
 
     @Override
@@ -65,10 +64,5 @@ public class BasicLicenseBackend implements LicenseBackend, ReportGenerator {
                 .flatMap(license -> license.getFeatures() != null ? license.getFeatures().stream() : Stream.empty())
                 .distinct()
                 .toList();
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("licenses", licenses);
     }
 }

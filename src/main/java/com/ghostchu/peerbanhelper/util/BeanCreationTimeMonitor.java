@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.util;
 
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -11,7 +10,7 @@ import java.util.Map;
 
 @Slf4j
 @Configuration
-public class BeanCreationTimeMonitor implements BeanPostProcessor, ReportGenerator {
+public class BeanCreationTimeMonitor implements BeanPostProcessor {
 
     private final Map<String, Long> startTimes = new HashMap<>();
 
@@ -29,10 +28,5 @@ public class BeanCreationTimeMonitor implements BeanPostProcessor, ReportGenerat
             log.debug("Bean '{}' initialized in {}ms", beanName, initializationTime);
         }
         return bean;
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("startTimes", startTimes);
     }
 }

@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.pbhplus.data.LicenseStatus;
 import com.ghostchu.peerbanhelper.pbhplus.validator.LicenseRevokeValidator;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.spotify.futures.CompletableFutures;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
@@ -17,21 +16,13 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class RevolvableLicenseBackend extends BasicLicenseBackend implements ReportGenerator {
+public class RevolvableLicenseBackend extends BasicLicenseBackend {
     private final Set<License> revokedLicenses = Collections.synchronizedSet(new LinkedHashSet<>());
     private final List<LicenseRevokeValidator> revokeValidators;
 
     public RevolvableLicenseBackend(List<LicenseRevokeValidator> revokeValidators) {
         this.revokeValidators = revokeValidators;
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::checkRevokedLicenses, 0, 1, TimeUnit.DAYS);
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("revokedLicenses", revokedLicenses);
-        map.put("revokeValidators", revokeValidators);
-        return map;
     }
 
     private synchronized void checkRevokedLicenses() {

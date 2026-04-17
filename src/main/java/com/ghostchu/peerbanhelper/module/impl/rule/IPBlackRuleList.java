@@ -21,7 +21,6 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -70,7 +69,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @Getter
-public final class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable, ReportGenerator {
+public final class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
     private final RuleSubLogService ruleSubLogsDao;
     private final ModuleMatchCache moduleMatchCache;
     private List<IPMatcher> ipBanMatchers;
@@ -514,13 +513,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
 
     private void preloadBanList() {
 
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("banDuration", banDuration,
-                 "checkInterval", checkInterval,
-                "ipBanMatchers", ipBanMatchers != null ? ipBanMatchers.stream().map(IPMatcher::metadata).toList() : "null");
     }
 }
 

@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.util.push;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.push.impl.*;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -26,7 +24,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public final class PushManagerImpl implements Reloadable, PushManager, ReportGenerator {
+public final class PushManagerImpl implements Reloadable, PushManager {
     @Getter
     private final List<PushProvider> providerList = new ArrayList<>();
     private final HTTPUtil httpUtil;
@@ -121,10 +119,5 @@ public final class PushManagerImpl implements Reloadable, PushManager, ReportGen
     public ReloadResult reloadModule() throws Exception {
         reloadConfig();
         return Reloadable.super.reloadModule();
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("providerList", providerList);
     }
 }

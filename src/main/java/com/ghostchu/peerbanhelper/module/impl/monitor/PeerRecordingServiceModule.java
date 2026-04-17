@@ -14,7 +14,6 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -40,7 +39,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class PeerRecordingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule, ReportGenerator {
+public class PeerRecordingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     private final AtomicBoolean databaseBackFlushFlag = new AtomicBoolean(true);
     @Autowired
     private PeerRecordService peerRecordDao;
@@ -158,10 +157,5 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
         databaseBackFlushFlag.set(false);
         diskWriteCache.invalidateAll();
         databaseBackFlushFlag.set(true);
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("databaseBackFlushFlag", databaseBackFlushFlag);
     }
 }

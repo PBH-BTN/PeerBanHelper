@@ -15,7 +15,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
@@ -31,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -168,15 +166,5 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                 gzipSink.close();
             }
         };
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "interval", interval,
-                "endpoint", endpoint,
-                "randomInitialDelay", randomInitialDelay,
-                "powCaptcha", powCaptcha
-        );
     }
 }

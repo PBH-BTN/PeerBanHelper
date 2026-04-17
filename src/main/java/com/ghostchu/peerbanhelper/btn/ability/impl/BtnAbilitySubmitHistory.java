@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
@@ -29,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -200,15 +198,5 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                 gzipSink.close();
             }
         };
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "interval", interval,
-                "endpoint", endpoint,
-                "randomInitialDelay", randomInitialDelay,
-                "powCaptcha", powCaptcha
-        );
     }
 }

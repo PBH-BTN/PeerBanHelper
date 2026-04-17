@@ -27,7 +27,6 @@ import com.ghostchu.peerbanhelper.util.WatchDog;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
@@ -61,7 +60,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public final class DownloaderServerImpl implements Reloadable, AutoCloseable, DownloaderServer, ReportGenerator {
+public final class DownloaderServerImpl implements Reloadable, AutoCloseable, DownloaderServer {
     @Getter
     private final DualIPv4v6Tries ignoreAddresses = new DualIPv4v6Tries();
     private final Lock banWaveLock = new ReentrantLock();
@@ -757,20 +756,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         } else {
             ExchangeMap.GUI_DISPLAY_FLAGS.removeIf(f -> "global-paused".equals(f.getId()));
         }
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        var map = new LinkedHashMap<>();
-        map.put("ignoreAddresses", ignoreAddresses);
-        map.put("scheduledBanLidtOperation", scheduledBanListOperations);
-        map.put("metrics", metrics);
-        map.put("banDuration", banDuration);
-        map.put("LIVE_PEERS", LIVE_PEERS);
-        map.put("hideFinishLogs", hideFinishLogs);
-        map.put("BANLIST_SAVE_INTERVAL", BANLIST_SAVE_INTERVAL);
-        map.put("needReApplyBanList", needReApplyBanList.get());
-        map.put("globalPaused", globalPaused);
     }
 
 

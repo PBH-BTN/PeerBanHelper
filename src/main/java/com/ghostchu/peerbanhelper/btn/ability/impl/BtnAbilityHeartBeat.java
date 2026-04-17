@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -35,6 +34,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     private final boolean multiIf;
     private final boolean powCaptcha;
     private String lastResult = "No information";
+    private final ExecutorService executorService = Executors.newWorkStealingPool(16);
 
     public BtnAbilityHeartBeat(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
@@ -333,17 +333,5 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
     static class ServerResponse {
         @SerializedName("external_ip")
         private String externalIp;
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "interval", interval,
-                "endpoint", endpoint,
-                "randomInitialDelay", randomInitialDelay,
-                "multiIf", multiIf,
-                "powCaptcha", powCaptcha,
-                "lastResult", lastResult
-        );
     }
 }

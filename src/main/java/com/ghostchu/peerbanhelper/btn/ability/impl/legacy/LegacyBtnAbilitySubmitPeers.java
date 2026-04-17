@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerPing;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
@@ -22,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -128,12 +126,5 @@ public final class LegacyBtnAbilitySubmitPeers extends AbstractBtnAbility {
 
     }
 
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of(
-                "interval", interval,
-                "endpoint", endpoint,
-                "randomInitialDelay", randomInitialDelay
-        );
-    }
+
 }

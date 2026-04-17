@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.util.portmapper;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.observable.ReportGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
@@ -27,7 +26,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public final class PBHPortMapperImpl implements PBHPortMapper, ReportGenerator {
+public final class PBHPortMapperImpl implements PBHPortMapper {
     private GatewayDiscover gatewayDiscover = null;
     private boolean isShutdown = false;
     private final Object discoverLock = new Object();
@@ -190,10 +189,5 @@ public final class PBHPortMapperImpl implements PBHPortMapper, ReportGenerator {
     public void close() {
         isShutdown = true;
         sched.shutdown();
-    }
-
-    @Override
-    public Map<String, Object> createReportJsonObject() {
-        return Map.of("isShutdown", isShutdown, "mappedPorts", mappedPorts, "lastCheckedNics", lastCheckedNics);
     }
 }

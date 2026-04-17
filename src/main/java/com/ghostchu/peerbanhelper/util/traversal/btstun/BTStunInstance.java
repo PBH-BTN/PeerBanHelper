@@ -8,7 +8,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
-import com.ghostchu.peerbanhelper.util.observable.ReportManager;
+import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.portmapper.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.Forwarder;
@@ -26,7 +26,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +40,6 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     private final BTStunManager manager;
     private final BanList banList;
     private final IPDBManager ipdb;
-    private final ReportManager reportManager;
     @Getter
     private StunTcpTunnel tunnel;
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
@@ -50,13 +48,12 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     private Forwarder tcpForwarder;
     private @Nullable TranslationComponent shutdownReason = null;
 
-    public BTStunInstance(BanList banList, PBHPortMapper portMapper, Downloader downloader, BTStunManager manager, IPDBManager ipdb, ReportManager reportManager) {
+    public BTStunInstance(BanList banList, PBHPortMapper portMapper, Downloader downloader, BTStunManager manager, Laboratory laboratory, IPDBManager ipdb) {
         this.banList = banList;
         this.portMapper = portMapper;
         this.downloader = downloader;
         this.manager = manager;
         this.ipdb = ipdb;
-        this.reportManager = reportManager;
         if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT)) {
             throw new IllegalArgumentException(tlUI(Lang.AUTOSTUN_DOWNLOADER_NOT_SUPPORT_LIVE_UPDATE_PORT, downloader.getName()));
         }
@@ -80,7 +77,6 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         }
         log.info(tlUI(Lang.BTSTUN_RESTART, downloader.getName()));
         this.tunnel = new StunTcpTunnelImpl(portMapper, this);
-        reportManager.register("StunTcpImpl-"+ UUID.randomUUID(), this.tunnel);
         this.tunnel.createMapping(ExternalSwitch.parseInt("pbh.btstun.localPort." + downloader.getId(), 0));
     }
 
@@ -118,7 +114,6 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         this.tcpForwarder = new TCPForwarderImpl(banList,
                 ExternalSwitch.parseBoolean("pbh.btstun.ipv6support", true) ? "[::]" : "0.0.0.0",
                 forwarderServerPort, downloaderHost, downloaderShouldListenOn, ipdb);
-        reportManager.register("BTStunInstance-TCPForwarder-"+forwarderServerPort+"-"+downloaderHost+"-"+downloaderShouldListenOn, tcpForwarder);
         tcpForwarder.start();
         try {
             if (downloader.getBTProtocolPort() != downloaderShouldListenOn) {
