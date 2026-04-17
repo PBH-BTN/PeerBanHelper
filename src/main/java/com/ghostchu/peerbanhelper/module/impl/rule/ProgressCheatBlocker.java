@@ -27,9 +27,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
 import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -49,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -487,8 +483,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
-        pcbRangeDao.saveOrUpdateIfDirty(pcbRangeEntity);
-        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
+        pcbRangeDao.saveOrUpdateIfDirtyWithIdRefill(pcbRangeEntity);
+        pcbAddressDao.saveOrUpdateIfDirtyWithIdRefill(pcbAddressEntity);
         return Pair.of(pcbRangeEntity, pcbAddressEntity);
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends CanDirty> extends AbstractCommonService<M,T> implements CommonCanDirtyService<T> {
 
     @Override
-    public boolean saveOrUpdateIfDirty(T t) {
+    public boolean saveOrUpdateIfDirtyWithIdRefill(T t) {
         if(t != null && t.isDirty()){
             boolean success = this.baseMapper.insertOrUpdate(t);
             if(success){
