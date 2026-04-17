@@ -483,8 +483,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
-        pcbRangeDao.saveOrUpdateIfDirtyWithIdRefill(pcbRangeEntity);
-        pcbAddressDao.saveOrUpdateIfDirtyWithIdRefill(pcbAddressEntity);
+        pcbRangeDao.saveOrUpdateIfDirty(pcbRangeEntity);
+        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
         return Pair.of(pcbRangeEntity, pcbAddressEntity);
     }
 

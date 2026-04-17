@@ -19,7 +19,7 @@ public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends Ca
     }
 
     @Override
-    public boolean saveOrUpdateIfDirtyWithIdRefill(T t) {
+    public boolean saveOrUpdateIfDirty(T t) {
         if(t != null && t.isDirty()){
             boolean success = this.baseMapper.insertOrUpdate(t);
             if(success){
@@ -32,7 +32,7 @@ public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends Ca
 
     @Override
     public List<BatchResult> saveOrUpdateIfDirty(List<T> t) {
-        return transactionTemplate.execute((status)->{
+        return transactionTemplate.execute((_)->{
             var dirtyElements = t.stream().filter(CanDirty::isDirty).toList();
             return this.baseMapper.insertOrUpdate(dirtyElements, 1000);
         });

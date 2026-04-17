@@ -12,7 +12,7 @@ public interface CommonCanDirtyService<T extends CanDirty> extends CommonService
      * @param t element
      * @return id-filled element
      */
-    boolean saveOrUpdateIfDirtyWithIdRefill(T t);
+    boolean saveOrUpdateIfDirty(T t);
 
     /**
      * 批量保存和更新脏对象，此操作不会在创建新记录时回填主键
