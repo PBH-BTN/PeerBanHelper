@@ -9,12 +9,25 @@ import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ghostchu.peerbanhelper.databasent.service.CommonService;
+import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
-public class AbstractCommonService<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
+public class AbstractCommonService<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> implements CommonService<T> {
     private static final String LAST_LIMIT = "LIMIT 200";
+    final TransactionTemplate transactionTemplate;
+
+    public AbstractCommonService(@NotNull TransactionTemplate transactionTemplate){
+        this.transactionTemplate = transactionTemplate;
+    }
+
+    @NotNull
+    public TransactionTemplate getTransactionTemplate() {
+        return transactionTemplate;
+    }
 
     public long splitBatchDelete(@NotNull QueryWrapper<T> wrapper) {
         return splitBatchDelete0(wrapper.last(LAST_LIMIT));
@@ -52,4 +65,5 @@ public class AbstractCommonService<M extends BaseMapper<T>, T> extends ServiceIm
         log.debug("[SpiltBatchDelete] Deleted {} total.", deleted);
         return deleted;
     }
+
 }

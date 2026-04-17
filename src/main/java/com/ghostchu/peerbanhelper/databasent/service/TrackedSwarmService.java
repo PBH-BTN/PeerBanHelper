@@ -18,5 +18,7 @@ public interface TrackedSwarmService extends IService<TrackedSwarmEntity> {
 
     void flushAll();
 
+    void closeCache() throws Exception;
+
     void resetTable();
 }

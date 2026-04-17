@@ -15,12 +15,13 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class PCBRangeServiceImpl extends AbstractCommonService<PCBRangeMapper, PCBRangeEntity> implements PCBRangeService {
+public class PCBRangeServiceImpl extends AbstractCanDirtyCommonService<PCBRangeMapper, PCBRangeEntity> implements PCBRangeService {
 
-	@Autowired
-	private TransactionTemplate transactionTemplate;
+    public PCBRangeServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
-	@Override
+    @Override
 	public List<PCBRangeEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
         return baseMapper.selectList(new LambdaQueryWrapper<PCBRangeEntity>()
                 .eq(PCBRangeEntity::getTorrentId, torrentId)

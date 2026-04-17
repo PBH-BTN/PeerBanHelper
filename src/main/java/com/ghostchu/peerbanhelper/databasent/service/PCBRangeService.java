@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public interface PCBRangeService extends IService<PCBRangeEntity> {
+public interface PCBRangeService extends CommonCanDirtyService<PCBRangeEntity> {
 
 	List<PCBRangeEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader);
 

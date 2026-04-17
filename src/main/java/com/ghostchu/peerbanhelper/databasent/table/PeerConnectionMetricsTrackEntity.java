@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
@@ -14,12 +15,13 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "peer_connection_metrics_track", autoResultMap = true)
-public final class PeerConnectionMetricsTrackEntity implements Serializable {
+public final class PeerConnectionMetricsTrackEntity extends AbstractCanDirtyEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

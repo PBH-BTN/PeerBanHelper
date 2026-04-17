@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.databasent.driver.common.JsonTypeHandlerForwar
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
@@ -16,12 +17,13 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "peer_records", autoResultMap = true)
-public final class PeerRecordEntity implements Serializable {
+public final class PeerRecordEntity extends AbstractCanDirtyEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

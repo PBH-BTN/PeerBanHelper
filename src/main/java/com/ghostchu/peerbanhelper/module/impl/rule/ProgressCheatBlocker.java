@@ -20,15 +20,13 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
+import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
 import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -44,34 +42,26 @@ import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
-    private final AtomicBoolean cacheBackFlushFlag = new AtomicBoolean(true);
-    @SuppressWarnings("NullableProblems")
-    private final Cache<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> cache = CacheBuilder.newBuilder()
-            .maximumSize(1024)
-            .expireAfterAccess(10, TimeUnit.SECONDS)
-            .softValues()
-            .recordStats()
-            .removalListener((RemovalListener<@NotNull CacheKey, @Nullable Pair<PCBRangeEntity, PCBAddressEntity>>) notification -> {
-                var pair = notification.getValue();
-                //noinspection ConstantValue
-                if (pair == null) {
-                    // oom 引发 soft-value 被垃圾回收，则可能导致其为 null
-                    return;
-                }
-                if (!cacheBackFlushFlag.get()) return;
-                flushBackDatabase(pair.getLeft(), pair.getRight());
-            })
-            .build();
+    private final PBHCache<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> cache = new PBHCache<>(
+            1024,
+            null,
+            180 * 1000L,
+            false,
+            false,
+            true,
+            this::batchFlushBackDatabase
+    );
     private long torrentMinimumSize;
     private boolean blockExcessiveClients;
     private double excessiveThreshold;
@@ -179,21 +169,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     public void onDisable() {
         Main.getEventBus().unregister(this);
         Main.getReloadManager().unregister(this);
-        flushBackDatabaseAll();
-        cacheBackFlushFlag.set(false);
-        cache.invalidateAll();
-        cacheBackFlushFlag.set(true);
+        try {
+            cache.close();
+        } catch (Exception e) {
+            log.warn("Unable to close cache instance", e);
+        }
     }
 
-    private void flushBackDatabaseAll() {
-
-        transactionTemplate.execute(_ -> {
-            for (Map.Entry<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> entry : cache.asMap().entrySet()) {
-                flushBackDatabase(entry.getValue().getKey(), entry.getValue().getRight());
-            }
-            return null;
-        });
-    }
 
     private void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
@@ -477,12 +459,12 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
                         rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
-                        pcbRangeDao.save(rangeEntity);
+                        rangeEntity.setDirty(true);
                     }
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
                         pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
-                        pcbAddressDao.save(pcbAddressEntity);
+                        pcbAddressEntity.setDirty(true);
                     }
                     return Pair.of(rangeEntity, pcbAddressEntity);
                 }
@@ -493,11 +475,16 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         }
     }
 
+    private void batchFlushBackDatabase(Stream<Pair<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>>> stream) {
+        List<Pair<PCBRangeEntity, PCBAddressEntity>> entities = stream.map(Pair::getRight).toList();
+        pcbRangeDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getLeft).toList());
+        pcbAddressDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getRight).toList());
+    }
+
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
-        log.debug("Flushing back to database for pair PCBRangeEntity id={} and PCBAddressEntity id={}", pcbRangeEntity.getId(), pcbAddressEntity.getId());
-        pcbRangeDao.saveOrUpdate(pcbRangeEntity);
-        pcbAddressDao.saveOrUpdate(pcbAddressEntity);
+        pcbRangeDao.saveOrUpdateIfDirty(pcbRangeEntity);
+        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
         return Pair.of(pcbRangeEntity, pcbAddressEntity);
     }
 

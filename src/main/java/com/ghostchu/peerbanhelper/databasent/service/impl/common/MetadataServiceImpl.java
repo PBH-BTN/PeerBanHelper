@@ -7,9 +7,15 @@ import com.ghostchu.peerbanhelper.databasent.table.MetadataEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class MetadataServiceImpl extends AbstractCommonService<MetadataMapper, MetadataEntity> implements MetadataService {
+
+    public MetadataServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
+
     @Override
     public @Nullable String get(@NotNull String key) {
         return getOrDefault(key, null);

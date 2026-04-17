@@ -27,8 +27,9 @@ import java.util.stream.Collectors;
 @Service
 public class HistoryServiceImpl extends AbstractCommonService<HistoryMapper, HistoryEntity> implements HistoryService {
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+    public HistoryServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter) {

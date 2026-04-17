@@ -14,8 +14,10 @@ import java.util.List;
 
 @Service
 public class AlertServiceImpl extends AbstractCommonService<AlertMapper, AlertEntity> implements AlertService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+
+    public AlertServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public @NotNull List<AlertEntity> getUnreadAlerts() {

@@ -21,8 +21,10 @@ import java.util.Map;
 @Slf4j
 @Service
 public class BanListServiceImpl extends AbstractCommonService<BanListMapper, BanListEntity> implements BanListService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+
+    public BanListServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public @NotNull Map<IPAddress, BanMetadata> readBanList() {

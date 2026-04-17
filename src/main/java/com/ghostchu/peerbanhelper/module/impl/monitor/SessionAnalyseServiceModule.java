@@ -113,6 +113,11 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     @Override
     public void onDisable() {
         flushData();
+        try {
+            connectionMetricsTrackDao.closeCache();
+        } catch (Exception e) {
+            log.warn("Unable to close session analyse cache instance", e);
+        }
     }
 
 

@@ -9,10 +9,9 @@ import com.ghostchu.peerbanhelper.databasent.mapper.java.TrackedSwarmMapper;
 import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.util.Pair;
+import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,25 +21,26 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @Component
 @Slf4j
 public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmMapper, TrackedSwarmEntity> implements TrackedSwarmService {
     @Autowired
     private TransactionTemplate transactionTemplate;
-    private final Cache<@NotNull CacheKey, @NotNull TrackedSwarmEntity> cache = CacheBuilder.newBuilder()
-            .maximumSize(ExternalSwitch.parseInt("pbh.module.swarm-tracking-module.cache-size", 1000))
-            .expireAfterAccess(3, TimeUnit.MINUTES)
-            .removalListener((RemovalListener<@NotNull CacheKey, @NotNull TrackedSwarmEntity>) notification -> {
-                var v = notification.getValue();
-                //noinspection ConstantValue
-                if (v != null) {
-                    baseMapper.upsert(v);
-                }
-            })
-            .softValues()
-            .build();
+    private final PBHCache<@NotNull CacheKey, @NotNull TrackedSwarmEntity> cache = new PBHCache<>(
+            ExternalSwitch.parseInt("pbh.module.swarm-tracking-module.cache-size", 1000),
+            null,
+            3 * 60 * 1000L,
+            false,
+            false,
+            true,
+            this::batchFlushDatabase
+    );
+
+    public TrackedSwarmServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
 
     @Override
@@ -121,6 +121,18 @@ public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmM
             for (TrackedSwarmEntity entity : cache.asMap().values()) {
                 baseMapper.upsert(entity);
             }
+            return null;
+        });
+    }
+
+    @Override
+    public void closeCache() throws Exception {
+        cache.close();
+    }
+
+    private void batchFlushDatabase(Stream<Pair<CacheKey, TrackedSwarmEntity>> stream) {
+        transactionTemplate.execute(_ -> {
+            stream.map(Pair::getRight).forEach(baseMapper::upsert);
             return null;
         });
     }
