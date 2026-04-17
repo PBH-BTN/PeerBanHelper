@@ -463,12 +463,12 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
                         rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
-                        pcbRangeDao.save(rangeEntity);
+                        rangeEntity.setDirty(true);
                     }
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
                         pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
-                        pcbAddressDao.save(pcbAddressEntity);
+                        pcbAddressEntity.setDirty(true);
                     }
                     return Pair.of(rangeEntity, pcbAddressEntity);
                 }
@@ -487,8 +487,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
-        pcbRangeDao.saveOrUpdate(pcbRangeEntity);
-        pcbAddressDao.saveOrUpdate(pcbAddressEntity);
+        pcbRangeDao.saveOrUpdateIfDirty(pcbRangeEntity);
+        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
         return Pair.of(pcbRangeEntity, pcbAddressEntity);
     }
 
