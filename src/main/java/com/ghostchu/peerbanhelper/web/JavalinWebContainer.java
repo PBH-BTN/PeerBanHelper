@@ -381,9 +381,9 @@ public final class JavalinWebContainer implements Reloadable {
             ipAddr = ipAddr.toIPv4();
         }
         if (ipAddr.isIPv4()) {
-            ipAddr = IPAddressUtil.toPrefixBlockAndZeroHost(ipAddr, 24);
+            ipAddr = ipAddr.toPrefixBlock(24);
         } else {
-            ipAddr = IPAddressUtil.toPrefixBlockAndZeroHost(ipAddr, 50);
+            ipAddr = ipAddr.toPrefixBlock(50);
         }
         return ipAddr;
     }

@@ -42,15 +42,15 @@ public final class BlockListController extends AbstractFeatureModule {
         Set<IPAddress> remappedIps = new LinkedHashSet<>();
         for (IPAddress ipAddress : banList.copyKeySet()) {
             if (ipAddress == null) continue;
-            ipAddress = IPAddressUtil.remapBanListAddress(ipAddress);
-            remappedIps.add(ipAddress);
+            var ipAddresses = IPAddressUtil.remapBanListAddress(ipAddress);
+            remappedIps.addAll(ipAddresses);
         }
         
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : remappedIps) {
-            String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
-            String end = ipAddress.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
-            builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toNormalizedString()).append("\n");
+            String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toCompressedString();
+            String end = ipAddress.toPrefixBlock().getUpper().withoutPrefixLength().toCompressedString();
+            builder.append(start).append(" - ").append(end).append(" , 000 , ").append(ipAddress.toCompressedString()).append("\n");
         }
         ctx.result(builder.toString());
     }
@@ -58,15 +58,15 @@ public final class BlockListController extends AbstractFeatureModule {
     private void blocklistP2pPlain(@NotNull Context ctx) {
         Set<IPAddress> remappedIps = new LinkedHashSet<>();
         for (IPAddress addr : banList.copyKeySet()) {
-            addr = IPAddressUtil.remapBanListAddress(addr);
-            remappedIps.add(addr);
+            var ipAddresses = IPAddressUtil.remapBanListAddress(addr);
+            remappedIps.addAll(ipAddresses);
         }
         
         StringBuilder builder = new StringBuilder();
         for (IPAddress addr : remappedIps) {
             String ruleName = UUID.randomUUID().toString().replace("-", "");
-            String start = addr.toPrefixBlock().getLower().withoutPrefixLength().toNormalizedString();
-            String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toNormalizedString();
+            String start = addr.toPrefixBlock().getLower().withoutPrefixLength().toCompressedString();
+            String end = addr.toPrefixBlock().getUpper().withoutPrefixLength().toCompressedString();
             builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
         }
         var result = builder.toString();
@@ -81,13 +81,13 @@ public final class BlockListController extends AbstractFeatureModule {
         // Deduplicate remapped IPs using LinkedHashSet to maintain insertion order
         Set<IPAddress> remappedIps = new LinkedHashSet<>();
         for (IPAddress ipAddress : banList.copyKeySet()) {
-            ipAddress = IPAddressUtil.remapBanListAddress(ipAddress);
-            remappedIps.add(ipAddress);
+            var ipAddresses = IPAddressUtil.remapBanListAddress(ipAddress);
+            remappedIps.addAll(ipAddresses);
         }
         
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : remappedIps) {
-            builder.append(ipAddress.toPrefixBlock().toNormalizedString()).append("\n");
+            builder.append(ipAddress.toPrefixBlock().toCompressedString()).append("\n");
         }
         ctx.result(builder.toString());
     }

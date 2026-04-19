@@ -524,7 +524,7 @@ public final class BitComet extends AbstractDownloader {
 
     private void setBanListFull(Collection<IPAddress> peerAddresses) {
         String banStr = peerAddresses.stream()
-                .map(ipAddr -> remapBanListAddress(ipAddr).toNormalizedString())
+                .flatMap(ipAddr -> remapBanListAddress(ipAddr).stream().map(IPAddress::toCompressedString))
                 .collect(Collectors.joining("\n"));
         operateBanListLegacy("replace", banStr);
     }

@@ -1,0 +1,1 @@
+ALTER TABLE peer_connection_metrics_track ALTER COLUMN peer_id DROP NOT NULL;

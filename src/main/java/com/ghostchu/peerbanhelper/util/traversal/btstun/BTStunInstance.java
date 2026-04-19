@@ -90,7 +90,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
         String hostAddress = null;
         HostName hostName = new HostName(downloaderHost);
         if (hostName.isAddress()) {
-            hostAddress = hostName.getAddress().toNormalizedString();
+            hostAddress = hostName.getAddress().toCompressedString();
         } else {
             try {
                 hostAddress = InetAddress.getByName(hostName.getHost()).getHostAddress();
