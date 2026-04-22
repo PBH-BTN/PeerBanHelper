@@ -66,7 +66,7 @@ dependencies {
     implementation("com.github.chris2018998:beecp:5.2.2")
     implementation("org.springframework:spring-tx:7.0.7")
     implementation("org.springframework:spring-jdbc:7.0.7")
-    implementation("org.xerial:sqlite-jdbc:3.51.3.0")
+    implementation("org.xerial:sqlite-jdbc:3.53.0.0")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.10")
     implementation("com.mysql:mysql-connector-j:9.6.0") {
