@@ -27,7 +27,7 @@
     "@vueuse/core": "^14",
     "antlr4": "^4.13.2",
     "compare-versions": "^6.1.1",
-    "copy-to-clipboard": "^3.3.3",
+    "copy-to-clipboard": "^4.0.0",
     "dayjs": "^1.11.20",
     "echarts": "^6.0.0",
     "is-in-subnet": "^4.0.1",
