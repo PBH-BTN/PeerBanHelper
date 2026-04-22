@@ -110,7 +110,7 @@ dependencies {
         exclude(group = "net.java.dev.jna", module = "jna")
     }
     // Markdown
-    implementation("org.commonmark:commonmark:0.27.1")
+    implementation("org.commonmark:commonmark:0.28.0")
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
