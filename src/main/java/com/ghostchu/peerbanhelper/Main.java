@@ -296,7 +296,38 @@ public class Main {
         } catch (Throwable e) {
             log.warn("Failed to set log level", e);
         }
+        try {
+            cleanupLogs();
+        } catch (Throwable e) {
+            log.warn("Failed to cleanup old logs", e);
+        }
+    }
 
+    private static void cleanupLogs() {
+        if (!logsDirectory.exists()) return;
+        File[] logsFile = logsDirectory.listFiles((dir, name) -> {
+            if (name == null) return false;
+            // .log.gz is compressed history logs, .tmp is uncompressed old logs (it not get compressed due application crashes or some other reason)
+            return name.endsWith(".log.gz") || name.endsWith(".tmp");
+        });
+        if (logsFile == null) return;
+        Arrays.sort(logsFile, (o1, o2) -> Long.compare(o2.lastModified(), o1.lastModified()));
+        long weekAgo = System.currentTimeMillis() - 604800000L;
+        int skipped = 0;
+        for (File file : logsFile) {
+            if (skipped <= 5) {
+                skipped++;
+                continue;
+            }
+            if (file.lastModified() < weekAgo) {
+                boolean success = file.delete();
+                if (success) {
+                    log.info("Deleted old logs file: {}", file.getAbsolutePath());
+                } else {
+                    log.warn("Failed to delete old logs file: {}", file.getAbsolutePath());
+                }
+            }
+        }
     }
 
     public static ReloadResult reloadModule() {
