@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.7"
-    id("com.install4j.gradle") version "12.0.3" apply false
+    id("com.install4j.gradle") version "12.0.4" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.3.20"
@@ -59,13 +59,13 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.6"){
+    implementation("org.springframework:spring-context:7.0.7"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
     implementation("com.github.chris2018998:beecp:5.2.2")
-    implementation("org.springframework:spring-tx:7.0.6")
-    implementation("org.springframework:spring-jdbc:7.0.6")
+    implementation("org.springframework:spring-tx:7.0.7")
+    implementation("org.springframework:spring-jdbc:7.0.7")
     implementation("org.xerial:sqlite-jdbc:3.51.3.0")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.10")
@@ -152,7 +152,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.18.1")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.11.Final") {
+    implementation("io.netty:netty-all:4.2.12.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")
@@ -170,7 +170,7 @@ dependencies {
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.133.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:12.0.3")
+    compileOnly("com.install4j:install4j-runtime:12.0.4")
 
     implementation(platform("io.sentry:sentry-bom:8.37.0")) //import bom
     implementation("io.sentry:sentry")
