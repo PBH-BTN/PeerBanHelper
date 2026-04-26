@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.3.11"
+version = "9.3.12"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -126,6 +126,9 @@ dependencies {
     implementation("com.google.guava:guava:33.5.0-jre")
     implementation("com.github.seancfoley:ipaddress:5.6.1")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
+    implementation("org.apache.commons:commons-collections4:4.5.0")
+    // CSV
+    implementation("de.siegmar:fastcsv:4.2.0")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {

@@ -99,7 +99,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
 
                 int size = 0;
                 int requests = 0;
-                Page<TrackedSwarmEntity> page = new Page<>(1, 1000); // 每页处理 100 条
+                Page<TrackedSwarmEntity> page = new Page<>(1, 1000); // 每页处理 1000 条
                 do {
                     var pair = getMemCursor();
                     long lastTimeSeen = pair.getLeft();
