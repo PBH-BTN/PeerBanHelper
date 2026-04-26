@@ -312,7 +312,7 @@ public class Main {
         });
         if (logsFile == null) return;
         Arrays.sort(logsFile, (o1, o2) -> Long.compare(o2.lastModified(), o1.lastModified()));
-        long weekAgo = System.currentTimeMillis() - 604800000L;
+        long weekAgo = System.currentTimeMillis() - java.util.concurrent.TimeUnit.DAYS.toMillis(7);
         int skipped = 0;
         for (File file : logsFile) {
             if (skipped <= 5) {
