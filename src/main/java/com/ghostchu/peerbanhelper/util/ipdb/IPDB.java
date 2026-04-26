@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.*;
+import com.ghostchu.peerbanhelper.util.ipdb.geocn.GeoCN1;
+import com.ghostchu.peerbanhelper.util.ipdb.geocn.GeoCN2;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
@@ -16,9 +18,9 @@ import com.maxmind.geoip2.model.CountryResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
 import io.sentry.Sentry;
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
@@ -37,7 +39,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -56,10 +57,11 @@ public final class IPDB implements AutoCloseable {
     private DatabaseReader mmdbCity;
     @Getter
     private DatabaseReader mmdbASN;
-    private Reader geoCN;
     private List<String> languageTag;
+    private GeoCN2 geoCN2;
+    private GeoCN1 geoCN1;
 
-    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent, HTTPUtil httpUtil, BackgroundTaskManager backgroundTaskManager) throws IllegalArgumentException, IOException {
+    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, String databaseGeoCN, boolean autoUpdate, String userAgent, HTTPUtil httpUtil, BackgroundTaskManager backgroundTaskManager) throws IllegalArgumentException, IOException {
 //        this.dataFolder = dataFolder;
 //        this.accountId = accountId;
 //        this.licenseKey = licenseKey;
@@ -91,7 +93,7 @@ public final class IPDB implements AutoCloseable {
             updateMMDB(databaseASN, mmdbASNFile);
         }
         if (needUpdateMMDB(mmdbGeoCNFile)) {
-            updateGeoCN(mmdbGeoCNFile);
+            updateMMDB(databaseGeoCN, mmdbGeoCNFile);
         }
         loadMMDB();
     }
@@ -113,64 +115,27 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
-        if(geoCN == null) {
-            return;
-        }
         try {
-            CNLookupResult cnLookupResult = geoCN.get(address, CNLookupResult.class);
-            if (cnLookupResult == null) {
-                return;
+            var data = geoCN2.query(address);
+            if(data != null){
+                geoData.mergeFrom(data, true);
             }
-            // City Data
-            IPGeoData.CityData cityResponse = Objects.requireNonNullElse(geoData.getCity(), new IPGeoData.CityData());
-            String cityName = (cnLookupResult.getProvince() + " " + cnLookupResult.getCity() + " " + cnLookupResult.getDistricts()).trim();
-            if (!cityName.isBlank()) {
-                cityResponse.setName(cityName);
-            }
-
-            Integer code = null;
-            if (cnLookupResult.getProvinceCode() != null) {
-                code = cnLookupResult.getProvinceCode().intValue();
-            }
-            if (cnLookupResult.getCityCode() != null) {
-                code = cnLookupResult.getCityCode().intValue();
-            }
-            if (cnLookupResult.getDistrictsCode() != null) {
-                code = cnLookupResult.getDistrictsCode().intValue();
-            }
-            cityResponse.setIso(Long.parseLong("86" + code));
-            cityResponse.setCnProvince(cnLookupResult.getProvince());
-            cityResponse.setCnCity(cnLookupResult.getCity());
-            cityResponse.setCnDistricts(cnLookupResult.getDistricts());
-            geoData.setCity(cityResponse);
-            // Network Data
-            IPGeoData.NetworkData networkData = Objects.requireNonNullElse(geoData.getNetwork(), new IPGeoData.NetworkData());
-            if (cnLookupResult.getIsp() != null && !cnLookupResult.getIsp().isBlank()) {
-                networkData.setIsp(cnLookupResult.getIsp());
-            }
-            if (cnLookupResult.getNet() != null && !cnLookupResult.getNet().isBlank()) {
-                TranslationComponent component = new TranslationComponent(cnLookupResult.getNet());
-                switch (cnLookupResult.getNet()) {
-                    case "宽带" -> new TranslationComponent(Lang.NET_TYPE_WIDEBAND);
-                    case "基站" -> new TranslationComponent(Lang.NET_TYPE_BASE_STATION);
-                    case "政企专线" -> new TranslationComponent(Lang.NET_TYPE_GOVERNMENT_AND_ENTERPRISE_LINE);
-                    case "业务平台" -> new TranslationComponent(Lang.NET_TYPE_BUSINESS_PLATFORM);
-                    case "骨干网" -> new TranslationComponent(Lang.NET_TYPE_BACKBONE_NETWORK);
-                    case "IP专网" -> new TranslationComponent(Lang.NET_TYPE_IP_PRIVATE_NETWORK);
-                    case "网吧" -> new TranslationComponent(Lang.NET_TYPE_INTERNET_CAFE);
-                    case "物联网" -> new TranslationComponent(Lang.NET_TYPE_IOT);
-                    case "数据中心" -> new TranslationComponent(Lang.NET_TYPE_DATACENTER);
+        } catch (IllegalStateException e) {
+            try{
+                var data = geoCN1.query(address);
+                if(data != null){
+                    geoData.mergeFrom(data, true);
                 }
-                networkData.setNetType(tlUI(component));
+            }catch ( IOException ioe1){
+                Sentry.captureException(ioe1);
             }
-            geoData.setNetwork(networkData);
-        } catch (Exception e) {
-            Sentry.captureException(e);
+        } catch (IOException ioe){
+            Sentry.captureException(ioe);
         }
     }
 
     private IPGeoData.NetworkData queryNetwork(InetAddress address) {
-        if(mmdbASN == null) {
+        if (mmdbASN == null) {
             return null;
         }
         try {
@@ -187,7 +152,7 @@ public final class IPDB implements AutoCloseable {
 
 
     private IPGeoData.CityData queryCity(InetAddress address) {
-        if(mmdbCity == null) {
+        if (mmdbCity == null) {
             return null;
         }
         try {
@@ -211,7 +176,7 @@ public final class IPDB implements AutoCloseable {
     }
 
     private IPGeoData.CountryData queryCountry(InetAddress address) {
-        if(mmdbCity == null) {
+        if (mmdbCity == null) {
             return null;
         }
         try {
@@ -238,7 +203,7 @@ public final class IPDB implements AutoCloseable {
 
 
     private IPGeoData.ASData queryAS(InetAddress address) {
-        if(mmdbASN == null) {
+        if (mmdbASN == null) {
             return null;
         }
         try {
@@ -257,25 +222,6 @@ public final class IPDB implements AutoCloseable {
             return null;
         }
     }
-
-    private void updateGeoCN(File mmdbGeoCNFile) {
-        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
-                new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB),
-                (task, callback) -> {
-                    log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
-                    IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
-                    IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", "GeoCN", true);
-                    IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", "GeoCN", true);
-                    Path tmp = Files.createTempFile("GeoCN", ".mmdb");
-                    downloadFile(tmp, "GeoCN", task, callback, mirror1, mirror3, mirror4).join();
-                    if (!tmp.toFile().exists()) {
-                        throw new IllegalStateException("Download mmdb database failed!");
-                    }
-                    Files.move(tmp, mmdbGeoCNFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-        )).join();
-    }
-
 
     private void loadMMDB() throws IOException {
         this.languageTag = List.of(Main.DEF_LOCALE, "en");
@@ -302,11 +248,20 @@ public final class IPDB implements AutoCloseable {
             log.error("Unable to load GeoIP ASN database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
         }
         try {
-            this.geoCN = new Reader(mmdbGeoCNFile, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache());
+            @Cleanup
+            var divisionReader = new InputStreamReader(Main.class.getResourceAsStream("/ok_data_level3.csv"));
+            this.geoCN2 = new GeoCN2(mmdbGeoCNFile, divisionReader, new MaxMindNodeCache());
         } catch (InvalidDatabaseException exception) {
             mmdbGeoCNFile.delete();
             mmdbGeoCNFile.deleteOnExit();
-            log.error("Unable to load GeoCN database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+            log.error("Unable to load GeoCN database (version 2), the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        }
+        try {
+            this.geoCN1 = new GeoCN1(mmdbGeoCNFile, new MaxMindNodeCache());
+        } catch (InvalidDatabaseException exception) {
+            mmdbGeoCNFile.delete();
+            mmdbGeoCNFile.deleteOnExit();
+            log.error("Unable to load GeoCN database (version 1), the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
         }
     }
 
@@ -453,48 +408,22 @@ public final class IPDB implements AutoCloseable {
 
             }
         }
-        if (this.geoCN != null) {
+        if (this.geoCN2 != null) {
             try {
-                this.geoCN.close();
-            } catch (IOException ignored) {
+                this.geoCN2.close();
+            } catch (Exception ignored) {
+
+            }
+        }
+        if (this.geoCN1 != null) {
+            try {
+                this.geoCN1.close();
+            } catch (Exception ignored) {
 
             }
         }
     }
 
-    @Getter
-    @ToString
-    public static class CNLookupResult {
-        private final String isp;
-        private final String net;
-        private final String province;
-        private final Long provinceCode;
-        private final String city;
-        private final Long cityCode;
-        private final String districts;
-        private final Long districtsCode;
-
-        @MaxMindDbConstructor
-        public CNLookupResult(
-                @MaxMindDbParameter(name = "isp") String isp,
-                @MaxMindDbParameter(name = "net") String net,
-                @MaxMindDbParameter(name = "province") String province,
-                @MaxMindDbParameter(name = "provinceCode") Object provinceCode,
-                @MaxMindDbParameter(name = "city") String city,
-                @MaxMindDbParameter(name = "cityCode") Object cityCode,
-                @MaxMindDbParameter(name = "districts") String districts,
-                @MaxMindDbParameter(name = "districtsCode") Object districtsCode
-        ) {
-            this.isp = isp;
-            this.net = net;
-            this.province = province;
-            this.provinceCode = provinceCode != null ? Long.parseLong(provinceCode.toString()) : null;
-            this.city = city;
-            this.cityCode = cityCode != null ? Long.parseLong(cityCode.toString()) : null;
-            this.districts = districts;
-            this.districtsCode = districtsCode != null ? Long.parseLong(districtsCode.toString()) : null;
-        }
-    }
 
     public static final class MaxMindNodeCache implements NodeCache {
         private final static Cache<@NotNull CacheKey, @NotNull DecodedValue> cache = CacheBuilder.newBuilder()
