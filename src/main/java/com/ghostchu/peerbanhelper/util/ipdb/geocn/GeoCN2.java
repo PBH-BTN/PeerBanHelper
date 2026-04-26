@@ -97,7 +97,7 @@ public class GeoCN2 implements AutoCloseable {
                 if (id == null || extName == null) {
                     log.debug("Invalid division record: {}", record);
                     skipped++;
-                    return;
+                    continue;
                 }
                 loaded++;
                 divisionTrie.put(id, extName);
