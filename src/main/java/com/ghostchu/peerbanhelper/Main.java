@@ -315,7 +315,7 @@ public class Main {
         long weekAgo = System.currentTimeMillis() - java.util.concurrent.TimeUnit.DAYS.toMillis(7);
         int skipped = 0;
         for (File file : logsFile) {
-            if (skipped <= 5) {
+            if (skipped < 5) {
                 skipped++;
                 continue;
             }
