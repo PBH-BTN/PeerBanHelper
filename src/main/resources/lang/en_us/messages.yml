@@ -562,3 +562,5 @@ WEBAPI_ROUTE_NOT_EXISTS: "Given route not available or not exists, Is that featu
 IP_BLACKLIST_CITY_RULE: "City Rule: {}"
 DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT: "Failed to save port for {}! {}"
 DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT: "Unable to read port of downloader {}! {}"
+IPDB_GEOCN2_LOAD_DIVISION_MAP_BEGIN: "[GeoCN 2] GeoCN IP geolocation database initialization - Loading the national administrative division code mapping of the People's Republic of China (data at province, city, county, and town levels). Data source: https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov. Please wait..."
+IPDB_GEOCN2_LOAD_DIVISION_MAP_COMPLETE: "[GeoCN 2] GeoCN IP geolocation database initialization - Successfully loaded {} mapping entries ({} skipped) in {} ms"
