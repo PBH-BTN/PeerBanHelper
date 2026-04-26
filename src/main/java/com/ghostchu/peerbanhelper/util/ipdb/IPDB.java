@@ -249,7 +249,7 @@ public final class IPDB implements AutoCloseable {
         }
         try {
             @Cleanup
-            var divisionReader = new InputStreamReader(Main.class.getResourceAsStream("/ok_data_level4.csv"));
+            var divisionReader = new InputStreamReader(Main.class.getResourceAsStream("/ok_data_level3.csv"));
             this.geoCN2 = new GeoCN2(mmdbGeoCNFile, divisionReader, new MaxMindNodeCache());
         } catch (InvalidDatabaseException exception) {
             mmdbGeoCNFile.delete();
