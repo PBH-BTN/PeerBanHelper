@@ -120,17 +120,18 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 return;
             }
             String addressType = "UNKNOWN";
+            IPAddress bannedCidr = bannedAddr;
             if (bannedAddr.isIPv4()) {
                 addressType = "IPv4/" + ipv4Prefix;
-                bannedAddr = bannedAddr.toPrefixBlock(ipv4Prefix);
+                bannedCidr = bannedAddr.toPrefixBlock(ipv4Prefix);
             }
             if (bannedAddr.isIPv6()) {
                 addressType = "IPv6/" + ipv6Prefix;
-                bannedAddr = bannedAddr.toPrefixBlock(ipv6Prefix);
+                bannedCidr = bannedAddr.toPrefixBlock(ipv6Prefix);
             }
-            if (bannedAddr.contains(finalPeerAddress)) {
+            if (bannedCidr.contains(finalPeerAddress)) {
                 reference.set(new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, finalPeerAddress.toString(),
-                        finalPeerAddress.toString(), bannedAddr.toString(), addressType),
+                        bannedAddr.toString(), bannedCidr.toString(), addressType),
                         StructuredData.create().add("relatedBannedAddress", bannedAddr.toCompressedString())));
             }
         });
