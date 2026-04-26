@@ -58,17 +58,17 @@ public class GeoCN1 implements AutoCloseable{
             if (cnLookupResult.getNet() != null && !cnLookupResult.getNet().isBlank()) {
                 TranslationComponent component = new TranslationComponent(cnLookupResult.getNet());
                 // TODO: 注意！先不要修复这个赋值 BUG，我们的一些功能依赖这个 BUG 运行
-                switch (cnLookupResult.getNet()) {
-                    case "宽带" -> new TranslationComponent(Lang.NET_TYPE_WIDEBAND);
-                    case "基站" -> new TranslationComponent(Lang.NET_TYPE_BASE_STATION);
-                    case "政企专线" -> new TranslationComponent(Lang.NET_TYPE_GOVERNMENT_AND_ENTERPRISE_LINE);
-                    case "业务平台" -> new TranslationComponent(Lang.NET_TYPE_BUSINESS_PLATFORM);
-                    case "骨干网" -> new TranslationComponent(Lang.NET_TYPE_BACKBONE_NETWORK);
-                    case "IP专网" -> new TranslationComponent(Lang.NET_TYPE_IP_PRIVATE_NETWORK);
-                    case "网吧" -> new TranslationComponent(Lang.NET_TYPE_INTERNET_CAFE);
-                    case "物联网" -> new TranslationComponent(Lang.NET_TYPE_IOT);
-                    case "数据中心" -> new TranslationComponent(Lang.NET_TYPE_DATACENTER);
-                }
+//                switch (cnLookupResult.getNet()) {
+//                    case "宽带" -> new TranslationComponent(Lang.NET_TYPE_WIDEBAND);
+//                    case "基站" -> new TranslationComponent(Lang.NET_TYPE_BASE_STATION);
+//                    case "政企专线" -> new TranslationComponent(Lang.NET_TYPE_GOVERNMENT_AND_ENTERPRISE_LINE);
+//                    case "业务平台" -> new TranslationComponent(Lang.NET_TYPE_BUSINESS_PLATFORM);
+//                    case "骨干网" -> new TranslationComponent(Lang.NET_TYPE_BACKBONE_NETWORK);
+//                    case "IP专网" -> new TranslationComponent(Lang.NET_TYPE_IP_PRIVATE_NETWORK);
+//                    case "网吧" -> new TranslationComponent(Lang.NET_TYPE_INTERNET_CAFE);
+//                    case "物联网" -> new TranslationComponent(Lang.NET_TYPE_IOT);
+//                    case "数据中心" -> new TranslationComponent(Lang.NET_TYPE_DATACENTER);
+//                }
                 networkData.setNetType(tlUI(component));
             }
             ipGeoData.setNetwork(networkData);
