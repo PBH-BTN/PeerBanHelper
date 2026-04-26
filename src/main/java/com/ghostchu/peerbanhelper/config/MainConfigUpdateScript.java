@@ -37,6 +37,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 46)
+    public void updateGeoCN(YamlConfiguration bundle) {
+        conf.set("ip-database.database-geocn", "GeoCN");
+    }
+
     @UpdateScript(version = 45)
     public void ipv6remapping(YamlConfiguration bundle) {
         int prefixLength = conf.getInt("banlist-remapping.ipv6.remap-range");

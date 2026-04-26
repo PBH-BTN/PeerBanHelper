@@ -59,7 +59,7 @@ public final class IPDB implements AutoCloseable {
     private Reader geoCN;
     private List<String> languageTag;
 
-    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent, HTTPUtil httpUtil, BackgroundTaskManager backgroundTaskManager) throws IllegalArgumentException, IOException {
+    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, String databaseGeoCN, boolean autoUpdate, String userAgent, HTTPUtil httpUtil, BackgroundTaskManager backgroundTaskManager) throws IllegalArgumentException, IOException {
 //        this.dataFolder = dataFolder;
 //        this.accountId = accountId;
 //        this.licenseKey = licenseKey;
@@ -91,7 +91,7 @@ public final class IPDB implements AutoCloseable {
             updateMMDB(databaseASN, mmdbASNFile);
         }
         if (needUpdateMMDB(mmdbGeoCNFile)) {
-            updateGeoCN(mmdbGeoCNFile);
+            updateMMDB(databaseGeoCN, mmdbGeoCNFile);
         }
         loadMMDB();
     }
@@ -257,25 +257,6 @@ public final class IPDB implements AutoCloseable {
             return null;
         }
     }
-
-    private void updateGeoCN(File mmdbGeoCNFile) {
-        backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
-                new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB),
-                (task, callback) -> {
-                    log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
-                    IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
-                    IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", "GeoCN", true);
-                    IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", "GeoCN", true);
-                    Path tmp = Files.createTempFile("GeoCN", ".mmdb");
-                    downloadFile(tmp, "GeoCN", task, callback, mirror1, mirror3, mirror4).join();
-                    if (!tmp.toFile().exists()) {
-                        throw new IllegalStateException("Download mmdb database failed!");
-                    }
-                    Files.move(tmp, mmdbGeoCNFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-        )).join();
-    }
-
 
     private void loadMMDB() throws IOException {
         this.languageTag = List.of(Main.DEF_LOCALE, "en");
