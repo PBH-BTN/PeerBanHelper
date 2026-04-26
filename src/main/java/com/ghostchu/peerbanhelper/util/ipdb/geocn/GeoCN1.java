@@ -57,6 +57,7 @@ public class GeoCN1 implements AutoCloseable{
             }
             if (cnLookupResult.getNet() != null && !cnLookupResult.getNet().isBlank()) {
                 TranslationComponent component = new TranslationComponent(cnLookupResult.getNet());
+                // TODO: 注意！先不要修复这个赋值 BUG，我们的一些功能依赖这个 BUG 运行
                 switch (cnLookupResult.getNet()) {
                     case "宽带" -> new TranslationComponent(Lang.NET_TYPE_WIDEBAND);
                     case "基站" -> new TranslationComponent(Lang.NET_TYPE_BASE_STATION);
