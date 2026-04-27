@@ -68,6 +68,7 @@ PeerBanHelper Credit
     cxzlw
     david082321
     DDSRem
+    gongfuture
     Kaffu-Chino
     mahoshojoHCG
     MirrorCY
