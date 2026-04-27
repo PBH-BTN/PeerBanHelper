@@ -54,9 +54,10 @@ public class IPDBManager {
             String licenseKey = Main.getMainConfig().getString("ip-database.license-key", "");
             String databaseCity = Main.getMainConfig().getString("ip-database.database-city", "GeoLite2-City");
             String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "GeoLite2-ASN");
+            String databaseGeoCN = Main.getMainConfig().getString("ip-database.database-geocn", "GeoCN");
             boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
-                    databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), hTTPUtil, backgroundTaskManager);
+                    databaseCity, databaseASN, databaseGeoCN, autoUpdate, Main.getUserAgent(), hTTPUtil, backgroundTaskManager);
         } catch (Exception e) {
             log.info(tlUI(Lang.IPDB_INVALID), e);
             Sentry.captureException(e);

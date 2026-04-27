@@ -347,16 +347,16 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         }
         if (networkType != null && geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
             String netType = geoData.getNetwork().getNetType();
-            boolean hit = switch (netType) {
+            boolean hit = switch (netType) { // TODO: 有空得改成枚举
                 case "宽带" -> networkType.contains("wideband");
                 case "基站" -> networkType.contains("baseStation");
-                case "政企专线" -> networkType.contains("governmentAndEnterpriseLine");
+                case "政企专线", "专线" -> networkType.contains("governmentAndEnterpriseLine");
                 case "业务平台" -> networkType.contains("businessPlatform");
                 case "骨干网" -> networkType.contains("backboneNetwork");
                 case "IP 专网", "IP专网" -> networkType.contains("ipPrivateNetwork");
                 case "网吧" -> networkType.contains("internetCafe");
                 case "物联网" -> networkType.contains("iot");
-                case "数据中心" -> networkType.contains("dataCenter") || networkType.contains("datacenter"); // fe workaround
+                case "数据中心", "IDC" -> networkType.contains("dataCenter") || networkType.contains("datacenter"); // fe workaround
                 default -> false;
             };
             if (hit) {

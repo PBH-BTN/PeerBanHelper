@@ -562,3 +562,5 @@ WEBAPI_ROUTE_NOT_EXISTS: "指定的路由不可用或不存在，對應的功能
 IP_BLACKLIST_CITY_RULE: "城市規則: {}"
 DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT: "無法保存 {} 的監聽埠！{}"
 DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT: "無法獲取 {} 的監聽埠！{}"
+IPDB_GEOCN2_LOAD_DIVISION_MAP_BEGIN: "[GeoCN 2] GeoCN IP 地理位置資訊庫初始化 - 正在載入中華人民共和國國家行政區劃代碼對照表（省、市、縣、鎮四級資料）。資料來源：https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov。請稍候…"
+IPDB_GEOCN2_LOAD_DIVISION_MAP_COMPLETE: "[GeoCN 2] GeoCN IP 地理位置資訊庫初始化 - 已成功載入 {}（{} 項略過）筆對照資料，耗時：{}ms"
