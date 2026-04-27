@@ -124,7 +124,7 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         String renderedBody = renderTemplate(bodyTemplate, title, content, contentType);
         RequestBody requestBody = createRequestBody(method, contentType, renderedBody);
 
-        String renderedUrl = renderTemplate(config.getUrl(), title, content, null);
+        String renderedUrl = renderUrlTemplate(config.getUrl(), title, content);
         Request.Builder requestBuilder = new Request.Builder().url(renderedUrl).method(method, requestBody);  
 
         applyContentType(requestBuilder, method, requestBody);
@@ -223,6 +223,20 @@ public final class WebhookPushProvider extends AbstractPushProvider {
             .replace("{channelName}", esc.apply(name));
     }
 
+    private String renderUrlTemplate(String urlTemplate, String title, String content) {
+        long now = System.currentTimeMillis();
+        java.util.function.UnaryOperator<String> enc = v -> v == null ? "" : URLEncoder.encode(v, StandardCharsets.UTF_8);
+        return template
+            .replace("{title}", enc.apply(title))
+            .replace("{content}", enc.apply(content))
+            .replace("{level}", enc.apply(extractLevel(title)))
+            .replace("{date}", enc.apply(TimeUtil.formatDateOnly(now)))
+            .replace("{time}", enc.apply(TimeUtil.formatTimeOnly(now)))
+            .replace("{datetime}", enc.apply(TimeUtil.formatDateTime(now)))
+            .replace("{channelName}", enc.apply(name));
+    }
+
+    //TODO: 改level这里也记得改
     private String extractLevel(String title) {
         Matcher matcher = LEVEL_PATTERN.matcher(title);
         if (matcher.find()) {
