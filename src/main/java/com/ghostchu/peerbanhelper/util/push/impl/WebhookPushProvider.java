@@ -70,8 +70,8 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         section.set("type", "webhook");
         section.set("url", config.getUrl());
         section.set("method", config.getMethod());
-        section.set("content_type", config.getContentType());
-        section.set("body_template", config.getBodyTemplate());
+        section.set("content-type", config.getContentType());
+        section.set("body-template", config.getBodyTemplate());
         section.set("headers", config.getHeaders());
         return section;
     }
@@ -96,9 +96,9 @@ public final class WebhookPushProvider extends AbstractPushProvider {
     public static WebhookPushProvider loadFromYaml(String name, ConfigurationSection section, HTTPUtil httpUtil) {
         var url = section.getString("url", "");
         var method = section.getString("method", DEFAULT_METHOD);
-        var contentType = section.getString("content_type", DEFAULT_CONTENT_TYPE);
+        var contentType = section.getString("content-type", DEFAULT_CONTENT_TYPE);
         var bodyTemplate = section.getString(
-                "body_template",
+                "body-template",
                 DEFAULT_BODY_TEMPLATE
         );
         Map<String, String> headers = new HashMap<>();
@@ -202,10 +202,10 @@ public final class WebhookPushProvider extends AbstractPushProvider {
     }
 
     private String renderTemplate(String template, String title, String content, String contentType) {
-        OffsetDateTime now = OffsetDateTime.now();
-        String date = TimeUtil.formatDateOnly(System.currentTimeMillis());
-        String time = TimeUtil.formatTimeOnly(System.currentTimeMillis());
-        String datetime = TimeUtil.formatDateTime(System.currentTimeMillis());
+        long currentTime = System.currentTimeMillis();
+        String date = TimeUtil.formatDateOnly(currentTime);
+        String time = TimeUtil.formatTimeOnly(currentTime);
+        String datetime = TimeUtil.formatDateTime(currentTime);
         boolean json = contentType != null && contentType.toLowerCase(Locale.ROOT).contains("json");
         java.util.function.UnaryOperator<String> esc = v -> {
             if (v == null) return "";
