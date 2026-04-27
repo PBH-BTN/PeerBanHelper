@@ -16,6 +16,8 @@ import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -225,8 +227,8 @@ public final class WebhookPushProvider extends AbstractPushProvider {
 
     private String renderUrlTemplate(String urlTemplate, String title, String content) {
         long now = System.currentTimeMillis();
-        java.util.function.UnaryOperator<String> enc = v -> v == null ? "" : URLEncoder.encode(v, StandardCharsets.UTF_8);
-        return template
+        java.util.function.UnaryOperator<String> enc = v -> v == null ? "" : URLEncoder.encode(v, StandardCharsets.UTF_8).replace("+", "%20");;
+        return urlTemplate
             .replace("{title}", enc.apply(title))
             .replace("{content}", enc.apply(content))
             .replace("{level}", enc.apply(extractLevel(title)))
