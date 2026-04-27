@@ -77,6 +77,9 @@ public final class WebhookPushProvider extends AbstractPushProvider {
 
     public static WebhookPushProvider loadFromJson(String name, JsonObject json, HTTPUtil httpUtil) {
         Config config = JsonUtil.getGson().fromJson(json, Config.class);
+        if (config == null) {
+            throw new IllegalArgumentException("Invalid webhook config JSON for provider '" + name + "': deserialized Config is null");
+        }
         if (config.getMethod() == null || config.getMethod().isBlank()) {
             config.setMethod(DEFAULT_METHOD);
         }
@@ -120,11 +123,13 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         String method = normalizeMethod(config.getMethod());
         String contentType = normalizeContentType(config.getContentType());
         String bodyTemplate = config.getBodyTemplate() == null ? "" : config.getBodyTemplate();
-        String renderedBody = renderTemplate(bodyTemplate, title, content);
+        String renderedBody = renderTemplate(bodyTemplate, title, content, contentType);
         RequestBody requestBody = createRequestBody(method, contentType, renderedBody);
 
-        Request.Builder requestBuilder = new Request.Builder().url(config.getUrl()).method(method, requestBody);
-        applyContentType(requestBuilder, method, requestBody, contentType);
+        String renderedUrl = renderTemplate(config.getUrl(), title, content, null);
+        Request.Builder requestBuilder = new Request.Builder().url(renderedUrl).method(method, requestBody);  
+
+        applyContentType(requestBuilder, method, requestBody);
         applyCustomHeaders(requestBuilder);
         Request request = requestBuilder.build();
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
@@ -132,6 +137,8 @@ public final class WebhookPushProvider extends AbstractPushProvider {
                 String responseBody = response.body() != null ? response.body().string() : "<empty>";
                 throw new IllegalStateException("HTTP failed while sending push messages to Webhook: " + responseBody);
             }
+        } catch (IllegalStateException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalStateException("Failed to send push message to Webhook", e);
         }
@@ -153,25 +160,35 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         if (contentType == null || contentType.isBlank()) {
             return DEFAULT_CONTENT_TYPE;
         }
-        return contentType;
+        MediaType parsed = MediaType.parse(contentType.trim());
+        return parsed != null ? parsed.toString() : DEFAULT_CONTENT_TYPE;
     }
 
     private RequestBody createRequestBody(String method, String contentType, String bodyContent) {
         if ("GET".equals(method)) {
             return null;
         }
+        MediaType mediaType = MediaType.parse(contentType);
+        if (mediaType == null) {
+            mediaType = MediaType.parse(DEFAULT_CONTENT_TYPE);
+        }
         if (bodyContent.isEmpty()) {
             if ("POST".equals(method)) {
-                return RequestBody.create("", MediaType.parse(contentType));
+                return RequestBody.create("", mediaType);
             }
             return null;
         }
-        return RequestBody.create(bodyContent, MediaType.parse(contentType));
+        return RequestBody.create(bodyContent, mediaType);
     }
 
-    private void applyContentType(Request.Builder requestBuilder, String method, RequestBody requestBody, String contentType) {
+    private void applyContentType(Request.Builder requestBuilder, String method, RequestBody requestBody) {
         if (!"GET".equals(method) && requestBody != null) {
-            requestBuilder.header("Content-Type", contentType);
+            MediaType mediaType = requestBody.contentType();
+            if (mediaType != null) {
+                requestBuilder.header("Content-Type", mediaType.toString());
+            } else {
+                requestBuilder.header("Content-Type", DEFAULT_CONTENT_TYPE);
+            }
         }
     }
 
@@ -186,19 +203,26 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         });
     }
 
-    private String renderTemplate(String template, String title, String content) {
+    private String renderTemplate(String template, String title, String content, String contentType) {
         OffsetDateTime now = OffsetDateTime.now();
         String date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String time = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         String datetime = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        boolean json = contentType != null && contentType.toLowerCase(Locale.ROOT).contains("json");
+        java.util.function.UnaryOperator<String> esc = v -> {
+            if (v == null) return "";
+            if (!json) return v;
+            String s = JsonUtil.standard().toJson(v); // 引号包裹的转义字符串
+            return s.substring(1, s.length() - 1);    // 去掉外层引号
+        };
         return template
-                .replace("{title}", title)
-                .replace("{content}", content)
-                .replace("{level}", extractLevel(title))
-                .replace("{date}", date)
-                .replace("{time}", time)
-                .replace("{datetime}", datetime)
-                .replace("{channelName}", name);
+            .replace("{title}", esc.apply(title))
+            .replace("{content}", esc.apply(content))
+            .replace("{level}", esc.apply(extractLevel(title)))
+            .replace("{date}", esc.apply(date))
+            .replace("{time}", esc.apply(time))
+            .replace("{datetime}", esc.apply(datetime))
+            .replace("{channelName}", esc.apply(name));
     }
 
     private String extractLevel(String title) {
