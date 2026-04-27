@@ -1,12 +1,14 @@
 package com.ghostchu.peerbanhelper.util.push.impl;
 
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -14,8 +16,6 @@ import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -36,6 +36,7 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         "channelName":"{channelName}"
     }
     """;
+    //TODO: 改方法签名并重构各模块以支持 Level 参数
     private static final Pattern LEVEL_PATTERN = Pattern.compile("\\[PeerBanHelper/([^]]+)]");
 
     private final Config config;
@@ -205,9 +206,9 @@ public final class WebhookPushProvider extends AbstractPushProvider {
 
     private String renderTemplate(String template, String title, String content, String contentType) {
         OffsetDateTime now = OffsetDateTime.now();
-        String date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String time = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        String datetime = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String date = TimeUtil.formatDateOnly(System.currentTimeMillis());
+        String time = TimeUtil.formatTimeOnly(System.currentTimeMillis());
+        String datetime = TimeUtil.formatDateTime(System.currentTimeMillis());
         boolean json = contentType != null && contentType.toLowerCase(Locale.ROOT).contains("json");
         java.util.function.UnaryOperator<String> esc = v -> {
             if (v == null) return "";
@@ -234,6 +235,7 @@ public final class WebhookPushProvider extends AbstractPushProvider {
     }
 
     @AllArgsConstructor
+    @NoArgsConstructor
     @Data
     public static class Config {
         @SerializedName("url")
