@@ -78,9 +78,6 @@ public final class WebhookPushProvider extends AbstractPushProvider {
 
     public static WebhookPushProvider loadFromJson(String name, JsonObject json, HTTPUtil httpUtil) {
         Config config = JsonUtil.getGson().fromJson(json, Config.class);
-        if (config == null) {
-            throw new IllegalArgumentException("Invalid webhook config JSON for provider '" + name + "': deserialized Config is null");
-        }
         if (config.getMethod() == null || config.getMethod().isBlank()) {
             config.setMethod(DEFAULT_METHOD);
         }
