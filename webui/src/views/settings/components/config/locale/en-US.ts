@@ -129,6 +129,7 @@ export default {
   'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
   'page.settings.tab.config.push.form.type.gotify': 'Gotify',
   'page.settings.tab.config.push.form.type.ntfy': 'Ntfy',
+  'page.settings.tab.config.push.form.type.webhook': 'Webhook',
 
   'page.settings.tab.config.push.form.stmp.host': 'Host',
   'page.settings.tab.config.push.form.stmp.port': 'Port',
@@ -161,6 +162,21 @@ export default {
   'page.settings.tab.config.push.form.ntfy.token': 'Access Token',
   'page.settings.tab.config.push.form.ntfy.priority': 'Priority',
   'page.settings.tab.config.push.form.ntfy.tags': 'Tags',
+
+  'page.settings.tab.config.push.form.webhook.url': 'URL',
+  'page.settings.tab.config.push.form.webhook.url.placeholder': 'Enter webhook URL',
+  'page.settings.tab.config.push.form.webhook.method': 'HTTP Method',
+  'page.settings.tab.config.push.form.webhook.content_type': 'Content Type',
+  'page.settings.tab.config.push.form.webhook.body_template': 'Message Template',
+  'page.settings.tab.config.push.form.webhook.body_template.placeholder':
+    'Enter message template, supported variables: {l}title{r}、{l}content{r}、{l}level{r}、{l}date{r}、{l}time{r}、{l}datetime{r}、{l}channelName{r}',
+  'page.settings.tab.config.push.form.webhook.headers': 'Custom Headers',
+  'page.settings.tab.config.push.form.webhook.headers.key': 'Header Name',
+  'page.settings.tab.config.push.form.webhook.headers.value': 'Header Value',
+  'page.settings.tab.config.push.form.webhook.headers.add': 'Add Header',
+  'page.settings.tab.config.push.form.webhook.variables': 'Available Variables',
+  'page.settings.tab.config.push.form.webhook.variables.tip':
+    'You can use the following variables directly',
 
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',

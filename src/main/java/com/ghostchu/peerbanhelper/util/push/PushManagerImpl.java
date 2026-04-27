@@ -47,6 +47,8 @@ public final class PushManagerImpl implements Reloadable, PushManager {
             case "pushdeer" -> provider = PushDeerPushProvider.loadFromYaml(name, section, httpUtil);
             case "gotify" -> provider = GotifyPushProvider.loadFromYaml(name, section, httpUtil);
             case "ntfy" -> provider = NtfyPushProvider.loadFromYaml(name, section, httpUtil);
+            case "webhook" -> provider = WebhookPushProvider.loadFromYaml(name, section, httpUtil);
+            default -> provider = null;
         }
         return provider;
     }
@@ -63,6 +65,8 @@ public final class PushManagerImpl implements Reloadable, PushManager {
             case "pushdeer" -> provider = PushDeerPushProvider.loadFromJson(name, jsonObject, httpUtil);
             case "gotify" -> provider = GotifyPushProvider.loadFromJson(name, jsonObject, httpUtil);
             case "ntfy" -> provider = NtfyPushProvider.loadFromJson(name, jsonObject, httpUtil);
+            case "webhook" -> provider = WebhookPushProvider.loadFromJson(name, jsonObject, httpUtil);
+            default -> provider = null;
         }
         return provider;
     }

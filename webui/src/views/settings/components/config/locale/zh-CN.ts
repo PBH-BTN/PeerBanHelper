@@ -125,6 +125,7 @@ export default {
   'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
   'page.settings.tab.config.push.form.type.gotify': 'Gotify',
   'page.settings.tab.config.push.form.type.ntfy': 'Ntfy',
+  'page.settings.tab.config.push.form.type.webhook': 'Webhook',
 
   'page.settings.tab.config.push.form.stmp.host': '主机',
   'page.settings.tab.config.push.form.stmp.port': '端口号',
@@ -156,6 +157,20 @@ export default {
   'page.settings.tab.config.push.form.ntfy.token': '访问令牌',
   'page.settings.tab.config.push.form.ntfy.priority': '优先级',
   'page.settings.tab.config.push.form.ntfy.tags': '标签',
+
+  'page.settings.tab.config.push.form.webhook.url': 'URL',
+  'page.settings.tab.config.push.form.webhook.url.placeholder': '请输入 Webhook 地址',
+  'page.settings.tab.config.push.form.webhook.method': '请求方法',
+  'page.settings.tab.config.push.form.webhook.content_type': '内容类型',
+  'page.settings.tab.config.push.form.webhook.body_template': '消息模板',
+  'page.settings.tab.config.push.form.webhook.body_template.placeholder':
+    '请输入消息模板，支持变量：{l}title{r}、{l}content{r}、{l}level{r}、{l}date{r}、{l}time{r}、{l}datetime{r}、{l}channelName{r}',
+  'page.settings.tab.config.push.form.webhook.headers': '自定义请求头',
+  'page.settings.tab.config.push.form.webhook.headers.key': 'Header 名称',
+  'page.settings.tab.config.push.form.webhook.headers.value': 'Header 值',
+  'page.settings.tab.config.push.form.webhook.headers.add': '新增请求头',
+  'page.settings.tab.config.push.form.webhook.variables': '可用变量',
+  'page.settings.tab.config.push.form.webhook.variables.tip': '以下变量可直接使用',
 
   'page.settings.tab.config.push.form.action.ok': '确定',
   'page.settings.tab.config.push.form.action.cancel': '取消',
