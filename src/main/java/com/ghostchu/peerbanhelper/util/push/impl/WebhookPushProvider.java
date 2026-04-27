@@ -227,7 +227,7 @@ public final class WebhookPushProvider extends AbstractPushProvider {
 
     private String renderUrlTemplate(String urlTemplate, String title, String content) {
         long now = System.currentTimeMillis();
-        java.util.function.UnaryOperator<String> enc = v -> v == null ? "" : URLEncoder.encode(v, StandardCharsets.UTF_8).replace("+", "%20");;
+        java.util.function.UnaryOperator<String> enc = v -> v == null ? "" : URLEncoder.encode(v, StandardCharsets.UTF_8).replace("+", "%20");
         return urlTemplate
             .replace("{title}", enc.apply(title))
             .replace("{content}", enc.apply(content))
