@@ -123,10 +123,10 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         String method = normalizeMethod(config.getMethod());
         String contentType = normalizeContentType(config.getContentType());
         String bodyTemplate = config.getBodyTemplate() == null ? "" : config.getBodyTemplate();
-        String renderedBody = renderTemplate(bodyTemplate, title, content, contentType);
+        String renderedBody = renderTemplate(bodyTemplate, title, content, contentType, false);
         RequestBody requestBody = createRequestBody(method, contentType, renderedBody);
 
-        String renderedUrl = renderUrlTemplate(config.getUrl(), title, content);
+        String renderedUrl = renderTemplate(config.getUrl(), title, content, contentType, true);
         Request.Builder requestBuilder = new Request.Builder().url(renderedUrl).method(method, requestBody);  
 
         applyContentType(requestBuilder, method, requestBody);
@@ -203,39 +203,29 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         });
     }
 
-    private String renderTemplate(String template, String title, String content, String contentType) {
+    private String renderTemplate(String template, String title, String content, String contentType, boolean urlEncode) {
         long currentTime = System.currentTimeMillis();
         String date = TimeUtil.formatDateOnly(currentTime);
         String time = TimeUtil.formatTimeOnly(currentTime);
         String datetime = TimeUtil.formatDateTime(currentTime);
         boolean json = contentType != null && contentType.toLowerCase(Locale.ROOT).contains("json");
-        java.util.function.UnaryOperator<String> esc = v -> {
+        java.util.function.UnaryOperator<String> transform = v -> {
             if (v == null) return "";
+            if (urlEncode) {
+                return URLEncoder.encode(v, StandardCharsets.UTF_8).replace("+", "%20");
+            }
             if (!json) return v;
             String s = JsonUtil.standard().toJson(v); // 引号包裹的转义字符串
             return s.substring(1, s.length() - 1);    // 去掉外层引号
         };
         return template
-            .replace("{title}", esc.apply(title))
-            .replace("{content}", esc.apply(content))
-            .replace("{level}", esc.apply(extractLevel(title)))
-            .replace("{date}", esc.apply(date))
-            .replace("{time}", esc.apply(time))
-            .replace("{datetime}", esc.apply(datetime))
-            .replace("{channelName}", esc.apply(name));
-    }
-
-    private String renderUrlTemplate(String urlTemplate, String title, String content) {
-        long now = System.currentTimeMillis();
-        java.util.function.UnaryOperator<String> enc = v -> v == null ? "" : URLEncoder.encode(v, StandardCharsets.UTF_8).replace("+", "%20");
-        return urlTemplate
-            .replace("{title}", enc.apply(title))
-            .replace("{content}", enc.apply(content))
-            .replace("{level}", enc.apply(extractLevel(title)))
-            .replace("{date}", enc.apply(TimeUtil.formatDateOnly(now)))
-            .replace("{time}", enc.apply(TimeUtil.formatTimeOnly(now)))
-            .replace("{datetime}", enc.apply(TimeUtil.formatDateTime(now)))
-            .replace("{channelName}", enc.apply(name));
+            .replace("{title}", transform.apply(title))
+            .replace("{content}", transform.apply(content))
+            .replace("{level}", transform.apply(extractLevel(title)))
+            .replace("{date}", transform.apply(date))
+            .replace("{time}", transform.apply(time))
+            .replace("{datetime}", transform.apply(datetime))
+            .replace("{channelName}", transform.apply(name));
     }
 
     //TODO: 改level这里也记得改
