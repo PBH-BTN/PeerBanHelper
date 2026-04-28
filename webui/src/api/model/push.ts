@@ -16,7 +16,7 @@ export enum WebhookMethod {
 }
 
 export enum WebhookContentType {
-  Json = 'application/json',
+  JSON = 'application/json',
   PlainText = 'text/plain'
 }
 

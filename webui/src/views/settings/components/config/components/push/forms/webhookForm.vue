@@ -100,7 +100,7 @@ const model = defineModel<WebhookConfig>({ required: true })
 
 if (model.value.url === undefined) model.value.url = ''
 if (model.value.method === undefined) model.value.method = WebhookMethod.POST
-if (model.value.content_type === undefined) model.value.content_type = WebhookContentType.Json
+if (model.value.content_type === undefined) model.value.content_type = WebhookContentType.JSON
 if (model.value.body_template === undefined) {
   model.value.body_template = `
 {
