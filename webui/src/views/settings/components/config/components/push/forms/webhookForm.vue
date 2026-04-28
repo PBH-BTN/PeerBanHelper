@@ -28,6 +28,7 @@
   </a-form-item>
 
   <a-form-item
+    v-if="model.method != 'GET'"
     field="config.body_template"
     :label="t('page.settings.tab.config.push.form.webhook.body_template')"
     required
