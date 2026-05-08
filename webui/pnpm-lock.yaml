@@ -4,8 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: sha256-p9jYcEi0IEiHBS4URspAuc4sT1cMrsjrxxA9lhW+gzQ=
-
 patchedDependencies:
   vue-request@2.0.4: a0013a8bdb361bbd3fd0a2a0c34418ae466b51e43079895b6666a63fdb8ef34d
 
@@ -36,7 +34,7 @@ importers:
         version: 10.52.0(pinia@3.0.4(typescript@6.0.3)(vue@3.5.34(typescript@6.0.3)))(vue@3.5.34(typescript@6.0.3))
       '@vueuse/core':
         specifier: ^14
-        version: 14.2.1(vue@3.5.34(typescript@6.0.3))
+        version: 14.3.0(vue@3.5.34(typescript@6.0.3))
       antlr4:
         specifier: ^4.13.2
         version: 4.13.2
@@ -187,10 +185,10 @@ packages:
     engines: {node: '>=6.0.0'}
 
   '@arco-design/color@0.4.0':
-    resolution: {integrity: sha1-b7RqMzpqHF5MVjL3WPGAeZAYKAw=}
+    resolution: {integrity: sha512-s7p9MSwJgHeL8DwcATaXvWT3m2SigKpxx4JA1BGPHL4gfvaQsmQfrLBDpjOJFJuJ2jG2dMt3R3P8Pm9E65q18g==}
 
   '@arco-design/web-vue@2.56.3':
-    resolution: {integrity: sha512-gXwFmobcb4WlHV16UdLdL4KTCoABhZ1QWtVrcwmgY2UtXzN4t1Y56x9pQVX63llIdx1S+CjdY5zNK2PQnZluQw==}
+    resolution: {integrity: sha512-D2CPIXRBUPcg37TFsfWROZddCWFZnIwqGpsOhOn2BhmH89UFqtBGpTxyuMdYJEwKNXunp3dVL6V69ZMmJBRPOg==}
     peerDependencies:
       vue: ^3.1.0
 
@@ -923,16 +921,16 @@ packages:
       vue:
         optional: true
 
-  '@vueuse/core@14.2.1':
-    resolution: {integrity: sha512-3vwDzV+GDUNpdegRY6kzpLm4Igptq+GA0QkJ3W61Iv27YWwW/ufSlOfgQIpN6FZRMG0mkaz4gglJRtq5SeJyIQ==}
+  '@vueuse/core@14.3.0':
+    resolution: {integrity: sha512-aHfz47g0ZhMtTVHmIzMVpJy8ePhhOy68GY5bv110+5DVtZ+W7BsOx+m61UNQqfrWyPztIHIanWa3E2tib3NFIw==}
     peerDependencies:
       vue: ^3.5.0
 
-  '@vueuse/metadata@14.2.1':
-    resolution: {integrity: sha512-1ButlVtj5Sb/HDtIy1HFr1VqCP4G6Ypqt5MAo0lCgjokrk2mvQKsK2uuy0vqu/Ks+sHfuHo0B9Y9jn9xKdjZsw==}
+  '@vueuse/metadata@14.3.0':
+    resolution: {integrity: sha512-BwxmbAzwAVF50+MW57GXOUEV61nFBGnlBvrTqj49PqWJu3uw7hdu72ztXeZ33RdZtDY6kO+bfCAE1PCn88Tktw==}
 
-  '@vueuse/shared@14.2.1':
-    resolution: {integrity: sha512-shTJncjV9JTI4oVNyF1FQonetYAiTBd+Qj7cY89SWbXSkx7gyhrgtEdF2ZAVWS1S3SHlaROO6F2IesJxQEkZBw==}
+  '@vueuse/shared@14.3.0':
+    resolution: {integrity: sha512-bZpge9eSXwa4ToSiqJ7j6KRwhAsneMFoSz3LMWKQDkqimm3D/tbFlrklrs/IOqC8tEcYmXQZJ6N0UrjhBirVCg==}
     peerDependencies:
       vue: ^3.5.0
 
@@ -3468,16 +3466,16 @@ snapshots:
       typescript: 6.0.3
       vue: 3.5.34(typescript@6.0.3)
 
-  '@vueuse/core@14.2.1(vue@3.5.34(typescript@6.0.3))':
+  '@vueuse/core@14.3.0(vue@3.5.34(typescript@6.0.3))':
     dependencies:
       '@types/web-bluetooth': 0.0.21
-      '@vueuse/metadata': 14.2.1
-      '@vueuse/shared': 14.2.1(vue@3.5.34(typescript@6.0.3))
+      '@vueuse/metadata': 14.3.0
+      '@vueuse/shared': 14.3.0(vue@3.5.34(typescript@6.0.3))
       vue: 3.5.34(typescript@6.0.3)
 
-  '@vueuse/metadata@14.2.1': {}
+  '@vueuse/metadata@14.3.0': {}
 
-  '@vueuse/shared@14.2.1(vue@3.5.34(typescript@6.0.3))':
+  '@vueuse/shared@14.3.0(vue@3.5.34(typescript@6.0.3))':
     dependencies:
       vue: 3.5.34(typescript@6.0.3)
 
