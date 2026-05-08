@@ -6,7 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.3.21"
-    id("io.freefair.lombok") version "9.4.0"
+    id("io.freefair.lombok") version "9.5.0"
 }
 
 group = "com.ghostchu.peerbanhelper"
