@@ -69,7 +69,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.53.0.0")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.11")
-    implementation("com.mysql:mysql-connector-j:9.6.0") {
+    implementation("com.mysql:mysql-connector-j:9.7.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
 
