@@ -57,14 +57,16 @@
 
   <a-form-item :label="t('page.settings.tab.config.push.form.webhook.headers')">
     <a-space direction="vertical" style="width: 100%">
-      <a-space v-for="(header, index) in headerRows" :key="header.id" fill>
+      <div v-for="(header, index) in headerRows" :key="header.id" style="display: flex; gap: 8px">
         <a-input
           v-model="header.key"
+          style="flex: 1"
           :placeholder="t('page.settings.tab.config.push.form.webhook.headers.key')"
           allow-clear
         />
         <a-input
           v-model="header.value"
+          style="flex: 1"
           :placeholder="t('page.settings.tab.config.push.form.webhook.headers.value')"
           allow-clear
         />
@@ -73,8 +75,13 @@
             <icon-delete />
           </template>
         </a-button>
-      </a-space>
-      <a-button long @click="addHeader">
+        <a-button @click="addHeader">
+          <template #icon>
+            <icon-plus />
+          </template>
+        </a-button>
+      </div>
+      <a-button v-if="headerRows.length === 0" long @click="addHeader">
         <template #icon>
           <icon-plus />
         </template>
