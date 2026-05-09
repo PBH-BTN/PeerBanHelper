@@ -59,7 +59,7 @@ const colorList: Record<PushType, CSSProperties['color']> = {
   [PushType.PushDeer]: '#00d8ff',
   [PushType.Gotify]: '#007ACC',
   [PushType.Ntfy]: '#57A773',
-  [PushType.Webhook]: '#FB8C00'
+  [PushType.Webhook]: '#696969'
 }
 const avatarList: Record<PushType, string> = {
   [PushType.Email]: 'M',
