@@ -165,6 +165,8 @@ export default {
   'page.settings.tab.config.push.form.webhook.body_template': '消息模板',
   'page.settings.tab.config.push.form.webhook.body_template.placeholder':
     '请输入消息模板，支持变量：{l}title{r}、{l}content{r}、{l}level{r}、{l}date{r}、{l}time{r}、{l}datetime{r}、{l}channelName{r}',
+  'page.settings.tab.config.push.form.webhook.body_template.tooltip':
+    '支持变量：{l}title{r} {l}content{r} {l}level{r} {l}date{r} {l}time{r} {l}datetime{r} {l}channelName{r}\n额外说明：{l}level{r}: TIP, *INFO*, WARN, ERROR, FATAL',
   'page.settings.tab.config.push.form.webhook.headers': '自定义请求头',
   'page.settings.tab.config.push.form.webhook.headers.key': 'Header 名称',
   'page.settings.tab.config.push.form.webhook.headers.value': 'Header 值',

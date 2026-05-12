@@ -33,40 +33,40 @@
     :label="t('page.settings.tab.config.push.form.webhook.body_template')"
     required
   >
-    <a-textarea
-      v-model="model.body_template"
-      :auto-size="{ minRows: 4, maxRows: 12 }"
-      :placeholder="
-        t('page.settings.tab.config.push.form.webhook.body_template.placeholder', {
-          l: '{',
-          r: '}'
-        })
-      "
-    />
-  </a-form-item>
-
-  <a-form-item :label="t('page.settings.tab.config.push.form.webhook.variables')">
-    <a-alert>
-      <template #title>{{
-        t('page.settings.tab.config.push.form.webhook.variables.tip')
-      }}</template>
-      <div v-pre>{title} {content} {level} {date} {time} {datetime} {channelName}</div>
-      <div v-pre>{level}: TIP, *INFO*, WARN, ERROR, FATAL</div>
-    </a-alert>
+    <div class="textarea-wrapper">
+      <div class="editor-container">
+        <VueMonacoEditor
+          v-model:value="model.body_template"
+          :theme="darkStore.isDark ? 'vs-dark' : 'vs'"
+          :language="contentTypeLanguage"
+          :options="editorOptions"
+        />
+      </div>
+      <a-tooltip position="right">
+        <template #content>
+          <div class="tooltip-content">
+            {{ t('page.settings.tab.config.push.form.webhook.body_template.tooltip', { l: '{', r: '}' }) }}
+          </div>
+        </template>
+        <span class="textarea-tooltip-icon">
+          <icon-exclamation-circle />
+        </span>
+      </a-tooltip>
+    </div>
   </a-form-item>
 
   <a-form-item :label="t('page.settings.tab.config.push.form.webhook.headers')">
     <a-space direction="vertical" style="width: 100%">
-      <div v-for="(header, index) in headerRows" :key="header.id" style="display: flex; gap: 8px">
+      <div v-for="(header, index) in headerRows" :key="index" class="header-row">
         <a-input
           v-model="header.key"
-          style="flex: 1"
+          class="header-input"
           :placeholder="t('page.settings.tab.config.push.form.webhook.headers.key')"
           allow-clear
         />
         <a-input
           v-model="header.value"
-          style="flex: 1"
+          class="header-input"
           :placeholder="t('page.settings.tab.config.push.form.webhook.headers.value')"
           allow-clear
         />
@@ -93,14 +93,13 @@
 
 <script setup lang="ts">
 import { WebhookContentType, WebhookMethod, type WebhookConfig } from '@/api/model/push'
-import { ref, watch } from 'vue'
+import { VueMonacoEditor, loader } from '@guolao/vue-monaco-editor'
+import * as monaco from 'monaco-editor'
+import { useDarkStore } from '@/stores/dark'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-type HeaderRow = {
-  id: number
-  key: string
-  value: string
-}
+loader.config({ monaco })
 
 const { t } = useI18n()
 const model = defineModel<WebhookConfig>({ required: true })
@@ -123,57 +122,80 @@ if (model.value.body_template === undefined) {
 }
 if (model.value.headers === undefined) model.value.headers = {}
 
-const nextRowId = ref(0)
-const createRow = (key = '', value = ''): HeaderRow => ({
-  id: nextRowId.value++,
-  key,
-  value
-})
+const darkStore = useDarkStore()
 
-const headerRows = ref<HeaderRow[]>([])
-
-const headersToRows = (headers: Record<string, string>): HeaderRow[] =>
-  Object.entries(headers).map(([key, value]) => createRow(key, value))
-
-const rowsToHeaders = (rows: HeaderRow[]): Record<string, string> => {
-  const headers: Record<string, string> = {}
-  rows.forEach((row) => {
-    const key = row.key.trim()
-    if (!key) return
-    headers[key] = row.value
-  })
-  return headers
-}
-
-headerRows.value = headersToRows(model.value.headers ?? {})
-
-// 仅在外部替换 model.headers 时回填 rows，避免与本地编辑互相覆盖
-watch(
-  () => model.value.headers,
-  (headers) => {
-    const fromRows = rowsToHeaders(headerRows.value)
-    const next = headers ?? {}
-    if (JSON.stringify(fromRows) === JSON.stringify(next)) {
-      return
-    }
-    headerRows.value = headersToRows(next)
-  }
+const contentTypeLanguage = computed(() =>
+  model.value.content_type === WebhookContentType.JSON ? 'json' : 'plaintext'
 )
 
-// rows 作为编辑真源，深度监听后回写 model（过滤空 key 仅影响提交数据，不影响 UI 行）
+const editorOptions = {
+  automaticLayout: true,
+  minimap: { enabled: false },
+  lineNumbers: 'off',
+  folding: false,
+  lineDecorationsWidth: 0,
+  lineNumbersMinChars: 0,
+  scrollBeyondLastLine: false,
+  wordWrap: 'on' as const,
+  tabSize: 2
+}
+
+const headerRows = ref<{ key: string; value: string }[]>(
+  Object.entries(model.value.headers ?? {}).map(([key, value]) => ({ key, value }))
+)
+
 watch(
   headerRows,
   (rows) => {
-    model.value.headers = rowsToHeaders(rows)
+    const headers: Record<string, string> = {}
+    rows.forEach((row) => {
+      const key = row.key.trim()
+      if (key) headers[key] = row.value
+    })
+    model.value.headers = headers
   },
   { deep: true }
 )
 
 const addHeader = () => {
-  headerRows.value.push(createRow())
+  headerRows.value.push({ key: '', value: '' })
 }
 
 const removeHeader = (index: number) => {
   headerRows.value.splice(index, 1)
 }
 </script>
+
+<style scoped>
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.editor-container {
+  height: 240px;
+}
+
+.tooltip-content {
+  max-width: 340px;
+  white-space: pre-line;
+}
+
+.textarea-tooltip-icon {
+  position: absolute;
+  top: 8px;
+  right: 24px;
+  color: var(--color-text-3);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.header-row {
+  display: flex;
+  gap: 8px;
+}
+
+.header-input {
+  flex: 1;
+}
+</style>

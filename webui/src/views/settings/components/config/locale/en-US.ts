@@ -170,6 +170,8 @@ export default {
   'page.settings.tab.config.push.form.webhook.body_template': 'Message Template',
   'page.settings.tab.config.push.form.webhook.body_template.placeholder':
     'Enter message template, supported variables: {l}title{r}, {l}content{r}, {l}level{r}, {l}date{r}, {l}time{r}, {l}datetime{r}, {l}channelName{r}',
+  'page.settings.tab.config.push.form.webhook.body_template.tooltip':
+    'Supported variables: {l}title{r} {l}content{r} {l}level{r} {l}date{r} {l}time{r} {l}datetime{r} {l}channelName{r}\nNote: {l}level{r}: TIP, *INFO*, WARN, ERROR, FATAL',
   'page.settings.tab.config.push.form.webhook.headers': 'Custom Headers',
   'page.settings.tab.config.push.form.webhook.headers.key': 'Header Name',
   'page.settings.tab.config.push.form.webhook.headers.value': 'Header Value',
