@@ -45,7 +45,12 @@
       <a-tooltip position="right">
         <template #content>
           <div class="tooltip-content">
-            {{ t('page.settings.tab.config.push.form.webhook.body_template.tooltip', { l: '{', r: '}' }) }}
+            {{
+              t('page.settings.tab.config.push.form.webhook.body_template.tooltip', {
+                l: '{',
+                r: '}'
+              })
+            }}
           </div>
         </template>
         <span class="textarea-tooltip-icon">
