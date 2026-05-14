@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push.impl;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -76,7 +77,7 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) {
+    public boolean push(String title, String content, AlertLevel level) {
         Map<String, Object> args = new HashMap<>() {{
             put("token", config.getToken());
             if (config.getTopic() != null) {

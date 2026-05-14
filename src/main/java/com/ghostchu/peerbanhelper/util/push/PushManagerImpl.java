@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.push;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.push.impl.*;
@@ -107,11 +108,11 @@ public final class PushManagerImpl implements Reloadable, PushManager {
     }
 
     @Override
-    public boolean pushMessage(String title, String description) {
+    public boolean pushMessage(String title, String description, AlertLevel level) {
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         providerList.forEach(pushProvider -> {
             try {
-                if (pushProvider.push(title, description)) {
+                if (pushProvider.push(title, description, level)) {
                     anySuccess.set(true);
                 }
             } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push.impl;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
@@ -65,7 +66,7 @@ public final class PushDeerPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) {
+    public boolean push(String title, String content, AlertLevel level) {
         Map<String, Object> map = new HashMap<>();
         map.put("pushkey", config.getPushKey());
         map.put("text", title);

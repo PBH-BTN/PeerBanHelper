@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push.impl;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
@@ -71,7 +72,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) {
+    public boolean push(String title, String content, AlertLevel level) {
 
         RequestBody requestBody = RequestBody.create(
                 content,
@@ -80,12 +81,14 @@ public final class NtfyPushProvider extends AbstractPushProvider {
 
         String encodedTitle = "=?UTF-8?B?" + Base64.getEncoder().encodeToString(title.getBytes(StandardCharsets.UTF_8)) + "?=";
 
+        int priority = mapLevelToPriority(level);
+
         Request request = new Request.Builder()
                 .url(config.getServerUrl() + "/" + config.getTopic())
                 .post(requestBody)
                 .header("Authorization", "Bearer " + config.getToken())
                 .header("Title", encodedTitle)
-                .header("Priority", String.valueOf(config.getPriority()))
+                .header("Priority", String.valueOf(priority))
                 .header("Tags", config.getTags())
                 .header("Icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png")
                 .build();
@@ -98,6 +101,16 @@ public final class NtfyPushProvider extends AbstractPushProvider {
             throw new IllegalStateException("Failed to send push message to Ntfy", e);
         }
         return true;
+    }
+
+    private int mapLevelToPriority(AlertLevel level) {
+        return switch (level) {
+            case TIP -> 1;
+            case INFO -> 2;
+            case WARN -> 3;
+            case ERROR -> 4;
+            case FATAL -> 5;
+        };
     }
 
     @AllArgsConstructor

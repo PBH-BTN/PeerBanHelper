@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push.impl;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -21,8 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class WebhookPushProvider extends AbstractPushProvider {
     private static final String DEFAULT_METHOD = "POST";
@@ -38,9 +37,6 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         "channelName":"{channelName}"
     }
     """;
-    //TODO: 改方法签名并重构各模块以支持 Level 参数
-    private static final Pattern LEVEL_PATTERN = Pattern.compile("\\[PeerBanHelper/([^]]+)]");
-
     private final Config config;
     private final String name;
     private final HTTPUtil httpUtil;
@@ -115,7 +111,7 @@ public final class WebhookPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) {
+    public boolean push(String title, String content, AlertLevel level) {
         if (config.getUrl() == null || config.getUrl().isBlank()) {
             throw new IllegalArgumentException("Webhook URL cannot be empty");
         }
@@ -123,10 +119,10 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         String method = normalizeMethod(config.getMethod());
         String contentType = normalizeContentType(config.getContentType());
         String bodyTemplate = config.getBodyTemplate() == null ? "" : config.getBodyTemplate();
-        String renderedBody = renderTemplate(bodyTemplate, title, content, contentType, false);
+        String renderedBody = renderTemplate(bodyTemplate, title, content, contentType, false, level);
         RequestBody requestBody = createRequestBody(method, contentType, renderedBody);
 
-        String renderedUrl = renderTemplate(config.getUrl(), title, content, contentType, true);
+        String renderedUrl = renderTemplate(config.getUrl(), title, content, contentType, true, level);
         Request.Builder requestBuilder = new Request.Builder().url(renderedUrl).method(method, requestBody);  
 
         applyContentType(requestBuilder, method, requestBody);
@@ -203,7 +199,7 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         });
     }
 
-    private String renderTemplate(String template, String title, String content, String contentType, boolean urlEncode) {
+    private String renderTemplate(String template, String title, String content, String contentType, boolean urlEncode, AlertLevel level) {
         long currentTime = System.currentTimeMillis();
         String date = TimeUtil.formatDateOnly(currentTime);
         String time = TimeUtil.formatTimeOnly(currentTime);
@@ -221,20 +217,11 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         return template
             .replace("{title}", transform.apply(title))
             .replace("{content}", transform.apply(content))
-            .replace("{level}", transform.apply(extractLevel(title)))
+            .replace("{level}", transform.apply(level.name()))
             .replace("{date}", transform.apply(date))
             .replace("{time}", transform.apply(time))
             .replace("{datetime}", transform.apply(datetime))
             .replace("{channelName}", transform.apply(name));
-    }
-
-    //TODO: 改level这里也记得改
-    private String extractLevel(String title) {
-        Matcher matcher = LEVEL_PATTERN.matcher(title);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return "INFO";
     }
 
     @AllArgsConstructor
