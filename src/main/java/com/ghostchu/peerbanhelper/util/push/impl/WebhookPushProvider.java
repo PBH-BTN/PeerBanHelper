@@ -19,6 +19,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -86,7 +87,7 @@ public final class WebhookPushProvider extends AbstractPushProvider {
             config.setBodyTemplate(DEFAULT_BODY_TEMPLATE);
         }
         if (config.getHeaders() == null) {
-            config.setHeaders(new HashMap<>());
+            config.setHeaders(Collections.emptyMap());
         }
         return new WebhookPushProvider(name, config, httpUtil);
     }
@@ -205,23 +206,24 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         String time = TimeUtil.formatTimeOnly(currentTime);
         String datetime = TimeUtil.formatDateTime(currentTime);
         boolean json = contentType != null && contentType.toLowerCase(Locale.ROOT).contains("json");
-        java.util.function.UnaryOperator<String> transform = v -> {
-            if (v == null) return "";
-            if (urlEncode) {
-                return URLEncoder.encode(v, StandardCharsets.UTF_8).replace("+", "%20");
-            }
-            if (!json) return v;
-            String s = JsonUtil.standard().toJson(v); // 引号包裹的转义字符串
-            return s.substring(1, s.length() - 1);    // 去掉外层引号
-        };
         return template
-            .replace("{title}", transform.apply(title))
-            .replace("{content}", transform.apply(content))
-            .replace("{level}", transform.apply(level.name()))
-            .replace("{date}", transform.apply(date))
-            .replace("{time}", transform.apply(time))
-            .replace("{datetime}", transform.apply(datetime))
-            .replace("{channelName}", transform.apply(name));
+            .replace("{title}", transformValue(title, urlEncode, json))
+            .replace("{content}", transformValue(content, urlEncode, json))
+            .replace("{level}", transformValue(level.name(), urlEncode, json))
+            .replace("{date}", transformValue(date, urlEncode, json))
+            .replace("{time}", transformValue(time, urlEncode, json))
+            .replace("{datetime}", transformValue(datetime, urlEncode, json))
+            .replace("{channelName}", transformValue(name, urlEncode, json));
+    }
+
+    private String transformValue(String value, boolean urlEncode, boolean json) {
+        if (value == null) return "";
+        if (urlEncode) {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
+        }
+        if (!json) return value;
+        String s = JsonUtil.standard().toJson(value);
+        return s.substring(1, s.length() - 1);
     }
 
     @AllArgsConstructor
