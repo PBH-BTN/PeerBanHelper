@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.apache.http.client.methods.RequestBuilder.options
+
 plugins {
     java
     application
@@ -105,7 +107,7 @@ dependencies {
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
     // System monitoring
-    implementation("com.github.oshi:oshi-core:7.1.0") {
+    implementation("com.github.oshi:oshi-core:6.12.0") {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
