@@ -1,0 +1,1 @@
+ALTER TABLE tracked_swarm ALTER COLUMN torrent_is_private TYPE BOOLEAN USING (torrent_is_private = 1);

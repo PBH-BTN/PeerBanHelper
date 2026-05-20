@@ -27,7 +27,7 @@ public final class PCBRangeEntity extends AbstractCanDirtyEntity implements Seri
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    @TableField(value = "`range`")
+    @TableField(value = "ip_range")
     private String range;
     @TableField(value = "torrent_id")
     private String torrentId;
