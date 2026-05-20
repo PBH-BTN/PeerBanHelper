@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.databasent.driver.common;
+package com.ghostchu.peerbanhelper.databasent.driver.common.basic;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.JdbcType;
