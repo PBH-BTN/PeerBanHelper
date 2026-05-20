@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.databasent.driver.common;
+package com.ghostchu.peerbanhelper.databasent.driver.common.basic;
 
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import inet.ipaddr.IPAddress;
