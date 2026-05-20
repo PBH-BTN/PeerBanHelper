@@ -88,19 +88,23 @@
         </p>
       </template>
       <template #actions="{ record }">
-        <a-popconfirm
-          :content="
-            t('page.dashboard.peerList.action.block.confirm', {
-              ip: formatIPAddressPort(record.peer.address.ip, record.peer.address.port)
-            })
-          "
-          type="warning"
-          @before-ok="() => handleBlockPeer(record.peer.address.ip)"
-        >
-          <a-button type="text" status="danger" size="mini">
-            {{ t('page.dashboard.peerList.action.block') }}
-          </a-button>
-        </a-popconfirm>
+        <a-tooltip :content="t('page.dashboard.peerList.action.block')" position="top" mini>
+          <a-popconfirm
+            :content="
+              t('page.dashboard.peerList.action.block.confirm', {
+                ip: formatIPAddressPort(record.peer.address.ip, record.peer.address.port)
+              })
+            "
+            type="warning"
+            @before-ok="() => handleBlockPeer(record.peer.address.ip)"
+          >
+            <a-button shape="circle" type="text" status="danger">
+              <template #icon>
+                <icon-stop />
+              </template>
+            </a-button>
+          </a-popconfirm>
+        </a-tooltip>
       </template>
     </a-table>
   </a-modal>
