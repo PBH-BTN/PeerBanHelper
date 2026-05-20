@@ -1,0 +1,1 @@
+ALTER TABLE torrents ALTER COLUMN private_torrent TYPE BOOLEAN USING (private_torrent = 1);
