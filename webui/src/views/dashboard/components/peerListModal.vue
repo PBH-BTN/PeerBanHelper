@@ -153,8 +153,8 @@ type PeerListRow = {
     progress: number
   }
 }
-const sortString = (a?: string, b?: string) => (a ?? '').localeCompare(b ?? '')
-const sortNumber = (a?: number, b?: number) => (a ?? 0) - (b ?? 0)
+const comparePeerString = (a?: string, b?: string) => (a ?? '').localeCompare(b ?? '')
+const comparePeerNumber = (a?: number, b?: number) => (a ?? 0) - (b ?? 0)
 const asPeerListRow = (row: TableData) => row as unknown as PeerListRow
 const columns = [
   {
@@ -163,8 +163,8 @@ const columns = [
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: (a: TableData, b: TableData) =>
-        sortString(asPeerListRow(a).peer.address.ip, asPeerListRow(b).peer.address.ip) ||
-        sortNumber(asPeerListRow(a).peer.address.port, asPeerListRow(b).peer.address.port)
+        comparePeerString(asPeerListRow(a).peer.address.ip, asPeerListRow(b).peer.address.ip) ||
+        comparePeerNumber(asPeerListRow(a).peer.address.port, asPeerListRow(b).peer.address.port)
     },
     width: 320
   },
@@ -174,7 +174,7 @@ const columns = [
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: (a: TableData, b: TableData) =>
-        sortString(asPeerListRow(a).peer.flags, asPeerListRow(b).peer.flags)
+        comparePeerString(asPeerListRow(a).peer.flags, asPeerListRow(b).peer.flags)
     },
     width: 110
   },
@@ -184,7 +184,7 @@ const columns = [
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: (a: TableData, b: TableData) =>
-        sortString(asPeerListRow(a).peer.id, asPeerListRow(b).peer.id)
+        comparePeerString(asPeerListRow(a).peer.id, asPeerListRow(b).peer.id)
     },
     width: 100
   },
@@ -194,7 +194,7 @@ const columns = [
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: (a: TableData, b: TableData) =>
-        sortString(asPeerListRow(a).peer.clientName, asPeerListRow(b).peer.clientName)
+        comparePeerString(asPeerListRow(a).peer.clientName, asPeerListRow(b).peer.clientName)
     },
     width: 300
   },
@@ -204,8 +204,8 @@ const columns = [
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: (a: TableData, b: TableData) =>
-        sortNumber(asPeerListRow(a).peer.uploadSpeed, asPeerListRow(b).peer.uploadSpeed) ||
-        sortNumber(asPeerListRow(a).peer.downloadSpeed, asPeerListRow(b).peer.downloadSpeed)
+        comparePeerNumber(asPeerListRow(a).peer.uploadSpeed, asPeerListRow(b).peer.uploadSpeed) ||
+        comparePeerNumber(asPeerListRow(a).peer.downloadSpeed, asPeerListRow(b).peer.downloadSpeed)
     },
     width: 140
   },
@@ -215,8 +215,8 @@ const columns = [
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: (a: TableData, b: TableData) =>
-        sortNumber(asPeerListRow(a).peer.uploaded, asPeerListRow(b).peer.uploaded) ||
-        sortNumber(asPeerListRow(a).peer.downloaded, asPeerListRow(b).peer.downloaded)
+        comparePeerNumber(asPeerListRow(a).peer.uploaded, asPeerListRow(b).peer.uploaded) ||
+        comparePeerNumber(asPeerListRow(a).peer.downloaded, asPeerListRow(b).peer.downloaded)
     },
     width: 140
   },
@@ -226,7 +226,7 @@ const columns = [
     sortable: {
       sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
       sorter: (a: TableData, b: TableData) =>
-        sortNumber(asPeerListRow(a).peer.progress, asPeerListRow(b).peer.progress)
+        comparePeerNumber(asPeerListRow(a).peer.progress, asPeerListRow(b).peer.progress)
     },
     width: 100
   },
@@ -250,9 +250,13 @@ const handleBlockPeer = async (ip: string) => {
     Message.success({ content: resp.message, resetOnHover: true })
     return true
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      Message.error({ content: error.message, resetOnHover: true })
-    }
+    Message.error({
+      content:
+        error instanceof Error
+          ? error.message
+          : t('page.dashboard.clientStatus.card.status.unknown'),
+      resetOnHover: true
+    })
     return false
   }
 }
