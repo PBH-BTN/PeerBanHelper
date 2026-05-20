@@ -246,6 +246,8 @@ public class Main {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (os.startsWith("win")) {
             platform = new WindowsPlatform();
+        } else if (os.startsWith("linux") || os.startsWith("mac")) {
+            platform = new com.ghostchu.peerbanhelper.platform.impl.posix.PosixPlatform();
         } else {
             platform = null;
         }
