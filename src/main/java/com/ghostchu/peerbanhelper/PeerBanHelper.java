@@ -169,9 +169,9 @@ public class PeerBanHelper implements Reloadable {
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
 
 
-        System.out.println("MTR Supported: " + Main.getPlatform().getMtrTool().isSupported(InetAddress.ofLiteral("58.216.33.162")));
-       var result = Main.getPlatform().getMtrTool().trace(InetAddress.ofLiteral("58.216.33.162"), MtrOptions.defaults());
-       System.out.println(result);
+      //  System.out.println("MTR Supported: " + Main.getPlatform().getMtrTool().isSupported(InetAddress.ofLiteral("58.216.33.162")));
+      // var result = Main.getPlatform().getMtrTool().trace(InetAddress.ofLiteral("58.216.33.162"), MtrOptions.defaults());
+      // System.out.println(result);
     }
 
 
