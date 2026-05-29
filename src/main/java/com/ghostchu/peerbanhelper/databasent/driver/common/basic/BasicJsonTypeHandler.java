@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.databasent.driver.common;
+package com.ghostchu.peerbanhelper.databasent.driver.common.basic;
 
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;

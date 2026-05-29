@@ -17,6 +17,7 @@ package com.ghostchu.peerbanhelper.databasent.driver.common;
 
 import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
+import com.ghostchu.peerbanhelper.databasent.driver.mysql.OffsetDateTimeTypeHandlerForMySQL;
 import com.ghostchu.peerbanhelper.databasent.driver.sqlite.OffsetDateTimeTypeHandlerForSQLite;
 import org.apache.ibatis.lang.UsesJava8;
 import org.apache.ibatis.type.BaseTypeHandler;
