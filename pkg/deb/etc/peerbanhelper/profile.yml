@@ -53,7 +53,6 @@ module:
       - '{"method":"STARTS_WITH","content":"-dt"}'
       - '{"method":"CONTAINS","content":"-rn0.0.0"}'
       - '{"method":"STARTS_WITH","content":"-sd"}'
-      - '{"method":"STARTS_WITH","content":"-sd"}'
       - '{"method":"STARTS_WITH","content":"-xf"}'
       - '{"method":"STARTS_WITH","content":"-qd"}'
       - '{"method":"STARTS_WITH","content":"-bn"}'
