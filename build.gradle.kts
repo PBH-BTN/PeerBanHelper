@@ -69,6 +69,7 @@ dependencies {
     implementation("org.springframework:spring-tx:7.0.7")
     implementation("org.springframework:spring-jdbc:7.0.7")
     implementation("org.xerial:sqlite-jdbc:3.53.1.0")
+    implementation("org.xerial:sqlite-jdbc:3.53.1.0:natives-android")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.11")
     implementation("com.mysql:mysql-connector-j:9.7.0") {
@@ -98,21 +99,22 @@ dependencies {
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
-    // System theme detector
-    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1") {
-        exclude(group = "com.github.oshi", module = "oshi-core")
-        exclude(group = "net.java.dev.jna", module = "jna-platform")
-        exclude(group = "net.java.dev.jna", module = "jna")
-    }
+//    // System theme detector
+//    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1") {
+//        exclude(group = "com.github.oshi", module = "oshi-core")
+//        exclude(group = "net.java.dev.jna", module = "jna-platform")
+//        exclude(group = "net.java.dev.jna", module = "jna")
+//    }
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
-    // System monitoring
-    implementation("com.github.oshi:oshi-core:6.12.0") {
-        exclude(group = "net.java.dev.jna", module = "jna-platform")
-        exclude(group = "net.java.dev.jna", module = "jna")
-    }
-    // System monitoring for supported platforms
-    implementation("com.github.oshi:oshi-core-ffm:7.2.1")
+//    // System monitoring
+//    implementation("com.github.oshi:oshi-core:6.12.0") {
+//        exclude(group = "net.java.dev.jna", module = "jna-platform")
+//        exclude(group = "net.java.dev.jna", module = "jna")
+//    }
+//    // System monitoring for supported platforms
+    implementation("com.github.oshi:oshi-common:7.2.1")
+    runtimeOnly("com.github.oshi:oshi-core-ffm:7.2.1")
     // Markdown
     implementation("org.commonmark:commonmark:0.28.0")
     // Compression
@@ -153,10 +155,6 @@ dependencies {
     // HTTP client
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
-
-    // JNA
-    implementation("net.java.dev.jna:jna:5.18.1")
-    implementation("net.java.dev.jna:jna-platform:5.18.1")
 
     // Netty
     implementation("io.netty:netty-all:4.2.13.Final") {

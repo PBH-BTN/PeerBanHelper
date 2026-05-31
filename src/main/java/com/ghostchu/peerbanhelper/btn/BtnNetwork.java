@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -37,10 +38,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import oshi.spi.SystemInfoProvider;
 
+import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -355,8 +358,17 @@ public final class BtnNetwork implements Reloadable {
 
     @NotNull
     public String getBtnHardwareId() {
-        return Hashing.sha256().hashString(systemInfo.getHardware().getComputerSystem().getHardwareUUID(), StandardCharsets.UTF_8).toString();
+        try {
+            return Hashing.sha256().hashString(systemInfo.getHardware().getComputerSystem().getHardwareUUID(), StandardCharsets.UTF_8).toString();
+        } catch (Throwable e) {
+            String mac = MiscUtil.getMacAddress();
+            if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
+                return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
+            }
+            return "MAC-" + MiscUtil.getMacAddress();
+        }
     }
+
 
     public void close() {
         log.info(tlUI(Lang.BTN_SHUTTING_DOWN));

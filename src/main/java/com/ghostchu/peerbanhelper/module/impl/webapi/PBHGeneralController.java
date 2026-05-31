@@ -225,24 +225,28 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private Map<String, Object> generateSystemData(Context context, SystemInfoProvider systemInfo) {
-
         Map<String, Object> os = new LinkedHashMap<>();
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
-        var operatingSystem = systemInfo.getOperatingSystem();
+        os.put("architecture", osMXBean.getArch());
+        os.put("cores", osMXBean.getAvailableProcessors());
+        os.put("load", osMXBean.getSystemLoadAverage());
         if (osMXBean.getName().contains("Windows")) {
             os.put("os", "Windows");
-            os.put("version", String.valueOf(operatingSystem));
+            os.put("version", osMXBean.getVersion());
         } else {
             os.put("os", osMXBean.getName());
             os.put("version", osMXBean.getVersion());
         }
-        os.put("architecture", osMXBean.getArch());
-        os.put("cores", osMXBean.getAvailableProcessors());
-        var mem = generateSystemMemoryData(systemInfo.getHardware());
-        os.put("memory", mem);
-        os.put("load", osMXBean.getSystemLoadAverage());
         var network = generateNetworkStats(context);
         os.put("network", network);
+        try {
+            var operatingSystem = systemInfo.getOperatingSystem();
+            os.put("version", String.valueOf(operatingSystem));
+            var mem = generateSystemMemoryData(systemInfo.getHardware());
+            os.put("memory", mem);
+        }catch (Throwable _){
+            os.put("version", "N/A");
+        }
         return os;
     }
 

@@ -21,7 +21,9 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.SwingProgressDialog;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
-import com.jthemedetecor.OsThemeDetector;
+//import com.jthemedetecor.OsThemeDetector;
+//import com.jthemedetecor.OsThemeDetector;
+//import com.jthemedetecor.OsThemeDetector;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -140,20 +142,21 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         //FlatIntelliJLaf.setup();
         setupSwingDefaultFonts();
         Main.getEventBus().register(this);
-        try {
-            // 这玩意儿能空指针？
-            OsThemeDetector detector = OsThemeDetector.getDetector();
-            detector.registerListener(this::updateTheme);
-            updateTheme(detector.isDark());
-        } catch (Exception e) {
-            Sentry.captureException(e);
-        }
+//        try {
+//            // 这玩意儿能空指针？
+//            OsThemeDetector detector = OsThemeDetector.getDetector();
+//            detector.registerListener(this::updateTheme);
+//            updateTheme(detector.isDark());
+//        } catch (Throwable e) {
+//            Sentry.captureException(e);
+//        }
         createMainWindow();
     }
 
     @Override
     public boolean isDarkMode() {
-        return OsThemeDetector.getDetector().isDark();
+        return false;
+       // return OsThemeDetector.getDetector().isDark();
     }
 
     private void setupSwingDefaultFonts() {

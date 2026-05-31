@@ -7,9 +7,11 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
@@ -17,6 +19,7 @@ import java.util.zip.GZIPOutputStream;
 @Slf4j
 public final class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
+    public static final String FALLBACK_MAC_ADDRESS = "00-00-00-00-00-00";
 
     public static String getAllThreadTrace() {
         StringBuilder threadDump = new StringBuilder(System.lineSeparator());
@@ -54,6 +57,25 @@ public final class MiscUtil {
             gzipOs.write(buffer, 0, bytesRead);
         }
         gzipOs.close();
+    }
+
+    public static String getMacAddress() {
+        try {
+            StringBuilder sb = new StringBuilder();
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface ni = networkInterfaces.nextElement();
+                byte[] mac = ni.getHardwareAddress();
+                if (mac != null) {
+                    for (int i = 0; i < mac.length; i++) {
+                        sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+                    }
+                }
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return FALLBACK_MAC_ADDRESS;
+        }
     }
 
     @NotNull

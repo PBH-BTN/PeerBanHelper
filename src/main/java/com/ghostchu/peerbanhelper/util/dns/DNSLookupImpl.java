@@ -52,7 +52,6 @@ public final class DNSLookupImpl implements Reloadable, DNSLookup {
             bootComplete = true;
         } catch (Throwable e) {
             log.error("Unable to complete oshi DNS Servers lookup, DNSJAVA functions may not work properly", e);
-            Sentry.captureException(e);
             bootComplete = false;
         }
     }

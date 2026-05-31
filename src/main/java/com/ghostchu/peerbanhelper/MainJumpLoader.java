@@ -23,7 +23,7 @@ public final class MainJumpLoader {
                 if (Long.parseLong(buildNumber) < 17134) { // 17134: Windows 10 1803
                     setupCharsets = false;
                 }
-            } catch (Exception _) {
+            } catch (Throwable _) {
             }
             if (setupCharsets) {
                 setupCharsets();
