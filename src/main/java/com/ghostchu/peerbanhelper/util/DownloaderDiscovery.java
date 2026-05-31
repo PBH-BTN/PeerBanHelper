@@ -11,8 +11,8 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 import oshi.software.os.InternetProtocolStats;
+import oshi.spi.SystemInfoProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class DownloaderDiscovery {
     private final OkHttpClient httpClient;
-    private final SystemInfo systemInfo;
+    private final SystemInfoProvider systemInfo;
 
-    public DownloaderDiscovery(HTTPUtil hTTPUtil, SystemInfo systemInfo) {
+    public DownloaderDiscovery(HTTPUtil hTTPUtil, SystemInfoProvider systemInfo) {
         this.systemInfo = systemInfo;
         this.httpClient = hTTPUtil.newBuilder()
                 .callTimeout(8, TimeUnit.SECONDS)

@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.spi.SystemInfoProvider;
 

@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper;
 
-import oshi.SystemInfo;
 import oshi.spi.SystemInfoFactory;
 import oshi.spi.SystemInfoProvider;
 

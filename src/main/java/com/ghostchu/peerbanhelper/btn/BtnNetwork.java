@@ -35,7 +35,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
+import oshi.spi.SystemInfoProvider;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -60,7 +60,7 @@ public final class BtnNetwork implements Reloadable {
     private final ScriptEngineManager scriptEngineManager;
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
-    private final SystemInfo systemInfo;
+    private final SystemInfoProvider systemInfo;
     private final TorrentService torrentDao;
     private final PeerRecordService peerRecordService;
     @Getter
@@ -100,7 +100,7 @@ public final class BtnNetwork implements Reloadable {
     private final long RETRY_PERIOD_SECONDS = 600;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfoProvider systemInfo, TorrentService torrentService,
                       PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager) {
         this.peerRecordService = peerRecordService;
         this.server = downloaderServer;

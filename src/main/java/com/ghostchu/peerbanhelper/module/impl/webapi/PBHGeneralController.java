@@ -33,7 +33,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.spi.SystemInfoProvider;
 
