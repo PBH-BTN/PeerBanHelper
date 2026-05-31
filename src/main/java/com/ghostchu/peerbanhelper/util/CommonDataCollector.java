@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
+import oshi.spi.SystemInfoProvider;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
@@ -24,7 +25,7 @@ public class CommonDataCollector {
     @Autowired
     private StunManager bTStunManager;
     @Autowired
-    private SystemInfo systemInfo;
+    private SystemInfoProvider systemInfo;
 
     public Map<String, Object> generatePbhData() {
         long compile_time = 0;

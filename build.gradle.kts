@@ -111,6 +111,8 @@ dependencies {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
         exclude(group = "net.java.dev.jna", module = "jna")
     }
+    // System monitoring for supported platforms
+    implementation("com.github.oshi:oshi-core-ffm:7.2.1")
     // Markdown
     implementation("org.commonmark:commonmark:0.28.0")
     // Compression
