@@ -436,7 +436,7 @@ module:
   # 此模块保护与 PeerBanHelper 关联的下载器的拒绝服务攻击
   # This module protects the downloader that associated with PBH from DoS attack
   idle-connection-dos-protection:
-    enabled: true
+    enabled: false
     ban-duration: 900000
     # 允许的最长闲置连接时间 - Max allowed idle time
     # 当一个 Peer 长时间没有任何数据传输或状态更新，且速度持续低于 idle-speed-threshold 时，将被视为闲置连接
