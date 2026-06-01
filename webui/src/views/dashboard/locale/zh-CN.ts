@@ -50,6 +50,11 @@ export default {
   'page.dashboard.editModal.label.endpoint.error.invalidUrl': '无效的URL',
   'page.dashboard.editModal.label.username': '用户名',
   'page.dashboard.editModal.label.password': '密码',
+  'page.dashboard.editModal.label.apiKey': 'API Key',
+  'page.dashboard.editModal.label.useApiKey': '使用 API Key 认证',
+  'page.dashboard.editModal.label.useApiKey.bearerToken': 'Bearer Token',
+  'page.dashboard.editModal.label.useApiKey.description':
+    '通过 {bearerToken} 进行无状态认证，需要 qBittorrent v5.2.0 或更高版本。',
   'page.dashboard.editModal.label.useBasicAuth': '使用 Basic Auth',
   'page.dashboard.editModal.label.httpVersion': 'HTTP版本',
   'page.dashboard.editModal.label.httpVersion.description': '2.0性能更好，1.1兼容性更好',
