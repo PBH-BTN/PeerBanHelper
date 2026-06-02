@@ -122,7 +122,9 @@
         FROM data_source
         WHERE field_data IS NOT NULL AND field_data != ''
         GROUP BY field_data
-        HAVING percent &gt; #{percentFilter}
+        HAVING CAST(COUNT(*) AS DECIMAL(20, 10))
+            / NULLIF((SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != ''), 0)
+            &gt; #{percentFilter}
         ORDER BY count DESC
     </select>
 
