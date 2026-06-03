@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.spi.SystemInfoProvider;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
@@ -23,8 +22,6 @@ public class CommonDataCollector {
     private HTTPUtil httpUtil;
     @Autowired
     private StunManager bTStunManager;
-    @Autowired
-    private SystemInfoProvider systemInfo;
 
     public Map<String, Object> generatePbhData() {
         long compile_time = 0;
@@ -71,10 +68,12 @@ public class CommonDataCollector {
         var network = generateNetworkStats();
         os.put("network", network);
         try {
-            var operatingSystem = systemInfo.getOperatingSystem();
-            os.put("version", String.valueOf(operatingSystem));
-            var mem = generateSystemMemoryData(systemInfo.getHardware());
-            os.put("memory", mem);
+            SystemInfoProviderWrapper.find().ifPresent(provider -> {
+                var operatingSystem = provider.getOperatingSystem();
+                os.put("version", String.valueOf(operatingSystem));
+                var mem = generateSystemMemoryData(provider.getHardware());
+                os.put("memory", mem);
+            });
             return os;
         } catch (Throwable e) {
             return Map.of("status", "failed-to-retrieve");
@@ -96,7 +95,10 @@ public class CommonDataCollector {
         jvm.put("vendor", runtimeMXBean.getVmVendor());
         jvm.put("runtime", runtimeMXBean.getVmName());
         try {
-            jvm.put("bitness", systemInfo.getOperatingSystem().getBitness());
+            var bitness = SystemInfoProviderWrapper.find()
+                    .<Object>map(provider -> provider.getOperatingSystem().getBitness())
+                    .orElse("unknown");
+            jvm.put("bitness", bitness);
         } catch (Throwable e) {
             jvm.put("bitness", "unknown");
         }

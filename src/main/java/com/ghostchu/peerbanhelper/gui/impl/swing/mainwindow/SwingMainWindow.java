@@ -7,12 +7,11 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.*;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
 import com.google.common.eventbus.Subscribe;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import oshi.spi.SystemInfoFactory;
-import oshi.spi.SystemInfoProvider;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -90,9 +89,10 @@ public final class SwingMainWindow extends JFrame {
             try { // SWT possible be null here on unsupported platform
                 boolean isWindows = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
                 if (isWindows) { // SWT 检测到不支持的系统直接就把 JVM 轰飞了，需要先检测系统版本
-                    SystemInfoProvider provider = SystemInfoFactory.create();
-                    var buildNumber = provider.getOperatingSystem().getVersionInfo().getBuildNumber();
-                    if (Long.parseLong(buildNumber) > 14393) {
+                    var buildNumber = SystemInfoProviderWrapper.find()
+                            .map(provider -> provider.getOperatingSystem().getVersionInfo().getBuildNumber())
+                            .orElse(null);
+                    if (buildNumber != null && Long.parseLong(buildNumber) > 14393) {
                         tabs.add(new WebUITab(this));
                     }
                 } else {

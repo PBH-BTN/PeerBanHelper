@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.pbhplus.bean.V1License;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -15,7 +16,6 @@ import com.google.gson.JsonParser;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import oshi.spi.SystemInfoProvider;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -46,8 +46,10 @@ public class LicenseParser {
     private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
     private String hardwareUUIDHash;
 
-    public LicenseParser(SystemInfoProvider systemInfo) throws Exception {
-        String hardwareUUID = systemInfo.getHardware().getComputerSystem().getHardwareUUID();
+    public LicenseParser() throws Exception {
+        String hardwareUUID = SystemInfoProviderWrapper.find()
+                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
+                .orElseGet(MiscUtil::getMacAddress);
         try {
             this.hardwareUUIDHash = Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString().substring(0, 10);
         } catch (Throwable e) {

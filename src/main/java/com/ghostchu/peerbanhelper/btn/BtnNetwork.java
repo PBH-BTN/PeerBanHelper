@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -36,7 +37,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import oshi.spi.SystemInfoProvider;
 
 import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
@@ -63,7 +63,6 @@ public final class BtnNetwork implements Reloadable {
     private final ScriptEngineManager scriptEngineManager;
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
-    private final SystemInfoProvider systemInfo;
     private final TorrentService torrentDao;
     private final PeerRecordService peerRecordService;
     @Getter
@@ -103,7 +102,7 @@ public final class BtnNetwork implements Reloadable {
     private final long RETRY_PERIOD_SECONDS = 600;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfoProvider systemInfo, TorrentService torrentService,
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, TorrentService torrentService,
                       PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager) {
         this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
@@ -114,7 +113,6 @@ public final class BtnNetwork implements Reloadable {
         this.historyDao = historyDao;
         this.trackedSwarmDao = trackedSwarmDao;
         this.torrentDao = torrentService;
-        this.systemInfo = systemInfo;
         this.backgroundTaskManager = backgroundTaskManager;
         this.alertManager = alertManager;
         Main.getReloadManager().register(this);
@@ -358,15 +356,16 @@ public final class BtnNetwork implements Reloadable {
 
     @NotNull
     public String getBtnHardwareId() {
-        try {
-            return Hashing.sha256().hashString(systemInfo.getHardware().getComputerSystem().getHardwareUUID(), StandardCharsets.UTF_8).toString();
-        } catch (Throwable e) {
-            String mac = MiscUtil.getMacAddress();
-            if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
-                return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
-            }
-            return "MAC-" + MiscUtil.getMacAddress();
-        }
+        var hardwareUUID = SystemInfoProviderWrapper.find()
+                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
+                .orElseGet(() -> {
+                    String mac = MiscUtil.getMacAddress();
+                    if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
+                        return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
+                    }
+                    return "MAC-" + MiscUtil.getMacAddress();
+                });
+        return Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString();
     }
 
 

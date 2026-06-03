@@ -34,7 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.spi.SystemInfoProvider;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -71,8 +70,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private StunManager bTStunManager;
     @Autowired
     private HTTPUtil hTTPUtil;
-    @Autowired
-    private SystemInfoProvider systemInfo;
 
     @Override
     public boolean isConfigurable() {
@@ -188,7 +185,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         // 有点大而全了，需要和前端看看哪些不需要可以删了
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("jvm", generateJvmData());
-        data.put("system", generateSystemData(context, systemInfo));
+        data.put("system", generateSystemData(context));
         data.put("peerbanhelper", generatePbhData());
         context.json(new StdResp(true, null, data));
     }
@@ -224,7 +221,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         return pbh;
     }
 
-    private Map<String, Object> generateSystemData(Context context, SystemInfoProvider systemInfo) {
+    private Map<String, Object> generateSystemData(Context context) {
         Map<String, Object> os = new LinkedHashMap<>();
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
         os.put("architecture", osMXBean.getArch());
@@ -240,10 +237,12 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         var network = generateNetworkStats(context);
         os.put("network", network);
         try {
-            var operatingSystem = systemInfo.getOperatingSystem();
-            os.put("version", String.valueOf(operatingSystem));
-            var mem = generateSystemMemoryData(systemInfo.getHardware());
-            os.put("memory", mem);
+            SystemInfoProviderWrapper.find().ifPresent(provider -> {
+                var operatingSystem = provider.getOperatingSystem();
+                os.put("version", String.valueOf(operatingSystem));
+                var mem = generateSystemMemoryData(provider.getHardware());
+                os.put("memory", mem);
+            });
         }catch (Throwable _){
             os.put("version", "N/A");
         }

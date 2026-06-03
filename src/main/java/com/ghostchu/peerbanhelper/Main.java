@@ -43,8 +43,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import oshi.spi.SystemInfoFactory;
-import oshi.spi.SystemInfoProvider;
 import raccoonfink.deluge.DelugeException;
 
 import javax.crypto.BadPaddingException;
@@ -485,12 +483,14 @@ public class Main {
         String buildNumber = "unknown";
         String codeName = "";
         try {
-            SystemInfoProvider info = SystemInfoFactory.create();
-            var verInfo = info.getOperatingSystem().getVersionInfo();
-            buildNumber = verInfo.getBuildNumber();
-            codeName = verInfo.getCodeName();
+            var verInfo = SystemInfoProviderWrapper.find()
+                    .map(info -> info.getOperatingSystem().getVersionInfo())
+                    .orElse(null);
+            if (verInfo != null) {
+                buildNumber = verInfo.getBuildNumber();
+                codeName = verInfo.getCodeName();
+            }
         } catch (Throwable e) {
-            Sentry.captureException(e);
             log.debug("Unable to get OS build number and code name", e);
         }
         userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
