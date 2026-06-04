@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.Main;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,6 +59,48 @@ public final class MiscUtil {
             gzipOs.write(buffer, 0, bytesRead);
         }
         gzipOs.close();
+    }
+
+    public static String getHardwareUUID(){
+        return SystemInfoProviderWrapper.find()
+                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
+                .orElseGet(() -> {
+                    String mac = MiscUtil.getMacAddress();
+                    if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
+                        return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
+                    }
+                    return "MAC-" + MiscUtil.getMacAddress();
+                });
+    }
+
+    public static String getMacAddress() {
+        try {
+            StringBuilder sb = new StringBuilder();
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface ni = networkInterfaces.nextElement();
+                byte[] mac = ni.getHardwareAddress();
+                if (mac != null) {
+                    for (int i = 0; i < mac.length; i++) {
+                        sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+                    }
+                }
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return FALLBACK_MAC_ADDRESS;
+        }
+    }
+
+    @NotNull
+    public static String throwableToString(@NotNull Throwable t) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream();
+             PrintStream ps = new PrintStream(os)) {
+            t.printStackTrace(ps);
+            return os.toString();
+        } catch (IOException e) {
+            return "Failed to convert throwable to string: " + e.getMessage();
+        }
     }
 
     /**

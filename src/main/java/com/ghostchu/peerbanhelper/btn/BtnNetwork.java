@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -355,8 +356,9 @@ public final class BtnNetwork implements Reloadable {
 
     @NotNull
     public String getBtnHardwareId() {
-        return Hashing.sha256().hashString(systemInfo.getHardware().getComputerSystem().getHardwareUUID(), StandardCharsets.UTF_8).toString();
+        return Hashing.sha256().hashString(MiscUtil.getHardwareUUID(), StandardCharsets.UTF_8).toString();
     }
+
 
     public void close() {
         log.info(tlUI(Lang.BTN_SHUTTING_DOWN));
