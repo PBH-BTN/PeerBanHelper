@@ -3,8 +3,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.BuildMeta;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
+import com.ghostchu.peerbanhelper.module.ModuleStatusType;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ModuleRecordDTO;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -49,9 +49,11 @@ public final class PBHMetadataController extends AbstractFeatureModule {
     private void handleManifest(Context ctx) {
         Map<String, Object> data = new HashMap<>();
         data.put("version", buildMeta);
-        data.put("modules", moduleManager.getModules().stream()
-                .filter(FeatureModule::isModuleEnabled)
-                .map(f -> new ModuleRecordDTO(f.getClass().getName(), f.getConfigName())).toList());
+        if(webContainer.isContextAuthorized(ctx) == JavalinWebContainer.TokenAuthResult.SUCCESS) {
+            data.put("modules", moduleManager.getModules().stream()
+                    .filter(module -> module.getModuleStatus().getType() != ModuleStatusType.DISABLED)
+                    .map(f -> new ModuleRecordDTO(f.getClass().getName(), f.getConfigName())).toList());
+        }
         data.put("installationId", Main.getMainConfig().getString("installation-id", "not-initialized"));
         data.put("analytics", Main.getMainConfig().getBoolean("privacy.analytics"));
         ctx.json(new StdResp(true, null, data));
