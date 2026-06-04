@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.pbhplus;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
@@ -25,7 +24,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -69,8 +67,7 @@ public class LocalKeyManager {
                 tlUI(Lang.FREE_LICENSE_DESCRIPTION),
                 "Local License",
                 List.of("basic"));
-        var encrypted = (RSAUtils.encryptByPrivateKey(JsonUtil.standard().toJson(key).getBytes(StandardCharsets.UTF_8),
-                Base64.getEncoder().encodeToString(localKeyPair.getKey().getEncoded())));
+        var encrypted = (RSAUtils.encryptByPrivateKey(JsonUtil.standard().toJson(key).getBytes(StandardCharsets.UTF_8), localKeyPair.getKey().getEncoded()));
         return Base64.getEncoder().encodeToString(encrypted);
     }
 
