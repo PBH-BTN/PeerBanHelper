@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -36,12 +37,13 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 
+import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -61,7 +63,6 @@ public final class BtnNetwork implements Reloadable {
     private final ScriptEngineManager scriptEngineManager;
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
-    private final SystemInfo systemInfo;
     private final TorrentService torrentDao;
     private final PeerRecordService peerRecordService;
     @Getter
@@ -101,7 +102,7 @@ public final class BtnNetwork implements Reloadable {
     private final long RETRY_PERIOD_SECONDS = 600;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, TorrentService torrentService,
                       PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager) {
         this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
@@ -112,7 +113,6 @@ public final class BtnNetwork implements Reloadable {
         this.historyDao = historyDao;
         this.trackedSwarmDao = trackedSwarmDao;
         this.torrentDao = torrentService;
-        this.systemInfo = systemInfo;
         this.backgroundTaskManager = backgroundTaskManager;
         this.alertManager = alertManager;
         Main.getReloadManager().register(this);
@@ -356,7 +356,7 @@ public final class BtnNetwork implements Reloadable {
 
     @NotNull
     public String getBtnHardwareId() {
-        return MiscUtil.getHardwareUUIDHash();
+        return Hashing.sha256().hashString(MiscUtil.getHardwareUUID(), StandardCharsets.UTF_8).toString();
     }
 
 

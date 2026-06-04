@@ -1,22 +1,18 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.google.common.hash.Hashing;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.lang.reflect.Field;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
@@ -24,8 +20,9 @@ import java.util.zip.GZIPOutputStream;
 @Slf4j
 public final class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
+    public static final String FALLBACK_MAC_ADDRESS = "00-00-00-00-00-00";
 
-    public static String getAllThreadTrace(){
+    public static String getAllThreadTrace() {
         StringBuilder threadDump = new StringBuilder(System.lineSeparator());
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
@@ -63,11 +60,7 @@ public final class MiscUtil {
         gzipOs.close();
     }
 
-    public static String getHardwareUUIDHash() {
-        return Hashing.sha256().hashString(MiscUtil.getHardwareUUID(), StandardCharsets.UTF_8).toString();
-    }
-
-    public static String getHardwareUUID() {
+    public static String getHardwareUUID(){
         return SystemInfoProviderWrapper.find()
                 .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
                 .orElseGet(() -> {
