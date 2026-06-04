@@ -65,9 +65,6 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
                     item.setEmailHash(getColumnValue(columns, headerMap, "email_hash"));
                     boolean result = false;
                     result = validateTrueShortCircuit(license.getLicenseTo(), item.getLicenseToHash(), result);
-                    System.out.println("License to hash: "+hash(license.getLicenseTo()));
-                    System.out.println("Description to hash: "+hash(license.getDescription()));
-
                     result = validateTrueShortCircuit(license.getDescription(), item.getDescriptionHash(), result);
                     result = validateTrueShortCircuit(license.getOrderId(), item.getOrderIdHash(), result);
                     result = validateTrueShortCircuit(license.getPaymentOrderId(), item.getPaymentOrderIdHash(), result);
