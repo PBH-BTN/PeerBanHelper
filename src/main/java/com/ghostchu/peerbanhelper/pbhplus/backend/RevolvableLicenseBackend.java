@@ -85,6 +85,6 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
     @Override
     public void setLicenses(@NotNull Map<String, License> in) {
         super.setLicenses(in);
-
+        checkRevokedLicenses();
     }
 }
