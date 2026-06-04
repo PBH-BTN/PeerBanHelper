@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.Main;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,6 +58,18 @@ public final class MiscUtil {
             gzipOs.write(buffer, 0, bytesRead);
         }
         gzipOs.close();
+    }
+
+    public static String getHardwareUUID(){
+        return SystemInfoProviderWrapper.find()
+                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
+                .orElseGet(() -> {
+                    String mac = MiscUtil.getMacAddress();
+                    if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
+                        return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
+                    }
+                    return "MAC-" + MiscUtil.getMacAddress();
+                });
     }
 
     public static String getMacAddress() {

@@ -356,16 +356,7 @@ public final class BtnNetwork implements Reloadable {
 
     @NotNull
     public String getBtnHardwareId() {
-        var hardwareUUID = SystemInfoProviderWrapper.find()
-                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
-                .orElseGet(() -> {
-                    String mac = MiscUtil.getMacAddress();
-                    if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
-                        return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
-                    }
-                    return "MAC-" + MiscUtil.getMacAddress();
-                });
-        return Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString();
+        return Hashing.sha256().hashString(MiscUtil.getHardwareUUID(), StandardCharsets.UTF_8).toString();
     }
 
 
