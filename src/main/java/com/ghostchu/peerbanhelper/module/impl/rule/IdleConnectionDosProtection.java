@@ -24,9 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -105,9 +103,9 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
                     return pass(); // 不支持 Peer Flags 的下载器不保护下载种子
                 }
                 // 检查 Peer Flags
-                if((flags.isInteresting()    // 存在 d/D，兴趣系统在工作，Peer 应该已发送 BIT_FIELD 或者 Fast Extension 更新了本地分段信息，使得本地兴趣系统活动，视为连接活动
+                if ((flags.isInteresting()    // 存在 d/D，兴趣系统在工作，Peer 应该已发送 BIT_FIELD 或者 Fast Extension 更新了本地分段信息，使得本地兴趣系统活动，视为连接活动
                         || flags.isRemoteInterested() // 存在 u/U，远程对我们感兴趣，我们发送的 BIT_FIELD 或者 Fast Extension 更新了远程兴趣系统并得到响应，视为连接活动
-                ) && ExternalSwitch.parseBoolean("pbh.module.idle-connection-dos-protection.ignore-if-any-interested", true)){
+                ) && ExternalSwitch.parseBoolean("pbh.module.idle-connection-dos-protection.ignore-if-any-interested", true)) {
                     return pass(); // 这类种子一般连接挺好的，忽略它们
                 }
             }
@@ -122,7 +120,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
         // 如果速度不够快，则从 map 里获取连接信息
         ConnectionInfo info;
         try {
-            info = idleConnections.get(hostAndPort, ()->new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), 0));
+            info = idleConnections.get(hostAndPort, () -> new ConnectionInfo(System.currentTimeMillis(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), 0));
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -167,10 +165,8 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
     }
 
     @Override
-    public void onPeersRetrieved(@NotNull Map<Downloader, Map<Torrent, List<Peer>>> peers) {
-        var allPeers = peers.values().stream()
-                .flatMap(map -> map.values().stream())
-                .flatMap(Collection::stream)
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers) {
+        var allPeers = peers.stream()
                 .map(peer -> HostAndPort.fromParts(peer.getPeerAddress().getIp(), peer.getPeerAddress().getPort()))
                 .toList();
         long count = idleConnections.size();
@@ -182,7 +178,6 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
             //log.debug("Removing idle connection {} due to not being seen for 5 checks", hostAndPort);
             return entry.getValue().getNotHitCounter() > 5;
         });
-        //log.debug("Removed {} disconnected connections.", count - idleConnections.size());
     }
 
     @Data
