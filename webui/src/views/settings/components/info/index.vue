@@ -561,7 +561,7 @@ const webuiHash = computed(() => {
 })
 
 const { data: btnEnable } = useRequest(CheckModuleEnable, {
-  defaultParams: ['btn'],
+  defaultParams: ['webapi-btn'],
   onSuccess: () => (btnLoading.value = false)
 })
 

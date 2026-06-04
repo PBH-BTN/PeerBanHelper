@@ -4,7 +4,10 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleStatus;
+import com.ghostchu.peerbanhelper.module.ModuleStatusType;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -43,9 +46,17 @@ public class PBHBtnController extends AbstractFeatureModule {
     }
 
     @Override
+    public @NotNull ModuleStatus getModuleStatus() {
+        return ModuleStatus.builder()
+                .type(btnNetwork != null ? ModuleStatusType.ENABLED : ModuleStatusType.DISABLED)
+                .description(btnNetwork != null ? new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_ENABLED) : new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_DISABLED))
+                .build();
+    }
+
+    @Override
     public void onEnable() {
         javalinWebContainer.javalinRouter()
-                .get("/api/modules/webapi-btn", this::status, Role.USER_READ);
+                .get("/api/modules/btn", this::status, Role.USER_READ);
         Main.getEventBus().register(this);
     }
 
