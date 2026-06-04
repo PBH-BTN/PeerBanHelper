@@ -62,6 +62,7 @@ public class PBHBtnController extends AbstractFeatureModule {
 
     private void status(Context context) {
         Map<String, Object> info = new HashMap<>();
+        info.put("enabled", btnNetwork != null);
         if (btnNetwork == null) {
             info.put("configSuccess", false);
             info.put("appId", "N/A");

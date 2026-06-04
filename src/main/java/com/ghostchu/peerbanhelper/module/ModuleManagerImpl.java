@@ -154,22 +154,26 @@ public final class ModuleManagerImpl implements ModuleManager {
 
         for (FeatureModule module : modulesCopy) {
             boolean shouldBeEnabled = module.shouldModuleEnabled();
-            if (shouldBeEnabled) {
-                // 模块应该启用但当前未启用，启用它
-                log.info("Enabling module {} due to configuration change", module.getName());
-                var moduleRegisterEvent = new ModuleRegisterEvent(module);
-                Main.getEventBus().post(moduleRegisterEvent);
-                if (moduleRegisterEvent.isCancelled()) {
-                    log.debug("Module {} registration cancelled: {}", module.getName(), moduleRegisterEvent.getCancelReason());
-                    continue;
+            try {
+                if (shouldBeEnabled) {
+                    // 模块应该启用但当前未启用，启用它
+                    log.info("Enabling module {} due to configuration change", module.getName());
+                    var moduleRegisterEvent = new ModuleRegisterEvent(module);
+                    Main.getEventBus().post(moduleRegisterEvent);
+                    if (moduleRegisterEvent.isCancelled()) {
+                        log.debug("Module {} registration cancelled: {}", module.getName(), moduleRegisterEvent.getCancelReason());
+                        continue;
+                    }
+                    module.enable();
+                } else {
+                    // 模块不应该启用但当前已启用，禁用它
+                    log.info("Disabling module {} due to configuration change", module.getName());
+                    var moduleUnregisterEvent = new ModuleUnregisterEvent(module);
+                    Main.getEventBus().post(moduleUnregisterEvent);
+                    module.disable();
                 }
-                module.enable();
-            } else {
-                // 模块不应该启用但当前已启用，禁用它
-                log.info("Disabling module {} due to configuration change", module.getName());
-                var moduleUnregisterEvent = new ModuleUnregisterEvent(module);
-                Main.getEventBus().post(moduleUnregisterEvent);
-                module.disable();
+            }catch (Throwable e){
+                log.error("Unable to reload module {} due to configuration change", module.getName(), e);
             }
         }
 
