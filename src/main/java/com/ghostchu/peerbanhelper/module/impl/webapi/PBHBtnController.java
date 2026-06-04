@@ -42,7 +42,7 @@ public class PBHBtnController extends AbstractFeatureModule {
 
     @Override
     public boolean isConfigurable() {
-        return true;
+        return false;
     }
 
     @Override
