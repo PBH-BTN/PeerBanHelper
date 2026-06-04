@@ -1,8 +1,10 @@
 package com.ghostchu.peerbanhelper.pbhplus.validator;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.pbhplus.LocalKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.hash.Hashing;
 import io.sentry.Sentry;
@@ -33,10 +35,12 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
     private final HTTPUtil httpUtil;
     private final File cacheDirectory;
     private static final long CACHE_DURATION_HOURS = 24;
+    private final LocalKeyManager localKeyManager;
 
-    public ServerRevokeValidator(HTTPUtil httpUtil) {
+    public ServerRevokeValidator(HTTPUtil httpUtil, LocalKeyManager localKeyManager) {
         this.httpUtil = httpUtil;
-        var rootCacheDirectory = new File(Main.getDataDirectory(),"cache");
+        this.localKeyManager = localKeyManager;
+        var rootCacheDirectory = new File(Main.getDataDirectory(), "cache");
         this.cacheDirectory = new File(rootCacheDirectory, "license-revoke");
         cacheDirectory.mkdirs();
     }
@@ -128,8 +132,9 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
             return null;
         }
         try {
-            String content = Files.readString(cacheFile.toPath(), StandardCharsets.UTF_8);
-            return JsonUtil.standard().fromJson(content, CacheEntry.class);
+            byte[] data = Files.readAllBytes(cacheFile.toPath());
+            byte[] decrypted = RSAUtils.decryptByPublicKey(data, localKeyManager.getLocalKeyPair().orElseThrow().getValue().getEncoded());
+            return JsonUtil.standard().fromJson(new String(decrypted, StandardCharsets.ISO_8859_1), CacheEntry.class);
         } catch (Exception e) {
             log.debug("Failed to read cache file {}: {}", cacheFile, e.getMessage());
             return null;
@@ -140,8 +145,9 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
         File cacheFile = new File(cacheDirectory, licenseHash + ".json");
         CacheEntry entry = new CacheEntry(revoked, Instant.now().toEpochMilli());
         try {
-            String content = JsonUtil.standard().toJson(entry);
-            Files.writeString(cacheFile.toPath(), content, StandardCharsets.UTF_8);
+            byte[] data = JsonUtil.standard().toJson(entry).getBytes(StandardCharsets.ISO_8859_1);
+            byte[] encrypted = RSAUtils.encryptByPrivateKey(data, localKeyManager.getLocalKeyPair().orElseThrow().getKey().getEncoded());
+            Files.write(cacheFile.toPath(), encrypted);
             log.debug("Cached result for license hash {}: {}", licenseHash, revoked);
         } catch (Exception e) {
             log.debug("Failed to cache result for license hash {}: {}", licenseHash, e.getMessage());
