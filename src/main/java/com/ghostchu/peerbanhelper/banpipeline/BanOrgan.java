@@ -23,16 +23,17 @@ public abstract class BanOrgan<IN, OUT> {
     protected final Executor digestEnergy;
     protected final long maxDigestDuration;
     protected final TimeUnit digestTimeUnit;
-    protected final AtomicBoolean loopRunning = new AtomicBoolean(false);
+    protected final AtomicBoolean loopRunning = new AtomicBoolean(true);
 
     /**
      * The organ that digest the data from BitTorrent clients. Which connects each other to a pipeline from HEAD to TAIL.
-     * @param schedEnergy The executor that used for schedule
-     * @param digestEnergy The executor that used for digesting the data
-     * @param in Upstream that provide the prey to digesting
-     * @param gastroscopy Gastroscopy that monitoring and process any exception the status changes
+     *
+     * @param schedEnergy       The executor that used for schedule
+     * @param digestEnergy      The executor that used for digesting the data
+     * @param in                Upstream that provide the prey to digesting
+     * @param gastroscopy       Gastroscopy that monitoring and process any exception the status changes
      * @param maxDigestDuration The max duration for digesting a prey, if the digestion time exceed this duration, the digestion will be cancelled and consider as TIMEOUT. This is important to avoid the organ stuck by some prey that hard to digest.
-     * @param digestTimeUnit Timeunit.
+     * @param digestTimeUnit    Timeunit.
      */
     public BanOrgan(Executor schedEnergy, Executor digestEnergy, @Nullable BanOrgan<?, IN> in, @Nullable BiConsumer<BanOrgan<IN, OUT>,
             BanOrganCallback<IN>> gastroscopy, long maxDigestDuration, TimeUnit digestTimeUnit) {
@@ -45,15 +46,17 @@ public abstract class BanOrgan<IN, OUT> {
     }
 
     public void waitForPrey() {
-        if (in == null) return; // The HEAD organ doesn't have IN source, so just skip it.
-        loopRunning.set(true); // mark loop running.
-        while (in.getStatus() != OrganLifeCycleStatus.DONE) { // If prev organ not stopped (e,g outlet have stuff or stomach still have task running, keep poll it.)
+        if (in == null) {
+            loopRunning.set(false); // The HEAD organ doesn't have IN source, so just skip it.
+            return;
+        }
+        while (in.getStatus() != OrganLifeCycleStatus.DONE || !checkIfRunningTaskEmpty()) { // If prev organ not stopped (e,g outlet have stuff or stomach still have task running, keep poll it.)
             // if prev organ's stomach still have contents, we need keep fetching its buffer
             try {
                 IN prey = in.outlet.poll(5, TimeUnit.MILLISECONDS); // set a 5ms delay to avoid spam the CPU, need test if 10ms is good too so we can let CPU sleep more times
                 if (prey == null) continue;
                 var future = CompletableFuture.runAsync(() -> digest(prey, (excretions) -> {
-                    /* The code that outlet.accept actually run */
+                            /* The code that outlet.accept actually run */
                             outlet.offer(excretions);
                             BanOrganCallback<IN> callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.SUCCESS, null, null);
                             if (gastroscopy != null) gastroscopy.accept(this, callback);
@@ -86,13 +89,14 @@ public abstract class BanOrgan<IN, OUT> {
                 return OrganLifeCycleStatus.RUNNING; // Current organ have their tasks to run.
             }
         } else {
-            if (!runningTaskEmpty) {
-                return OrganLifeCycleStatus.RUNNING; // although waitForPrey() is not running, but there are still tasks running, so we consider it as RUNNING. Sub-tasks in digest() can lead to this status.
-            }
-            if (isOutletEmpty()) {
-                return OrganLifeCycleStatus.DONE; // No possible data will come from upstream, no more tasks running, and outlet also empty. nice.
+            if (runningTaskEmpty) {
+                if (isOutletEmpty()) {
+                    return OrganLifeCycleStatus.DONE; // No possible data will come from upstream, no more tasks running, and outlet also empty. nice.
+                } else {
+                    return OrganLifeCycleStatus.WAITING_OUTLET; // Waiting downstream organ retrieve the data in outlet that already digested. Then this organ can DONE.
+                }
             } else {
-                return OrganLifeCycleStatus.WAITING_OUTLET; // Waiting downstream organ retrieve the data in outlet that already digested. Then this organ can DONE.
+                return OrganLifeCycleStatus.RUNNING; // although waitForPrey() is not running, but there are still tasks running, so we consider it as RUNNING. Sub-tasks in digest() can lead to this status.
             }
         }
     }
@@ -103,7 +107,8 @@ public abstract class BanOrgan<IN, OUT> {
 
     /**
      * Handle and processing the input data, put processed data into outlet.
-     * @param input The input data(s)
+     *
+     * @param input  The input data(s)
      * @param outlet The data need transfer to downstream organ.
      * @throws RuntimeException If you throw a RuntimeException, the pipeline will be cancelled at this stage.
      */
@@ -112,6 +117,7 @@ public abstract class BanOrgan<IN, OUT> {
     /**
      * Remove the completed Futures from runningTask list then returns a boolean that indicate if the runningTask list is empty
      * !! NOTE: The Racing conditions can occur here, use getStatus() is recommended
+     *
      * @return running tasks is empty
      */
     public boolean checkIfRunningTaskEmpty() {
@@ -121,6 +127,7 @@ public abstract class BanOrgan<IN, OUT> {
 
     /**
      * Check if outlet nothing need to retrieve by downstream organ
+     *
      * @return Outlet is empty
      */
     public boolean isOutletEmpty() {
