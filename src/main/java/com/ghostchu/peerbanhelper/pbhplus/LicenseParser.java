@@ -1,70 +1,48 @@
 package com.ghostchu.peerbanhelper.pbhplus;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V1License;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
-import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
-import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
-import com.ghostchu.peerbanhelper.util.TimeUtil;
+import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.google.common.hash.Hashing;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+import java.util.Optional;
 
 @Component
 public class LicenseParser {
     public static final String OFFICIAL_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCHxgRTk+Zx/pkN8rpK+Lbr1/f1meapIRDJIgBiSfFy4xdbmDF8wE9PJhdM+3peThz9dJQlt6dkeduIVp65rGS9oZdj7gO5YKtUCDir4NgGQGe1p2C41Xv6RiOXObLmF+ubAJILsimwtDyJT8IysEh9hgaZWnvRXT8JX9wB0Ti2rwIDAQAB";
-    @Getter
-    private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
-    private String hardwareUUIDHash;
+    private LocalKeyManager localKeyManager;
 
-    public LicenseParser() throws Exception {
-        String hardwareUUID = SystemInfoProviderWrapper.find()
-                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
-                .orElseGet(MiscUtil::getMacAddress);
-        try {
-            this.hardwareUUIDHash = Hashing.sha256().hashString(hardwareUUID, StandardCharsets.UTF_8).toString().substring(0, 10);
-        } catch (Throwable e) {
-            this.hardwareUUIDHash = Hashing.sha256().hashString(MiscUtil.getMacAddress(), StandardCharsets.UTF_8).toString().substring(0, 10);
-        }
-        localKeyPair = loadLocalKeyPair();
+    public LicenseParser(LocalKeyManager localKeyManager) {
+        this.localKeyManager = localKeyManager;
     }
 
     @NotNull
     public License fromLicense(String encryptedLicense) throws IllegalArgumentException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, IOException, InvalidKeyException {
         byte[] encrypted = Base64.getDecoder().decode(encryptedLicense);
         String json = null;
-        try {
-            json = new String(RSAUtils.decryptByPublicKey(encrypted, Base64.getEncoder().encodeToString(localKeyPair.getValue().getEncoded())), StandardCharsets.UTF_8);
-        } catch (Exception ignored) {
+        Optional<Pair<PrivateKey, PublicKey>> localKeyPair = localKeyManager.getLocalKeyPair();
+        if (localKeyPair.isPresent()) {
+            try {
+                json = new String(RSAUtils.decryptByPublicKey(encrypted, Base64.getEncoder().encodeToString(localKeyPair.get().getValue().getEncoded())), StandardCharsets.UTF_8);
+            } catch (Exception ignored) {
+            }
         }
         if (json == null) {
             json = new String(RSAUtils.decryptByPublicKey(encrypted, OFFICIAL_PUBLIC_KEY), StandardCharsets.UTF_8);
@@ -98,48 +76,4 @@ public class LicenseParser {
         return JsonUtil.standard().fromJson(json, V1License.class);
     }
 
-    public String generateLocalLicense() throws Exception {
-        var key = new V2License("",
-                "PeerBanHelper",
-                2,
-                "local",
-                tlUI(Lang.FREE_LICENSE_SOURCE),
-                System.getProperty("user.name", "Local User"),
-                null,
-                null,
-                null,
-                null,
-                null,
-                BigDecimal.ZERO,
-                System.currentTimeMillis(),
-                System.currentTimeMillis(),
-                LocalDateTime.now().plusDays(15).atOffset(TimeUtil.getSystemZoneOffset()).toInstant().toEpochMilli(),
-                tlUI(Lang.FREE_LICENSE_DESCRIPTION),
-                "Local License",
-                List.of("basic"));
-        var encrypted = (RSAUtils.encryptByPrivateKey(JsonUtil.standard().toJson(key).getBytes(StandardCharsets.UTF_8),
-                Base64.getEncoder().encodeToString(getLocalKeyPair().getKey().getEncoded())));
-        return Base64.getEncoder().encodeToString(encrypted);
-    }
-
-    private Map.Entry<PrivateKey, PublicKey> loadLocalKeyPair() throws Exception {
-        File publicKeyFile = new File(Main.getDataDirectory(), "local_license2_keypair_" + hardwareUUIDHash + ".pub");
-        File privateKeyFile = new File(Main.getDataDirectory(), "local_license2_keypair_" + hardwareUUIDHash + ".key");
-
-        if (!publicKeyFile.exists() || !privateKeyFile.exists()) {
-            var map = RSAUtils.genKeyPair();
-            var privateKeyObj = (RSAPrivateKey) map.get(RSAUtils.PRIVATE_KEY);
-            var publicKeyObj = (RSAPublicKey) map.get(RSAUtils.PUBLIC_KEY);
-            Files.write(privateKeyFile.toPath(), privateKeyObj.getEncoded());
-            Files.write(publicKeyFile.toPath(), publicKeyObj.getEncoded());
-        }
-        // read to RSAPrivateKey
-        byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());
-        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
-
-        PrivateKey privateKey = RSAUtils.getRSAPrivateKeyFromRawEncoded(privateKeyBytes);
-        PublicKey publicKey = RSAUtils.getRSAPublicKeyFromRawEncoded(publicKeyBytes);
-
-        return Map.entry(privateKey, publicKey);
-    }
 }

@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PBHPlusStatusDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PowCaptchaData;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseDownloader;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
+import com.ghostchu.peerbanhelper.pbhplus.LocalKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V1License;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -47,11 +48,14 @@ public final class PBHPlusController extends AbstractFeatureModule {
     private LicenseManager licenseManager;
     @Autowired
     private LicenseDownloader licenseDownloader;
+    @Autowired
+    private LocalKeyManager localKeyManager;
     private final Cache<String, PoWServer> powCaptcha = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build();
     private final int powCaptchaDifficultyBits = 5;
     private final String powCaptchaAlgorithm = "SHA-1";
+
 
 
     @Override
@@ -138,7 +142,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
             context.json(new StdResp(false, tlUI(Lang.PBH_PLUS_FREE_LICENSE_DENIED_EXISTS), null));
             return;
         }
-        var local = licenseManager.getLicenseParser().generateLocalLicense();
+        var local = localKeyManager.generateLocalLicense();
         var keyList = Main.getMainConfig().getStringList("pbh-plus-key");
         if (!keyList.contains(local)) {
             keyList.add(local);
