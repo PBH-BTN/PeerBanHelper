@@ -571,3 +571,6 @@ MODULE_STATUS_DESCRIPTION_ENABLED: "模块已启用"
 MODULE_STATUS_DESCRIPTION_DISABLED: "模块已禁用"
 MODULE_STATUS_DESCRIPTION_NEED_RESTART: "此模块请求重新启动 PeerBanHelper 以应用更改"
 BTN_CONFIG_STATUS_SUCCESSFUL_READ_ONLY: "已成功连接到 BTN 服务器 (只读模式)"
+
+MODULE_CHECK_UNEXCEPTED_EXCEPTION: "[谴责] 检查模块 {} [{}] 执行时在不允许抛出异常的区域抛出了运行时异常，请与此模块开发者联系，所有模块必须在其作用域内完成异常处理，不得抛出运行时错误！"
+DIGESTION_SYSTEM_DIGEST_RUNTIME_EXCEPTION: "[错误] 封禁线程的一个数据处理过程出现了未知错误，请将此错误报告给开发者。"

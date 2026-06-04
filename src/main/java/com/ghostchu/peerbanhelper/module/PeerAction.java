@@ -5,8 +5,8 @@ import lombok.Getter;
 @Getter
 public enum PeerAction {
     NO_ACTION(0),
-    BAN(1),
-    BAN_FOR_DISCONNECT(2),
+    BAN_FOR_DISCONNECT(1),
+    BAN(2),
     SKIP(3);
     private final int value;
 

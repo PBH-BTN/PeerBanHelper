@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.banpipeline.DigestionSession;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -23,6 +24,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.WatchDog;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
@@ -202,41 +204,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans", false);
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
+            DigestionSession session = new DigestionSession(downloaderManager, this, moduleManager);
             // 被新封禁的对等体列表
             Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>();
-            // 当前所有活跃的对等体列表
-            banWaveWatchDog.setLastOperation("Collect peers", true);
-            Map<Downloader, Map<Torrent, List<Peer>>> peers = collectPeers();
-            // 更新 LIVE_PEERS 用于数据展示
-            banWaveWatchDog.setLastOperation("Update live peers", false);
-            updateLivePeers(peers);
-            banWaveWatchDog.setLastOperation("Notify BatchMonitorFeatureModules", false);
-            for (FeatureModule module : moduleManager.getModules()) {
-                if (module instanceof BatchMonitorFeatureModule batchMonitorFeatureModule) {
-                    Main.getEventBus().post(new FeatureModuleExecuteEvent(module));
-                    batchMonitorFeatureModule.onPeersRetrieved(peers);
-                }
-            }
-            peers.forEach((downloader, entry) -> {
-                banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules", false);
-                for (FeatureModule module : moduleManager.getModules()) {
-                    if (module instanceof MonitorFeatureModule monitorFeatureModule) {
-                        Main.getEventBus().post(new FeatureModuleExecuteEvent(module));
-                        entry.forEach((torrent, plist) -> monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist));
-                    }
-                }
-            });
-            // ========== 处理封禁逻辑 ==========
-            Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
-            banWaveWatchDog.setLastOperation("Check Bans", false);
-            peers.keySet().stream().map(downloader -> CompletableFuture.runAsync(() -> {
-                try {
-                    downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
-                } catch (Exception e) {
-                    log.error("Unexpected fatal error occurred while checking bans!", e);
-                    throw e;
-                }
-            }, mainWorkStealingService)).collect(CompletableFutures.joinList()).join();
+
+            log.debug("BEGIN RUN BAN WAVE");
+            Pair<Map<Downloader, List<BanDetail>>, DigestionSession.ProcessingStatistics> sessionResult = session.runBanWave();
+            Map<Downloader, List<BanDetail>> downloaderBanDetailMap = sessionResult.getKey();
             // 处理计划操作
             int scheduled = 0;
             while (!scheduledBanListOperations.isEmpty()) {
@@ -311,9 +285,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 needReApplyBanList.set(false);
             }
             if (!hideFinishLogs && !downloaderManager.isEmpty()) {
-                long downloadersCount = peers.size();
-                long torrentsCount = peers.values().stream().mapToLong(Map::size).sum();
-                long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
+                long downloadersCount = sessionResult.getValue().downloaders();
+                long torrentsCount = sessionResult.getValue().torrents();
+                long peersCount = sessionResult.getValue().peers();
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
             banWaveWatchDog.setLastOperation("Completed", false);
@@ -368,7 +342,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         return futures.stream().map(CompletableFuture::join).toList();
     }
 
-    private void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
+    public void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
         Map<PeerAddress, List<PeerMetadata>> livePeers = new HashMap<>();
         peers.forEach((downloader, tasks) ->
                 tasks.forEach((torrent, peer) ->
