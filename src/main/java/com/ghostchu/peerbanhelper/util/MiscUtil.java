@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.google.common.hash.Hashing;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +14,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +63,11 @@ public final class MiscUtil {
         gzipOs.close();
     }
 
-    public static String getHardwareUUID(){
+    public static String getHardwareUUIDHash() {
+        return Hashing.sha256().hashString(MiscUtil.getHardwareUUID(), StandardCharsets.UTF_8).toString();
+    }
+
+    public static String getHardwareUUID() {
         return SystemInfoProviderWrapper.find()
                 .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
                 .orElseGet(() -> {

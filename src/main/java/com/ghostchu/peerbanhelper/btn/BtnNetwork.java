@@ -356,7 +356,7 @@ public final class BtnNetwork implements Reloadable {
 
     @NotNull
     public String getBtnHardwareId() {
-        return Hashing.sha256().hashString(MiscUtil.getHardwareUUID(), StandardCharsets.UTF_8).toString();
+        return MiscUtil.getHardwareUUIDHash();
     }
 
 
