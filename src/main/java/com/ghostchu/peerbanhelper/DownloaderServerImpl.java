@@ -612,7 +612,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     addr = addr.toIPv4();
                 }
                 var addrStr = addr.toCompressedString();
-                return (addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal());
+                return (addrStr.endsWith(".1") || addrStr.endsWith(".0"))  // check for possible gateway in-correct forward without oshi calls, tricky
+                        && (addr.isLocal() || addr.isAnyLocal());
             }
         }
         return false;
