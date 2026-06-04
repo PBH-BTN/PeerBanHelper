@@ -54,6 +54,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -468,25 +469,58 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             return null;
         }
         List<Torrent> torrents = downloader.getTorrents();
-        List<CompletableFuture<?>> futures = new ArrayList<>();
+        List<PeerFetchTask> fetchTasks = new ArrayList<>();
         Semaphore parallelReqRestrict = new Semaphore(downloader.getMaxConcurrentPeerRequestSlots());
-        torrents.forEach(torrent ->
-                futures.add(CompletableFuture.runAsync(() -> {
-                    try {
-                        parallelReqRestrict.acquire();
-                        var p = downloader.getPeers(torrent);
-                        peers.put(torrent, p);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    } catch (Exception e) {
-                        log.error(tlUI(Lang.UNABLE_RETRIEVE_PEERS), e);
-                    } finally {
-                        parallelReqRestrict.release();
-                    }
-                }, slaveWorkStealingService)));
-        futures.forEach(CompletableFuture::join);
+        torrents.forEach(torrent -> fetchTasks.add(new PeerFetchTask(downloader, torrent, peers, slaveWorkStealingService, parallelReqRestrict)));
+        fetchTasks.forEach(task -> {
+            try { // TODO: Change me! This will wait everysingle requests for 10 seconds, will make timeout check buggy
+                task.getFuture().get(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (TimeoutException e) {
+                log.warn(tlUI(Lang.DOWNLOADER_SERVER_TIMEOUT_RETRIEVE_PEERS, task.getDownloader().getName() + "(" + task.getDownloader().getEndpoint() + ")", task.getTorrent().getName() + "(" + task.getTorrent().getHash() + ")"));
+            }
+        });
         downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent(Lang.STATUS_TEXT_OK));
         return peers;
+    }
+
+    public static class PeerFetchTask {
+        private final Semaphore parallelReqRestrict;
+        @Getter
+        private final Downloader downloader;
+        @Getter
+        private final Torrent torrent;
+        private final Map<Torrent, List<Peer>> peersList;
+        @Getter
+        private final CompletableFuture<?> future;
+
+        public PeerFetchTask(Downloader downloader, Torrent torrent, Map<Torrent, List<Peer>> peersList, Executor executor, Semaphore parallelReqRestrict) {
+            this.downloader = downloader;
+            this.torrent = torrent;
+            this.peersList = peersList;
+            this.parallelReqRestrict = parallelReqRestrict;
+            this.future = CompletableFuture.supplyAsync(this::run, executor);
+        }
+
+        public Supplier<Void> run() {
+            return () -> {
+                try {
+                    parallelReqRestrict.acquire();
+                    var p = downloader.getPeers(torrent);
+                    peersList.put(torrent, p);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    log.error(tlUI(Lang.UNABLE_RETRIEVE_PEERS), e);
+                } finally {
+                    parallelReqRestrict.release();
+                }
+                return null;
+            };
+        }
     }
 
 
