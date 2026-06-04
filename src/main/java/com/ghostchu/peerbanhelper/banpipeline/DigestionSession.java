@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.banpipeline;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.DownloaderServerImpl;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.banpipeline.data.CheckResultBatch;
 import com.ghostchu.peerbanhelper.banpipeline.organ.DownloaderLoginOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.organ.DownloaderProviderOrgan;
@@ -17,6 +18,7 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.util.Pair;
+import com.ghostchu.peerbanhelper.util.WatchDog;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,14 +44,16 @@ public class DigestionSession {
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
     private final List<BanOrgan<?, ?>> organs = new ArrayList<>();
+    private final AlertManager alertManager;
 
-    public DigestionSession(DownloaderManager downloaderManager, DownloaderServer downloaderServer, ModuleManager moduleManager) {
+    public DigestionSession(DownloaderManager downloaderManager, DownloaderServer downloaderServer, ModuleManager moduleManager, AlertManager alertManager) {
         this.downloaderManager = downloaderManager;
         this.downloaderServer = downloaderServer;
         this.moduleManager = moduleManager;
+        this.alertManager = alertManager;
     }
 
-    public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> runBanWave() {
+    public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> runBanWave(WatchDog banWaveWatchDog) {
         organs.clear();
         DownloaderProviderOrgan downloaderProviderOrgan = new DownloaderProviderOrgan(
                 downloaderManager,
@@ -59,6 +63,7 @@ public class DigestionSession {
                 null,
                 60, TimeUnit.SECONDS
         );
+        organs.add(downloaderProviderOrgan);
         DownloaderLoginOrgan downloaderLoginOrgan = new DownloaderLoginOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -66,6 +71,7 @@ public class DigestionSession {
                 null,
                 60, TimeUnit.SECONDS
         );
+        organs.add(downloaderLoginOrgan);
         TorrentsFetchOrgan torrentsFetchOrgan = new TorrentsFetchOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -73,6 +79,7 @@ public class DigestionSession {
                 null,
                 60, TimeUnit.SECONDS
         );
+        organs.add(torrentsFetchOrgan);
         PeersFetchOrgan peersFetchOrgan = new PeersFetchOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -80,6 +87,7 @@ public class DigestionSession {
                 null,
                 60, TimeUnit.SECONDS
         );
+        organs.add(peersFetchOrgan);
         UpdateSnapshotOrgan updateSnapshotOrgan = new UpdateSnapshotOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -88,6 +96,7 @@ public class DigestionSession {
                 60, TimeUnit.SECONDS,
                 (DownloaderServerImpl) downloaderServer
         );
+        organs.add(updateSnapshotOrgan);
         RunMonitorModuleOrgan runMonitorModuleOrgan = new RunMonitorModuleOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -96,22 +105,18 @@ public class DigestionSession {
                 60, TimeUnit.SECONDS,
                 moduleManager
         );
+        organs.add(runMonitorModuleOrgan);
         RunCheckModuleOrgan runCheckModuleOrgan = new RunCheckModuleOrgan(
                 scheduleEnergy,
                 digestEnergy,
                 runMonitorModuleOrgan,
                 null,
                 60, TimeUnit.SECONDS,
-                moduleManager
+                moduleManager,
+                alertManager,
+                (DownloaderServerImpl) downloaderServer
         );
-        organs.add(downloaderProviderOrgan);
-        organs.add(downloaderLoginOrgan);
-        organs.add(torrentsFetchOrgan);
-        organs.add(peersFetchOrgan);
-//        organs.add(updateSnapshotOrgan);
-//        organs.add(runMonitorModuleOrgan);
         organs.add(runCheckModuleOrgan);
-
         runCheckModuleOrgan.endSession();
         return convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan));
     }
@@ -131,19 +136,17 @@ public class DigestionSession {
                 lastRetrieve = lastOrgan.outlet.poll(10, TimeUnit.MILLISECONDS);
                 if (lastRetrieve == null) {
                     for (BanOrgan<?, ?> organ : organs) {
-                        log.debug("----------");
+                        log.debug("--------------");
                         log.debug("ORGAN: {}", organ.getClass().getSimpleName());
-                        log.debug("LifeCycleDone: {}", organ.getStatus().name());
+                        log.debug("Life Cycle Done: {}", organ.getStatus().name());
                         log.debug("Running Tasks: {}", organ.runningTasks.size());
                         log.debug("Outlet Waiting Retrieve: {}", organ.outlet.size());
                     }
                     continue;
                 }
-
                 var torrentMap = handled.getOrDefault(lastRetrieve.downloader(), Collections.synchronizedMap(new HashMap<>()));
                 var peersMap = torrentMap.getOrDefault(lastRetrieve.torrent(), Collections.synchronizedMap(new HashMap<>()));
                 var lastPeer = peersMap.getOrDefault(lastRetrieve.peer(), lastRetrieve.checkResult());
-
                 // 现在检查状态，SKIP > BAN > NO_ACTION
                 if (lastPeer.action().ordinal() > lastRetrieve.checkResult().action().ordinal()) { // 如果状态等级更高，则忽略避免覆写
                     continue;
@@ -172,6 +175,11 @@ public class DigestionSession {
      * @return 转换后的 BanDetails 集合
      */
     public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> convertBanDetails(Map<Downloader, Map<Torrent, Map<Peer, CheckResult>>> handled) {
+        // 下面这段代码只能写一次，因为再读就读不懂了
+        // 总之是数据转换，以一种最节省 Heap 的方式进行
+        // 实在看不懂就找 AI 问问吧
+        // ~Ghost
+
         long downloaders = 0;
         long torrents = 0;
         long peers = 0;
