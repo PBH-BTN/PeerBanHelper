@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
+import com.ghostchu.peerbanhelper.module.ModuleStatusType;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -149,7 +150,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                     || module.getConfigName().equalsIgnoreCase(moduleName)
                     || module.getClass().getName().equalsIgnoreCase(moduleName)
                     || module.getClass().getSimpleName().equalsIgnoreCase(moduleName)) {
-                if (module.isModuleEnabled()) {
+                if (module.getModuleStatus().getType() == ModuleStatusType.ENABLED) {
                     context.json(new StdResp(true, null, true));
                     return;
                 }
