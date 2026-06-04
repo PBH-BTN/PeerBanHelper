@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleStatus;
+import com.ghostchu.peerbanhelper.module.ModuleStatusType;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -61,11 +63,6 @@ public class PBHAutoStunController extends AbstractFeatureModule {
     }
 
     @Override
-    public boolean isActuallyEnabled() {
-        return super.isActuallyEnabled();
-    }
-
-    @Override
     public void onEnable() {
         javalinWebContainer.javalinRouter()
                 .get("/api/autostun/status", this::getModuleStatus, Role.USER_READ)
@@ -78,8 +75,12 @@ public class PBHAutoStunController extends AbstractFeatureModule {
     }
 
     @Override
-    public Map<String, Boolean> getWebModuleStatus() {
-        return Map.of(getConfigName(), isActuallyEnabled() && SystemInfoProviderWrapper.find().isPresent());
+    public @NotNull ModuleStatus getModuleStatus() {
+        boolean enabled = shouldModuleEnabled() && SystemInfoProviderWrapper.find().isPresent();
+        return ModuleStatus.builder()
+                .type(enabled ? ModuleStatusType.ENABLED : ModuleStatusType.DISABLED)
+                .description(enabled ? new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_ENABLED): new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_DISABLED))
+                .build();
     }
 
     private void getModuleStatus(@NotNull Context context) {
