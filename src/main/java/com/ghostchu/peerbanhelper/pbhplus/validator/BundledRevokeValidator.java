@@ -63,9 +63,11 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
                     item.setOrderIdHash(getColumnValue(columns, headerMap, "order_id_hash"));
                     item.setPaymentOrderIdHash(getColumnValue(columns, headerMap, "payment_order_id_hash"));
                     item.setEmailHash(getColumnValue(columns, headerMap, "email_hash"));
-
                     boolean result = false;
                     result = validateTrueShortCircuit(license.getLicenseTo(), item.getLicenseToHash(), result);
+                    System.out.println("License to hash: "+hash(license.getLicenseTo()));
+                    System.out.println("Description to hash: "+hash(license.getDescription()));
+
                     result = validateTrueShortCircuit(license.getDescription(), item.getDescriptionHash(), result);
                     result = validateTrueShortCircuit(license.getOrderId(), item.getOrderIdHash(), result);
                     result = validateTrueShortCircuit(license.getPaymentOrderId(), item.getPaymentOrderIdHash(), result);
@@ -92,11 +94,11 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
         return null;
     }
 
-    private boolean validateTrueShortCircuit(String unhashedValue, String compareTo, boolean anotherBoolean) {
+    private boolean validateTrueShortCircuit(String unhashedValue, String compareToHashValue, boolean anotherBoolean) {
         if (anotherBoolean) return true;
         if (unhashedValue == null) return false;
         String hashedValue = hash(unhashedValue);
-        return compareTo.equalsIgnoreCase(hashedValue);
+        return compareToHashValue.equalsIgnoreCase(hashedValue);
     }
 
     private String hash(String value) {

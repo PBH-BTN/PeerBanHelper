@@ -40,12 +40,12 @@ public class LicenseParser {
         Optional<Pair<PrivateKey, PublicKey>> localKeyPair = localKeyManager.getLocalKeyPair();
         if (localKeyPair.isPresent()) {
             try {
-                json = new String(RSAUtils.decryptByPublicKey(encrypted, Base64.getEncoder().encodeToString(localKeyPair.get().getValue().getEncoded())), StandardCharsets.UTF_8);
+                json = new String(RSAUtils.decryptByPublicKey(encrypted, localKeyPair.get().getValue().getEncoded()), StandardCharsets.UTF_8);
             } catch (Exception ignored) {
             }
         }
         if (json == null) {
-            json = new String(RSAUtils.decryptByPublicKey(encrypted, OFFICIAL_PUBLIC_KEY), StandardCharsets.UTF_8);
+            json = new String(RSAUtils.decryptByPublicKey(encrypted, Base64.getDecoder().decode(OFFICIAL_PUBLIC_KEY)), StandardCharsets.UTF_8);
         }
         JsonElement parser = JsonParser.parseString(json);
         if (!parser.isJsonObject())
