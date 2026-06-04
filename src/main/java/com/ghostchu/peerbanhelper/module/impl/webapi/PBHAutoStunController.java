@@ -77,6 +77,11 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 .put("/api/autostun/config", this::putModuleConfig, Role.USER_WRITE);
     }
 
+    @Override
+    public Map<String, Boolean> getWebModuleStatus() {
+        return Map.of(getConfigName(), isActuallyEnabled() && SystemInfoProviderWrapper.find().isPresent());
+    }
+
     private void getModuleStatus(@NotNull Context context) {
         var section = Main.getMainConfig().getConfigurationSection("auto-stun");
         if (section == null) throw new IllegalStateException("Auto-stun configuration section not found");

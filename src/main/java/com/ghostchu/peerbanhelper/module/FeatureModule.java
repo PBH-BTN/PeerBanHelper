@@ -4,7 +4,6 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 public interface FeatureModule {
@@ -24,16 +23,10 @@ public interface FeatureModule {
     @NotNull
     String getConfigName();
 
-    /**
-     * 指定在 WebAPI 中暴露的 Module Status
-     * @return WebAPI 模块状态映射
-     */
-    default Map<String, Boolean> getWebModuleStatus(){
-        return Map.of(getConfigName(), isModuleEnabled());
-    }
+    boolean shouldModuleEnabled();
 
-
-    boolean isModuleEnabled();
+    @NotNull
+    ModuleStatus getModuleStatus();
 
     ConfigurationSection getConfig();
 
@@ -63,10 +56,5 @@ public interface FeatureModule {
      * 保存配置
      */
     void saveConfig() throws IOException;
-
-    /**
-     * 模块是否实际已启用（调用了 enable()）
-     */
-    boolean isActuallyEnabled();
 
 }

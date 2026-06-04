@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
-import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPAllowList;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPDenyList;
 import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityRules;
@@ -19,12 +18,13 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.SharedObject;
-import com.ghostchu.peerbanhelper.util.rule.*;
+import com.ghostchu.peerbanhelper.util.rule.MatchResult;
+import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
+import com.ghostchu.peerbanhelper.util.rule.Rule;
+import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
+import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
-import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
@@ -32,20 +32,20 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.eventbus.Subscribe;
 import com.googlecode.aviator.exception.TimeoutException;
 import inet.ipaddr.IPAddress;
-import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -54,8 +54,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
     private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"), StructuredData.create().add("status", "btn_manager_not_initialized"));
     private long banDuration;
-    @Autowired
-    private JavalinWebContainer javalinWebContainer;
     @Autowired(required = false)
     private BtnNetwork btnNetwork;
     @Autowired
@@ -65,7 +63,6 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
     @Autowired
     private BanList banList;
-
 
     @Override
     public @NotNull String getName() {
@@ -86,55 +83,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     public void onEnable() {
         reloadConfig();
         Main.getReloadManager().register(this);
-        javalinWebContainer.javalinRouter()
-                .get("/api/modules/btn", this::status, Role.USER_READ);
         Main.getEventBus().register(this);
-    }
-
-    private void status(Context context) {
-        Map<String, Object> info = new HashMap<>();
-        if (btnNetwork == null) {
-            info.put("configSuccess", false);
-            info.put("appId", "N/A");
-            info.put("appSecret", "N/A");
-            info.put("abilities", Collections.emptyList());
-            info.put("configUrl", tl(locale(context), Lang.BTN_SERVICES_NEED_RESTART));
-            context.json(new StdResp(false, tl(locale(context), Lang.BTN_NOT_ENABLE_AND_REQUIRE_RESTART), null));
-            return;
-        }
-
-        info.put("configSuccess", btnNetwork.getConfigSuccess());
-        info.put("configResult", btnNetwork.getConfigResult() == null ? null : tl(locale(context), btnNetwork.getConfigResult()));
-        var abilities = new ArrayList<>();
-        for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
-            Map<String, Object> abilityStatus = new HashMap<>();
-            abilityStatus.put("name", entry.getValue().getName());
-            abilityStatus.put("displayName", tl(locale(context), entry.getValue().getDisplayName()));
-            abilityStatus.put("description", tl(locale(context), entry.getValue().getDescription()));
-            abilityStatus.put("lastSuccess", entry.getValue().lastStatus());
-            abilityStatus.put("lastMessage", tl(locale(context), entry.getValue().lastMessage()));
-            abilityStatus.put("lastUpdateAt", entry.getValue().lastStatusAt());
-            abilities.add(abilityStatus);
-        }
-        info.put("abilities", abilities);
-        info.put("appId", btnNetwork.getAppId());
-        String appSecret;
-        if (btnNetwork.getAppSecret().length() > 5) {
-            appSecret = btnNetwork.getAppSecret().substring(0, 5) + "*******";
-        } else {
-            appSecret = "******";
-        }
-        info.put("appSecret", appSecret);
-        info.put("configUrl", btnNetwork.getConfigUrl());
-        context.json(new StdResp(true, null, info));
-    }
-
-    @Override
-    public boolean isModuleEnabled() {
-        if (super.isModuleEnabled()) {
-            return btnNetwork != null && btnNetwork.isEnableBTN();
-        }
-        return false;
     }
 
     @Override
