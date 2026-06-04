@@ -51,7 +51,7 @@ public final class PBHMetadataController extends AbstractFeatureModule {
         data.put("version", buildMeta);
         if(webContainer.isContextAuthorized(ctx) == JavalinWebContainer.TokenAuthResult.SUCCESS) {
             data.put("modules", moduleManager.getModules().stream()
-                    .filter(module -> module.getModuleStatus().getType() != ModuleStatusType.DISABLED)
+                    .filter(module -> module.getModuleStatus().getType() == ModuleStatusType.ENABLED)
                     .map(f -> new ModuleRecordDTO(f.getClass().getName(), f.getConfigName())).toList());
         }
         data.put("installationId", Main.getMainConfig().getString("installation-id", "not-initialized"));
