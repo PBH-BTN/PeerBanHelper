@@ -89,7 +89,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalinRouter()
+        webContainer.routes()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
                 .post("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_WRITE)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)

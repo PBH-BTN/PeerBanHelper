@@ -320,7 +320,7 @@ public final class JavalinWebContainer implements Reloadable {
         this.started = true;
     }
 
-    public RoutesConfig javalinRouter() {
+    public RoutesConfig routes() {
         return this.javalin.unsafe.routes;
     }
     public String reqLocale(Context context) {

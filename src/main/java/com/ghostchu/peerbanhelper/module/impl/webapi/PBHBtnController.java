@@ -55,7 +55,7 @@ public class PBHBtnController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        javalinWebContainer.javalinRouter()
+        javalinWebContainer.routes()
                 .get("/api/modules/btn", this::status, Role.USER_READ);
         Main.getEventBus().register(this);
     }

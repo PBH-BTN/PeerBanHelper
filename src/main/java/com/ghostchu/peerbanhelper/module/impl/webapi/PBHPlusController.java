@@ -75,7 +75,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalinRouter()
+        webContainer.routes()
                 .get("/api/pbhplus/status", this::handleStatus, Role.USER_READ)
                 .put("/api/pbhplus/key", this::handleLicensePut, Role.USER_WRITE)
                 .delete("/api/pbhplus/key", this::handleLicenseDelete, Role.USER_WRITE)

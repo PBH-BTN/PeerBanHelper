@@ -50,7 +50,7 @@ public class PBHPluginController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        javalinWebContainer.javalinRouter()
+        javalinWebContainer.routes()
                 .get("/api/plugins", this::listPlugins, Role.USER_READ)
                 .post("/api/plugins/operate", this::operatePlugins, Role.USER_WRITE);
     }

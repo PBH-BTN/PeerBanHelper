@@ -62,7 +62,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalinRouter()
+        webContainer.routes()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
         Main.getReloadManager().register(this);
     }

@@ -53,7 +53,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalinRouter()
+        webContainer.routes()
                 .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
                 .get("/api/statistic/analysis/field", this::handleHistoryNumberAccess, Role.USER_READ)
                 .get("/api/statistic/analysis/banTrends", this::handleBanTrends, Role.USER_READ)
