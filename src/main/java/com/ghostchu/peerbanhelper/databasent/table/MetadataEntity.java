@@ -19,7 +19,7 @@ import java.io.Serializable;
 @Data
 @Accessors(chain = true)
 @TableName(value = "metadata", autoResultMap = true)
-public final class MetadataEntity extends AbstractCanDirtyEntity implements Serializable, CanDirty {
+public final class MetadataEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
