@@ -21,7 +21,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class StunManager implements AutoCloseable {
     private NatType cachedNatType = NatType.Unknown;
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("StunManager-RefreshNatType").factory());
 
     public StunManager() {
         scheduledExecutorService.scheduleWithFixedDelay(this::refreshNatType, 0, 1, TimeUnit.HOURS);
