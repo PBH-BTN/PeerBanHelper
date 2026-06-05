@@ -4,11 +4,13 @@ import com.ghostchu.peerbanhelper.Main;
 import com.google.common.hash.Hashing;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import oshi.SystemInfo;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.Field;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
@@ -67,15 +69,16 @@ public final class MiscUtil {
     }
 
     public static String getHardwareUUID() {
-        return SystemInfoProviderWrapper.find()
-                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
-                .orElseGet(() -> {
-                    String mac = MiscUtil.getMacAddress();
-                    if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
-                        return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
-                    }
-                    return "MAC-" + MiscUtil.getMacAddress();
-                });
+        SystemInfo systemInfo = new SystemInfo();
+        try {
+            return systemInfo.getHardware().getComputerSystem().getHardwareUUID();
+        } catch (Exception e) {
+            String mac = MiscUtil.getMacAddress();
+            if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
+                return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
+            }
+            return "MAC-" + MiscUtil.getMacAddress();
+        }
     }
 
     public static String getMacAddress() {
