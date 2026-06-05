@@ -12,7 +12,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,14 +28,14 @@ public final class RSAUtils {
 
     private static final int MAX_DECRYPT_BLOCK = 128;
 
-    public static String sign(byte[] data, byte[] privateKey) throws Exception {
+    public static byte[] sign(byte[] data, byte[] privateKey) throws Exception {
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(privateKey);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         PrivateKey privateK = keyFactory.generatePrivate(pkcs8KeySpec);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initSign(privateK);
         signature.update(data);
-        return Base64.getEncoder().encodeToString(signature.sign());
+        return signature.sign();
     }
 
     public static boolean verify(byte[] data, byte[] publicKey, byte[] sign)
@@ -47,7 +46,7 @@ public final class RSAUtils {
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(publicK);
         signature.update(data);
-        return signature.verify(Base64.getDecoder().decode(sign));
+        return signature.verify(sign);
     }
 
     public static byte[] encryptByPublicKey(byte[] data, byte[] publicKey)
