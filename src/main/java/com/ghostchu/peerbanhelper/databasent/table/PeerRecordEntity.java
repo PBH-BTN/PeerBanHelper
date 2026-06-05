@@ -17,13 +17,13 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "peer_records", autoResultMap = true)
-public final class PeerRecordEntity extends AbstractCanDirtyEntity implements Serializable {
+public final class PeerRecordEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
