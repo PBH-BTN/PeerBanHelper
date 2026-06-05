@@ -15,13 +15,13 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "peer_connection_metrics_track", autoResultMap = true)
-public final class PeerConnectionMetricsTrackEntity extends AbstractCanDirtyEntity implements Serializable {
+public final class PeerConnectionMetricsTrackEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
