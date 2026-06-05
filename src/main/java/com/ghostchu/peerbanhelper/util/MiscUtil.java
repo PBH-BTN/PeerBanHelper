@@ -94,7 +94,7 @@ public final class MiscUtil {
                 }
                 break;
             }
-            return sb.toString();
+            return sb.isEmpty() ? FALLBACK_MAC_ADDRESS : sb.toString();
         } catch (Exception e) {
             return FALLBACK_MAC_ADDRESS;
         }
