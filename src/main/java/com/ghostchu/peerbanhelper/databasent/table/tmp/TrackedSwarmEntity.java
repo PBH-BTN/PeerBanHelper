@@ -67,4 +67,114 @@ public final class TrackedSwarmEntity extends AbstractCanDirtyEntity implements 
     @TableField(value = "upload_speed_max")
     private long uploadSpeedMax;
 
+
+    public void setId(Long id) {
+        this.id = id;
+        setDirty(true);
+    }
+
+    public void setIp(InetAddress ip) {
+        this.ip = ip;
+        setDirty(true);
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+        setDirty(true);
+    }
+
+    public void setInfoHash(String infoHash) {
+        this.infoHash = infoHash;
+        setDirty(true);
+    }
+
+    public void setTorrentIsPrivate(Boolean torrentIsPrivate) {
+        this.torrentIsPrivate = torrentIsPrivate;
+        setDirty(true);
+    }
+
+    public void setTorrentSize(long torrentSize) {
+        this.torrentSize = torrentSize;
+        setDirty(true);
+    }
+
+    public void setDownloader(String downloader) {
+        this.downloader = downloader;
+        setDirty(true);
+    }
+
+    public void setDownloaderProgress(double downloaderProgress) {
+        this.downloaderProgress = downloaderProgress;
+        setDirty(true);
+    }
+
+    public void setPeerId(String peerId) {
+        this.peerId = peerId;
+        setDirty(true);
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+        setDirty(true);
+    }
+
+    public void setPeerProgress(double peerProgress) {
+        this.peerProgress = peerProgress;
+        setDirty(true);
+    }
+
+    public void setUploaded(long uploaded) {
+        this.uploaded = uploaded;
+        setDirty(true);
+    }
+
+    public void setUploadedOffset(long uploadedOffset) {
+        this.uploadedOffset = uploadedOffset;
+        setDirty(true);
+    }
+
+    public void setUploadSpeed(long uploadSpeed) {
+        this.uploadSpeed = uploadSpeed;
+        setDirty(true);
+    }
+
+    public void setDownloaded(long downloaded) {
+        this.downloaded = downloaded;
+        setDirty(true);
+    }
+
+    public void setDownloadedOffset(long downloadedOffset) {
+        this.downloadedOffset = downloadedOffset;
+        setDirty(true);
+    }
+
+    public void setDownloadSpeed(long downloadSpeed) {
+        this.downloadSpeed = downloadSpeed;
+        setDirty(true);
+    }
+
+    public void setLastFlags(String lastFlags) {
+        this.lastFlags = lastFlags;
+        setDirty(true);
+    }
+
+    public void setFirstTimeSeen(OffsetDateTime firstTimeSeen) {
+        this.firstTimeSeen = firstTimeSeen;
+        setDirty(true);
+    }
+
+    public void setLastTimeSeen(OffsetDateTime lastTimeSeen) {
+        this.lastTimeSeen = lastTimeSeen;
+        setDirty(true);
+    }
+
+    public void setDownloadSpeedMax(long downloadSpeedMax) {
+        this.downloadSpeedMax = downloadSpeedMax;
+        setDirty(true);
+    }
+
+    public void setUploadSpeedMax(long uploadSpeedMax) {
+        this.uploadSpeedMax = uploadSpeedMax;
+        setDirty(true);
+    }
 }

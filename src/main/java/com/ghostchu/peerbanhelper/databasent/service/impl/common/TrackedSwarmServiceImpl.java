@@ -72,7 +72,7 @@ public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmM
                 return lastData;
             }
 
-            return new TrackedSwarmEntity(
+            var entity = new TrackedSwarmEntity(
                     null,
                     peer.getPeerAddress().getAddress().toInetAddress(),
                     peer.getPeerAddress().getPort(),
@@ -96,6 +96,8 @@ public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmM
                     peer.getDownloadSpeed(),
                     peer.getUploadSpeed()
             );
+            entity.setDirty(true);
+            return entity;
         });
         long newDownloaded = peer.getDownloaded() >= cachedEntity.getDownloadedOffset()
                 ? peer.getDownloaded() - cachedEntity.getDownloadedOffset()
