@@ -84,12 +84,15 @@ public final class MiscUtil {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface ni = networkInterfaces.nextElement();
+                if(ni.isLoopback() || ni.isPointToPoint() || ni.isVirtual())
+                    continue;
                 byte[] mac = ni.getHardwareAddress();
                 if (mac != null) {
                     for (int i = 0; i < mac.length; i++) {
                         sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
                     }
                 }
+                break;
             }
             return sb.toString();
         } catch (Exception e) {
