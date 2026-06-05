@@ -27,7 +27,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class StunTcpTunnelImpl implements StunTcpTunnel {
     private final StunListener stunListener;
-    private final ScheduledExecutorService keepAliveService = Executors.newScheduledThreadPool(1, runnable -> Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").unstarted(runnable));
+    private final ScheduledExecutorService keepAliveService = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").factory());
     private final AtomicBoolean valid = new AtomicBoolean(false);
     private final PBHPortMapper pbhPortMapper;
     private final String testHost;
