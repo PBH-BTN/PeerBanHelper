@@ -39,7 +39,7 @@ public class GatewayDeviceHandler extends DefaultHandler {
      * The device that should be populated with data coming from the stream
      * being parsed
      */
-    private GatewayDevice device;
+    private final GatewayDevice device;
 
     /**
      * Creates a new instance of GatewayDeviceHandler that will populate the

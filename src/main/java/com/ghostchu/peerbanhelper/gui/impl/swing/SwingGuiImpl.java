@@ -57,7 +57,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     public SwingGuiImpl(String[] args) {
         super(args);
-        this.silentStart = Arrays.stream(args).anyMatch(s -> "silent".equalsIgnoreCase(s));
+        this.silentStart = Arrays.stream(args).anyMatch("silent"::equalsIgnoreCase);
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("apple.awt.application.name", "PeerBanHelper");
         System.setProperty("apple.awt.application.appearance", "system");

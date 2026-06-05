@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.BatchResult;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;

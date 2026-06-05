@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.banpipeline.organ;
 
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
-import com.ghostchu.peerbanhelper.banpipeline.OrganLifeCycleStatus;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 

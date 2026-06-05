@@ -381,7 +381,7 @@ public class Main {
             configuration.load(file);
         } catch (IOException | InvalidConfigurationException e) {
             log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
-            if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> "nogui".equalsIgnoreCase(arg))) {
+            if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch("nogui"::equalsIgnoreCase)) {
                 try {
                     log.error("Bad configuration:  {}", Files.readString(file.toPath()));
                 } catch (IOException ex) {
@@ -450,14 +450,14 @@ public class Main {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
-        if (Arrays.stream(args).anyMatch(arg -> "swing".equalsIgnoreCase(arg))) {
+        if (Arrays.stream(args).anyMatch("swing"::equalsIgnoreCase)) {
             guiType = "swing";
-        } else if (Arrays.stream(args).anyMatch(arg -> "swt".equalsIgnoreCase(arg))) {
+        } else if (Arrays.stream(args).anyMatch("swt"::equalsIgnoreCase)) {
             guiType = "swt";
-        } else if (Arrays.stream(args).anyMatch(arg -> "qt".equalsIgnoreCase(arg))) {
+        } else if (Arrays.stream(args).anyMatch("qt"::equalsIgnoreCase)) {
             guiType = "qt";
         }
-        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> "nogui".equalsIgnoreCase(arg))) {
+        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch("nogui"::equalsIgnoreCase)) {
             guiType = "console";
         }
 

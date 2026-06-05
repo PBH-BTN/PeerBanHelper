@@ -10,8 +10,6 @@ import com.ghostchu.peerbanhelper.banpipeline.data.FetchedPeersBatch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -23,8 +21,6 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;

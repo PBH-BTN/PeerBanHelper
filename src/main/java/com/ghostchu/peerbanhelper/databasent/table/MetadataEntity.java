@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.databasent.table;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper;
 
-import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.banpipeline.DigestionSession;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -12,7 +11,6 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
-import com.ghostchu.peerbanhelper.event.banwave.FeatureModuleExecuteEvent;
 import com.ghostchu.peerbanhelper.event.banwave.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.banwave.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
@@ -39,7 +37,6 @@ import com.spotify.futures.CompletableFutures;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.AssociativeAddressTrie;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
-import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +53,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -304,13 +300,11 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private void reApplyBanListForDownloaders() {
         try {
             List<CompletableFuture<Void>> futures = new ArrayList<>();
-            downloaderManager.forEach(downloader -> {
-                futures.add(CompletableFuture.runAsync(() -> {
-                    if (downloader.login().success()) {
-                        downloader.setBanList(banList.copyKeySet(), null, null, true);
-                    }
-                }));
-            });
+            downloaderManager.forEach(downloader -> futures.add(CompletableFuture.runAsync(() -> {
+                if (downloader.login().success()) {
+                    downloader.setBanList(banList.copyKeySet(), null, null, true);
+                }
+            })));
             CompletableFutures.allAsList(futures).join();
         } catch (Exception e) {
             log.error("Error re-applying ban list for downloaders", e);

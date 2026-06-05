@@ -295,8 +295,8 @@ public final class Transmission extends AbstractDownloader {
         TypedResponse<RsSessionGet> sessionGetResp = client.execute(sessionGet);
         if (sessionGetResp.isSuccess()) {
             RsSessionGet args = sessionGetResp.getArgs();
-            long downloadLimit = args.getSpeedLimitDown() * 1024;
-            long uploadLimit = args.getSpeedLimitUp() * 1024;
+            long downloadLimit = args.getSpeedLimitDown() * 1024L;
+            long uploadLimit = args.getSpeedLimitUp() * 1024L;
             if (!args.getSpeedLimitDownEnabled()) {
                 downloadLimit = 0;
             }

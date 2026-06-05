@@ -58,7 +58,7 @@ public abstract class BanOrgan<IN, OUT> {
                 if (prey == null) continue;
                 var future = CompletableFuture.runAsync(() -> digest(prey, (excretions) -> {
                             /* The code that outlet.accept actually run */
-                            BanOrganCallback<IN> callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.SUCCESS, null, null);;
+                            BanOrganCallback<IN> callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.SUCCESS, null, null);
                             try {
                                 outlet.put(excretions);
                             } catch (InterruptedException e) {

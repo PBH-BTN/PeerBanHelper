@@ -142,14 +142,11 @@ public final class LibcSocket {
         if (errnoSym.isEmpty()) {
             errnoSym = LOOKUP.find("__error"); // macOS
         }
-        if (errnoSym.isPresent()) {
-            MH_ERRNO_LOCATION = LINKER.downcallHandle(
-                    errnoSym.get(),
-                    FunctionDescriptor.of(ValueLayout.ADDRESS) // int*
-            );
-        } else {
-            MH_ERRNO_LOCATION = null; // should not happen on Linux/macOS
-        }
+        // should not happen on Linux/macOS
+        MH_ERRNO_LOCATION = errnoSym.map(memorySegment -> LINKER.downcallHandle(
+                memorySegment,
+                FunctionDescriptor.of(ValueLayout.ADDRESS) // int*
+        )).orElse(null);
     }
 
     // -------------------------------------------------------------------------

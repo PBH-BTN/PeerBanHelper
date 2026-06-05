@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
