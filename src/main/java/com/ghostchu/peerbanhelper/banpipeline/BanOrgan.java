@@ -6,9 +6,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
@@ -19,7 +20,7 @@ public abstract class BanOrgan<IN, OUT> {
     protected final BanOrgan<?, IN> in;
     protected final BiConsumer<BanOrgan<IN, OUT>, BanOrganCallback<IN>> gastroscopy;
     protected final List<CompletableFuture<?>> runningTasks = Collections.synchronizedList(new ArrayList<>());
-    protected final LinkedBlockingQueue<OUT> outlet = new LinkedBlockingQueue<>();
+    protected final BlockingQueue<OUT> outlet = new ArrayBlockingQueue<>(64);
     protected final Executor digestEnergy;
     protected final long maxDigestDuration;
     protected final TimeUnit digestTimeUnit;
@@ -57,9 +58,16 @@ public abstract class BanOrgan<IN, OUT> {
                 if (prey == null) continue;
                 var future = CompletableFuture.runAsync(() -> digest(prey, (excretions) -> {
                             /* The code that outlet.accept actually run */
-                            outlet.offer(excretions);
-                            BanOrganCallback<IN> callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.SUCCESS, null, null);
-                            if (gastroscopy != null) gastroscopy.accept(this, callback);
+                            BanOrganCallback<IN> callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.SUCCESS, null, null);;
+                            try {
+                                outlet.put(excretions);
+                            } catch (InterruptedException e) {
+                                callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.TIMEOUT, e, null);
+                                Thread.currentThread().interrupt();
+                            }finally {
+                                if (gastroscopy != null) gastroscopy.accept(this, callback);
+                            }
+
                         }), digestEnergy) // run digest executor.
                         .orTimeout(maxDigestDuration, digestTimeUnit) // this is the actually reason we use CompletableFutures
                         .exceptionally(e -> { // f.
