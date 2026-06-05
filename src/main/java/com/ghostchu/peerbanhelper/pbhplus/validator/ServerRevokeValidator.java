@@ -80,21 +80,21 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
                 .addPathSegment("licenses")
                 .addPathSegment("checkRevoke");
         if (license.getLicenseTo() != null)
-            urlBuilder.addQueryParameter("licenseTo", license.getLicenseTo());
+            urlBuilder.addQueryParameter("licenseTo", hash(license.getLicenseTo()));
         if (license.getDescription() != null)
-            urlBuilder.addQueryParameter("description", license.getDescription());
+            urlBuilder.addQueryParameter("description", hash(license.getDescription()));
         if (license.getOrderId() != null)
-            urlBuilder.addQueryParameter("orderId", license.getOrderId());
+            urlBuilder.addQueryParameter("orderId", hash(license.getOrderId()));
         if (license.getPaymentOrderId() != null)
-            urlBuilder.addQueryParameter("paymentOrderId", license.getPaymentOrderId());
+            urlBuilder.addQueryParameter("paymentOrderId", hash(license.getPaymentOrderId()));
         if (license.getPaymentGateway() != null)
-            urlBuilder.addQueryParameter("paymentGateway", license.getPaymentGateway());
+            urlBuilder.addQueryParameter("paymentGateway", hash(license.getPaymentGateway()));
         if (license.getSku() != null)
-            urlBuilder.addQueryParameter("sku", license.getSku());
+            urlBuilder.addQueryParameter("sku", hash(license.getSku()));
         if (license.getSource() != null)
-            urlBuilder.addQueryParameter("source", license.getSource());
+            urlBuilder.addQueryParameter("source", hash(license.getSource()));
         if (license.getType() != null)
-            urlBuilder.addQueryParameter("type", license.getType());
+            urlBuilder.addQueryParameter("type", hash(license.getType()));
 
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
