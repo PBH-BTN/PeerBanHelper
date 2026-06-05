@@ -64,11 +64,11 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
                     item.setPaymentOrderIdHash(getColumnValue(columns, headerMap, "payment_order_id_hash"));
                     item.setEmailHash(getColumnValue(columns, headerMap, "email_hash"));
                     boolean result = false;
-                    result = validateTrueShortCircuit(license.getLicenseTo(), item.getLicenseToHash(), result);
-                    result = validateTrueShortCircuit(license.getDescription(), item.getDescriptionHash(), result);
-                    result = validateTrueShortCircuit(license.getOrderId(), item.getOrderIdHash(), result);
-                    result = validateTrueShortCircuit(license.getPaymentOrderId(), item.getPaymentOrderIdHash(), result);
-                    result = validateTrueShortCircuit(license.getEmail(), item.getEmailHash(), result);
+                    result = validateTrueShortCircuit(hash(license.getLicenseTo()), item.getLicenseToHash(), result);
+                    result = validateTrueShortCircuit(hash(license.getDescription()), item.getDescriptionHash(), result);
+                    result = validateTrueShortCircuit(hash(license.getOrderId()), item.getOrderIdHash(), result);
+                    result = validateTrueShortCircuit(hash(license.getPaymentOrderId()), item.getPaymentOrderIdHash(), result);
+                    result = validateTrueShortCircuit(hash(license.getEmail()), item.getEmailHash(), result);
                     return result;
                 });
             }
@@ -91,11 +91,10 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
         return null;
     }
 
-    private boolean validateTrueShortCircuit(String unhashedValue, String compareToHashValue, boolean anotherBoolean) {
+    private boolean validateTrueShortCircuit(String hashedValue, String compareToHashValue, boolean anotherBoolean) {
         if (anotherBoolean) return true;
-        if (unhashedValue == null) return false;
-        String hashedValue = hash(unhashedValue);
-        return compareToHashValue.equalsIgnoreCase(hashedValue);
+        if (hashedValue == null) return false;
+        return hashedValue.equalsIgnoreCase(compareToHashValue);
     }
 
     private String hash(String value) {

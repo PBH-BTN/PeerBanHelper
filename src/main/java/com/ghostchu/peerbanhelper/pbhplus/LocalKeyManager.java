@@ -49,6 +49,7 @@ public class LocalKeyManager {
     }
 
     public String generateLocalLicense() throws Exception {
+        if (localKeyPair == null) throw new IllegalStateException("Local Keypair Not Generated");
         var key = new V2License("",
                 "PeerBanHelper",
                 2,
