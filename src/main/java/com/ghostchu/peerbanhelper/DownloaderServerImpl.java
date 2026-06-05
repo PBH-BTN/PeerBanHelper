@@ -89,7 +89,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private boolean globalPaused = false;
     private final AlertManager alertManager;
-    private final ExecutorService slaveWorkStealingService = Executors.newWorkStealingPool();
     private final ExecutorService mainWorkStealingService = Executors.newWorkStealingPool();
 
 
@@ -249,8 +248,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                         , downloaderManager.getDownloadInfo(downloader.getId()),
                                         OffsetDateTime.now(), OffsetDateTime.now().plus(actualBanDuration, ChronoUnit.MILLIS),
                                         detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
-                                        detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
-                                        detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                        detail.result().action().isExcludeFromReport(),
+                                        detail.result().action().isExcludeFromDisplay(),
                                         detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(), detail.result().structuredData());
                                 bannedPeers.add(banMetadata);
                                 banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
@@ -408,8 +407,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         metrics.recordPeerBan(peer.getPeerAddress().getAddress(), banMetadata);
         banMetadata.setReverseLookup("N/A");
         if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
-            //Thread.ofVirtual().start(() -> {
-            //if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
             dnsLookup.ptr(peer.getPeerAddress().getAddress().toReverseDNSLookupString()).thenAccept(hostName -> {
                 if (hostName.isPresent()) {
                     if (!peer.getPeerAddress().getIp().equals(hostName.get())) {
@@ -417,13 +414,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                     }
                 }
             });
-//                } else {
-//                    String hostName = peer.getPeerAddress().getAddress().toInetAddress().getHostName();
-//                    if (!peer.getPeerAddress().getIp().equals(hostName)) {
-//                        banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toInetAddress().getHostName());
-//                    }
-//                }
-            //});
         }
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
     }

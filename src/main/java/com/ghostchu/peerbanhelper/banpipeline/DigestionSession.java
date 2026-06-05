@@ -38,8 +38,8 @@ public class DigestionSession {
     @Getter
     private final UUID sessionId = UUID.randomUUID();
     private final long sessionStartAt = System.currentTimeMillis();
-    private final ExecutorService scheduleEnergy = Executors.newCachedThreadPool();
-    private final Executor digestEnergy = Executors.newCachedThreadPool();
+    private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
+    private final Executor digestEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
     private final DownloaderManager downloaderManager;
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
