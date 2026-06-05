@@ -95,7 +95,7 @@ public class BundledRevokeValidator implements LicenseRevokeValidator {
         if (anotherBoolean) return true;
         if (unhashedValue == null) return false;
         String hashedValue = hash(unhashedValue);
-        return compareToHashValue.equalsIgnoreCase(hashedValue);
+        return hashedValue.equalsIgnoreCase(compareToHashValue);
     }
 
     private String hash(String value) {
