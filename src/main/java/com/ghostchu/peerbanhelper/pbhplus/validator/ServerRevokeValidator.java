@@ -1,8 +1,10 @@
 package com.ghostchu.peerbanhelper.pbhplus.validator;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.pbhplus.LocalKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.common.hash.Hashing;
 import io.sentry.Sentry;
@@ -33,10 +35,12 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
     private final HTTPUtil httpUtil;
     private final File cacheDirectory;
     private static final long CACHE_DURATION_HOURS = 24;
+    private final LocalKeyManager localKeyManager;
 
-    public ServerRevokeValidator(HTTPUtil httpUtil) {
+    public ServerRevokeValidator(HTTPUtil httpUtil, LocalKeyManager localKeyManager) {
         this.httpUtil = httpUtil;
-        var rootCacheDirectory = new File(Main.getDataDirectory(),"cache");
+        this.localKeyManager = localKeyManager;
+        var rootCacheDirectory = new File(Main.getDataDirectory(), "cache");
         this.cacheDirectory = new File(rootCacheDirectory, "license-revoke");
         cacheDirectory.mkdirs();
     }
@@ -76,15 +80,22 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
                 .addPathSegment("licenses")
                 .addPathSegment("checkRevoke");
         if (license.getLicenseTo() != null)
-            urlBuilder.addQueryParameter("licenseToHash", hash(license.getLicenseTo()));
+            urlBuilder.addQueryParameter("licenseTo", hash(license.getLicenseTo()));
         if (license.getDescription() != null)
-            urlBuilder.addQueryParameter("descriptionHash", hash(license.getDescription()));
+            urlBuilder.addQueryParameter("description", hash(license.getDescription()));
         if (license.getOrderId() != null)
-            urlBuilder.addQueryParameter("orderIdHash", hash(license.getOrderId()));
+            urlBuilder.addQueryParameter("orderId", hash(license.getOrderId()));
         if (license.getPaymentOrderId() != null)
-            urlBuilder.addQueryParameter("paymentOrderIdHash", hash(license.getPaymentOrderId()));
-        if (license.getEmail() != null)
-            urlBuilder.addQueryParameter("emailHash", hash(license.getEmail()));
+            urlBuilder.addQueryParameter("paymentOrderId", hash(license.getPaymentOrderId()));
+        if (license.getPaymentGateway() != null)
+            urlBuilder.addQueryParameter("paymentGateway", hash(license.getPaymentGateway()));
+        if (license.getSku() != null)
+            urlBuilder.addQueryParameter("sku", hash(license.getSku()));
+        if (license.getSource() != null)
+            urlBuilder.addQueryParameter("source", hash(license.getSource()));
+        if (license.getType() != null)
+            urlBuilder.addQueryParameter("type", hash(license.getType()));
+
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .get()
@@ -128,8 +139,9 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
             return null;
         }
         try {
-            String content = Files.readString(cacheFile.toPath(), StandardCharsets.UTF_8);
-            return JsonUtil.standard().fromJson(content, CacheEntry.class);
+            byte[] data = Files.readAllBytes(cacheFile.toPath());
+            byte[] decrypted = RSAUtils.decryptByPublicKey(data, localKeyManager.getLocalKeyPair().orElseThrow().getValue().getEncoded());
+            return JsonUtil.standard().fromJson(new String(decrypted, StandardCharsets.UTF_8), CacheEntry.class);
         } catch (Exception e) {
             log.debug("Failed to read cache file {}: {}", cacheFile, e.getMessage());
             return null;
@@ -140,8 +152,9 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
         File cacheFile = new File(cacheDirectory, licenseHash + ".json");
         CacheEntry entry = new CacheEntry(revoked, Instant.now().toEpochMilli());
         try {
-            String content = JsonUtil.standard().toJson(entry);
-            Files.writeString(cacheFile.toPath(), content, StandardCharsets.UTF_8);
+            byte[] data = JsonUtil.standard().toJson(entry).getBytes(StandardCharsets.UTF_8);
+            byte[] encrypted = RSAUtils.encryptByPrivateKey(data, localKeyManager.getLocalKeyPair().orElseThrow().getKey().getEncoded());
+            Files.write(cacheFile.toPath(), encrypted);
             log.debug("Cached result for license hash {}: {}", licenseHash, revoked);
         } catch (Exception e) {
             log.debug("Failed to cache result for license hash {}: {}", licenseHash, e.getMessage());

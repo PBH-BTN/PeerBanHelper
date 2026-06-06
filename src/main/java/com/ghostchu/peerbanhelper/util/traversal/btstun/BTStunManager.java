@@ -39,7 +39,7 @@ public class BTStunManager implements AutoCloseable, Reloadable {
     private final IPDBManager iPDBManager;
     @Getter
     private boolean enabled = false;
-    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+    private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("BTStunManager-ScanAndLoad").factory());
 
     public BTStunManager(BanList banList, DownloaderManager downloaderManager, PBHPortMapper pBHPortMapper, DownloaderServer downloaderServer, NatAddressProviderRegistry natAddressProviderRegistry, Laboratory laboratory, IPDBManager iPDBManager) {
         this.banList = banList;

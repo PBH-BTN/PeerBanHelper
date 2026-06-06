@@ -54,7 +54,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     private final EventLoopGroup bossGroup;
     private final EventLoopGroup workerGroup;
-    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+    private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("TCPForwarder-Cleanup").factory());
 
     private final BiMap<InetSocketAddress, InetSocketAddress> connectionMap = Maps.synchronizedBiMap(HashBiMap.create());
     private final Map<InetSocketAddress, ConnectionStatistics> connectionStats = new ConcurrentHashMap<>();

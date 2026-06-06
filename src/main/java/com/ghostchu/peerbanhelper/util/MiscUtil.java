@@ -1,19 +1,22 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.google.common.hash.Hashing;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import oshi.SystemInfo;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Field;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
@@ -21,8 +24,9 @@ import java.util.zip.GZIPOutputStream;
 @Slf4j
 public final class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
+    public static final String FALLBACK_MAC_ADDRESS = "00-00-00-00-00-00";
 
-    public static String getAllThreadTrace(){
+    public static String getAllThreadTrace() {
         StringBuilder threadDump = new StringBuilder(System.lineSeparator());
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
@@ -58,6 +62,56 @@ public final class MiscUtil {
             gzipOs.write(buffer, 0, bytesRead);
         }
         gzipOs.close();
+    }
+
+    public static String getHardwareUUIDHash() {
+        return Hashing.sha256().hashString(MiscUtil.getHardwareUUID(), StandardCharsets.UTF_8).toString();
+    }
+
+    public static String getHardwareUUID() {
+        SystemInfo systemInfo = new SystemInfo();
+        try {
+            return systemInfo.getHardware().getComputerSystem().getHardwareUUID();
+        } catch (Exception e) {
+            String mac = MiscUtil.getMacAddress();
+            if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
+                return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
+            }
+            return "MAC-" + MiscUtil.getMacAddress();
+        }
+    }
+
+    public static String getMacAddress() {
+        try {
+            StringBuilder sb = new StringBuilder();
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface ni = networkInterfaces.nextElement();
+                if(ni.isLoopback() || ni.isPointToPoint() || ni.isVirtual())
+                    continue;
+                byte[] mac = ni.getHardwareAddress();
+                if (mac != null) {
+                    for (int i = 0; i < mac.length; i++) {
+                        sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+                    }
+                }
+                break;
+            }
+            return sb.isEmpty() ? FALLBACK_MAC_ADDRESS : sb.toString();
+        } catch (Exception e) {
+            return FALLBACK_MAC_ADDRESS;
+        }
+    }
+
+    @NotNull
+    public static String throwableToString(@NotNull Throwable t) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream();
+             PrintStream ps = new PrintStream(os)) {
+            t.printStackTrace(ps);
+            return os.toString();
+        } catch (IOException e) {
+            return "Failed to convert throwable to string: " + e.getMessage();
+        }
     }
 
     /**

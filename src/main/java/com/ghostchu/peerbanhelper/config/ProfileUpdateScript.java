@@ -25,6 +25,25 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 39)
+    public void updateRuleSubUrl() {
+        var moduleSection = conf.getConfigurationSection("module");
+        if (moduleSection == null) return;
+        var ipBlockerSection = moduleSection.getConfigurationSection("ip-address-blocker-rules");
+        if (ipBlockerSection == null) return;
+        var rulesSection = ipBlockerSection.getConfigurationSection("rules");
+        if (rulesSection == null) return;
+        for (String key : rulesSection.getKeys(false)) {
+            var subSection = rulesSection.getConfigurationSection(key);
+            if (subSection == null) continue;
+            String url = subSection.getString("url");
+            if (url == null) continue;
+            if (url.contains("bcr.pbh-btn.ghorg.ghostchu-services.top")) {
+                subSection.set("url", url.replace("bcr.pbh-btn.ghorg.ghostchu-services.top", "bcr.pbh-btn.com"));
+            }
+        }
+    }
+
     @UpdateScript(version = 38)
     public void addUnknownRules() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");

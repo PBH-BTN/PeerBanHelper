@@ -50,7 +50,7 @@ public final class HTTPUtil implements Reloadable {
     private final List<Pattern> proxyBypasses = Collections.synchronizedList(new ArrayList<>());
     private Proxy proxyInstance;
     private final NetworkReachability networkReachability = new NetworkReachability();
-    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+    private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("HTTPUtil-Reachability").factory());
 
     public HTTPUtil() {
         Main.getReloadManager().register(this);
