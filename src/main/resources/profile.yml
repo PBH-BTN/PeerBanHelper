@@ -1,4 +1,4 @@
-config-version: 39
+config-version: 40
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -53,7 +53,6 @@ module:
       - '{"method":"STARTS_WITH","content":"-dt"}'
       - '{"method":"CONTAINS","content":"-rn0.0.0"}'
       - '{"method":"STARTS_WITH","content":"-sd"}'
-      - '{"method":"STARTS_WITH","content":"-sd"}'
       - '{"method":"STARTS_WITH","content":"-xf"}'
       - '{"method":"STARTS_WITH","content":"-qd"}'
       - '{"method":"STARTS_WITH","content":"-bn"}'
@@ -92,6 +91,7 @@ module:
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ޭ__"}' # 0xde-0xad-0xbe-0xef
       - '{"method":"STARTS_WITH","content":"Unknown ["}' # qb Workaround
+      - '{"method":"STARTS_WITH","content":"Gopeed bt-exp"}'
 
   # 进度作弊检查器：Progress Cheat Blocker
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
