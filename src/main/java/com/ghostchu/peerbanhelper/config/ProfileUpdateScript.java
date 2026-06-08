@@ -25,6 +25,13 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 40)
+    public void addGopeedExpRules() {
+        List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");
+        bannedClientNames.add("{\"method\":\"STARTS_WITH\",\"content\":\"Gopeed bt-exp\"}");
+        conf.set("module.client-name-blacklist.banned-client-name", bannedClientNames);
+    }
+
     @UpdateScript(version = 39)
     public void updateRuleSubUrl() {
         var moduleSection = conf.getConfigurationSection("module");
