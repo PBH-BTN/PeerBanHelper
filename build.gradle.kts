@@ -214,11 +214,6 @@ tasks.processResources {
     )
     inputs.properties(expandProps)
 
-    // Don't expand all files, only specific ones if needed
-    filesMatching(listOf("**/*.properties")) {
-        expand(expandProps)
-    }
-
     val sentryDsn = System.getenv("JAVA_SENTRY_DSN") ?: ""
     filesMatching("sentry.properties") {
         expand(mapOf("JAVA_SENTRY_DSN" to sentryDsn))
