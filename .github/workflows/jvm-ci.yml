@@ -128,7 +128,7 @@ jobs:
         password: ${{ secrets.DOCKER_TOKEN }}
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v6.0.0
+      uses: docker/metadata-action@v6.1.0
       with:
         images: ghostchu/peerbanhelper-snapshot
         tags: |
@@ -165,7 +165,7 @@ jobs:
       uses: docker/setup-buildx-action@v4
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v6.0.0
+      uses: docker/metadata-action@v6.1.0
       with:
         images: ghostchu/peerbanhelper-snapshot
         tags: |
