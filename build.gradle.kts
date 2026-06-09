@@ -179,7 +179,7 @@ dependencies {
     implementation("io.sentry:sentry-jdbc")
 
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
     testImplementation(platform("org.junit:junit-bom:6.0.3"))
