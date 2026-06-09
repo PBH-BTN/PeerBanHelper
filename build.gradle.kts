@@ -110,7 +110,7 @@ dependencies {
 //    }
 //    // System monitoring for supported platforms
     implementation("com.github.oshi:oshi-common:7.3.0")
-    runtimeOnly("com.github.oshi:oshi-core-ffm:7.2.1")
+    runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.0")
     // Markdown
     implementation("org.commonmark:commonmark:0.28.0")
     // Compression
