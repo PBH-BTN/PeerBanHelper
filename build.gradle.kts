@@ -3,7 +3,7 @@ import org.gradle.internal.impldep.org.apache.http.client.methods.RequestBuilder
 plugins {
     java
     application
-    id("com.gorylenko.gradle-git-properties") version "2.5.7"
+    id("com.gorylenko.gradle-git-properties") version "4.0.1"
     id("com.install4j.gradle") version "12.0.5" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
