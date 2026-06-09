@@ -129,7 +129,7 @@ dependencies {
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.5.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.2.0")
+    implementation("de.siegmar:fastcsv:4.3.0")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
