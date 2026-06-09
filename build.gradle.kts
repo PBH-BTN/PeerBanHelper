@@ -4,7 +4,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "2.5.7"
-    id("com.install4j.gradle") version "12.0.4" apply false
+    id("com.install4j.gradle") version "12.0.5" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.3.21"
@@ -61,15 +61,15 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.7"){
+    implementation("org.springframework:spring-context:7.0.8"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
     implementation("com.github.chris2018998:beecp:5.2.2")
-    implementation("org.springframework:spring-tx:7.0.7")
-    implementation("org.springframework:spring-jdbc:7.0.7")
-    implementation("org.xerial:sqlite-jdbc:3.53.1.0")
-    implementation("org.xerial:sqlite-jdbc:3.53.1.0:natives-android")
+    implementation("org.springframework:spring-tx:7.0.8")
+    implementation("org.springframework:spring-jdbc:7.0.8")
+    implementation("org.xerial:sqlite-jdbc:3.53.2.0")
+    implementation("org.xerial:sqlite-jdbc:3.53.2.0:natives-android")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.11")
     implementation("com.mysql:mysql-connector-j:9.7.0") {
@@ -93,7 +93,7 @@ dependencies {
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
-    implementation("io.javalin:javalin:7.2.0")
+    implementation("io.javalin:javalin:7.2.2")
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.0.2")
     // Expression engine
@@ -116,7 +116,7 @@ dependencies {
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
-    implementation("dnsjava:dnsjava:3.6.4")
+    implementation("dnsjava:dnsjava:3.6.5")
     // UI - FlatLaf
     implementation("com.formdev:flatlaf-extras:3.7.1")
     implementation("com.formdev:flatlaf:$flatlafVersion")
@@ -142,8 +142,8 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.32")
-    implementation("org.slf4j:jcl-over-slf4j:2.0.17")
+    implementation("ch.qos.logback:logback-classic:1.5.34")
+    implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
@@ -153,7 +153,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.13.Final") {
+    implementation("io.netty:netty-all:4.2.15.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")
@@ -171,7 +171,7 @@ dependencies {
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.133.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:12.0.4")
+    compileOnly("com.install4j:install4j-runtime:12.0.5")
 
     implementation(platform("io.sentry:sentry-bom:8.41.0")) //import bom
     implementation("io.sentry:sentry")
