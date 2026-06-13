@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldDateResult;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
@@ -212,6 +213,9 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         }
         if (field == null) {
             throw new IllegalArgumentException("field cannot be null");
+        }
+        if (SqlInjectionUtils.check(field)) {
+            throw new IllegalArgumentException("Detected dangerous SQL injection");
         }
         List<UniversalFieldNumResult> results = switch (type) {
             case "count" -> historyService.countField(field, filter, downloader, substringLength);
