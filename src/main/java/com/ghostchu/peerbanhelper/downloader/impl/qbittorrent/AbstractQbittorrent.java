@@ -460,7 +460,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     private void addTracker(Torrent torrent, List<Tracker> newAdded) {
         StringJoiner joiner = new StringJoiner("\n");
-        newAdded.forEach(t -> t.getTrackersInGroup().forEach(joiner::add));
+        newAdded.forEach(t -> {
+            if (t.getTrackersInGroup() != null) {
+                t.getTrackersInGroup().forEach(joiner::add);
+            }
+        });
 
         FormBody formBody = new FormBody.Builder()
                 .add("hash", torrent.getId())
