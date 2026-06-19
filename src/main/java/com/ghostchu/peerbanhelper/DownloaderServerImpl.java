@@ -74,7 +74,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private boolean hideFinishLogs;
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
-    private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"), StructuredData.create());
     @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private ScheduledExecutorService BAN_WAVE_SERVICE;
