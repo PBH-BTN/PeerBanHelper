@@ -33,16 +33,29 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Peers 处理会话，每次处理 BanWave 将打开一个新的会话，用于安全且正确的处理 Peers 获取、检查、封禁流程
+ */
 @Slf4j
 public class DigestionSession {
     @Getter
     private final UUID sessionId = UUID.randomUUID();
+    @Getter
     private final long sessionStartAt = System.currentTimeMillis();
+    /*
+    调度线程池
+     */
     private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
+    /*
+    执行线程池
+     */
     private final Executor digestEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
     private final DownloaderManager downloaderManager;
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
+    /*
+    管道处理节点
+     */
     private final List<BanOrgan<?, ?>> organs = new ArrayList<>();
     private final AlertManager alertManager;
 
@@ -53,8 +66,14 @@ public class DigestionSession {
         this.alertManager = alertManager;
     }
 
+    /**
+     * 执行 BanWave 流程
+     * @param banWaveWatchDog 监控 BanWave 的 WatchDog
+     * @return BanWave 处理结果，包括封禁详情和处理统计信息
+     */
     public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> runBanWave(WatchDog banWaveWatchDog) {
         organs.clear();
+        // 下载器提供器
         DownloaderProviderOrgan downloaderProviderOrgan = new DownloaderProviderOrgan(
                 downloaderManager,
                 scheduleEnergy,
@@ -64,6 +83,7 @@ public class DigestionSession {
                 60, TimeUnit.SECONDS
         );
         organs.add(downloaderProviderOrgan);
+        // 下载器会话登录器
         DownloaderLoginOrgan downloaderLoginOrgan = new DownloaderLoginOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -72,6 +92,7 @@ public class DigestionSession {
                 60, TimeUnit.SECONDS
         );
         organs.add(downloaderLoginOrgan);
+        // 种子数据获取器
         TorrentsFetchOrgan torrentsFetchOrgan = new TorrentsFetchOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -80,6 +101,7 @@ public class DigestionSession {
                 60, TimeUnit.SECONDS
         );
         organs.add(torrentsFetchOrgan);
+        // Peers 获取器
         PeersFetchOrgan peersFetchOrgan = new PeersFetchOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -88,6 +110,7 @@ public class DigestionSession {
                 60, TimeUnit.SECONDS
         );
         organs.add(peersFetchOrgan);
+        // 内存快照更新器
         UpdateSnapshotOrgan updateSnapshotOrgan = new UpdateSnapshotOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -97,6 +120,7 @@ public class DigestionSession {
                 (DownloaderServerImpl) downloaderServer
         );
         organs.add(updateSnapshotOrgan);
+        // 观察者回调器
         RunMonitorModuleOrgan runMonitorModuleOrgan = new RunMonitorModuleOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -106,6 +130,7 @@ public class DigestionSession {
                 moduleManager
         );
         organs.add(runMonitorModuleOrgan);
+        // 规则和反吸血模块执行器
         RunCheckModuleOrgan runCheckModuleOrgan = new RunCheckModuleOrgan(
                 scheduleEnergy,
                 digestEnergy,
@@ -117,8 +142,11 @@ public class DigestionSession {
                 (DownloaderServerImpl) downloaderServer
         );
         organs.add(runCheckModuleOrgan);
+        // 等待数据并完成数据转换操作
+        var returns = convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan));
+        // 调用 Tail Organ 的 endSession 方法，其调用会随着链式递归调用到 Head Organ 的 endSession 方法，完成会话结束通知
         runCheckModuleOrgan.endSession();
-        return convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan));
+        return returns;
     }
 
     /**
@@ -188,13 +216,13 @@ public class DigestionSession {
         while (it.hasNext()) {
             var l2 = it.next();
             var downloader = l2.getKey();
-            downloaders ++;
+            downloaders++;
             var banDetailSection = banDetails.getOrDefault(downloader, new ArrayList<>());
             var l3It = l2.getValue().entrySet().iterator();
             while (l3It.hasNext()) {
                 var l3 = l3It.next();
                 var torrent = l3.getKey();
-                torrents ++;
+                torrents++;
                 var l4It = l3.getValue().entrySet().iterator();
                 while (l4It.hasNext()) {
                     var l4 = l4It.next();
@@ -211,7 +239,7 @@ public class DigestionSession {
             banDetails.put(downloader, banDetailSection);
             it.remove();
         }
-        return Pair.of(banDetails, new ProcessingStatistics(downloaders,torrents,peers));
+        return Pair.of(banDetails, new ProcessingStatistics(downloaders, torrents, peers));
     }
 
     public record ProcessingStatistics(
