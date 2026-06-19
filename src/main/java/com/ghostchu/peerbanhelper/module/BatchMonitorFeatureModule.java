@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module;
 
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -15,7 +16,7 @@ public interface BatchMonitorFeatureModule extends FeatureModule {
      *
      * @param peers 下载器 -> 种子 -> 对等体列表
      */
-    default void onPeersRetrieved(@NotNull Map<Downloader, Map<Torrent, List<Peer>>> peers) {
+    default void onPeersRetrieved(@NotNull Map<Downloader, Map<Torrent, List<Peer>>> peers, @NotNull PipelineTask<?> task) {
     }
 
     /**
@@ -26,6 +27,6 @@ public interface BatchMonitorFeatureModule extends FeatureModule {
      * @param torrent    种子
      * @param peers      对等体列表
      */
-    default void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers) {
+    default void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
     }
 }

@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public abstract class BanOrgan<IN, OUT> {
     protected final BanOrgan<?, IN> in;
     protected final BiConsumer<BanOrgan<IN, OUT>, BanOrganCallback<IN>> gastroscopy;
-    protected final List<CompletableFuture<?>> runningTasks = Collections.synchronizedList(new ArrayList<>());
+    protected final List<PipelineTask<?>> runningTasks = Collections.synchronizedList(new ArrayList<>());
     protected final BlockingQueue<OUT> outlet = new ArrayBlockingQueue<>(64);
     protected final Executor digestEnergy;
     protected final long maxDigestDuration;
@@ -56,19 +56,23 @@ public abstract class BanOrgan<IN, OUT> {
             try {
                 IN prey = in.outlet.poll(5, TimeUnit.MILLISECONDS); // set a 5ms delay to avoid spam the CPU, need test if 10ms is good too so we can let CPU sleep more times
                 if (prey == null) continue;
-                var future = CompletableFuture.runAsync(() -> digest(prey, (excretions) -> {
-                            /* The code that outlet.accept actually run */
-                            BanOrganCallback<IN> callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.SUCCESS, null, null);
-                            try {
-                                outlet.put(excretions);
-                            } catch (InterruptedException e) {
-                                callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.TIMEOUT, e, null);
-                                Thread.currentThread().interrupt();
-                            }finally {
-                                if (gastroscopy != null) gastroscopy.accept(this, callback);
-                            }
+                PipelineTask<Void> wrapper = new PipelineTask<>(null, this, "Initializing Task");
+                wrapper.setDelegate(CompletableFuture.runAsync(() -> {
+                            digest(prey, (excretions) -> {
+                                /* The code that outlet.accept actually run */
+                                BanOrganCallback<IN> callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.SUCCESS, null, null);
+                                try {
+                                    outlet.put(excretions);
+                                } catch (InterruptedException e) {
+                                    callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.TIMEOUT, e, null);
+                                    Thread.currentThread().interrupt();
+                                } finally {
+                                    if (gastroscopy != null) gastroscopy.accept(this, callback);
+                                }
 
-                        }), digestEnergy) // run digest executor.
+                            }, wrapper);
+                            wrapper.setComment(false, "Completed.");
+                        }, digestEnergy) // run digest executor.
                         .orTimeout(maxDigestDuration, digestTimeUnit) // this is the actually reason we use CompletableFutures
                         .exceptionally(e -> { // f.
                             BanOrganCallback<IN> callback;
@@ -79,8 +83,8 @@ public abstract class BanOrgan<IN, OUT> {
                             }
                             if (gastroscopy != null) gastroscopy.accept(this, callback);
                             return null;
-                        });
-                runningTasks.add(future); // TIMING! This could let runningTasks.size() == 0 be true, that's why getStatus() must check if loopRunning.
+                        }));
+                runningTasks.add(wrapper); // TIMING! This could let runningTasks.size() == 0 be true, that's why getStatus() must check if loopRunning.
             } catch (InterruptedException e) {
                 break;
             }
@@ -109,18 +113,19 @@ public abstract class BanOrgan<IN, OUT> {
         }
     }
 
-    public void addMoreDigestingPrey(CompletableFuture<?> future) {
+    public void addMoreDigestingPrey(PipelineTask<?> future) {
         this.runningTasks.add(future); // helper method to put more tasks in running tasks.
     }
 
     /**
      * Handle and processing the input data, put processed data into outlet.
      *
-     * @param input  The input data(s)
-     * @param outlet The data need transfer to downstream organ.
+     * @param input           The input data(s)
+     * @param outlet          The data need transfer to downstream organ.
+     * @param futureContainer The wrapper Future container so you can set comment and bind it
      * @throws RuntimeException If you throw a RuntimeException, the pipeline will be cancelled at this stage.
      */
-    public abstract void digest(IN input, Consumer<OUT> outlet) throws RuntimeException;
+    public abstract void digest(IN input, Consumer<OUT> outlet, PipelineTask<?> futureContainer) throws RuntimeException;
 
     /**
      * Remove the completed Futures from runningTask list then returns a boolean that indicate if the runningTask list is empty
@@ -129,7 +134,7 @@ public abstract class BanOrgan<IN, OUT> {
      * @return running tasks is empty
      */
     public boolean checkIfRunningTaskEmpty() {
-        runningTasks.removeIf(CompletableFuture::isDone);
+        runningTasks.removeIf(future -> future.getDelegate() != null && future.getDelegate().isDone());
         return runningTasks.isEmpty();
     }
 

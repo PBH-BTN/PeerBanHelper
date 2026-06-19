@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.banpipeline.organ;
 
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.banpipeline.data.FetchedTorrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +18,11 @@ public class TorrentsFetchOrgan extends BanOrgan<Downloader, FetchedTorrent> {
     }
 
     @Override
-    public void digest(Downloader input, Consumer<FetchedTorrent> outlet) throws RuntimeException {
-        input.getTorrents().forEach(t -> outlet.accept(new FetchedTorrent(input, t)));
+    public void digest(Downloader input, Consumer<FetchedTorrent> outlet, PipelineTask<?> future) throws RuntimeException {
+        future.setComment(true, "Requesting downloader: " + input.getName() + "(" + input.getEndpoint() + ") for Torrents....");
+        input.getTorrents().forEach(t -> {
+            future.setComment(false, "Waiting until outlet have space.");
+            outlet.accept(new FetchedTorrent(input, t));
+        });
     }
 }

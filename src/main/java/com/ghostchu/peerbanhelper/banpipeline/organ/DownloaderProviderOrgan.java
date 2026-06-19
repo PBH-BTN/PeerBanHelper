@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.banpipeline.organ;
 
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 
@@ -22,7 +23,7 @@ public class DownloaderProviderOrgan extends BanOrgan<Void, Downloader> {
     }
 
     @Override
-    public void digest(Void input, Consumer<Downloader> outlet) throws RuntimeException {
+    public void digest(Void input, Consumer<Downloader> outlet, PipelineTask<?> wrapper) throws RuntimeException {
 
     }
 

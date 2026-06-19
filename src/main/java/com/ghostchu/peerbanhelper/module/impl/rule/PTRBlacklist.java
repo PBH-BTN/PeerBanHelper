@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -96,7 +97,7 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (isHandShaking(peer)) {
             return handshaking();
         }
@@ -105,6 +106,7 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
             Optional<String> ptr;
 //            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
             try {
+                task.setComment(true, "Running PTR dns lookup for: "+ peer.getPeerAddress());
                 ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 ptr = Optional.empty();
@@ -118,6 +120,7 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
 //                }
 //            }
             if (ptr.isPresent()) {
+                task.setComment(false, "Running rule matching...");
                 RuleMatchResult matchResult = RuleParser.matchRule(ptrRules, ptr.get());
                 if (matchResult.hit()) {
                     return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().matcherName(),

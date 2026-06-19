@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -95,7 +96,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (isHandShaking(peer)) {
             return pass();
         }
@@ -108,6 +109,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         }
         AtomicReference<CheckResult> reference = new AtomicReference<>(null);
         IPAddress finalPeerAddress = peerAddress;
+        task.setComment(false, "Iterating banList for related ban entries.");
         banList.forEach((bannedAddr, bannedMeta) -> {
             if (reference.get() != null) {
                 return;

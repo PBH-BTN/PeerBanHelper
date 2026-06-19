@@ -18,7 +18,9 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class WatchDog implements AutoCloseable {
     private final String name;
+    @Getter
     private final long timeout;
+    @Getter
     private final AtomicLong lastFeedAt = new AtomicLong(System.currentTimeMillis());
     private final ScheduledExecutorService service;
     private final Runnable hungry;

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.banpipeline.organ;
 
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -28,8 +29,10 @@ public class DownloaderLoginOrgan extends BanOrgan<Downloader, Downloader> {
     }
 
     @Override
-    public void digest(Downloader downloader, Consumer<Downloader> outlet) throws RuntimeException {
+    public void digest(Downloader downloader, Consumer<Downloader> outlet, PipelineTask<?> wrapper) throws RuntimeException {
+        wrapper.setComment(true, "Try to login downloader: " + downloader.getName() + " (" + downloader.getEndpoint() + ").");
         var loginResult = downloader.login();
+        wrapper.setComment(false, "Processing downloader: " + downloader.getName() + " (" + downloader.getEndpoint() + ") login result...");
         if (!loginResult.success()) {
             if (loginResult.status() != DownloaderLoginResult.Status.PAUSED) {
                 log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.message())));

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
@@ -39,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -116,34 +118,39 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (btnNetwork == null) {
             return BTN_MANAGER_NOT_INITIALIZED;
         }
         // TODO: 需要重构
-        var checkExceptionResult = checkShouldSkip(torrent, peer, downloader);
+        task.setComment(false, "BTN: check should skip.");
+        var checkExceptionResult = checkShouldSkip(torrent, peer, downloader, task);
         if (checkExceptionResult.action() == PeerAction.SKIP) {
             return checkExceptionResult;
         }
         if (allowScript) {
-            var scriptResult = checkScript(torrent, peer, downloader, parallelService);
+            task.setComment(false, "BTN: run script.");
+            var scriptResult = checkScript(torrent, peer, downloader, parallelService, task);
             if (scriptResult.action() != PeerAction.NO_ACTION) {
                 return scriptResult;
             }
         }
-        var result = checkShouldBanModern(torrent, peer, downloader);
+        task.setComment(false, "BTN: check should ban (modern)");
+        var result = checkShouldBanModern(torrent, peer, downloader, task);
         if (result.action() != PeerAction.NO_ACTION) {
             return result;
         }
-        return checkShouldBanLegacy(torrent, peer, downloader);
+        task.setComment(false, "BTN: check should ban (legacy)");
+        return checkShouldBanLegacy(torrent, peer, downloader, task);
     }
 
-    private @NotNull CheckResult checkShouldBanModern(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    private @NotNull CheckResult checkShouldBanModern(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityIPDenyList.class);
         if (abilityObject == null) {
             return pass();
         }
         BtnAbilityIPDenyList denyList = (BtnAbilityIPDenyList) abilityObject;
+        task.setComment(false, "CheckShouldBanModern: matching IP address with rules...");
         var result = denyList.getIpMatcher().match(peer.getPeerAddress().getAddress().toCompressedString());
         if (result.result() == MatchResultEnum.TRUE) {
             return new CheckResult(getClass(), PeerAction.BAN, banDuration,
@@ -155,12 +162,13 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return pass();
     }
 
-    private @NotNull CheckResult checkShouldSkip(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    private @NotNull CheckResult checkShouldSkip(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityIPAllowList.class);
         if (abilityObject == null) {
             return pass();
         }
         BtnAbilityIPAllowList allowList = (BtnAbilityIPAllowList) abilityObject;
+        task.setComment(false, "CheckShouldSkip: matching IP address with rules...");
         var result = allowList.getIpMatcher().match(peer.getPeerAddress().getAddress().toCompressedString());
         if (result.result() == MatchResultEnum.TRUE) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0,
@@ -173,7 +181,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return pass();
     }
 
-    private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
+    private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor, PipelineTask<?> task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
@@ -187,15 +195,17 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             return handshaking();
         }
 
-        List<CompletableFuture<CheckResult>> futures = new ArrayList<>();
+        Map<CompiledScript, CompletableFuture<CheckResult>> futures = new HashMap<>();
 
         for (var kvPair : rule.getScriptRules().entrySet()) {
-            futures.add(CompletableFuture.supplyAsync(() -> runExpression(kvPair.getValue(), torrent, peer, downloader), ruleExecuteExecutor));
+            task.setComment(false, "checkScript: Executing script: " + kvPair.toString());
+            futures.put(kvPair.getValue(), CompletableFuture.supplyAsync(() -> runExpression(kvPair.getValue(), torrent, peer, downloader, task), ruleExecuteExecutor));
         }
 
         CheckResult finalResult = pass();
-        for (CompletableFuture<CheckResult> future : futures) {
-            CheckResult result = future.join();
+        for (var set : futures.entrySet()) {
+            task.setComment(false, "checkScript: Waiting script to complete: " + set.getKey().name());
+            CheckResult result = set.getValue().join();
             if (result.action() == PeerAction.SKIP) {
                 return result; // Early exit on SKIP action
             } else if (result.action() == PeerAction.BAN) {
@@ -206,7 +216,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return finalResult;
     }
 
-    public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
         return getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
@@ -236,7 +246,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }, script.cacheable());
     }
 
-    private @NotNull CheckResult checkShouldBanLegacy(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    private @NotNull CheckResult checkShouldBanLegacy(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();

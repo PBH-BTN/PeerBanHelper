@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.banpipeline.data.CheckResultBatch;
 import com.ghostchu.peerbanhelper.banpipeline.data.FetchedPeersBatch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -47,38 +48,52 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
     }
 
     @Override
-    public void digest(FetchedPeersBatch input, Consumer<CheckResultBatch> outlet) throws RuntimeException {
+    public void digest(FetchedPeersBatch input, Consumer<CheckResultBatch> outlet, PipelineTask<?> wrapper) throws RuntimeException {
         for (FeatureModule m : moduleManager.getModules()) {
             if (!(m instanceof RuleFeatureModule ruleFeatureModule)) {
+                wrapper.setComment(false, "Skipped non-rule feature module");
                 continue;
             }
             var downloader = input.downloader();
             var torrent = input.torrent();
             var peers = input.peers();
+            var prefix = "[" + ruleFeatureModule.getName() + "] (" + torrent.getId() + "): ";
             AtomicInteger newSpawned = new AtomicInteger();
-            peers.forEach(peer -> addMoreDigestingPrey(CompletableFuture.runAsync(() -> {
-                        newSpawned.addAndGet(1);
-                        var badConfigCheck = checkIfPossibleBadConfig(downloader, torrent, peer);
-                        if (badConfigCheck != null) {
-                            outlet.accept(new CheckResultBatch(downloader, torrent, peer, badConfigCheck));
-                            return;
-                        }
-                        try {
-                            if (ruleFeatureModule.isThreadSafe()) {
-                                outlet.accept(new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader)));
-                            } else {
-                                try {
-                                    ruleFeatureModule.getThreadLock().lock();
-                                    outlet.accept(new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader)));
-                                } finally {
-                                    ruleFeatureModule.getThreadLock().unlock();
-                                }
+            peers.forEach(peer -> {
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    newSpawned.addAndGet(1);
+                    wrapper.setComment(false, prefix + "Checking possible BadConfig...)");
+                    var badConfigCheck = checkIfPossibleBadConfig(downloader, torrent, peer);
+                    if (badConfigCheck != null) {
+                        outlet.accept(new CheckResultBatch(downloader, torrent, peer, badConfigCheck));
+                        return;
+                    }
+                    try {
+                        if (ruleFeatureModule.isThreadSafe()) {
+                            wrapper.setComment(false,prefix + "Executing: thread-safe");
+                            var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader,wrapper));
+                            wrapper.setComment(false, prefix + "Waiting: until outlet have space");
+                            outlet.accept(result);
+                        } else {
+                            try {
+                                wrapper.setComment(false, prefix + "Waiting for thread lock (non-thread-safe)");
+                                ruleFeatureModule.getThreadLock().lock();
+                                wrapper.setComment(false, prefix + "Executing: non-thread-safe");
+                                var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader,wrapper));
+                                wrapper.setComment(false, prefix + "Waiting: until outlet have space");
+                                outlet.accept(result);
+                            } finally {
+                                wrapper.setComment(false, prefix + "Waiting for thread unlocking...");
+                                ruleFeatureModule.getThreadLock().unlock();
                             }
-                        } catch (RuntimeException e) {
-                            log.warn(tlUI(Lang.MODULE_CHECK_UNEXCEPTED_EXCEPTION, ruleFeatureModule.getName(), ruleFeatureModule.getClass().getName()), e);
                         }
-                    }, digestEnergy)
-            ));
+                    } catch (RuntimeException e) {
+                        log.warn(tlUI(Lang.MODULE_CHECK_UNEXCEPTED_EXCEPTION, ruleFeatureModule.getName(), ruleFeatureModule.getClass().getName()), e);
+                    }
+                }, digestEnergy);
+                addMoreDigestingPrey(new PipelineTask<>(future, this, "Forked prey spawned, waiting for execute..."));
+            });
+            wrapper.setComment(false, "Running check module: " + ruleFeatureModule.getName() + " for torrent: " + torrent.getId() + ", spawned tasks: " + newSpawned.get());
             log.debug("[ORGAN-DEBUG] New spawned {} peers task checkmodule futures", newSpawned.get());
         }
 

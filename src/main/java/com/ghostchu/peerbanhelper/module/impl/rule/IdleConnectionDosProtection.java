@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -89,7 +90,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         // 先检查种子状态
         if (protectionMode == ProtectionMode.ALWAYS_SEEDING && !torrent.isSeeding()) {
             return pass();
@@ -165,7 +166,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
     }
 
     @Override
-    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
         var allPeers = peers.stream()
                 .map(peer -> HostAndPort.fromParts(peer.getPeerAddress().getIp(), peer.getPeerAddress().getPort()))
                 .toList();

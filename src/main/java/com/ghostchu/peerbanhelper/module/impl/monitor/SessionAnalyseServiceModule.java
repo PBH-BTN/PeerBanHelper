@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
@@ -50,8 +51,9 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
         try {
+            task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
             connectionMetricsTrackDao.syncPeers(downloader, torrent, peers);
         } catch (ExecutionException e) {
             log.warn("Failed to record torrent peers for session analyse", e);

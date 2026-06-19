@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.WatchDog;
 import lombok.Getter;
@@ -27,11 +28,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * Peers 处理会话，每次处理 BanWave 将打开一个新的会话，用于安全且正确的处理 Peers 获取、检查、封禁流程
@@ -68,10 +73,12 @@ public class DigestionSession {
 
     /**
      * 执行 BanWave 流程
+     *
      * @param banWaveWatchDog 监控 BanWave 的 WatchDog
      * @return BanWave 处理结果，包括封禁详情和处理统计信息
      */
     public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> runBanWave(WatchDog banWaveWatchDog) {
+        banWaveWatchDog.setLastOperation("Initializing runBanWave", false);
         organs.clear();
         // 下载器提供器
         DownloaderProviderOrgan downloaderProviderOrgan = new DownloaderProviderOrgan(
@@ -143,7 +150,8 @@ public class DigestionSession {
         );
         organs.add(runCheckModuleOrgan);
         // 等待数据并完成数据转换操作
-        var returns = convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan));
+        banWaveWatchDog.feed();
+        var returns = convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan, banWaveWatchDog));
         // 调用 Tail Organ 的 endSession 方法，其调用会随着链式递归调用到 Head Organ 的 endSession 方法，完成会话结束通知
         runCheckModuleOrgan.endSession();
         return returns;
@@ -156,19 +164,34 @@ public class DigestionSession {
      * @param lastOrgan 最后输出的 Organ
      * @return 中间产物
      */
-    private Map<Downloader, Map<Torrent, Map<Peer, CheckResult>>> extractFromLastOrgan(BanOrgan<?, CheckResultBatch> lastOrgan) {
+    private Map<Downloader, Map<Torrent, Map<Peer, CheckResult>>> extractFromLastOrgan(BanOrgan<?, CheckResultBatch> lastOrgan, WatchDog banWaveWatchDog) {
+        boolean warningTriggered = false;
         Map<Downloader, Map<Torrent, Map<Peer, CheckResult>>> handled = new HashMap<>();
         try {
             CheckResultBatch lastRetrieve;
             do {
                 lastRetrieve = lastOrgan.outlet.poll(10, TimeUnit.MILLISECONDS);
                 if (lastRetrieve == null) {
-                    for (BanOrgan<?, ?> organ : organs) {
-                        log.debug("--------------");
-                        log.debug("ORGAN: {}", organ.getClass().getSimpleName());
-                        log.debug("Life Cycle Done: {}", organ.getStatus().name());
-                        log.debug("Running Tasks: {}", organ.runningTasks.size());
-                        log.debug("Outlet Waiting Retrieve: {}", organ.outlet.size());
+                    // 这里插入 WatchDog，如果即将触发 WatchDog 则打印等待日志
+                    if (System.currentTimeMillis() - banWaveWatchDog.getLastFeedAt().get() > (banWaveWatchDog.getTimeout() - (1000 * 60)) && !warningTriggered) {
+                        StringJoiner joiner = new StringJoiner("\n");
+                        for (BanOrgan<?, ?> organ : organs) {
+                            joiner.add("--------------");
+                            joiner.add("ORGAN:" + organ.getClass().getName());
+                            joiner.add("Life Cycle Done: " + organ.getStatus().name());
+                            joiner.add("Loop Running: " + organ.loopRunning.get());
+                            if (organ.in != null) {
+                                joiner.add("Upstream In: " + organ.in.getClass().getName());
+                            } else {
+                                joiner.add("Upstream In: null");
+                            }
+                            joiner.add("Running Tasks: " + organ.runningTasks.size());
+                            organ.runningTasks.forEach(future -> joiner.add("  - " + Objects.requireNonNullElse(future, "null")));
+                            joiner.add("Outlet Waiting Retrieve: " + organ.outlet.size());
+                            organ.outlet.forEach(item -> joiner.add("  - " + Objects.requireNonNullElse(item, "null")));
+                        }
+                        joiner.add("-------------- (end)");
+                        log.warn(tlUI(Lang.DIGESTION_SYSTEM_WATCH_EARLY_WARNING, joiner.toString()));
                     }
                     continue;
                 }

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.banpipeline.organ;
 import com.ghostchu.peerbanhelper.DownloaderServerImpl;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.banpipeline.data.FetchedPeersBatch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -31,7 +32,8 @@ public class UpdateSnapshotOrgan extends BanOrgan<FetchedPeersBatch, FetchedPeer
     }
 
     @Override
-    public void digest(FetchedPeersBatch input, Consumer<FetchedPeersBatch> outlet) throws RuntimeException {
+    public void digest(FetchedPeersBatch input, Consumer<FetchedPeersBatch> outlet, PipelineTask<?> wrapper) throws RuntimeException {
+        wrapper.setComment(false, "Filling collections with fresh data.");
         var downloader = snapshot.getOrDefault(input.downloader(), Collections.synchronizedMap(new HashMap<>()));
         var torrent = downloader.getOrDefault(input.torrent(), Collections.synchronizedList(new ArrayList<>()));
         torrent.addAll(input.peers());
