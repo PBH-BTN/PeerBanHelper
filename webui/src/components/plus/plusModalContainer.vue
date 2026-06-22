@@ -4,7 +4,7 @@
     title="PeerBanHelper Plus"
     unmount-on-close
     hide-cancel
-    width="48rem"
+    width="50rem"
     draggable
   >
     <a-space v-if="endpointStore.plusStatus?.licenses.length === 0">
@@ -80,7 +80,7 @@
         v-model:active-key="currentActiveKey"
         position="left"
         scroll-position="auto"
-        style="height: 18rem"
+        style="height: 18rem; margin-right: 2rem"
       >
         <a-tab-pane
           v-for="(license, index) in endpointStore.plusStatus?.licenses"

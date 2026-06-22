@@ -11,7 +11,7 @@
           </a-space>
         </template>
         <a-descriptions-item :label="t('plus.status')">
-          <a-typography-text :type="status.status === LicenseStatus.Valid ? 'success' : ''">
+          <a-typography-text v-if="status.status === LicenseStatus.Valid" type="success">
             {{
               t(
                 status.data?.type === LicenseType.Local
@@ -20,6 +20,10 @@
               )
             }}
           </a-typography-text>
+          <a-tag v-else-if="status.status === LicenseStatus.Revoked" color="red">{{
+            t('plus.status.status.' + status.status)
+          }}</a-tag>
+          <a-tag v-else color="orange">{{ t('plus.status.status.' + status.status) }}</a-tag>
         </a-descriptions-item>
         <a-descriptions-item :label="t('plus.licenseTo')">
           <a-typography-text
@@ -79,7 +83,7 @@
     </template>
     <template #second>
       <div
-        v-if="status.data?.type !== LicenseType.Local"
+        v-if="status.data?.type !== LicenseType.Local && status.status !== LicenseStatus.Revoked"
         style="display: flex; height: 100%; width: 100%"
       >
         <medal
