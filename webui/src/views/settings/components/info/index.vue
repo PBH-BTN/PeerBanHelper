@@ -248,7 +248,8 @@
             <component :is="osLogo[data?.data.system.os ?? 'Other']"></component>
             {{
               data?.data.system.os === OSType.MacOS
-                ? compare(data?.data.system.version, '11.0.0', '>')
+                ? data?.data.system.version.includes('macOS') ||
+                  compare(data?.data.system.version, '11.0.0', '>')
                   ? 'macOS'
                   : 'data?.data.system.os'
                 : data?.data.system.os
