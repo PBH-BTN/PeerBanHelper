@@ -67,10 +67,10 @@ public final class AntiVampire extends AbstractRuleFeatureModule implements Relo
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
-        if(xunleiPreset){
+        if (xunleiPreset) {
             task.setComment(false, "Determine if Peer is Xunlei then returns the operation.");
             CheckResult checkResult = checkXunleiPreset(torrent, peer, downloader);
-            if(checkResult != null) return checkResult;
+            if (checkResult != null) return checkResult;
         }
         return pass();
     }
@@ -96,17 +96,17 @@ public final class AntiVampire extends AbstractRuleFeatureModule implements Relo
                 }
             }
         }
-        if(!isXunlei){
+        if (!isXunlei) {
             return null; // 不是迅雷客户端的直接过
         }
-        if(!isXunlei0019){
+        if (!isXunlei0019) {
             return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MODULE_ANTI_VAMPIRE_TITLE), new TranslationComponent(Lang.MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_NON_0019),
                     StructuredData.create().add("xunleiType", "non-0019").add("seeding", torrent.isSeeding()));
         }
         // 是迅雷，也是迅雷 0019的
 
         // 不允许做种连接
-        if(torrent.isSeeding()){
+        if (torrent.isSeeding()) {
             return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MODULE_ANTI_VAMPIRE_TITLE), new TranslationComponent(Lang.MODULE_ANTI_VAMPIRE_DESCRIPTION_XUNLEI_0019_SEEDING),
                     StructuredData.create().add("xunleiType", "0019").add("seeding", torrent.isSeeding()));
         }
