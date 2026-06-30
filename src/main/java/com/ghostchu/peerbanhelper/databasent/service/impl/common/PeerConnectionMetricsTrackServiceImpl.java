@@ -95,17 +95,17 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
                 if (entity == null) {
                     entity = new PeerConnectionMetricsTrackEntity();
                     entity.setTimeframeAt(cacheKey.timeframeAt());
-                    entity.setDownloader(downloader.getId());
-                    entity.setTorrentId(torrentEntity.getId());
-                    entity.setAddress(peer.getPeerAddress().getAddress().toInetAddress());
-                    entity.setPort(peer.getPeerAddress().getPort());
                 }
                 return entity;
             });
             trackEntity.setPeerId(peer.getPeerId());
             trackEntity.setClientName(peer.getClientName());
             trackEntity.setLastFlags(peer.getFlags() == null ? null : peer.getFlags().getLtStdString());
-            baseMapper.insertOrUpdate(trackEntity);
+            trackEntity.setDownloader(downloader.getId());
+            trackEntity.setTorrentId(torrentEntity.getId());
+            trackEntity.setAddress(peer.getPeerAddress().getAddress().toInetAddress());
+            trackEntity.setPort(peer.getPeerAddress().getPort());
+            //baseMapper.insertOrUpdate(trackEntity);
         }
     }
 
