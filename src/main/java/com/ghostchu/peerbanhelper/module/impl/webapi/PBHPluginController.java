@@ -94,7 +94,7 @@ public class PBHPluginController extends AbstractFeatureModule {
             case "load" -> dto.getIdentifiers().forEach(path -> {
                 try {
                     var pathObj = Paths.get(path);
-                    if (pathObj.startsWith(Main.getPluginDirectory().getAbsolutePath())) {
+                    if (pathObj.normalize().startsWith(Main.getPluginDirectory().toPath().normalize())) {
                         result.add(new PluginOperateResultDTO(path, null, tl(locale(context), Lang.WEBAPI_PLUGIN_LOAD_FROM_UNSAFE_LOCATION)));
                         return;
                     }
