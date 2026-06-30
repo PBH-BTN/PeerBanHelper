@@ -1,5 +1,3 @@
-import org.gradle.internal.impldep.org.apache.http.client.methods.RequestBuilder.options
-
 plugins {
     java
     application
