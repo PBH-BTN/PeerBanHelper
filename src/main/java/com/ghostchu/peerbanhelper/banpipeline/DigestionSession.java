@@ -42,7 +42,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
  * Peers 处理会话，每次处理 BanWave 将打开一个新的会话，用于安全且正确的处理 Peers 获取、检查、封禁流程
  */
 @Slf4j
-public class DigestionSession {
+public class DigestionSession implements AutoCloseable {
     @Getter
     private final UUID sessionId = UUID.randomUUID();
     @Getter
@@ -54,7 +54,7 @@ public class DigestionSession {
     /*
     执行线程池
      */
-    private final Executor digestEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
+    private final ExecutorService digestEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
     private final DownloaderManager downloaderManager;
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
@@ -263,6 +263,12 @@ public class DigestionSession {
             it.remove();
         }
         return Pair.of(banDetails, new ProcessingStatistics(downloaders, torrents, peers));
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.digestEnergy.close();
+        this.scheduleEnergy.close();
     }
 
     public record ProcessingStatistics(

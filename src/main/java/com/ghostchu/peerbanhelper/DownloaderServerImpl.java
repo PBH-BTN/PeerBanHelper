@@ -198,11 +198,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans", false);
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
-            DigestionSession session = new DigestionSession(downloaderManager, this, moduleManager, alertManager);
-            // 被新封禁的对等体列表
             Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>();
-            banWaveWatchDog.setLastOperation("Running Prey Digestion Pipeline", true);
-            Pair<Map<Downloader, List<BanDetail>>, DigestionSession.ProcessingStatistics> sessionResult = session.runBanWave(banWaveWatchDog);
+            Pair<Map<Downloader, List<BanDetail>>, DigestionSession.ProcessingStatistics> sessionResult;
+            try (DigestionSession session = new DigestionSession(downloaderManager, this, moduleManager, alertManager)) {
+                // 被新封禁的对等体列表
+                banWaveWatchDog.setLastOperation("Running Prey Digestion Pipeline", true);
+                sessionResult = session.runBanWave(banWaveWatchDog);
+            }
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = sessionResult.getKey();
             // 处理计划操作
             int scheduled = 0;
