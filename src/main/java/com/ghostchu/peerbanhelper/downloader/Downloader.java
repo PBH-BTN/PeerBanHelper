@@ -13,8 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
-public interface Downloader extends AutoCloseable {
+public interface Downloader {
 
     @NotNull
     YamlConfiguration saveDownloader();
@@ -171,6 +172,8 @@ public interface Downloader extends AutoCloseable {
 
     int getMaxConcurrentPeerRequestSlots();
 
+    Semaphore getConcurrentRequestControlSemaphore();
+
 //    /**
 //     * 添加标签到指定种子
 //     * @param torrent Torrent
@@ -219,4 +222,6 @@ public interface Downloader extends AutoCloseable {
 
     int getBTProtocolPort();
     void setBTProtocolPort(int port);
+
+    void close();
 }

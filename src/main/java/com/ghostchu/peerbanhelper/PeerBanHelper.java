@@ -15,7 +15,17 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.PeerRecordingServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SessionAnalyseServiceModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
-import com.ghostchu.peerbanhelper.module.impl.rule.*;
+import com.ghostchu.peerbanhelper.module.impl.rule.AntiVampire;
+import com.ghostchu.peerbanhelper.module.impl.rule.AutoRangeBan;
+import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
+import com.ghostchu.peerbanhelper.module.impl.rule.ClientNameBlacklist;
+import com.ghostchu.peerbanhelper.module.impl.rule.ExpressionRule;
+import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackList;
+import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
+import com.ghostchu.peerbanhelper.module.impl.rule.IdleConnectionDosProtection;
+import com.ghostchu.peerbanhelper.module.impl.rule.MultiDialingBlocker;
+import com.ghostchu.peerbanhelper.module.impl.rule.PeerIdBlacklist;
+import com.ghostchu.peerbanhelper.module.impl.rule.ProgressCheatBlocker;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -166,6 +176,11 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
+
+
+      //  System.out.println("MTR Supported: " + Main.getPlatform().getMtrTool().isSupported(InetAddress.ofLiteral("58.216.33.162")));
+      // var result = Main.getPlatform().getMtrTool().trace(InetAddress.ofLiteral("58.216.33.162"), MtrOptions.defaults());
+      // System.out.println(result);
     }
 
 
@@ -264,6 +279,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(PeerRecordingServiceModule.class);
         moduleClasses.add(AntiVampire.class);
         moduleClasses.add(PBHPluginController.class);
+        moduleClasses.add(PBHBtnController.class);
         moduleClasses.forEach(moduleClass -> moduleManager.register(moduleClass)); // 不要并行加载，会破坏依赖关系
     }
 

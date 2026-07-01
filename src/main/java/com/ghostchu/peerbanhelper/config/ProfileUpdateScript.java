@@ -25,6 +25,32 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 40)
+    public void addGopeedExpRules() {
+        List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");
+        bannedClientNames.add("{\"method\":\"STARTS_WITH\",\"content\":\"Gopeed bt-exp\"}");
+        conf.set("module.client-name-blacklist.banned-client-name", bannedClientNames);
+    }
+
+    @UpdateScript(version = 39)
+    public void updateRuleSubUrl() {
+        var moduleSection = conf.getConfigurationSection("module");
+        if (moduleSection == null) return;
+        var ipBlockerSection = moduleSection.getConfigurationSection("ip-address-blocker-rules");
+        if (ipBlockerSection == null) return;
+        var rulesSection = ipBlockerSection.getConfigurationSection("rules");
+        if (rulesSection == null) return;
+        for (String key : rulesSection.getKeys(false)) {
+            var subSection = rulesSection.getConfigurationSection(key);
+            if (subSection == null) continue;
+            String url = subSection.getString("url");
+            if (url == null) continue;
+            if (url.contains("bcr.pbh-btn.ghorg.ghostchu-services.top")) {
+                subSection.set("url", url.replace("bcr.pbh-btn.ghorg.ghostchu-services.top", "bcr.pbh-btn.com"));
+            }
+        }
+    }
+
     @UpdateScript(version = 38)
     public void addUnknownRules() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
@@ -53,11 +79,11 @@ public final class ProfileUpdateScript {
     @UpdateScript(version = 35)
     public void removeXunleiRules() {
         var peerIdList = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
-        peerIdList.removeIf(s -> "{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}".equals(s));
+        peerIdList.removeIf("{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}"::equals);
         conf.set("module.peer-id-blacklist.banned-peer-id", peerIdList);
         var clientNameList = conf.getStringList("module.client-name-blacklist.banned-client-name");
-        clientNameList.removeIf(s -> "{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}".equals(s));
-        clientNameList.removeIf(s -> "{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}".equals(s));
+        clientNameList.removeIf("{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}"::equals);
+        clientNameList.removeIf("{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}"::equals);
         conf.set("module.client-name-blacklist.banned-client-name", clientNameList);
     }
 

@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.databasent.table;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,13 +12,13 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 import java.io.Serializable;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "metadata", autoResultMap = true)
-public final class MetadataEntity extends AbstractCanDirtyEntity implements Serializable, CanDirty {
+public final class MetadataEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

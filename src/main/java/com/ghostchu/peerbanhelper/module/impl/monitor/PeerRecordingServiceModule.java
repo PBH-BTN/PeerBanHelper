@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
@@ -85,7 +86,8 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
+        task.setComment(true, "Update Peers into diskWriteCache, and flush to disk if needed.");
         peers.stream().filter(peer -> {
                     var clientName = peer.getClientName();
                     var peerId = peer.getPeerId();

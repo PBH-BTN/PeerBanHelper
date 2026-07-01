@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow;
 
-import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
@@ -8,6 +7,7 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.*;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
 import com.google.common.eventbus.Subscribe;
 import io.sentry.Sentry;
 import lombok.Getter;
@@ -46,8 +46,8 @@ public final class SwingMainWindow extends JFrame {
 
     public SwingMainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
-        if (SystemInfo.isMacFullWindowContentSupported)
-            getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
+//        if (SystemInfo.isMacFullWindowContentSupported)
+//            getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
         new WindowTitle(this);
         // max dimension size or 720p
         var maxAllowedWidth = Math.min(1280, Toolkit.getDefaultToolkit().getScreenSize().width);
@@ -89,8 +89,10 @@ public final class SwingMainWindow extends JFrame {
             try { // SWT possible be null here on unsupported platform
                 boolean isWindows = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
                 if (isWindows) { // SWT 检测到不支持的系统直接就把 JVM 轰飞了，需要先检测系统版本
-                    var buildNumber = new oshi.SystemInfo().getOperatingSystem().getVersionInfo().getBuildNumber();
-                    if (Long.parseLong(buildNumber) > 14393) {
+                    var buildNumber = SystemInfoProviderWrapper.find()
+                            .map(provider -> provider.getOperatingSystem().getVersionInfo().getBuildNumber())
+                            .orElse(null);
+                    if (buildNumber != null && Long.parseLong(buildNumber) > 14393) {
                         tabs.add(new WebUITab(this));
                     }
                 } else {

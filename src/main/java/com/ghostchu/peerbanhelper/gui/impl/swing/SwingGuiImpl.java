@@ -21,6 +21,9 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.SwingProgressDialog;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+//import com.jthemedetecor.OsThemeDetector;
+//import com.jthemedetecor.OsThemeDetector;
+//import com.jthemedetecor.OsThemeDetector;
 import com.jthemedetecor.OsThemeDetector;
 import io.sentry.Sentry;
 import lombok.Getter;
@@ -54,7 +57,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     public SwingGuiImpl(String[] args) {
         super(args);
-        this.silentStart = Arrays.stream(args).anyMatch(s -> "silent".equalsIgnoreCase(s));
+        this.silentStart = Arrays.stream(args).anyMatch("silent"::equalsIgnoreCase);
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("apple.awt.application.name", "PeerBanHelper");
         System.setProperty("apple.awt.application.appearance", "system");
@@ -145,7 +148,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             OsThemeDetector detector = OsThemeDetector.getDetector();
             detector.registerListener(this::updateTheme);
             updateTheme(detector.isDark());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Sentry.captureException(e);
         }
         createMainWindow();
@@ -153,7 +156,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public boolean isDarkMode() {
-        return OsThemeDetector.getDetector().isDark();
+        return false;
+       // return OsThemeDetector.getDetector().isDark();
     }
 
     private void setupSwingDefaultFonts() {

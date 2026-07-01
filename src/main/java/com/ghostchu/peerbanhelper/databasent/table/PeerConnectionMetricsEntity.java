@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,13 +15,13 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @TableName(value = "peer_connection_metrics", autoResultMap = true)
-public final class PeerConnectionMetricsEntity extends AbstractCanDirtyEntity implements Serializable, CanDirty {
+public final class PeerConnectionMetricsEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

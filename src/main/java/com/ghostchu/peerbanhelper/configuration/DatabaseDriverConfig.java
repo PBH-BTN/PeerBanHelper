@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
-import com.ghostchu.peerbanhelper.databasent.driver.common.BasicIPAddressTypeHandler;
-import com.ghostchu.peerbanhelper.databasent.driver.common.BasicInetTypeHandler;
+import com.ghostchu.peerbanhelper.databasent.driver.common.basic.BasicIPAddressTypeHandler;
+import com.ghostchu.peerbanhelper.databasent.driver.common.InetTypeHandlerForwarder;
 import com.ghostchu.peerbanhelper.databasent.driver.common.OffsetDateTimeTypeHandlerForwarder;
 import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
@@ -48,7 +48,7 @@ public class DatabaseDriverConfig {
     public void setupJsqlParserThreadPool(){
         int parallelism = ExternalSwitch.parseInt("pbh.database.jsqlparser.thread-pool.parallelism", Math.min(4, Runtime.getRuntime().availableProcessors()));
         ExecutorService executorService = Executors.newWorkStealingPool(parallelism);
-        JsqlParserGlobal.setExecutorService(executorService, Thread.ofVirtual().unstarted(() -> {
+        JsqlParserGlobal.setExecutorService(executorService, Thread.ofPlatform().unstarted(() -> {
             if (!executorService.isShutdown()) {
                 executorService.shutdown();
             }
@@ -110,7 +110,10 @@ public class DatabaseDriverConfig {
         interceptorList.add(sentryMyBatisInterceptor);
         factoryBean.setPlugins(interceptorList.toArray(new Interceptor[0]));
 
-        factoryBean.setTypeHandlers(new BasicInetTypeHandler(), new BasicIPAddressTypeHandler(), new OffsetDateTimeTypeHandlerForwarder());
+        factoryBean.setTypeHandlers(
+                new InetTypeHandlerForwarder(),
+                new BasicIPAddressTypeHandler(),
+                new OffsetDateTimeTypeHandlerForwarder());
 
         String xmlPath = "classpath*:" + driver.getMapperXmlPath();
         log.info(tlUI(Lang.DBNT_LOADING_MAPPER, xmlPath));

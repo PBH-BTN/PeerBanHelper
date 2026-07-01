@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
@@ -102,7 +103,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalinRouter()
+        webContainer.routes()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ);
         CommonUtil.getBgCleanupScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
@@ -195,7 +196,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (isHandShaking(peer)) {
             return handshaking();
         }
@@ -208,7 +209,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             peerPrefix = peerIp.toPrefixBlock(ipv6PrefixLength);
         }
         String peerPrefixString = peerPrefix.toString();
+        var prefix = String.format("%s,%s,%s,%s,%s", downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
+        task.setComment(true, "Loading data from DB for: " + prefix);
         var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
+        task.setComment(false, "Executing and determining whether to ban the peer based on loaded data and current report.");
         PCBRangeEntity rangeEntity = pair.getLeft();
         PCBAddressEntity addressEntity = pair.getRight();
         long computedUploadedIncremental; // 上传增量
@@ -248,6 +252,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     .add("fastPcbTestPercentage", fastPcbTestPercentage);
             // 快速 PCB 测试
             {
+                task.setComment(false, "Run fastPcbTest for " + prefix);
                 CheckResult result = fastPcbTest(addressEntity, rangeEntity, computedUploaded, torrentSize, structuredData, downloader);
                 if (result != null) return result;
             }
@@ -259,6 +264,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             // 过量下载检查
             // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
             {
+                task.setComment(false, "Run excessiveClientTest for " + prefix);
                 CheckResult result = excessiveClient(computedUploaded, torrentSize, structuredData, rangeEntity, addressEntity, completedSize, computedCompletedSize);
                 if (result != null) return result;
             }
@@ -269,10 +275,12 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             // 计算进度差异
             // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
             {
+                task.setComment(false, "Run differenceTest for " + prefix);
                 CheckResult result = differenceTest(rangeEntity, addressEntity, clientReportedProgress, computedProgress, structuredData, torrentSize, peer);
                 if (result != null) return result;
             }
             {
+                task.setComment(false, "Run progressRewindTest for " + prefix);
                 CheckResult result = progressRewind(peer, structuredData, rangeEntity, addressEntity, clientReportedProgress, computedProgress, torrentSize);
                 if (result != null) return result;
             }

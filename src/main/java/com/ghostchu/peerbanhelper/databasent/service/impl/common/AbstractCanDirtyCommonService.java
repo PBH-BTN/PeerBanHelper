@@ -6,13 +6,12 @@ import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.BatchResult;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
 @Slf4j
-public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends CanDirty> extends AbstractCommonService<M,T> implements CommonCanDirtyService<T> {
+public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends CanDirty> extends AbstractCommonService<M, T> implements CommonCanDirtyService<T> {
 
     public AbstractCanDirtyCommonService(@NotNull TransactionTemplate transactionTemplate) {
         super(transactionTemplate);
@@ -20,9 +19,9 @@ public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends Ca
 
     @Override
     public boolean saveOrUpdateIfDirty(T t) {
-        if(t != null && t.isDirty()){
+        if (t != null && t.isDirty()) {
             boolean success = this.baseMapper.insertOrUpdate(t);
-            if(success){
+            if (success) {
                 t.setDirty(false);
             }
             return success;
@@ -32,8 +31,11 @@ public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends Ca
 
     @Override
     public List<BatchResult> saveOrUpdateIfDirty(List<T> t) {
-        return transactionTemplate.execute((_)->{
+        return transactionTemplate.execute((_) -> {
             var dirtyElements = t.stream().filter(CanDirty::isDirty).toList();
+            if (dirtyElements.isEmpty()) {
+                return java.util.Collections.emptyList();
+            }
             return this.baseMapper.insertOrUpdate(dirtyElements, 1000);
         });
     }

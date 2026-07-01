@@ -2,11 +2,9 @@ package com.ghostchu.peerbanhelper.util.ipdb.geocn;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
-import com.maxmind.db.CHMCache;
 import com.maxmind.db.NodeCache;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
-import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.jetbrains.annotations.NotNull;

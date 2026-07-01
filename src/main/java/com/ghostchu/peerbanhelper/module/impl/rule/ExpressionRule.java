@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -83,7 +84,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             log.error("Failed to load scripts", e);
             Sentry.captureException(e);
         }
-        javalinWebContainer.javalinRouter()
+        javalinWebContainer.routes()
                 .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
                 .get("/api/" + getConfigName() + "/editable", this::editable, Role.USER_READ)
                 .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
@@ -249,22 +250,27 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
 
     @SneakyThrows
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         AtomicReference<CheckResult> checkResult = new AtomicReference<>(pass());
-
-        for (CompletableFuture<Void> future : scripts.stream().map(compiledScript -> CompletableFuture.runAsync(() -> {
-            CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader);
-            if (expressionRun.action() == PeerAction.SKIP) {
-                checkResult.set(expressionRun); // 提前退出
-                return;
-            }
-            if (expressionRun.action() == PeerAction.BAN) {
-                if (checkResult.get().action() != PeerAction.SKIP) {
-                    checkResult.set(expressionRun);
+        Map<CompiledScript, CompletableFuture<?>> map = new HashMap<>();
+        for (CompiledScript compiledScript : scripts) {
+            var f = CompletableFuture.runAsync(() -> {
+                CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader);
+                if (expressionRun.action() == PeerAction.SKIP) {
+                    checkResult.set(expressionRun); // 提前退出
+                    return;
                 }
-            }
-        }, parallelService)).toList()) {
-            future.join();
+                if (expressionRun.action() == PeerAction.BAN) {
+                    if (checkResult.get().action() != PeerAction.SKIP) {
+                        checkResult.set(expressionRun);
+                    }
+                }
+            }, parallelService);
+            map.put(compiledScript, f);
+        }
+        for (var entry : map.entrySet()) {
+            task.setComment(false, "Waiting for script complete: "+entry.getKey().name());
+            entry.getValue().join();
         }
         return checkResult.get();
     }

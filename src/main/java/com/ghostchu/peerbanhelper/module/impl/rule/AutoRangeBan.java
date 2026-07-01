@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -12,7 +13,6 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -63,7 +63,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalinRouter()
+        webContainer.routes()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
         Main.getReloadManager().register(this);
     }
@@ -96,7 +96,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (isHandShaking(peer)) {
             return pass();
         }
@@ -109,6 +109,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         }
         AtomicReference<CheckResult> reference = new AtomicReference<>(null);
         IPAddress finalPeerAddress = peerAddress;
+        task.setComment(false, "Iterating banList for related ban entries.");
         banList.forEach((bannedAddr, bannedMeta) -> {
             if (reference.get() != null) {
                 return;

@@ -11,10 +11,7 @@
           </a-space>
         </template>
         <a-descriptions-item :label="t('plus.status')">
-          <a-typography-text v-if="status.status !== LicenseStatus.Valid" type="warning">{{
-            t('plus.status.status.' + status.status)
-          }}</a-typography-text>
-          <a-typography-text v-else type="success">
+          <a-typography-text v-if="status.status === LicenseStatus.Valid" type="success">
             {{
               t(
                 status.data?.type === LicenseType.Local
@@ -23,6 +20,10 @@
               )
             }}
           </a-typography-text>
+          <a-tag v-else-if="status.status === LicenseStatus.Revoked" color="red">{{
+            t('plus.status.status.' + status.status)
+          }}</a-tag>
+          <a-tag v-else color="orange">{{ t('plus.status.status.' + status.status) }}</a-tag>
         </a-descriptions-item>
         <a-descriptions-item :label="t('plus.licenseTo')">
           <a-typography-text
@@ -61,7 +62,7 @@
     </template>
     <template #second>
       <div
-        v-if="status.data?.type !== LicenseType.Local"
+        v-if="status.data?.type !== LicenseType.Local && status.status !== LicenseStatus.Revoked"
         :style="{
           display: 'flex',
           height: '100%',
@@ -80,6 +81,19 @@
           style="margin: auto"
         />
       </div>
+      <a-space
+        v-else
+        direction="vertical"
+        style="display: flex; flex-direction: column; text-align: center"
+      >
+        <a-typography-paragraph style="max-width: 50em; text-align: left">
+          {{ t(status?.data?.type === LicenseType.Local ? 'plug.begging.local' : 'plus.begging') }}
+        </a-typography-paragraph>
+        <a href="https://ifdian.net/a/Ghost_chu" style="text-decoration: none" target="_blank">
+          <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
+          <!-- <mbd :width="228" :height="83" /> -->
+        </a>
+      </a-space>
     </template>
   </a-split>
 </template>

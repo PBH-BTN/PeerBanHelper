@@ -1,16 +1,16 @@
 plugins {
     java
     application
-    id("com.gorylenko.gradle-git-properties") version "2.5.7"
-    id("com.install4j.gradle") version "12.0.4" apply false
+    id("com.gorylenko.gradle-git-properties") version "4.0.1"
+    id("com.install4j.gradle") version "13.0" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.3.20"
-    id("io.freefair.lombok") version "9.4.0"
+    kotlin("plugin.lombok") version "2.4.0"
+    id("io.freefair.lombok") version "9.5.0"
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.3.12"
+version = "9.4.0-dev"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -59,17 +59,18 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.7"){
+    implementation("org.springframework:spring-context:7.0.8"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
     implementation("com.github.chris2018998:beecp:5.2.2")
-    implementation("org.springframework:spring-tx:7.0.7")
-    implementation("org.springframework:spring-jdbc:7.0.7")
-    implementation("org.xerial:sqlite-jdbc:3.53.0.0")
+    implementation("org.springframework:spring-tx:7.0.8")
+    implementation("org.springframework:spring-jdbc:7.0.8")
+    implementation("org.xerial:sqlite-jdbc:3.53.2.0")
+    implementation("org.xerial:sqlite-jdbc:3.53.2.0:natives-android")
     implementation("com.h2database:h2:2.3.232")
-    implementation("org.postgresql:postgresql:42.7.10")
-    implementation("com.mysql:mysql-connector-j:9.6.0") {
+    implementation("org.postgresql:postgresql:42.7.11")
+    implementation("com.mysql:mysql-connector-j:9.7.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
 
@@ -90,44 +91,43 @@ dependencies {
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
-    implementation("io.javalin:javalin:7.2.0")
+    implementation("io.javalin:javalin:7.2.2")
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:5.0.2")
+    implementation("com.maxmind.geoip2:geoip2:5.1.0")
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
     // System theme detector
-    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1") {
-        exclude(group = "com.github.oshi", module = "oshi-core")
-        exclude(group = "net.java.dev.jna", module = "jna-platform")
-        exclude(group = "net.java.dev.jna", module = "jna")
-    }
+    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1")
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
-    // System monitoring
-    implementation("com.github.oshi:oshi-core:6.12.0") {
-        exclude(group = "net.java.dev.jna", module = "jna-platform")
-        exclude(group = "net.java.dev.jna", module = "jna")
-    }
+//    // System monitoring
+//    implementation("com.github.oshi:oshi-core:6.12.0") {
+//        exclude(group = "net.java.dev.jna", module = "jna-platform")
+//        exclude(group = "net.java.dev.jna", module = "jna")
+//    }
+//    // System monitoring for supported platforms
+    implementation("com.github.oshi:oshi-common:7.3.0")
+    runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.0")
     // Markdown
     implementation("org.commonmark:commonmark:0.28.0")
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
-    implementation("dnsjava:dnsjava:3.6.4")
+    implementation("dnsjava:dnsjava:3.6.5")
     // UI - FlatLaf
     implementation("com.formdev:flatlaf-extras:3.7.1")
     implementation("com.formdev:flatlaf:$flatlafVersion")
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
     // Utilities
-    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("com.google.code.gson:gson:2.14.0")
     implementation("com.google.guava:guava:33.6.0-jre")
     implementation("com.github.seancfoley:ipaddress:5.6.2")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.5.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.2.0")
+    implementation("de.siegmar:fastcsv:4.3.0")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
@@ -140,22 +140,18 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.32")
-    implementation("org.slf4j:jcl-over-slf4j:2.0.17")
+    implementation("ch.qos.logback:logback-classic:1.5.34")
+    implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
 
     // HTTP client
-    implementation("com.squareup.okhttp3:okhttp:5.3.2")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
-
-    // JNA
-    implementation("net.java.dev.jna:jna:5.18.1")
-    implementation("net.java.dev.jna:jna-platform:5.18.1")
+    implementation("com.squareup.okhttp3:okhttp:5.4.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.12.Final") {
+    implementation("io.netty:netty-all:4.2.15.Final") {
         exclude(group = "io.netty", module = "netty-codec-memcache")
         exclude(group = "io.netty", module = "netty-codec-redis")
         exclude(group = "io.netty", module = "netty-codec-smtp")
@@ -170,21 +166,21 @@ dependencies {
     }
 
     // SWT (provided scope - for compilation only)
-    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.133.0")
+    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:12.0.4")
+    compileOnly("com.install4j:install4j-runtime:13.0")
 
-    implementation(platform("io.sentry:sentry-bom:8.39.1")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.43.1")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
 
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:6.0.3"))
+    testImplementation(platform("org.junit:junit-bom:6.1.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
@@ -215,11 +211,6 @@ tasks.processResources {
         "name" to project.name
     )
     inputs.properties(expandProps)
-
-    // Don't expand all files, only specific ones if needed
-    filesMatching(listOf("**/*.properties")) {
-        expand(expandProps)
-    }
 
     val sentryDsn = System.getenv("JAVA_SENTRY_DSN") ?: ""
     filesMatching("sentry.properties") {

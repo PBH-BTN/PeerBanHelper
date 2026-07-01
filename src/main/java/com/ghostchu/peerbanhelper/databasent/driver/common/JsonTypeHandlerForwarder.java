@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.databasent.driver.common;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
+import com.ghostchu.peerbanhelper.databasent.driver.common.basic.BasicJsonTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.postgres.PGJsonbTypeHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.JdbcType;

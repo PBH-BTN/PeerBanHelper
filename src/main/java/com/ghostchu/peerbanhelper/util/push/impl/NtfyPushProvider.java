@@ -81,18 +81,21 @@ public final class NtfyPushProvider extends AbstractPushProvider {
 
         String encodedTitle = "=?UTF-8?B?" + Base64.getEncoder().encodeToString(title.getBytes(StandardCharsets.UTF_8)) + "?=";
 
-        int priority = mapLevelToPriority(level);
-
-        Request request = new Request.Builder()
+        Request.Builder builder = new Request.Builder()
                 .url(config.getServerUrl() + "/" + config.getTopic())
                 .post(requestBody)
-                .header("Authorization", "Bearer " + config.getToken())
                 .header("Title", encodedTitle)
-                .header("Priority", String.valueOf(priority))
-                .header("Tags", config.getTags())
-                .header("Icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png")
-                .build();
-        
+                .header("Priority", String.valueOf(config.getPriority()))
+                .header("Icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
+
+        if (config.getToken() != null && !config.getToken().isBlank()) {
+            builder.header("Authorization", "Bearer " + config.getToken());
+        }
+        if (config.getTags() != null && !config.getTags().isBlank()) {
+            builder.header("Tags", config.getTags());
+        }
+        Request request = builder.build();
+
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("HTTP Failed while sending push messages to Ntfy: " + response.body().string());

@@ -31,9 +31,7 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
             List<CompletableFuture<Void>> futures = new ArrayList<>();
 
             for (LicenseRevokeValidator validator : revokeValidators) {
-                futures.add(CompletableFuture.runAsync(() -> {
-                    revoked.addAll(validator.checkRevoked(licenses.values()));
-                }));
+                futures.add(CompletableFuture.runAsync(() -> revoked.addAll(validator.checkRevoked(licenses.values()))));
             }
             CompletableFutures.allAsList(futures).join();
             synchronized (revokedLicenses) {
@@ -51,9 +49,7 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
             Set<License> revoked = Collections.synchronizedSet(new HashSet<>());
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (LicenseRevokeValidator validator : revokeValidators) {
-                futures.add(CompletableFuture.runAsync(() -> {
-                    revoked.addAll(validator.checkRevoked(licenses.values()));
-                }));
+                futures.add(CompletableFuture.runAsync(() -> revoked.addAll(validator.checkRevoked(licenses.values()))));
             }
             CompletableFutures.allAsList(futures).join();
             synchronized (revokedLicenses) {
@@ -85,6 +81,6 @@ public class RevolvableLicenseBackend extends BasicLicenseBackend {
     @Override
     public void setLicenses(@NotNull Map<String, License> in) {
         super.setLicenses(in);
-
+        checkRevokedLicenses();
     }
 }

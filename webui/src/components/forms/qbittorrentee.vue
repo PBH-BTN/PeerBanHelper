@@ -16,10 +16,41 @@
   >
     <a-input v-model="config.endpoint" allow-clear></a-input>
   </a-form-item>
-  <a-form-item field="config.username" :label="t('page.dashboard.editModal.label.username')">
+  <a-form-item :label="t('page.dashboard.editModal.label.useApiKey')">
+    <a-switch v-model="useApiKey" />
+    <template #extra>
+      <i18n-t keypath="page.dashboard.editModal.label.useApiKey.description">
+        <template #bearerToken>
+          <a-link
+            href="https://github.com/qbittorrent/qBittorrent/wiki/API-Key-Authentication-(%E2%89%A5v5.2.0)"
+            rel="noopener"
+            target="_blank"
+            @click.stop
+            >{{ t('page.dashboard.editModal.label.useApiKey.bearerToken') }}
+          </a-link>
+        </template>
+      </i18n-t>
+    </template>
+  </a-form-item>
+  <a-form-item
+    v-if="useApiKey"
+    :label="t('page.dashboard.editModal.label.apiKey')"
+    field="config.apiKey"
+  >
+    <a-input-password v-model="config.apiKey" allow-clear></a-input-password>
+  </a-form-item>
+  <a-form-item
+    v-if="!useApiKey"
+    :label="t('page.dashboard.editModal.label.username')"
+    field="config.username"
+  >
     <a-input v-model="config.username" allow-clear></a-input>
   </a-form-item>
-  <a-form-item field="config.password" :label="t('page.dashboard.editModal.label.password')">
+  <a-form-item
+    v-if="!useApiKey"
+    :label="t('page.dashboard.editModal.label.password')"
+    field="config.password"
+  >
     <a-input-password v-model="config.password" allow-clear></a-input-password>
   </a-form-item>
   <a-form-item>
@@ -79,6 +110,7 @@ import type { qBittorrentEEConfig } from '@/api/model/downloader'
 import type { FieldRule } from '@arco-design/web-vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 const { t } = useI18n()
 const config = defineModel<qBittorrentEEConfig>({ required: true })
 const urlRules: FieldRule<string> = {
@@ -101,4 +133,5 @@ const useBasicAuth = ref(false)
 if (config.value?.basicAuth.pass || config.value?.basicAuth.pass) {
   useBasicAuth.value = true
 }
+const useApiKey = ref(!!config.value?.apiKey)
 </script>

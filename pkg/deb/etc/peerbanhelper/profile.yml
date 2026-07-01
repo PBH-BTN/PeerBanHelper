@@ -1,4 +1,4 @@
-config-version: 38
+config-version: 40
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -91,6 +91,7 @@ module:
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ޭ__"}' # 0xde-0xad-0xbe-0xef
       - '{"method":"STARTS_WITH","content":"Unknown ["}' # qb Workaround
+      - '{"method":"STARTS_WITH","content":"Gopeed bt-exp"}'
 
   # 进度作弊检查器：Progress Cheat Blocker
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
@@ -373,7 +374,7 @@ module:
         # 显示名称 - Display Name
         name: all-in-one
         # 规则文件订阅地址 - Subscription Address
-        url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
+        url: https://bcr.pbh-btn.com/combine/all.txt
   # 主动监测 - Active Monitoring
   # 此功能允许 PeerBanHelper 监视下载器的网络传输活动，自动调整其传输速率设置，并在达到阈值时发送告警信息
   # This feature allows PeerBanHelper to monitor the network traffic activity of downloader, automatically adjust its transfer rate settings, and send alert messages when the threshold is reached.
@@ -436,7 +437,7 @@ module:
   # 此模块保护与 PeerBanHelper 关联的下载器的拒绝服务攻击
   # This module protects the downloader that associated with PBH from DoS attack
   idle-connection-dos-protection:
-    enabled: true
+    enabled: false
     ban-duration: 900000
     # 允许的最长闲置连接时间 - Max allowed idle time
     # 当一个 Peer 长时间没有任何数据传输或状态更新，且速度持续低于 idle-speed-threshold 时，将被视为闲置连接

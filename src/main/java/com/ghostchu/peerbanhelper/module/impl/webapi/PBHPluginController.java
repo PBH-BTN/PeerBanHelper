@@ -50,7 +50,7 @@ public class PBHPluginController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        javalinWebContainer.javalinRouter()
+        javalinWebContainer.routes()
                 .get("/api/plugins", this::listPlugins, Role.USER_READ)
                 .post("/api/plugins/operate", this::operatePlugins, Role.USER_WRITE);
     }
@@ -94,9 +94,7 @@ public class PBHPluginController extends AbstractFeatureModule {
             case "load" -> dto.getIdentifiers().forEach(path -> {
                 try {
                     var pathObj = Paths.get(path);
-                    String pluginDirectoryFullPath = Main.getPluginDirectory().getAbsolutePath();
-                    String pathFullPath = pathObj.toAbsolutePath().toString();
-                    if (!pathFullPath.startsWith(pluginDirectoryFullPath)) {
+                    if (pathObj.normalize().startsWith(Main.getPluginDirectory().toPath().normalize())) {
                         result.add(new PluginOperateResultDTO(path, null, tl(locale(context), Lang.WEBAPI_PLUGIN_LOAD_FROM_UNSAFE_LOCATION)));
                         return;
                     }

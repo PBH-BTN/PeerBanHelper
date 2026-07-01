@@ -71,6 +71,22 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             .header("Authorization", credential)
                             .build();
                 });
+        // qBittorrent ≥ v5.2.0: API-Key 认证（无状态，使用 Bearer Token）
+        // https://github.com/qbittorrent/qBittorrent/wiki/API-Key-Authentication-(%E2%89%A5v5.2.0)
+        if (config.getApiKey() != null && !config.getApiKey().isBlank()) {
+            builder.addInterceptor(chain -> {
+                Request original = chain.request();
+                // API key 不能用于 /auth/login 和 /auth/logout 端点
+                String urlPath = original.url().encodedPath();
+                if (urlPath.contains("/auth/login") || urlPath.contains("/auth/logout")) {
+                    return chain.proceed(original);
+                }
+                Request authed = original.newBuilder()
+                        .header("Authorization", "Bearer " + config.getApiKey())
+                        .build();
+                return chain.proceed(authed);
+            });
+        }
         httpUtil.disableSSLVerify(builder, !config.isVerifySsl());
         this.httpClient = builder.build();
 
@@ -110,6 +126,22 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     public DownloaderLoginResult login0() {
         if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
+        // 使用 API Key 认证时无需调用 /auth/login，直接通过 isLoggedIn() 验证 API Key 可用性
+        if (config.getApiKey() != null && !config.getApiKey().isBlank()) {
+            try {
+                if (isLoggedIn()) {
+                    updateAndApplyMetadataIfRequired();
+                    if (lastSemver.isGreaterThanOrEqualTo(new Semver("5.2.0")) || ExternalSwitch.parseBoolean("pbh.downloader.qBittorrent.bypassVersionCheck", false)) {
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+                    } else {
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_VERSION_INCOMPATIBLE, lastSemver.toString(), ">= 5.2.0"));
+                    }
+                }
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, "API Key authentication failed"));
+            } catch (Exception e) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+            }
+        }
         try {
             FormBody formBody = new FormBody.Builder()
                     .add("username", config.getUsername())
@@ -428,7 +460,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     private void addTracker(Torrent torrent, List<Tracker> newAdded) {
         StringJoiner joiner = new StringJoiner("\n");
-        newAdded.forEach(t -> t.getTrackersInGroup().forEach(joiner::add));
+        newAdded.forEach(t -> {
+            if (t.getTrackersInGroup() != null) {
+                t.getTrackersInGroup().forEach(joiner::add);
+            }
+        });
 
         FormBody formBody = new FormBody.Builder()
                 .add("hash", torrent.getId())

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
@@ -75,9 +76,9 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onEnable() {
         Main.getEventBus().register(this);
-        javalinWebContainer.javalinRouter()
+        javalinWebContainer.routes()
                 .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
-        javalinWebContainer.javalinRouter()
+        javalinWebContainer.routes()
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
         trackedSwarmDao.resetTable();
         registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
@@ -109,10 +110,11 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
         try {
             for (Peer peer : peers) {
                 if (peer.isHandshaking()) continue;
+                task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
                 trackedSwarmDao.syncPeers(downloader, torrent, peer);
             }
         } catch (ExecutionException e) {

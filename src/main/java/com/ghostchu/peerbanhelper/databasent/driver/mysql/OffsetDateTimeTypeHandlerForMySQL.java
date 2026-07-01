@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ghostchu.peerbanhelper.databasent.driver.common;
+package com.ghostchu.peerbanhelper.databasent.driver.mysql;
 
 import org.apache.ibatis.lang.UsesJava8;
 import org.apache.ibatis.type.BaseTypeHandler;

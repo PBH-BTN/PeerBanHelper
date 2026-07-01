@@ -60,7 +60,7 @@ public final class PBHEasterEggController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        javalinWebContainer.javalinRouter()
+        javalinWebContainer.routes()
                 .get("/api/egg", this::handleEgg);
     }
 

@@ -238,6 +238,7 @@ export interface qBittorrentConfig {
   endpoint: string
   username: string
   password: string
+  apiKey: string
   basicAuth: BasicAuth
   httpVersion: string
   incrementBan: boolean
@@ -252,6 +253,7 @@ export interface qBittorrentEEConfig {
   endpoint: string
   username: string
   password: string
+  apiKey: string
   basicAuth: BasicAuth
   httpVersion: string
   incrementBan: boolean

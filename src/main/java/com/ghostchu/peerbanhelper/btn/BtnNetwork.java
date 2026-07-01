@@ -4,14 +4,27 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
-import com.ghostchu.peerbanhelper.btn.ability.impl.*;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityHeartBeat;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPAllowList;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPDenyList;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityReconfigure;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityRules;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilitySubmitBans;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilitySubmitHistory;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilitySubmitSwarm;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
-import com.ghostchu.peerbanhelper.databasent.service.*;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -21,7 +34,6 @@ import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.eventbus.Subscribe;
-import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.sentry.Sentry;
@@ -35,9 +47,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
@@ -60,7 +70,6 @@ public final class BtnNetwork implements Reloadable {
     private final ScriptEngineManager scriptEngineManager;
     @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
-    private final SystemInfo systemInfo;
     private final TorrentService torrentDao;
     private final PeerRecordService peerRecordService;
     @Getter
@@ -100,7 +109,7 @@ public final class BtnNetwork implements Reloadable {
     private final long RETRY_PERIOD_SECONDS = 600;
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
-                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, SystemInfo systemInfo, TorrentService torrentService,
+                      MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, TorrentService torrentService,
                       PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager) {
         this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
@@ -111,7 +120,6 @@ public final class BtnNetwork implements Reloadable {
         this.historyDao = historyDao;
         this.trackedSwarmDao = trackedSwarmDao;
         this.torrentDao = torrentService;
-        this.systemInfo = systemInfo;
         this.backgroundTaskManager = backgroundTaskManager;
         this.alertManager = alertManager;
         Main.getReloadManager().register(this);
@@ -254,7 +262,7 @@ public final class BtnNetwork implements Reloadable {
                     }
                 });
                 configSuccess.set(true);
-                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
+                configResult = submit ? new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL) : new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL_READ_ONLY);
             } catch (Throwable e) {
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage(), RETRY_PERIOD_SECONDS), e);
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
@@ -355,8 +363,9 @@ public final class BtnNetwork implements Reloadable {
 
     @NotNull
     public String getBtnHardwareId() {
-        return Hashing.sha256().hashString(systemInfo.getHardware().getComputerSystem().getHardwareUUID(), StandardCharsets.UTF_8).toString();
+        return MiscUtil.getHardwareUUIDHash();
     }
+
 
     public void close() {
         log.info(tlUI(Lang.BTN_SHUTTING_DOWN));

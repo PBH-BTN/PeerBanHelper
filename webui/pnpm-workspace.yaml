@@ -1,0 +1,6 @@
+allowBuilds:
+  less: true
+  esbuild: true
+  vue-demi: false
+patchedDependencies:
+  vue-request@2.0.4: patches/vue-request@2.0.4.patch

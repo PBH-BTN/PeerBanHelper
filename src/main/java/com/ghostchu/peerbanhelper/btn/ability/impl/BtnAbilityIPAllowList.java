@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
@@ -155,7 +154,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
             btnNetwork.getServer().scheduleUnBanPeer(unbanPeer.getIpAddress());
             btnNetwork.getAlertManager().publishAlert(false,
                     AlertLevel.INFO,
-                    "btn-allowlist-unbanned-peer-"+unbanPeer.getIpAddress().toCompressedString()+UUID.randomUUID().toString(),
+                    "btn-allowlist-unbanned-peer-"+unbanPeer.getIpAddress().toCompressedString()+ UUID.randomUUID(),
                     new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_TITLE),
                     new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION,
                             unbanPeer.getIpAddress().toCompressedString(),

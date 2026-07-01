@@ -42,7 +42,7 @@ public class BTStunInstance implements StunListener, AutoCloseable, NatAddressPr
     private final IPDBManager ipdb;
     @Getter
     private StunTcpTunnel tunnel;
-    private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+    private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").factory());
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     @Nullable
     private Forwarder tcpForwarder;
