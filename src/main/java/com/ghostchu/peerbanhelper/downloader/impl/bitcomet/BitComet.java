@@ -405,9 +405,18 @@ public final class BitComet extends AbstractDownloader {
         long totalUploaded = 0;
         long totalDownloaded = 0;
         Map<String, Object> body = new HashMap<>();
-        body.put("token_list", List.of(
-                "${G_TOTAL_DOWNLOAD_AUTO}", "${G_TOTAL_UPLOAD_AUTO}", "${G_SESSION_DOWNLOAD_AUTO}", "${G_SESSION_UPLOAD_AUTO}",
-                "${G_TOTAL_DOWNLOAD_BYTE}", "${G_TOTAL_UPLOAD_BYTE}", "${G_SESSION_DOWNLOAD_BYTE}", "${G_SESSION_UPLOAD_BYTE}"));
+
+        // BitComet 2.21: 我偷偷删一个 $，炸飞第三方应用
+        if (serverVersion.isGreaterThanOrEqualTo("2.21")) {
+            body.put("token_list", List.of(
+                    "{G_TOTAL_DOWNLOAD_AUTO}", "{G_TOTAL_UPLOAD_AUTO}", "{G_SESSION_DOWNLOAD_AUTO}", "{G_SESSION_UPLOAD_AUTO}",
+                    "{G_TOTAL_DOWNLOAD_BYTE}", "{G_TOTAL_UPLOAD_BYTE}", "{G_SESSION_DOWNLOAD_BYTE}", "{G_SESSION_UPLOAD_BYTE}"));
+        } else {
+            body.put("token_list", List.of(
+                    "${G_TOTAL_DOWNLOAD_AUTO}", "${G_TOTAL_UPLOAD_AUTO}", "${G_SESSION_DOWNLOAD_AUTO}", "${G_SESSION_UPLOAD_AUTO}",
+                    "${G_TOTAL_DOWNLOAD_BYTE}", "${G_TOTAL_UPLOAD_BYTE}", "${G_SESSION_DOWNLOAD_BYTE}", "${G_SESSION_UPLOAD_BYTE}"));
+        }
+
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(body), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + BCEndpoint.GET_STATISTICS_LIST.getEndpoint())
@@ -423,14 +432,16 @@ public final class BitComet extends AbstractDownloader {
             for (BCStatisticsValueListResponse.ValueListDTO valueListDTO : valueList.getValueList()) {
                 if (serverVersion.isGreaterThanOrEqualTo("2.20")) {
                     switch (valueListDTO.getToken()) {
-                        case "${G_TOTAL_DOWNLOAD_BYTE}" -> totalDownloaded = Long.parseLong(valueListDTO.getValue());
-                        case "${G_TOTAL_UPLOAD_BYTE}" -> totalUploaded = Long.parseLong(valueListDTO.getValue());
+                        case "${G_TOTAL_DOWNLOAD_BYTE}", "{G_TOTAL_DOWNLOAD_BYTE}" ->
+                                totalDownloaded = Long.parseLong(valueListDTO.getValue());
+                        case "${G_TOTAL_UPLOAD_BYTE}", "{G_TOTAL_UPLOAD_BYTE}" ->
+                                totalUploaded = Long.parseLong(valueListDTO.getValue());
                     }
                 } else {
                     switch (valueListDTO.getToken()) {
-                        case "${G_TOTAL_DOWNLOAD_AUTO}" ->
+                        case "${G_TOTAL_DOWNLOAD_AUTO}", "{G_TOTAL_DOWNLOAD_AUTO}" ->
                                 totalDownloaded = readHumanReadableValue(valueListDTO.getValue());
-                        case "${G_TOTAL_UPLOAD_AUTO}" ->
+                        case "${G_TOTAL_UPLOAD_AUTO}", "{G_TOTAL_UPLOAD_AUTO}" ->
                                 totalUploaded = readHumanReadableValue(valueListDTO.getValue());
                     }
                 }
