@@ -45,10 +45,10 @@ public final class WatchDog implements AutoCloseable {
     }
 
     public void start() {
-        this.service.scheduleAtFixedRate(this::watchDogCheck, 1, timeout, TimeUnit.MILLISECONDS);
+        this.service.scheduleAtFixedRate(this::watchDogCheck, 50, timeout, TimeUnit.MILLISECONDS);
     }
 
-    public long getRemainingMsUntilTriggered(){
+    public long getRemainingMsUntilTriggered() {
         long notFeedDurationMs = System.currentTimeMillis() - lastFeedAt.get();
         return timeout - notFeedDurationMs;
     }
@@ -67,13 +67,16 @@ public final class WatchDog implements AutoCloseable {
             CompletableFuture.runAsync(() -> {
                 if ((System.currentTimeMillis() - lastFeedAt.get()) > timeout) {
                     hungry();
+                    close();
                 } else {
                     good();
+                    close();
                 }
             }, executor).get(10, TimeUnit.SECONDS);
         } catch (Throwable e) {
             log.error(tlUI(Lang.WATCH_DOG_CALLBACK_BLOCKED), e);
             Sentry.captureException(e);
+            close();
         }
     }
 
