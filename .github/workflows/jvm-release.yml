@@ -326,7 +326,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v6.1.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: ghostchu/peerbanhelper
           tags: |
@@ -339,7 +339,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v7.2.0
+        uses: docker/build-push-action@v7.3.0
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
         with:
           context: .
@@ -362,7 +362,7 @@ jobs:
           password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
       - name: Extract metadata (tags, labels) for Aliyun ACR
         id: meta-acr
-        uses: docker/metadata-action@v6.1.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper
           tags: |
@@ -376,7 +376,7 @@ jobs:
             type=sha
       - name: Build and push Aliyun ACR
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
-        uses: docker/build-push-action@v7.2.0
+        uses: docker/build-push-action@v7.3.0
         with:
           context: .
           file: ./Dockerfile-Release

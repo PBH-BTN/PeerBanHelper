@@ -128,6 +128,11 @@ dependencies {
     implementation("org.apache.commons:commons-collections4:4.5.0")
     // CSV
     implementation("de.siegmar:fastcsv:4.3.0")
+    // Jackson
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.22.0")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
