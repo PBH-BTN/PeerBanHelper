@@ -25,7 +25,7 @@ public final class WatchDog implements AutoCloseable {
     private final ScheduledExecutorService service;
     private final Runnable hungry;
     private final Runnable good;
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor(); // Watch dog 使用平台线程
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor(Thread.ofPlatform().daemon().factory()); // Watch dog 使用平台线程
     @Getter
     private String lastOperation = "N/A";
     @Getter
