@@ -9,7 +9,7 @@ jobs:
   install4jc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: java_info
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v8
@@ -22,7 +22,7 @@ jobs:
           version: 11.0.5
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Restore install4j cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/install4j/v11
           key: install4j-11-${{ hashFiles('**/*.install4j') }}
