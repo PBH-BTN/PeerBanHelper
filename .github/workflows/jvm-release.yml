@@ -159,6 +159,10 @@ jobs:
         with:
           name: freebsd-pkg-14.1-dist
           path: build/media
+      - uses: actions/download-artifact@v8
+        with:
+          name: freebsd-pkg-15.1-dist
+          path: build/media
       - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/
       - name: Install mktorrent
