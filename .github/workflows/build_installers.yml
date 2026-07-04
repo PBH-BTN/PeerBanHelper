@@ -19,15 +19,15 @@ jobs:
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
-          version: 11.0.5
+          version: 13.0
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Restore install4j cache
         uses: actions/cache@v6
         with:
-          path: ~/.cache/install4j/v11
-          key: install4j-11-${{ hashFiles('**/*.install4j') }}
+          path: ~/.cache/install4j/v13
+          key: install4j-13-${{ hashFiles('**/*.install4j') }}
           restore-keys: |
-            install4j-11-${{ hashFiles('**/*.install4j') }}
+            install4j-13-${{ hashFiles('**/*.install4j') }}
       - name: Make installers
         run: |
           /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.x_version }} -g -d build/media -D librariesPath=$(pwd)/build/libraries install4j/project.install4j
