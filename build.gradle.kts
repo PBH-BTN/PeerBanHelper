@@ -97,12 +97,6 @@ dependencies {
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
-    // System theme detector
-    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1") {
-        exclude(group = "com.github.oshi", module = "oshi-core")
-        exclude(group = "net.java.dev.jna", module = "jna-platform")
-        exclude(group = "net.java.dev.jna", module = "jna")
-    }
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
     // System monitoring
