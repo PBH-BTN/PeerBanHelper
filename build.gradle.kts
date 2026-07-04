@@ -1,6 +1,3 @@
-import org.gradle.internal.impldep.org.apache.http.client.methods.RequestBuilder.options
-import org.gradle.internal.impldep.org.eclipse.jgit.diff.DiffDriver
-
 plugins {
     java
     application
@@ -15,7 +12,7 @@ plugins {
 group = "com.ghostchu.peerbanhelper"
 version = "9.4.0-dev"
 
-DiffDriver.java {
+java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
 }
@@ -49,7 +46,6 @@ repositories {
 }
 
 val flatlafVersion = "3.7.1"
-val ormliteVersion = "6.1"
 val nettyVersion = "4.2.15.Final"
 val sqliteVersion = "3.53.2.0"
 val springVersion = "7.0.8"
@@ -120,7 +116,7 @@ dependencies {
     // DNS
     implementation("dnsjava:dnsjava:3.6.5")
     // UI - FlatLaf
-    implementation("com.formdev:flatlaf-extras:3.7.1")
+    implementation("com.formdev:flatlaf-extras:$flatlafVersion")
     implementation("com.formdev:flatlaf:$flatlafVersion")
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
@@ -133,10 +129,11 @@ dependencies {
     // CSV
     implementation("de.siegmar:fastcsv:4.3.1")
     // Jackson
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.0")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.22.0")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.0"))
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.core:jackson-core")
+    implementation("com.fasterxml.jackson.core:jackson-annotations")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
