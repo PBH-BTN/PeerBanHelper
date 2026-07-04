@@ -173,15 +173,19 @@ public class DigestionSession implements AutoCloseable {
                 lastRetrieve = lastOrgan.outlet.poll(10, TimeUnit.MILLISECONDS);
                 if (lastRetrieve == null) {
                     // 这里插入 WatchDog，如果即将触发 WatchDog 则打印等待日志
-                    if (System.currentTimeMillis() - banWaveWatchDog.getLastFeedAt().get() > (banWaveWatchDog.getTimeout() - (1000 * 60)) && !warningTriggered) {
+                    if (banWaveWatchDog.getRemainingMsUntilTriggered() < 1000 && !warningTriggered) {
                         StringJoiner joiner = new StringJoiner("\n");
                         for (BanOrgan<?, ?> organ : organs) {
                             joiner.add("--------------");
                             joiner.add("ORGAN:" + organ.getClass().getName());
                             joiner.add("Life Cycle Done: " + organ.getStatus().name());
                             joiner.add("Loop Running: " + organ.loopRunning.get());
-                            joiner.add("Last Tick: " + (System.currentTimeMillis() - organ.lastTick.get()) + "ms ago");
-                            joiner.add("Running Duration: "+ (organ.lastTick.get() - sessionStartAt)+"ms total.");
+                            if (organ.lastTick.get() == 0) {
+                                joiner.add("Last Tick: never");
+                            } else {
+                                joiner.add("Last Tick: " + (System.currentTimeMillis() - organ.lastTick.get()) + "ms ago");
+                            }
+                            joiner.add("Running Duration: " + (organ.lastTick.get() - sessionStartAt) + "ms total.");
                             if (organ.in != null) {
                                 joiner.add("Upstream In: " + organ.in.getClass().getName());
                             } else {

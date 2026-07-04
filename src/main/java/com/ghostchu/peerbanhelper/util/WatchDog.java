@@ -48,6 +48,11 @@ public final class WatchDog implements AutoCloseable {
         this.service.scheduleAtFixedRate(this::watchDogCheck, 1, timeout, TimeUnit.MILLISECONDS);
     }
 
+    public long getRemainingMsUntilTriggered(){
+        long notFeedDurationMs = System.currentTimeMillis() - lastFeedAt.get();
+        return timeout - notFeedDurationMs;
+    }
+
     @Override
     public void close() {
         this.service.shutdown();
