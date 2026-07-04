@@ -110,7 +110,7 @@ dependencies {
     implementation("com.github.oshi:oshi-common:7.3.0")
     runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.0")
     // Markdown
-    implementation("org.commonmark:commonmark:0.28.0")
+    implementation("org.commonmark:commonmark:0.29.0")
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
