@@ -22,9 +22,7 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -36,6 +34,10 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
     private final ModuleManager moduleManager;
     private final AlertManager alertManager;
     private final DownloaderServerImpl downloaderServer;
+    /*
+   判定执行线程池
+    */
+    private final ExecutorService jobRunExecutor = Executors.newWorkStealingPool(Math.max(8, Runtime.getRuntime().availableProcessors() - 1));
 
     public RunCheckModuleOrgan(Executor schedEnergy, Executor digestEnergy, @Nullable BanOrgan<?, FetchedPeersBatch> in,
                                @Nullable BiConsumer<BanOrgan<FetchedPeersBatch, CheckResultBatch>, BanOrganCallback<FetchedPeersBatch>> gastroscopy,
@@ -90,7 +92,7 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
                     } catch (RuntimeException e) {
                         log.warn(tlUI(Lang.MODULE_CHECK_UNEXCEPTED_EXCEPTION, ruleFeatureModule.getName(), ruleFeatureModule.getClass().getName()), e);
                     }
-                }, digestEnergy);
+                }, jobRunExecutor);
                 addMoreDigestingPrey(new PipelineTask<>(future, this, "Forked prey spawned, waiting for execute..."));
             });
             wrapper.setComment(false, "Running check module: " + ruleFeatureModule.getName() + " for torrent: " + torrent.getId() + ", spawned tasks: " + newSpawned.get());
@@ -113,6 +115,12 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"), StructuredData.create().add("type", "ignoredAddresses"));
         }
         return null;
+    }
+
+    @Override
+    public void endSession() {
+        jobRunExecutor.shutdown();
+        super.endSession();
     }
 
     private boolean isPeerHavePossibleBadNatConfig(Peer peer) {

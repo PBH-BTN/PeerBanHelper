@@ -48,13 +48,13 @@ public class DigestionSession implements AutoCloseable {
     @Getter
     private final long sessionStartAt = System.currentTimeMillis();
     /*
-    调度线程池
+    主调度线程池
      */
     private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
     /*
     执行线程池
      */
-    private final ExecutorService digestEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
+    private final ExecutorService digestEnergy = Executors.newVirtualThreadPerTaskExecutor();
     private final DownloaderManager downloaderManager;
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
