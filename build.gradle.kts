@@ -15,7 +15,7 @@ plugins {
 group = "com.ghostchu.peerbanhelper"
 version = "9.4.0-dev"
 
-java {
+DiffDriver.java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
 }
@@ -51,6 +51,8 @@ repositories {
 val flatlafVersion = "3.7.1"
 val ormliteVersion = "6.1"
 val nettyVersion = "4.2.15.Final"
+val sqliteVersion = "3.53.2.0"
+val springVersion = "7.0.8"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -63,15 +65,15 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.8"){
+    implementation("org.springframework:spring-context:${springVersion}"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
     implementation("com.github.chris2018998:beecp:5.2.2")
-    implementation("org.springframework:spring-tx:7.0.8")
-    implementation("org.springframework:spring-jdbc:7.0.8")
-    implementation("org.xerial:sqlite-jdbc:3.53.2.0")
-    implementation("org.xerial:sqlite-jdbc:3.53.2.0:natives-android")
+    implementation("org.springframework:spring-tx:${springVersion}")
+    implementation("org.springframework:spring-jdbc:${springVersion}")
+    implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
+    implementation("org.xerial:sqlite-jdbc:${sqliteVersion}:natives-android")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.12")
     implementation("com.mysql:mysql-connector-j:9.7.0") {
