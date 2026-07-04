@@ -1,0 +1,1 @@
+import{$ as e,Dt as t,F as n,X as r,k as i}from"./echarts-DTBbmvn7.js";var a=[`href`],o=n({__name:`queryIpLink`,props:{ip:{},style:{type:[Boolean,null,String,Object,Array],default:()=>void 0}},setup(n){return(o,s)=>(r(),i(`a`,{style:t([{"text-decoration":`none`,cursor:`pointer`},n.style]),href:`ipHistory?ip=${n.ip}`},[e(o.$slots,`default`)],12,a))}});export{o as t};
