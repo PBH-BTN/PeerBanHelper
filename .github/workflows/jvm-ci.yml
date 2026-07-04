@@ -44,7 +44,7 @@ jobs:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: java_info
         uses: YunaBraska/java-info-action@main
       # download artifacts
@@ -112,7 +112,7 @@ jobs:
     needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/download-artifact@v8
       with:
         name: gradle-dist
@@ -158,7 +158,7 @@ jobs:
     name: Build Standalone Docker Images
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Set Up QEMU
       uses: docker/setup-qemu-action@v4
     - name: Set Up Buildx

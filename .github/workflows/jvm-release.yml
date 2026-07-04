@@ -88,7 +88,7 @@ jobs:
     needs: Build_SPK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: java_info
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v8
@@ -310,7 +310,7 @@ jobs:
     needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: gradle-dist
