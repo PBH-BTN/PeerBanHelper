@@ -81,7 +81,7 @@ dependencies {
     implementation("com.baomidou:mybatis-plus-extension")
     implementation("com.baomidou:mybatis-plus-spring")
 
-    implementation("org.mybatis:mybatis-spring:4.0.0")
+    implementation("org.mybatis:mybatis-spring:4.1.0")
 
     // Annotations
     implementation("org.flywaydb:flyway-core:11.20.3")
