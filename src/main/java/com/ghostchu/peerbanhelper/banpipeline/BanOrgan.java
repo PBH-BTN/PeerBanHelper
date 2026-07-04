@@ -122,7 +122,6 @@ public abstract class BanOrgan<IN, OUT> {
 
     /**
      * Handle and processing the input data, put processed data into outlet.
-     * You will be run in a Virtual Thread, it is safe to execute blocking code.
      *
      * @param input           The input data(s)
      * @param outlet          The data need transfer to downstream organ.

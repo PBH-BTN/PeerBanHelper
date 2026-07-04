@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -50,11 +49,12 @@ public class DigestionSession implements AutoCloseable {
     /*
     主调度线程池
      */
-    private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
+    private final ExecutorService scheduleEnergy;
     /*
     执行线程池
      */
-    private final ExecutorService digestEnergy = Executors.newVirtualThreadPerTaskExecutor();
+    private final ExecutorService digestEnergyCompute;
+    private final ExecutorService digestEnergyIO;
     private final DownloaderManager downloaderManager;
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
@@ -64,11 +64,16 @@ public class DigestionSession implements AutoCloseable {
     private final List<BanOrgan<?, ?>> organs = new ArrayList<>();
     private final AlertManager alertManager;
 
-    public DigestionSession(DownloaderManager downloaderManager, DownloaderServer downloaderServer, ModuleManager moduleManager, AlertManager alertManager) {
+    public DigestionSession(DownloaderManager downloaderManager, DownloaderServer downloaderServer, ModuleManager moduleManager,
+                            AlertManager alertManager,
+                            ExecutorService scheduleEnergy, ExecutorService digestEnergyCompute, ExecutorService digestEnergyIO) {
         this.downloaderManager = downloaderManager;
         this.downloaderServer = downloaderServer;
         this.moduleManager = moduleManager;
         this.alertManager = alertManager;
+        this.scheduleEnergy = scheduleEnergy;
+        this.digestEnergyCompute = digestEnergyCompute;
+        this.digestEnergyIO = digestEnergyIO;
     }
 
     /**
@@ -84,7 +89,7 @@ public class DigestionSession implements AutoCloseable {
         DownloaderProviderOrgan downloaderProviderOrgan = new DownloaderProviderOrgan(
                 downloaderManager,
                 scheduleEnergy,
-                digestEnergy,
+                digestEnergyCompute,
                 null,
                 null,
                 60, TimeUnit.SECONDS
@@ -93,7 +98,7 @@ public class DigestionSession implements AutoCloseable {
         // 下载器会话登录器
         DownloaderLoginOrgan downloaderLoginOrgan = new DownloaderLoginOrgan(
                 scheduleEnergy,
-                digestEnergy,
+                digestEnergyIO,
                 downloaderProviderOrgan,
                 null,
                 60, TimeUnit.SECONDS
@@ -102,7 +107,7 @@ public class DigestionSession implements AutoCloseable {
         // 种子数据获取器
         TorrentsFetchOrgan torrentsFetchOrgan = new TorrentsFetchOrgan(
                 scheduleEnergy,
-                digestEnergy,
+                digestEnergyIO,
                 downloaderLoginOrgan,
                 null,
                 60, TimeUnit.SECONDS
@@ -111,7 +116,7 @@ public class DigestionSession implements AutoCloseable {
         // Peers 获取器
         PeersFetchOrgan peersFetchOrgan = new PeersFetchOrgan(
                 scheduleEnergy,
-                digestEnergy,
+                digestEnergyIO,
                 torrentsFetchOrgan,
                 null,
                 60, TimeUnit.SECONDS
@@ -120,7 +125,7 @@ public class DigestionSession implements AutoCloseable {
         // 内存快照更新器
         UpdateSnapshotOrgan updateSnapshotOrgan = new UpdateSnapshotOrgan(
                 scheduleEnergy,
-                digestEnergy,
+                digestEnergyCompute,
                 peersFetchOrgan,
                 null,
                 60, TimeUnit.SECONDS,
@@ -130,7 +135,7 @@ public class DigestionSession implements AutoCloseable {
         // 观察者回调器
         RunMonitorModuleOrgan runMonitorModuleOrgan = new RunMonitorModuleOrgan(
                 scheduleEnergy,
-                digestEnergy,
+                digestEnergyCompute,
                 updateSnapshotOrgan,
                 null,
                 60, TimeUnit.SECONDS,
@@ -140,7 +145,7 @@ public class DigestionSession implements AutoCloseable {
         // 规则和反吸血模块执行器
         RunCheckModuleOrgan runCheckModuleOrgan = new RunCheckModuleOrgan(
                 scheduleEnergy,
-                digestEnergy,
+                digestEnergyCompute,
                 runMonitorModuleOrgan,
                 null,
                 60, TimeUnit.SECONDS,
@@ -274,8 +279,6 @@ public class DigestionSession implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        this.digestEnergy.close();
-        this.scheduleEnergy.close();
     }
 
     public record ProcessingStatistics(
