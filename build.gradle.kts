@@ -1,3 +1,6 @@
+import org.gradle.internal.impldep.org.apache.http.client.methods.RequestBuilder.options
+import org.gradle.internal.impldep.org.eclipse.jgit.diff.DiffDriver
+
 plugins {
     java
     application
@@ -47,6 +50,7 @@ repositories {
 
 val flatlafVersion = "3.7.1"
 val ormliteVersion = "6.1"
+val nettyVersion = "4.2.15.Final"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -97,8 +101,6 @@ dependencies {
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
-    // System theme detector
-    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1")
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
 //    // System monitoring
@@ -156,19 +158,10 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.15.Final") {
-        exclude(group = "io.netty", module = "netty-codec-memcache")
-        exclude(group = "io.netty", module = "netty-codec-redis")
-        exclude(group = "io.netty", module = "netty-codec-smtp")
-        exclude(group = "io.netty", module = "netty-codec-mqtt")
-        exclude(group = "io.netty", module = "netty-codec-stomp")
-        exclude(group = "io.netty", module = "netty-codec-protobuf")
-        exclude(group = "io.netty", module = "netty-codec-haproxy")
-        exclude(group = "io.netty", module = "netty-codec-marshalling")
-        exclude(group = "io.netty", module = "netty-transport-sctp")
-        exclude(group = "io.netty", module = "netty-transport-udt")
-        exclude(group = "io.netty", module = "netty-transport-rxtx")
-    }
+    implementation("io.netty:netty-transport:${nettyVersion}")
+    implementation("io.netty:netty-transport-native-epoll:${nettyVersion}")
+    implementation("io.netty:netty-transport-native-kqueue:${nettyVersion}")
+    implementation("io.netty:netty-transport-native-io_uring:${nettyVersion}")
 
     // SWT (provided scope - for compilation only)
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
