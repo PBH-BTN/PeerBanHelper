@@ -54,7 +54,7 @@ public class DigestionSession implements AutoCloseable {
     /*
     执行线程池
      */
-    private final ExecutorService digestEnergy = Executors.newVirtualThreadPerTaskExecutor();
+    private final ExecutorService digestEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
     private final DownloaderManager downloaderManager;
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
