@@ -2,10 +2,11 @@ import tsParser from '@typescript-eslint/parser'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import pluginVue from 'eslint-plugin-vue'
 import ts from 'typescript-eslint'
+import { defineConfig } from 'eslint/config'
 
-export default [
-  ...ts.configs.recommended,
-  ...pluginVue.configs['flat/recommended'],
+export default defineConfig(
+  ts.configs.recommended,
+  pluginVue.configs['flat/recommended'],
   eslintConfigPrettier,
   {
     files: ['**/*.ts', '**/*.js', '**/*.vue'],
@@ -32,4 +33,4 @@ export default [
       ]
     }
   }
-]
+)

@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -21,8 +20,10 @@ import java.util.Map;
 @Slf4j
 @Service
 public class BanListServiceImpl extends AbstractCommonService<BanListMapper, BanListEntity> implements BanListService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+
+    public BanListServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public @NotNull Map<IPAddress, BanMetadata> readBanList() {

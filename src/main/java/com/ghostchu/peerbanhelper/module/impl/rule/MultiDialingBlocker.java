@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -9,7 +10,6 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -55,7 +55,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalin()
+        webContainer.routes()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
         Main.getReloadManager().register(this);
@@ -141,7 +141,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
 
     @Override
     public @NotNull CheckResult shouldBanPeer(
-            @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+            @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (isHandShaking(peer)) {
             return handshaking();
         }

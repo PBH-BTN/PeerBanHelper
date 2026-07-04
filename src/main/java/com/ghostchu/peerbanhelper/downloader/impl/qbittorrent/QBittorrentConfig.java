@@ -16,6 +16,8 @@ public interface QBittorrentConfig {
 
     String getPassword();
 
+    String getApiKey();
+
     QBittorrentBasicAuth getBasicAuth();
 
 
@@ -38,6 +40,8 @@ public interface QBittorrentConfig {
     void setUsername(String username);
 
     void setPassword(String password);
+
+    void setApiKey(String apiKey);
 
     void setBasicAuth(QBittorrentBasicAuth basicAuth);
 

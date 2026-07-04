@@ -4,13 +4,11 @@ import com.ghostchu.peerbanhelper.Main;
 import com.google.common.hash.Hashing;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import oshi.SystemInfo;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.lang.reflect.Field;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
@@ -69,16 +67,15 @@ public final class MiscUtil {
     }
 
     public static String getHardwareUUID() {
-        SystemInfo systemInfo = new SystemInfo();
-        try {
-            return systemInfo.getHardware().getComputerSystem().getHardwareUUID();
-        } catch (Exception e) {
-            String mac = MiscUtil.getMacAddress();
-            if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
-                return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
-            }
-            return "MAC-" + MiscUtil.getMacAddress();
-        }
+        return SystemInfoProviderWrapper.find()
+                .map(provider -> provider.getHardware().getComputerSystem().getHardwareUUID())
+                .orElseGet(() -> {
+                    String mac = MiscUtil.getMacAddress();
+                    if (MiscUtil.FALLBACK_MAC_ADDRESS.equals(mac)) {
+                        return "IID-" + Main.getMainConfig().getString("installation-id", "failed-to-retrieve");
+                    }
+                    return "MAC-" + MiscUtil.getMacAddress();
+                });
     }
 
     public static String getMacAddress() {
@@ -189,24 +186,6 @@ public final class MiscUtil {
             return localPort;
         } catch (Exception e) {
             return 0;
-        }
-    }
-
-    public static void removeBeeCPShutdownHook(Object dataSource) {
-        try {
-            Class<?> dataSourceClass = dataSource.getClass();
-            Field poolField = dataSourceClass.getDeclaredField("pool");
-            poolField.setAccessible(true);
-            Object poolObj = poolField.get(dataSource);
-
-            Class<?> poolClass = poolObj.getClass();
-            Field hookField = poolClass.getDeclaredField("exitHook");
-            hookField.setAccessible(true);
-            Thread hookObj = (Thread) hookField.get(poolObj);
-
-            Runtime.getRuntime().removeShutdownHook(hookObj);
-        } catch (Throwable t) {
-            log.warn("Failed to remove BeeCP shutdown hook", t);
         }
     }
 }

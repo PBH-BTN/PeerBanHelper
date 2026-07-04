@@ -16,7 +16,7 @@ const isAnalyze = process.env.ANALYZE === 'true'
 const isProduction = process.env.NODE_ENV === 'production'
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '',
+  base: './',
   plugins: [
     vue(),
     ...(isProduction ? [] : [VueDevTools()]),
@@ -40,14 +40,41 @@ export default defineConfig({
     }
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          libs: ['pinia', 'vue-request', 'vue-i18n', 'vue-router', 'vue', '@vueuse/core', 'lodash'],
-          monacoEditor: ['monaco-editor'],
-          arcoDesign: ['@arco-design/web-vue'],
-          echarts: ['echarts', 'vue-echarts'],
-          uuid: ['uuid']
+        codeSplitting: {
+          groups: [
+            {
+              name: 'monacoEditor',
+              test: /node_modules[\\/]monaco-editor/,
+              priority: 30
+            },
+            {
+              name: 'echarts',
+              test: /node_modules[\\/](echarts|vue-echarts)/,
+              priority: 25
+            },
+            {
+              name: 'arcoDesign',
+              test: /node_modules[\\/]@arco-design/,
+              priority: 20
+            },
+            {
+              name: 'uuid',
+              test: /node_modules[\\/]uuid/,
+              priority: 15
+            },
+            {
+              name: 'libs',
+              test: /node_modules[\\/](pinia|vue-request|vue-i18n|vue-router|vue|@vueuse|lodash)/,
+              priority: 15
+            },
+            {
+              name: 'vendor',
+              test: /node_modules/,
+              priority: 10
+            }
+          ]
         }
       }
     }

@@ -40,7 +40,10 @@ function getFormatter(): DurationFormat {
   }
 }
 
-export function formatMilliseconds(ms: number): string {
+export function formatMilliseconds(ms?: number): string {
+  if (ms === undefined) {
+    ms = 0
+  }
   const formatter = getFormatter()
   return formatter.format(parseTimeDuration(ms))
 }

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,20 +38,26 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     private PeerBanHelper server;
     @Getter
     private boolean register;
-    @Getter
-    private boolean actuallyEnabled = false;  // 实际是否已启用（调用了 enable()）
     @Autowired
     JavalinWebContainer javalinWebContainer;
     private final List<ScheduledFuture<?>> scheduledTasks = new ArrayList<>();
 
     @Override
-    public boolean isModuleEnabled() {
+    public boolean shouldModuleEnabled() {
         try {
             return !isConfigurable() || getConfig().getBoolean("enabled");
         } catch (Exception e) {
             log.warn(tlUI(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName()));
             return false;
         }
+    }
+
+    @Override
+    public @NotNull ModuleStatus getModuleStatus() {
+        return ModuleStatus.builder()
+                .type(register ? ModuleStatusType.ENABLED : ModuleStatusType.DISABLED)
+                .description(register ? new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_ENABLED) : new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_DISABLED))
+                .build();
     }
 
     @Override
@@ -80,7 +88,6 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public void disable() {
         if (register) {
-            actuallyEnabled = false;
             onDisable();
             cancelAllScheduledTasks();
             try {
@@ -144,7 +151,6 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public void enable() {
         register = true;
-        actuallyEnabled = true;
         onEnable();
         log.info(tlUI(Lang.MODULE_REGISTER, getName()));
     }

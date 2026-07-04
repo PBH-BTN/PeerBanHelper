@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.databasent.mapper.java.AlertMapper;
 import com.ghostchu.peerbanhelper.databasent.service.AlertService;
 import com.ghostchu.peerbanhelper.databasent.table.AlertEntity;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -14,8 +13,10 @@ import java.util.List;
 
 @Service
 public class AlertServiceImpl extends AbstractCommonService<AlertMapper, AlertEntity> implements AlertService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+
+    public AlertServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public @NotNull List<AlertEntity> getUnreadAlerts() {

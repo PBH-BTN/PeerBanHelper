@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public abstract class AbstractDownloader implements Downloader {
     public final AlertManager alertManager;
@@ -26,11 +27,18 @@ public abstract class AbstractDownloader implements Downloader {
     private TranslationComponent statusMessage = new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN);
     private int failedLoginAttempts = 0;
     private long nextLoginTry = 0L;
+    private final Semaphore concurrentRequestControlSemaphore;
 
     public AbstractDownloader(String id, AlertManager alertManager, NatAddressProvider natAddressProvider) {
         this.id = id;
         this.alertManager = alertManager;
         this.natAddressProvider = natAddressProvider;
+        this.concurrentRequestControlSemaphore = new Semaphore(getMaxConcurrentPeerRequestSlots());
+    }
+
+    @Override
+    public Semaphore getConcurrentRequestControlSemaphore() {
+        return concurrentRequestControlSemaphore;
     }
 
     @NotNull

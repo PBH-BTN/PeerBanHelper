@@ -17,6 +17,7 @@
 *.iws
 *.iml
 *.ipr
+.kotlin
 
 ### Eclipse ###
 .apt_generated

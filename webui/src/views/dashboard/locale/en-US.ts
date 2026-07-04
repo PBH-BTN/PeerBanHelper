@@ -49,6 +49,11 @@ export default {
   'page.dashboard.editModal.label.endpoint.error.invalidUrl': 'Invalid URL',
   'page.dashboard.editModal.label.username': 'Username',
   'page.dashboard.editModal.label.password': 'Password',
+  'page.dashboard.editModal.label.apiKey': 'API Key',
+  'page.dashboard.editModal.label.useApiKey': 'Use API Key Authentication',
+  'page.dashboard.editModal.label.useApiKey.bearerToken': 'Bearer Token',
+  'page.dashboard.editModal.label.useApiKey.description':
+    'Stateless authentication via {bearerToken}. Requires qBittorrent v5.2.0 or later.',
   'page.dashboard.editModal.label.useBasicAuth': 'Use HTTP Basic Auth',
   'page.dashboard.editModal.label.httpVersion': 'HTTP Version',
   'page.dashboard.editModal.label.httpVersion.description':

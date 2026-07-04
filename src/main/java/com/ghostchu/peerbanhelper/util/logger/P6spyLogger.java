@@ -20,15 +20,18 @@ import java.util.Queue;
 public class P6spyLogger extends FormattedLogger {
     public static final Queue<@NotNull String> sqlRingQueue = Queues.synchronizedQueue(EvictingQueue.create(ExternalSwitch.parseInt("pbh.p6spy.ringqueue.size", 50)));
     public static final Queue<@NotNull String> writeSqlRingQueue = Queues.synchronizedQueue(EvictingQueue.create(ExternalSwitch.parseInt("pbh.p6spy.writeringqueue.size", 30)));
+    private static final boolean P6SPY_CONSOLE_ENABLE = ExternalSwitch.parseBoolean("pbh.p6spy.enable", false);
 
     @Override
     public void logException(Exception e) {
-        log.error("P6Spy error logging", e);
+        if(P6SPY_CONSOLE_ENABLE)
+          log.error("P6Spy error logging", e);
     }
 
     @Override
     public void logText(String text) {
-        log.debug("[P6Spy] {}", text);
+        if(P6SPY_CONSOLE_ENABLE)
+            log.debug("[P6Spy] {}", text);
     }
 
     @Override
@@ -49,7 +52,8 @@ public class P6spyLogger extends FormattedLogger {
             }
             //super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);
             if (category == Category.OUTAGE) {
-                log.warn("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, prepared, MiscUtil.getAllThreadTrace());
+                if(P6SPY_CONSOLE_ENABLE)
+                    log.debug("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, prepared, MiscUtil.getAllThreadTrace());
                 SentryEvent event = new SentryEvent();
                 Message msg = new Message();
                 msg.setMessage("SQL Outage/Slow Query: " + prepared);
@@ -67,7 +71,8 @@ public class P6spyLogger extends FormattedLogger {
                 event.setThreads(SentryUtils.getSentryThreads());
                 Sentry.captureEvent(event);
             }
-            log.debug("[P6Spy] {} | {} | took {} ms | {}", now, category.getName(), elapsed, sql);
+            if(P6SPY_CONSOLE_ENABLE)
+                log.debug("[P6Spy] {} | {} | took {} ms | {}", now, category.getName(), elapsed, sql);
         } catch (Throwable th) { // make sure SQL can execute even exception fired
             Sentry.captureException(th);
         }

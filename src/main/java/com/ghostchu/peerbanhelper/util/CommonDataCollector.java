@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import java.lang.management.ManagementFactory;
@@ -23,8 +22,6 @@ public class CommonDataCollector {
     private HTTPUtil httpUtil;
     @Autowired
     private StunManager bTStunManager;
-    @Autowired
-    private SystemInfo systemInfo;
 
     public Map<String, Object> generatePbhData() {
         long compile_time = 0;
@@ -56,23 +53,31 @@ public class CommonDataCollector {
     }
 
     public Map<String, Object> generateSystemData() {
+
         Map<String, Object> os = new LinkedHashMap<>();
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
-        var operatingSystem = systemInfo.getOperatingSystem();
+        os.put("architecture", osMXBean.getArch());
+        os.put("cores", osMXBean.getAvailableProcessors());
         if (osMXBean.getName().contains("Windows")) {
             os.put("os", "Windows");
-            os.put("version", String.valueOf(operatingSystem));
+            os.put("version", osMXBean.getVersion());
         } else {
             os.put("os", osMXBean.getName());
             os.put("version", osMXBean.getVersion());
         }
-        os.put("architecture", osMXBean.getArch());
-        os.put("cores", osMXBean.getAvailableProcessors());
-        var mem = generateSystemMemoryData(systemInfo.getHardware());
-        os.put("memory", mem);
         var network = generateNetworkStats();
         os.put("network", network);
-        return os;
+        try {
+            SystemInfoProviderWrapper.find().ifPresent(provider -> {
+                var operatingSystem = provider.getOperatingSystem();
+                os.put("version", String.valueOf(operatingSystem));
+                var mem = generateSystemMemoryData(provider.getHardware());
+                os.put("memory", mem);
+            });
+            return os;
+        } catch (Throwable e) {
+            return Map.of("status", "failed-to-retrieve");
+        }
     }
 
     public Map<String, Object> generateNetworkStats() {
@@ -89,7 +94,14 @@ public class CommonDataCollector {
         jvm.put("version", runtimeMXBean.getVmVersion());
         jvm.put("vendor", runtimeMXBean.getVmVendor());
         jvm.put("runtime", runtimeMXBean.getVmName());
-        jvm.put("bitness", systemInfo.getOperatingSystem().getBitness());
+        try {
+            var bitness = SystemInfoProviderWrapper.find()
+                    .<Object>map(provider -> provider.getOperatingSystem().getBitness())
+                    .orElse("unknown");
+            jvm.put("bitness", bitness);
+        } catch (Throwable e) {
+            jvm.put("bitness", "unknown");
+        }
         Map<String, Object> mem = new LinkedHashMap<>();
         mem.put("heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
         mem.put("non_heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));

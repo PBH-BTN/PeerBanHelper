@@ -4,10 +4,22 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
-import com.ghostchu.peerbanhelper.btn.ability.impl.*;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityHeartBeat;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPAllowList;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIPDenyList;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityIpQuery;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityReconfigure;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilityRules;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilitySubmitBans;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilitySubmitHistory;
+import com.ghostchu.peerbanhelper.btn.ability.impl.BtnAbilitySubmitSwarm;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
-import com.ghostchu.peerbanhelper.databasent.service.*;
+import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
+import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
+import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
+import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -36,12 +48,9 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.net.NetworkInterface;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -253,7 +262,7 @@ public final class BtnNetwork implements Reloadable {
                     }
                 });
                 configSuccess.set(true);
-                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
+                configResult = submit ? new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL) : new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL_READ_ONLY);
             } catch (Throwable e) {
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage(), RETRY_PERIOD_SECONDS), e);
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());

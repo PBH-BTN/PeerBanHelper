@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.TrafficJournalService;
@@ -160,7 +161,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
 
     }
 }

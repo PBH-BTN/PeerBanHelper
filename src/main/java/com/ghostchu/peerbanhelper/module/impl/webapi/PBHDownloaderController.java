@@ -78,7 +78,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.routes()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
                 .post("/api/downloaders/scan", this::handleDownloaderScan, Role.USER_WRITE)
                 .put("/api/downloaders", this::handleDownloaderPut, Role.USER_WRITE)
