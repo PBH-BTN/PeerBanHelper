@@ -696,7 +696,70 @@ return foundValidWebView2;</condition>
           </screen>
         </startup>
         <screens>
-          <screen id="24" beanClass="com.install4j.runtime.beans.screens.UninstallWelcomeScreen" styleId="7" rollbackBarrierExitCode="0">
+          <screen id="24" beanClass="com.install4j.runtime.beans.screens.UninstallWelcomeScreen" styleId="456" rollbackBarrierExitCode="0">
+            <styleOverrides>
+              <styleOverride name="Customize banner image" enabled="true">
+                <group id="473" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
+                  <serializedBean>
+                    <property name="backgroundColor">
+                      <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                        <object class="java.awt.Color">
+                          <int>255</int>
+                          <int>255</int>
+                          <int>255</int>
+                          <int>255</int>
+                        </object>
+                        <object class="java.awt.Color">
+                          <int>49</int>
+                          <int>52</int>
+                          <int>53</int>
+                          <int>255</int>
+                        </object>
+                      </object>
+                    </property>
+                    <property name="borderSides">
+                      <object class="com.install4j.runtime.beans.formcomponents.BorderSides">
+                        <property name="bottom" type="boolean" value="true" />
+                      </object>
+                    </property>
+                    <property name="imageEdgeBackgroundColor">
+                      <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                        <object class="java.awt.Color">
+                          <int>27</int>
+                          <int>143</int>
+                          <int>220</int>
+                          <int>255</int>
+                        </object>
+                        <object class="java.awt.Color">
+                          <int>0</int>
+                          <int>73</int>
+                          <int>150</int>
+                          <int>255</int>
+                        </object>
+                      </object>
+                    </property>
+                    <property name="imageFile">
+                      <object class="com.install4j.api.beans.ExternalFile">
+                        <string>${compiler:sys.install4jHome}/resource/styles/wizard.png</string>
+                      </object>
+                    </property>
+                    <property name="insets">
+                      <object class="java.awt.Insets">
+                        <int>5</int>
+                        <int>10</int>
+                        <int>10</int>
+                        <int>10</int>
+                      </object>
+                    </property>
+                  </serializedBean>
+                  <externalParametrizationPropertyNames>
+                    <propertyName>imageAnchor</propertyName>
+                    <propertyName>imageEdgeBackgroundColor</propertyName>
+                    <propertyName>imageFile</propertyName>
+                  </externalParametrizationPropertyNames>
+                </group>
+              </styleOverride>
+            </styleOverrides>
             <formComponents>
               <formComponent id="25" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetBottom="10">
                 <serializedBean>
@@ -717,7 +780,7 @@ return console.askYesNo(message, true);
               </formComponent>
             </formComponents>
           </screen>
-          <screen id="27" beanClass="com.install4j.runtime.beans.screens.UninstallationScreen" rollbackBarrierExitCode="0">
+          <screen id="27" beanClass="com.install4j.runtime.beans.screens.UninstallationScreen" styleId="450" rollbackBarrierExitCode="0">
             <actions>
               <action id="298" beanClass="com.install4j.runtime.beans.actions.services.StopServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
@@ -1100,7 +1163,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
               </formComponent>
             </formComponents>
           </screen>
-          <screen name="Check for update" id="171" beanClass="com.install4j.runtime.beans.screens.FormScreen">
+          <screen name="Check for update" id="171" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="450">
             <serializedBean>
               <property name="subTitle" type="string">${i18n:updater.CheckForUpdateSubtitle}</property>
               <property name="title" type="string">${i18n:updater.CheckForUpdateTitle}</property>
@@ -1391,7 +1454,7 @@ return true;
                   </formComponent>
                 </formComponents>
               </screen>
-              <screen name="Download new version" id="201" beanClass="com.install4j.runtime.beans.screens.FormScreen">
+              <screen name="Download new version" id="201" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="450">
                 <serializedBean>
                   <property name="subTitle" type="string">${i18n:updater.DownloadSubTitle}</property>
                   <property name="title" type="string">${i18n:updater.DownloadTitle}</property>
@@ -1956,22 +2019,22 @@ return true;</property>
                   <property name="imageEdgeBackgroundColor">
                     <object class="com.install4j.runtime.beans.LightOrDarkColor">
                       <object class="java.awt.Color">
-                        <int>27</int>
-                        <int>143</int>
-                        <int>220</int>
+                        <int>192</int>
+                        <int>192</int>
+                        <int>192</int>
                         <int>255</int>
                       </object>
                       <object class="java.awt.Color">
-                        <int>0</int>
-                        <int>73</int>
-                        <int>150</int>
+                        <int>51</int>
+                        <int>51</int>
+                        <int>51</int>
                         <int>255</int>
                       </object>
                     </object>
                   </property>
                   <property name="imageFile">
                     <object class="com.install4j.api.beans.ExternalFile">
-                      <string>${compiler:sys.install4jHome}/resource/styles/wizard.png</string>
+                      <string>./assets/icon/banner.png</string>
                     </object>
                   </property>
                   <property name="insets">
@@ -2007,7 +2070,7 @@ return true;</property>
               </group>
               <formComponent id="461" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetBottom="0">
                 <serializedBean>
-                  <property name="styleId" type="string">463</property>
+                  <property name="styleId" type="string">467</property>
                 </serializedBean>
               </formComponent>
             </formComponents>
@@ -2144,7 +2207,23 @@ return true;</property>
       </group>
     </styles>
     <widgetStyles defaultWidgetStyleId="242">
-      <widgetStyle name="Standard" id="242" beanClass="com.install4j.runtime.beans.widgets.WidgetStyleCollection" />
+      <widgetStyle name="Standard" id="242" beanClass="com.install4j.runtime.beans.widgets.WidgetStyleCollection">
+        <serializedBean>
+          <property name="buttonWidgetStyle" id="ButtonWidgetStyle0">
+            <void id="FontDescriptor0" property="fontDescriptor" />
+          </property>
+          <property name="defaultsWidgetStyle">
+            <property name="fontDescriptor">
+              <object idref="FontDescriptor0" />
+            </property>
+          </property>
+          <property name="labelWidgetStyle">
+            <property name="fontDescriptor">
+              <object idref="FontDescriptor0" />
+            </property>
+          </property>
+        </serializedBean>
+      </widgetStyle>
     </widgetStyles>
   </installerGui>
   <mediaSets>
