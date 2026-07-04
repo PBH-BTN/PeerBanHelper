@@ -45,7 +45,7 @@ jobs:
       - name: Copy JBR Bundles
         id: jbr_bundles
         run: |
-          dir="${1:-$HOME/.cache/install4j/v11/cached_jres/generated}"
+          dir="${1:-$HOME/.cache/install4j/v13/cached_jres/generated}"
           find "$dir" -type f -name 'windows-amd64-*.tar.gz' -printf '%T@ %p\n' \
             | sort -nr | cut -d' ' -f2- \
             | while IFS= read -r f; do
