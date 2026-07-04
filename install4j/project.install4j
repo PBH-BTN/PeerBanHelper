@@ -84,7 +84,7 @@
   </files>
   <launchers>
     <launcher name="PeerBanHelper" id="26" menuName="${i18n:launcher.peerbanhelper.gui}" checkUpdater="true">
-      <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStderr="false" executableMode="gui" changeWorkingDirectory="false" checkConsoleParameter="true">
+      <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStderr="false" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatform}">
@@ -101,7 +101,7 @@
       </iconImageFiles>
     </launcher>
     <launcher name="PeerBanHelper GUI Silent" id="66" excludeFromMenu="true" checkUpdater="true">
-      <executable name="PeerBanHelper-GUI-Silent" iconSet="true" executableDir="." redirectStderr="false" executableMode="gui" checkConsoleParameter="true">
+      <executable name="PeerBanHelper-GUI-Silent" iconSet="true" executableDir="." redirectStderr="false" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatform}" arguments="silent">
@@ -118,7 +118,7 @@
       </iconImageFiles>
     </launcher>
     <launcher name="PeerBanHelper NoGUI" id="28" menuName="${i18n:launcher.peerbanhelper.nogui}" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-NoGUI" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" checkConsoleParameter="true">
+      <executable name="PeerBanHelper-NoGUI" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatformNoGUI}" arguments="nogui">
@@ -149,7 +149,7 @@
       </iconImageFiles>
     </launcher>
     <launcher name="PeerBanHelper Service" id="291" excludeFromMenu="true" checkUpdater="true">
-      <executable name="PeerBanHelper-Service" iconSet="true" executableDir="." redirectStderr="false" executableMode="service" checkConsoleParameter="true">
+      <executable name="PeerBanHelper-Service" iconSet="true" executableDir="." redirectStderr="false" executableMode="service" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatform}" arguments="silent">
@@ -452,7 +452,7 @@ return true;
               </formComponent>
             </formComponents>
           </screen>
-          <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
+          <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" styleId="450" rollbackBarrier="true" rollbackBarrierExitCode="0">
             <actions>
               <action id="270" beanClass="com.install4j.runtime.beans.actions.UninstallPreviousAction" actionElevationType="none" rollbackBarrierExitCode="0" failureStrategy="ask" failureAskIgnore="false" />
               <action id="17" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="quit" errorMessage="${i18n:FileCorrupted}" />
@@ -1653,128 +1653,39 @@ return true;</property>
       </application>
     </applications>
     <styles defaultStyleId="1">
-      <style name="Standard" id="1" beanClass="com.install4j.runtime.beans.styles.FormStyle">
-        <formComponents>
-          <formComponent name="Header" id="2" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
-            <serializedBean>
-              <property name="styleId" type="string">14</property>
-            </serializedBean>
-          </formComponent>
-          <group name="Main" id="3" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup">
-            <beans>
-              <formComponent id="4" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetLeft="20" insetBottom="10" insetRight="20" />
-              <formComponent name="Watermark" id="5" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" insetTop="0" insetLeft="5" insetBottom="0" useExternalParametrization="true" externalParametrizationName="Custom watermark" externalParametrizationMode="include">
-                <serializedBean>
-                  <property name="enabledTitleText" type="boolean" value="false" />
-                  <property name="labelText" type="string">install4j</property>
-                </serializedBean>
-                <externalParametrizationPropertyNames>
-                  <propertyName>labelText</propertyName>
-                </externalParametrizationPropertyNames>
-              </formComponent>
-              <formComponent name="Footer" id="6" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
-                <serializedBean>
-                  <property name="styleId" type="string">18</property>
-                </serializedBean>
-              </formComponent>
-            </beans>
-          </group>
-        </formComponents>
-      </style>
-      <style name="Banner" id="7" beanClass="com.install4j.runtime.beans.styles.FormStyle">
-        <formComponents>
-          <group id="8" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
-            <serializedBean>
-              <property name="backgroundColor">
-                <object class="com.install4j.runtime.beans.LightOrDarkColor">
-                  <object class="java.awt.Color">
-                    <int>255</int>
-                    <int>255</int>
-                    <int>255</int>
-                    <int>255</int>
-                  </object>
-                  <object class="java.awt.Color">
-                    <int>49</int>
-                    <int>52</int>
-                    <int>53</int>
-                    <int>255</int>
-                  </object>
-                </object>
-              </property>
-              <property name="borderSides">
-                <object class="com.install4j.runtime.beans.formcomponents.BorderSides">
-                  <property name="bottom" type="boolean" value="true" />
-                </object>
-              </property>
-              <property name="imageEdgeBackgroundColor">
-                <object class="com.install4j.runtime.beans.LightOrDarkColor">
-                  <object class="java.awt.Color">
-                    <int>27</int>
-                    <int>143</int>
-                    <int>220</int>
-                    <int>255</int>
-                  </object>
-                  <object class="java.awt.Color">
-                    <int>0</int>
-                    <int>73</int>
-                    <int>150</int>
-                    <int>255</int>
-                  </object>
-                </object>
-              </property>
-              <property name="imageFile">
-                <object class="com.install4j.api.beans.ExternalFile">
-                  <string>${compiler:sys.install4jHome}/resource/styles/wizard.png</string>
-                </object>
-              </property>
-              <property name="insets">
-                <object class="java.awt.Insets">
-                  <int>5</int>
-                  <int>10</int>
-                  <int>10</int>
-                  <int>10</int>
-                </object>
-              </property>
-            </serializedBean>
-            <beans>
-              <formComponent id="9" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetTop="0">
-                <serializedBean>
-                  <property name="labelWidgetStyle" id="LabelWidgetStyle0">
-                    <property name="fontDescriptor">
-                      <property name="fontSizePercent" type="int" value="130" />
-                      <property name="fontStyle" type="enum" class="com.install4j.runtime.beans.formcomponents.FontStyle" value="BOLD" />
-                      <property name="fontType" type="enum" class="com.install4j.runtime.beans.formcomponents.FontType" value="DERIVED" />
-                    </property>
-                  </property>
-                  <property name="labelWidgetStyleId" type="null" />
-                </serializedBean>
-              </formComponent>
-              <formComponent id="10" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" />
-              <formComponent id="11" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetBottom="0" />
-            </beans>
-            <externalParametrizationPropertyNames>
-              <propertyName>imageAnchor</propertyName>
-              <propertyName>imageEdgeBackgroundColor</propertyName>
-              <propertyName>imageFile</propertyName>
-            </externalParametrizationPropertyNames>
-          </group>
-          <formComponent id="12" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetBottom="0">
-            <serializedBean>
-              <property name="styleId" type="string">18</property>
-            </serializedBean>
-          </formComponent>
-        </formComponents>
-      </style>
-      <group name="Style components" id="13" beanClass="com.install4j.runtime.beans.groups.StyleGroup">
+      <group name="Standard" id="448" beanClass="com.install4j.runtime.beans.groups.StyleGroup">
         <beans>
-          <style name="Standard header" id="14" beanClass="com.install4j.runtime.beans.styles.FormStyle">
-            <serializedBean>
-              <property name="fillVertical" type="boolean" value="false" />
-              <property name="standalone" type="boolean" value="false" />
-              <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTH" />
-            </serializedBean>
+          <style name="Standard" id="1" beanClass="com.install4j.runtime.beans.styles.FormStyle">
             <formComponents>
-              <group id="15" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
+              <formComponent name="Header" id="2" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
+                <serializedBean>
+                  <property name="styleId" type="string">14</property>
+                </serializedBean>
+              </formComponent>
+              <group name="Main" id="3" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title">
+                <beans>
+                  <formComponent id="4" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetLeft="20" insetBottom="10" insetRight="20" />
+                  <formComponent name="Watermark" id="5" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" insetTop="0" insetLeft="5" insetBottom="0" useExternalParametrization="true" externalParametrizationName="Custom watermark" externalParametrizationMode="include">
+                    <serializedBean>
+                      <property name="enabledTitleText" type="boolean" value="false" />
+                      <property name="labelText" type="string">install4j</property>
+                    </serializedBean>
+                    <externalParametrizationPropertyNames>
+                      <propertyName>labelText</propertyName>
+                    </externalParametrizationPropertyNames>
+                  </formComponent>
+                  <formComponent name="Footer" id="6" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
+                    <serializedBean>
+                      <property name="styleId" type="string">18</property>
+                    </serializedBean>
+                  </formComponent>
+                </beans>
+              </group>
+            </formComponents>
+          </style>
+          <style name="Banner" id="7" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+            <formComponents>
+              <group id="8" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="backgroundColor">
                     <object class="com.install4j.runtime.beans.LightOrDarkColor">
@@ -1797,35 +1708,42 @@ return true;</property>
                       <property name="bottom" type="boolean" value="true" />
                     </object>
                   </property>
-                  <property name="imageAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTHEAST" />
-                  <property name="imageEdgeBorderWidth" type="int" value="2" />
-                  <property name="imageFile">
-                    <object class="com.install4j.api.beans.ExternalFile">
-                      <string>icon:${installer:sys.installerApplicationMode}_header.png</string>
+                  <property name="imageEdgeBackgroundColor">
+                    <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                      <object class="java.awt.Color">
+                        <int>27</int>
+                        <int>143</int>
+                        <int>220</int>
+                        <int>255</int>
+                      </object>
+                      <object class="java.awt.Color">
+                        <int>0</int>
+                        <int>73</int>
+                        <int>150</int>
+                        <int>255</int>
+                      </object>
                     </object>
                   </property>
-                  <property name="imageInsets">
-                    <object class="java.awt.Insets">
-                      <int>0</int>
-                      <int>5</int>
-                      <int>1</int>
-                      <int>1</int>
+                  <property name="imageFile">
+                    <object class="com.install4j.api.beans.ExternalFile">
+                      <string>${compiler:sys.install4jHome}/resource/styles/wizard.png</string>
                     </object>
                   </property>
                   <property name="insets">
                     <object class="java.awt.Insets">
-                      <int>0</int>
-                      <int>20</int>
-                      <int>0</int>
+                      <int>5</int>
+                      <int>10</int>
+                      <int>10</int>
                       <int>10</int>
                     </object>
                   </property>
                 </serializedBean>
                 <beans>
-                  <formComponent name="Title" id="16" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent">
+                  <formComponent id="9" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetTop="0">
                     <serializedBean>
                       <property name="labelWidgetStyle" id="LabelWidgetStyle0">
                         <property name="fontDescriptor">
+                          <property name="fontSizePercent" type="int" value="130" />
                           <property name="fontStyle" type="enum" class="com.install4j.runtime.beans.formcomponents.FontStyle" value="BOLD" />
                           <property name="fontType" type="enum" class="com.install4j.runtime.beans.formcomponents.FontType" value="DERIVED" />
                         </property>
@@ -1833,65 +1751,395 @@ return true;</property>
                       <property name="labelWidgetStyleId" type="null" />
                     </serializedBean>
                   </formComponent>
-                  <formComponent name="Subtitle" id="17" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetLeft="8">
+                  <formComponent id="10" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" />
+                  <formComponent id="11" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetBottom="0" />
+                </beans>
+                <externalParametrizationPropertyNames>
+                  <propertyName>imageAnchor</propertyName>
+                  <propertyName>imageEdgeBackgroundColor</propertyName>
+                  <propertyName>imageFile</propertyName>
+                </externalParametrizationPropertyNames>
+              </group>
+              <formComponent id="12" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetBottom="0">
+                <serializedBean>
+                  <property name="styleId" type="string">18</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </style>
+          <group name="Style components" id="13" beanClass="com.install4j.runtime.beans.groups.StyleGroup">
+            <beans>
+              <style name="Standard header" id="14" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+                <serializedBean>
+                  <property name="fillVertical" type="boolean" value="false" />
+                  <property name="standalone" type="boolean" value="false" />
+                  <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTH" />
+                </serializedBean>
+                <formComponents>
+                  <group id="15" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
                     <serializedBean>
-                      <property name="titleType" type="enum" class="com.install4j.runtime.beans.styles.TitleType" value="SUB_TITLE" />
+                      <property name="backgroundColor">
+                        <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                          <object class="java.awt.Color">
+                            <int>255</int>
+                            <int>255</int>
+                            <int>255</int>
+                            <int>255</int>
+                          </object>
+                          <object class="java.awt.Color">
+                            <int>49</int>
+                            <int>52</int>
+                            <int>53</int>
+                            <int>255</int>
+                          </object>
+                        </object>
+                      </property>
+                      <property name="borderSides">
+                        <object class="com.install4j.runtime.beans.formcomponents.BorderSides">
+                          <property name="bottom" type="boolean" value="true" />
+                        </object>
+                      </property>
+                      <property name="imageAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTHEAST" />
+                      <property name="imageEdgeBorderWidth" type="int" value="2" />
+                      <property name="imageFile">
+                        <object class="com.install4j.api.beans.ExternalFile">
+                          <string>icon:${installer:sys.installerApplicationMode}_header.png</string>
+                        </object>
+                      </property>
+                      <property name="imageInsets">
+                        <object class="java.awt.Insets">
+                          <int>0</int>
+                          <int>5</int>
+                          <int>1</int>
+                          <int>1</int>
+                        </object>
+                      </property>
+                      <property name="insets">
+                        <object class="java.awt.Insets">
+                          <int>0</int>
+                          <int>20</int>
+                          <int>0</int>
+                          <int>10</int>
+                        </object>
+                      </property>
+                    </serializedBean>
+                    <beans>
+                      <formComponent name="Title" id="16" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent">
+                        <serializedBean>
+                          <property name="labelWidgetStyle" id="LabelWidgetStyle0">
+                            <property name="fontDescriptor">
+                              <property name="fontStyle" type="enum" class="com.install4j.runtime.beans.formcomponents.FontStyle" value="BOLD" />
+                              <property name="fontType" type="enum" class="com.install4j.runtime.beans.formcomponents.FontType" value="DERIVED" />
+                            </property>
+                          </property>
+                          <property name="labelWidgetStyleId" type="null" />
+                        </serializedBean>
+                      </formComponent>
+                      <formComponent name="Subtitle" id="17" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetLeft="8">
+                        <serializedBean>
+                          <property name="titleType" type="enum" class="com.install4j.runtime.beans.styles.TitleType" value="SUB_TITLE" />
+                        </serializedBean>
+                      </formComponent>
+                    </beans>
+                    <externalParametrizationPropertyNames>
+                      <propertyName>backgroundColor</propertyName>
+                      <propertyName>foregroundColor</propertyName>
+                      <propertyName>imageAnchor</propertyName>
+                      <propertyName>imageFile</propertyName>
+                      <propertyName>imageOverlap</propertyName>
+                    </externalParametrizationPropertyNames>
+                  </group>
+                </formComponents>
+              </style>
+              <style name="Standard footer" id="18" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+                <serializedBean>
+                  <property name="fillVertical" type="boolean" value="false" />
+                  <property name="standalone" type="boolean" value="false" />
+                  <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="SOUTH" />
+                </serializedBean>
+                <formComponents>
+                  <group id="19" beanClass="com.install4j.runtime.beans.groups.HorizontalFormComponentGroup">
+                    <serializedBean>
+                      <property name="alignFirstLabel" type="boolean" value="false" />
+                      <property name="insets">
+                        <object class="java.awt.Insets">
+                          <int>3</int>
+                          <int>5</int>
+                          <int>8</int>
+                          <int>5</int>
+                        </object>
+                      </property>
+                    </serializedBean>
+                    <beans>
+                      <formComponent id="20" beanClass="com.install4j.runtime.beans.formcomponents.SpringComponent" />
+                      <formComponent name="Back button" id="21" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
+                        <serializedBean>
+                          <property name="buttonText" type="string">&lt; ${i18n:ButtonBack}</property>
+                          <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="PREVIOUS" />
+                        </serializedBean>
+                      </formComponent>
+                      <formComponent name="Next button" id="22" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
+                        <serializedBean>
+                          <property name="buttonText" type="string">${i18n:ButtonNext} &gt;</property>
+                          <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="NEXT" />
+                        </serializedBean>
+                      </formComponent>
+                      <formComponent name="Cancel button" id="23" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent" insetLeft="5">
+                        <serializedBean>
+                          <property name="buttonText" type="string">${i18n:ButtonCancel}</property>
+                          <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="CANCEL" />
+                        </serializedBean>
+                      </formComponent>
+                    </beans>
+                  </group>
+                </formComponents>
+              </style>
+            </beans>
+          </group>
+        </beans>
+      </group>
+      <group name="Mint" id="449" beanClass="com.install4j.runtime.beans.groups.StyleGroup">
+        <beans>
+          <style name="Mint" id="450" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+            <formComponents>
+              <formComponent name="Header" id="451" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
+                <serializedBean>
+                  <property name="styleId" type="string">463</property>
+                </serializedBean>
+              </formComponent>
+              <group name="Main" id="452" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title">
+                <beans>
+                  <formComponent id="453" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetLeft="20" insetBottom="10" insetRight="20" />
+                  <formComponent name="Watermark" id="454" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" insetTop="0" insetLeft="5" insetBottom="0" useExternalParametrization="true" externalParametrizationName="Custom watermark" externalParametrizationMode="include">
+                    <serializedBean>
+                      <property name="enabledTitleText" type="boolean" value="false" />
+                      <property name="labelText" type="string">install4j</property>
+                    </serializedBean>
+                    <externalParametrizationPropertyNames>
+                      <propertyName>labelText</propertyName>
+                    </externalParametrizationPropertyNames>
+                  </formComponent>
+                  <formComponent name="Footer" id="455" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
+                    <serializedBean>
+                      <property name="styleId" type="string">467</property>
                     </serializedBean>
                   </formComponent>
                 </beans>
-                <externalParametrizationPropertyNames>
-                  <propertyName>backgroundColor</propertyName>
-                  <propertyName>foregroundColor</propertyName>
-                  <propertyName>imageAnchor</propertyName>
-                  <propertyName>imageFile</propertyName>
-                  <propertyName>imageOverlap</propertyName>
-                </externalParametrizationPropertyNames>
               </group>
             </formComponents>
           </style>
-          <style name="Standard footer" id="18" beanClass="com.install4j.runtime.beans.styles.FormStyle">
-            <serializedBean>
-              <property name="fillVertical" type="boolean" value="false" />
-              <property name="standalone" type="boolean" value="false" />
-              <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="SOUTH" />
-            </serializedBean>
+          <style name="Mint Banner" id="456" beanClass="com.install4j.runtime.beans.styles.FormStyle">
             <formComponents>
-              <group id="19" beanClass="com.install4j.runtime.beans.groups.HorizontalFormComponentGroup">
+              <group id="457" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
                 <serializedBean>
-                  <property name="alignFirstLabel" type="boolean" value="false" />
+                  <property name="backgroundColor">
+                    <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                      <object class="java.awt.Color">
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                      </object>
+                      <object class="java.awt.Color">
+                        <int>49</int>
+                        <int>52</int>
+                        <int>53</int>
+                        <int>255</int>
+                      </object>
+                    </object>
+                  </property>
+                  <property name="borderSides">
+                    <object class="com.install4j.runtime.beans.formcomponents.BorderSides">
+                      <property name="bottom" type="boolean" value="true" />
+                    </object>
+                  </property>
+                  <property name="imageEdgeBackgroundColor">
+                    <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                      <object class="java.awt.Color">
+                        <int>27</int>
+                        <int>143</int>
+                        <int>220</int>
+                        <int>255</int>
+                      </object>
+                      <object class="java.awt.Color">
+                        <int>0</int>
+                        <int>73</int>
+                        <int>150</int>
+                        <int>255</int>
+                      </object>
+                    </object>
+                  </property>
+                  <property name="imageFile">
+                    <object class="com.install4j.api.beans.ExternalFile">
+                      <string>${compiler:sys.install4jHome}/resource/styles/wizard.png</string>
+                    </object>
+                  </property>
                   <property name="insets">
                     <object class="java.awt.Insets">
-                      <int>3</int>
                       <int>5</int>
-                      <int>8</int>
-                      <int>5</int>
+                      <int>10</int>
+                      <int>10</int>
+                      <int>10</int>
                     </object>
                   </property>
                 </serializedBean>
                 <beans>
-                  <formComponent id="20" beanClass="com.install4j.runtime.beans.formcomponents.SpringComponent" />
-                  <formComponent name="Back button" id="21" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
+                  <formComponent id="458" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetTop="0">
                     <serializedBean>
-                      <property name="buttonText" type="string">&lt; ${i18n:ButtonBack}</property>
-                      <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="PREVIOUS" />
+                      <property name="labelWidgetStyle" id="LabelWidgetStyle0">
+                        <property name="fontDescriptor">
+                          <property name="fontSizePercent" type="int" value="130" />
+                          <property name="fontStyle" type="enum" class="com.install4j.runtime.beans.formcomponents.FontStyle" value="BOLD" />
+                          <property name="fontType" type="enum" class="com.install4j.runtime.beans.formcomponents.FontType" value="DERIVED" />
+                        </property>
+                      </property>
+                      <property name="labelWidgetStyleId" type="null" />
                     </serializedBean>
                   </formComponent>
-                  <formComponent name="Next button" id="22" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
-                    <serializedBean>
-                      <property name="buttonText" type="string">${i18n:ButtonNext} &gt;</property>
-                      <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="NEXT" />
-                    </serializedBean>
-                  </formComponent>
-                  <formComponent name="Cancel button" id="23" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent" insetLeft="5">
-                    <serializedBean>
-                      <property name="buttonText" type="string">${i18n:ButtonCancel}</property>
-                      <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="CANCEL" />
-                    </serializedBean>
-                  </formComponent>
+                  <formComponent id="459" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" />
+                  <formComponent id="460" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetBottom="0" />
                 </beans>
+                <externalParametrizationPropertyNames>
+                  <propertyName>imageAnchor</propertyName>
+                  <propertyName>imageEdgeBackgroundColor</propertyName>
+                  <propertyName>imageFile</propertyName>
+                </externalParametrizationPropertyNames>
               </group>
+              <formComponent id="461" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetBottom="0">
+                <serializedBean>
+                  <property name="styleId" type="string">463</property>
+                </serializedBean>
+              </formComponent>
             </formComponents>
           </style>
+          <group name="Style components" id="462" beanClass="com.install4j.runtime.beans.groups.StyleGroup">
+            <beans>
+              <style name="Mint header" id="463" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+                <serializedBean>
+                  <property name="fillVertical" type="boolean" value="false" />
+                  <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTH" />
+                </serializedBean>
+                <formComponents>
+                  <group id="464" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
+                    <serializedBean>
+                      <property name="backgroundColor">
+                        <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                          <object class="java.awt.Color">
+                            <int>255</int>
+                            <int>255</int>
+                            <int>255</int>
+                            <int>255</int>
+                          </object>
+                          <object class="java.awt.Color">
+                            <int>49</int>
+                            <int>52</int>
+                            <int>53</int>
+                            <int>255</int>
+                          </object>
+                        </object>
+                      </property>
+                      <property name="borderSides">
+                        <object class="com.install4j.runtime.beans.formcomponents.BorderSides">
+                          <property name="bottom" type="boolean" value="true" />
+                        </object>
+                      </property>
+                      <property name="imageAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTHEAST" />
+                      <property name="imageEdgeBorderWidth" type="int" value="2" />
+                      <property name="imageFile">
+                        <object class="com.install4j.api.beans.ExternalFile">
+                          <string>./assets/icon/header_installation.png</string>
+                        </object>
+                      </property>
+                      <property name="imageInsets">
+                        <object class="java.awt.Insets">
+                          <int>0</int>
+                          <int>5</int>
+                          <int>1</int>
+                          <int>1</int>
+                        </object>
+                      </property>
+                      <property name="insets">
+                        <object class="java.awt.Insets">
+                          <int>0</int>
+                          <int>20</int>
+                          <int>0</int>
+                          <int>10</int>
+                        </object>
+                      </property>
+                    </serializedBean>
+                    <beans>
+                      <formComponent name="Title" id="465" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent">
+                        <serializedBean>
+                          <property name="labelWidgetStyle" id="LabelWidgetStyle0">
+                            <property name="fontDescriptor">
+                              <property name="fontStyle" type="enum" class="com.install4j.runtime.beans.formcomponents.FontStyle" value="BOLD" />
+                              <property name="fontType" type="enum" class="com.install4j.runtime.beans.formcomponents.FontType" value="DERIVED" />
+                            </property>
+                          </property>
+                          <property name="labelWidgetStyleId" type="null" />
+                        </serializedBean>
+                      </formComponent>
+                      <formComponent name="Subtitle" id="466" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetLeft="8">
+                        <serializedBean>
+                          <property name="titleType" type="enum" class="com.install4j.runtime.beans.styles.TitleType" value="SUB_TITLE" />
+                        </serializedBean>
+                      </formComponent>
+                    </beans>
+                    <externalParametrizationPropertyNames>
+                      <propertyName>backgroundColor</propertyName>
+                      <propertyName>foregroundColor</propertyName>
+                      <propertyName>imageAnchor</propertyName>
+                      <propertyName>imageFile</propertyName>
+                      <propertyName>imageOverlap</propertyName>
+                    </externalParametrizationPropertyNames>
+                  </group>
+                </formComponents>
+              </style>
+              <style name="Mint footer" id="467" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+                <serializedBean>
+                  <property name="fillVertical" type="boolean" value="false" />
+                  <property name="standalone" type="boolean" value="false" />
+                  <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="SOUTH" />
+                </serializedBean>
+                <formComponents>
+                  <group id="468" beanClass="com.install4j.runtime.beans.groups.HorizontalFormComponentGroup">
+                    <serializedBean>
+                      <property name="alignFirstLabel" type="boolean" value="false" />
+                      <property name="insets">
+                        <object class="java.awt.Insets">
+                          <int>3</int>
+                          <int>5</int>
+                          <int>8</int>
+                          <int>5</int>
+                        </object>
+                      </property>
+                    </serializedBean>
+                    <beans>
+                      <formComponent id="469" beanClass="com.install4j.runtime.beans.formcomponents.SpringComponent" />
+                      <formComponent name="Back button" id="470" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
+                        <serializedBean>
+                          <property name="buttonText" type="string">&lt; ${i18n:ButtonBack}</property>
+                          <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="PREVIOUS" />
+                        </serializedBean>
+                      </formComponent>
+                      <formComponent name="Next button" id="471" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
+                        <serializedBean>
+                          <property name="buttonText" type="string">${i18n:ButtonNext} &gt;</property>
+                          <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="NEXT" />
+                        </serializedBean>
+                      </formComponent>
+                      <formComponent name="Cancel button" id="472" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent" insetLeft="5">
+                        <serializedBean>
+                          <property name="buttonText" type="string">${i18n:ButtonCancel}</property>
+                          <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="CANCEL" />
+                        </serializedBean>
+                      </formComponent>
+                    </beans>
+                  </group>
+                </formComponents>
+              </style>
+            </beans>
+          </group>
         </beans>
       </group>
     </styles>
@@ -1906,7 +2154,6 @@ return true;</property>
         <component id="327" />
       </excludedComponents>
     </windows>
-    <msix name="Windows MSIX" id="356" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_msix_${compiler:sys.version}" architecture="64" createForStore="true" storePublisherId="CN=85226E13-4038-4181-9416-1CBA33669064" packageIconImageFile="./icon.png" />
     <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
       <excludedComponents>
         <component id="326" />
