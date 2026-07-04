@@ -182,7 +182,7 @@ public class DigestionSession implements AutoCloseable {
                         StringJoiner joiner = new StringJoiner("\n");
                         for (BanOrgan<?, ?> organ : organs) {
                             joiner.add("--------------");
-                            joiner.add("ORGAN:" + organ.getClass().getName());
+                            joiner.add("ORGAN: " + organ.getClass().getName());
                             joiner.add("Life Cycle Done: " + organ.getStatus().name());
                             joiner.add("Loop Running: " + organ.loopRunning.get());
                             if (organ.lastTick.get() == 0) {
