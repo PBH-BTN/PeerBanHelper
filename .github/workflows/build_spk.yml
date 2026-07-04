@@ -29,7 +29,7 @@ jobs:
           echo "pkgscripts_sha=$PKGSCRIPTS_SHA" >> $GITHUB_OUTPUT
       - name: Restore synopkg cache
         id: cache-synopkg-restore
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ~/toolkit
           key: synopkg-DSM7.2-${{ steps.pkgscripts_info.outputs.pkgscripts_sha }}
@@ -39,7 +39,7 @@ jobs:
       - name: Save synopkg cache
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         id: cache-synopkg-save
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: ~/toolkit
           key: ${{ steps.cache-synopkg-restore.outputs.cache-primary-key }}
