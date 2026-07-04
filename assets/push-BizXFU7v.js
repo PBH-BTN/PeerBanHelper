@@ -1,0 +1,1 @@
+var e=function(e){return e.Email=`smtp`,e.PushPlus=`pushplus`,e.ServerChan=`serverchan`,e.Telegram=`telegram`,e.Bark=`bark`,e.PushDeer=`pushdeer`,e.Gotify=`gotify`,e.Ntfy=`ntfy`,e}({}),t=function(e){return e.None=`NONE`,e.StartTLS=`STARTTLS`,e.EnforceStartTLS=`ENFORCE_STARTTLS`,e.SSLTLS=`SSLTLS`,e}({});export{t as n,e as t};
