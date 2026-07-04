@@ -69,7 +69,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.53.2.0")
     implementation("org.xerial:sqlite-jdbc:3.53.2.0:natives-android")
     implementation("com.h2database:h2:2.3.232")
-    implementation("org.postgresql:postgresql:42.7.11")
+    implementation("org.postgresql:postgresql:42.7.12")
     implementation("com.mysql:mysql-connector-j:9.7.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
@@ -107,8 +107,8 @@ dependencies {
 //        exclude(group = "net.java.dev.jna", module = "jna")
 //    }
 //    // System monitoring for supported platforms
-    implementation("com.github.oshi:oshi-common:7.3.0")
-    runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.0")
+    implementation("com.github.oshi:oshi-common:7.3.2")
+    runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.2")
     // Markdown
     implementation("org.commonmark:commonmark:0.29.0")
     // Compression
@@ -127,7 +127,7 @@ dependencies {
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.5.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.3.0")
+    implementation("de.siegmar:fastcsv:4.3.1")
     // Jackson
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.0")
@@ -145,7 +145,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.34")
+    implementation("ch.qos.logback:logback-classic:1.5.37")
     implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
@@ -185,7 +185,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.0"))
+    testImplementation(platform("org.junit:junit-bom:6.1.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
