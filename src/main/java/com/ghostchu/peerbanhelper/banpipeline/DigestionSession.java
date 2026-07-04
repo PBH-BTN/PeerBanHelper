@@ -192,6 +192,7 @@ public class DigestionSession implements AutoCloseable {
                         }
                         joiner.add("-------------- (end)");
                         log.warn(tlUI(Lang.DIGESTION_SYSTEM_WATCH_EARLY_WARNING, joiner.toString()));
+                        warningTriggered = true;
                     }
                     continue;
                 }
