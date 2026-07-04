@@ -180,6 +180,8 @@ public class DigestionSession implements AutoCloseable {
                             joiner.add("ORGAN:" + organ.getClass().getName());
                             joiner.add("Life Cycle Done: " + organ.getStatus().name());
                             joiner.add("Loop Running: " + organ.loopRunning.get());
+                            joiner.add("Last Tick: " + (System.currentTimeMillis() - organ.lastTick.get()) + "ms ago");
+                            joiner.add("Running Duration: "+ (organ.lastTick.get() - sessionStartAt)+"ms total.");
                             if (organ.in != null) {
                                 joiner.add("Upstream In: " + organ.in.getClass().getName());
                             } else {
