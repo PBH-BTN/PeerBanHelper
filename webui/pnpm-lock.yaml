@@ -19,7 +19,7 @@ importers:
         version: 3.4.5
       '@formatjs/intl-durationformat':
         specifier: ^0.10.8
-        version: 0.10.14
+        version: 0.10.15
       '@guolao/vue-monaco-editor':
         specifier: ^1.6.0
         version: 1.6.0(monaco-editor@0.55.1)(vue@3.5.39(typescript@6.0.3))
@@ -349,8 +349,8 @@ packages:
   '@formatjs/fast-memoize@3.1.6':
     resolution: {integrity: sha512-H5aexk1Le7T9TPmscacZ+1pR6CTa2n1wq+HDVGXhH8TzUlQQpeXzZs91dRtmFHrbeNbjPFPfQujUqm7MHgVoXQ==}
 
-  '@formatjs/intl-durationformat@0.10.14':
-    resolution: {integrity: sha512-qVrbKGJZwoGFLmQyMBn4Pk44WCpBKINwLf+isrEd4RpvKs5nChRofHanWJqSu8TjuKJjk1qJjDIFkA/hJX/a9Q==}
+  '@formatjs/intl-durationformat@0.10.15':
+    resolution: {integrity: sha512-3W636wOl2pOVKR2+aFC+2BMOHA/FYsHZfKTr/cT1OG0YIXI2hhGrBH2+EFmqEzzClRi5BlPvwE6LlLN2dikdDQ==}
 
   '@formatjs/intl-localematcher@0.8.10':
     resolution: {integrity: sha512-P/IC3qws3jH+1fEs+o0RIFgXKRaQlFehjS5W0FPAqdo6hgzawLl+eD0q0JjheQ3XtoOe5n8WSYfX06KQZI/QJA==}
@@ -2740,7 +2740,7 @@ snapshots:
 
   '@formatjs/fast-memoize@3.1.6': {}
 
-  '@formatjs/intl-durationformat@0.10.14':
+  '@formatjs/intl-durationformat@0.10.15':
     dependencies:
       '@formatjs/bigdecimal': 0.2.6
       '@formatjs/intl-localematcher': 0.8.10
