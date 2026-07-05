@@ -33,6 +33,10 @@ public class PipelineTask<T> {
 
     @Override
     public String toString() {
-        return "[Task] (" + organ.getClass().getSimpleName() + ") " + comment;
+        if(io){
+            return "[Task] (" + organ.getClass().getSimpleName() + ") " + comment;
+        }else{
+            return "[Task >IO<] (" + organ.getClass().getSimpleName() + ") " + comment;
+        }
     }
 }
