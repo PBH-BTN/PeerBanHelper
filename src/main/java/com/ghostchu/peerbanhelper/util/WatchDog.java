@@ -62,7 +62,6 @@ public final class WatchDog implements AutoCloseable {
             CompletableFuture.runAsync(() -> {
                 if ((System.currentTimeMillis() - lastFeedAt.get()) > timeout) {
                     hungry();
-                    close();
                 } else {
                     good();
                 }
@@ -70,7 +69,6 @@ public final class WatchDog implements AutoCloseable {
         } catch (Throwable e) {
             log.error(tlUI(Lang.WATCH_DOG_CALLBACK_BLOCKED), e);
             Sentry.captureException(e);
-            close();
         }
     }
 
