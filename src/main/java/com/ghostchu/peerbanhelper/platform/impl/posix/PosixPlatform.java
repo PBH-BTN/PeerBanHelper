@@ -1,10 +1,8 @@
 package com.ghostchu.peerbanhelper.platform.impl.posix;
 
 import com.ghostchu.peerbanhelper.platform.Platform;
-import com.ghostchu.peerbanhelper.platform.impl.posix.mtr.PosixMtrTool;
 import com.ghostchu.peerbanhelper.platform.types.EcoQosAPI;
 import com.ghostchu.peerbanhelper.platform.types.MalwareScanner;
-import com.ghostchu.peerbanhelper.platform.types.MtrTool;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
