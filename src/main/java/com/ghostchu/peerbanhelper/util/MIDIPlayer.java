@@ -15,7 +15,7 @@ public final class MIDIPlayer implements AutoCloseable {
     private Sequencer midip = null;
     private int currentIndex = -1;
 
-    public MIDIPlayer(InputStream... sequences) {
+    public MIDIPlayer(InputStream[] sequences) {
         this.sequence = sequences;
         try {
             this.midip = MidiSystem.getSequencer();
