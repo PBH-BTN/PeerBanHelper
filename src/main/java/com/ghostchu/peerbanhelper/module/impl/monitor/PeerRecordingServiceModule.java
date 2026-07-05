@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -32,6 +33,7 @@ import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -45,7 +47,7 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
     @Autowired
     private TransactionTemplate transactionTemplate;
 
-    private final PBHCache<PeerRecordServiceImpl.@NotNull BatchHandleTasks, @NotNull Object> diskWriteCache = new PBHCache<>(
+    private final PBHCache<CacheKey, PeerRecordServiceImpl.@NotNull PeerRecordCachingEntire> diskWriteCache = new PBHCache<>(
             ExternalSwitch.parseInt("pbh.module.peerRecordingServiceModule.diskWriteCache.size", 3500),
             ExternalSwitch.parseLong("pbh.module.peerRecordingServiceModule.diskWriteCache.timeout", 180000),
             null,
@@ -61,20 +63,20 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
 
     public void flush() {
         transactionTemplate.execute(_ -> {
-            for (Map.Entry<PeerRecordServiceImpl.BatchHandleTasks, @NotNull Object> entry : diskWriteCache.asMap().entrySet()) {
-                backFlushDatabase(entry.getKey());
+            for (Map.Entry<CacheKey, PeerRecordServiceImpl.PeerRecordCachingEntire> entry : diskWriteCache.asMap().entrySet()) {
+                backFlushDatabase0(entry.getKey());
             }
             return null;
         });
     }
 
-    private void backFlushDatabase(PeerRecordServiceImpl.BatchHandleTasks key) {
-        peerRecordDao.flushToDatabase(key);
+    private void backFlushDatabase0(CacheKey cacheKey, PeerRecordServiceImpl.PeerRecordCachingEntire value) {
+        peerRecordDao.flushToDatabase(value);
     }
 
-    private void batchFlushDatabase(Stream<Pair<PeerRecordServiceImpl.BatchHandleTasks, Object>> stream) {
+    private void batchFlushDatabase(Stream<Pair<CacheKey, PeerRecordServiceImpl.PeerRecordCachingEntire>> stream) {
         transactionTemplate.execute(_ -> {
-            stream.forEach(pair -> backFlushDatabase(pair.getLeft()));
+            stream.forEach(pair -> backFlushDatabase0(pair.getLeft()));
             return null;
         });
     }
@@ -99,10 +101,20 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
                     }
                     return !peer.isHandshaking();
                 })
-                .forEach(peer ->
-                        diskWriteCache.put(new PeerRecordServiceImpl.BatchHandleTasks(OffsetDateTime.now(),
-                                        downloader.getId(), new TorrentWrapper(torrent), new PeerWrapper(peer)),
-                                MiscUtil.EMPTY_OBJECT));
+                .forEach(peer -> {
+                    CacheKey cacheKey = new CacheKey(downloader, new TorrentWrapper(torrent), peer.getPeerAddress());
+                    var current = new PeerRecordServiceImpl.PeerRecordCachingEntire(OffsetDateTime.now(),
+                            downloader.getId(), new TorrentWrapper(torrent), new PeerWrapper(peer), true);
+                    try {
+                        var inCache = diskWriteCache.get(cacheKey, () -> current);
+                        if (!inCache.equals(current)) {
+                            diskWriteCache.put(cacheKey, current); // 因为dirty 默认是 false，这里就不用更新了
+                        }
+                        // 如果一样，则不做任何事，因为没有更新
+                    } catch (ExecutionException e) {
+                        log.error("Unable to execute the PeerRecordingService cache loading task", e);
+                    }
+                });
     }
 
     @Override
@@ -162,5 +174,9 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
         } catch (Exception e) {
             log.warn("Unable to close peer recording cache instance", e);
         }
+    }
+
+    private record CacheKey(Downloader downloader, TorrentWrapper torrent, PeerAddress peerAddress) {
+
     }
 }

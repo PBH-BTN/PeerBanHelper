@@ -21,7 +21,7 @@ import java.util.Map;
 public interface PeerRecordService extends IService<PeerRecordEntity> {
     List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader);
 
-    void flushToDatabase(PeerRecordServiceImpl.BatchHandleTasks tasks);
+    void flushToDatabase(PeerRecordServiceImpl.PeerRecordCachingEntire tasks);
 
     long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt);
 
