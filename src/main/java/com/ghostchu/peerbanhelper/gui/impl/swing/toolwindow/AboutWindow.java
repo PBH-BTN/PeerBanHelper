@@ -63,7 +63,7 @@ public class AboutWindow {
         playList.add("/assets/midi/Starry_Sea.mid");
         playList.add("/assets/midi/A_Symphony_of_Moments.mid");
         Collections.shuffle(playList, new Random());
-        playList.add("/assets/midi/Reply.mid"); // Make sure it plays at last one
+        playList.add(1, "/assets/midi/Reply.mid"); // Make sure it plays at second one
         midiPlayer = new MIDIPlayer(playList.stream().map(Main.class::getResourceAsStream).toArray(InputStream[]::new));
 
         // https://pbhbtn-afdian-sponors.ghostchu.workers.dev/raw/PBH-BTN/afdian-sponsors-list/master/list.txt
