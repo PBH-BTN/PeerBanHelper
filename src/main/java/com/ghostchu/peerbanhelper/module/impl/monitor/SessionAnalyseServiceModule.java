@@ -98,7 +98,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     private void cleanup() {
         backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
                 new TranslationComponent(Lang.MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA),
-                (task, callback) -> connectionMetricDao.removeOutdatedData(OffsetDateTime.now().minus(this.dataRetentionTime, ChronoUnit.MILLIS))
+                (_, _) -> connectionMetricDao.removeOutdatedData(OffsetDateTime.now().minus(this.dataRetentionTime, ChronoUnit.MILLIS))
         )).join();
     }
 
