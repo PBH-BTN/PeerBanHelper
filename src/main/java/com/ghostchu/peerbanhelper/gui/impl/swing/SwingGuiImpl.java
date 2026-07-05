@@ -65,10 +65,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             JFrame.setDefaultLookAndFeelDecorated(true);
             JDialog.setDefaultLookAndFeelDecorated(true);
         }
-        try{
-            this.colorDetector = new SystemThemeDetector();;
-        }catch (Exception e){
-            log.error("Unable initialize system color scheme detector.");
+        try {
+            this.colorDetector = new SystemThemeDetector();
+        } catch (Exception e) {
+            log.error("Unable initialize system color scheme detector.", e);
         }
     }
 
