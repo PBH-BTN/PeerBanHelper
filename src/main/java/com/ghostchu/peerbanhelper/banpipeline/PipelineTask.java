@@ -13,6 +13,7 @@ public class PipelineTask<T> {
     @Getter
     @Nullable
     private volatile String comment;
+    @Getter
     @Setter
     @Nullable
     private CompletableFuture<T> delegate;
