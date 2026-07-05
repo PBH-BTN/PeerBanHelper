@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
+import com.ghostchu.peerbanhelper.wrapper.BanDetailData;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
@@ -152,6 +153,8 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
         });
         for (UnbanPeerTask unbanPeer : unbanPeers) {
             btnNetwork.getServer().scheduleUnBanPeer(unbanPeer.getIpAddress());
+            BanDetailData banDetailData = btnNetwork.getHistoryDao().extractBanDetails(unbanPeer.getBanMetadata().getLinkedHistoryId());
+
             btnNetwork.getAlertManager().publishAlert(false,
                     AlertLevel.INFO,
                     "btn-allowlist-unbanned-peer-"+unbanPeer.getIpAddress().toCompressedString()+ UUID.randomUUID(),

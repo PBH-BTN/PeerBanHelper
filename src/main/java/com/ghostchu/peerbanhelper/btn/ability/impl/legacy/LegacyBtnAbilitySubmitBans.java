@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.wrapper.BanDetailData;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
@@ -127,16 +128,17 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
             if (e.getValue().getBanAt().isBefore(lastReport) || e.getValue().getBanAt().isEqual(lastReport)) {
                 continue;
             }
-            if (e.getValue().isBanForDisconnect() || e.getValue().isExcludeFromReport()) {
+            if (e.getValue().isExcludeFromReport() || e.getValue().isExcludeFromPersist()) {
                 continue;
             }
+            BanDetailData banDetailData = btnNetwork.getHistoryDao().extractBanDetails(e.getValue().getLinkedHistoryId());
             LegacyBtnBan btnBan = new LegacyBtnBan();
             btnBan.setBtnBan(e.getValue().getContext().equals(BtnNetworkOnline.class.getName()));
             btnBan.setPeer(e.getKey());
             btnBan.setModule(e.getValue().getContext());
-            btnBan.setRule(tl(Main.DEF_LOCALE, e.getValue().getDescription()));
+            btnBan.setRule(tl(Main.DEF_LOCALE, banDetailData.description()));
             btnBan.setBanUniqueId(Hashing.sha256().hashString(e.getValue().toString(), StandardCharsets.UTF_8).toString());
-            btnBan.setStructuredData(e.getValue().getStructuredData());
+            btnBan.setStructuredData(banDetailData.structuredData());
             list.add(btnBan);
         }
         return list;

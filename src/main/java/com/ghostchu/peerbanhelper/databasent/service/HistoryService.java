@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.databasent.dto.PeerBanCount;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.ghostchu.peerbanhelper.wrapper.BanDetailData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,4 +39,6 @@ public interface HistoryService extends IService<HistoryEntity> {
     List<String> getDistinctIps(@NotNull java.time.OffsetDateTime start,
                                 @NotNull java.time.OffsetDateTime end,
                                 @Nullable String downloader);
+
+    BanDetailData extractBanDetails(long linkedHistoryId);
 }

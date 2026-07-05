@@ -114,7 +114,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             if (reference.get() != null) {
                 return;
             }
-            if (bannedMeta.isBanForDisconnect()) {
+            if (bannedMeta.isExcludeFromNotify() || bannedMeta.isExcludeFromPersist()) {
                 return;
             }
             if (finalPeerAddress.isIPv4() != bannedAddr.isIPv4()) {

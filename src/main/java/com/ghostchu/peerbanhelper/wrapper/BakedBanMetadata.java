@@ -23,15 +23,15 @@ public final class BakedBanMetadata implements Serializable {
     private String rule;
     private String description;
 
-    public BakedBanMetadata(String locale, BanMetadata banMetadata) {
+    public BakedBanMetadata(String locale, BanMetadata banMetadata, BanDetailData banDetailData) {
         this.downloader = banMetadata.getDownloader();
         this.torrent = banMetadata.getTorrent();
         this.peer = banMetadata.getPeer();
-        this.reverseLookup = banMetadata.getReverseLookup();
+        this.reverseLookup = banMetadata.getReserveDnsLookup();
         this.context = banMetadata.getContext();
         this.banAt = banMetadata.getBanAt();
         this.unbanAt = banMetadata.getUnbanAt();
-        this.rule = tl(locale, banMetadata.getRule());
-        this.description = tl(locale, banMetadata.getDescription());
+        this.rule = tl(locale, banDetailData.rule());
+        this.description = tl(locale, banDetailData.description());
     }
 }

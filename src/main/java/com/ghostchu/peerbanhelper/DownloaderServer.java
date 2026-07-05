@@ -15,7 +15,7 @@ public interface DownloaderServer {
 
     @NotNull Map<PeerAddress, List<PeerMetadata>> getPeerSnapshot();
 
-    void scheduleBanPeerNoAssign(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer);
+    void scheduleBanPeerNoAssign(@NotNull String downloaderId, @NotNull Torrent torrent, @NotNull Peer peer);
 
     void scheduleBanPeerNoAssign(@NotNull PeerAddress addr);
 

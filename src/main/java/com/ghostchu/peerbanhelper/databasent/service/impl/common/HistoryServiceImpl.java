@@ -11,6 +11,8 @@ import com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.ghostchu.peerbanhelper.wrapper.BanDetailData;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -116,5 +118,14 @@ public class HistoryServiceImpl extends AbstractCommonService<HistoryMapper, His
     @Override
     public List<String> getDistinctIps(@NotNull OffsetDateTime start, @NotNull OffsetDateTime end, @Nullable String downloader) {
         return baseMapper.getDistinctIps(start, end, downloader);
+    }
+
+    @Override
+    public BanDetailData extractBanDetails(long linkedHistoryId) {
+        var history = baseMapper.selectById(linkedHistoryId);
+        return new BanDetailData(history.getModuleName(),
+                history.getRuleName(),
+                history.getDescription(),
+                StructuredData.create().addAll(history.getStructuredData()));
     }
 }

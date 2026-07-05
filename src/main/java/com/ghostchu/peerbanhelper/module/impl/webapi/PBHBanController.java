@@ -22,6 +22,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BanDetailData;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import inet.ipaddr.IPAddress;
@@ -154,8 +155,8 @@ public final class PBHBanController extends AbstractFeatureModule {
          *  The controller detects the presence of the `page` query parameter.
          */
 
-        boolean ignoreBanForDisconnect =
-                Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
+//        boolean ignoreBanForDisconnect =
+//                Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
         String search = ctx.queryParam("search");
         if (search != null) search = URLDecoder.decode(search, StandardCharsets.UTF_8);
         /* ---------------- Pagination path ---------------- */
@@ -163,7 +164,6 @@ public final class PBHBanController extends AbstractFeatureModule {
 
         // We always sort by ban time (desc) as default
         var banStream = getBanResponseStream(ctx.req().getLocale().toString(),
-                ignoreBanForDisconnect,
                 search);
 
         List<BanDTO> allResults = banStream.toList();
@@ -183,19 +183,18 @@ public final class PBHBanController extends AbstractFeatureModule {
 
     }
 
-    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, boolean ignoreBanForDisconnect, String search) {
+    private @NotNull Stream<BanDTO> getBanResponseStream(String locale,  String search) {
         var banResponseList = banList.toMap()
                 .entrySet()
                 .stream()
-                .filter(b -> {
-                    if (b.getValue().isExcludeFromDisplay()) return false;
-                    if (!ignoreBanForDisconnect) return true;
-                    return !b.getValue().isBanForDisconnect();
-                })
+                .filter(b -> !b.getValue().isExcludeFromDisplay())
                 .filter(b -> search == null
                         || Arrays.stream(b.getKey().toStandardStrings()).anyMatch(ip -> ip.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
-                .map(entry -> new BanDTO(entry.getKey().toCompressedString(), new BakedBanMetadata(locale, entry.getValue()), null))
+                .map(entry ->{
+                    BanDetailData banDetailData = historyService.extractBanDetails(entry.getValue().getLinkedHistoryId());
+                    return new BanDTO(entry.getKey().toCompressedString(), new BakedBanMetadata(locale, entry.getValue(), banDetailData), null);
+                })
                 .sorted((o1, o2) -> o2.getBanMetadata().getBanAt().compareTo(o1.getBanMetadata().getBanAt()));
 
         banResponseList = banResponseList.peek(response -> {

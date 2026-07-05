@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
@@ -12,31 +13,30 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.*;
 import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component("persistMetrics")
-public final class PersistMetrics implements BasicMetrics {
-    private final InMemoryMetrics inMemory;
+public final class PersistMetrics extends InMemoryMetrics implements BasicMetrics {
     private final TorrentService torrentDao;
     private final HistoryService historyDao;
     private final IPDBManager ipdbManager;
 
-
-    public PersistMetrics(HistoryService historyDao, TorrentService torrentDao, InMemoryMetrics inMemory, IPDBManager ipdbManager) {
+    public PersistMetrics(HistoryService historyDao, TorrentService torrentDao, IPDBManager ipdbManager) {
         this.historyDao = historyDao;
         this.torrentDao = torrentDao;
-        this.inMemory = inMemory;
         this.ipdbManager = ipdbManager;
         Main.getEventBus().register(this);
     }
@@ -65,41 +65,15 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
-    public long getCheckCounter() {
-        return inMemory.getCheckCounter();
-    }
-
-    @Override
-    public long getPeerBanCounter() {
-        return inMemory.getPeerBanCounter();
-    }
-
-    @Override
-    public long getPeerUnbanCounter() {
-        return inMemory.getPeerUnbanCounter();
-    }
-
-    @Override
-    public long getSavedTraffic() {
-        return inMemory.getSavedTraffic();
-    }
-
-    @Override
-    public long getWastedTraffic() {
-        return inMemory.getWastedTraffic();
-    }
-
-    @Override
-    public void recordCheck() {
-        inMemory.recordCheck();
-    }
-
-    @Override
-    public void recordPeerBan(@NotNull IPAddress address, @NotNull BanMetadata metadata) {
-        if (metadata.isBanForDisconnect()) {
-            return;
+    public BanMetadata recordPeerBan(@NotNull IPAddress address, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt,
+                                     boolean excludeFromPersist, boolean excludeFromNotify, boolean excludeFromReport, boolean excludeFromDisplay,
+                                     TorrentWrapper torrent, PeerWrapper peer, BanDetailData banDetailData) {
+        BanMetadata metadata = super.recordPeerBan(address, downloader, banAt, unbanAt, excludeFromPersist, excludeFromNotify,
+                excludeFromReport, excludeFromDisplay, torrent, peer,
+                banDetailData);
+        if (metadata.isExcludeFromPersist()) {
+            return metadata;
         }
-        inMemory.recordPeerBan(address, metadata);
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
                 metadata.getTorrent().getHash(),
@@ -112,35 +86,39 @@ public final class PersistMetrics implements BasicMetrics {
         if (resp != null) {
             geoIpData = resp.geoData().get();
         }
-        historyDao.save(new HistoryEntity(
+        var entity = new HistoryEntity(
                 null,
-                metadata.getBanAt(),
-                metadata.getUnbanAt(),
+                banAt,
+                unbanAt,
                 address.toInetAddress(),
-                metadata.getPeer().getAddress().getPort(),
-                metadata.getPeer().getId(),
-                metadata.getPeer().getClientName(),
-                metadata.getPeer().getUploaded(),
-                metadata.getPeer().getDownloaded(),
-                metadata.getPeer().getProgress(),
-                metadata.getTorrent().getProgress(),
+                peer.getAddress().getPort(),
+                peer.getId(),
+                peer.getClientName(),
+                peer.getUploaded(),
+                peer.getDownloaded(),
+                peer.getProgress(),
+                torrent.getProgress(),
                 torrentEntity.getId(),
-                metadata.getContext(),
-                metadata.getRule(),
-                metadata.getDescription(),
+                banDetailData.context(),
+                banDetailData.rule(),
+                banDetailData.description(),
                 metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags(),
                 metadata.getDownloader().id(),
-                metadata.getStructuredData() == null ? null : metadata.getStructuredData(),
+                banDetailData.structuredData(),
                 geoIpData
-        ));
+        );
+        historyDao.save(entity);
+        metadata.setLinkedHistoryId(entity.getId());
+        return metadata;
     }
+
 
     @Override
     public void recordPeerUnban(@NotNull IPAddress address, @NotNull BanMetadata metadata) {
-        if (metadata.isBanForDisconnect()) {
+        super.recordPeerUnban(address, metadata);
+        if (metadata.isExcludeFromNotify()) {
             return;
         }
-        inMemory.recordPeerUnban(address, metadata);
         // no record
     }
 
@@ -151,7 +129,7 @@ public final class PersistMetrics implements BasicMetrics {
 
     @Override
     public void close() {
-        inMemory.close();
+        super.close();
         flush();
     }
 }

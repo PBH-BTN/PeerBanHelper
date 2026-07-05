@@ -1,9 +1,6 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
-import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
-import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -22,41 +19,26 @@ public class BanMetadata extends PeerMetadata implements Serializable {
     private String randomId;
     private OffsetDateTime banAt;
     private OffsetDateTime unbanAt;
-    private boolean banForDisconnect;
+    private boolean excludeFromPersist;
+    private boolean excludeFromNotify;
     private boolean excludeFromReport;
     private boolean excludeFromDisplay;
-    private TranslationComponent rule;
-    private TranslationComponent description;
-    private StructuredData<String, Object> structuredData;
+    private long linkedHistoryId = -1; // persist
+    private transient String reserveDnsLookup = "N/A";
 
-    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, Torrent torrent, Peer peer, TranslationComponent rule,
-                       TranslationComponent description, StructuredData<String, Object> structuredData) {
+    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt,
+                       boolean excludeFromPersist, boolean excludeFromNotify, boolean excludeFromReport, boolean excludeFromDisplay,
+                       TorrentWrapper torrent, PeerWrapper peer, long linkedHistoryId) {
         super(downloader, torrent, peer);
         this.context = context;
         this.randomId = randomId;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
-        this.banForDisconnect = banForDisconnect;
+        this.excludeFromPersist = excludeFromPersist;
+        this.excludeFromNotify = excludeFromNotify;
         this.excludeFromDisplay = excludeFromDisplay;
         this.excludeFromReport = excludeFromReport;
-        this.rule = rule;
-        this.description = description;
-        this.structuredData = structuredData;
-    }
-
-    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
-                       TranslationComponent description, StructuredData<String, Object> structuredData) {
-        super(downloader, torrent, peer);
-        this.context = context;
-        this.randomId = randomId;
-        this.banAt = banAt;
-        this.unbanAt = unbanAt;
-        this.banForDisconnect = banForDisconnect;
-        this.excludeFromDisplay = excludeFromDisplay;
-        this.excludeFromReport = excludeFromReport;
-        this.rule = rule;
-        this.description = description;
-        this.structuredData = structuredData;
+        this.linkedHistoryId = linkedHistoryId;
     }
 
     @Override
@@ -66,12 +48,12 @@ public class BanMetadata extends PeerMetadata implements Serializable {
                 ", randomId='" + randomId + '\'' +
                 ", banAt=" + banAt +
                 ", unbanAt=" + unbanAt +
-                ", banForDisconnect=" + banForDisconnect +
+                ", excludeFromPersist=" + excludeFromPersist +
+                ", excludeFromNotify=" + excludeFromNotify +
                 ", excludeFromReport=" + excludeFromReport +
                 ", excludeFromDisplay=" + excludeFromDisplay +
-                ", rule=" + tlUI(rule) +
-                ", description=" + tlUI(description) +
-                ", structuredData=" + structuredData +
+                ", linkedHistoryId=" + linkedHistoryId +
+                ", reserveDnsLookup='" + reserveDnsLookup + '\'' +
                 '}';
     }
 }
