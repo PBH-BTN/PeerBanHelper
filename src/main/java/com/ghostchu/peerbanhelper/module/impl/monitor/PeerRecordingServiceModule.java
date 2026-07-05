@@ -108,7 +108,7 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
                     try {
                         var inCache = diskWriteCache.get(cacheKey, () -> current);
                         if (!inCache.equals(current)) {
-                            diskWriteCache.put(cacheKey, current); // 因为dirty 默认是 false，这里就不用更新了
+                            diskWriteCache.put(cacheKey, current); // 因为dirty 默认是 true，这里就不用更新了
                         }
                         // 如果一样，则不做任何事，因为没有更新
                     } catch (ExecutionException e) {
