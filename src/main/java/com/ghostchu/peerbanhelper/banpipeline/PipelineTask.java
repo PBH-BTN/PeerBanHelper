@@ -12,8 +12,7 @@ public class PipelineTask<T> {
     private final BanOrgan<?, ?> organ;
     @Getter
     @Nullable
-    private String comment;
-    @Getter
+    private volatile String comment;
     @Setter
     @Nullable
     private CompletableFuture<T> delegate;
