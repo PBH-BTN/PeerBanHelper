@@ -15,7 +15,7 @@ Password: peerbanhelper@admin123,./
 [speed:10]
 Logged in.
 [clear]
-[f:#eace5a,b:#000000]
+[f:#ffffff,b:#384f6c,g:#f9635e,gr:5,gi:1.0,gb:2.4]
 [speed:0]
 ----------------------------------------------------------------------------------------------------------------
 RS232                   ONLINE                       UTF-8                 9600bps                         MIDI
