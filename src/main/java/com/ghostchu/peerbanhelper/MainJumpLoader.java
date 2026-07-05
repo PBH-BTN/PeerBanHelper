@@ -21,8 +21,14 @@ public final class MainJumpLoader {
                     .orElse(null);
             if (buildNumber == null) {
                 setupCharsets = false;
-            } else if (Long.parseLong(buildNumber) < 17134) { // 17134: Windows 10 1803
-                setupCharsets = false;
+            } else {
+                try {
+                    if (Long.parseLong(buildNumber) < 17134) { // 17134: Windows 10 1803
+                        setupCharsets = false;
+                    }
+                } catch (NumberFormatException ignored) {
+                    setupCharsets = false;
+                }
             }
             if (setupCharsets) {
                 setupCharsets();
