@@ -6,11 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -79,7 +75,7 @@ public abstract class BanOrgan<IN, OUT> {
                         .orTimeout(maxDigestDuration, digestTimeUnit) // this is the actually reason we use CompletableFutures
                         .exceptionally(e -> { // f.
                             BanOrganCallback<IN> callback;
-                            if (e instanceof InterruptedException) {
+                            if (e instanceof InterruptedException || e instanceof  TimeoutException) {
                                 callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.TIMEOUT, e, null);
                             } else {
                                 callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.ERRORED, e, null);
