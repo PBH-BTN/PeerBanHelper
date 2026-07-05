@@ -64,7 +64,7 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
     public void flush() {
         transactionTemplate.execute(_ -> {
             for (Map.Entry<CacheKey, PeerRecordServiceImpl.PeerRecordCachingEntire> entry : diskWriteCache.asMap().entrySet()) {
-                backFlushDatabase0(entry.getKey());
+                backFlushDatabase0(entry.getKey(), entry.getValue());
             }
             return null;
         });
@@ -76,7 +76,7 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
 
     private void batchFlushDatabase(Stream<Pair<CacheKey, PeerRecordServiceImpl.PeerRecordCachingEntire>> stream) {
         transactionTemplate.execute(_ -> {
-            stream.forEach(pair -> backFlushDatabase0(pair.getLeft()));
+            stream.forEach(pair -> backFlushDatabase0(pair.getLeft(), pair.getRight()));
             return null;
         });
     }
