@@ -16,7 +16,8 @@ public class PipelineTask<T> {
     @Setter
     @Nullable
     private CompletableFuture<T> delegate;
-    private boolean io;
+    @Getter
+    private volatile boolean io;
 
     public PipelineTask(CompletableFuture<T> delegate, BanOrgan<?, ?> organ, String comment) {
         this.delegate = delegate;
