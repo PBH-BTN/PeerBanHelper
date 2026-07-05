@@ -6,7 +6,7 @@ jobs:
   pkg:
     strategy:
       matrix:
-        version: [13.4, 14.1]
+        version: [13.4, 14.1, 15.1]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
