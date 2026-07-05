@@ -50,7 +50,8 @@ public final class WatchDog implements AutoCloseable {
 
     @Override
     public void close() {
-        this.monitor.cancel(true);
+        if(this.monitor != null)
+            this.monitor.cancel(true);
     }
 
     public void feed() {
