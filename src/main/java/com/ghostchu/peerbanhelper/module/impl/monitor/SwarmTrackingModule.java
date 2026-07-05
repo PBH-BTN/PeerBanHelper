@@ -8,7 +8,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
+import com.ghostchu.peerbanhelper.module.BatchMonitorFeatureModule;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 
-public final class SwarmTrackingModule extends AbstractFeatureModule implements MonitorFeatureModule {
+public final class SwarmTrackingModule extends AbstractFeatureModule implements BatchMonitorFeatureModule {
     @Autowired
     private TrackedSwarmService trackedSwarmDao;
     @Autowired
@@ -110,7 +110,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
         try {
             for (Peer peer : peers) {
                 if (peer.isHandshaking()) continue;

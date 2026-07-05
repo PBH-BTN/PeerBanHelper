@@ -8,7 +8,7 @@ import com.ghostchu.peerbanhelper.databasent.service.PeerRecordService;
 import com.ghostchu.peerbanhelper.databasent.service.impl.common.PeerRecordServiceImpl;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
+import com.ghostchu.peerbanhelper.module.BatchMonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -39,7 +39,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class PeerRecordingServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
+public class PeerRecordingServiceModule extends AbstractFeatureModule implements Reloadable, BatchMonitorFeatureModule {
     @Autowired
     private PeerRecordService peerRecordDao;
     @Autowired
@@ -86,7 +86,7 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
         task.setComment(true, "Update Peers into diskWriteCache, and flush to disk if needed.");
         peers.stream().filter(peer -> {
                     var clientName = peer.getClientName();
