@@ -24,10 +24,11 @@ public class PeersFetchOrgan extends BanOrgan<FetchedTorrent, FetchedPeersBatch>
             input.downloader().getConcurrentRequestControlSemaphore().acquire();
             wrapper.setComment(true, "Fetching peers for torrent: " + input.torrent().getId()+", execute HTTP requests...");
             var peers = input.downloader().getPeers(input.torrent());
-            input.downloader().getConcurrentRequestControlSemaphore().release();
             wrapper.setComment(false, "Fetching peers for torrent: " + input.torrent().getId()+", waiting for outlet...");
             outlet.accept(new FetchedPeersBatch(input.downloader(), input.torrent(), peers));
         } catch (InterruptedException _) {
+           Thread.currentThread().interrupt();
+        } finally {
             input.downloader().getConcurrentRequestControlSemaphore().release();
         }
     }
