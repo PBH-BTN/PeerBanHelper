@@ -270,7 +270,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(PBHTorrentController.class);
         moduleClasses.add(PBHPeerController.class);
         moduleClasses.add(PBHAlertController.class);
-        moduleClasses.add(PBHLogsLegacyController.class);
+        moduleClasses.add(PBHLogsController.class);
         moduleClasses.add(PBHPushController.class);
         moduleClasses.add(PBHLabController.class);
         moduleClasses.add(PBHEasterEggController.class);
