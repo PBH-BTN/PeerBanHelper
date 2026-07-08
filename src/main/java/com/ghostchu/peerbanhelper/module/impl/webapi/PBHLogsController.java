@@ -2,8 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
-import com.ghostchu.peerbanhelper.module.AbstractWebSocketFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebSocketLogEntryDTO;
+import com.ghostchu.peerbanhelper.module.AbstractSSEFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebUILogEntryDTO;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.eventbus.Subscribe;
 import io.javalin.http.Context;
+import io.javalin.http.sse.SseClient;
 import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +21,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public final class PBHLogsController extends AbstractWebSocketFeatureModule {
+public final class PBHLogsController extends AbstractSSEFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+    private static final String logEntryKey = "logEntry";
 
     @Override
     public boolean isConfigurable() {
@@ -31,7 +33,7 @@ public final class PBHLogsController extends AbstractWebSocketFeatureModule {
 
     @Override
     public @NotNull String getName() {
-        return "WebAPI - Logs";
+        return "WebAPI - Logs)";
     }
 
     @Override
@@ -43,59 +45,43 @@ public final class PBHLogsController extends AbstractWebSocketFeatureModule {
     public void onEnable() {
         webContainer.routes()
                 .get("/api/logs/history", this::handleLogs, Role.USER_WRITE)
-                .wsBeforeUpgrade("/api/logs/stream", this::beforeUpgrade)
-                .ws("/api/logs/stream", this::handleLogsStream, Role.USER_WRITE);
+                .sse("/api/logs/live", this::handleLiveConnection, Role.USER_WRITE)
+        ;
         Main.getEventBus().register(this);
     }
 
+    private void handleLiveConnection(SseClient sseClient) {
+        log.debug("Established Logs SSE Connection: {}", sseClient);
+        sendCurrentLogs(sseClient);
+        this.registerSseManagement(sseClient);
+    }
+
+    private void sendCurrentLogs(SseClient sseClient) {
+        var list = JListAppender.ringDeque.stream().map(e -> new WebUILogEntryDTO(
+                e.time(),
+                e.thread(),
+                e.level().name(),
+                e.content(),
+                e.seq()
+        )).toList();
+        list.forEach(logEntry -> sseClient.sendEvent(logEntryKey, logEntry));
+    }
 
     @Subscribe
     public void onLogRecordCreated(NewLogEntryCreatedEvent event) {
-        for (WsContext wsContext : wsSessions) {
-            wsContext.send(new StdResp(true, null,
-                    new WebSocketLogEntryDTO(
-                            event.entry().time(),
-                            event.entry().thread(),
-                            event.entry().level().name(),
-                            event.entry().content(),
-                            event.entry().seq()
-                    )));
-        }
-    }
-
-    private void handleLogsStream(WsConfig wsConfig) {
-        acceptWebSocket(wsConfig, (ctx) -> {
-            var offset = ctx.queryParam("offset");
-            sendHistoryLogs(ctx, Long.parseLong(offset == null ? String.valueOf(Long.MAX_VALUE) : offset));
-        });
-    }
-
-    private void sendHistoryLogs(WsContext ctx, long offset) {
-        if (offset > JListAppender.getSeq().longValue()) {// PBH 重启，但是 WebUI 没有刷新，或者为未传递 seq 参数
-            offset = 0;
-            var peekedRecord = JListAppender.ringDeque.peek();
-            if (peekedRecord != null) {
-                var headSeq = peekedRecord.seq();
-                offset = headSeq - 1;
-            }
-        }
-        for (LogEntry logEntry : JListAppender.ringDeque) {
-            if (logEntry.seq() > offset) {
-                ctx.send(new StdResp(true, null,
-                        new WebSocketLogEntryDTO(
-                                logEntry.time(),
-                                logEntry.thread(),
-                                logEntry.level().name(),
-                                logEntry.content(),
-                                logEntry.seq()
-                        )));
-            }
-        }
+        var logEntry = new WebUILogEntryDTO(
+                event.entry().time(),
+                event.entry().thread(),
+                event.entry().level().name(),
+                event.entry().content(),
+                event.entry().seq()
+        );
+        iterateSseClients(sse-> sse.sendEvent(logEntryKey, logEntry));
     }
 
     private void handleLogs(Context ctx) {
         ctx.status(200);
-        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntryDTO(
+        var list = JListAppender.ringDeque.stream().map(e -> new WebUILogEntryDTO(
                 e.time(),
                 e.thread(),
                 e.level().name(),
