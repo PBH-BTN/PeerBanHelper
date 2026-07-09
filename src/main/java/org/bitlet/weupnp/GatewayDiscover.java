@@ -75,7 +75,7 @@ public class GatewayDiscover {
     /**
      * The gateway types the discover have to search.
      */
-    private String[] searchTypes;
+    private final String[] searchTypes;
     
     /**
      * The default gateway types to use in search
@@ -93,14 +93,14 @@ public class GatewayDiscover {
      * The assumption is that a machine is connected to up to a Gateway Device
      * per InetAddress
      */
-    private final Map<InetAddress, GatewayDevice> devices = new HashMap<InetAddress, GatewayDevice>();
+    private final Map<InetAddress, GatewayDevice> devices = new HashMap<>();
 
     /*
       *  Thread class for sending a search datagram and process the response.
       */
     private class SendDiscoveryThread extends Thread {
-        InetAddress ip;
-        String searchMessage;
+        final InetAddress ip;
+        final String searchMessage;
         long delay;
 
         SendDiscoveryThread(InetAddress localIP, String searchMessage) {
@@ -246,7 +246,7 @@ public class GatewayDiscover {
                     "\r\n";
 
             // perform search requests for multiple network adapters concurrently
-            Collection<SendDiscoveryThread> threads = new ArrayList<SendDiscoveryThread>();
+            Collection<SendDiscoveryThread> threads = new ArrayList<>();
             for (InetAddress ip : ips) {
                 SendDiscoveryThread thread = new SendDiscoveryThread(ip, searchMessage);
                 threads.add(thread);
@@ -351,7 +351,7 @@ public class GatewayDiscover {
      * @return Collection if {@link InetAddress}es
      */
     private List<InetAddress> getLocalInetAddresses(boolean getIPv4, boolean getIPv6, boolean sortIPv4BeforeIPv6) {
-        List<InetAddress> arrayIPAddress = new ArrayList<InetAddress>();
+        List<InetAddress> arrayIPAddress = new ArrayList<>();
         int lastIPv4Index = 0;
 
         // Get all network interfaces
@@ -388,12 +388,12 @@ public class GatewayDiscover {
                 int index = arrayIPAddress.size();
 
                 if (!getIPv4 || !getIPv6) {
-                    if (getIPv4 && !Inet4Address.class.isInstance(inetAddress))
+                    if (getIPv4 && !(inetAddress instanceof Inet4Address))
                         continue;
 
-                    if (getIPv6 && !Inet6Address.class.isInstance(inetAddress))
+                    if (getIPv6 && !(inetAddress instanceof Inet6Address))
                         continue;
-                } else if (sortIPv4BeforeIPv6 && Inet4Address.class.isInstance(inetAddress)) {
+                } else if (sortIPv4BeforeIPv6 && inetAddress instanceof Inet4Address) {
                     index = lastIPv4Index++;
                 }
 

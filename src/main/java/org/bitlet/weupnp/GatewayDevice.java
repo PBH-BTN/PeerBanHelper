@@ -138,7 +138,7 @@ public class GatewayDevice {
 
         /* fix urls */
         String ipConDescURL;
-        if (urlBase != null && urlBase.trim().length() > 0) {
+        if (urlBase != null && !urlBase.trim().isEmpty()) {
             ipConDescURL = urlBase;
         } else {
             ipConDescURL = location;
@@ -185,7 +185,7 @@ public class GatewayDevice {
                 "<SOAP-ENV:Body>" +
                 "<m:" + action + " xmlns:m=\"" + service + "\">");
 
-        if (args != null && args.size() > 0) {
+        if (args != null && !args.isEmpty()) {
 
             Set<Map.Entry<String, String>> entrySet = args.entrySet();
 
@@ -217,7 +217,7 @@ public class GatewayDevice {
 
         conn.getOutputStream().write(soapBodyBytes);
 
-        Map<String, String> nameValue = new HashMap<String, String>();
+        Map<String, String> nameValue = new HashMap<>();
         XMLReader parser = XMLReaderFactory.createXMLReader();
         parser.setContentHandler(new NameValueHandler(nameValue));
         if (conn.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
@@ -252,12 +252,8 @@ public class GatewayDevice {
                 serviceType, "GetStatusInfo", null);
 
         String connectionStatus = nameValue.get("NewConnectionStatus");
-        if (connectionStatus != null
-                && connectionStatus.equalsIgnoreCase("Connected")) {
-            return true;
-        }
-
-        return false;
+        return connectionStatus != null
+                && connectionStatus.equalsIgnoreCase("Connected");
     }
 
     /**
@@ -298,7 +294,7 @@ public class GatewayDevice {
     public boolean addPortMapping(int externalPort, int internalPort,
                                   String internalClient, String protocol, String description)
             throws IOException, SAXException {
-        Map<String, String> args = new LinkedHashMap<String, String>();
+        Map<String, String> args = new LinkedHashMap<>();
         args.put("NewRemoteHost", "");    // wildcard, any remote host matches
         args.put("NewExternalPort", Integer.toString(externalPort));
         args.put("NewProtocol", protocol);
@@ -341,7 +337,7 @@ public class GatewayDevice {
         portMappingEntry.setExternalPort(externalPort);
         portMappingEntry.setProtocol(protocol);
 
-        Map<String, String> args = new LinkedHashMap<String, String>();
+        Map<String, String> args = new LinkedHashMap<>();
         args.put("NewRemoteHost", ""); // wildcard, any remote host matches
         args.put("NewExternalPort", Integer.toString(externalPort));
         args.put("NewProtocol", protocol);
@@ -391,7 +387,7 @@ public class GatewayDevice {
     public boolean getGenericPortMappingEntry(int index,
                                               final PortMappingEntry portMappingEntry)
             throws IOException, SAXException {
-        Map<String, String> args = new LinkedHashMap<String, String>();
+        Map<String, String> args = new LinkedHashMap<>();
         args.put("NewPortMappingIndex", Integer.toString(index));
 
         Map<String, String> nameValue = simpleUPnPcommand(controlURL,
@@ -458,7 +454,7 @@ public class GatewayDevice {
      */
     public boolean deletePortMapping(int externalPort, String protocol)
             throws IOException, SAXException {
-        Map<String, String> args = new LinkedHashMap<String, String>();
+        Map<String, String> args = new LinkedHashMap<>();
         args.put("NewRemoteHost", "");
         args.put("NewExternalPort", Integer.toString(externalPort));
         args.put("NewProtocol", protocol);

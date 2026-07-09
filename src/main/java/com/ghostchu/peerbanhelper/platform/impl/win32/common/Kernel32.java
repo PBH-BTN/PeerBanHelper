@@ -1,40 +1,74 @@
 package com.ghostchu.peerbanhelper.platform.impl.win32.common;
 
-import com.sun.jna.Native;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinNT;
-import com.sun.jna.win32.StdCallLibrary;
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
 
 /**
- * Windows Kernel32 API 接口定义
- * 用于进程工作集内存管理
+ * Windows Kernel32 API — Foreign Function & Memory API 实现
  */
-public interface Kernel32 extends StdCallLibrary {
-    
-    Kernel32 INSTANCE = Native.load("kernel32", Kernel32.class);
-    
-    /**
-     * 获取当前进程的句柄
-     * @return 当前进程的句柄
-     */
-    WinNT.HANDLE GetCurrentProcess();
-    
-    /**
-     * 设置进程的工作集大小限制
-     * @param hProcess 进程句柄
-     * @param dwMinimumWorkingSetSize 最小工作集大小（以字节为单位）
-     * @param dwMaximumWorkingSetSize 最大工作集大小（以字节为单位）
-     * @return 如果函数成功，返回值为非零值；如果函数失败，返回值为零
-     */
-    boolean SetProcessWorkingSetSize(
-            WinNT.HANDLE hProcess,
-            WinDef.DWORD dwMinimumWorkingSetSize,
-            WinDef.DWORD dwMaximumWorkingSetSize
+public final class Kernel32 {
+
+    private static final Linker LINKER = Linker.nativeLinker();
+    private static final SymbolLookup KERNEL32 = SymbolLookup.libraryLookup("kernel32", Arena.global());
+
+    // HANDLE GetCurrentProcess()
+    private static final MethodHandle MH_GET_CURRENT_PROCESS = LINKER.downcallHandle(
+            KERNEL32.find("GetCurrentProcess").orElseThrow(),
+            FunctionDescriptor.of(ValueLayout.ADDRESS)
     );
-    
+
+    // BOOL SetProcessWorkingSetSize(HANDLE hProcess, SIZE_T min, SIZE_T max)
+    // On 64-bit Windows SIZE_T = 8 bytes => JAVA_LONG
+    private static final MethodHandle MH_SET_WORKING_SET_SIZE = LINKER.downcallHandle(
+            KERNEL32.find("SetProcessWorkingSetSize").orElseThrow(),
+            FunctionDescriptor.of(ValueLayout.JAVA_INT,
+                    ValueLayout.ADDRESS,
+                    ValueLayout.JAVA_LONG,
+                    ValueLayout.JAVA_LONG)
+    );
+
+    // DWORD GetLastError()
+    private static final MethodHandle MH_GET_LAST_ERROR = LINKER.downcallHandle(
+            KERNEL32.find("GetLastError").orElseThrow(),
+            FunctionDescriptor.of(ValueLayout.JAVA_INT)
+    );
+
+    private Kernel32() {
+    }
+
     /**
-     * 获取最后的错误代码
-     * @return 最后的错误代码
+     * GetCurrentProcess — 返回伪句柄，无需关闭
      */
-    int GetLastError();
+    public static MemorySegment getCurrentProcess() {
+        try {
+            return (MemorySegment) MH_GET_CURRENT_PROCESS.invokeExact();
+        } catch (Throwable t) {
+            throw new RuntimeException("GetCurrentProcess failed", t);
+        }
+    }
+
+    /**
+     * SetProcessWorkingSetSize
+     *
+     * @return 非零为成功
+     */
+    public static boolean setProcessWorkingSetSize(MemorySegment hProcess, long minBytes, long maxBytes) {
+        try {
+            int result = (int) MH_SET_WORKING_SET_SIZE.invokeExact(hProcess, minBytes, maxBytes);
+            return result != 0;
+        } catch (Throwable t) {
+            throw new RuntimeException("SetProcessWorkingSetSize failed", t);
+        }
+    }
+
+    /**
+     * GetLastError
+     */
+    public static int getLastError() {
+        try {
+            return (int) MH_GET_LAST_ERROR.invokeExact();
+        } catch (Throwable t) {
+            throw new RuntimeException("GetLastError failed", t);
+        }
+    }
 }

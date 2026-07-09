@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
@@ -10,7 +11,7 @@ import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
+import com.ghostchu.peerbanhelper.module.BatchMonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class SessionAnalyseServiceModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
+public class SessionAnalyseServiceModule extends AbstractFeatureModule implements Reloadable, BatchMonitorFeatureModule {
     @Autowired
     private PeerConnectionMetricsTrackService connectionMetricsTrackDao;
     @Autowired
@@ -50,8 +51,9 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
         try {
+            task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
             connectionMetricsTrackDao.syncPeers(downloader, torrent, peers);
         } catch (ExecutionException e) {
             log.warn("Failed to record torrent peers for session analyse", e);
@@ -96,7 +98,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     private void cleanup() {
         backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
                 new TranslationComponent(Lang.MODULE_PEER_ANALYSING_DELETING_EXPIRED_DATA),
-                (task, callback) -> connectionMetricDao.removeOutdatedData(OffsetDateTime.now().minus(this.dataRetentionTime, ChronoUnit.MILLIS))
+                (_, _) -> connectionMetricDao.removeOutdatedData(OffsetDateTime.now().minus(this.dataRetentionTime, ChronoUnit.MILLIS))
         )).join();
     }
 
@@ -113,6 +115,11 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     @Override
     public void onDisable() {
         flushData();
+        try {
+            connectionMetricsTrackDao.closeCache();
+        } catch (Exception e) {
+            log.warn("Unable to close session analyse cache instance", e);
+        }
     }
 
 

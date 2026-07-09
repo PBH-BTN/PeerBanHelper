@@ -18,37 +18,40 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class WatchDog implements AutoCloseable {
     private final String name;
+    @Getter
     private final long timeout;
+    @Getter
     private final AtomicLong lastFeedAt = new AtomicLong(System.currentTimeMillis());
-    private final ScheduledExecutorService service;
     private final Runnable hungry;
     private final Runnable good;
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor(); // Watch dog 使用平台线程
+    private static final ExecutorService executor = Executors.newWorkStealingPool(2); // Watch dog 使用平台线程
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, Thread.ofPlatform().name("PBHWatchDog-Scheduler").daemon().factory());
     @Getter
     private String lastOperation = "N/A";
     @Getter
     private boolean isDownloaderIO;
+    private ScheduledFuture<?> monitor;
 
     public WatchDog(String name, long timeout, @NotNull Runnable hungry, @Nullable Runnable good) {
         this.name = name;
         this.timeout = timeout;
         this.hungry = hungry;
         this.good = good;
-        this.service = Executors.newScheduledThreadPool(1, r -> {
-            Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            thread.setName("PBH-Watchdog-" + name);
-            return thread;
-        });
     }
 
     public void start() {
-        this.service.scheduleAtFixedRate(this::watchDogCheck, 1, timeout, TimeUnit.MILLISECONDS);
+        this.monitor = scheduler.scheduleAtFixedRate(this::watchDogCheck, 50, timeout, TimeUnit.MILLISECONDS);
+    }
+
+    public long getRemainingMsUntilTriggered() {
+        long notFeedDurationMs = System.currentTimeMillis() - lastFeedAt.get();
+        return timeout - notFeedDurationMs;
     }
 
     @Override
     public void close() {
-        this.service.shutdown();
+        if(this.monitor != null)
+            this.monitor.cancel(true);
     }
 
     public void feed() {

@@ -11,7 +11,6 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 import oshi.software.os.InternetProtocolStats;
 
 import java.util.ArrayList;
@@ -26,10 +25,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class DownloaderDiscovery {
     private final OkHttpClient httpClient;
-    private final SystemInfo systemInfo;
 
-    public DownloaderDiscovery(HTTPUtil hTTPUtil, SystemInfo systemInfo) {
-        this.systemInfo = systemInfo;
+    public DownloaderDiscovery(HTTPUtil hTTPUtil) {
         this.httpClient = hTTPUtil.newBuilder()
                 .callTimeout(8, TimeUnit.SECONDS)
                 .followRedirects(true)
@@ -47,7 +44,9 @@ public class DownloaderDiscovery {
     public CompletableFuture<List<DiscoveredDownloader>> scan(@NotNull List<Integer> addedPorts) {
         return CompletableFuture.supplyAsync(() -> {
             List<DiscoveredDownloader> found = Collections.synchronizedList(new ArrayList<>());
-            var listenConnections = systemInfo.getOperatingSystem().getInternetProtocolStats().getConnections()
+            var listenConnections = SystemInfoProviderWrapper.find()
+                    .map(provider -> provider.getOperatingSystem().getInternetProtocolStats().getConnections())
+                    .orElse(List.of())
                     .stream()
                     .filter(conn -> {
                         var type = conn.getType();

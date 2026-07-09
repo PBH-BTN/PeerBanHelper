@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -27,8 +26,9 @@ import java.util.stream.Collectors;
 @Service
 public class HistoryServiceImpl extends AbstractCommonService<HistoryMapper, HistoryEntity> implements HistoryService {
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+    public HistoryServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
     @Override
     public IPage<PeerBanCount> getBannedIps(@NotNull Page<PeerBanCount> page, @Nullable String filter) {

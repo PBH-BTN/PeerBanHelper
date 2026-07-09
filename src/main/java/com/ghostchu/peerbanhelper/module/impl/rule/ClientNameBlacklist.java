@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -55,7 +56,7 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
     @Override
     public void onEnable() {
         reloadConfig();
-        webContainer.javalin()
+        webContainer.routes()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
         Main.getReloadManager().register(this);
     }
@@ -88,7 +89,7 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (isHandShaking(peer) && (peer.getClientName() == null || peer.getClientName().isBlank())) {
             return handshaking();
         }

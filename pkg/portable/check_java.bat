@@ -72,7 +72,6 @@ setlocal enabledelayedexpansion
 set "MSG_VERSION_LOW_DISPLAY=!MSG_VERSION_LOW:{VER}=%MAJOR_VER%!"
 if !MAJOR_VER! LSS %REQ_VER% (
     echo !MSG_VERSION_LOW_DISPLAY!
-    pause
     exit /b 1
 )
 endlocal
@@ -82,5 +81,4 @@ exit /b 0
 
 :ERROR_PARSE
 echo %MSG_PARSE_FAILED%
-pause
 exit /b 1

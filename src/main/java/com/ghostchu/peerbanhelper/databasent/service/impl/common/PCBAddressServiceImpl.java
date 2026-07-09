@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -14,12 +13,13 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
-public class PCBAddressServiceImpl extends AbstractCommonService<PCBAddressMapper, PCBAddressEntity> implements PCBAddressService {
+public class PCBAddressServiceImpl extends AbstractCanDirtyCommonService<PCBAddressMapper, PCBAddressEntity> implements PCBAddressService {
 
-	@Autowired
-	private TransactionTemplate transactionTemplate;
+    public PCBAddressServiceImpl(TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
-	@Override
+    @Override
 	public List<PCBAddressEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
         return baseMapper.selectList(new LambdaQueryWrapper<PCBAddressEntity>()
                 .eq(PCBAddressEntity::getTorrentId, torrentId)

@@ -5,6 +5,7 @@ export default {
   'page.settings.tab.profile.unit.ms': '毫秒',
   'page.settings.tab.profile.unit.s': '秒',
   'page.settings.tab.profile.unit.bytes': '位元組',
+  'page.settings.tab.profile.form.globalBanDuration': '全域封禁時間',
   'page.settings.tab.profile.form.banDuration': '使用全域封禁時間',
   'page.settings.tab.profile.form.ignoreAddress': '忽略地址',
   'page.settings.tab.profile.form.ignoreAddress.action': '按此查看',

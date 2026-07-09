@@ -17,6 +17,7 @@ public final class QBittorrentConfigImpl implements QBittorrentConfig {
     private String endpoint;
     private String username;
     private String password;
+    private String apiKey;
     private QBittorrentBasicAuth basicAuth;
     private boolean incrementBan;
     private boolean useShadowBan;
@@ -34,6 +35,7 @@ public final class QBittorrentConfigImpl implements QBittorrentConfig {
         }
         config.setUsername(section.getString("username", ""));
         config.setPassword(section.getString("password", ""));
+        config.setApiKey(section.getString("api-key", ""));
         QBittorrentBasicAuth basicauthDTO = new QBittorrentBasicAuth();
         basicauthDTO.setUser(section.getString("basic-auth.user"));
         basicauthDTO.setPass(section.getString("basic-auth.pass"));
@@ -54,6 +56,7 @@ public final class QBittorrentConfigImpl implements QBittorrentConfig {
         section.set("endpoint", endpoint);
         section.set("username", username);
         section.set("password", password);
+        section.set("api-key", Objects.requireNonNullElse(apiKey, ""));
         section.set("basic-auth.user", Objects.requireNonNullElse(basicAuth.getUser(), ""));
         section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.getPass(), ""));
         section.set("increment-ban", incrementBan);

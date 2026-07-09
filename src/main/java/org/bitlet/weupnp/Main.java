@@ -41,9 +41,9 @@ import java.util.Map;
  */
 public class Main {
 
-	private static int SAMPLE_PORT = 6991;
-	private static short WAIT_TIME = 10;
-	private static boolean LIST_ALL_MAPPINGS = false;
+	private static final int SAMPLE_PORT = 6991;
+	private static final short WAIT_TIME = 10;
+	private static final boolean LIST_ALL_MAPPINGS = false;
 
 	public static void main(String[] args) throws Exception{
 

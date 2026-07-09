@@ -6,10 +6,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.RuleSubLogMapper;
 import com.ghostchu.peerbanhelper.databasent.service.RuleSubLogService;
 import com.ghostchu.peerbanhelper.databasent.table.RuleSubLogEntity;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class RuleSubLogServiceImpl extends AbstractCommonService<RuleSubLogMapper, RuleSubLogEntity> implements RuleSubLogService {
+    public RuleSubLogServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
+
     @Override
     public RuleSubLogEntity getLastLog(String ruleId) {
         return baseMapper.selectOne(new LambdaQueryWrapper<RuleSubLogEntity>().eq(RuleSubLogEntity::getRuleId, ruleId).orderByDesc(RuleSubLogEntity::getId).last("LIMIT 1"));

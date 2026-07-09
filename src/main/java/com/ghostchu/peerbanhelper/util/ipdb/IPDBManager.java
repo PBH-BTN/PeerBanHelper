@@ -41,11 +41,7 @@ public class IPDBManager {
     public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory, BackgroundTaskManager backgroundTaskManager) {
         this.hTTPUtil = hTTPUtil;
         this.backgroundTaskManager = backgroundTaskManager;
-        if (laboratory.isExperimentActivated(Experiments.ASYNC_IPDB_SETUP.getExperiment())) {
-            CompletableFuture.runAsync(this::setupIPDB);
-        } else {
-            setupIPDB();
-        }
+        CompletableFuture.runAsync(this::setupIPDB);
     }
 
     private void setupIPDB() {

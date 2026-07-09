@@ -17,11 +17,15 @@ import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -40,6 +44,10 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
     @Autowired
     private IPDBManager ipdbManager;
 
+    public PeerRecordServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
+
     @Override
     public List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader) {
         return baseMapper.selectList(new LambdaQueryWrapper<PeerRecordEntity>()
@@ -49,7 +57,7 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
     }
 
     @Override
-    public void flushToDatabase(BatchHandleTasks t) {
+    public void flushToDatabase(PeerRecordCachingEntire t) {
         var torrent = t.torrent;
         var peer = t.peer;
         var downloader = t.downloader;
@@ -83,6 +91,7 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
                 timestamp,
                 peerGeoIp
         ));
+        t.setDirty(false);
     }
 
     @Override
@@ -170,9 +179,15 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
                 .lt(PeerRecordEntity::getLastTimeSeen, before));
     }
 
-
-    public record BatchHandleTasks(OffsetDateTime timestamp, String downloader, TorrentWrapper torrent,
-                                   PeerWrapper peer) {
-
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class PeerRecordCachingEntire{
+        private OffsetDateTime timestamp;
+        private String downloader;
+        private TorrentWrapper torrent;
+        private PeerWrapper peer;
+        private boolean dirty;
     }
+
 }

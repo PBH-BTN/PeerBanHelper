@@ -40,7 +40,7 @@ public class NameValueHandler extends DefaultHandler {
     /**
      * A reference to the name-value map to populate with the data being read
      */
-    private Map<String,String> nameValue;
+    private final Map<String,String> nameValue;
 
     /**
      * The last read element

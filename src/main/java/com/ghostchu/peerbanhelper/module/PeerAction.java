@@ -4,14 +4,18 @@ import lombok.Getter;
 
 @Getter
 public enum PeerAction {
-    NO_ACTION(0),
-    BAN(1),
-    BAN_FOR_DISCONNECT(2),
-    SKIP(3);
+    NO_ACTION(0, false, false),
+    BAN_FOR_DISCONNECT(1, true, true),
+    BAN(2, false, false),
+    SKIP(3, false, false);
     private final int value;
+    private final boolean excludeFromReport;
+    private final boolean excludeFromDisplay;
 
-    PeerAction(int value) {
+    PeerAction(int value, boolean excludeFromReport, boolean excludeFromDisplay) {
         this.value = value;
+        this.excludeFromReport = excludeFromReport;
+        this.excludeFromDisplay = excludeFromDisplay;
     }
 
     public static PeerAction fromValue(int value) {

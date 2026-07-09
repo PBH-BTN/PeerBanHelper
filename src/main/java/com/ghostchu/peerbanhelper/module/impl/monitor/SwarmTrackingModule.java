@@ -2,12 +2,13 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
+import com.ghostchu.peerbanhelper.module.BatchMonitorFeatureModule;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 
-public final class SwarmTrackingModule extends AbstractFeatureModule implements MonitorFeatureModule {
+public final class SwarmTrackingModule extends AbstractFeatureModule implements BatchMonitorFeatureModule {
     @Autowired
     private TrackedSwarmService trackedSwarmDao;
     @Autowired
@@ -75,9 +76,9 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onEnable() {
         Main.getEventBus().register(this);
-        javalinWebContainer.javalin()
+        javalinWebContainer.routes()
                 .get("/api/modules/swarm-tracking", this::handleWebAPI, Role.USER_READ);
-        javalinWebContainer.javalin()
+        javalinWebContainer.routes()
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
         trackedSwarmDao.resetTable();
         registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
@@ -101,14 +102,19 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
-        trackedSwarmDao.flushAll();
+        try {
+            trackedSwarmDao.closeCache();
+        } catch (Exception e) {
+            log.warn("Unable to close tracked swarm cache instance", e);
+        }
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
         try {
             for (Peer peer : peers) {
                 if (peer.isHandshaking()) continue;
+                task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
                 trackedSwarmDao.syncPeers(downloader, torrent, peer);
             }
         } catch (ExecutionException e) {

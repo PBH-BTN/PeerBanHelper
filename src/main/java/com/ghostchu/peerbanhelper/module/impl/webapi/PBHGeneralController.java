@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
+import com.ghostchu.peerbanhelper.module.ModuleStatusType;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -33,7 +34,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import javax.management.MBeanServer;
@@ -71,8 +71,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private StunManager bTStunManager;
     @Autowired
     private HTTPUtil hTTPUtil;
-    @Autowired
-    private SystemInfo systemInfo;
 
     @Override
     public boolean isConfigurable() {
@@ -91,7 +89,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.routes()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
                 .post("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_WRITE)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
@@ -152,7 +150,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                     || module.getConfigName().equalsIgnoreCase(moduleName)
                     || module.getClass().getName().equalsIgnoreCase(moduleName)
                     || module.getClass().getSimpleName().equalsIgnoreCase(moduleName)) {
-                if (module.isModuleEnabled()) {
+                if (module.getModuleStatus().getType() == ModuleStatusType.ENABLED) {
                     context.json(new StdResp(true, null, true));
                     return;
                 }
@@ -178,6 +176,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             context.header("Content-Disposition", "attachment; filename=\"" + finalHprof.getName() + "\"");
             context.header("Content-Length", String.valueOf(finalHprof.length()));
             context.header("Content-Type", "application/octet-stream");
+            context.disableCompression();
             var stream = new FileInputStream(finalHprof); // 这个 stream 将由 Jetty 关闭，不要手动关闭流，否则报错 stream closed
             context.result(stream);
         }
@@ -187,7 +186,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         // 有点大而全了，需要和前端看看哪些不需要可以删了
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("jvm", generateJvmData());
-        data.put("system", generateSystemData(context, systemInfo));
+        data.put("system", generateSystemData(context));
         data.put("peerbanhelper", generatePbhData());
         context.json(new StdResp(true, null, data));
     }
@@ -223,25 +222,31 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         return pbh;
     }
 
-    private Map<String, Object> generateSystemData(Context context, SystemInfo systemInfo) {
-
+    private Map<String, Object> generateSystemData(Context context) {
         Map<String, Object> os = new LinkedHashMap<>();
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
-        var operatingSystem = systemInfo.getOperatingSystem();
+        os.put("architecture", osMXBean.getArch());
+        os.put("cores", osMXBean.getAvailableProcessors());
+        os.put("load", osMXBean.getSystemLoadAverage());
         if (osMXBean.getName().contains("Windows")) {
             os.put("os", "Windows");
-            os.put("version", String.valueOf(operatingSystem));
+            os.put("version", osMXBean.getVersion());
         } else {
             os.put("os", osMXBean.getName());
             os.put("version", osMXBean.getVersion());
         }
-        os.put("architecture", osMXBean.getArch());
-        os.put("cores", osMXBean.getAvailableProcessors());
-        var mem = generateSystemMemoryData(systemInfo.getHardware());
-        os.put("memory", mem);
-        os.put("load", osMXBean.getSystemLoadAverage());
         var network = generateNetworkStats(context);
         os.put("network", network);
+        try {
+            SystemInfoProviderWrapper.find().ifPresent(provider -> {
+                var operatingSystem = provider.getOperatingSystem();
+                os.put("version", String.valueOf(operatingSystem));
+                var mem = generateSystemMemoryData(provider.getHardware());
+                os.put("memory", mem);
+            });
+        }catch (Throwable _){
+            os.put("version", "N/A");
+        }
         return os;
     }
 

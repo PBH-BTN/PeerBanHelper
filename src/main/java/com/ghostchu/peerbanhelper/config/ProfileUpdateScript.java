@@ -79,11 +79,11 @@ public final class ProfileUpdateScript {
     @UpdateScript(version = 35)
     public void removeXunleiRules() {
         var peerIdList = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
-        peerIdList.removeIf(s -> "{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}".equals(s));
+        peerIdList.removeIf("{\"method\":\"STARTS_WITH\",\"content\":\"-xl\"}"::equals);
         conf.set("module.peer-id-blacklist.banned-peer-id", peerIdList);
         var clientNameList = conf.getStringList("module.client-name-blacklist.banned-client-name");
-        clientNameList.removeIf(s -> "{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}".equals(s));
-        clientNameList.removeIf(s -> "{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}".equals(s));
+        clientNameList.removeIf("{\"method\":\"CONTAINS\",\"content\":\"xunlei\"}"::equals);
+        clientNameList.removeIf("{\"method\":\"STARTS_WITH\",\"content\":\"-XL\"}"::equals);
         conf.set("module.client-name-blacklist.banned-client-name", clientNameList);
     }
 

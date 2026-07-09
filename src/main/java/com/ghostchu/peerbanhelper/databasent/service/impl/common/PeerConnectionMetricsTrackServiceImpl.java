@@ -10,10 +10,9 @@ import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.databasent.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
+import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,35 +22,41 @@ import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @Service
 public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService<PeerConnectionMetricsTrackMapper, PeerConnectionMetricsTrackEntity> implements PeerConnectionMetricsTrackService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
-    private final Cache<@NotNull CacheKey, @NotNull PeerConnectionMetricsTrackEntity> cache = CacheBuilder.newBuilder()
-            .maximumSize(ExternalSwitch.parseInt("pbh.module.session-analyse-service-module.cache-size", 1000))
-            .expireAfterAccess(3, TimeUnit.MINUTES)
-            .removalListener((RemovalListener<@NotNull CacheKey, @NotNull PeerConnectionMetricsTrackEntity>) notification -> {
-                var v = notification.getValue();
-                //noinspection ConstantValue
-                if (v != null) {
-                    baseMapper.upsert(v);
-                }
-            })
-            .softValues()
-            .build();
+    private final PBHCache<@NotNull CacheKey, @NotNull PeerConnectionMetricsTrackEntity> cache = new PBHCache<>(
+            ExternalSwitch.parseInt("pbh.module.session-analyse-service-module.cache-size", 1000),
+            null,
+            3 * 60 * 1000L,
+            false,
+            false,
+            true,
+            this::batchFlushDatabase
+    );
 
     @Autowired
     private TorrentService torrentService;
 
+    public PeerConnectionMetricsTrackServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
+
     @Override
     public void flushAll() {
-        transactionTemplate.execute(_->{
-            for (PeerConnectionMetricsTrackEntity value : cache.asMap().values()) {
-                baseMapper.upsert(value);
-            }
+        batchFlushDatabase(cache.asMap().entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())));
+    }
+
+    @Override
+    public void closeCache() throws Exception {
+        cache.close();
+    }
+
+    private void batchFlushDatabase(Stream<Pair<CacheKey, PeerConnectionMetricsTrackEntity>> stream) {
+        transactionTemplate.execute(_ -> {
+            stream.map(Pair::getRight).forEach(baseMapper::upsert);
             return null;
         });
     }
@@ -90,16 +95,17 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
                 if (entity == null) {
                     entity = new PeerConnectionMetricsTrackEntity();
                     entity.setTimeframeAt(cacheKey.timeframeAt());
-                    entity.setDownloader(downloader.getId());
-                    entity.setTorrentId(torrentEntity.getId());
-                    entity.setAddress(peer.getPeerAddress().getAddress().toInetAddress());
-                    entity.setPort(peer.getPeerAddress().getPort());
                 }
                 return entity;
             });
             trackEntity.setPeerId(peer.getPeerId());
             trackEntity.setClientName(peer.getClientName());
             trackEntity.setLastFlags(peer.getFlags() == null ? null : peer.getFlags().getLtStdString());
+            trackEntity.setDownloader(downloader.getId());
+            trackEntity.setTorrentId(torrentEntity.getId());
+            trackEntity.setAddress(peer.getPeerAddress().getAddress().toInetAddress());
+            trackEntity.setPort(peer.getPeerAddress().getPort());
+            //baseMapper.insertOrUpdate(trackEntity);
         }
     }
 

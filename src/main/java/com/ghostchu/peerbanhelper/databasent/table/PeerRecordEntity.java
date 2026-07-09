@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.databasent.driver.common.JsonTypeHandlerForwar
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
@@ -16,6 +17,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

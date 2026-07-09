@@ -12,7 +12,6 @@ import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -29,8 +28,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Service
 @Slf4j
 public class PeerConnectionMetricsServiceImpl extends AbstractCommonService<PeerConnectionMetricsMapper, PeerConnectionMetricsEntity> implements PeerConnectionMetricsService {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+
+    public PeerConnectionMetricsServiceImpl(@NotNull TransactionTemplate transactionTemplate) {
+        super(transactionTemplate);
+    }
 
 
     @Override

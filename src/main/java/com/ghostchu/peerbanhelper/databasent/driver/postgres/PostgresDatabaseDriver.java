@@ -10,8 +10,6 @@ import org.stone.beecp.BeeDataSourceConfig;
 import javax.sql.DataSource;
 import java.io.IOException;
 
-import static com.ghostchu.peerbanhelper.util.MiscUtil.removeBeeCPShutdownHook;
-
 public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
     private final BeeDataSource dataSource;
 
@@ -39,6 +37,9 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
 
         // 启用公平排队 (FIFO)
         config.setFairMode(true);
+
+        // 手动关闭连接池
+        config.setRegisterJvmHook(false);
         
         // PostgreSQL 事务中 schema/catalog 变更支持
         config.setForceDirtyWhenSetSchema(true);
@@ -48,8 +49,7 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
         config.addConnectionFactoryProperty("tcpKeepAlive", "true");
         config.addConnectionFactoryProperty("reWriteBatchedInserts", "true"); // Improve batch insert performance
 
-        this.dataSource = new BeeDataSource(config);
-        removeBeeCPShutdownHook(dataSource);
+        dataSource = new BeeDataSource(config);
     }
 
     @Override

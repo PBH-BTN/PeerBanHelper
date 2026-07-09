@@ -42,7 +42,7 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin()
+        webContainer.routes()
                 .post("/api/auth/login", this::handleLogin, Role.ANYONE)
                 .post("/api/auth/logout", this::handleLogout, Role.ANYONE);
     }

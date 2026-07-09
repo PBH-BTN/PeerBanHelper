@@ -1,14 +1,13 @@
 package com.ghostchu.peerbanhelper.util.dns;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
-import oshi.SystemInfo;
 
 import java.net.UnknownHostException;
 import java.time.Duration;
@@ -23,12 +22,10 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Component
 public final class DNSLookupImpl implements Reloadable, DNSLookup {
-    private final SystemInfo systemInfo;
     private volatile ExtendedResolver resolver;
     private volatile boolean bootComplete = false;
 
-    public DNSLookupImpl(SystemInfo systemInfo) {
-        this.systemInfo = systemInfo;
+    public DNSLookupImpl() {
         reloadConfig();
         Main.getReloadManager().register(this);
     }
@@ -43,16 +40,17 @@ public final class DNSLookupImpl implements Reloadable, DNSLookup {
         // get system dns via oshi
         try {
             resolver = new ExtendedResolver();
-            var dnsServers = systemInfo.getOperatingSystem().getNetworkParams().getDnsServers();
-            List<String> dns = Main.getMainConfig().getStringList("resolvers.servers");
+            List<String> dns = new ArrayList<>(Main.getMainConfig().getStringList("resolvers.servers"));
             if (Main.getMainConfig().getBoolean("resolvers.use-system", true)) {
+                var dnsServers = SystemInfoProviderWrapper.find()
+                        .map(provider -> provider.getOperatingSystem().getNetworkParams().getDnsServers())
+                        .orElse(new String[0]);
                 dns.addAll(Arrays.asList(dnsServers));
             }
             applyDnsServers(dns);
             bootComplete = true;
         } catch (Throwable e) {
             log.error("Unable to complete oshi DNS Servers lookup, DNSJAVA functions may not work properly", e);
-            Sentry.captureException(e);
             bootComplete = false;
         }
     }
