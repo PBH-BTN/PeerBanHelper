@@ -17,7 +17,7 @@
               </a-input-number>
             </a-form-item>
             <a-form-item
-              :label="t('page.settings.tab.profile.form.golbalBanDuration')"
+              :label="t('page.settings.tab.profile.form.globalBanDuration')"
               field="ban_duration"
               required
             >
