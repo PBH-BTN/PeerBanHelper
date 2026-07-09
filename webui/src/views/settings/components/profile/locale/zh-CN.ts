@@ -5,7 +5,7 @@ export default {
   'page.settings.tab.profile.unit.ms': '毫秒',
   'page.settings.tab.profile.unit.s': '秒',
   'page.settings.tab.profile.unit.bytes': '字节',
-  'page.settings.tab.profile.form.golbalBanDuration': '全局封禁时间',
+  'page.settings.tab.profile.form.globalBanDuration': '全局封禁时间',
   'page.settings.tab.profile.form.banDuration': '使用全局封禁时间',
   'page.settings.tab.profile.form.ignoreAddress': '忽略地址',
   'page.settings.tab.profile.form.ignoreAddress.action': '点击查看',

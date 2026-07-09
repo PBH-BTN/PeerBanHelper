@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.4.0-beta2"
+version = "9.4.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -129,7 +129,7 @@ dependencies {
     // CSV
     implementation("de.siegmar:fastcsv:4.3.1")
     // Jackson
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.0"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.core:jackson-core")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
