@@ -23,6 +23,7 @@ import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.UnauthorizedResponse;
 import io.javalin.http.staticfiles.JavalinStaticResourceHandler;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
@@ -121,7 +122,11 @@ public final class JavalinWebContainer implements Reloadable {
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ), null));
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.FORBIDDEN);
+                    ctx.status(HttpStatus.FORBIDDEN); // TODO: Switch to UNAUTHORIZED
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
+                })
+                .exception(UnauthorizedResponse.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.UNAUTHORIZED);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
                 })
                 .exception(NeedInitException.class, (e, ctx) -> {
