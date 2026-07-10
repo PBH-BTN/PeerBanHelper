@@ -485,16 +485,18 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     private void batchFlushBackDatabase(Stream<Pair<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>>> stream) {
         List<Pair<PCBRangeEntity, PCBAddressEntity>> entities = stream.map(Pair::getRight).toList();
-        pcbRangeDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getLeft).toList());
-        pcbAddressDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getRight).toList());
+        synchronized (cacheDBLoadingLock) {
+            pcbRangeDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getLeft).toList());
+            pcbAddressDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getRight).toList());
+        }
     }
 
-    @NotNull
-    private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
-        pcbRangeDao.saveOrUpdateIfDirty(pcbRangeEntity);
-        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
-        return Pair.of(pcbRangeEntity, pcbAddressEntity);
-    }
+//    @NotNull
+//    private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
+//        pcbRangeDao.saveOrUpdateIfDirty(pcbRangeEntity);
+//        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
+//        return Pair.of(pcbRangeEntity, pcbAddressEntity);
+//    }
 
     private String percent(double d) {
         return MsgUtil.getPercentageFormatter().format(d);
