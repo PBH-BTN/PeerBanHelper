@@ -1,25 +1,49 @@
 <template>
-  <a-form-item field="config.url" :label="t('page.settings.tab.config.push.form.webhook.url')" required
-    validate-trigger="blur" :rules="urlRules">
-    <a-input v-model="model.url" :placeholder="t('page.settings.tab.config.push.form.webhook.url.placeholder')"
-      allow-clear />
+  <a-form-item
+    field="config.url"
+    :label="t('page.settings.tab.config.push.form.webhook.url')"
+    required
+    validate-trigger="blur"
+    :rules="urlRules"
+  >
+    <a-input
+      v-model="model.url"
+      :placeholder="t('page.settings.tab.config.push.form.webhook.url.placeholder')"
+      allow-clear
+    />
   </a-form-item>
 
-  <a-form-item field="config.method" :label="t('page.settings.tab.config.push.form.webhook.method')" required>
+  <a-form-item
+    field="config.method"
+    :label="t('page.settings.tab.config.push.form.webhook.method')"
+    required
+  >
     <a-select v-model="model.method" :options="Object.values(WebhookMethod)" />
   </a-form-item>
 
-  <a-form-item v-if="!isGetMethod" field="config.content_type"
-    :label="t('page.settings.tab.config.push.form.webhook.content_type')" required>
+  <a-form-item
+    v-if="!isGetMethod"
+    field="config.content_type"
+    :label="t('page.settings.tab.config.push.form.webhook.content_type')"
+    required
+  >
     <a-select v-model="model.content_type" :options="Object.values(WebhookContentType)" />
   </a-form-item>
 
-  <a-form-item v-if="!isGetMethod" field="config.body_template"
-    :label="t('page.settings.tab.config.push.form.webhook.body_template')" required>
+  <a-form-item
+    v-if="!isGetMethod"
+    field="config.body_template"
+    :label="t('page.settings.tab.config.push.form.webhook.body_template')"
+    required
+  >
     <div class="textarea-wrapper">
       <div class="editor-container">
-        <VueMonacoEditor v-model:value="model.body_template" :theme="darkStore.isDark ? 'vs-dark' : 'vs'"
-          :language="contentTypeLanguage" :options="editorOptions" />
+        <VueMonacoEditor
+          v-model:value="model.body_template"
+          :theme="darkStore.isDark ? 'vs-dark' : 'vs'"
+          :language="contentTypeLanguage"
+          :options="editorOptions"
+        />
       </div>
       <a-tooltip position="right">
         <template #content>
@@ -39,8 +63,11 @@
     </div>
   </a-form-item>
 
-  <a-form-item field="config.headers" :label="t('page.settings.tab.config.push.form.webhook.headers')"
-    :rules="[{ validator: headersValidator }]">
+  <a-form-item
+    field="config.headers"
+    :label="t('page.settings.tab.config.push.form.webhook.headers')"
+    :rules="[{ validator: headersValidator }]"
+  >
     <a-space direction="vertical" style="width: 100%">
       <a-button @click="addHeader">
         <template #icon>
@@ -48,18 +75,35 @@
         </template>
         {{ t('page.settings.tab.config.push.form.webhook.headers.add') }}
       </a-button>
-      <a-list v-if="headerRows.length > 0" class="header-list" :pagination-props="controlledPaginationProps"
-        :data="dataWithIndex">
+      <a-list
+        v-if="headerRows.length > 0"
+        class="header-list"
+        :pagination-props="controlledPaginationProps"
+        :data="dataWithIndex"
+      >
         <template #item="{ item }">
           <a-list-item>
             <div class="header-row">
-              <a-input v-model="headerRows[item.index]!.key" class="header-input"
-                :placeholder="t('page.settings.tab.config.push.form.webhook.headers.key')" allow-clear />
-              <a-input v-model="headerRows[item.index]!.value" class="header-input"
-                :placeholder="t('page.settings.tab.config.push.form.webhook.headers.value')" allow-clear />
+              <a-input
+                v-model="headerRows[item.index]!.key"
+                class="header-input"
+                :placeholder="t('page.settings.tab.config.push.form.webhook.headers.key')"
+                allow-clear
+              />
+              <a-input
+                v-model="headerRows[item.index]!.value"
+                class="header-input"
+                :placeholder="t('page.settings.tab.config.push.form.webhook.headers.value')"
+                allow-clear
+              />
             </div>
             <template #actions>
-              <a-button status="danger" shape="circle" type="text" @click="removeHeader(item.index)">
+              <a-button
+                status="danger"
+                shape="circle"
+                type="text"
+                @click="removeHeader(item.index)"
+              >
                 <template #icon>
                   <icon-delete />
                 </template>
@@ -174,11 +218,7 @@ const syncHeadersToModel = () => {
   model.value.headers = headers
 }
 
-watch(
-  headerRows,
-  () => syncHeadersToModel(),
-  { deep: true }
-)
+watch(headerRows, () => syncHeadersToModel(), { deep: true })
 
 watch(model, (value) => {
   if (value.headers === undefined) value.headers = {}
