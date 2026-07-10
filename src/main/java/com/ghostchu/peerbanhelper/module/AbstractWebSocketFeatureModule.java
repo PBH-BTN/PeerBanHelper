@@ -5,9 +5,9 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.http.UnauthorizedResponse;
 import io.javalin.websocket.*;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,17 +24,17 @@ public abstract class AbstractWebSocketFeatureModule extends AbstractFeatureModu
         var ua = ctx.userAgent();
         if (!javalinWebContainer.allowAttemptLogin(ip, ua)) {
             ctx.json(new StdResp(false, "Too many failed retries, IP banned.", null));
-            return;
+            throw new UnauthorizedResponse();
         }
         var authResult = javalinWebContainer.isContextAuthorized(ctx);
         if (authResult == JavalinWebContainer.TokenAuthResult.NO_AUTH_TOKEN_PROVIDED) {
             ctx.json(new StdResp(false, tlUI(Lang.WS_LOGS_STREAM_ACCESS_DENIED), null));
-            return;
+            throw new UnauthorizedResponse();
         }
         if (authResult == JavalinWebContainer.TokenAuthResult.FAILED) {
             ctx.json(new StdResp(false, tlUI(Lang.WS_LOGS_STREAM_ACCESS_DENIED), null));
             javalinWebContainer.markLoginFailed(ip, ua);
-            return;
+            throw new UnauthorizedResponse();
         }
         javalinWebContainer.markLoginSuccess(ip, ua, false);
     }
