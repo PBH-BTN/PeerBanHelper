@@ -20,6 +20,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -72,6 +73,18 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
         return Reloadable.super.reloadModule();
     }
 
+    @OpenApi(
+            path = "/api/modules/multi-dialing-blocker/status",
+            methods = HttpMethod.GET,
+            summary = "获取模块状态",
+            description = "获取多重拨号阻止模块的运行状态与缓存信息",
+            tags = {"多重拨号阻止"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "multiDialingBlockerStatus"
+    )
     private void handleStatus(Context ctx) {
         Map<String, Object> status = new HashMap<>();
         status.put("huntingList", huntingList.asMap());
@@ -82,6 +95,18 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
         ctx.json(new StdResp(true, null, status));
     }
 
+    @OpenApi(
+            path = "/api/modules/multi-dialing-blocker",
+            methods = HttpMethod.GET,
+            summary = "获取模块配置",
+            description = "获取多重拨号阻止模块的当前配置",
+            tags = {"多重拨号阻止"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "multiDialingBlockerConfig"
+    )
     private void handleConfig(Context ctx) {
         Map<String, Object> config = new HashMap<>();
         config.put("subnetMaskLength", subnetMaskLength);
@@ -244,5 +269,4 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
     ) {
     }
 }
-
 

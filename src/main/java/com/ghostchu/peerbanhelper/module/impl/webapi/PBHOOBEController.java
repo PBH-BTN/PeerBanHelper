@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
@@ -73,11 +74,22 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         webContainer.routes()
                 .post("/api/oobe/init", this::handleOOBERequest, Role.ANYONE)
                 .post("/api/oobe/scanDownloader", this::handleOOBEScanDownloader, Role.ANYONE)
-                .post("/api/oobe/testDownloader", ctx -> validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject()), Role.ANYONE) // 指定 ANYONE，否则会被鉴权代码拉取鉴权
+                .post("/api/oobe/testDownloader", this::handleTestDownloader, Role.ANYONE) // 指定 ANYONE，否则会被鉴权代码拉取鉴权
                 .post("/api/oobe/testDatabaseConfig", this::handleDatabaseNtTest, Role.ANYONE);
 
     }
 
+    @OpenApi(
+            path = "/api/oobe/scanDownloader",
+            methods = HttpMethod.POST,
+            summary = "扫描本地下载器",
+            description = "扫描当前主机上可用的本地下载器配置",
+            tags = {"初始化"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleOOBEScanDownloader"
+    )
     private void handleOOBEScanDownloader(@NotNull Context ctx) {
         if (isInitialized(ctx)) {
             return;
@@ -86,6 +98,17 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, downloaders));
     }
 
+    @OpenApi(
+            path = "/api/oobe/init",
+            methods = HttpMethod.POST,
+            summary = "初始化系统",
+            description = "完成首次启动向导并初始化系统配置",
+            tags = {"初始化"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleOOBERequest"
+    )
     private void handleOOBERequest(Context ctx) throws IOException {
         if (isInitialized(ctx)) {
             return;
@@ -165,6 +188,21 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         handleReloading(ctx);
     }
 
+    @OpenApi(
+            path = "/api/oobe/testDownloader",
+            methods = HttpMethod.POST,
+            summary = "测试下载器连接",
+            description = "测试初始化向导中填写的下载器连接配置是否有效",
+            tags = {"初始化"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleTestDownloader"
+    )
+    private void handleTestDownloader(Context ctx) {
+        validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject());
+    }
+
     private void handleReloading(Context context) {
         var result = Main.getReloadManager().reload();
         List<ReloadEntryDTO> entryList = new ArrayList<>();
@@ -221,6 +259,18 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/oobe/testDatabaseConfig",
+            methods = HttpMethod.POST,
+            summary = "测试数据库配置",
+            description = "测试初始化向导中填写的数据库连接配置",
+            tags = {"初始化"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = DatabaseNtConfigDTO.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDatabaseNtTest"
+    )
     private void handleDatabaseNtTest(@NotNull Context context) {
         if (isInitialized(context)) {
             return;

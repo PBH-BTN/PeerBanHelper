@@ -22,6 +22,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,21 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                 .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS);
     }
 
+    @OpenApi(
+            path = "/api/torrent/{infoHash}/banHistory",
+            methods = HttpMethod.GET,
+            summary = "获取种子封禁历史",
+            description = "分页获取指定种子的 Peer 封禁历史记录",
+            tags = {"种子管理"},
+            pathParams = {
+                    @OpenApiParam(name = "infoHash", description = "种子的 InfoHash", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "torrentBanHistory"
+    )
     private void handleBanHistory(Context ctx) {
         var torrent = torrentService.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent == null) {
@@ -105,6 +121,22 @@ public final class PBHTorrentController extends AbstractFeatureModule {
     }
 
 
+    @OpenApi(
+            path = "/api/torrent/query",
+            methods = HttpMethod.GET,
+            summary = "查询种子",
+            description = "分页查询种子列表并支持关键字和排序筛选",
+            tags = {"种子管理"},
+            queryParams = {
+                    @OpenApiParam(name = "keyword", description = "种子关键字"),
+                    @OpenApiParam(name = "orderBy", description = "排序字段，支持多次传入")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleTorrentQuery"
+    )
     private void handleTorrentQuery(Context ctx) {
         Pageable pageable = new Pageable(ctx);
 
@@ -149,6 +181,21 @@ public final class PBHTorrentController extends AbstractFeatureModule {
     }
 
 
+    @OpenApi(
+            path = "/api/torrent/{infoHash}",
+            methods = HttpMethod.GET,
+            summary = "获取种子信息",
+            description = "获取指定种子的基础信息与统计数据",
+            tags = {"种子管理"},
+            pathParams = {
+                    @OpenApiParam(name = "infoHash", description = "种子的 InfoHash", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleTorrentInfo"
+    )
     private void handleTorrentInfo(Context ctx) {
         var torrent = torrentService.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent == null) {
@@ -163,6 +210,21 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                 peerBanCount, peerAccessCount)));
     }
 
+    @OpenApi(
+            path = "/api/torrent/{infoHash}/accessHistory",
+            methods = HttpMethod.GET,
+            summary = "获取种子访问历史",
+            description = "分页获取指定种子的 Peer 访问历史记录",
+            tags = {"种子管理"},
+            pathParams = {
+                    @OpenApiParam(name = "infoHash", description = "种子的 InfoHash", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleConnectHistory"
+    )
     private void handleConnectHistory(Context ctx) {
         var torrent = torrentService.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent == null) {

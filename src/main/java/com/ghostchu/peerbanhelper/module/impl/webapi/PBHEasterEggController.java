@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import io.javalin.http.Context;
+import io.javalin.openapi.HttpMethod;
+import io.javalin.openapi.OpenApi;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -64,6 +66,11 @@ public final class PBHEasterEggController extends AbstractFeatureModule {
                 .get("/api/egg", this::handleEgg);
     }
 
+    @OpenApi(
+            path = "/api/egg",
+            methods = HttpMethod.GET,
+            ignore = true
+    )
     private void handleEgg(Context context) {
         int index = ThreadLocalRandom.current().nextInt(urls.size());
         context.redirect(urls.get(index));

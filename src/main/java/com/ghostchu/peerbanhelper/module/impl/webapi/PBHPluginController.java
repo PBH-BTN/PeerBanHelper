@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,6 +56,19 @@ public class PBHPluginController extends AbstractFeatureModule {
                 .post("/api/plugins/operate", this::operatePlugins, Role.USER_WRITE);
     }
 
+    @OpenApi(
+            path = "/api/plugins/operate",
+            methods = HttpMethod.POST,
+            summary = "操作插件",
+            description = "按请求对指定插件执行启动、停止、启用、禁用等操作",
+            tags = {"插件管理"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = OperatePluginDTO.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "operatePlugins"
+    )
     private void operatePlugins(@NotNull Context context) {
         OperatePluginDTO dto = context.bodyAsClass(OperatePluginDTO.class);
         List<PluginOperateResultDTO> result = new ArrayList<>();
@@ -125,6 +139,18 @@ public class PBHPluginController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, result));
     }
 
+    @OpenApi(
+            path = "/api/plugins",
+            methods = HttpMethod.GET,
+            summary = "获取插件列表",
+            description = "获取当前已加载插件及其状态信息列表",
+            tags = {"插件管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "listPlugins"
+    )
     private void listPlugins(@NotNull Context context) {
         context.json(new StdResp(true, null, pluginManager.getPlugins().stream().map(pluginWrapper -> new PluginDTO(locale(context), pluginWrapper)).toList()));
     }

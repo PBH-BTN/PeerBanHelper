@@ -31,6 +31,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -140,6 +141,18 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         )).join();
     }
 
+    @OpenApi(
+            path = "/api/modules/progress-cheat-blocker",
+            methods = HttpMethod.GET,
+            summary = "获取模块配置",
+            description = "获取进度作弊阻止模块的当前配置",
+            tags = {"进度作弊阻止"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "progressCheatBlockerConfig"
+    )
     public void handleConfig(Context ctx) {
         Map<String, Object> config = new LinkedHashMap<>();
         config.put("torrentMinimumSize", torrentMinimumSize);
@@ -504,5 +517,4 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     record CacheKey(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp) {
     }
 }
-
 

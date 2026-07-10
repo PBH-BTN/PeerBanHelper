@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -84,12 +85,41 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
         registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
     }
 
+    @OpenApi(
+            path = "/api/modules/swarm-tracking/details",
+            methods = HttpMethod.GET,
+            summary = "获取追踪明细",
+            description = "分页获取群体追踪模块记录的追踪明细",
+            tags = {"群体追踪"},
+            queryParams = {
+                    @OpenApiParam(name = "page", type = Long.class, description = "页码"),
+                    @OpenApiParam(name = "pageSize", type = Long.class, description = "每页数量"),
+                    @OpenApiParam(name = "orderBy", description = "排序字段，格式为 字段名|asc 或 字段名|desc")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDetails"
+    )
     private void handleDetails(@NotNull Context context) {
         Pageable pageable = new Pageable(context);
         var page = trackedSwarmDao.page(pageable.toPage(), new Orderable(Map.of(), context).apply(new QueryWrapper<>()));
         context.json(new StdResp(true, null, PBHPage.from(page)));
     }
 
+    @OpenApi(
+            path = "/api/modules/swarm-tracking",
+            methods = HttpMethod.GET,
+            summary = "获取模块状态",
+            description = "获取群体追踪模块的当前统计信息",
+            tags = {"群体追踪"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Map.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "swarmTrackingStatus"
+    )
     private void handleWebAPI(@NotNull Context context) {
         Map<String, Object> response = new HashMap<>();
         response.put("trackedSwarmSize", trackedSwarmDao.count());

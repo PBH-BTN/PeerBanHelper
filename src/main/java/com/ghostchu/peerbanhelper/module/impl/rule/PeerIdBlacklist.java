@@ -20,6 +20,7 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,6 +66,18 @@ public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements 
         return true;
     }
 
+    @OpenApi(
+            path = "/api/modules/peer-id-blacklist",
+            methods = HttpMethod.GET,
+            summary = "获取模块配置",
+            description = "获取 PeerID 黑名单模块的规则配置",
+            tags = {"PeerID 黑名单"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "peerIdBlacklistConfig"
+    )
     private void handleWebAPI(Context ctx) {
         String locale = locale(ctx);
         ctx.json(new StdResp(true, null, Map.of("peerId", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList())));

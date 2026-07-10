@@ -20,6 +20,7 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +67,18 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
         return true;
     }
 
+    @OpenApi(
+            path = "/api/modules/client-name-blacklist",
+            methods = HttpMethod.GET,
+            summary = "获取模块配置",
+            description = "获取客户端名称黑名单模块的规则配置",
+            tags = {"客户端名称黑名单"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "clientNameBlacklistConfig"
+    )
     private void handleWebAPI(Context ctx) {
         String locale = locale(ctx);
         ctx.json(new StdResp(true, null, Map.of("clientName", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList())));

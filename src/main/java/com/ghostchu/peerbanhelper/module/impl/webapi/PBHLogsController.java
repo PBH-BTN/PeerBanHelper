@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.eventbus.Subscribe;
 import io.javalin.http.Context;
 import io.javalin.http.sse.SseClient;
+import io.javalin.openapi.*;
 import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +80,18 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
         iterateSseClients(sse-> sse.sendEvent(logEntryKey, logEntry));
     }
 
+    @OpenApi(
+            path = "/api/logs/history",
+            methods = HttpMethod.GET,
+            summary = "获取日志历史",
+            description = "获取当前缓存的日志历史记录列表",
+            tags = {"日志"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "systemLogs"
+    )
     private void handleLogs(Context ctx) {
         ctx.status(200);
         var list = JListAppender.ringDeque.stream().map(e -> new WebUILogEntryDTO(

@@ -30,6 +30,7 @@ import com.googlecode.aviator.exception.ExpressionSyntaxErrorException;
 import com.googlecode.aviator.exception.TimeoutException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import io.sentry.Sentry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -92,6 +93,18 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
     }
 
+    @OpenApi(
+            path = "/api/expression-engine/editable",
+            methods = HttpMethod.GET,
+            summary = "获取编辑权限状态",
+            description = "检查当前请求是否允许编辑表达式规则脚本",
+            tags = {"表达式规则"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "editable"
+    )
     private void editable(Context context) {
         Map<String, Object> map = new HashMap<>();
         var editable = isSafeNetworkEnvironment(context);
@@ -100,6 +113,21 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         context.json(new StdResp(true, null, map));
     }
 
+    @OpenApi(
+            path = "/api/expression-engine/{scriptId}",
+            methods = HttpMethod.DELETE,
+            summary = "删除脚本",
+            description = "删除指定的表达式规则脚本文件",
+            tags = {"表达式规则"},
+            pathParams = {
+                    @OpenApiParam(name = "scriptId", description = "脚本文件标识", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "deleteScript"
+    )
     private void deleteScript(Context context) throws IOException {
         if (!isSafeNetworkEnvironment(context)) {
             context.status(HttpStatus.FORBIDDEN);
@@ -123,6 +151,21 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         reloadConfig();
     }
 
+    @OpenApi(
+            path = "/api/expression-engine/{scriptId}",
+            methods = HttpMethod.PUT,
+            summary = "保存脚本",
+            description = "写入或更新指定的表达式规则脚本文件",
+            tags = {"表达式规则"},
+            pathParams = {
+                    @OpenApiParam(name = "scriptId", description = "脚本文件标识", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "writeScript"
+    )
     private void writeScript(Context context) throws IOException {
         if (!isSafeNetworkEnvironment(context)) {
             context.status(HttpStatus.FORBIDDEN);
@@ -158,6 +201,21 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         reloadConfig();
     }
 
+    @OpenApi(
+            path = "/api/expression-engine/{scriptId}",
+            methods = HttpMethod.GET,
+            summary = "读取脚本",
+            description = "读取指定的表达式规则脚本内容",
+            tags = {"表达式规则"},
+            pathParams = {
+                    @OpenApiParam(name = "scriptId", description = "脚本文件标识", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "readScript"
+    )
     private void readScript(Context context) throws IOException {
         var scriptId = context.pathParam("scriptId");
         File readFile = getIfAllowedScriptId(scriptId);
@@ -210,6 +268,22 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         return target.startsWith(path);
     }
 
+    @OpenApi(
+            path = "/api/expression-engine/scripts",
+            methods = HttpMethod.GET,
+            summary = "列出脚本",
+            description = "分页获取表达式规则脚本列表",
+            tags = {"表达式规则"},
+            queryParams = {
+                    @OpenApiParam(name = "page", type = Long.class, description = "页码"),
+                    @OpenApiParam(name = "pageSize", type = Long.class, description = "每页数量")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "listScripts"
+    )
     private void listScripts(Context context) {
         Pageable pageable = new Pageable(context);
         List<ExpressionMetadataDto> list = new ArrayList<>();

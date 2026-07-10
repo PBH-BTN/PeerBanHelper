@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -108,6 +109,18 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 查询检查间隔
      */
+    @OpenApi(
+            path = "/api/sub/interval",
+            methods = HttpMethod.GET,
+            summary = "获取检查间隔",
+            description = "获取当前规则订阅的自动检查间隔",
+            tags = {"规则订阅"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "getCheckInterval"
+    )
     private void getCheckInterval(Context ctx) {
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS), ipBlackRuleList.getCheckInterval()));
     }
@@ -115,6 +128,18 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 修改检查间隔
      */
+    @OpenApi(
+            path = "/api/sub/interval",
+            methods = HttpMethod.PATCH,
+            summary = "修改检查间隔",
+            description = "修改规则订阅的自动检查间隔",
+            tags = {"规则订阅"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "changeCheckInterval"
+    )
     private void changeCheckInterval(Context ctx) {
         try {
             long interval = JsonUtil.readObject(ctx.body()).get("checkInterval").getAsLong();
@@ -129,6 +154,41 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 查询订阅规则日志
      */
+    @OpenApi(
+            path = "/api/sub/logs",
+            methods = HttpMethod.GET,
+            summary = "获取所有订阅日志",
+            description = "分页获取全部规则订阅的更新日志",
+            tags = {"规则订阅"},
+            queryParams = {
+                    @OpenApiParam(name = "page", type = Integer.class, description = "页码"),
+                    @OpenApiParam(name = "pageSize", type = Integer.class, description = "每页数量")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "listRuleSubLogs"
+    )
+    @OpenApi(
+            path = "/api/sub/logs/{ruleId}",
+            methods = HttpMethod.GET,
+            summary = "获取特定规则的订阅日志",
+            description = "分页获取指定规则订阅的更新日志",
+            tags = {"规则订阅"},
+            pathParams = {
+                    @OpenApiParam(name = "ruleId", description = "规则订阅 ID", required = true)
+            },
+            queryParams = {
+                    @OpenApiParam(name = "page", type = Integer.class, description = "页码"),
+                    @OpenApiParam(name = "pageSize", type = Integer.class, description = "每页数量")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "getRuleSubLogs"
+    )
     private void logs(Context ctx, String ruleId) {
         try {
             Pageable pageable = new Pageable(ctx);
@@ -143,6 +203,18 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 手动更新全部订阅规则
      */
+    @OpenApi(
+            path = "/api/sub/rules/update",
+            methods = HttpMethod.POST,
+            summary = "更新所有规则订阅",
+            description = "手动触发全部规则订阅的更新",
+            tags = {"规则订阅"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "updateAll"
+    )
     private StdResp updateAll(Context ctx) {
         String locale = locale(ctx);
         AtomicReference<StdResp> result = new AtomicReference<>();
@@ -159,6 +231,21 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 手动更新订阅规则
      */
+    @OpenApi(
+            path = "/api/sub/rule/{ruleId}/update",
+            methods = HttpMethod.POST,
+            summary = "更新规则订阅",
+            description = "手动触发指定规则订阅的更新",
+            tags = {"规则订阅"},
+            pathParams = {
+                    @OpenApiParam(name = "ruleId", description = "规则订阅 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "update"
+    )
     private StdResp update(Context ctx, String ruleId) {
         String locale = locale(ctx);
         return updateIpRule(locale, ruleId);
@@ -178,6 +265,21 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 启用/禁用订阅规则
      */
+    @OpenApi(
+            path = "/api/sub/rule/{ruleId}",
+            methods = HttpMethod.PATCH,
+            summary = "切换规则启用状态",
+            description = "启用或禁用指定的规则订阅",
+            tags = {"规则订阅"},
+            pathParams = {
+                    @OpenApiParam(name = "ruleId", description = "规则订阅 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "switcher"
+    )
     private void switcher(Context ctx) throws IOException {
         String ruleId = ctx.pathParam("ruleId");
         boolean enabled;
@@ -215,6 +317,21 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 删除订阅规则
      */
+    @OpenApi(
+            path = "/api/sub/rule/{ruleId}",
+            methods = HttpMethod.DELETE,
+            summary = "删除规则订阅",
+            description = "删除指定的规则订阅配置",
+            tags = {"规则订阅"},
+            pathParams = {
+                    @OpenApiParam(name = "ruleId", description = "规则订阅 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "delete"
+    )
     private void delete(Context ctx) throws IOException {
         String ruleId = ctx.pathParam("ruleId");
         deleteIpRule(ctx, ruleId);
@@ -237,6 +354,33 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 保存订阅规则（新增/修改）
      */
+    @OpenApi(
+            path = "/api/sub/rule",
+            methods = HttpMethod.PUT,
+            summary = "新建规则订阅",
+            description = "创建新的规则订阅配置",
+            tags = {"规则订阅"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "createRuleSub"
+    )
+    @OpenApi(
+            path = "/api/sub/rule/{ruleId}",
+            methods = HttpMethod.POST,
+            summary = "保存规则订阅",
+            description = "保存指定规则订阅的配置修改",
+            tags = {"规则订阅"},
+            pathParams = {
+                    @OpenApiParam(name = "ruleId", description = "规则订阅 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "saveRuleSub"
+    )
     private void save(Context ctx, String ruleId, boolean isAdd) throws IOException {
         saveIpRule(ctx, ruleId, isAdd);
     }
@@ -306,6 +450,21 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 查询订阅规则
      */
+    @OpenApi(
+            path = "/api/sub/rule/{ruleId}",
+            methods = HttpMethod.GET,
+            summary = "获取规则订阅",
+            description = "获取指定规则订阅的详细信息",
+            tags = {"规则订阅"},
+            pathParams = {
+                    @OpenApiParam(name = "ruleId", description = "规则订阅 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "get"
+    )
     private StdResp get(Context ctx, String ruleId) {
         String locale = locale(ctx);
         return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
@@ -314,6 +473,18 @@ public final class RuleSubController extends AbstractFeatureModule {
     /**
      * 查询订阅规则列表
      */
+    @OpenApi(
+            path = "/api/sub/rules",
+            methods = HttpMethod.GET,
+            summary = "获取规则订阅列表",
+            description = "获取全部规则订阅配置列表",
+            tags = {"规则订阅"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "list"
+    )
     private StdResp list(Context ctx) {
         String locale = locale(ctx);
         List<String> keys = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();

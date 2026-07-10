@@ -27,6 +27,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -90,6 +91,18 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
                 .get("/api/downloaders/{downloaderId}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderId"), ctx.pathParam("torrentId")), Role.USER_READ);
     }
 
+    @OpenApi(
+            path = "/api/downloaders/scan",
+            methods = HttpMethod.POST,
+            summary = "扫描本地下载器",
+            description = "扫描本机环境中可发现的下载器实例",
+            tags = {"下载器管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderScan"
+    )
     private void handleDownloaderScan(@NotNull Context ctx) {
         List<Integer> addedLocalDownloaderPorts = downloaderManager.getDownloaders().stream()
                 .map(downloader -> {
@@ -113,6 +126,18 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, downloaders));
     }
 
+    @OpenApi(
+            path = "/api/downloaders",
+            methods = HttpMethod.PUT,
+            summary = "添加下载器",
+            description = "创建并保存新的下载器配置",
+            tags = {"下载器管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderPut"
+    )
     private void handleDownloaderPut(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String id = draftDownloader.get("id").getAsString();
@@ -141,6 +166,21 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/downloaders/{downloaderId}",
+            methods = HttpMethod.PATCH,
+            summary = "更新下载器配置",
+            description = "更新指定下载器的配置信息",
+            tags = {"下载器管理"},
+            pathParams = {
+                    @OpenApiParam(name = "downloaderId", description = "下载器 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderPatch"
+    )
     private void handleDownloaderPatch(Context ctx, String downloaderId) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
@@ -170,6 +210,18 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/downloaders/test",
+            methods = HttpMethod.POST,
+            summary = "测试下载器连接",
+            description = "测试下载器配置是否能够成功连接",
+            tags = {"下载器管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderTest"
+    )
     private void handleDownloaderTest(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
@@ -205,6 +257,21 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/downloaders/{downloaderId}",
+            methods = HttpMethod.DELETE,
+            summary = "删除下载器",
+            description = "删除指定下载器并保存配置变更",
+            tags = {"下载器管理"},
+            pathParams = {
+                    @OpenApiParam(name = "downloaderId", description = "下载器 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderDelete"
+    )
     private void handleDownloaderDelete(Context ctx, String downloaderId) {
         Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getId().equals(downloaderId)).findFirst();
         if (selected.isEmpty()) {
@@ -225,6 +292,22 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     }
 
+    @OpenApi(
+            path = "/api/downloaders/{downloaderId}/torrent/{torrentId}/peers",
+            methods = HttpMethod.GET,
+            summary = "获取特定种子的 Peers",
+            description = "获取指定下载器中指定种子的 Peer 列表",
+            tags = {"下载器管理"},
+            pathParams = {
+                    @OpenApiParam(name = "downloaderId", description = "下载器 ID", required = true),
+                    @OpenApiParam(name = "torrentId", description = "种子 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePeersInTorrentOnDownloader"
+    )
     private void handlePeersInTorrentOnDownloader(Context ctx, String downloaderId, String torrentId) {
         Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getId().equals(downloaderId)).findFirst();
         if (selected.isEmpty()) {
@@ -267,6 +350,21 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         return dto;
     }
 
+    @OpenApi(
+            path = "/api/downloaders/{downloaderId}/torrents",
+            methods = HttpMethod.GET,
+            summary = "获取下载器的种子列表",
+            description = "获取指定下载器当前活跃的种子列表",
+            tags = {"下载器管理"},
+            pathParams = {
+                    @OpenApiParam(name = "downloaderId", description = "下载器 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderTorrents"
+    )
     private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderId) {
         Optional<Downloader> selected = downloaderManager.stream()
                 .filter(d -> d.getId().equals(downloaderId))
@@ -295,6 +393,21 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, torrentWrappers));
     }
 
+    @OpenApi(
+            path = "/api/downloaders/{downloaderId}/status",
+            methods = HttpMethod.GET,
+            summary = "获取下载器状态",
+            description = "获取指定下载器的状态和统计信息",
+            tags = {"下载器管理"},
+            pathParams = {
+                    @OpenApiParam(name = "downloaderId", description = "下载器 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderStatus"
+    )
     private void handleDownloaderStatus(@NotNull Context ctx, String downloaderId) {
         String locale = locale(ctx);
         Optional<Downloader> selected = downloaderManager.stream()
@@ -334,6 +447,18 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new DownloaderStatusDTO(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config, downloader.isPaused())));
     }
 
+    @OpenApi(
+            path = "/api/downloaders",
+            methods = HttpMethod.GET,
+            summary = "获取下载器列表",
+            description = "获取当前已配置的下载器列表",
+            tags = {"下载器管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDownloaderList"
+    )
     private void handleDownloaderList(@NotNull Context ctx) {
         List<DownloaderWrapperDTO> downloaders = downloaderManager
                 .stream().map(d -> new DownloaderWrapperDTO(d.getId(), d.getName(), ExternalSwitch.parseBoolean("pbh.demoMode") ? "REDACTED_IN_DEMO_MODE" : d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))

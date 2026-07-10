@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,6 +48,17 @@ public final class PBHMetadataController extends AbstractFeatureModule {
         webContainer.routes().get("/api/metadata/manifest", this::handleManifest, Role.ANYONE);
     }
 
+    @OpenApi(
+            path = "/api/metadata/manifest",
+            methods = HttpMethod.GET,
+            summary = "请求基本清单数据",
+            description = "返回版本、模块和安装信息",
+            tags = {"元数据"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleManifest"
+    )
     private void handleManifest(Context ctx) {
         Map<String, Object> data = new HashMap<>();
         data.put("version", buildMeta);

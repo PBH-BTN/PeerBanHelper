@@ -27,6 +27,7 @@ import com.google.gson.reflect.TypeToken;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
@@ -103,12 +104,36 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     }
 
 
+    @OpenApi(
+            path = "/api/general/refreshNatStatus",
+            methods = HttpMethod.POST,
+            summary = "刷新 NAT 状态",
+            description = "触发 NAT 类型状态刷新",
+            tags = {"常规"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleRefreshNatStatus"
+    )
     private void handleRefreshNatStatus(@NotNull Context context) {
         Thread.ofVirtual().name("Refresh NAT Status").start(() -> bTStunManager.refreshNatType());
         context.json(new StdResp(true, "Refreshing NAT Status", null));
     }
 
 
+    @OpenApi(
+            path = "/api/general/stacktrace",
+            methods = HttpMethod.GET,
+            summary = "获取 JVM 堆栈信息",
+            description = "返回当前 JVM 线程堆栈信息",
+            tags = {"常规"},
+            responses = {
+                    @OpenApiResponse(status = "200"),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleDumpStackTrace"
+    )
     private void handleDumpStackTrace(Context context) {
         StringBuilder threadDump = new StringBuilder();
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -122,6 +147,18 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/general/global",
+            methods = HttpMethod.GET,
+            summary = "获取全局配置",
+            description = "读取全局暂停和分析配置",
+            tags = {"常规"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleGlobalConfigRead"
+    )
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("globalPaused", downloaderServer.isGlobalPaused());
@@ -129,6 +166,19 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, data));
     }
 
+    @OpenApi(
+            path = "/api/general/global",
+            methods = HttpMethod.PATCH,
+            summary = "更新全局配置",
+            description = "更新全局暂停等全局配置项",
+            tags = {"常规"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = GlobalOptionPatchBody.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleGlobalConfig"
+    )
     private void handleGlobalConfig(Context context) {
         var body = context.bodyAsClass(GlobalOptionPatchBody.class);
         if (body == null) {
@@ -140,6 +190,21 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, "OK!", null));
     }
 
+    @OpenApi(
+            path = "/api/general/checkModuleAvailable",
+            methods = HttpMethod.GET,
+            summary = "检查模块是否可用",
+            description = "检查指定模块是否已启用",
+            tags = {"常规"},
+            queryParams = {
+                    @OpenApiParam(name = "module", description = "模块名称或标识", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleModuleAvailable"
+    )
     private void handleModuleAvailable(Context context) {
         var moduleName = context.queryParam("module");
         if (moduleName == null) {
@@ -159,6 +224,18 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, false));
     }
 
+    @OpenApi(
+            path = "/api/general/heapdump",
+            methods = HttpMethod.GET,
+            summary = "生成 JVM 堆转储文件",
+            description = "生成并下载 JVM 堆转储文件",
+            tags = {"常规"},
+            responses = {
+                    @OpenApiResponse(status = "200"),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleHeapDump"
+    )
     private void handleHeapDump(Context context) throws IOException {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
@@ -182,6 +259,18 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/general/status",
+            methods = HttpMethod.GET,
+            summary = "获取服务器状态",
+            description = "返回系统、JVM 和应用状态信息",
+            tags = {"常规"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleStatusGet"
+    )
     private void handleStatusGet(Context context) {
         // 有点大而全了，需要和前端看看哪些不需要可以删了
         Map<String, Object> data = new LinkedHashMap<>();
@@ -296,6 +385,18 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         return mem;
     }
 
+    @OpenApi(
+            path = "/api/general/reload",
+            methods = HttpMethod.POST,
+            summary = "重载所有模块",
+            description = "执行系统配置和模块重载",
+            tags = {"常规"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleReloading"
+    )
     private void handleReloading(Context context) {
         Main.setupConfiguration();
         var result = Main.getReloadManager().reload();
@@ -332,6 +433,21 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(success, tl(locale(context), message), entryList));
     }
 
+    @OpenApi(
+            path = "/api/general/{configName}",
+            methods = HttpMethod.GET,
+            summary = "获取模块配置",
+            description = "读取指定模块配置内容",
+            tags = {"常规"},
+            pathParams = {
+                    @OpenApiParam(name = "configName", description = "配置名称", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "generalConfigGet"
+    )
     private void handleConfigGet(Context context) throws IOException, InvalidConfigurationException {
         YamlConfiguration yamlConfiguration = new YamlConfiguration();
         yamlConfiguration.getOptions()
@@ -365,6 +481,21 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, replaceKeys(yamlConfiguration, "-", "_")));
     }
 
+    @OpenApi(
+            path = "/api/general/{configName}",
+            methods = HttpMethod.PUT,
+            summary = "更新模块配置",
+            description = "更新指定模块配置并触发重载",
+            tags = {"常规"},
+            pathParams = {
+                    @OpenApiParam(name = "configName", description = "配置名称", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleConfigPut"
+    )
     private void handleConfigPut(Context context) throws IOException, InvalidConfigurationException {
         File configFile;
         YamlConfiguration yamlConfiguration = new YamlConfiguration();

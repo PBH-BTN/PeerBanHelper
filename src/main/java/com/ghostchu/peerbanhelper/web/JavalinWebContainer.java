@@ -26,6 +26,8 @@ import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.JavalinStaticResourceHandler;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
+import io.javalin.openapi.plugin.OpenApiPlugin;
+import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import io.javalin.router.EndpointNotFound;
 import io.sentry.Sentry;
@@ -96,6 +98,21 @@ public final class JavalinWebContainer implements Reloadable {
                 c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
             }
             c.resourceHandler(new JavalinStaticResourceHandler());
+            c.registerPlugin(new io.javalin.openapi.plugin.OpenApiPlugin(openApiConfig ->
+                    openApiConfig
+                            .withDocumentationPath("/api/openapi")
+                            .withDefinitionConfiguration((version, builder) ->
+                                    builder.info(openApiInfo ->
+                                            openApiInfo
+                                                    .title("PeerBanHelper WebAPI")
+                                                    .version("1.0.0")
+                                                    .description("PeerBanHelper WebAPI Documentation")
+                                    )
+                            )
+            ));
+            c.registerPlugin(new io.javalin.openapi.plugin.swagger.SwaggerPlugin(swaggerConfig ->
+                    swaggerConfig.withDocumentationPath("/api/openapi")
+            ));
             if (Main.getMainConfig().getBoolean("server.external-webui", false)) {
                 c.staticFiles.add(staticFiles -> {
                     staticFiles.hostedPath = "/";

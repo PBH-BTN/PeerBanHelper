@@ -26,6 +26,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -87,6 +88,21 @@ public final class PBHChartController extends AbstractFeatureModule {
         ;
     }
 
+    @OpenApi(
+            path = "/api/chart/clientAnalyse",
+            methods = HttpMethod.GET,
+            summary = "客户端分析",
+            description = "按时间范围分析 Peer 客户端统计信息",
+            tags = {"图表"},
+            queryParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleClientAnalyse"
+    )
     private void handleClientAnalyse(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         var downloader = ctx.queryParam("downloader");
@@ -97,6 +113,21 @@ public final class PBHChartController extends AbstractFeatureModule {
     }
 
 
+    @OpenApi(
+            path = "/api/chart/sessionAnalyse",
+            methods = HttpMethod.GET,
+            summary = "会话分析",
+            description = "按时间范围分析 Peer 会话指标数据",
+            tags = {"图表"},
+            queryParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleSessionAnalyse"
+    )
     private void handleSessionAnalyse(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         var downloader = ctx.queryParam("downloader");
@@ -104,6 +135,21 @@ public final class PBHChartController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, data));
     }
 
+    @OpenApi(
+            path = "/api/chart/sessionBetween",
+            methods = HttpMethod.GET,
+            summary = "会话时间区间分析",
+            description = "统计指定时间范围内的会话时间区间分布",
+            tags = {"图表"},
+            queryParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleSessionBetween"
+    )
     private void handleSessionBetween(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
@@ -114,6 +160,21 @@ public final class PBHChartController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, peerRecordService.sessionBetween(downloader, timeQueryModel.startAt(), timeQueryModel.endAt())));
     }
 
+    @OpenApi(
+            path = "/api/chart/sessionDayBucket",
+            methods = HttpMethod.GET,
+            summary = "会话日期分布",
+            description = "按日期统计指定时间范围内的会话分布情况",
+            tags = {"图表"},
+            queryParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleSessionDayBucket"
+    )
     private void handleSessionDayBucket(@NotNull Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
@@ -154,6 +215,21 @@ public final class PBHChartController extends AbstractFeatureModule {
         private final AtomicInteger incoming = new AtomicInteger(0);
     }
 
+    @OpenApi(
+            path = "/api/chart/traffic",
+            methods = HttpMethod.GET,
+            summary = "流量图表",
+            description = "按时间范围统计下载器的流量变化图表",
+            tags = {"图表"},
+            queryParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleTrafficClassic"
+    )
     private void handleTrafficClassic(Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
@@ -190,6 +266,21 @@ public final class PBHChartController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, mergedRecords));
     }
 
+    @OpenApi(
+            path = "/api/chart/trend",
+            methods = HttpMethod.GET,
+            summary = "Peer 趋势图表",
+            description = "按时间范围统计连接和封禁 Peer 的趋势变化",
+            tags = {"图表"},
+            queryParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePeerTrends"
+    )
     private void handlePeerTrends(Context ctx) {
         var downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
@@ -232,6 +323,22 @@ public final class PBHChartController extends AbstractFeatureModule {
         )));
     }
 
+    @OpenApi(
+            path = "/api/chart/geoIpInfo",
+            methods = HttpMethod.GET,
+            summary = "GeoIP 分布统计",
+            description = "按时间范围统计 Peer 的 GeoIP 分布信息",
+            tags = {"图表"},
+            queryParams = {
+                    @OpenApiParam(name = "bannedOnly", type = Boolean.class, description = "是否仅统计被封禁的 Peer"),
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleGeoIP"
+    )
     private void handleGeoIP(Context ctx) {
         IPDB ipdb = iPDBManager.getIpdb();
         if (ipdb == null) {

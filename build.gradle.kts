@@ -94,6 +94,10 @@ dependencies {
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
     implementation("io.javalin:javalin:7.2.2")
+    // Javalin OpenAPI
+    annotationProcessor("io.javalin.community.openapi:openapi-annotation-processor:7.2.2")
+    implementation("io.javalin.community.openapi:javalin-openapi-plugin:7.2.2")
+    implementation("io.javalin.community.openapi:javalin-swagger-plugin:7.2.2")
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.1.0")
     // Expression engine
@@ -196,6 +200,12 @@ application {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.release.set(25)
+    options.compilerArgs.addAll(
+        listOf(
+            "-Aopenapi.info.title=PeerBanHelper WebAPI",
+            "-Aopenapi.info.version=${project.version}"
+        )
+    )
 }
 
 tasks.processResources {

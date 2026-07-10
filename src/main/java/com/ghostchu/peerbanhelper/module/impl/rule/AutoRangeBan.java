@@ -21,6 +21,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,18 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         return Reloadable.super.reloadModule();
     }
 
+    @OpenApi(
+            path = "/api/modules/auto-range-ban",
+            methods = HttpMethod.GET,
+            summary = "获取模块状态",
+            description = "获取自动范围封禁模块的当前前缀配置状态",
+            tags = {"自动范围封禁"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "autoRangeBanStatus"
+    )
     private void handleWebAPI(Context ctx) {
         ctx.json(new StdResp(true, null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix)));
     }

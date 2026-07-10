@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,17 @@ public final class BlockListController extends AbstractFeatureModule {
                 .get("/blocklist/dat-emule", this::blocklistDatEmule, Role.ANYONE);
     }
 
+    @OpenApi(
+            path = "/blocklist/dat-emule",
+            methods = HttpMethod.GET,
+            summary = "eMule DAT 格式封禁列表",
+            description = "以 eMule DAT 文本格式导出当前封禁 IP 列表",
+            tags = {"封禁列表"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(mimeType = "text/plain"))
+            },
+            operationId = "blocklistDatEmule"
+    )
     private void blocklistDatEmule(@NotNull Context ctx) {
         // Deduplicate remapped IPs using LinkedHashSet to maintain insertion order
         Set<IPAddress> remappedIps = new LinkedHashSet<>();
@@ -55,6 +67,17 @@ public final class BlockListController extends AbstractFeatureModule {
         ctx.result(builder.toString());
     }
 
+    @OpenApi(
+            path = "/blocklist/p2p-plain-format",
+            methods = HttpMethod.GET,
+            summary = "P2P 明文格式封禁列表",
+            description = "以 P2P 明文格式导出当前封禁 IP 列表",
+            tags = {"封禁列表"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(mimeType = "text/plain"))
+            },
+            operationId = "blocklistP2pPlain"
+    )
     private void blocklistP2pPlain(@NotNull Context ctx) {
         Set<IPAddress> remappedIps = new LinkedHashSet<>();
         for (IPAddress addr : banList.copyKeySet()) {
@@ -77,6 +100,17 @@ public final class BlockListController extends AbstractFeatureModule {
         ctx.result(result);
     }
 
+    @OpenApi(
+            path = "/blocklist/ip",
+            methods = HttpMethod.GET,
+            summary = "获取 IP 封禁列表",
+            description = "以纯文本格式导出当前封禁 IP 列表",
+            tags = {"封禁列表"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(mimeType = "text/plain"))
+            },
+            operationId = "blocklistIp"
+    )
     private void blocklistIp(@NotNull Context ctx) {
         // Deduplicate remapped IPs using LinkedHashSet to maintain insertion order
         Set<IPAddress> remappedIps = new LinkedHashSet<>();

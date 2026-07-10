@@ -21,6 +21,7 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -83,6 +84,18 @@ public final class PBHPlusController extends AbstractFeatureModule {
                 .post("/api/pbhplus/renewFreeLicense", this::handleLicenseRenew, Role.USER_WRITE);
     }
 
+    @OpenApi(
+            path = "/api/pbhplus/claimRenewFreeLicenseCaptcha",
+            methods = HttpMethod.GET,
+            summary = "获取免费许可证验证码",
+            description = "获取续订免费许可证所需的工作量证明验证码",
+            tags = {"PBH+"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "claimRenewFreeLicenseCaptcha"
+    )
     private void claimRenewFreeLicenseCaptcha(@NotNull Context context) {
         var server = new PoWServer(powCaptchaDifficultyBits, powCaptchaAlgorithm);
         var challengeId = UUID.randomUUID().toString();
@@ -90,6 +103,19 @@ public final class PBHPlusController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, new PowCaptchaData(challengeId, Base64.getEncoder().encodeToString(server.getChallenge()), server.getDifficultyBits(), powCaptchaAlgorithm)));
     }
 
+    @OpenApi(
+            path = "/api/pbhplus/key",
+            methods = HttpMethod.PUT,
+            summary = "添加许可证",
+            description = "添加并激活 PBH+ 许可证",
+            tags = {"PBH+"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = LicensePutRequestBody.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleLicensePut"
+    )
     private void handleLicensePut(@NotNull Context context) throws Exception {
         var body = context.bodyAsClass(LicensePutRequestBody.class);
         var input = body.key().trim();
@@ -127,6 +153,19 @@ public final class PBHPlusController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/pbhplus/renewFreeLicense",
+            methods = HttpMethod.POST,
+            summary = "续订免费许可证",
+            description = "提交验证码并续订免费 PBH+ 许可证",
+            tags = {"PBH+"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = PowCaptchaBody.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleLicenseRenew"
+    )
     private void handleLicenseRenew(@NotNull Context context) throws Exception {
         var body = context.bodyAsClass(PowCaptchaBody.class);
         var captchaServer = powCaptcha.getIfPresent(body.getCaptchaId());
@@ -153,6 +192,19 @@ public final class PBHPlusController extends AbstractFeatureModule {
         context.json(new StdResp(true, tlUI(Lang.PBH_PLUS_LICENSE_UPDATED), null));
     }
 
+    @OpenApi(
+            path = "/api/pbhplus/key",
+            methods = HttpMethod.DELETE,
+            summary = "删除许可证",
+            description = "删除指定的 PBH+ 许可证",
+            tags = {"PBH+"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = LicenseDeleteBody.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleLicenseDelete"
+    )
     private void handleLicenseDelete(@NotNull Context context) throws Exception {
         String key = context.bodyAsClass(LicenseDeleteBody.class).getLicenseId();
         var mappedLicense = licenseManager.getLicenseBackend().getLicensesMap().get(key);
@@ -171,6 +223,18 @@ public final class PBHPlusController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/pbhplus/status",
+            methods = HttpMethod.GET,
+            summary = "获取 PBH+ 状态",
+            description = "获取当前 PBH+ 功能和许可证状态",
+            tags = {"PBH+"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "pbhPlusStatus"
+    )
     private void handleStatus(@NotNull Context context) {
         List<LicenseKeyPairDTO> licenseKeyPairDTOList = new ArrayList<>();
         licenseManager.getLicenseBackend().getLicensesMap().forEach((licenseId, license) -> {

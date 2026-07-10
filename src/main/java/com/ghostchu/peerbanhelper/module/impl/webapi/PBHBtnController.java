@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,6 +61,18 @@ public class PBHBtnController extends AbstractFeatureModule {
         Main.getEventBus().register(this);
     }
 
+    @OpenApi(
+            path = "/api/modules/btn",
+            methods = HttpMethod.GET,
+            summary = "获取 BTN 网络状态",
+            description = "获取 BTN 网络模块的启用状态和配置信息",
+            tags = {"BTN 网络"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "status"
+    )
     private void status(Context context) {
         Map<String, Object> info = new HashMap<>();
         info.put("enabled", btnNetwork != null);

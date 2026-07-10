@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +58,18 @@ public final class PBHPushController extends AbstractFeatureModule {
                 .delete("/api/push/{pushName}", ctx -> handlePushProviderDelete(ctx, ctx.pathParam("pushName")), Role.USER_WRITE);
     }
 
-
+    @OpenApi(
+            path = "/api/push",
+            methods = HttpMethod.PUT,
+            summary = "添加推送提供商",
+            description = "创建新的推送提供商配置",
+            tags = {"推送管理"},
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePushProviderPut"
+    )
     private void handlePushProviderPut(Context ctx) {
         JsonObject draftPushProvider = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftPushProvider.get("name").getAsString();
@@ -88,6 +100,21 @@ public final class PBHPushController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/push/{pushName}",
+            methods = HttpMethod.PATCH,
+            summary = "更新推送提供商配置",
+            description = "更新指定推送提供商的名称、类型或配置",
+            tags = {"推送管理"},
+            pathParams = {
+                    @OpenApiParam(name = "pushName", description = "推送提供商名称", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePushProviderPatch"
+    )
     private void handlePushProviderPatch(Context ctx, String pushProviderName) {
         JsonObject draftProvider = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftProvider.get("name").getAsString();
@@ -121,6 +148,18 @@ public final class PBHPushController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/push/test",
+            methods = HttpMethod.POST,
+            summary = "测试推送提供商",
+            description = "使用提供的配置测试推送提供商是否可用",
+            tags = {"推送管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePushProviderTest"
+    )
     private void handlePushProviderTest(Context ctx) {
         JsonObject draftPushProvider = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftPushProvider.get("name").getAsString();
@@ -148,6 +187,21 @@ public final class PBHPushController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/push/{pushName}",
+            methods = HttpMethod.DELETE,
+            summary = "删除推送提供商",
+            description = "删除指定的推送提供商配置",
+            tags = {"推送管理"},
+            pathParams = {
+                    @OpenApiParam(name = "pushName", description = "推送提供商名称", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePushProviderDelete"
+    )
     private void handlePushProviderDelete(Context ctx, String pushProviderName) {
         Optional<PushProvider> selected = pushManager.getProviderList().stream().filter(d -> d.getName().equals(pushProviderName)).findFirst();
         if (selected.isEmpty()) {
@@ -167,6 +221,18 @@ public final class PBHPushController extends AbstractFeatureModule {
         }
     }
 
+    @OpenApi(
+            path = "/api/push",
+            methods = HttpMethod.GET,
+            summary = "获取推送提供商列表",
+            description = "获取所有已配置的推送提供商",
+            tags = {"推送管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePushProviderList"
+    )
     private void handlePushProviderList(@NotNull Context ctx) {
         List<PushWrapperDTO> pushProviders = pushManager.getProviderList()
                 .stream().map(d -> new PushWrapperDTO(d.getName(), d.getConfigType(), d.saveJson()))

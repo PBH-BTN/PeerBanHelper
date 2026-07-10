@@ -26,6 +26,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,19 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .put("/api/bans", this::handleBanAdd, Role.USER_WRITE);
     }
 
+    @OpenApi(
+            path = "/api/bans",
+            methods = HttpMethod.PUT,
+            summary = "添加封禁条目",
+            description = "添加一个或多个封禁条目到当前封禁列表",
+            tags = {"封禁管理"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = String[].class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleBanAdd"
+    )
     private void handleBanAdd(@NotNull Context context) {
         String[] request = context.bodyAsClass(String[].class);
         int size = 0;
@@ -94,6 +108,19 @@ public final class PBHBanController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, Map.of("count", size)));
     }
 
+    @OpenApi(
+            path = "/api/bans",
+            methods = HttpMethod.DELETE,
+            summary = "删除封禁条目",
+            description = "删除一个或多个封禁条目，支持使用 * 清空全部封禁",
+            tags = {"封禁管理"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = String[].class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleBanDelete"
+    )
     private void handleBanDelete(Context context) {
         List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
         List<IPAddress> pendingRemovals = new ArrayList<>();
@@ -109,12 +136,39 @@ public final class PBHBanController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, Map.of("count", pendingRemovals.size())));
     }
 
+    @OpenApi(
+            path = "/api/bans/ranks",
+            methods = HttpMethod.GET,
+            summary = "获取封禁排行",
+            description = "分页获取封禁 IP 的排行数据",
+            tags = {"封禁管理"},
+            queryParams = {
+                    @OpenApiParam(name = "filter", description = "用于筛选排行结果的关键字")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleRanks"
+    )
     private void handleRanks(Context ctx) {
         Pageable pageable = new Pageable(ctx);
         String filter = ctx.queryParam("filter");
         ctx.json(new StdResp(true, null, PBHPage.from(historyService.getBannedIps(pageable.toPage(), filter))));
     }
 
+    @OpenApi(
+            path = "/api/bans/logs",
+            methods = HttpMethod.GET,
+            summary = "获取封禁日志",
+            description = "分页获取封禁日志记录列表",
+            tags = {"封禁管理"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "banLogs"
+    )
     private void handleLogs(Context ctx) {
         persistMetrics.flush();
         Pageable pageable = new Pageable(ctx);
@@ -145,6 +199,22 @@ public final class PBHBanController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new PBHPage<>(pageResult.getCurrent(), pageResult.getSize(), pageResult.getTotal(), result)));
     }
 
+    @OpenApi(
+            path = "/api/bans",
+            methods = HttpMethod.GET,
+            summary = "获取当前封禁列表",
+            description = "分页获取当前封禁列表，并支持按关键字和断连封禁状态筛选",
+            tags = {"封禁管理"},
+            queryParams = {
+                    @OpenApiParam(name = "ignoreBanForDisconnect", description = "是否忽略因断连产生的封禁"),
+                    @OpenApiParam(name = "search", description = "用于搜索 IP 或封禁信息的关键字")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleBans"
+    )
     private void handleBans(Context ctx) {
         /*
          * Two modes are supported here for backward-compatibility:

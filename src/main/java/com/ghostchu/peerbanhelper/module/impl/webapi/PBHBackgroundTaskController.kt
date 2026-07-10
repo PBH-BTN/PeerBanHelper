@@ -13,6 +13,8 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.TaskStatusListener
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer
 import com.ghostchu.peerbanhelper.web.Role
 import io.javalin.http.sse.SseClient
+import io.javalin.openapi.HttpMethod
+import io.javalin.openapi.OpenApi
 import io.javalin.websocket.WsConfig
 import io.javalin.websocket.WsContext
 import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyles
@@ -49,6 +51,13 @@ class PBHBackgroundTaskController : AbstractSSEFeatureModule() {
         backgroundTaskManager.removeStatusListener(statusListener)
     }
 
+    @OpenApi(
+        path = "/api/tasks/live",
+        methods = [HttpMethod.GET],
+        summary = "实时任务状态推送",
+        description = "通过 SSE 推送后台任务的实时状态更新",
+        tags = ["后台任务"]
+    )
     private fun handleSseConnection(sseClient: SseClient) {
         sendCurrentTasks(sseClient);
         registerSseManagement(sseClient);

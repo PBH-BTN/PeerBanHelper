@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +48,36 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
                 .post("/api/auth/logout", this::handleLogout, Role.ANYONE);
     }
 
+    @OpenApi(
+            path = "/api/auth/logout",
+            methods = HttpMethod.POST,
+            summary = "注销登录态",
+            description = "注销当前会话的登录态",
+            tags = {"鉴权"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "logout"
+    )
     private void handleLogout(Context ctx) {
         ctx.sessionAttribute("authenticated", null);
         ctx.json(new StdResp(true, "success", null));
     }
 
+    @OpenApi(
+            path = "/api/auth/login",
+            methods = HttpMethod.POST,
+            summary = "登录",
+            description = "使用访问令牌登录 WebUI",
+            tags = {"鉴权"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = LoginRequestBody.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "401", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "login"
+    )
     private void handleLogin(Context ctx) throws NeedInitException, IPAddressBannedException {
 //        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
 //            ctx.status(HttpStatus.OK);

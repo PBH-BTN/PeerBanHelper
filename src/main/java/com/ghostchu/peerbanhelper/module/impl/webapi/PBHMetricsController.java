@@ -18,6 +18,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,21 @@ public final class PBHMetricsController extends AbstractFeatureModule {
                 .get("/api/statistic/analysis/date", this::handleHistoryDateAccess, Role.USER_READ);
     }
 
+    @OpenApi(
+            path = "/api/statistic/analysis/banTrends",
+            methods = HttpMethod.GET,
+            summary = "封禁趋势分析",
+            description = "按时间范围统计封禁趋势数据",
+            tags = {"基本统计"},
+            queryParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleBanTrends"
+    )
     private void handleBanTrends(Context ctx) {
         var downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
@@ -86,6 +102,23 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         ));
     }
 
+    @OpenApi(
+            path = "/api/statistic/analysis/date",
+            methods = HttpMethod.GET,
+            summary = "日期统计分析",
+            description = "按日期粒度统计历史字段分布",
+            tags = {"基本统计"},
+            queryParams = {
+                    @OpenApiParam(name = "filter", type = Double.class, description = "最小占比过滤值"),
+                    @OpenApiParam(name = "type", description = "时间粒度类型"),
+                    @OpenApiParam(name = "field", description = "统计字段名称")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleHistoryDateAccess"
+    )
     private void handleHistoryDateAccess(Context ctx) {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String filter = Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0");
@@ -198,6 +231,24 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         return calendar;
     }
 
+    @OpenApi(
+            path = "/api/statistic/analysis/field",
+            methods = HttpMethod.GET,
+            summary = "字段统计分析",
+            description = "按字段统计数量或求和值",
+            tags = {"基本统计"},
+            queryParams = {
+                    @OpenApiParam(name = "type", description = "统计方式"),
+                    @OpenApiParam(name = "field", description = "统计字段名称"),
+                    @OpenApiParam(name = "filter", type = Double.class, description = "最小占比过滤值"),
+                    @OpenApiParam(name = "downloader", description = "下载器标识")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleHistoryNumberAccess"
+    )
     private void handleHistoryNumberAccess(Context ctx) {
         // 过滤 X% 以下的数据
         String type = ctx.queryParam("type");
@@ -242,6 +293,18 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e) -> new UniversalFieldDateResult(e.getKey(), e.getValue().intValue(), 0)).toList()));
     }
 
+    @OpenApi(
+            path = "/api/statistic/counter",
+            methods = HttpMethod.GET,
+            summary = "统计计数器",
+            description = "返回系统基础统计计数器",
+            tags = {"基本统计"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleBasicCounter"
+    )
     private void handleBasicCounter(Context ctx) {
         Map<String, Object> map = new HashMap<>();
         map.put("checkCounter", metrics.getCheckCounter());

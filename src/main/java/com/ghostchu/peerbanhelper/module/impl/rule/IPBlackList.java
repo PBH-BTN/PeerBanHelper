@@ -23,6 +23,7 @@ import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         Main.getReloadManager().register(this);
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/netType",
+            methods = HttpMethod.PUT,
+            summary = "设置网络类型规则",
+            description = "覆盖更新 IP 黑名单模块中的网络类型规则列表",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = String[].class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleNetTypePut"
+    )
     private void handleNetTypePut(@NotNull Context context) {
         String[] inputNetTypes = context.bodyAsClass(String[].class);
         this.networkType = new HashSet<>(Arrays.asList(inputNetTypes));
@@ -102,6 +116,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         }
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/city",
+            methods = HttpMethod.DELETE,
+            summary = "删除城市规则",
+            description = "删除 IP 黑名单模块中的城市匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserCityRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleCitiesDelete"
+    )
     private void handleCitiesDelete(Context context) throws IOException {
         if (cities.removeIf(city -> city.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
             //context.status(HttpStatus.OK);
@@ -113,6 +140,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/city",
+            methods = HttpMethod.PUT,
+            summary = "添加城市规则",
+            description = "向 IP 黑名单模块中添加城市匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserCityRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleCities"
+    )
     private void handleCities(Context context) throws IOException {
         var city = context.bodyAsClass(UserCityRequest.class).city();
         if (city == null || city.isBlank())
@@ -124,6 +164,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/region",
+            methods = HttpMethod.DELETE,
+            summary = "删除地区规则",
+            description = "删除 IP 黑名单模块中的地区匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserRegionRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleRegionDelete"
+    )
     private void handleRegionDelete(Context context) throws IOException {
         if (regions.removeIf(region -> region.equals(context.bodyAsClass(UserRegionRequest.class).region()))) {
             //context.status(HttpStatus.OK);
@@ -135,6 +188,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/asn",
+            methods = HttpMethod.DELETE,
+            summary = "删除 ASN 规则",
+            description = "删除 IP 黑名单模块中的 ASN 匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserASNRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleASNDelete"
+    )
     private void handleASNDelete(Context context) throws IOException {
         if (asns.removeIf(p -> p == context.bodyAsClass(UserASNRequest.class).asn())) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
@@ -145,6 +211,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/port",
+            methods = HttpMethod.DELETE,
+            summary = "删除端口规则",
+            description = "删除 IP 黑名单模块中的端口匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserPortRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePortDelete"
+    )
     private void handlePortDelete(Context context) throws IOException {
         if (ports.removeIf(p -> p == context.bodyAsClass(UserPortRequest.class).port())) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
@@ -155,6 +234,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/ip",
+            methods = HttpMethod.DELETE,
+            summary = "删除 IP 规则",
+            description = "删除 IP 黑名单模块中的 IP 或 CIDR 匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserIPRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleIPDelete"
+    )
     private void handleIPDelete(Context context) throws IOException {
         var parsed = IPAddressUtil.getIPAddress(context.bodyAsClass(UserIPRequest.class).ip());
         if (parsed == null)
@@ -169,6 +261,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     }
 
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/region",
+            methods = HttpMethod.PUT,
+            summary = "添加地区规则",
+            description = "向 IP 黑名单模块中添加地区匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserRegionRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleRegion"
+    )
     private void handleRegion(Context ctx) throws IOException {
         var region = ctx.bodyAsClass(UserRegionRequest.class).region();
         if (region == null || region.isBlank())
@@ -180,6 +285,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/asn",
+            methods = HttpMethod.PUT,
+            summary = "添加 ASN 规则",
+            description = "向 IP 黑名单模块中添加 ASN 匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserASNRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleASN"
+    )
     private void handleASN(Context ctx) throws IOException {
         UserASNRequest asn = ctx.bodyAsClass(UserASNRequest.class);
         asns.add(asn.asn());
@@ -190,6 +308,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     }
 
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/port",
+            methods = HttpMethod.PUT,
+            summary = "添加端口规则",
+            description = "向 IP 黑名单模块中添加端口匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserPortRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handlePort"
+    )
     private void handlePort(Context ctx) throws IOException {
         UserPortRequest req = ctx.bodyAsClass(UserPortRequest.class);
         ports.add(req.port());
@@ -199,6 +330,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/ip",
+            methods = HttpMethod.PUT,
+            summary = "添加 IP 规则",
+            description = "向 IP 黑名单模块中添加 IP 或 CIDR 匹配规则",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserIPRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleIPPut"
+    )
     private void handleIPPut(Context context) throws IOException {
         IPAddress ipAddress = parseIPAddressFromReq(context);
         ips.add(ipAddress);
@@ -208,6 +352,19 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         getCache().invalidateAll();
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/ip/test",
+            methods = HttpMethod.POST,
+            summary = "测试 IP 规则",
+            description = "测试输入的 IP 或范围并返回生成的 CIDR 信息",
+            tags = {"IP 黑名单"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = UserIPRequest.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleIPTest"
+    )
     private void handleIPTest(Context context) throws IOException {
         IPAddress ipAddress = parseIPAddressFromReq(context);
         IPAddress lower = ipAddress.getLower().withoutPrefixLength();
@@ -237,6 +394,21 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         return true;
     }
 
+    @OpenApi(
+            path = "/api/modules/ipblacklist/{ruleType}",
+            methods = HttpMethod.GET,
+            summary = "获取黑名单规则",
+            description = "按规则类型获取 IP 黑名单模块的当前配置",
+            tags = {"IP 黑名单"},
+            pathParams = {
+                    @OpenApiParam(name = "ruleType", description = "规则类型，可选 ip、port、asn、region、city、netType", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "ipBlackListConfig"
+    )
     private void handleWebAPI(Context ctx) {
         Map<String, Object> map = new LinkedHashMap<>();
         switch (ctx.pathParam("ruleType")) {

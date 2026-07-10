@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -56,6 +57,19 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
         ;
     }
 
+    @OpenApi(
+            path = "/api/utilities/replaceTracker",
+            methods = HttpMethod.POST,
+            summary = "替换 Tracker",
+            description = "批量替换下载器任务中的 Tracker 地址",
+            tags = {"工具"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = ReplaceTrackerDTO.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleReplaceTracker"
+    )
     private void handleReplaceTracker(Context context) {
         ReplaceTrackerDTO dto = context.bodyAsClass(ReplaceTrackerDTO.class);
         if (dto == null || dto.from() == null || dto.to() == null || dto.from().isEmpty() || dto.to().isEmpty()) {

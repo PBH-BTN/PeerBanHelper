@@ -22,6 +22,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -83,6 +84,18 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 .build();
     }
 
+    @OpenApi(
+            path = "/api/autostun/status",
+            methods = HttpMethod.GET,
+            summary = "获取 NAT 穿透模块状态",
+            description = "获取 NAT 穿透模块当前配置和 NAT 类型状态",
+            tags = {"NAT 穿透"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "getModuleStatus"
+    )
     private void getModuleStatus(@NotNull Context context) {
         var section = Main.getMainConfig().getConfigurationSection("auto-stun");
         if (section == null) throw new IllegalStateException("Auto-stun configuration section not found");
@@ -104,6 +117,19 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, autoStunConfigDto));
     }
 
+    @OpenApi(
+            path = "/api/autostun/config",
+            methods = HttpMethod.PUT,
+            summary = "更新 NAT 穿透配置",
+            description = "更新 NAT 穿透模块启用状态和下载器配置",
+            tags = {"NAT 穿透"},
+            requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = AutoStunConfigForm.class)),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "putModuleConfig"
+    )
     private void putModuleConfig(@NotNull Context context) throws Exception {
         AutoStunConfigForm autoStunConfigForm = context.bodyAsClass(AutoStunConfigForm.class);
         var section = Main.getMainConfig().getConfigurationSection("auto-stun");
@@ -121,6 +147,25 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         context.json(new StdResp(true, tl(locale(context), Lang.AUTOSTUN_CONFIG_REAPPLIED), null));
     }
 
+    @OpenApi(
+            path = "/api/autostun/tunnel/{downloader}/connections",
+            methods = HttpMethod.GET,
+            summary = "获取隧道连接列表",
+            description = "分页获取指定下载器的 NAT 穿透隧道连接列表",
+            tags = {"NAT 穿透"},
+            pathParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器 ID", required = true)
+            },
+            queryParams = {
+                    @OpenApiParam(name = "page", type = Long.class, description = "页码"),
+                    @OpenApiParam(name = "pageSize", type = Long.class, description = "每页数量")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "tunnelConnections"
+    )
     private void tunnelConnections(@NotNull Context context) {
         Pageable pageable = new Pageable(context);
         var downloaderId = context.pathParam("downloader");
@@ -172,6 +217,21 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, new PBHPage<>(pageable.getPage(), pageable.getSize(), total, connectionList.stream().skip(skip).limit(pageable.getSize()).toList())));
     }
 
+    @OpenApi(
+            path = "/api/autostun/tunnel/{downloader}/info",
+            methods = HttpMethod.GET,
+            summary = "获取指定下载器的隧道信息",
+            description = "获取指定下载器当前 NAT 穿透隧道状态",
+            tags = {"NAT 穿透"},
+            pathParams = {
+                    @OpenApiParam(name = "downloader", description = "下载器 ID", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "tunnelInfo"
+    )
     private void tunnelInfo(@NotNull Context context) {
         var downloaderId = context.pathParam("downloader");
         var downloader = downloaderManager.getDownloaderById(downloaderId);
@@ -187,6 +247,18 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, toTunnelInfoDto(locale(context), stunInstance)));
     }
 
+    @OpenApi(
+            path = "/api/autostun/tunnels",
+            methods = HttpMethod.GET,
+            summary = "获取所有隧道信息",
+            description = "获取所有下载器的 NAT 穿透隧道状态",
+            tags = {"NAT 穿透"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "tunnels"
+    )
     private void tunnels(@NotNull Context context) {
         List<TunnelsDTO> tunnels = new ArrayList<>();
         for (Map.Entry<Downloader, BTStunInstance> entry : bTStunManager.getDownloadStunInstances().entrySet()) {
@@ -218,6 +290,18 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         );
     }
 
+    @OpenApi(
+            path = "/api/autostun/restart",
+            methods = HttpMethod.POST,
+            summary = "重启 NAT 穿透",
+            description = "重新加载 NAT 穿透模块",
+            tags = {"NAT 穿透"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "autoStunRestart"
+    )
     private void autoStunRestart(@NotNull Context context) {
         try {
             bTStunManager.reloadModule();
@@ -227,6 +311,18 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         context.json(new StdResp(true, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_RESTARTED)), null));
     }
 
+    @OpenApi(
+            path = "/api/autostun/refreshNatType",
+            methods = HttpMethod.POST,
+            summary = "刷新 NAT 类型",
+            description = "异步刷新当前 NAT 类型探测结果",
+            tags = {"NAT 穿透"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "refreshNatType"
+    )
     private void refreshNatType(@NotNull Context context) {
         Thread.ofVirtual().name("Refresh NAT Status").start(stunManager::refreshNatType);
         context.json(new StdResp(true, "Refreshing NAT Status", null));

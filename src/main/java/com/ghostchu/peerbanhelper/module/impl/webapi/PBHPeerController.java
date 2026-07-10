@@ -33,6 +33,7 @@ import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.net.HostAndPort;
 import io.javalin.http.Context;
+import io.javalin.openapi.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,21 @@ public final class PBHPeerController extends AbstractFeatureModule {
 
     }
 
+    @OpenApi(
+            path = "/api/peer/{ip}/btnQueryIframe",
+            methods = HttpMethod.GET,
+            summary = "BTN 查询 IFrame 页面",
+            description = "获取指定 Peer 的 BTN 查询 IFrame 链接",
+            tags = {"Peer 管理"},
+            pathParams = {
+                    @OpenApiParam(name = "ip", description = "Peer 的 IP 地址", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleBtnQueryIFrame"
+    )
     private void handleBtnQueryIFrame(@NotNull Context ctx) {
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
         var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
@@ -126,6 +142,21 @@ public final class PBHPeerController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, url));
     }
 
+    @OpenApi(
+            path = "/api/peer/{ip}/btnQuery",
+            methods = HttpMethod.GET,
+            summary = "查询 BTN 封禁状态",
+            description = "查询指定 Peer 在 BTN 网络中的封禁状态",
+            tags = {"Peer 管理"},
+            pathParams = {
+                    @OpenApiParam(name = "ip", description = "Peer 的 IP 地址", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleBtnQuery"
+    )
     private void handleBtnQuery(@NotNull Context ctx) throws IOException {
         // 转换 IP 格式到 PBH 统一内部格式
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
@@ -146,6 +177,21 @@ public final class PBHPeerController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, query));
     }
 
+    @OpenApi(
+            path = "/api/peer/{ip}",
+            methods = HttpMethod.GET,
+            summary = "获取 Peer 信息",
+            description = "获取指定 Peer 的基础信息、地理位置和统计数据",
+            tags = {"Peer 管理"},
+            pathParams = {
+                    @OpenApiParam(name = "ip", description = "Peer 的 IP 地址", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleInfo"
+    )
     private void handleInfo(Context ctx) {
         // 转换 IP 格式到 PBH 统一内部格式
         HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
@@ -193,6 +239,21 @@ public final class PBHPeerController extends AbstractFeatureModule {
     }
 
 
+    @OpenApi(
+            path = "/api/peer/{ip}/banHistory",
+            methods = HttpMethod.GET,
+            summary = "获取 Peer 封禁历史",
+            description = "分页获取指定 Peer 的封禁历史记录",
+            tags = {"Peer 管理"},
+            pathParams = {
+                    @OpenApiParam(name = "ip", description = "Peer 的 IP 地址", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "peerBanHistory"
+    )
     private void handleBanHistory(Context ctx) {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
@@ -236,6 +297,21 @@ public final class PBHPeerController extends AbstractFeatureModule {
     }
 
 
+    @OpenApi(
+            path = "/api/peer/{ip}/accessHistory",
+            methods = HttpMethod.GET,
+            summary = "获取 Peer 访问历史",
+            description = "分页获取指定 Peer 的访问历史记录",
+            tags = {"Peer 管理"},
+            pathParams = {
+                    @OpenApiParam(name = "ip", description = "Peer 的 IP 地址", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = StdResp.class)),
+                    @OpenApiResponse(status = "403", content = @OpenApiContent(from = StdResp.class))
+            },
+            operationId = "handleAccessHistory"
+    )
     private void handleAccessHistory(Context ctx) {
         InetAddress ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toInetAddress();
         Pageable pageable = new Pageable(ctx);
