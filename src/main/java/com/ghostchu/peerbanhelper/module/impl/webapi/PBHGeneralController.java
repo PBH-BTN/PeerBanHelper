@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import oshi.hardware.HardwareAbstractionLayer;
+import oshi.software.common.os.linux.LinuxOperatingSystem;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -240,7 +241,11 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         try {
             SystemInfoProviderWrapper.find().ifPresent(provider -> {
                 var versionInfo = provider.getOperatingSystem().getVersionInfo();
-                os.put("version", versionInfo.getVersion() != null ? versionInfo.getVersion() : String.valueOf(versionInfo));
+                if (provider.getOperatingSystem() instanceof LinuxOperatingSystem) {
+                    os.put("version", versionInfo.getBuildNumber() != null ? versionInfo.getBuildNumber() : String.valueOf(versionInfo));
+                } else {
+                    os.put("version", versionInfo.getVersion() != null ? versionInfo.getVersion() : String.valueOf(versionInfo));
+                }
                 var mem = generateSystemMemoryData(provider.getHardware());
                 os.put("memory", mem);
             });
