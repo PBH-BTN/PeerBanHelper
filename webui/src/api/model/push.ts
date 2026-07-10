@@ -10,6 +10,13 @@ export enum PushType {
   Webhook = 'webhook'
 }
 
+export enum SMTPEncryption {
+  None = 'NONE',
+  StartTLS = 'STARTTLS',
+  EnforceStartTLS = 'ENFORCE_STARTTLS',
+  SSLTLS = 'SSLTLS'
+}
+
 export enum WebhookMethod {
   GET = 'GET',
   POST = 'POST'
@@ -18,13 +25,6 @@ export enum WebhookMethod {
 export enum WebhookContentType {
   JSON = 'application/json',
   PlainText = 'text/plain'
-}
-
-export enum SMTPEncryption {
-  None = 'NONE',
-  StartTLS = 'STARTTLS',
-  EnforceStartTLS = 'ENFORCE_STARTTLS',
-  SSLTLS = 'SSLTLS'
 }
 
 interface SMTPConfigBase {
