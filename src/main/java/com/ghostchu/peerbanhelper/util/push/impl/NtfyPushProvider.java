@@ -23,6 +23,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
     private final HTTPUtil httpUtil;
+    private static final String ICON_URL ="https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png";
 
     public NtfyPushProvider(String name, Config config, HTTPUtil httpUtil) {
         this.name = name;
@@ -86,7 +87,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
                 .post(requestBody)
                 .header("Title", encodedTitle)
                 .header("Priority", String.valueOf(config.getPriority()))
-                .header("Icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
+                .header("Icon", ICON_URL);
 
         if (config.getToken() != null && !config.getToken().isBlank()) {
             builder.header("Authorization", "Bearer " + config.getToken());
