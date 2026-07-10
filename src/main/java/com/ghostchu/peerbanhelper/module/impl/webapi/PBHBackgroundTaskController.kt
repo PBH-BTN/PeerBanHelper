@@ -37,7 +37,9 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     override fun getConfigName(): String = "webapi-background-tasks"
 
     override fun onEnable() {
-        webContainer.routes().ws("/api/tasks/stream", this::handleTaskStream, Role.USER_READ)
+        webContainer.routes()
+            .wsBeforeUpgrade("/api/tasks/stream", this::beforeUpgrade)
+            .ws("/api/tasks/stream", this::handleTaskStream, Role.USER_READ)
 
         backgroundTaskManager.addStatusListener(statusListener)
     }
@@ -53,7 +55,7 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     }
 
     private fun sendCurrentTasks(ctx: WsContext) {
-        val lang = locale(getContextFromWsContext(ctx))
+        val lang = locale(ctx)
         for (task in backgroundTaskManager.getTaskList()) {
             try {
                 ctx.send(
@@ -79,7 +81,7 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     private fun broadcastTaskUpdate(task: BackgroundTask) {
         for (session in wsSessions) {
             try {
-                val lang = locale(getContextFromWsContext(session))
+                val lang = locale(session)
                 val response = BackgroundTaskEvent(
                     BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
                         id = task.id,

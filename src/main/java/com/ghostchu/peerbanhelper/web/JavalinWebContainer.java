@@ -28,6 +28,7 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import io.javalin.router.EndpointNotFound;
+import io.javalin.websocket.WsContext;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.Setter;
@@ -323,8 +324,17 @@ public final class JavalinWebContainer implements Reloadable {
     public RoutesConfig routes() {
         return this.javalin.unsafe.routes;
     }
+
     public String reqLocale(Context context) {
-        for (AcceptLanguages requestLocale : requestLocales(context)) {
+        return reqLocale(context.header("Accept-Language"));
+    }
+
+    public String reqLocale(WsContext context) {
+        return reqLocale(context.header("Accept-Language"));
+    }
+
+    public String reqLocale(String headerLocale) {
+        for (AcceptLanguages requestLocale : requestLocales(headerLocale)) {
             String pbhCode = requestLocale.code.toLowerCase(Locale.ROOT).replace("-", "_");
             if (TextManager.INSTANCE_HOLDER.getAvailableLanguages().contains(pbhCode)) {
                 return pbhCode;
@@ -334,7 +344,10 @@ public final class JavalinWebContainer implements Reloadable {
     }
 
     private List<AcceptLanguages> requestLocales(Context context) {
-        String headerLocale = context.header("Accept-Language");
+        return requestLocales(context.header("Accept-Language"));
+    }
+
+    private List<AcceptLanguages> requestLocales(String headerLocale) {
         if (headerLocale == null) {
             return List.of(new AcceptLanguages(Main.DEF_LOCALE, 1.0f));
         }

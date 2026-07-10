@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import io.javalin.http.Context;
+import io.javalin.websocket.WsContext;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -163,6 +164,10 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     }
 
     public String locale(Context ctx) {
+        return javalinWebContainer.reqLocale(ctx);
+    }
+
+    public String locale(WsContext ctx) {
         return javalinWebContainer.reqLocale(ctx);
     }
 
