@@ -36,6 +36,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -61,6 +62,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     private final BiMap<InetSocketAddress, InetSocketAddress> connectionMap = Maps.synchronizedBiMap(HashBiMap.create());
     private final Map<InetSocketAddress, ConnectionStatistics> connectionStats = new ConcurrentHashMap<>();
     private final Map<InetSocketAddress, Channel> downstreamChannelMap = new ConcurrentHashMap<>();
+    private final Set<InetAddress> pendingConnectionIps = ConcurrentHashMap.newKeySet();
 
     private final LongAdder connectionHandled = new LongAdder();
     private final LongAdder connectionFailed = new LongAdder();
@@ -197,9 +199,17 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                 connectionRejected.increment();
                 return;
             }
+
+            if (!reservePendingConnection(downstreamSocketAddress)) {
+                log.debug("Connection from the same IP is already pending or established: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
+                downstreamChannel.close();
+                connectionRejected.increment();
+                return;
+            }
             // --- Ban Check ---
             IPAddress downstreamIpAddress = IPAddressUtil.getIPAddress(downstreamSocketAddress.getAddress().getHostAddress());
             if (ifBannedAddress(downstreamIpAddress)) {
+                releasePendingConnection(downstreamSocketAddress);
                 log.debug("Decline banned connection from {}:{}", downstreamIpAddress, downstreamSocketAddress.getPort());
                 downstreamChannel.close();
                 connectionBlocked.increment();
@@ -222,42 +232,46 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                     .option(ChannelOption.SO_KEEPALIVE, true);
 
             connectToUpstreamFriendly(b, downstreamSocketAddress, future -> {
-                if (future.isSuccess()) {
-                    // --- Friendly Address Binding Logic ---
-                    final Channel upstreamChannel = future.channel();
-                    log.debug("Connected to upstream: {}, starting dual direction forward channel", upstreamChannel.remoteAddress());
+                try {
+                    if (future.isSuccess()) {
+                        // --- Friendly Address Binding Logic ---
+                        final Channel upstreamChannel = future.channel();
+                        log.debug("Connected to upstream: {}, starting dual direction forward channel", upstreamChannel.remoteAddress());
 
-                    // 连接成功，将下游的处理器替换为中继处理器
-                    ctx.pipeline().addLast(new RelayHandler(upstreamChannel));
-                    // 绑定双向 Channel 引用
-                    downstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(upstreamChannel);
-                    upstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(downstreamChannel);
+                        // 连接成功，将下游的处理器替换为中继处理器
+                        ctx.pipeline().addLast(new RelayHandler(upstreamChannel));
+                        // 绑定双向 Channel 引用
+                        downstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(upstreamChannel);
+                        upstreamChannel.attr(RelayHandler.RELAY_CHANNEL_KEY).set(downstreamChannel);
 
-                    // 记录连接信息
-                    ConnectionStatistics stats = new ConnectionStatistics();
-                    stats.setEstablishedAt();
+                        // 记录连接信息
+                        ConnectionStatistics stats = new ConnectionStatistics();
+                        stats.setEstablishedAt();
 
-                    InetSocketAddress upstreamLocalSocketAddress = (InetSocketAddress) upstreamChannel.localAddress();
-                    connectionMap.put(downstreamSocketAddress, upstreamLocalSocketAddress);
-                    stats.setIpGeoData(ipdb.queryIPDB(downstreamSocketAddress.getAddress()).geoData().get());
-                    connectionStats.put(downstreamSocketAddress, stats);
-                    downstreamChannelMap.put(downstreamSocketAddress, downstreamChannel);
+                        InetSocketAddress upstreamLocalSocketAddress = (InetSocketAddress) upstreamChannel.localAddress();
+                        connectionMap.put(downstreamSocketAddress, upstreamLocalSocketAddress);
+                        stats.setIpGeoData(ipdb.queryIPDB(downstreamSocketAddress.getAddress()).geoData().get());
+                        connectionStats.put(downstreamSocketAddress, stats);
+                        downstreamChannelMap.put(downstreamSocketAddress, downstreamChannel);
 
-                    // 添加统计处理器
-                    downstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, true, totalToUpstream, totalToDownstream));
-                    upstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, false, totalToUpstream, totalToDownstream));
+                        // 添加统计处理器
+                        downstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, true, totalToUpstream, totalToDownstream));
+                        upstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, false, totalToUpstream, totalToDownstream));
 
-                    // 移除当前处理器
-                    ctx.pipeline().remove(ProxyFrontendHandler.this);
-                    // 全部设置完毕，开始读取下游数据
-                    downstreamChannel.config().setAutoRead(true);
-                } else {
-                    log.debug("Error connecting to upstream server", future.cause());
-                    downstreamChannel.close();
-                    connectionFailed.increment();
-                    if (connectionFailed.sum() % 50 == 0) {
-                        log.error(tlUI(Lang.AUTOSTUN_TCP_FORWARDER_UNABLE_CONNECT_UPSTREAM, upstreamHost + ":" + upstreamPort, connectionFailed.sum()), future.cause());
+                        // 移除当前处理器
+                        ctx.pipeline().remove(ProxyFrontendHandler.this);
+                        // 全部设置完毕，开始读取下游数据
+                        downstreamChannel.config().setAutoRead(true);
+                    } else {
+                        log.debug("Error connecting to upstream server", future.cause());
+                        downstreamChannel.close();
+                        connectionFailed.increment();
+                        if (connectionFailed.sum() % 50 == 0) {
+                            log.error(tlUI(Lang.AUTOSTUN_TCP_FORWARDER_UNABLE_CONNECT_UPSTREAM, upstreamHost + ":" + upstreamPort, connectionFailed.sum()), future.cause());
+                        }
                     }
+                } finally {
+                    releasePendingConnection(downstreamSocketAddress);
                 }
             });
         }
@@ -332,8 +346,26 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             fallback.connect(upstreamAddress).addListener(completion);
         }
 
+        private boolean reservePendingConnection(InetSocketAddress downstreamSocketAddress) {
+            InetAddress remoteInetAddress = downstreamSocketAddress.getAddress();
+            return remoteInetAddress != null && pendingConnectionIps.add(remoteInetAddress);
+        }
+
+        private void releasePendingConnection(@Nullable InetSocketAddress downstreamSocketAddress) {
+            if (downstreamSocketAddress == null) {
+                return;
+            }
+            InetAddress remoteInetAddress = downstreamSocketAddress.getAddress();
+            if (remoteInetAddress != null) {
+                pendingConnectionIps.remove(remoteInetAddress);
+            }
+        }
+
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            InetSocketAddress downstreamSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+            releasePendingConnection(downstreamSocketAddress);
+
             if (!(cause instanceof IOException)) {
                 log.debug("Exception in ProxyFrontendHandler", cause);
             }
@@ -357,7 +389,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                 }
             }
         }
-        return false;
+        return pendingConnectionIps.contains(remoteInetAddress);
     }
 
     public class RelayHandler extends ChannelInboundHandlerAdapter {
