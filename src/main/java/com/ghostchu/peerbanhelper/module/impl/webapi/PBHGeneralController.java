@@ -239,8 +239,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         os.put("network", network);
         try {
             SystemInfoProviderWrapper.find().ifPresent(provider -> {
-                var operatingSystem = provider.getOperatingSystem();
-                os.put("version", String.valueOf(operatingSystem));
+                var versionInfo = provider.getOperatingSystem().getVersionInfo();
+                os.put("version", versionInfo.getVersion() != null ? versionInfo.getVersion() : String.valueOf(versionInfo));
                 var mem = generateSystemMemoryData(provider.getHardware());
                 os.put("memory", mem);
             });
