@@ -165,6 +165,10 @@ export default {
 
   'page.settings.tab.config.push.form.webhook.url': 'URL',
   'page.settings.tab.config.push.form.webhook.url.placeholder': 'Enter webhook URL',
+  'page.settings.tab.config.push.form.webhook.url.error.required': 'Enter webhook URL',
+  'page.settings.tab.config.push.form.webhook.url.error.invalidSchema':
+    'Webhook URL must start with http:// or https://',
+  'page.settings.tab.config.push.form.webhook.url.error.invalidUrl': 'Invalid webhook URL',
   'page.settings.tab.config.push.form.webhook.method': 'HTTP Method',
   'page.settings.tab.config.push.form.webhook.content_type': 'Content Type',
   'page.settings.tab.config.push.form.webhook.body_template': 'Message Template',
@@ -176,6 +180,9 @@ export default {
   'page.settings.tab.config.push.form.webhook.headers.key': 'Header Name',
   'page.settings.tab.config.push.form.webhook.headers.value': 'Header Value',
   'page.settings.tab.config.push.form.webhook.headers.add': 'Add Header',
+  'page.settings.tab.config.push.form.webhook.headers.error.emptyKey': 'Header name is required',
+  'page.settings.tab.config.push.form.webhook.headers.error.duplicateKey':
+    'Header name cannot be duplicated',
   'page.settings.tab.config.push.form.webhook.variables': 'Available Variables',
   'page.settings.tab.config.push.form.webhook.variables.tip':
     'You can use the following variables directly',

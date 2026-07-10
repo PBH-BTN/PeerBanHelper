@@ -161,6 +161,10 @@ export default {
 
   'page.settings.tab.config.push.form.webhook.url': 'URL',
   'page.settings.tab.config.push.form.webhook.url.placeholder': '請輸入 Webhook 位址',
+  'page.settings.tab.config.push.form.webhook.url.error.required': '請輸入 Webhook 位址',
+  'page.settings.tab.config.push.form.webhook.url.error.invalidSchema':
+    'Webhook 位址必須以 http:// 或 https:// 開頭',
+  'page.settings.tab.config.push.form.webhook.url.error.invalidUrl': 'Webhook 位址格式不正確',
   'page.settings.tab.config.push.form.webhook.method': '請求方法',
   'page.settings.tab.config.push.form.webhook.content_type': '內容類型',
   'page.settings.tab.config.push.form.webhook.body_template': '消息模板',
@@ -172,6 +176,8 @@ export default {
   'page.settings.tab.config.push.form.webhook.headers.key': 'Header 名稱',
   'page.settings.tab.config.push.form.webhook.headers.value': 'Header 值',
   'page.settings.tab.config.push.form.webhook.headers.add': '新增請求頭',
+  'page.settings.tab.config.push.form.webhook.headers.error.emptyKey': 'Header 名稱不能為空',
+  'page.settings.tab.config.push.form.webhook.headers.error.duplicateKey': 'Header 名稱不能重複',
   'page.settings.tab.config.push.form.webhook.variables': '可用變數',
   'page.settings.tab.config.push.form.webhook.variables.tip': '以下變數可直接使用',
 
