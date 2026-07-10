@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.4.0-dev"
+version = "9.4.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -46,7 +46,9 @@ repositories {
 }
 
 val flatlafVersion = "3.7.1"
-val ormliteVersion = "6.1"
+val nettyVersion = "4.2.15.Final"
+val sqliteVersion = "3.53.2.0"
+val springVersion = "7.0.8"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -59,17 +61,17 @@ dependencyManagement {
 }
 dependencies {
     // Spring Framework
-    implementation("org.springframework:spring-context:7.0.8"){
+    implementation("org.springframework:spring-context:${springVersion}"){
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
     implementation("com.github.chris2018998:beecp:5.2.2")
-    implementation("org.springframework:spring-tx:7.0.8")
-    implementation("org.springframework:spring-jdbc:7.0.8")
-    implementation("org.xerial:sqlite-jdbc:3.53.2.0")
-    implementation("org.xerial:sqlite-jdbc:3.53.2.0:natives-android")
+    implementation("org.springframework:spring-tx:${springVersion}")
+    implementation("org.springframework:spring-jdbc:${springVersion}")
+    implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
+    implementation("org.xerial:sqlite-jdbc:${sqliteVersion}:natives-android")
     implementation("com.h2database:h2:2.3.232")
-    implementation("org.postgresql:postgresql:42.7.11")
+    implementation("org.postgresql:postgresql:42.7.12")
     implementation("com.mysql:mysql-connector-j:9.7.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
@@ -81,7 +83,7 @@ dependencies {
     implementation("com.baomidou:mybatis-plus-extension")
     implementation("com.baomidou:mybatis-plus-spring")
 
-    implementation("org.mybatis:mybatis-spring:4.0.0")
+    implementation("org.mybatis:mybatis-spring:4.1.0")
 
     // Annotations
     implementation("org.flywaydb:flyway-core:11.20.3")
@@ -97,8 +99,6 @@ dependencies {
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
-    // System theme detector
-    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.9.1")
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
 //    // System monitoring
@@ -107,16 +107,16 @@ dependencies {
 //        exclude(group = "net.java.dev.jna", module = "jna")
 //    }
 //    // System monitoring for supported platforms
-    implementation("com.github.oshi:oshi-common:7.3.0")
-    runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.0")
+    implementation("com.github.oshi:oshi-common:7.3.2")
+    runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.2")
     // Markdown
-    implementation("org.commonmark:commonmark:0.28.0")
+    implementation("org.commonmark:commonmark:0.29.0")
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
     implementation("dnsjava:dnsjava:3.6.5")
     // UI - FlatLaf
-    implementation("com.formdev:flatlaf-extras:3.7.1")
+    implementation("com.formdev:flatlaf-extras:$flatlafVersion")
     implementation("com.formdev:flatlaf:$flatlafVersion")
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
@@ -127,7 +127,13 @@ dependencies {
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.5.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.3.0")
+    implementation("de.siegmar:fastcsv:4.3.1")
+    // Jackson
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.core:jackson-core")
+    implementation("com.fasterxml.jackson.core:jackson-annotations")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // Plugin framework
     implementation("org.pf4j:pf4j-spring:0.10.0") {
@@ -140,7 +146,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.34")
+    implementation("ch.qos.logback:logback-classic:1.5.37")
     implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
@@ -151,19 +157,10 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
 
     // Netty
-    implementation("io.netty:netty-all:4.2.15.Final") {
-        exclude(group = "io.netty", module = "netty-codec-memcache")
-        exclude(group = "io.netty", module = "netty-codec-redis")
-        exclude(group = "io.netty", module = "netty-codec-smtp")
-        exclude(group = "io.netty", module = "netty-codec-mqtt")
-        exclude(group = "io.netty", module = "netty-codec-stomp")
-        exclude(group = "io.netty", module = "netty-codec-protobuf")
-        exclude(group = "io.netty", module = "netty-codec-haproxy")
-        exclude(group = "io.netty", module = "netty-codec-marshalling")
-        exclude(group = "io.netty", module = "netty-transport-sctp")
-        exclude(group = "io.netty", module = "netty-transport-udt")
-        exclude(group = "io.netty", module = "netty-transport-rxtx")
-    }
+    implementation("io.netty:netty-transport:${nettyVersion}")
+    implementation("io.netty:netty-transport-native-epoll:${nettyVersion}")
+    implementation("io.netty:netty-transport-native-kqueue:${nettyVersion}")
+    implementation("io.netty:netty-transport-native-io_uring:${nettyVersion}")
 
     // SWT (provided scope - for compilation only)
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
@@ -171,7 +168,7 @@ dependencies {
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:13.0")
 
-    implementation(platform("io.sentry:sentry-bom:8.43.1")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.47.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
@@ -180,7 +177,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.0"))
+    testImplementation(platform("org.junit:junit-bom:6.1.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")

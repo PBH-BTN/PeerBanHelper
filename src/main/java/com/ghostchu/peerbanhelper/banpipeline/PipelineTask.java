@@ -12,12 +12,13 @@ public class PipelineTask<T> {
     private final BanOrgan<?, ?> organ;
     @Getter
     @Nullable
-    private String comment;
+    private volatile String comment;
     @Getter
     @Setter
     @Nullable
     private CompletableFuture<T> delegate;
-    private boolean io;
+    @Getter
+    private volatile boolean io;
 
     public PipelineTask(CompletableFuture<T> delegate, BanOrgan<?, ?> organ, String comment) {
         this.delegate = delegate;
@@ -32,6 +33,10 @@ public class PipelineTask<T> {
 
     @Override
     public String toString() {
-        return "[Task] (" + organ.getClass().getSimpleName() + ") " + comment;
+        if(io){
+            return "[Task] (" + organ.getClass().getSimpleName() + ") " + comment;
+        }else{
+            return "[Task >IO<] (" + organ.getClass().getSimpleName() + ") " + comment;
+        }
     }
 }

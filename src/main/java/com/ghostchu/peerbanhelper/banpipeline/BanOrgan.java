@@ -6,12 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -25,6 +22,7 @@ public abstract class BanOrgan<IN, OUT> {
     protected final long maxDigestDuration;
     protected final TimeUnit digestTimeUnit;
     protected final AtomicBoolean loopRunning = new AtomicBoolean(true);
+    protected final AtomicLong lastTick = new AtomicLong(0);
 
     /**
      * The organ that digest the data from BitTorrent clients. Which connects each other to a pipeline from HEAD to TAIL.
@@ -54,6 +52,7 @@ public abstract class BanOrgan<IN, OUT> {
         while (in.getStatus() != OrganLifeCycleStatus.DONE || !checkIfRunningTaskEmpty()) { // If prev organ not stopped (e,g outlet have stuff or stomach still have task running, keep poll it.)
             // if prev organ's stomach still have contents, we need keep fetching its buffer
             try {
+                lastTick.set(System.currentTimeMillis());
                 IN prey = in.outlet.poll(5, TimeUnit.MILLISECONDS); // set a 5ms delay to avoid spam the CPU, need test if 10ms is good too so we can let CPU sleep more times
                 if (prey == null) continue;
                 PipelineTask<Void> wrapper = new PipelineTask<>(null, this, "Initializing Task");
@@ -76,7 +75,7 @@ public abstract class BanOrgan<IN, OUT> {
                         .orTimeout(maxDigestDuration, digestTimeUnit) // this is the actually reason we use CompletableFutures
                         .exceptionally(e -> { // f.
                             BanOrganCallback<IN> callback;
-                            if (e instanceof InterruptedException) {
+                            if (e instanceof InterruptedException || e instanceof  TimeoutException) {
                                 callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.TIMEOUT, e, null);
                             } else {
                                 callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.ERRORED, e, null);

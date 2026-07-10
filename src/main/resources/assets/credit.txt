@@ -1,46 +1,41 @@
-[speed:0]
-[f:#000000,b:#ffffff]
-[speed:5]
-Host 'peerbanhelper.about.console' resolved to 127.127.127.127.
-Connecting to 127.127.127.127:12345...
-[speed:2000]
-[speed:5]
-Connection established.
-To escape to local shell, press '❤'.
-[speed:1000]
-[speed:50]
-User: root
-Password: peerbanhelper@admin123,./
-[speed:1000]
-[speed:10]
-Logged in.
-[clear]
-[f:#eace5a,b:#000000]
+[size:14]
+[f:#ffffff,b:#080b0f,g:#FFAA00,gr:5,gi:1.0,gb:2.4]
 [speed:0]
 ----------------------------------------------------------------------------------------------------------------
 RS232                   ONLINE                       UTF-8                 9600bps                         MIDI
 ----------------------------------------------------------------------------------------------------------------
+Connecting to PeerBanHelper server...
+[speed:1000]
+...
 [speed:10]
-WARNING! The remote PeerBanHelper server rejected love forwarding request.
+Connection established.
+[speed:20]
+
+[f:#ffffff,b:#121922,g:#f9635e,gr:5,gi:1.0,gb:2.4]
 
 Welcome to PeerBanHelper {version} (PBH/BTN JVM-Toolchain 8086-generic).
 CPU: 4.77Mhz MEM: 16KB/64KB SWAP: 0KB/0KB UPTIME: ?:??:??
-Counter: {worldEndingCounter} days until the end of the world.
-
-⚠ Corrupted RAM is detected, it is recommended that the RAM module be replaced. [ECC Mode: Enabled]
-Please contact the after-sales service.
 
 Last login: {lastLogin} from 1.1.1.1
 [speed:20]
-[root@peerbanhelper]# credit
-[speed:1000]
+
+
 [speed:50]
+[root@peerbanhelper]# credit
+[speed:15]
+[play_midi]
+
 [window_maximized]
-Fullscreen mode activated.
 ----------------------------------
-PeerBanHelper Credit
+PeerBanHelper 开发人员与社区贡献者名单
 ----------------------------------
-核心团队 - Core Team：
+[speed:40]
+
+[f:#ffffff,b:#1f2b3a,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
+核心开发者团队 - Core Developer Team：
+[size:14]
+
     (按字母顺序排序)
     azicen
     Gaojianli
@@ -53,43 +48,59 @@ PeerBanHelper Credit
     XiaoXice
     yujiangqaq
     zhongfly
+[speed:40]
 
+[f:#ffffff,b:#273649,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
 贡献者 - Contributors:
+[size:14]
+
     (按字母顺序排序)
+    0x391F
     1476523
     AmeroHan
     Anuskuss
     AstroProfundis
     BUnipendix
+    cc
     ccloli
     cddjr
+    CharlesChou73
     chisaato
+    Copilot
     CreeperAWA
     cxzlw
     david082321
     DDSRem
+    DeepChirp
     gongfuture
-    Kaffu-Chino
     mahoshojoHCG
+    maoruishan
     MirrorCY
     nlsdt
     Rbqwow
     SaikiCode
     tbc0309
     TioaChan
+    whuangbh
     WordlessEcho
-    XiaoXice
+    XiaoBu39
 
-
-
+[f:#ffffff,b:#28384d,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
 本地化 - Internalization:
+[size:14]
+
     简体中文(zh-CN): PBH-BTN
     English(en-US): PBH-BTN
     繁體中文(zh-TW): david082321
+[speed:40]
 
-
-[speed:50]
+[f:#ffffff,b:#2a3b51,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
 特别致谢 - Special Thanks:
+[size:14]
+
     (以下排名不分先后)
 [speed:40]
     大河李斯特视频工作室 - 《【看番教程39】怎么样从网上下载资源？磁链/种子到底是啥？？评论区神秘代码要怎么用？什么是BT协议？BT入门保姆级教程，webUI、屏蔽吸血客户端PCDN详解》帮助更多人了解 BitTorrent 世界和 PeerBanHelper
@@ -100,284 +111,140 @@ PeerBanHelper Credit
     HDArea - 感谢 HDArea 帮助调查在 PT 环境下的恶意 Peer 活动情况以帮助了解 BT/PT 威胁态势现状
     我不是矿神 IMNKS - 感谢 IMNKS SPK 套件源托管了 PeerBanHelper 的 SPK 安装包，并提供了与群晖系统集成方面的重要帮助和建议
     zhuxiaoying85309 (小樱/ITZMX) - 感谢在与 BitComet 集成期间提供的大量帮助，并提供了对 Sparkle Tracker / Trunker 的多次负载测试和 Tracker 相关方面的建议
-
     SpecterShell - 维护和更新 winget-pkgs 上的 PeerBanHelper 程序包
     miryo - 维护和更新 AUR 源上的 PeerBanHelper 程序包
-
     ej-technolgies - 提供 install4j 和 JProfiler 的开源项目许可证
     coderabbitai - 提供开放源代码 Pro 许可证
 
+    以及其它社区软件包和贡献者
+
+[f:#ffffff,b:#2c3e55,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
 PeerBanHelper 测试计划 - Testing Team：
+[size:14]
+
     感谢这些用户在 PeerBanHelper 测试计划群中提供测试版的反馈和建议。
     (按字母顺序排序)
-    42
-    ABC-Bate (ван юйсюань)
-    DQ
-    Ｈａｋｉｙｓｕ☆
-    IPP
-    kiXfKS7KETRoz9pEx37M2Q==
-    Koito Raziumu
-    l_unar
-    lang
-    LittleSho
-    LY
-    PluieM
-    ziyii
-    🐟
-    成
-    純潔ちゃんofficial
-    瓜
-    郭大明
-    嗨皮重生锚
-    吉吉
-    镜中人
-    九十九里百子
-    锟斤铐之烫烫烫
-    落花击水
-    清寂
-    水 天 泽 月
-    一只鸽子🐦
-    佚名
-    昨天👍👍👍👍👍👍
+    42, ABC-Bate (ван юйсюань), DQ
+    Ｈａｋｉｙｓｕ☆, IPP, kiXfKS7KETRoz9pEx37M2Q==
+    Koito Raziumu, l_unar, lang,
+    LittleSho, LY, PluieM
+    ziyiim, 🐟, 成
+    純潔ちゃんofficial, 瓜, 郭大明
+    嗨皮重生锚, 吉吉, 镜中人
+    九十九里百子, 锟斤铐之烫烫烫, 落花击水
+    清寂, 水 天 泽 月, 一只鸽子🐦
+    佚名, 昨天👍👍👍👍👍👍
 
+[f:#ffffff,b:#30435c,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
 先锋用户 - Early Users with Feedbacks:
+[size:14]
+
     感谢这些用户在 PeerBanHelper 发展的早期提供宝贵反馈和建议。
     (按字母顺序排序, 使用 Github Issues 统计)
 [speed:40]
-    675658
-    aagaguai
-    Asendaushoe
-    asky88
-    autumnsentiment
-    BasaltCompass
-    Blake57H
-    cangming0703
-    CaoMeiYouRen
-    CCXXXI
-    Changcta
-    CharlesChou73
-    cherinyy
-    Cirn09
-    cjjdaq
-    cloudwindy
-    CloudyEagle
-    cmmdwl
-    DDSDerek
-    desktop4025
-    doio
-    dousha
-    DrJason33564
-    emptylight370
-    fouvromenth
-    FrzMtrsprt
-    fsxitutu
-    Fvpder
-    GalaxySnail
-    hanqingchina
-    happilying
-    HebronG
-    HiruOcha
-    Huiaei
-    iceBear67
-    IllyaTheHath
-    ixff
-    john-kacino
-    jqtmviyu
-    junyuyuan
-    k3bc999
-    Kaffu-Chino
-    Kosakanao
-    kukusyaoran
-    leosejin
-    licia-tia
-    lifegpc
-    LightmoonXD
-    LingluoYusa
-    LovelyBaibai
-    Magicgazer
-    Mintisn
-    Miraitowa-max
-    Mishasama
-    molehzy
-    MononeV
-    mslxl
-    Msopopop
-    muiyuchit
-    mzhboy
-    nacfight
-    pmman289
-    poplar-at-twilight
-    povsister
-    pullingtab
-    Puqns67
-    qwqcwcawa
-    rihalvnium76
-    Rirmach
-    sakuyamaij
-    SantaSati
-    scrpr
-    serapolis
-    shiyunjin
-    sojuo
-    soulmatelh
-    stan0577
-    Star-Dust-08
-    starxjys
-    SteveYu000
-    Sudo-Winnie
-    Tang-pure
-    ted423
-    TobisLee
-    tongxiangzheng
-    TPAXcc
-    TTsdzb
-    Unihis
-    vcup
-    wannacry601
-    whitelist2333
-    wods
-    XiaoBu39
-    xzlosats111
-    yueisme
-    yuricon
-    Zalore
-    ztmzzz
-    zxcec
+    675658, aagaguai, Asendaushoe
+    asky88, autumnsentiment, BasaltCompass
+    Blake57H, cangming0703, CaoMeiYouRen
+    CCXXXI, Changcta, CharlesChou73
+    cherinyy, Cirn09, cjjdaq
+    cloudwindy, CloudyEagle, cmmdwl
+    DDSDerek, desktop4025, doio
+    dousha, DrJason33564, emptylight370
+    fouvromenth, FrzMtrsprt, fsxitutu
+    Fvpder, GalaxySnail, hanqingchina
+    happilying, HebronG, HiruOcha
+    Huiaei, iceBear67, IllyaTheHath
+    ixff, john-kacino, jqtmviyu
+    junyuyuan, k3bc999, Kaffu-Chino
+    Kosakanao, kukusyaoran, leosejin
+    licia-tia, lifegpc, LightmoonXD
+    LingluoYusa, LovelyBaibai, Magicgazer
+    Mintisn, Miraitowa-max, Mishasama
+    molehzy, MononeV, mslxl
+    Msopopop, muiyuchit, mzhboy
+    nacfight, pmman289, poplar-at-twilight
+    povsister, pullingtab, Puqns67
+    qwqcwcawa, rihalvnium76, Rirmach
+    sakuyamaij, SantaSati, scrpr
+    serapolis, shiyunjin, sojuo
+    soulmatelh, stan0577, Star-Dust-08
+    starxjys, SteveYu000, Sudo-Winnie
+    Tang-pure, ted423, TobisLee
+    tongxiangzheng, TPAXcc, TTsdzb
+    Unihis, vcup, wannacry601
+    whitelist2333, wods, XiaoBu39
+    xzlosats111, yueisme, yuricon
+    Zalore, ztmzzz, zxcec
 [speed:50]
 
+[f:#ffffff,b:#334761,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
 BTN 威胁防护网络先行者 - BTN Beta Testers:
+[size:14]
+
     感谢 BTN 先行者们参与早期的 BTN 开发和测试工作。所提交的宝贵数据帮助 BTN 发展并成为了今天反吸血系统的重要基石。
     (按注册时间排序)
 [speed:40]
-    Radium-bit
-    Iannnnnnnnnnnnnnnnn
-    EdmundFu-233
-    yujiangqaq
-    Car279dark
-    pigeonssss
-    HappyRespawnanchor
-    Sora39831
-    BUnipendix
-    YaleCheng404
-    8Bobo8Jun
-    bai0012
-    yesterday666
-    Kenda-12
-    Mandi-Sa
-    yemijun
-    yingseason
-    zhiwenyyn
-    StarDust189
-    zwzzrl
-    azicen
-    TTsdzb
-    KJH-x
-    xiao-sheng-vip
-    Mickeyilmaz
-    NicholasYZ
-    FranciscoTu
-    KagurazakaNyaa
-    PluieM
-    Hdm980129
-    hjfnd
-    fiiz7
-    littlesho
-    Yorutori-Hatsuki
-    changmianzzz
-    featherwit
-    fireflame-opx
-    chinaozy
-    tehcneko
-    dewcurve
-    HayauX
-    Kaffu-Chino
-    FrzMtrsprt
-    zhongfly
-    Dawn-K
-    sakuyamaij
-    Kyakui
-    poplar-at-twilight
-    YUeH885
-    Alice114514
-    Snapmali
-    asky88
-    wegood9
-    Heartbeat-Heartbreak
-    SAENE
-    Duck1998
-    Btxs
-    Cwek
-    Iensuredit
-    yume-chan
-    0Lynk
-    flewes
-    MononeV
-    xddxdd
-    yuxueco3
-    lkyu-ly
-    paulzzh
-    snfcx
-    Moraxyc
-    TobisLee
-    1016470686
-    MysteryDove
-    Jisxu
-    SlightDust
-    zccat
-    dmMaze
-    yescallop
-    Fawean
-    Msopopop
-    cls1997
-    TomoeMami
-    JZCW
-    btdwv
-    LASER-Yi
-    JamesNong
-    Yui-Yri
-    it95833
-    Adamantium1777
-    Zzzwannasleep
-    AkaMiku39
-    sixuyunqian
-    feimao999
-    JianxiaoD
-    ControlNet
-    1fantasy1
-    Iverrey
-    sugarkingdom
-    ItsDApples
-    shitdarling
+    Radium-bit, Iannnnnnnnnnnnnnnnn, EdmundFu-233
+    yujiangqaq, Car279dark, pigeonssss
+    HappyRespawnanchor, Sora39831, BUnipendix
+    YaleCheng404, 8Bobo8Jun, bai0012
+    yesterday666, Kenda-12, Mandi-Sa
+    yemijun, yingseason, zhiwenyyn
+    StarDust189, zwzzrl, azicen
+    TTsdzb, KJH-x, xiao-sheng-vip
+    Mickeyilmaz, NicholasYZ, FranciscoTu
+    KagurazakaNyaa, PluieM, Hdm980129
+    hjfnd, fiiz7, littlesho
+    Yorutori-Hatsuki, changmianzzz, featherwit
+    fireflame-opx, chinaozy, tehcneko
+    dewcurve, HayauX, Kaffu-Chino
+    FrzMtrsprt, zhongfly, Dawn-K
+    sakuyamaij, Kyakui, poplar-at-twilight
+    YUeH885, Alice114514, Snapmali
+    asky88, wegood9, Heartbeat-Heartbreak
+    SAENE, Duck1998, Btxs
+    Cwek, Iensuredit, yume-chan
+    0Lynk, flewes, MononeV
+    xddxdd, yuxueco3, lkyu-ly
+    paulzzh, snfcx, Moraxyc
+    TobisLee, 1016470686, MysteryDove
+    Jisxu, SlightDust, zccat
+    dmMaze, yescallop, Fawean
+    Msopopop, cls1997, TomoeMami
+    JZCW, btdwv, LASER-Yi
+    JamesNong, Yui-Yri, it95833
+    Adamantium1777, Zzzwannasleep, AkaMiku39
+    sixuyunqian, feimao999, JianxiaoD
+    ControlNet, 1fantasy1, Iverrey
+    sugarkingdom, ItsDApples, shitdarling
 
-
-[speed:50]
-AI 工具人 - AI Assistant:
-    (以下排名不分先后)
-    OpenAI ChatGPT 4o - 帮助编写了大量代码
-    Github Copilot - 帮助编写了大量代码
-    DeepSeek - 正在努力接替上面的两位老前辈
-    coderabbitai - Pull Requests 审核，质量保证
-    renovate - 依赖更新
-    dependabot - 依赖更新
-
+[f:#ffffff,b:#364c68,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
 音乐 - Music:
-* 关于页面：
-    MusicMenu - MiSide by AIHASTO on Steam (https://store.steampowered.com/app/2527500)
-        MIDI 米塔-MusicMenu by 一朵黑心棉 (midishow) (https://www.midishow.com/midi/musicmenu-midi-download-210590)
-    MusicMenu Update - MiSide by AIHASTO on Steam (https://store.steampowered.com/app/2527500)
-        MIDI 米塔-MusicMenu Update by 一朵黑心棉 (midishow) (https://www.midishow.com/midi/musicmenu-update-midi-download-210591)
+[size:14]
 
-[speed:1500]
-[speed:50]
-以及…… {username}
+    Cosmic Princess Kaguya! - Reply (Full Size Piano Sheets) (PDF + MIDI) - Nayu
+    Cosmic Princess Kaguya! - A Symphony of Moments / 瞬間、シンフォニー。 (Full Size Piano Sheets) (PDF + MIDI) - Nayu
+    Cosmic Princess Kaguya! - Starry Sea / 星降る海 (Full Size Piano Sheets) (PDF + MIDI) - Nayu
+    Cosmic Princess Kaguya! - Remember (Full Size Piano Sheets) (PDF + MIDI) - Nayu
 
-[speed:3000]
-[speed:50]
-[root@peerbanhelper]# repair --force --ignore-warning
-[speed:1000]
-[speed:5]
+    The MIDI purchased at: https://sheets.nayu.fun/
 
+[f:#ffffff,b:#384f6c,g:#f9635e,gr:5,gi:1.0,gb:2.4]
+[size:18]
+捐赠者 - Sponsors:
+[size:14]
 
+    感谢所有来自社区的捐赠者，以下是捐赠人员名单：
+[speed:20]
+[sponsors]
+
+[speed:40]
+感谢在面包多和爱发电上捐赠支持我们的朋友们
+以及在世界各个角落用实际行动传承互联网精神的 BTer
 
 
 
@@ -406,8 +273,7 @@ AI 工具人 - AI Assistant:
 
 
 [speed:50]
-感谢在面包多和爱发电上捐赠支持我们的朋友们
-以及在世界各个角落用实际行动传承互联网精神的 BTer
+
 
 
 

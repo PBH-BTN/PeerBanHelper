@@ -114,7 +114,7 @@ PeerBanHelper 使用 [JProfiler all-in one Java profiler](https://www.ej-technol
 - [AviatorScript](https://github.com/killme2008/aviatorscript)
 - [javalin](https://javalin.io/)
 - [deluge-java](https://github.com/RangerRick/deluge-java)
-- [jSystemThemeDetector](https://github.com/Dansoftowner/jSystemThemeDetector)
+- [SystemThemeDetector](https://github.com/Benzor94/SystemThemeDetector)
 - [Methanol](https://github.com/mizosoft/methanol)
 - [Flatlaf](https://github.com/JFormDesigner/FlatLaf)
 - [GeoIP2](https://dev.maxmind.com/geoip)

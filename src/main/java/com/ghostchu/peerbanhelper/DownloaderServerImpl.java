@@ -86,6 +86,10 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private final AlertManager alertManager;
     private final ExecutorService mainWorkStealingService = Executors.newWorkStealingPool();
 
+    private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
+    private final ExecutorService digestEnergyCompute = Executors.newWorkStealingPool(Math.max(8, Runtime.getRuntime().availableProcessors() - 1));
+    private final ExecutorService digestEnergyIO = Executors.newVirtualThreadPerTaskExecutor();
+
 
     public DownloaderServerImpl(BanList banList, DownloaderManagerImpl downloaderManager,
                                 @Qualifier("persistMetrics") BasicMetrics metrics,
@@ -116,11 +120,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
-        if (laboratory.isExperimentActivated(Experiments.ASYNC_BANLIST_APPLY.getExperiment())) {
-            CompletableFuture.runAsync(this::reApplyBanListForDownloaders);
-        } else {
-            reApplyBanListForDownloaders();
-        }
+        CompletableFuture.runAsync(this::reApplyBanListForDownloaders);
         unbanWhitelistedPeers();
         registerTimer();
     }
@@ -130,6 +130,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     public void close() {
         if (BAN_WAVE_SERVICE != null) {
             BAN_WAVE_SERVICE.shutdown();
+        }
+        if(banWaveWatchDog != null){
+            banWaveWatchDog.close();
         }
         this.metrics.close();
         saveBanList();
@@ -200,7 +203,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
             Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>();
             Pair<Map<Downloader, List<BanDetail>>, DigestionSession.ProcessingStatistics> sessionResult;
-            try (DigestionSession session = new DigestionSession(downloaderManager, this, moduleManager, alertManager)) {
+            try (DigestionSession session = new DigestionSession(downloaderManager, this, moduleManager, alertManager, scheduleEnergy, digestEnergyCompute, digestEnergyIO)) {
                 // 被新封禁的对等体列表
                 banWaveWatchDog.setLastOperation("Running Prey Digestion Pipeline", true);
                 sessionResult = session.runBanWave(banWaveWatchDog);

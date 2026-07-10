@@ -88,7 +88,7 @@ jobs:
     needs: Build_SPK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: java_info
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v8
@@ -158,6 +158,10 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: freebsd-pkg-14.1-dist
+          path: build/media
+      - uses: actions/download-artifact@v8
+        with:
+          name: freebsd-pkg-15.1-dist
           path: build/media
       - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/
@@ -310,7 +314,7 @@ jobs:
     needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: gradle-dist
@@ -326,7 +330,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v6.1.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: ghostchu/peerbanhelper
           tags: |
@@ -339,7 +343,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v7.2.0
+        uses: docker/build-push-action@v7.3.0
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
         with:
           context: .
@@ -362,7 +366,7 @@ jobs:
           password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
       - name: Extract metadata (tags, labels) for Aliyun ACR
         id: meta-acr
-        uses: docker/metadata-action@v6.1.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper
           tags: |
@@ -376,7 +380,7 @@ jobs:
             type=sha
       - name: Build and push Aliyun ACR
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
-        uses: docker/build-push-action@v7.2.0
+        uses: docker/build-push-action@v7.3.0
         with:
           context: .
           file: ./Dockerfile-Release

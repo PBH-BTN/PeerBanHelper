@@ -9,7 +9,7 @@ jobs:
   install4jc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: java_info
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v8
@@ -19,15 +19,15 @@ jobs:
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
-          version: 11.0.5
+          version: "13.0"
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Restore install4j cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
-          path: ~/.cache/install4j/v11
-          key: install4j-11-${{ hashFiles('**/*.install4j') }}
+          path: ~/.cache/install4j/v13
+          key: install4j-13-${{ hashFiles('**/*.install4j') }}
           restore-keys: |
-            install4j-11-${{ hashFiles('**/*.install4j') }}
+            install4j-13-${{ hashFiles('**/*.install4j') }}
       - name: Make installers
         run: |
           /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.x_version }} -g -d build/media -D librariesPath=$(pwd)/build/libraries install4j/project.install4j
@@ -45,7 +45,7 @@ jobs:
       - name: Copy JBR Bundles
         id: jbr_bundles
         run: |
-          dir="${1:-$HOME/.cache/install4j/v11/cached_jres/generated}"
+          dir="${1:-$HOME/.cache/install4j/v13/cached_jres/generated}"
           find "$dir" -type f -name 'windows-amd64-*.tar.gz' -printf '%T@ %p\n' \
             | sort -nr | cut -d' ' -f2- \
             | while IFS= read -r f; do

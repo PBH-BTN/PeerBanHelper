@@ -21,10 +21,8 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.SwingProgressDialog;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
-//import com.jthemedetecor.OsThemeDetector;
-//import com.jthemedetecor.OsThemeDetector;
-//import com.jthemedetecor.OsThemeDetector;
-import com.jthemedetecor.OsThemeDetector;
+import hu.benzor.systemthemedetector.SystemThemeDetector;
+import hu.benzor.systemthemedetector.api.theme.Theme;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
+    private SystemThemeDetector colorDetector;
     private SwingMainWindow mainWindow;
     @Getter
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
@@ -57,7 +56,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     public SwingGuiImpl(String[] args) {
         super(args);
-        this.silentStart = Arrays.stream(args).anyMatch("silent"::equalsIgnoreCase);
+        this.silentStart = Arrays.stream(args).anyMatch(s -> "silent".equalsIgnoreCase(s));
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("apple.awt.application.name", "PeerBanHelper");
         System.setProperty("apple.awt.application.appearance", "system");
@@ -65,6 +64,11 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (System.getProperty("os.name").contains("Linux")) {
             JFrame.setDefaultLookAndFeelDecorated(true);
             JDialog.setDefaultLookAndFeelDecorated(true);
+        }
+        try {
+            this.colorDetector = new SystemThemeDetector();
+        } catch (Exception e) {
+            log.error("Unable initialize system color scheme detector.", e);
         }
     }
 
@@ -143,21 +147,31 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         //FlatIntelliJLaf.setup();
         setupSwingDefaultFonts();
         Main.getEventBus().register(this);
-        try {
-            // 这玩意儿能空指针？
-            OsThemeDetector detector = OsThemeDetector.getDetector();
-            detector.registerListener(this::updateTheme);
-            updateTheme(detector.isDark());
-        } catch (Throwable e) {
-            Sentry.captureException(e);
+        if(colorDetector != null) {
+            try {
+                // 这玩意儿能空指针？
+                colorDetector.onAppearanceChange(appearance -> {
+                    if (appearance == Theme.Appearance.DARK) {
+                        this.updateTheme(true);
+                    } else {
+                        this.updateTheme(false);
+                    }
+                });
+                this.updateTheme(colorDetector.getAppearance().orElse(Theme.Appearance.LIGHT) == Theme.Appearance.DARK);
+            } catch (Exception e) {
+                Sentry.captureException(e);
+            }
         }
         createMainWindow();
     }
 
     @Override
     public boolean isDarkMode() {
-        return false;
-       // return OsThemeDetector.getDetector().isDark();
+        if(colorDetector != null) {
+            return colorDetector.getAppearance().orElse(Theme.Appearance.LIGHT) == Theme.Appearance.DARK;
+        }else{
+            return false;
+        }
     }
 
     private void setupSwingDefaultFonts() {

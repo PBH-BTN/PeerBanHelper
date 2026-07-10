@@ -1,0 +1,2 @@
+The midi is used for program play only. Do not redistribute.
+The midi and sheets is licensed to PBH-BTN for PeerBanHelper software via purchase on Payhip.

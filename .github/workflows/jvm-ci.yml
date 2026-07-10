@@ -44,7 +44,7 @@ jobs:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: java_info
         uses: YunaBraska/java-info-action@main
       # download artifacts
@@ -75,6 +75,10 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: freebsd-pkg-14.1-dist
+          path: build/media
+      - uses: actions/download-artifact@v8
+        with:
+          name: freebsd-pkg-15.1-dist
           path: build/media
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside build/media/
       - name: Zip medias for create torrent
@@ -112,7 +116,7 @@ jobs:
     needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/download-artifact@v8
       with:
         name: gradle-dist
@@ -128,7 +132,7 @@ jobs:
         password: ${{ secrets.DOCKER_TOKEN }}
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v6.1.0
+      uses: docker/metadata-action@v6.2.0
       with:
         images: ghostchu/peerbanhelper-snapshot
         tags: |
@@ -141,7 +145,7 @@ jobs:
           type=raw,ci
           type=sha
     - name: Build and push Docker image
-      uses: docker/build-push-action@v7.2.0
+      uses: docker/build-push-action@v7.3.0
       with:
         context: .
         file: ./Dockerfile
@@ -158,14 +162,14 @@ jobs:
     name: Build Standalone Docker Images
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Set Up QEMU
       uses: docker/setup-qemu-action@v4
     - name: Set Up Buildx
       uses: docker/setup-buildx-action@v4
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v6.1.0
+      uses: docker/metadata-action@v6.2.0
       with:
         images: ghostchu/peerbanhelper-snapshot
         tags: |
@@ -178,7 +182,7 @@ jobs:
           type=raw,ci
           type=sha
     - name: Build and push Docker image
-      uses: docker/build-push-action@v7.2.0
+      uses: docker/build-push-action@v7.3.0
       with:
         context: .
         file: ./Dockerfile

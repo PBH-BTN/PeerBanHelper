@@ -30,6 +30,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import com.ghostchu.peerbanhelper.util.umami.UmamiHelper;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -80,6 +81,9 @@ public class PeerBanHelper implements Reloadable {
     private DatabaseDriver databaseDriver;
     @Autowired(required = false)
     private BtnNetwork btnNetwork;
+    @Getter
+    @Autowired
+    private HTTPUtil httpUtil;
 
     public PeerBanHelper() {
         reloadConfig();
@@ -278,7 +282,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(SessionAnalyseServiceModule.class);
         moduleClasses.add(PeerRecordingServiceModule.class);
         moduleClasses.add(AntiVampire.class);
-        moduleClasses.add(PBHPluginController.class);
+        //moduleClasses.add(PBHPluginController.class);
         moduleClasses.add(PBHBtnController.class);
         moduleClasses.forEach(moduleClass -> moduleManager.register(moduleClass)); // 不要并行加载，会破坏依赖关系
     }
