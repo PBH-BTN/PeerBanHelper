@@ -19,7 +19,7 @@ public class KQueueHandler implements ForwarderIOHandler {
 
     @Override
     public ForwarderIOHandlerType ioHandlerType() {
-        return ForwarderIOHandlerType.IO_URING;
+        return ForwarderIOHandlerType.KQUEUE;
     }
 
     @Override
