@@ -12,6 +12,8 @@ public interface PCBRangeService extends CommonCanDirtyService<PCBRangeEntity> {
 
 	PCBRangeEntity fetchFromDatabase(@NotNull String torrentId, @NotNull String range, @NotNull String downloader);
 
+	int upsert(@NotNull PCBRangeEntity entity);
+
 	int deleteEntry(@NotNull String torrentId,  @NotNull String range);
 
     long cleanupDatabase(OffsetDateTime timestamp);

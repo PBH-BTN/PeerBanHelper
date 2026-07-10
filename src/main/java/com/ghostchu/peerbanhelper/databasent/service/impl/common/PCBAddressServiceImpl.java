@@ -35,6 +35,24 @@ public class PCBAddressServiceImpl extends AbstractCanDirtyCommonService<PCBAddr
                 .eq(PCBAddressEntity::getDownloader, downloader));
 	}
 
+  @Override
+  public int upsert(@NotNull PCBAddressEntity entity) {
+    int affected = baseMapper.upsert(entity);
+    if (affected > 0) {
+      entity.setDirty(false);
+    }
+    return affected;
+  }
+
+  @Override
+  public int upsert(@NotNull PCBAddressEntity entity) {
+    int affected = baseMapper.insertOrUpdate(entity);
+    if (affected > 0) {
+      entity.setDirty(false);
+    }
+    return affected;
+  }
+
 	@Override
     public int deleteEntry(@NotNull String torrentId, @NotNull InetAddress ip) {
         return baseMapper.delete(new LambdaQueryWrapper<PCBAddressEntity>()

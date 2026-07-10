@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ghostchu.peerbanhelper.databasent.mapper.java.PCBAddressMapper">
-
+	<insert id="upsert" parameterType="com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity">
+		INSERT INTO pcb_address (ip, port, torrent_id, last_report_progress, last_report_uploaded,
+								 tracking_uploaded_increase_total, rewind_counter, progress_difference_counter,
+								 first_time_seen, last_time_seen, downloader, ban_delay_window_end_at,
+								 fast_pcb_test_execute_at, last_torrent_completed_size)
+		VALUES (#{ip}, #{port}, #{torrentId}, #{lastReportProgress}, #{lastReportUploaded},
+				#{trackingUploadedIncreaseTotal}, #{rewindCounter}, #{progressDifferenceCounter},
+				#{firstTimeSeen}, #{lastTimeSeen}, #{downloader}, #{banDelayWindowEndAt},
+				#{fastPcbTestExecuteAt}, #{lastTorrentCompletedSize})
+		ON CONFLICT(ip, port, torrent_id, downloader) DO UPDATE SET
+			last_report_progress = excluded.last_report_progress,
+			last_report_uploaded = excluded.last_report_uploaded,
+			tracking_uploaded_increase_total = excluded.tracking_uploaded_increase_total,
+			rewind_counter = excluded.rewind_counter,
+			progress_difference_counter = excluded.progress_difference_counter,
+			first_time_seen = excluded.first_time_seen,
+			last_time_seen = excluded.last_time_seen,
+			ban_delay_window_end_at = excluded.ban_delay_window_end_at,
+			fast_pcb_test_execute_at = excluded.fast_pcb_test_execute_at,
+			last_torrent_completed_size = excluded.last_torrent_completed_size
+	</insert>
 </mapper>

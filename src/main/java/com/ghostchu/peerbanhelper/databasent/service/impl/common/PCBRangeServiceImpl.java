@@ -35,6 +35,24 @@ public class PCBRangeServiceImpl extends AbstractCanDirtyCommonService<PCBRangeM
                 .eq(PCBRangeEntity::getDownloader, downloader));
 	}
 
+  @Override
+  public int upsert(@NotNull PCBRangeEntity entity) {
+    int affected = baseMapper.upsert(entity);
+    if (affected > 0) {
+      entity.setDirty(false);
+    }
+    return affected;
+  }
+
+  @Override
+  public int upsert(@NotNull PCBRangeEntity entity) {
+    int affected = baseMapper.upsert(entity);
+    if (affected > 0) {
+      entity.setDirty(false);
+    }
+    return affected;
+  }
+
 	@Override
 	public int deleteEntry(@NotNull String torrentId, @NotNull String range) {
         return baseMapper.delete(new LambdaQueryWrapper<PCBRangeEntity>()

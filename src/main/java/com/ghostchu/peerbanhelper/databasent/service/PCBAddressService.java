@@ -12,6 +12,8 @@ public interface PCBAddressService extends CommonCanDirtyService<PCBAddressEntit
 
 	PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull InetAddress ip, int port, @NotNull String downloader);
 
+	int upsert(@NotNull PCBAddressEntity entity);
+
     int deleteEntry(@NotNull String torrentId, @NotNull InetAddress ip);
 
     long cleanupDatabase(OffsetDateTime timestamp);

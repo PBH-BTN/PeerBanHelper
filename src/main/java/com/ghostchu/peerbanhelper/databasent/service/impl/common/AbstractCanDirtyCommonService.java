@@ -36,7 +36,9 @@ public class AbstractCanDirtyCommonService<M extends BaseMapper<T>, T extends Ca
             if (dirtyElements.isEmpty()) {
                 return java.util.Collections.emptyList();
             }
-            return this.baseMapper.insertOrUpdate(dirtyElements, 1000);
+            var results = this.baseMapper.insertOrUpdate(dirtyElements, 1000);
+            dirtyElements.forEach(e -> e.setDirty(false));
+            return results;
         });
     }
 }
