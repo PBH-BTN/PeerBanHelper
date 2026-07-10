@@ -54,14 +54,23 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
-    private final PBHCache<@NotNull CacheKey, @NotNull Pair<PCBRangeEntity, PCBAddressEntity>> cache = new PBHCache<>(
+    private final PBHCache<@NotNull CacheKeyPrefix, @NotNull PCBRangeEntity> prefixCache = new PBHCache<>(
             1024,
             null,
             180 * 1000L,
             false,
             false,
             true,
-            this::batchFlushBackDatabase
+            this::batchFlushBackDatabasePrefix
+    );
+    private final PBHCache<@NotNull CacheKeyAddr, @NotNull PCBAddressEntity> addrCache = new PBHCache<>(
+            1024,
+            null,
+            180 * 1000L,
+            false,
+            false,
+            true,
+            this::batchFlushBackDatabaseAddr
     );
     private long torrentMinimumSize;
     private boolean blockExcessiveClients;
@@ -171,7 +180,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         Main.getEventBus().unregister(this);
         Main.getReloadManager().unregister(this);
         try {
-            cache.close();
+            prefixCache.close();
+            addrCache.close();
         } catch (Exception e) {
             log.warn("Unable to close cache instance", e);
         }
@@ -458,36 +468,47 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp, int port) {
-        CacheKey cacheKey = new CacheKey(downloader, torrentId, peerAddressPrefix, peerAddressIp);
+        CacheKeyPrefix cacheKeyPrefix = new CacheKeyPrefix(downloader, torrentId, peerAddressPrefix);
+        CacheKeyAddr cacheKeyAddr = new CacheKeyAddr(downloader, torrentId, peerAddressIp);
         try {
-            return cache.get(cacheKey, () -> {
+            PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
                 synchronized (cacheDBLoadingLock) {
                     PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
-                    PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
                         rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
                         rangeEntity.setDirty(true);
                     }
+                    return rangeEntity;
+                }
+            });
+            PCBAddressEntity addrEntity = addrCache.get(cacheKeyAddr, () -> {
+                synchronized (cacheDBLoadingLock) {
+                    PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
                         pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
                         pcbAddressEntity.setDirty(true);
                     }
-                    return Pair.of(rangeEntity, pcbAddressEntity);
+                    return pcbAddressEntity;
                 }
             });
+            return Pair.of(prefixEntity, addrEntity);
         } catch (ExecutionException e) {
             Sentry.captureException(e);
             throw new RuntimeException(e.getCause());
         }
     }
 
-    private void batchFlushBackDatabase(Stream<Pair<CacheKey, Pair<PCBRangeEntity, PCBAddressEntity>>> stream) {
-        List<Pair<PCBRangeEntity, PCBAddressEntity>> entities = stream.map(Pair::getRight).toList();
+    private void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
         synchronized (cacheDBLoadingLock) {
-            pcbRangeDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getLeft).toList());
-            pcbAddressDao.saveOrUpdateIfDirty(entities.stream().map(Pair::getRight).toList());
+            pcbRangeDao.saveOrUpdateIfDirty(stream.map(Pair::getRight).toList());
+        }
+    }
+
+    private void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
+        synchronized (cacheDBLoadingLock) {
+            pcbAddressDao.saveOrUpdateIfDirty(stream.map(Pair::getRight).toList());
         }
     }
 
@@ -503,7 +524,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
 
-    record CacheKey(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp) {
+    record CacheKeyPrefix(String downloader, String torrentId, String peerAddressPrefix) {
+    }
+
+    record CacheKeyAddr(String downloader, String torrentId, InetAddress peerAddressIp) {
     }
 }
 
