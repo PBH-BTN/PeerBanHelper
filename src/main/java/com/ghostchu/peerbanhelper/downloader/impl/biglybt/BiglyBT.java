@@ -271,11 +271,11 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getAllTorrents() {
+    public @NotNull List<? extends Torrent> getAllTorrents() {
         return fetchTorrents(Collections.emptyList(), true);
     }
 
-    private List<Torrent> fetchTorrents(List<Object> filtersUrlEncoded, boolean includePrivate) {
+    private List<? extends Torrent> fetchTorrents(List<Object> filtersUrlEncoded, boolean includePrivate) {
         StringBuilder urlBuilder = new StringBuilder(apiEndpoint + "/downloads");
         if (!filtersUrlEncoded.isEmpty()) {
             urlBuilder.append("?filter=");
@@ -320,7 +320,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Tracker> getTrackers(@NotNull Torrent torrent) {
         BiglyBTTorrent biglyBTTorrent = (BiglyBTTorrent) torrent;
         if (biglyBTTorrent.getTrackers() == null) {
             return Collections.emptyList();
@@ -367,7 +367,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/download/" + torrent.getId() + "/peers")
                 .get()

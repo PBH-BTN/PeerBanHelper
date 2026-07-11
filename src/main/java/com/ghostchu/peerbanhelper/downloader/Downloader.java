@@ -91,7 +91,7 @@ public interface Downloader {
      * @return 返回所有活动的 Torrents
      */
     @NotNull
-    List<Torrent> getTorrents();
+    List<? extends Torrent> getTorrents();
 
     /**
      * 获取此下载器的所有 Torrents
@@ -99,7 +99,7 @@ public interface Downloader {
      * @return 返回所有的 Torrents
      */
     @NotNull
-    List<Torrent> getAllTorrents();
+    List<? extends Torrent> getAllTorrents();
 
     /**
      * 获取指定 Torrent 的对等体列表
@@ -108,7 +108,7 @@ public interface Downloader {
      * @return 对等体列表
      */
     @NotNull
-    List<Peer> getPeers(@NotNull Torrent torrent);
+    List<? extends Peer> getPeers(@NotNull Torrent torrent);
 
     /**
      * 获取指定 Torrent 的 Tracker 列表
@@ -117,7 +117,7 @@ public interface Downloader {
      * @return Tracker 列表
      */
     @NotNull
-    List<Tracker> getTrackers(@NotNull Torrent torrent);
+    List<? extends Tracker> getTrackers(@NotNull Torrent torrent);
 
     /**
      * 设置指定 Torrent 的 Tracker 列表
