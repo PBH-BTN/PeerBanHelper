@@ -31,7 +31,7 @@ jobs:
         id: cache-synopkg-restore
         uses: actions/cache/restore@v6
         with:
-          path: ~/toolkit
+          path: ~/toolkit/build_env/ds.apollolake-7.2
           key: synopkg-DSM7.2-${{ steps.pkgscripts_info.outputs.pkgscripts_sha }}
       - name: Run deploy script
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
@@ -41,7 +41,7 @@ jobs:
         id: cache-synopkg-save
         uses: actions/cache/save@v6
         with:
-          path: ~/toolkit
+          path: ~/toolkit/build_env/ds.apollolake-7.2
           key: ${{ steps.cache-synopkg-restore.outputs.cache-primary-key }}
       - name: Process version for SPK
         id: process_version
