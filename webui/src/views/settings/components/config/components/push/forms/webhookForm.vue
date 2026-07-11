@@ -27,7 +27,11 @@
     :label="t('page.settings.tab.config.push.form.webhook.content_type')"
     required
   >
-    <a-select v-model="model.content_type" style="width: 12em" :options="Object.values(WebhookContentType)" />
+    <a-select
+      v-model="model.content_type"
+      style="width: 12em"
+      :options="Object.values(WebhookContentType)"
+    />
   </a-form-item>
 
   <a-form-item
