@@ -1,11 +1,6 @@
 #!/bin/bash
 
 cd /toolkit/pkgscripts-ng/
-
-Sed -i '/self.deploy_base_env(platform)/d' include/python/pkgdeploy.py
-sed -i '/self.deploy_env(platform)/d' include/python/pkgdeploy.py
-sed -i '/self.deploy_dev(platform)/d' include/python/pkgdeploy.py
-
 ./EnvDeploy -v 7.2 -p apollolake -D
 mkdir -p /toolkit/source
 
