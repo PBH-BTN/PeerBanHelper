@@ -66,6 +66,18 @@ jobs:
         with:
           name: installer-dist
           path: build/media
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: PeerBanHelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: build/media
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: peerbanhelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: build/media
       - uses: shallwefootball/s3-upload-action@master
         with:
           aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
@@ -131,42 +143,6 @@ jobs:
       statuses: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v8
-        with:
-          name: gradle-dist
-          path: build/
-      - uses: actions/download-artifact@v8
-        with:
-          name: installer-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: spk-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: deb-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: portable-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-13.4-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-14.1-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-15.1-dist
-          path: build/media
-      - name: Zip medias for create torrent
-        run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/
-      - name: Install mktorrent
-        run: sudo apt-get install -y mktorrent
       - name: Determine version
         id: set_version
         run: |
@@ -176,8 +152,24 @@ jobs:
             SHORT_SHA=$(git rev-parse --short "${{ github.sha }}")
             echo "version=sha-$SHORT_SHA" >> $GITHUB_OUTPUT
           fi
-      - name: Create copy of Installers archive
-        run: cp PeerBanHelper_Installers.tar.gz "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
+      - uses: actions/download-artifact@v8
+        with:
+          name: installer-dist
+          path: "${{ steps.set_version.outputs.version }}"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: PeerBanHelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: "${{ steps.set_version.outputs.version }}"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: peerbanhelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: "${{ steps.set_version.outputs.version }}"
+      - name: Install mktorrent
+        run: sudo apt-get install -y mktorrent
       - name: Make torrent
         run: |
           mktorrent -t 8 \
@@ -188,21 +180,20 @@ jobs:
           -a udp://opentracker.io:6969/announce \
           -a wss://tracker.openwebtorrent.com:443/announce \
           -c "PeerBanHelper/${{ github.ref }} (${{ github.sha }}) on ${{ github.repository }}. Published by ${{ github.repository_owner }}." \
-          -w "https://github.com/${{ github.repository }}/releases/download/${{ steps.set_version.outputs.version }}/PeerBanHelper_Installers.tar.gz" \
+          -w "https://github.com/${{ github.repository }}/releases/download/" \
           -o peerbanhelper.torrent \
-          "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
+          "${{ steps.set_version.outputs.version }}"
       - uses: actions/upload-artifact@v7
         with:
-          name: torrent-dist
-          path: |
-            peerbanhelper.torrent
-            PeerBanHelper_Installers.tar.gz
-        id: project
+          archive: false
+          if-no-files-found: error
+          path: peerbanhelper.torrent
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          DIST: ${{ steps.set_version.outputs.version }}
         with:
-          asset_paths: '["build/media/PeerBanHelper_*", "build/media/peerbanhelper_*", "build/media/peerbanhelper-*", "build/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
+          asset_paths: '["${{ env.DIST }}/PeerBanHelper*", "${{ env.DIST }}/peerbanhelper*", "peerbanhelper.torrent"]'
 
   Publish_Changelog:
     name: Publish Changelog to Forum

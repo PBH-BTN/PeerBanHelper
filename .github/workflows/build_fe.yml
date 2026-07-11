@@ -49,4 +49,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: webui-dist
+          if-no-files-found: error
           path: webui/dist

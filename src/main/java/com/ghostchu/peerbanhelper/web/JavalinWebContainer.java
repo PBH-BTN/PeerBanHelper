@@ -23,11 +23,13 @@ import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.UnauthorizedResponse;
 import io.javalin.http.staticfiles.JavalinStaticResourceHandler;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import io.javalin.router.EndpointNotFound;
+import io.javalin.websocket.WsContext;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.Setter;
@@ -120,7 +122,11 @@ public final class JavalinWebContainer implements Reloadable {
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ), null));
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.FORBIDDEN);
+                    ctx.status(HttpStatus.FORBIDDEN); // TODO: Switch to UNAUTHORIZED
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
+                })
+                .exception(UnauthorizedResponse.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.UNAUTHORIZED);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
                 })
                 .exception(NeedInitException.class, (e, ctx) -> {
@@ -323,8 +329,17 @@ public final class JavalinWebContainer implements Reloadable {
     public RoutesConfig routes() {
         return this.javalin.unsafe.routes;
     }
+
     public String reqLocale(Context context) {
-        for (AcceptLanguages requestLocale : requestLocales(context)) {
+        return reqLocale(context.header("Accept-Language"));
+    }
+
+    public String reqLocale(WsContext context) {
+        return reqLocale(context.header("Accept-Language"));
+    }
+
+    public String reqLocale(String headerLocale) {
+        for (AcceptLanguages requestLocale : requestLocales(headerLocale)) {
             String pbhCode = requestLocale.code.toLowerCase(Locale.ROOT).replace("-", "_");
             if (TextManager.INSTANCE_HOLDER.getAvailableLanguages().contains(pbhCode)) {
                 return pbhCode;
@@ -334,7 +349,10 @@ public final class JavalinWebContainer implements Reloadable {
     }
 
     private List<AcceptLanguages> requestLocales(Context context) {
-        String headerLocale = context.header("Accept-Language");
+        return requestLocales(context.header("Accept-Language"));
+    }
+
+    private List<AcceptLanguages> requestLocales(String headerLocale) {
         if (headerLocale == null) {
             return List.of(new AcceptLanguages(Main.DEF_LOCALE, 1.0f));
         }

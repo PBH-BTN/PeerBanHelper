@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.4.0"
+version = "9.4.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -158,9 +158,17 @@ dependencies {
 
     // Netty
     implementation("io.netty:netty-transport:${nettyVersion}")
-    implementation("io.netty:netty-transport-native-epoll:${nettyVersion}")
-    implementation("io.netty:netty-transport-native-kqueue:${nettyVersion}")
-    implementation("io.netty:netty-transport-native-io_uring:${nettyVersion}")
+    compileOnly("io.netty:netty-transport-native-epoll:$nettyVersion")
+    runtimeOnly("io.netty:netty-transport-native-epoll:$nettyVersion:linux-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-epoll:$nettyVersion:linux-aarch_64")
+    runtimeOnly("io.netty:netty-transport-native-epoll:$nettyVersion:linux-riscv64")
+    compileOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:$nettyVersion:linux-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:$nettyVersion:linux-aarch_64")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:$nettyVersion:linux-riscv64")
+    compileOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}")
+    runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
 
     // SWT (provided scope - for compilation only)
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")

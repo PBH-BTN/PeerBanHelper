@@ -42,6 +42,6 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: freebsd-pkg-${{ matrix.version }}-dist
-          path: |
-            pkg/*.pkg
+          archive: false
+          if-no-files-found: error
+          path: pkg/*.pkg

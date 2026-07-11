@@ -60,6 +60,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: gradle-dist
+          if-no-files-found: error
           path: |
             build/libraries
             build/libs/*.jar

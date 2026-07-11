@@ -36,6 +36,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -54,11 +55,14 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     private final EventLoopGroup bossGroup;
     private final EventLoopGroup workerGroup;
-    private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("TCPForwarder-Cleanup").factory());
+    private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor(
+            Thread.ofVirtual().name("TCPForwarder-Cleanup").factory()
+    );
 
     private final BiMap<InetSocketAddress, InetSocketAddress> connectionMap = Maps.synchronizedBiMap(HashBiMap.create());
     private final Map<InetSocketAddress, ConnectionStatistics> connectionStats = new ConcurrentHashMap<>();
     private final Map<InetSocketAddress, Channel> downstreamChannelMap = new ConcurrentHashMap<>();
+    private final Set<InetAddress> pendingConnectionIps = ConcurrentHashMap.newKeySet();
 
     private final LongAdder connectionHandled = new LongAdder();
     private final LongAdder connectionFailed = new LongAdder();
@@ -79,6 +83,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         this.upstreamHost = upstreamHost;
         this.upstreamPort = upstreamPort;
         this.ipdb = ipdb;
+
         if (IoUring.isAvailable()) { // 性能最好
             ioHandler = new IOUringHandler();
         } else if (Epoll.isAvailable()) { // 性能很不错！
@@ -88,10 +93,12 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         } else { // oh shit
             ioHandler = new NioHandler();
         }
-        log.debug("IOHandler selected: {}", ioHandler.getClass().getSimpleName());
+
+        log.info("IOHandler selected: {}", ioHandler.getClass().getSimpleName());
         this.bossGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
         this.workerGroup = new MultiThreadIoEventLoopGroup(ioHandler.ioHandlerFactory());
         log.debug("Netty TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
+
         sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 30, TimeUnit.SECONDS);
         Main.getEventBus().register(this);
     }
@@ -99,14 +106,16 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     @Override
     public void start() {
         ServerBootstrap b = new ServerBootstrap();
-        ioHandler.apply(b.group(bossGroup, workerGroup)
-                        .channel(ioHandler.serverSocketChannelClass())
-                        .childHandler(new ChannelInitializer<SocketChannel>() {
-                            @Override
-                            protected void initChannel(SocketChannel ch) {
-                                ch.pipeline().addLast(new ProxyFrontendHandler());
-                            }
-                        }))
+        ioHandler.apply(
+                        b.group(bossGroup, workerGroup)
+                                .channel(ioHandler.serverSocketChannelClass())
+                                .childHandler(new ChannelInitializer<SocketChannel>() {
+                                    @Override
+                                    protected void initChannel(SocketChannel ch) {
+                                        ch.pipeline().addLast(new ProxyFrontendHandler());
+                                    }
+                                })
+                )
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
@@ -126,8 +135,12 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     public void onPeerBanned(PeerBanEvent peerBanEvent) {
         var bannedPeerAddr = peerBanEvent.getPeer().getAddress();
         log.debug("Received PeerBanEvent for {}", bannedPeerAddr);
+
         downstreamChannelMap.forEach((address, channel) -> {
             var inetAddress = address.getAddress();
+            if (inetAddress == null) {
+                return;
+            }
             IPAddress downstreamAddress = IPAddressUtil.getIPAddress(inetAddress.getHostAddress());
             if (bannedPeerAddr.contains(downstreamAddress)) {
                 log.debug("Closing connection from banned address from banEvent: {}", address);
@@ -140,7 +153,11 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     private void cleanupBannedConnections() {
         downstreamChannelMap.forEach((clientAddress, channel) -> {
-            IPAddress clientIp = IPAddressUtil.getIPAddress(clientAddress.getAddress().getHostAddress());
+            InetAddress inetAddress = clientAddress.getAddress();
+            if (inetAddress == null) {
+                return;
+            }
+            IPAddress clientIp = IPAddressUtil.getIPAddress(inetAddress.getHostAddress());
             if (banList.contains(clientIp)) {
                 log.debug("Closing connection from banned address during cleanup: {}", clientAddress);
                 closeConnectionByDownstreamAddress(clientAddress);
@@ -169,8 +186,22 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             final Channel downstreamChannel = ctx.channel();
             InetSocketAddress downstreamSocketAddress = (InetSocketAddress) downstreamChannel.remoteAddress();
             // 检查连接表，检查 IP 地址是否已有另一个链接，不允许多重连接，会干扰 ProgressCheatBlocker
+            if (downstreamSocketAddress == null || downstreamSocketAddress.getAddress() == null) {
+                log.debug("Reject connection with unresolved remote address: {}", downstreamSocketAddress);
+                downstreamChannel.close();
+                connectionRejected.increment();
+                return;
+            }
+
             if (isDuplicateConnection(downstreamSocketAddress)) {
                 log.debug("Multiple connections from the same IP address detected: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
+                downstreamChannel.close();
+                connectionRejected.increment();
+                return;
+            }
+
+            if (!reservePendingConnection(downstreamSocketAddress)) {
+                log.debug("Connection from the same IP is already pending or established: {}, disconnecting...", downstreamSocketAddress.getAddress().getHostAddress());
                 downstreamChannel.close();
                 connectionRejected.increment();
                 return;
@@ -178,6 +209,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             // --- Ban Check ---
             IPAddress downstreamIpAddress = IPAddressUtil.getIPAddress(downstreamSocketAddress.getAddress().getHostAddress());
             if (ifBannedAddress(downstreamIpAddress)) {
+                releasePendingConnection(downstreamSocketAddress);
                 log.debug("Decline banned connection from {}:{}", downstreamIpAddress, downstreamSocketAddress.getPort());
                 downstreamChannel.close();
                 connectionBlocked.increment();
@@ -199,13 +231,12 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                     })
                     .option(ChannelOption.SO_KEEPALIVE, true);
 
-            Thread.ofVirtual().name("Connection establisher").start(() -> {
-                // --- Friendly Address Binding Logic ---
-                ChannelFuture connectFuture = connectToUpstreamFriendly(b, downstreamSocketAddress);
-                connectFuture.addListener((ChannelFuture future) -> {
+            connectToUpstreamFriendly(b, downstreamSocketAddress, future -> {
+                try {
                     if (future.isSuccess()) {
+                        // --- Friendly Address Binding Logic ---
                         final Channel upstreamChannel = future.channel();
-                        log.debug("Connected to upstream: {}, starting dual directory forward channel", upstreamChannel.remoteAddress());
+                        log.debug("Connected to upstream: {}, starting dual direction forward channel", upstreamChannel.remoteAddress());
 
                         // 连接成功，将下游的处理器替换为中继处理器
                         ctx.pipeline().addLast(new RelayHandler(upstreamChannel));
@@ -228,7 +259,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                         upstreamChannel.pipeline().addFirst(new TrafficCounterHandler(stats, false, totalToUpstream, totalToDownstream));
 
                         // 移除当前处理器
-                        ctx.pipeline().remove(this);
+                        ctx.pipeline().remove(ProxyFrontendHandler.this);
                         // 全部设置完毕，开始读取下游数据
                         downstreamChannel.config().setAutoRead(true);
                     } else {
@@ -239,7 +270,9 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
                             log.error(tlUI(Lang.AUTOSTUN_TCP_FORWARDER_UNABLE_CONNECT_UPSTREAM, upstreamHost + ":" + upstreamPort, connectionFailed.sum()), future.cause());
                         }
                     }
-                });
+                } finally {
+                    releasePendingConnection(downstreamSocketAddress);
+                }
             });
         }
 
@@ -247,50 +280,92 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             return banList.contains(downstreamIpAddress);
         }
 
-        private ChannelFuture connectToUpstreamFriendly(Bootstrap b, InetSocketAddress downstreamSocket) {
+        private void connectToUpstreamFriendly(Bootstrap b,
+                                               InetSocketAddress downstreamSocket,
+                                               ChannelFutureListener completion) {
             InetAddress incomingAddress = downstreamSocket.getAddress();
             InetSocketAddress upstreamAddress = new InetSocketAddress(upstreamHost, upstreamPort);
+            InetAddress upstreamInetAddress = upstreamAddress.getAddress();
 
-            if (upstreamAddress.getAddress().isLoopbackAddress() && incomingAddress instanceof Inet4Address && ExternalSwitch.parseBoolean("pbh.TCPForwarder.useFriendlyAddressForLoopback", true)) {
-                try {
-                    byte[] bytes = new byte[4];
-                    bytes[0] = 127;
-                    bytes[1] = incomingAddress.getAddress()[1];
-                    bytes[2] = incomingAddress.getAddress()[2];
-                    bytes[3] = incomingAddress.getAddress()[3];
-                    InetAddress outgoingAddress = InetAddress.getByAddress(bytes);
+            boolean useFriendly =
+                    upstreamInetAddress != null
+                            && upstreamInetAddress.isLoopbackAddress()
+                            && incomingAddress instanceof Inet4Address
+                            && ExternalSwitch.parseBoolean("pbh.TCPForwarder.useFriendlyAddressForLoopback", true);
+
+            if (useFriendly) {
+                byte[] incomingBytes = incomingAddress.getAddress();
+                if (incomingBytes != null && incomingBytes.length >= 4) {
                     try {
-                        ChannelFuture firstAttempt = b.localAddress(outgoingAddress, downstreamSocket.getPort()).connect(upstreamAddress).syncUninterruptibly();
-                        if (firstAttempt.isSuccess()) {
-                            return firstAttempt;
-                        } else {
-                            throw new IllegalStateException("Failed to bind to friendly address " + outgoingAddress.getHostAddress() + ":" + downstreamSocket.getPort());
-                        }
-                    } catch (Exception e) {
-                        // 尝试绑定到友好地址和原始端口
-                        log.debug("Failed to bind to friendly address {}:{}, trying random port.", outgoingAddress.getHostAddress(), downstreamSocket.getPort());
-                        // 失败则退回，绑定到友好地址和随机端口
-                        try {
-                            Bootstrap b2 = b.clone();
-                            ChannelFuture secondAttempt = b2.localAddress(outgoingAddress, 0).connect(upstreamAddress).syncUninterruptibly();
-                            if (secondAttempt.isSuccess()) {
-                                return secondAttempt;
-                            }
-                        } catch (Exception e2) {
-                            log.debug("Failed to bind to friendly address {} with random port as well.", outgoingAddress.getHostAddress());
-                        }
+                        byte[] bytes = new byte[4];
+                        bytes[0] = 127;
+                        bytes[1] = incomingBytes[1];
+                        bytes[2] = incomingBytes[2];
+                        bytes[3] = incomingBytes[3];
+
+                        InetAddress outgoingAddress = InetAddress.getByAddress(bytes);
+
+                        Bootstrap first = b.clone();
+                        first.localAddress(outgoingAddress, downstreamSocket.getPort())
+                                .connect(upstreamAddress)
+                                .addListener((ChannelFuture future) -> {
+                                    if (future.isSuccess()) {
+                                        completion.operationComplete(future);
+                                    } else {
+                                        // 尝试绑定到友好地址和原始端口
+                                        log.debug("Failed to bind to friendly address {}:{}, trying random port.",
+                                                outgoingAddress.getHostAddress(), downstreamSocket.getPort(), future.cause());
+
+                                        // 失败则退回，绑定到友好地址和随机端口
+                                        Bootstrap second = b.clone();
+                                        second.localAddress(outgoingAddress, 0)
+                                                .connect(upstreamAddress)
+                                                .addListener((ChannelFuture future2) -> {
+                                                    if (future2.isSuccess()) {
+                                                        completion.operationComplete(future2);
+                                                    } else {
+                                                        log.debug("Failed to bind to friendly address {} with random port as well.",
+                                                                outgoingAddress.getHostAddress(), future2.cause());
+
+                                                        Bootstrap fallback = b.clone();
+                                                        fallback.connect(upstreamAddress)
+                                                                .addListener(completion);
+                                                    }
+                                                });
+                                    }
+                                });
+                        return;
+                    } catch (UnknownHostException e) {
+                        // fall through to default
                     }
-                } catch (UnknownHostException e) {
-                    // fall through to default
                 }
             }
-            Bootstrap b3 = b.clone();
+
+            Bootstrap fallback = b.clone();
             log.debug("Failed to bind to friendly address, falling back to default.");
-            return b3.localAddress(null).connect(upstreamAddress);
+            fallback.connect(upstreamAddress).addListener(completion);
+        }
+
+        private boolean reservePendingConnection(InetSocketAddress downstreamSocketAddress) {
+            InetAddress remoteInetAddress = downstreamSocketAddress.getAddress();
+            return remoteInetAddress != null && pendingConnectionIps.add(remoteInetAddress);
+        }
+
+        private void releasePendingConnection(@Nullable InetSocketAddress downstreamSocketAddress) {
+            if (downstreamSocketAddress == null) {
+                return;
+            }
+            InetAddress remoteInetAddress = downstreamSocketAddress.getAddress();
+            if (remoteInetAddress != null) {
+                pendingConnectionIps.remove(remoteInetAddress);
+            }
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            InetSocketAddress downstreamSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+            releasePendingConnection(downstreamSocketAddress);
+
             if (!(cause instanceof IOException)) {
                 log.debug("Exception in ProxyFrontendHandler", cause);
             }
@@ -300,12 +375,21 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     }
 
     private boolean isDuplicateConnection(InetSocketAddress downstreamSocketAddress) {
-        for (InetSocketAddress inetSocketAddress : connectionMap.keySet()) {
-            if (Arrays.equals(downstreamSocketAddress.getAddress().getAddress(), inetSocketAddress.getAddress().getAddress())) {
-                return true;
+        InetAddress remoteInetAddress = downstreamSocketAddress.getAddress();
+        if (remoteInetAddress == null) {
+            return false;
+        }
+        byte[] target = remoteInetAddress.getAddress();
+
+        synchronized (connectionMap) {
+            for (InetSocketAddress inetSocketAddress : connectionMap.keySet()) {
+                InetAddress existingAddress = inetSocketAddress.getAddress();
+                if (existingAddress != null && Arrays.equals(target, existingAddress.getAddress())) {
+                    return true;
+                }
             }
         }
-        return false;
+        return pendingConnectionIps.contains(remoteInetAddress);
     }
 
     public class RelayHandler extends ChannelInboundHandlerAdapter {
@@ -357,14 +441,21 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         }
 
         private void cleanupConnectionState(Channel channel) {
-            Channel downstreamChannel = channel.hasAttr(RELAY_CHANNEL_KEY) ? channel.attr(RELAY_CHANNEL_KEY).get().attr(RELAY_CHANNEL_KEY).get() : channel;
-            if (downstreamChannel != null) {
-                InetSocketAddress downstreamAddress = (InetSocketAddress) downstreamChannel.remoteAddress();
-                if (downstreamAddress != null) {
-                    connectionMap.remove(downstreamAddress);
-                    connectionStats.remove(downstreamAddress);
-                    downstreamChannelMap.remove(downstreamAddress);
+            Channel downstreamChannel = channel;
+
+            // 如果当前关闭的是上游，则优先切回下游；如果当前关闭的就是下游，则直接使用当前 channel。
+            if (!downstreamChannelMap.containsValue(channel) && channel.hasAttr(RELAY_CHANNEL_KEY)) {
+                Channel peer = channel.attr(RELAY_CHANNEL_KEY).get();
+                if (peer != null && downstreamChannelMap.containsValue(peer)) {
+                    downstreamChannel = peer;
                 }
+            }
+
+            InetSocketAddress downstreamAddress = (InetSocketAddress) downstreamChannel.remoteAddress();
+            if (downstreamAddress != null) {
+                connectionMap.remove(downstreamAddress);
+                connectionStats.remove(downstreamAddress);
+                downstreamChannelMap.remove(downstreamAddress);
             }
         }
     }
@@ -402,7 +493,6 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         }
     }
 
-
     @Override
     public void close() {
         sched.shutdown();
@@ -420,13 +510,16 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     @Override
     public BiMap<InetSocketAddress, InetSocketAddress> getDownstreamAddressAsKeyConnectionMap() {
-        return ImmutableBiMap.copyOf(connectionMap);
+        synchronized (connectionMap) {
+            return ImmutableBiMap.copyOf(connectionMap);
+        }
     }
 
     @Override
     public BiMap<InetSocketAddress, InetSocketAddress> getProxyLAddressAsKeyConnectionMap() {
-        return ImmutableBiMap.copyOf(connectionMap.inverse());
-
+        synchronized (connectionMap) {
+            return ImmutableBiMap.copyOf(connectionMap.inverse());
+        }
     }
 
     @Override
@@ -486,7 +579,9 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
 
     @Override
     public @Nullable InetSocketAddress translate(@Nullable InetSocketAddress nattedAddress) {
-        return connectionMap.inverse().get(nattedAddress);
+        synchronized (connectionMap) {
+            return connectionMap.inverse().get(nattedAddress);
+        }
     }
 
     @Override
