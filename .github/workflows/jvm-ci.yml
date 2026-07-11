@@ -50,13 +50,19 @@ jobs:
       # download artifacts
       - uses: actions/download-artifact@v8
         with:
+          name: installer-dist
+          path: build/media
+      - uses: actions/download-artifact@v8
+        with:
           pattern: PeerBanHelper*
           merge-multiple: true
+          skip-decompress: true
           path: build/media
       - uses: actions/download-artifact@v8
         with:
           pattern: peerbanhelper*
           merge-multiple: true
+          skip-decompress: true
           path: build/media
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside build/media/
       - name: Zip medias for create torrent

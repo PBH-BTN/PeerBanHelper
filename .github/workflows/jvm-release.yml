@@ -70,11 +70,13 @@ jobs:
         with:
           pattern: PeerBanHelper*
           merge-multiple: true
+          skip-decompress: true
           path: build/media
       - uses: actions/download-artifact@v8
         with:
           pattern: peerbanhelper*
           merge-multiple: true
+          skip-decompress: true
           path: build/media
       - uses: shallwefootball/s3-upload-action@master
         with:
@@ -149,11 +151,13 @@ jobs:
         with:
           pattern: PeerBanHelper*
           merge-multiple: true
+          skip-decompress: true
           path: build/media
       - uses: actions/download-artifact@v8
         with:
           pattern: peerbanhelper*
           merge-multiple: true
+          skip-decompress: true
           path: build/media
       - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/
