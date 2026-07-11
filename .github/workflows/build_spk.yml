@@ -34,13 +34,15 @@ jobs:
           key: synopkg-DSM7.2-${{ steps.pkgscripts_info.outputs.pkgscripts_sha }}
       - name: Restore synopkg cache
         if: steps.cache-synopkg-restore.outputs.cache-hit == 'true'
-        run: sudo tar -xpf ~/toolkit-cache/cache.tar -C /toolkit
+        run: |
+          sudo mkdir -p /toolkit
+          sudo tar -xpf ~/toolkit-cache/cache.tar -C /toolkit
 
       - name: Run deploy script
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         run:  |
           sudo bash pkg/synopkg/deploy-env.sh
-          sudo tar -cpf ~/toolkit-cache/cache.tar -C /toolkit
+          sudo tar -cpf ~/toolkit-cache/cache.tar -C /toolkit .
       - name: Save synopkg cache
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         id: cache-synopkg-save
