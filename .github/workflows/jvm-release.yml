@@ -105,7 +105,8 @@ jobs:
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v8
         with:
-          name: spk-dist
+          pattern: peerbanhelper-*.spk
+          skip-decompress: true
           path: build/media
       - name: Upload SPK to SPKRepo
         run: |
