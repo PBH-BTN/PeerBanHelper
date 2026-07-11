@@ -268,16 +268,16 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getTorrents() {
+    public @NotNull List<? extends Torrent> getTorrents() {
         return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
-    public @NotNull List<Torrent> getAllTorrents() {
+    public @NotNull List<? extends Torrent> getAllTorrents() {
         return fetchTorrents(false, true);
     }
 
-    private List<Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
+    private List<? extends Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
         List<QBittorrentTorrent> allTorrents = new ArrayList<>();
         Set<String> seenHashes = new HashSet<>(); // 用于检测重复
         int pageSize = 100; // 每页大小
@@ -348,7 +348,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Tracker> getTrackers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/torrents/trackers?hash=" + torrent.getId())
@@ -603,7 +603,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())

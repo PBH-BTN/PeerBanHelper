@@ -129,7 +129,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getTorrents() {
+    public @NotNull List<? extends Torrent> getTorrents() {
         List<Torrent> torrents = new ArrayList<>();
         try {
             for (PBHActiveTorrentsResponse.ActiveTorrentsResponseDTO activeTorrent : this.client.getActiveTorrents().getActiveTorrents()) {
@@ -175,12 +175,12 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getAllTorrents() {
+    public @NotNull List<? extends Torrent> getAllTorrents() {
         return getTorrents();
     }
 
     @Override
-    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
         if (!(torrent instanceof DelugeTorrent delugeTorrent)) {
             throw new IllegalStateException("The torrent object not a instance of DelugeTorrent");
         }
@@ -188,7 +188,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Tracker> getTrackers(@NotNull Torrent torrent) {
         return List.of();
     }
 

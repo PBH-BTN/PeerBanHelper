@@ -278,7 +278,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getTorrents() {
+    public @NotNull List<? extends Torrent> getTorrents() {
         Map<String, Object> requirements = new HashMap<>();
         requirements.put("state_group", "ACTIVE");
         requirements.put("sort_key", "");
@@ -291,7 +291,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getAllTorrents() {
+    public @NotNull List<? extends Torrent> getAllTorrents() {
         Map<String, Object> requirements = new HashMap<>();
         requirements.put("state_group", "ALL");
         requirements.put("sort_key", "");
@@ -304,7 +304,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
 
-    public List<Torrent> fetchTorrents(Map<String, Object> requirements, boolean includePrivate) {
+    public List<? extends Torrent> fetchTorrents(Map<String, Object> requirements, boolean includePrivate) {
         RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(requirements), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint())
@@ -370,7 +370,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Tracker> getTrackers(@NotNull Torrent torrent) {
         Map<String, Object> requirements = new HashMap<>();
         requirements.put("task_id", torrent.getId());
         requirements.put("max_count", String.valueOf(Integer.MAX_VALUE));
@@ -484,7 +484,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
         Map<String, Object> requirements = new HashMap<>();
         requirements.put("groups", peerGroupsFilter);
         requirements.put("task_id", torrent.getId());
