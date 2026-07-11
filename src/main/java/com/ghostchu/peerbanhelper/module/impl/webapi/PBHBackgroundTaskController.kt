@@ -1,10 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi
 
 import com.ghostchu.peerbanhelper.module.AbstractSSEFeatureModule
-import com.ghostchu.peerbanhelper.module.AbstractWebSocketFeatureModule
-import com.ghostchu.peerbanhelper.module.AbstractWebSocketFeatureModule.getContextFromWsContext
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskDTO
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEvent
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEventType
 import com.ghostchu.peerbanhelper.text.TextManager.tl
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTask
@@ -13,9 +10,6 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.TaskStatusListener
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer
 import com.ghostchu.peerbanhelper.web.Role
 import io.javalin.http.sse.SseClient
-import io.javalin.websocket.WsConfig
-import io.javalin.websocket.WsContext
-import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyles
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
