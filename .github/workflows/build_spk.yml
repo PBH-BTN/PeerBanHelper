@@ -35,7 +35,7 @@ jobs:
           key: synopkg-DSM7.2-${{ steps.pkgscripts_info.outputs.pkgscripts_sha }}
       - name: Run deploy script
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
-        run: sudo bash pkg/synopkg/deploy-env.sh
+        run: bash pkg/synopkg/deploy-env.sh
       - name: Save synopkg cache
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         id: cache-synopkg-save
@@ -57,7 +57,7 @@ jobs:
           echo "Raw version: $RAW_VERSION"
           echo "SPK version: $SPK_VERSION"
       - name: Run build script
-        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} SPK_VERSION=${{ env.SPK_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
+        run: PBH_VERSION=${{ env.PBH_VERSION }} SPK_VERSION=${{ env.SPK_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
           SPK_VERSION: ${{ steps.process_version.outputs.spk_version }}
