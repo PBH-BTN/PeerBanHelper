@@ -30,25 +30,25 @@ jobs:
         id: cache-synopkg-restore
         uses: actions/cache/restore@v6
         with:
-          path: ~/toolkit-cache/cache.tar
+          path: ~/toolkit-cache/cache.txz
           key: synopkg-DSM7.2-${{ steps.pkgscripts_info.outputs.pkgscripts_sha }}
       - name: Restore synopkg cache
         if: steps.cache-synopkg-restore.outputs.cache-hit == 'true'
         run: |
           sudo mkdir -p /toolkit
-          sudo tar -xpf ~/toolkit-cache/cache.tar -C /toolkit
+          sudo tar -xJpf ~/toolkit-cache/cache.txz -C /toolkit
 
       - name: Run deploy script
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         run:  |
           sudo bash pkg/synopkg/deploy-env.sh
-          sudo tar -cpf ~/toolkit-cache/cache.tar -C /toolkit .
+          sudo tar -cJpf ~/toolkit-cache/cache.txz -C /toolkit .
       - name: Save synopkg cache
         if: steps.cache-synopkg-restore.outputs.cache-hit != 'true'
         id: cache-synopkg-save
         uses: actions/cache/save@v6
         with:
-          path: ~/toolkit-cache/cache.tar
+          path: ~/toolkit-cache/cache.txz
           key: ${{ steps.cache-synopkg-restore.outputs.cache-primary-key }}
 
       - name: Process version for SPK
