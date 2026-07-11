@@ -130,7 +130,7 @@ jobs:
           name: installer-dist
           if-no-files-found: error
           path: |
-            md5sums
-            sha256sums
-            output.txt
-            updates.xml
+            build/media/md5sums
+            build/media/sha256sums
+            build/media/output.txt
+            build/media/updates.xml
