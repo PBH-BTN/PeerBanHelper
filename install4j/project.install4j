@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="13.0" transformSequenceNumber="13">
+<install4j version="13.0.1" transformSequenceNumber="13">
   <directoryPresets config="../native/qt6" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="9.4.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="25" javaMaxVersion="25">
     <languages>
@@ -2276,10 +2276,10 @@ return true;</property>
       <jreBundle jreBundleSource="none" />
     </macosFolder>
     <macosFolder name="macOS Folder (Intel)" id="335" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="amd64">
-      <excludedComponents>
-        <component id="319" />
-        <component id="326" />
-      </excludedComponents>
+      <exclude>
+        <entry filesetId="306" />
+        <entry filesetId="308" />
+      </exclude>
     </macosFolder>
     <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_rpm_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64">
       <exclude>
