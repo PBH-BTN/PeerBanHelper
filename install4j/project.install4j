@@ -2263,7 +2263,7 @@ return true;</property>
       </excludedComponents>
       <jreBundle jdkProviderId="Liberica" release="25/25.0.3+11" overrideJdkRelease="true" />
     </windows>
-    <msix name="Windows MSIX" id="474" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_msix_${compiler:sys.version}" architecture="64" packageIdentityName="Ghostchu.PeerBanHelper" createForStore="true" storePublisherId="CN=85226E13-4038-4181-9416-1CBA33669064">
+    <msix name="Windows MSIX" id="474" mediaFileName="debug_unpublished_${compiler:sys.shortName}_${compiler:sys.platform}_msix_${compiler:sys.version}" architecture="64" packageIdentityName="Ghostchu.PeerBanHelper" createForStore="true" storePublisherId="CN=85226E13-4038-4181-9416-1CBA33669064">
       <excludedComponents>
         <component id="326" />
         <component id="327" />
