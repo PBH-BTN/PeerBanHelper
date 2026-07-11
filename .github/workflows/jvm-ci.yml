@@ -50,35 +50,13 @@ jobs:
       # download artifacts
       - uses: actions/download-artifact@v8
         with:
-          name: gradle-dist
-          path: build/
-      - uses: actions/download-artifact@v8
-        with:
-          name: installer-dist
+          pattern: PeerBanHelper*
+          merge-multiple: true
           path: build/media
       - uses: actions/download-artifact@v8
         with:
-          name: spk-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: deb-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: portable-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-13.4-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-14.1-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-15.1-dist
+          pattern: peerbanhelper*
+          merge-multiple: true
           path: build/media
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside build/media/
       - name: Zip medias for create torrent

@@ -65,7 +65,8 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: spk-dist
+          archive: false
+          if-no-files-found: error
           path: |
             /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
             !/toolkit/build_env/ds.apollolake-7.2/image/packages/*_debug.spk

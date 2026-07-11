@@ -31,6 +31,6 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: deb-dist
-          path: |
-            pkg/*.deb
+          archive: false
+          if-no-files-found: error
+          path: pkg/*.deb

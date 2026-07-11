@@ -21,24 +21,39 @@ jobs:
         id: build-portable
         run: |
           mkdir -p pkg/portable/PeerBanHelper
+          mkdir -p pkg/portable/raw
+          mkdir -p pkg/portable/nojava
+          mkdir -p pkg/portable/java
           mv build/libraries pkg/portable/PeerBanHelper/
           cp build/libs/PeerBanHelper.jar pkg/portable/PeerBanHelper/
           cp install4j/icon.ico pkg/portable/PeerBanHelper/
-          (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
+          (cd pkg/portable && zip -r raw/PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
           cp -r platform-natives/windows-x86_64/libraries pkg/portable/PeerBanHelper/
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
-          (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
+          (cd pkg/portable && zip -r nojava/PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable_nojava.zip PeerBanHelper)
           mkdir -p jre
           mv jbr-dist/windows-amd64-*.tar.gz jre/jre.tar.gz
           (cd jre && tar -zxvf jre.tar.gz && rm jre.tar.gz)
           mv jre pkg/portable/PeerBanHelper/
-          (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)
+          (cd pkg/portable && zip -r java/PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)
         # 上面那个文件名需要符合收集条件
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
-      - name: Upload build artifacts
+      - name: Upload build artifacts raw
         uses: actions/upload-artifact@v7
         with:
-          name: portable-dist
-          path: |
-            pkg/portable/*.zip
+          archive: false
+          if-no-files-found: error
+          path: pkg/portable/raw/*.zip
+      - name: Upload build artifacts nojava
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: pkg/portable/nojava/*.zip
+      - name: Upload build artifacts java
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: pkg/portable/java/*.zip
