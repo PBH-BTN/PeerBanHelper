@@ -30,18 +30,11 @@ jobs:
             install4j-13-${{ hashFiles('**/*.install4j') }}
       - name: Make installers
         run: |
-          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.x_version }} -g -d build/media -D librariesPath=$(pwd)/build/libraries install4j/project.install4j
+          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.x_version }} -d build/media -D librariesPath=$(pwd)/build/libraries install4j/project.install4j
       - name: Delete garbages
         run: |
           rm -rf build/media/debug*
       # jarPath=$(pwd) 是必须的，install4jc 不知道什么毛病，不支持相对路径，这太诡异了
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: installer-dist
-          path: |
-            build/media/*
-        id: project
       - name: Copy JBR Bundles
         id: jbr_bundles
         run: |
@@ -58,4 +51,86 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: jbr-dist
+          if-no-files-found: error
           path: ${{ steps.jbr_bundles.outputs.jbr_path }}
+      - name: Upload build artifacts linux aarch64
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_linux-aarch64*
+      - name: Upload build artifacts linux amd64
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_linux-amd64*
+      - name: Upload build artifacts macos aarch64
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_macos_macos-aarch64*
+      - name: Upload build artifacts macos amd64
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_macos_macos-amd64*
+      - name: Upload build artifacts macos nojava
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_macos_nojava*
+      - name: Upload build artifacts rpm
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_rpm*
+      - name: Upload build artifacts windows arm64
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: |
+            build/media/PeerBanHelper_windows-arm64*
+            !build/media/*nojava.exe
+      - name: Upload build artifacts windows arm64 nojava
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_windows-arm64*nojava.exe
+      - name: Upload build artifacts windows x64
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: |
+            build/media/PeerBanHelper_windows-x64*
+            !build/media/PeerBanHelper_windows-x64_win7*
+            !build/media/*nojava.exe
+      - name: Upload build artifacts windows x64 nojava
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_windows-x64*nojava.exe
+      - name: Upload build artifacts windows x64 win7
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          if-no-files-found: error
+          path: build/media/PeerBanHelper_windows-x64_win7*
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-dist
+          if-no-files-found: error
+          path: |
+            build/media/md5sums
+            build/media/sha256sums
+            build/media/output.txt
+            build/media/updates.xml

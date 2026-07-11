@@ -2282,12 +2282,16 @@ return true;</property>
     </msix>
     <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}">
       <exclude>
+        <entry location="redistributable" />
+        <entry location="scripts" />
         <entry filesetId="306" />
         <entry filesetId="320" />
       </exclude>
     </macosFolder>
     <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}">
       <exclude>
+        <entry location="redistributable" />
+        <entry location="scripts" />
         <entry filesetId="306" />
         <entry filesetId="320" />
       </exclude>
@@ -2295,12 +2299,16 @@ return true;</property>
     </macosFolder>
     <macosFolder name="macOS Folder (Intel)" id="335" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="amd64">
       <exclude>
+        <entry location="redistributable" />
+        <entry location="scripts" />
         <entry filesetId="306" />
         <entry filesetId="308" />
       </exclude>
     </macosFolder>
     <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_rpm_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64">
       <exclude>
+        <entry location="redistributable" />
+        <entry location="scripts" />
         <entry filesetId="306" />
         <entry filesetId="308" />
         <entry filesetId="320" />
@@ -2308,6 +2316,8 @@ return true;</property>
     </linuxRPM>
     <unixInstaller name="x64 Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
       <exclude>
+        <entry location="redistributable" />
+        <entry location="scripts" />
         <entry filesetId="306" />
         <entry filesetId="308" />
         <entry filesetId="320" />
@@ -2315,6 +2325,8 @@ return true;</property>
     </unixInstaller>
     <unixInstaller name="aarch64 Linux Installer" id="127" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
       <exclude>
+        <entry location="redistributable" />
+        <entry location="scripts" />
         <entry filesetId="306" />
         <entry filesetId="308" />
         <entry filesetId="320" />
