@@ -193,7 +193,7 @@ jobs:
           archive: false
           if-no-files-found: error
           path: peerbanhelper.torrent
-      - uses: alexellis/upload-assets@0.4.1
+      - uses: alexellis/upload-assets@0.5.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DIST: ${{ steps.set_version.outputs.version }}
