@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 @Slf4j
-public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cache<K,V> {
+public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cache<K, V> {
     private final Cache<@NotNull K, @NotNull V> delegate;
     private final @Nullable Consumer<Stream<Pair<@NotNull K, @NotNull V>>> removeCallback;
     private final AtomicBoolean receiveNotification = new AtomicBoolean(true);
@@ -97,8 +97,8 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
         if (removeCallback == null) return;
         //noinspection ConstantValue
         removeCallback.accept(delegate.asMap().entrySet().stream()
-                .filter(entry->entry.getKey() != null && entry.getValue() != null)
-                .map(entry->Pair.of(entry.getKey(), entry.getValue())));
+                .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue())));
     }
 
     @Override

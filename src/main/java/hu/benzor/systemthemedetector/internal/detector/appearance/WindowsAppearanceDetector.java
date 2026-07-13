@@ -1,11 +1,11 @@
 package hu.benzor.systemthemedetector.internal.detector.appearance;
 
-import java.util.Optional;
-
 import hu.benzor.systemthemedetector.api.theme.Theme.Appearance;
 import hu.benzor.systemthemedetector.internal.command.CommandOutputLineMapper;
 import hu.benzor.systemthemedetector.internal.command.FilteredCommandOutputLineMapper;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 @Slf4j
 public final class WindowsAppearanceDetector extends AppearanceDetector {
@@ -14,11 +14,11 @@ public final class WindowsAppearanceDetector extends AppearanceDetector {
 
     public WindowsAppearanceDetector() {
         ProcessBuilder pb = new ProcessBuilder(
-            "reg",
-            "query",
-            "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-            "/v",
-            "AppsUseLightTheme"
+                "reg",
+                "query",
+                "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                "/v",
+                "AppsUseLightTheme"
         );
         outputLineMapper = new FilteredCommandOutputLineMapper(pb, "AppsUseLightTheme");
     }
@@ -30,7 +30,7 @@ public final class WindowsAppearanceDetector extends AppearanceDetector {
 
     @Override
     protected Optional<Appearance> outputLineToThemeMap(String line) {
-         /*
+        /*
          * Output is of the form
          *   AppsUseLightTheme    REG_DWORD    0x1
          * 0 = dark

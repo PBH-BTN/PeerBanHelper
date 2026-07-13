@@ -85,18 +85,18 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
         if (config.getOpenId() != null) {
             map.put("openid", config.getOpenId());
         }
-        
+
         RequestBody requestBody = RequestBody.create(
                 JsonUtil.getGson().toJson(map),
                 MediaType.parse("application/json")
         );
-        
+
         Request request = new Request.Builder()
                 .url("https://sctapi.ftqq.com/" + config.getSendKey() + ".send")
                 .post(requestBody)
                 .header("Content-Type", "application/json")
                 .build();
-        
+
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 String responseBody = response.body().string();
@@ -108,9 +108,10 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
         }
         return true;
     }
+
     @AllArgsConstructor
     @Data
-    public static class Config{
+    public static class Config {
         private String sendKey;
         private String channel;
         private String openId;

@@ -45,7 +45,7 @@ public final class BlockListController extends AbstractFeatureModule {
             var ipAddresses = IPAddressUtil.remapBanListAddress(ipAddress);
             remappedIps.addAll(ipAddresses);
         }
-        
+
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : remappedIps) {
             String start = ipAddress.toPrefixBlock().getLower().withoutPrefixLength().toCompressedString();
@@ -61,7 +61,7 @@ public final class BlockListController extends AbstractFeatureModule {
             var ipAddresses = IPAddressUtil.remapBanListAddress(addr);
             remappedIps.addAll(ipAddresses);
         }
-        
+
         StringBuilder builder = new StringBuilder();
         for (IPAddress addr : remappedIps) {
             String ruleName = UUID.randomUUID().toString().replace("-", "");
@@ -71,7 +71,7 @@ public final class BlockListController extends AbstractFeatureModule {
         }
         var result = builder.toString();
         var userAgent = ctx.userAgent();
-        if(result.isBlank() && userAgent != null && userAgent.startsWith("Transmission")){
+        if (result.isBlank() && userAgent != null && userAgent.startsWith("Transmission")) {
             result = "TransmissionWorkaround:127.127.127.127-127.127.127.127";
         }
         ctx.result(result);
@@ -84,7 +84,7 @@ public final class BlockListController extends AbstractFeatureModule {
             var ipAddresses = IPAddressUtil.remapBanListAddress(ipAddress);
             remappedIps.addAll(ipAddresses);
         }
-        
+
         StringBuilder builder = new StringBuilder();
         for (IPAddress ipAddress : remappedIps) {
             builder.append(ipAddress.toPrefixBlock().toCompressedString()).append("\n");
@@ -96,7 +96,6 @@ public final class BlockListController extends AbstractFeatureModule {
     public void onDisable() {
 
     }
-
 
 
     @Override

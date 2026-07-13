@@ -1,13 +1,13 @@
 package hu.benzor.systemthemedetector.internal.command;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class FilteredCommandOutputLineMapper implements CommandOutputLineMapper 
                     process.destroyForcibly();
                 }
             }
-        } catch (IOException | IndexOutOfBoundsException e){
+        } catch (IOException | IndexOutOfBoundsException e) {
             log.debug("Failed to read process output", e);
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();

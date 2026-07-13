@@ -5,12 +5,12 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 
-public record CheckResultBatch (
+public record CheckResultBatch(
         Downloader downloader,
         Torrent torrent,
         Peer peer,
         CheckResult checkResult
 
-){
+) {
 
 }

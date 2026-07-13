@@ -22,11 +22,11 @@ public abstract class AbstractSSEFeatureModule extends AbstractFeatureModule {
         sseClient.keepAlive();
     }
 
-    protected void iterateSseClients(Consumer<? super SseClient> clients){
+    protected void iterateSseClients(Consumer<? super SseClient> clients) {
         this.sseClients.forEach(clients);
     }
 
-    protected void onClose(SseClient sseClient){
+    protected void onClose(SseClient sseClient) {
         this.sseClients.remove(sseClient);
     }
 }

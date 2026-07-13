@@ -19,7 +19,7 @@ public class AbstractCommonService<M extends BaseMapper<T>, T> extends ServiceIm
     private static final String LAST_LIMIT = "LIMIT 200";
     final TransactionTemplate transactionTemplate;
 
-    public AbstractCommonService(@NotNull TransactionTemplate transactionTemplate){
+    public AbstractCommonService(@NotNull TransactionTemplate transactionTemplate) {
         this.transactionTemplate = transactionTemplate;
     }
 

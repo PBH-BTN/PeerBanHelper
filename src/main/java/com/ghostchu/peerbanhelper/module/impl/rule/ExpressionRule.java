@@ -139,7 +139,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         var content = context.bodyAsBytes();
         var platform = Main.getPlatform();
         if (platform != null) {
-            try(var scanner = platform.getMalwareScanner()) {
+            try (var scanner = platform.getMalwareScanner()) {
                 if (scanner != null) {
                     if (scanner.isMalicious(context.body())) {
                         context.status(HttpStatus.BAD_REQUEST);
@@ -148,7 +148,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                         return;
                     }
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.debug("Malware scan failed for pending to add script", e);
                 Sentry.captureException(e);
             }
@@ -269,7 +269,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             map.put(compiledScript, f);
         }
         for (var entry : map.entrySet()) {
-            task.setComment(false, "Waiting for script complete: "+entry.getKey().name());
+            task.setComment(false, "Waiting for script complete: " + entry.getKey().name());
             entry.getValue().join();
         }
         return checkResult.get();

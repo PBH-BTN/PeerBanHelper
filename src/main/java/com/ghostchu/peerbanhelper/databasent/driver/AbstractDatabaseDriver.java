@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 @Slf4j
 public abstract class AbstractDatabaseDriver implements DatabaseDriver {
     private DataSource dataSource;
+
     @Override
     public @NotNull String getMapperXmlPath() {
         return "mapper/" + getType().getMapperType() + "/**/*.xml"; // H2 使用 MySQL 方言

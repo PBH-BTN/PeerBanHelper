@@ -104,7 +104,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
 
                     // Update maintenance timestamp
                     java.nio.file.Files.writeString(maintenanceFile.toPath(),
-                                                    String.valueOf(System.currentTimeMillis()));
+                            String.valueOf(System.currentTimeMillis()));
 
                     log.info("SQLite database VACUUM completed successfully");
                 }

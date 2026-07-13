@@ -102,16 +102,16 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())
                     .get()
                     .build();
-            
+
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
                     throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body().string()));
                 }
-                
+
                 String responseBody = response.body().string();
                 JsonObject object = JsonParser.parseString(responseBody).getAsJsonObject();
                 JsonObject peers = object.getAsJsonObject("peers");
-                
+
                 List<Peer> peersList = new ArrayList<>();
                 for (String s : peers.keySet()) {
                     JsonObject singlePeerObject = peers.getAsJsonObject(s);
@@ -195,7 +195,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                         .url(apiEndpoint + "/app/preferences")
                         .get()
                         .build();
-                
+
                 try (Response response = httpClient.newCall(request).execute()) {
                     if (!response.isSuccessful()) {
                         throw new IllegalStateException("Failed to get preferences: " + response.code());
@@ -248,14 +248,14 @@ public final class QBittorrentEE extends AbstractQbittorrent {
             FormBody formBody = new FormBody.Builder()
                     .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", banStr)))
                     .build();
-            
+
             try {
                 Request request = new Request.Builder()
                         .url(apiEndpoint + "/app/setPreferences")
                         .post(formBody)
                         .header("Content-Type", "application/x-www-form-urlencoded")
                         .build();
-                
+
                 try (Response response = httpClient.newCall(request).execute()) {
                     if (!response.isSuccessful()) {
                         log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));

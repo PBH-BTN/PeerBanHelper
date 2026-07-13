@@ -182,7 +182,7 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class PeerRecordCachingEntire{
+    public static class PeerRecordCachingEntire {
         private OffsetDateTime timestamp;
         private String downloader;
         private TorrentWrapper torrent;

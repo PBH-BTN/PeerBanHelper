@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class PeerBanCount {
-	private String peerIp;
-	private long count;
+    private String peerIp;
+    private long count;
 }

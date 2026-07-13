@@ -249,7 +249,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 var mem = generateSystemMemoryData(provider.getHardware());
                 os.put("memory", mem);
             });
-        }catch (Throwable _){
+        } catch (Throwable _) {
             os.put("version", "N/A");
         }
         return os;

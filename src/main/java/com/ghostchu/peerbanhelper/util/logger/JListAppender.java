@@ -20,7 +20,7 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
 
     public static final Queue<LogEntry> logEntryDeque = Queues.synchronizedQueue(EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200)));
     public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(true);
-    public static final Queue<LogEntry> ringDeque =  Queues.synchronizedQueue(EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100)));
+    public static final Queue<LogEntry> ringDeque = Queues.synchronizedQueue(EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100)));
     @Getter
     private static final AtomicLong seq = new AtomicLong(0);
     private PatternLayout layout;

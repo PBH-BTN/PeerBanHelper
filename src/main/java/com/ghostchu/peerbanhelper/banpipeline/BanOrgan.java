@@ -75,7 +75,7 @@ public abstract class BanOrgan<IN, OUT> {
                         .orTimeout(maxDigestDuration, digestTimeUnit) // this is the actually reason we use CompletableFutures
                         .exceptionally(e -> { // f.
                             BanOrganCallback<IN> callback;
-                            if (e instanceof InterruptedException || e instanceof  TimeoutException) {
+                            if (e instanceof InterruptedException || e instanceof TimeoutException) {
                                 callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.TIMEOUT, e, null);
                             } else {
                                 callback = new BanOrganCallback<>(prey, BanOrganCallbackResult.ERRORED, e, null);

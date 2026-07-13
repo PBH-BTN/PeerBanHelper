@@ -16,16 +16,13 @@ import com.ghostchu.peerbanhelper.event.banwave.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
-import com.ghostchu.peerbanhelper.module.*;
+import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
-import com.ghostchu.peerbanhelper.util.Pair;
-import com.ghostchu.peerbanhelper.util.WatchDog;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
-import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -131,7 +128,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         if (BAN_WAVE_SERVICE != null) {
             BAN_WAVE_SERVICE.shutdown();
         }
-        if(banWaveWatchDog != null){
+        if (banWaveWatchDog != null) {
             banWaveWatchDog.close();
         }
         this.metrics.close();

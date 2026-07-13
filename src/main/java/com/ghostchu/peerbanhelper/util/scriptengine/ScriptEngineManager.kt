@@ -70,6 +70,7 @@ class ScriptEngineManager(
                 0 -> {
                     return null
                 }
+
                 1 -> {
                     return CheckResult(
                         javaClass,
@@ -80,6 +81,7 @@ class ScriptEngineManager(
                         StructuredData.create().add("script", script.name())
                     )
                 }
+
                 2 -> {
                     return CheckResult(
                         javaClass,
@@ -90,6 +92,7 @@ class ScriptEngineManager(
                         StructuredData.create().add("script", script.name())
                     )
                 }
+
                 else -> {
                     log.error(TextManager.tlUI(Lang.RULE_ENGINE_INVALID_RETURNS, script))
                     return null

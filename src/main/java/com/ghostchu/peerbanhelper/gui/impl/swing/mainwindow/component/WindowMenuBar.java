@@ -60,8 +60,8 @@ public class WindowMenuBar {
         }
         //menuBar.add(Box.createGlue());
         menuBar.add(generateHelpAbout());
-    //    menuBar.add(Box.createGlue());
-    //    menuBar.add(generateAlertsButton());
+        //menuBar.add(Box.createGlue());
+        //menuBar.add(generateAlertsButton());
         parent.add(menuBar, BorderLayout.NORTH);
         return menuBar;
     }
@@ -70,7 +70,7 @@ public class WindowMenuBar {
         FlatButton alertButton = new FlatButton();
         alertButton.setButtonType(FlatButton.ButtonType.toolBarButton);
         alertButton.setFocusable(false);
-        alertButton.addActionListener(event -> bridge.getWebUiUrl().ifPresent(uri-> parent.getSwingGUI().openWebpage(uri)));
+        alertButton.addActionListener(event -> bridge.getWebUiUrl().ifPresent(uri -> parent.getSwingGUI().openWebpage(uri)));
         CommonUtil.getScheduler().scheduleAtFixedRate(() -> {
             if (bridge == null) {
                 alertButton.setEnabled(false);
@@ -86,7 +86,7 @@ public class WindowMenuBar {
             SwingUtilities.invokeLater(() -> {
                 alertButton.setText(text);
                 if (highestLevel == null || alerts.isEmpty()) {
-                    alertButton.setBackground(new Color(0,0,0,1));
+                    alertButton.setBackground(new Color(0, 0, 0, 1));
                     alertButton.setForeground(null);
                     alertButton.setIcon(new FlatSVGIcon(Main.class.getResource("/assets/icon/common/alert.svg")));
                     alertButton.setEnabled(false);

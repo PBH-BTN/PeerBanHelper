@@ -117,19 +117,19 @@ public final class IPDB implements AutoCloseable {
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
         try {
             var data = geoCN2.query(address);
-            if(data != null){
+            if (data != null) {
                 geoData.mergeFrom(data, true);
             }
         } catch (IllegalStateException e) {
-            try{
+            try {
                 var data = geoCN1.query(address);
-                if(data != null){
+                if (data != null) {
                     geoData.mergeFrom(data, true);
                 }
-            }catch ( IOException ioe1){
+            } catch (IOException ioe1) {
                 Sentry.captureException(ioe1);
             }
-        } catch (IOException ioe){
+        } catch (IOException ioe) {
             Sentry.captureException(ioe);
         }
     }

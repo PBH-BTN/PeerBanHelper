@@ -9,9 +9,9 @@ import com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
-import com.ghostchu.peerbanhelper.databasent.driver.common.basic.BasicIPAddressTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.common.InetTypeHandlerForwarder;
 import com.ghostchu.peerbanhelper.databasent.driver.common.OffsetDateTimeTypeHandlerForwarder;
+import com.ghostchu.peerbanhelper.databasent.driver.common.basic.BasicIPAddressTypeHandler;
 import com.ghostchu.peerbanhelper.databasent.driver.h2.H2DatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.mysql.MySQLDatabaseDriver;
 import com.ghostchu.peerbanhelper.databasent.driver.postgres.PostgresDatabaseDriver;
@@ -45,7 +45,7 @@ public class DatabaseDriverConfig {
     public static DatabaseDriver databaseDriver;
 
     @PostConstruct
-    public void setupJsqlParserThreadPool(){
+    public void setupJsqlParserThreadPool() {
         int parallelism = ExternalSwitch.parseInt("pbh.database.jsqlparser.thread-pool.parallelism", Math.min(4, Runtime.getRuntime().availableProcessors()));
         ExecutorService executorService = Executors.newWorkStealingPool(parallelism);
         JsqlParserGlobal.setExecutorService(executorService, Thread.ofPlatform().unstarted(() -> {
@@ -123,7 +123,7 @@ public class DatabaseDriverConfig {
     }
 
     @Bean
-    public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager){
+    public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager) {
         return new TransactionTemplate(platformTransactionManager);
     }
 }

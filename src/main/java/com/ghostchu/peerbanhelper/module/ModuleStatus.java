@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class ModuleStatus {
-   private ModuleStatusType type;
-   private TranslationComponent description;
+    private ModuleStatusType type;
+    private TranslationComponent description;
 }

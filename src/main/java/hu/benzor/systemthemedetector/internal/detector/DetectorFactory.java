@@ -1,7 +1,5 @@
 package hu.benzor.systemthemedetector.internal.detector;
 
-import java.util.Optional;
-
 import hu.benzor.systemthemedetector.api.environment.DesktopEnvironment;
 import hu.benzor.systemthemedetector.api.environment.Platform;
 import hu.benzor.systemthemedetector.api.theme.Theme.AccentColor;
@@ -18,6 +16,8 @@ import hu.benzor.systemthemedetector.internal.detector.font.MacOsFontDetector;
 import hu.benzor.systemthemedetector.internal.detector.font.WindowsFontDetector;
 import hu.benzor.systemthemedetector.internal.environment.EnvironmentDetector;
 import lombok.Getter;
+
+import java.util.Optional;
 
 public class DetectorFactory {
 

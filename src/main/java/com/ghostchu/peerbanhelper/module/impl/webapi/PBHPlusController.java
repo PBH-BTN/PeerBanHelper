@@ -57,7 +57,6 @@ public final class PBHPlusController extends AbstractFeatureModule {
     private final String powCaptchaAlgorithm = "SHA-1";
 
 
-
     @Override
     public boolean isConfigurable() {
         return false;

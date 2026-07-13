@@ -15,9 +15,9 @@ public final class TrackerImpl implements Tracker {
     public TrackerImpl(String string) {
         Objects.requireNonNull(string, "tracker string cannot be null");
         this.trackers = Stream.of(string.split("\n"))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .sorted()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .sorted()
                 .toList();
     }
 
@@ -44,9 +44,9 @@ public final class TrackerImpl implements Tracker {
             return Collections.emptyList();
         }
         return Stream.of(trackerList.split("\n\n"))
-            .filter(str -> !str.isBlank())
-            .map(TrackerImpl::new)
-            .collect(Collectors.toUnmodifiableList());
+                .filter(str -> !str.isBlank())
+                .map(TrackerImpl::new)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override

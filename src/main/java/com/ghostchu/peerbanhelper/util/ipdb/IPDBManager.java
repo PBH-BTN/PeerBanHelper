@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
-import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -90,5 +89,6 @@ public class IPDBManager {
         }
     }
 
-    public record IPDBResponse(LazyLoad<IPGeoData> geoData) { }
+    public record IPDBResponse(LazyLoad<IPGeoData> geoData) {
+    }
 }
