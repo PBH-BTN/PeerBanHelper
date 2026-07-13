@@ -8,5 +8,5 @@ sed -i "s#@@@@DATABESE_TYPE@@@@#${DATEBASE_TYPE}#g" build/data/config/config.yml
 cd build
 timeout 30 java -jar PeerBanHelper.jar nogui | tee -a pbh.log
 if ! grep --quiet --fixed-strings "PeerBanHelper started in" pbh.log; then exit 1; fi;
-
+if grep --quiet --fixed-strings "Exception" pbh.log; then exit 1; fi;
 exit 0
