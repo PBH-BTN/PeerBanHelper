@@ -123,7 +123,7 @@ def setPreferences():
 
 @app.route("/api/v2/sync/maindata")
 def maindata():
-    return jsonify({"server_state":{"alltime_dl":0,"alltime_ul":0}})
+    return jsonify({"server_state":{"alltime_dl":1,"alltime_ul":1}})
 
 @app.route("/api/v2/app/preferences")
 def preferences():

@@ -293,11 +293,11 @@ public final class IPDB implements AutoCloseable {
     }
 
     private boolean needUpdateMMDB(File target) {
-        if (!target.exists()) {
-            return true;
-        }
         if (!autoUpdate) {
             return false;
+        }
+        if (!target.exists()) {
+            return true;
         }
         // 45天
         long updateInterval = 3888000000L;
