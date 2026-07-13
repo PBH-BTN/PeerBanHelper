@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "4.0.1"
-    id("com.install4j.gradle") version "13.0" apply false
+    id("com.install4j.gradle") version "13.0.1" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.4.0"
@@ -45,8 +45,8 @@ repositories {
     }
 }
 
-val flatlafVersion = "3.7.1"
-val nettyVersion = "4.2.15.Final"
+val flatlafVersion = "3.7.2"
+val nettyVersion = "4.2.16.Final"
 val sqliteVersion = "3.53.2.0"
 val springVersion = "7.0.8"
 
@@ -56,7 +56,7 @@ configurations.all {
 
 dependencyManagement {
     imports {
-        mavenBom("com.baomidou:mybatis-plus-bom:3.5.16")
+        mavenBom("com.baomidou:mybatis-plus-bom:3.5.17")
     }
 }
 dependencies {
@@ -71,7 +71,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}:natives-android")
     implementation("com.h2database:h2:2.3.232")
-    implementation("org.postgresql:postgresql:42.7.12")
+    implementation("org.postgresql:postgresql:42.7.13")
     implementation("com.mysql:mysql-connector-j:9.7.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
@@ -146,7 +146,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.37")
+    implementation("ch.qos.logback:logback-classic:1.5.38")
     implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
@@ -174,7 +174,7 @@ dependencies {
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:13.0")
+    compileOnly("com.install4j:install4j-runtime:13.0.1")
 
     implementation(platform("io.sentry:sentry-bom:8.47.0")) //import bom
     implementation("io.sentry:sentry")
@@ -185,7 +185,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.1"))
+    testImplementation(platform("org.junit:junit-bom:6.1.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
