@@ -95,7 +95,10 @@ dependencies {
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
-    implementation("io.javalin:javalin:7.2.2")
+    // Javalin
+    implementation("io.javalin:javalin:7.2.2") {
+        exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
+    }
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.1.0")
     // Expression engine
@@ -103,7 +106,7 @@ dependencies {
 
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
-    // System monitoring for supported platforms
+    // Operating System and Hardware Information
     implementation("com.github.oshi:oshi-common:${oshiVersion}")
     runtimeOnly("com.github.oshi:oshi-core-ffm:${oshiVersion}")
     // Markdown
@@ -173,6 +176,7 @@ dependencies {
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:13.0.1")
 
+    // sentry
     implementation(platform("io.sentry:sentry-bom:8.48.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
