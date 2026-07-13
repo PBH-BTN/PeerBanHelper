@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -27,7 +27,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class IPDBManager {
     private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000), TimeUnit.MILLISECONDS)
+            .expireAfterAccess(Duration.ofMillis(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000)))
             .maximumSize(ExternalSwitch.parseInt("pbh.geoIpCache.size", 300))
             .softValues()
             .build();

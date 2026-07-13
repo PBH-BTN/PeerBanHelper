@@ -151,11 +151,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             try {
                 // 这玩意儿能空指针？
                 colorDetector.onAppearanceChange(appearance -> {
-                    if (appearance == Theme.Appearance.DARK) {
-                        this.updateTheme(true);
-                    } else {
-                        this.updateTheme(false);
-                    }
+                    this.updateTheme(appearance == Theme.Appearance.DARK);
                 });
                 this.updateTheme(colorDetector.getAppearance().orElse(Theme.Appearance.LIGHT) == Theme.Appearance.DARK);
             } catch (Exception e) {

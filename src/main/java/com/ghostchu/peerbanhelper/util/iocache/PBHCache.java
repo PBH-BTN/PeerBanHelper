@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Queue;
@@ -34,10 +35,10 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
             builder.maximumSize(maxCapacity);
         }
         if (expireWriteMillis != null) {
-            builder.expireAfterWrite(expireWriteMillis, TimeUnit.MILLISECONDS);
+            builder.expireAfterWrite(Duration.ofMillis(expireWriteMillis));
         }
         if (expireAccessMillis != null) {
-            builder.expireAfterAccess(expireAccessMillis, TimeUnit.MILLISECONDS);
+            builder.expireAfterAccess(Duration.ofMillis(expireAccessMillis));
         }
         if (weakKey) {
             builder.weakKeys();

@@ -44,8 +44,8 @@ class PBHBackgroundTaskController : AbstractSSEFeatureModule() {
     }
 
     private fun handleSseConnection(sseClient: SseClient) {
-        sendCurrentTasks(sseClient);
-        registerSseManagement(sseClient);
+        sendCurrentTasks(sseClient)
+        registerSseManagement(sseClient)
     }
 
 

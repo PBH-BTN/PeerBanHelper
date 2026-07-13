@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -428,7 +427,7 @@ public final class IPDB implements AutoCloseable {
     public static final class MaxMindNodeCache implements NodeCache {
         private final static Cache<@NotNull CacheKey, @NotNull DecodedValue> cache = CacheBuilder.newBuilder()
                 .maximumSize(2000)
-                .expireAfterAccess(1, TimeUnit.HOURS)
+                .expireAfterAccess(Duration.ofHours(1))
                 .build();
 
         @SneakyThrows

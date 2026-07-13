@@ -29,7 +29,6 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import io.javalin.router.EndpointNotFound;
-import io.javalin.websocket.WsContext;
 import io.sentry.Sentry;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,9 +40,9 @@ import org.slf4j.event.Level;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -60,7 +59,7 @@ public final class JavalinWebContainer implements Reloadable {
     @Getter
     private String token;
     private final Cache<@NotNull IPAddress, @NotNull AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
-            .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
+            .expireAfterWrite(Duration.ofMillis(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000)))
             .build();
     private final Cache<@NotNull IPAddress, @NotNull Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
@@ -331,10 +330,6 @@ public final class JavalinWebContainer implements Reloadable {
     }
 
     public String reqLocale(Context context) {
-        return reqLocale(context.header("Accept-Language"));
-    }
-
-    public String reqLocale(WsContext context) {
         return reqLocale(context.header("Accept-Language"));
     }
 

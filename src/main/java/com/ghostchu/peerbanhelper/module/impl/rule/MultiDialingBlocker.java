@@ -26,10 +26,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 同一网段集中下载同一个种子视为多拨，因为多拨和PCDN强相关所以可以直接封禁
@@ -120,19 +120,19 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
         keepHuntingTime = getConfig().getInt("keep-hunting-time") * 1000L;
 
         cache = CacheBuilder.newBuilder().
-                expireAfterWrite(cacheLifespan, TimeUnit.MILLISECONDS).
+                expireAfterWrite(Duration.ofMillis(cacheLifespan)).
                 maximumSize(TORRENT_PEER_MAX_NUM).
                 softValues().
                 build();
         // 内层维护子网下的peer列表，外层回收不再使用的列表
         // 外层按最后访问时间过期即可，若子网的列表还在被访问，说明还有属于该子网的peer在连接
         subnetCounter = CacheBuilder.newBuilder().
-                expireAfterAccess(cacheLifespan, TimeUnit.MILLISECONDS).
+                expireAfterAccess(Duration.ofMillis(cacheLifespan)).
                 maximumSize(TORRENT_PEER_MAX_NUM).
                 softValues().
                 build();
         huntingList = CacheBuilder.newBuilder().
-                expireAfterWrite(keepHuntingTime, TimeUnit.MILLISECONDS).
+                expireAfterAccess(Duration.ofMillis(keepHuntingTime)).
                 maximumSize(TORRENT_PEER_MAX_NUM).
                 softValues().
                 build();
@@ -216,7 +216,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
 
     private Cache<String, Long> genPeerGroup() {
         return CacheBuilder.newBuilder().
-                expireAfterAccess(cacheLifespan, TimeUnit.MILLISECONDS).
+                expireAfterAccess(Duration.ofMillis(cacheLifespan)).
                 maximumSize(PEER_MAX_NUM_PER_SUBNET).
                 softValues().
                 build();
