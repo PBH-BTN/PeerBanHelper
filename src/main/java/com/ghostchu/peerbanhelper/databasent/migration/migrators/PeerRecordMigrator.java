@@ -91,6 +91,8 @@ public class PeerRecordMigrator implements TableMigrator {
             }
         }
 
+        MigrationContext.fixAutoIncrement("peer_records");
+
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "peer_records"));
         context.incrementTotalRecords(count);
         return count;

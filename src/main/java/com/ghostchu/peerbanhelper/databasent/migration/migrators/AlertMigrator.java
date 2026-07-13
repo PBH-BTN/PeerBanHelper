@@ -120,6 +120,8 @@ public class AlertMigrator implements TableMigrator {
             }
         }
 
+        MigrationContext.fixAutoIncrement("alert");
+
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "alert"));
         context.incrementTotalRecords(count);
         return count;

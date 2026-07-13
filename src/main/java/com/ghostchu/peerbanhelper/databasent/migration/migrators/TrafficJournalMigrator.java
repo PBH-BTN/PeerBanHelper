@@ -110,6 +110,8 @@ public class TrafficJournalMigrator implements TableMigrator {
             }
         }
 
+        MigrationContext.fixAutoIncrement("traffic_journal_v3");
+
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "traffic_journal_v3"));
         context.incrementTotalRecords(count);
         return count;

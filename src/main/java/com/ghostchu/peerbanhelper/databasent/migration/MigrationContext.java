@@ -1,9 +1,14 @@
 package com.ghostchu.peerbanhelper.databasent.migration;
 
+import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
+import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.ibatis.jdbc.SqlRunner;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,5 +84,34 @@ public class MigrationContext {
         if (logInterval == 0) logInterval = 100;
 
         return (current - lastLogged) >= logInterval;
+    }
+
+    /**
+     * Generate SQL to synchronize auto increment value after migration.
+     *
+     * @param tableName table name
+     */
+    public static void fixAutoIncrement(String tableName) throws SQLException {
+        try (Connection connection = DatabaseDriverConfig.databaseDriver.getDataSource().getConnection()){
+            DatabaseType databaseType = DatabaseDriverConfig.databaseDriver.getType();
+            SqlRunner sqlRunner = new SqlRunner(connection);
+
+            switch (databaseType) {
+                case POSTGRES -> sqlRunner.selectOne("""
+                        SELECT setval(
+                            pg_get_serial_sequence('%s', 'id'),
+                            COALESCE((SELECT MAX(id) FROM %s), 1),
+                            true
+                        );
+                        """.formatted(tableName, tableName));
+
+                case MYSQL, H2 -> sqlRunner.update("""
+                        ALTER TABLE `%s`
+                        AUTO_INCREMENT = (
+                            SELECT COALESCE(MAX(id), 1) + 1 FROM `%s`
+                        );
+                        """.formatted(tableName, tableName));
+            }
+        }
     }
 }

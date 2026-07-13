@@ -109,6 +109,8 @@ public class HistoryMigrator implements TableMigrator {
             }
         }
 
+        MigrationContext.fixAutoIncrement("history");
+
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "history"));
         context.incrementTotalRecords(count);
         return count;

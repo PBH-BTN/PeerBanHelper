@@ -106,6 +106,8 @@ public class PeerConnectionMetricsMigrator implements TableMigrator {
             }
         }
 
+        MigrationContext.fixAutoIncrement("peer_connection_metrics");
+
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "peer_connection_metrics"));
         context.incrementTotalRecords(count);
         return count;

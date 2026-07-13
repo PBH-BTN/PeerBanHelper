@@ -98,6 +98,8 @@ public class RuleSubLogMigrator implements TableMigrator {
             }
         }
 
+        MigrationContext.fixAutoIncrement("rule_sub_log");
+
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "rule_sub_log"));
         context.incrementTotalRecords(count);
         return count;

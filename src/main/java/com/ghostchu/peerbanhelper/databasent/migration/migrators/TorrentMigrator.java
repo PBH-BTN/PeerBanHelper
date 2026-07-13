@@ -95,6 +95,8 @@ public class TorrentMigrator implements TableMigrator {
             }
         }
 
+        MigrationContext.fixAutoIncrement("torrent");
+
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "torrent"));
         context.incrementTotalRecords(count);
         return count;
