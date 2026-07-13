@@ -49,6 +49,11 @@ public class TrafficJournalMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = """
                 SELECT timestamp, downloader, dataOverallUploadedAtStart, dataOverallUploaded,
@@ -109,8 +114,6 @@ public class TrafficJournalMigrator implements TableMigrator {
                 count += batch.size();
             }
         }
-
-        MigrationContext.fixAutoIncrement("traffic_journal_v3");
 
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "traffic_journal_v3"));
         context.incrementTotalRecords(count);

@@ -62,6 +62,11 @@ public class HistoryMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         // Query with JOIN to get module and rule names
         String selectQuery = """
@@ -108,8 +113,6 @@ public class HistoryMigrator implements TableMigrator {
                 count += batch.size();
             }
         }
-
-        MigrationContext.fixAutoIncrement("history");
 
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "history"));
         context.incrementTotalRecords(count);

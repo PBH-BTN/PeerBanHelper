@@ -51,6 +51,11 @@ public class PeerRecordMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = """
                 SELECT address, port, torrent_id, downloader, peerId, clientName,
@@ -90,8 +95,6 @@ public class PeerRecordMigrator implements TableMigrator {
                 count += batch.size();
             }
         }
-
-        MigrationContext.fixAutoIncrement("peer_records");
 
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "peer_records"));
         context.incrementTotalRecords(count);

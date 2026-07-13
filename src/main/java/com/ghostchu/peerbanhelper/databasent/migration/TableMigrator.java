@@ -32,4 +32,11 @@ public interface TableMigrator {
     default int getMigrationOrder() {
         return 100; // Default order
     }
+
+    /**
+     * Check if this table have an auto-increment primary key
+     */
+    default boolean isAutoIncrement() {
+        return false;
+    }
 }

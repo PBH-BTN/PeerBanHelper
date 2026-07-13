@@ -53,6 +53,11 @@ public class AlertMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = """
                 SELECT createAt, readAt, level, identifier, title, content
@@ -119,8 +124,6 @@ public class AlertMigrator implements TableMigrator {
                 count += batch.size();
             }
         }
-
-        MigrationContext.fixAutoIncrement("alert");
 
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "alert"));
         context.incrementTotalRecords(count);

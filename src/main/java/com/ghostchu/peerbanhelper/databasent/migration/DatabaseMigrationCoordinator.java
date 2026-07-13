@@ -163,6 +163,12 @@ public class DatabaseMigrationCoordinator {
                 }
             }
 
+            for (TableMigrator migrator : migrators) {
+                if (migrator.isAutoIncrement()) {
+                    MigrationContext.fixAutoIncrement(migrator.getTableName());
+                }
+            }
+
             long duration = System.currentTimeMillis() - startTime;
             log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_FINISHED, context.getTotalRecordsMigrated(), duration / 1000));
         }

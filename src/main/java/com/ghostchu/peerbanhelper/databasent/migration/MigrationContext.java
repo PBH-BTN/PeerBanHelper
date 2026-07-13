@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.ibatis.jdbc.SqlRunner;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,6 +18,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
+@Slf4j
 public class MigrationContext {
     /**
      * Batch size for reading from SQLite and inserting to target DB
@@ -96,13 +97,15 @@ public class MigrationContext {
         if (databaseType == DatabaseType.POSTGRES) {
             try (Connection conn = DatabaseDriverConfig.databaseDriver.getDataSource().getConnection();
                  var stmt = conn.createStatement()) {
-                stmt.execute("""
+                String sql = """
                         SELECT setval(
                             pg_get_serial_sequence('%s', 'id'),
                             COALESCE((SELECT MAX(id) FROM %s), 1),
                             true
                         );
-                        """.formatted(tableName, tableName));
+                        """.formatted(tableName, tableName);
+                log.debug(sql);
+                stmt.execute(sql);
             }
         }
     }

@@ -47,6 +47,11 @@ public class RuleSubLogMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = "SELECT id, ruleId, updateTime, count, updateType FROM rule_sub_log";
         long count = 0;
@@ -97,8 +102,6 @@ public class RuleSubLogMigrator implements TableMigrator {
                 count += batch.size();
             }
         }
-
-        MigrationContext.fixAutoIncrement("rule_sub_log");
 
         log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "rule_sub_log"));
         context.incrementTotalRecords(count);
