@@ -92,23 +92,15 @@ public class MigrationContext {
      * @param tableName table name
      */
     public static void fixAutoIncrement(String tableName) throws SQLException {
-        try (Connection connection = DatabaseDriverConfig.databaseDriver.getDataSource().getConnection()){
-            DatabaseType databaseType = DatabaseDriverConfig.databaseDriver.getType();
-            SqlRunner sqlRunner = new SqlRunner(connection);
-
-            switch (databaseType) {
-                case POSTGRES -> sqlRunner.selectOne("""
+        DatabaseType databaseType = DatabaseDriverConfig.databaseDriver.getType();
+        if (databaseType == DatabaseType.POSTGRES) {
+            try (Connection conn = DatabaseDriverConfig.databaseDriver.getDataSource().getConnection();
+                 var stmt = conn.createStatement()) {
+                stmt.execute("""
                         SELECT setval(
                             pg_get_serial_sequence('%s', 'id'),
                             COALESCE((SELECT MAX(id) FROM %s), 1),
                             true
-                        );
-                        """.formatted(tableName, tableName));
-
-                case MYSQL, H2 -> sqlRunner.update("""
-                        ALTER TABLE `%s`
-                        AUTO_INCREMENT = (
-                            SELECT COALESCE(MAX(id), 1) + 1 FROM `%s`
                         );
                         """.formatted(tableName, tableName));
             }
