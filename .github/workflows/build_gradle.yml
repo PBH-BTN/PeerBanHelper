@@ -84,7 +84,7 @@ jobs:
       - name: Run test
         run: |
           chmod +x test/test-db.sh
-          test/test-db.sh
+          sudo test/test-db.sh
         env:
           DATEBASE_TYPE: ${{ matrix.type }}
   Test_Database_Server:
@@ -134,7 +134,7 @@ jobs:
           POSTGRES_PASSWORD: test
           POSTGRES_DB: test
         options: >-
-          --health-cmd ${{ matrix.wait }}
+          --health-cmd "${{ matrix.wait }}"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -153,6 +153,6 @@ jobs:
       - name: Run test
         run: |
           chmod +x test/test-db.sh
-          test/test-db.sh
+          sudo test/test-db.sh
         env:
           DATEBASE_TYPE: ${{ matrix.type }}
