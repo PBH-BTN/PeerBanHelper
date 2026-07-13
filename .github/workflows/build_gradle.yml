@@ -102,26 +102,32 @@ jobs:
             type: mysql
             port: 3306
             wait: mysqladmin ping
+            cmd: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
           - db: mysql:8.4
             type: mysql
             port: 3306
             wait: mysqladmin ping
+            cmd: ""
           - db: mariadb:10.6
             type: mysql
             port: 3306
             wait: mariadb-admin ping
+            cmd: ""
           - db: mariadb:11
             type: mysql
             port: 3306
             wait: mariadb-admin ping
+            cmd: ""
           - db: postgres:14
             type: postgresql
             port: 5432
             wait: pg_isready
+            cmd: ""
           - db: postgres:16
             type: postgresql
             port: 5432
             wait: pg_isready
+            cmd: ""
     services:
       db:
         image: ${{ matrix.db }}
@@ -142,7 +148,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        command: ${{ matrix.cmd }}
         ports:
           - 3306:${{ matrix.port }}
     steps:
