@@ -1,7 +1,4 @@
 #!/bin/bash
-apt-get update > /dev/null 2>&1
-apt-get install -y python3-flask 2>&1
-
 python3 test/fakeqb.py &
 
 mv build/libs/PeerBanHelper.jar build/PeerBanHelper.jar
