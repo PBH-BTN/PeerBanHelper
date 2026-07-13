@@ -107,7 +107,7 @@ dependencies {
 //        exclude(group = "net.java.dev.jna", module = "jna")
 //    }
 //    // System monitoring for supported platforms
-    implementation("com.github.oshi:oshi-common:7.3.2")
+    implementation("com.github.oshi:oshi-common:7.4.0")
     runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.2")
     // Markdown
     implementation("org.commonmark:commonmark:0.29.0")
