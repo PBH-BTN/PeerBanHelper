@@ -64,3 +64,95 @@ jobs:
           path: |
             build/libraries
             build/libs/*.jar
+  Test_Database_Local:
+    needs: [ Gradle ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [sqlite, h2]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: gradle-dist
+          path: build/
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "25"
+      - name: Run test
+        run: |
+          chmod +x test/test-db.sh
+          test/test-db.sh
+        env:
+          DATEBASE_TYPE: ${{ matrix.type }}
+  Test_Database_Server:
+    needs: [ Gradle ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - db: mysql:5.7
+            type: mysql
+            port: 3306
+            wait: mysqladmin ping
+          - db: mysql:8.4
+            type: mysql
+            port: 3306
+            wait: mysqladmin ping
+          - db: mariadb:10.6
+            type: mysql
+            port: 3306
+            wait: mariadb-admin ping
+          - db: mariadb:11
+            type: mysql
+            port: 3306
+            wait: mariadb-admin ping
+          - db: postgres:14
+            type: postgresql
+            port: 5432
+            wait: pg_isready
+          - db: postgres:16
+            type: postgresql
+            port: 5432
+            wait: pg_isready
+    services:
+      db:
+        image: ${{ matrix.db }}
+        env:
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: test
+          MARIADB_USER: test
+          MARIADB_PASSWORD: test
+          MARIADB_DATABASE: test
+          MARIADB_ROOT_PASSWORD: test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd ${{ matrix.wait }}
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - ${{ matrix.port }}:3306
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: gradle-dist
+          path: build/
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "25"
+      - name: Run test
+        run: |
+          chmod +x test/test-db.sh
+          test/test-db.sh
+        env:
+          DATEBASE_TYPE: ${{ matrix.type }}
