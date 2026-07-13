@@ -49,6 +49,8 @@ val flatlafVersion = "3.7.2"
 val nettyVersion = "4.2.16.Final"
 val sqliteVersion = "3.53.2.0"
 val springVersion = "7.0.8"
+val flywayVersion = "12.10.0"
+val oshiVersion = "7.4.0"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -86,9 +88,9 @@ dependencies {
     implementation("org.mybatis:mybatis-spring:4.1.0")
 
     // Annotations
-    implementation("org.flywaydb:flyway-core:11.20.3")
-    implementation("org.flywaydb:flyway-mysql:11.20.3")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.3")
+    implementation("org.flywaydb:flyway-core:${flywayVersion}")
+    implementation("org.flywaydb:flyway-mysql:${flywayVersion}")
+    implementation("org.flywaydb:flyway-database-postgresql:${flywayVersion}")
     compileOnly("org.jetbrains:annotations:26.1.0")
 
     // Core dependencies
@@ -101,14 +103,9 @@ dependencies {
 
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
-//    // System monitoring
-//    implementation("com.github.oshi:oshi-core:6.12.0") {
-//        exclude(group = "net.java.dev.jna", module = "jna-platform")
-//        exclude(group = "net.java.dev.jna", module = "jna")
-//    }
-//    // System monitoring for supported platforms
-    implementation("com.github.oshi:oshi-common:7.4.0")
-    runtimeOnly("com.github.oshi:oshi-core-ffm:7.4.0")
+    // System monitoring for supported platforms
+    implementation("com.github.oshi:oshi-common:${oshiVersion}")
+    runtimeOnly("com.github.oshi:oshi-core-ffm:${oshiVersion}")
     // Markdown
     implementation("org.commonmark:commonmark:0.29.0")
     // Compression
@@ -116,8 +113,8 @@ dependencies {
     // DNS
     implementation("dnsjava:dnsjava:3.6.5")
     // UI - FlatLaf
-    implementation("com.formdev:flatlaf-extras:$flatlafVersion")
-    implementation("com.formdev:flatlaf:$flatlafVersion")
+    implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
+    implementation("com.formdev:flatlaf:${flatlafVersion}")
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
     // Utilities
@@ -158,14 +155,14 @@ dependencies {
 
     // Netty
     implementation("io.netty:netty-transport:${nettyVersion}")
-    compileOnly("io.netty:netty-transport-native-epoll:$nettyVersion")
-    runtimeOnly("io.netty:netty-transport-native-epoll:$nettyVersion:linux-x86_64")
-    runtimeOnly("io.netty:netty-transport-native-epoll:$nettyVersion:linux-aarch_64")
-    runtimeOnly("io.netty:netty-transport-native-epoll:$nettyVersion:linux-riscv64")
+    compileOnly("io.netty:netty-transport-native-epoll:${nettyVersion}")
+    runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-aarch_64")
+    runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-riscv64")
     compileOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}")
-    runtimeOnly("io.netty:netty-transport-native-io_uring:$nettyVersion:linux-x86_64")
-    runtimeOnly("io.netty:netty-transport-native-io_uring:$nettyVersion:linux-aarch_64")
-    runtimeOnly("io.netty:netty-transport-native-io_uring:$nettyVersion:linux-riscv64")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-aarch_64")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-riscv64")
     compileOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}")
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-x86_64")
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
@@ -303,7 +300,7 @@ tasks.register<Exec>("compileInstall4jCI") {
         ?: "/opt/install4j"
 
     commandLine(
-        "$install4jHome/bin/install4jc",
+        "${install4jHome}/bin/install4jc",
         "--release=${project.version}",
         "-g",
         "-d", layout.buildDirectory.dir("media").get().asFile.absolutePath,
@@ -317,7 +314,7 @@ tasks.register<Exec>("compileInstall4jCI") {
 
     doFirst {
         if (!file(install4jHome).exists()) {
-            throw GradleException("Install4j not found at: $install4jHome. Please set install4j.home property or INSTALL4J_HOME environment variable.")
+            throw GradleException("Install4j not found at: ${install4jHome}. Please set install4j.home property or INSTALL4J_HOME environment variable.")
         }
     }
 }
@@ -333,7 +330,7 @@ tasks.register<Exec>("compileInstall4jDev") {
         ?: "/opt/install4j"
 
     commandLine(
-        "$install4jHome/bin/install4jc",
+        "${install4jHome}/bin/install4jc",
         "--release=${project.version}",
         "-g",
         "-d", layout.buildDirectory.dir("media").get().asFile.absolutePath,
@@ -347,7 +344,7 @@ tasks.register<Exec>("compileInstall4jDev") {
 
     doFirst {
         if (!file(install4jHome).exists()) {
-            throw GradleException("Install4j not found at: $install4jHome. Please set install4j.home property or INSTALL4J_HOME environment variable.")
+            throw GradleException("Install4j not found at: ${install4jHome}. Please set install4j.home property or INSTALL4J_HOME environment variable.")
         }
     }
 }
