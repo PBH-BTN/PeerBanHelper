@@ -41,7 +41,9 @@ public class IPDBManager {
     public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory, BackgroundTaskManager backgroundTaskManager) {
         this.hTTPUtil = hTTPUtil;
         this.backgroundTaskManager = backgroundTaskManager;
-        CompletableFuture.runAsync(this::setupIPDB);
+        if (ExternalSwitch.parseBoolean("pbh.forceDisableIPDB")) {
+            CompletableFuture.runAsync(this::setupIPDB);
+        }
     }
 
     private void setupIPDB() {
