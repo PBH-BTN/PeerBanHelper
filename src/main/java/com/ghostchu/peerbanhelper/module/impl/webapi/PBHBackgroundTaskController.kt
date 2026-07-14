@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi
 
 import com.ghostchu.peerbanhelper.module.AbstractSSEFeatureModule
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskDTO
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEvent
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEventType
 import com.ghostchu.peerbanhelper.text.TextManager.tl
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTask
@@ -54,15 +55,17 @@ class PBHBackgroundTaskController : AbstractSSEFeatureModule() {
         for (task in backgroundTaskManager.getTaskList()) {
             try {
                 sseClient.sendEvent(
-                    BackgroundTaskEventType.UPDATED.name, BackgroundTaskDTO(
-                        id = task.id,
-                        title = tl(lang, task.title),
-                        statusText = tl(lang, task.statusText),
-                        status = task.status,
-                        barType = task.barType,
-                        progress = task.progress,
-                        current = task.current,
-                        max = task.max
+                    BackgroundTaskEvent(
+                        BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
+                            id = task.id,
+                            title = tl(lang, task.title),
+                            statusText = tl(lang, task.statusText),
+                            status = task.status,
+                            barType = task.barType,
+                            progress = task.progress,
+                            current = task.current,
+                            max = task.max
+                        )
                     )
                 )
             } catch (e: Exception) {
@@ -77,15 +80,17 @@ class PBHBackgroundTaskController : AbstractSSEFeatureModule() {
                 try {
                     val lang = locale(sseClient.ctx())
                     sseClient.sendEvent(
-                        BackgroundTaskEventType.UPDATED.name, BackgroundTaskDTO(
-                            id = task.id,
-                            title = tl(lang, task.title),
-                            statusText = if (task.statusText != null) tl(lang, task.statusText!!) else null,
-                            status = task.status,
-                            barType = task.barType,
-                            progress = task.progress,
-                            current = task.current,
-                            max = task.max
+                        BackgroundTaskEvent(
+                            BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
+                                id = task.id,
+                                title = tl(lang, task.title),
+                                statusText = if (task.statusText != null) tl(lang, task.statusText!!) else null,
+                                status = task.status,
+                                barType = task.barType,
+                                progress = task.progress,
+                                current = task.current,
+                                max = task.max
+                            )
                         )
                     )
                 } catch (e: Exception) {

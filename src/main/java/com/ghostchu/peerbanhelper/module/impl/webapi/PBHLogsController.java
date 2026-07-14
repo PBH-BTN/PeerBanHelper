@@ -61,7 +61,7 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
                 e.content(),
                 e.seq()
         )).toList();
-        list.forEach(logEntry -> sseClient.sendEvent(logEntryKey, logEntry));
+        list.forEach(sseClient::sendEvent);
     }
 
     @Subscribe
@@ -73,7 +73,7 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
                 event.entry().content(),
                 event.entry().seq()
         );
-        iterateSseClients(sse -> sse.sendEvent(logEntryKey, logEntry));
+        iterateSseClients(sse -> sse.sendEvent(logEntry));
     }
 
     private void handleLogs(Context ctx) {
