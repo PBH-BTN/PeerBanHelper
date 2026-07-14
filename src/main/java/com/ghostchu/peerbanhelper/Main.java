@@ -115,6 +115,7 @@ public class Main {
     @Getter
     private static Platform platform;
     private static String userAgent;
+    private static String serverFingerprint;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 20;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.1";
     private static long bootSince;
@@ -495,6 +496,12 @@ public class Main {
         }
         userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
         return userAgent;
+    }
+    public static String getServerFingerprint() {
+        if (serverFingerprint != null) return serverFingerprint;
+        String fingerprintTemplate = "PeerBanHelper/%s BTN-Protocol/%s BTN-Protocol-Version/%s";
+        serverFingerprint = String.format(fingerprintTemplate, meta.getVersion(), PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
+        return serverFingerprint;
     }
 
     private static void handleCommand(String input) {

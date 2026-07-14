@@ -225,7 +225,7 @@ public final class JavalinWebContainer implements Reloadable {
                 .options("/*", ctx -> ctx.status(200))
                 .after(ctx -> {
                     if (ctx.attribute("skipAfter") != null) return;
-                    ctx.header("Server", Main.getUserAgent());
+                    ctx.header("Server", Main.getServerFingerprint());
                 });
     }
 
