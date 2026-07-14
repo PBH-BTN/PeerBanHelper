@@ -17,10 +17,9 @@ export class SSEHandler<T> {
     this.url.searchParams.append('token', token)
   }
 
-  open(offset: number, callback: (data: T) => unknown, errorCallback: (e: Error) => void): boolean {
+  open(callback: (data: T) => unknown, errorCallback: (e: Error) => void): boolean {
     try {
       this.es?.close() // 关闭旧链接
-      this.url.searchParams.set('offset', offset.toString())
       this.es = new EventSource(this.url)
       this.es.onopen = () => {
         this.#isOpen = true

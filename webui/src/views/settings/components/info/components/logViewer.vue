@@ -147,8 +147,10 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
     if (enable) {
       console.log('open auto refresh')
       return stream.open(
-        logBuffer.value.length > 0 ? logBuffer.value[logBuffer.value.length - 1]!.offset : 0,
         (newLog) => {
+          if(newLog.offset <= logBuffer.value[logBuffer.value.length - 1]?.offset) { // offset is smaller than the last log, ignore it
+            return
+          }
           logBuffer.value.push(newLog)
           modules.value.add(newLog.thread)
           console.log('scroll to', logBuffer.value.length - 1)
