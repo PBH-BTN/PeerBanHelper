@@ -148,7 +148,8 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
       console.log('open auto refresh')
       return stream.open(
         (newLog) => {
-          if(newLog.time <= logBuffer.value[logBuffer.value.length - 1]?.time && newLog.offset < logBuffer.value[logBuffer.value.length - 1]?.offset) { // load lastest log only
+          const lastLog = logBuffer.value[logBuffer.value.length - 1]
+          if(newLog.time <= lastLog?.time && newLog.offset < lastLog?.offset) { // load lastest log only
               return
           }
           logBuffer.value.push(newLog)
