@@ -1,8 +1,8 @@
-import type { Log } from '@/api/model/log'
-import { SSEHandler } from './eventstream'
 import type { CommonResponse } from '@/api/model/common'
+import type { Log } from '@/api/model/log'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
+import { SSEHandler } from './eventstream'
 import { getCommonHeader } from './utils'
 export class StreamLogger extends SSEHandler<Log> {
   constructor() {
@@ -21,3 +21,4 @@ export async function GetHistoryLogs(): Promise<CommonResponse<Log[]>> {
     return res.json()
   })
 }
+

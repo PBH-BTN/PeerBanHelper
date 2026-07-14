@@ -1,10 +1,10 @@
 import urlJoin from 'url-join'
 
 export class SSEHandler<T> {
-  private _isOpen: boolean = false
+  #isOpen: boolean = false
 
-  get isOpen(): boolean {
-    return this._isOpen
+  isOpen(): boolean {
+    return this.#isOpen
   }
 
   private es?: EventSource
@@ -23,7 +23,7 @@ export class SSEHandler<T> {
       this.url.searchParams.set('offset', offset.toString())
       this.es = new EventSource(this.url)
       this.es.onopen = () => {
-        this._isOpen = true
+        this.#isOpen = true
       }
       this.es.onerror = () => {
         errorCallback(new Error('SSE connection error'))
@@ -44,7 +44,7 @@ export class SSEHandler<T> {
   }
 
   close() {
-    if (this._isOpen) {
+    if (this.#isOpen) {
       this.es?.close()
       this.es = undefined
     }
