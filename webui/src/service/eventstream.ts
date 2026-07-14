@@ -14,9 +14,7 @@ export class SSEHandler<T> {
 
   constructor(endpoint: string, path: string, token: string) {
     const url = new URL(endpoint)
-    this.url = new URL(
-      urlJoin(`${url.protocol}//${url.host}${url.pathname}`, path)
-    )
+    this.url = new URL(urlJoin(`${url.protocol}//${url.host}${url.pathname}`, path))
     this.url.searchParams.append('token', token)
   }
 
