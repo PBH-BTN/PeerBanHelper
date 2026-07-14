@@ -1,4 +1,3 @@
-import type { CommonResponse } from '@/api/model/common'
 import urlJoin from 'url-join'
 
 export class SSEHandler<T> {
