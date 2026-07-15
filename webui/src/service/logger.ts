@@ -21,4 +21,3 @@ export async function GetHistoryLogs(): Promise<CommonResponse<Log[]>> {
     return res.json()
   })
 }
-

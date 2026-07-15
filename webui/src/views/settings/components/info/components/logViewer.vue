@@ -149,8 +149,9 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
       return stream.open(
         (newLog) => {
           const lastLog = logBuffer.value[logBuffer.value.length - 1]
-          if(newLog.time <= lastLog?.time && newLog.offset < lastLog?.offset) { // load lastest log only
-              return
+          if (newLog.time <= lastLog?.time && newLog.offset < lastLog?.offset) {
+            // load lastest log only
+            return
           }
           logBuffer.value.push(newLog)
           modules.value.add(newLog.thread)
