@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractSSEFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebUILogEntryDTO;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
+import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -49,19 +50,31 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
 
     private void handleLiveConnection(SseClient sseClient) {
         log.debug("Established Logs SSE Connection: {}", sseClient);
-        sendCurrentLogs(sseClient);
+        var offset = sseClient.ctx().queryParam("offset");
+        sendCurrentLogs(sseClient, Long.parseLong(offset == null ? String.valueOf(Long.MAX_VALUE) : offset));
         this.registerSseManagement(sseClient);
     }
 
-    private void sendCurrentLogs(SseClient sseClient) {
-        var list = JListAppender.ringDeque.stream().map(e -> new WebUILogEntryDTO(
-                e.time(),
-                e.thread(),
-                e.level().name(),
-                e.content(),
-                e.seq()
-        )).toList();
-        list.forEach(sseClient::sendEvent);
+    private void sendCurrentLogs(SseClient sseClient, long offset) {
+        if (offset > JListAppender.getSeq().longValue()) { // PBH 重启，但是 WebUI 没有刷新，或者为未传递 seq 参数
+            offset = 0;
+            var peekedRecord = JListAppender.ringDeque.peek();
+            if (peekedRecord != null) {
+                var headSeq = peekedRecord.seq();
+                offset = headSeq - 1;
+            }
+        }
+        for (LogEntry logEntry : JListAppender.ringDeque) {
+            if (logEntry.seq() > offset) {
+                sseClient.sendEvent(new WebUILogEntryDTO(
+                        logEntry.time(),
+                        logEntry.thread(),
+                        logEntry.level().name(),
+                        logEntry.content(),
+                        logEntry.seq()
+                ));
+            }
+        }
     }
 
     @Subscribe
