@@ -167,7 +167,9 @@ jobs:
           path: "${{ steps.set_version.outputs.version }}"
       - name: Install torrenttools
         run: |
+          echo "2d15f8ab3cee5ebb392e3fb219b186cc99efc7224b08b39d298c54e894401a18 torrenttools" > torrenttools.sha256
           wget https://github.com/fbdtemme/torrenttools/releases/download/v0.6.2/torrenttools-0.6.2-linux-x86_64.AppImage -O torrenttools
+          sha256sum -c torrenttools.sha256
           chmod +x torrenttools
       - name: Make torrent
         run: |
