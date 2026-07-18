@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "4.0.1"
-    id("com.install4j.gradle") version "13.0.1" apply false
+    id("com.install4j.gradle") version "13.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.4.0"
