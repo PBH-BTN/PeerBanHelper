@@ -470,8 +470,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         CacheKeyPrefix cacheKeyPrefix = new CacheKeyPrefix(downloader, torrentId, peerAddressPrefix);
         CacheKeyAddr cacheKeyAddr = new CacheKeyAddr(downloader, torrentId, peerAddressIp);
         try {
-            PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
-                synchronized (cacheDBLoadingLock) {
+            synchronized (cacheDBLoadingLock) {
+                PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
                     PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
@@ -480,10 +480,8 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         pcbRangeDao.saveOrUpdateIfDirty(rangeEntity);
                     }
                     return rangeEntity;
-                }
-            });
-            PCBAddressEntity addrEntity = addrCache.get(cacheKeyAddr, () -> {
-                synchronized (cacheDBLoadingLock) {
+                });
+                PCBAddressEntity addrEntity = addrCache.get(cacheKeyAddr, () -> {
                     PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
@@ -492,9 +490,9 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
                     }
                     return pcbAddressEntity;
-                }
-            });
-            return Pair.of(prefixEntity, addrEntity);
+                });
+                return Pair.of(prefixEntity, addrEntity);
+            }
         } catch (ExecutionException e) {
             Sentry.captureException(e);
             throw new RuntimeException(e.getCause());
