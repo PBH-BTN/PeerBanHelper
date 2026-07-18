@@ -30,7 +30,7 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
 
     @Override
     public @NotNull String getName() {
-        return "WebAPI - Logs)";
+        return "WebAPI - Logs";
     }
 
     @Override
@@ -73,7 +73,13 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
                 event.entry().content(),
                 event.entry().seq()
         );
-        iterateSseClients(sse -> sse.sendEvent(logEntry));
+        iterateSseClients(sse -> {
+            try {
+                sse.sendEvent(logEntry);
+            } catch (Exception e) {
+                log.debug("Failed to send logs to SSE client", e);
+            }
+        });
     }
 
     private void handleLogs(Context ctx) {
