@@ -85,9 +85,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private boolean globalPaused = false;
     private final AlertManager alertManager;
     private final ExecutorService mainWorkStealingService = Executors.newWorkStealingPool();
-
-    private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
-    private final ExecutorService digestEnergyCompute = Executors.newWorkStealingPool(Math.max(8, Runtime.getRuntime().availableProcessors() - 1));
+    private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.clamp(Runtime.getRuntime().availableProcessors(), ExternalSwitch.parseInt("pbh.digestSession.scheduleEnergy.min", 2), ExternalSwitch.parseInt("pbh.digestSession.scheduleEnergy.max", 4)));
+    private final ExecutorService digestEnergyCompute = Executors.newWorkStealingPool(Math.clamp(Runtime.getRuntime().availableProcessors() / 2, ExternalSwitch.parseInt("pbh.digestSession.digestEnergyCompute.min", 2), ExternalSwitch.parseInt("pbh.digestSession.digestEnergyCompute.max", 8)));
     private final ExecutorService digestEnergyIO = Executors.newVirtualThreadPerTaskExecutor();
 
 
@@ -131,7 +130,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         if (BAN_WAVE_SERVICE != null) {
             BAN_WAVE_SERVICE.shutdown();
         }
-        if(banWaveWatchDog != null){
+        if (banWaveWatchDog != null) {
             banWaveWatchDog.close();
         }
         this.metrics.close();
