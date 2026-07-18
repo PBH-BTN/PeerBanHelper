@@ -174,7 +174,7 @@ dependencies {
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:13.0.1")
+    compileOnly("com.install4j:install4j-runtime:13.0.2")
 
     // sentry
     implementation(platform("io.sentry:sentry-bom:8.48.0")) //import bom

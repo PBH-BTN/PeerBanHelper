@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="13.0.1" transformSequenceNumber="13">
+<install4j version="13.0.2" transformSequenceNumber="13">
   <directoryPresets config="../native/qt6" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="${compiler:publisherName}" publisherWeb="https://github.com/PBH-BTN" version="9.4.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="25" javaMaxVersion="25">
     <languages>
