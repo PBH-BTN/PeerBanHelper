@@ -84,7 +84,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         this.upstreamPort = upstreamPort;
         this.ipdb = ipdb;
 
-        if (IoUring.isAvailable() && ExternalSwitch.parseBoolean("pbh.tcpforwarder.ioHandler.io_uring", true)) { // 性能最好
+        if (IoUring.isAvailable() && ExternalSwitch.parseBoolean("pbh.tcpforwarder.ioHandler.io_uring", false)) { // 性能最好
             ioHandler = new IOUringHandler();
         } else if (Epoll.isAvailable() && ExternalSwitch.parseBoolean("pbh.tcpforwarder.ioHandler.epoll", true)) { // 性能很不错！
             ioHandler = new EpollHandler();
