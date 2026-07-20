@@ -75,18 +75,18 @@ public final class BarkPushProvider extends AbstractPushProvider {
         map.put("device_key", config.getDeviceKey());
         map.put("group", config.getMessageGroup());
         map.put("icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
-        
+
         RequestBody requestBody = RequestBody.create(
                 JsonUtil.getGson().toJson(map),
                 MediaType.parse("application/json")
         );
-        
+
         Request request = new Request.Builder()
                 .url(config.getBackendUrl())
                 .post(requestBody)
                 .header("Content-Type", "application/json")
                 .build();
-        
+
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("HTTP Failed while sending push messages to Bark: " + response.body().string());

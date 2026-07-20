@@ -26,12 +26,12 @@ public final class DelugeServer {
         m_password = password;
         this.client = httpUtil
                 .disableSSLVerify(httpUtil.newBuilderForDownloader().connectionPool(new ConnectionPool(24, 5, TimeUnit.MINUTES)).authenticator((route, response) -> {
-            if (HTTPUtil.responseCount(response) > 1) {
-                return null;
-            }
-            String credential = Credentials.basic(baUser, baPassword);
-            return response.request().newBuilder().header("Authorization", credential).build();
-        }), !verifySSL).build();
+                    if (HTTPUtil.responseCount(response) > 1) {
+                        return null;
+                    }
+                    String credential = Credentials.basic(baUser, baPassword);
+                    return response.request().newBuilder().header("Authorization", credential).build();
+                }), !verifySSL).build();
     }
 
     public DelugeResponse makeRequest(final DelugeRequest delugeRequest) throws DelugeException {

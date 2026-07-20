@@ -20,7 +20,7 @@ jobs:
       - uses: pnpm/action-setup@v6.0.9
         name: Install pnpm
         with:
-          version: latest
+          version: 11.11.0
           run_install: false
 
       - name: Get pnpm store directory
@@ -49,4 +49,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: webui-dist
+          if-no-files-found: error
           path: webui/dist

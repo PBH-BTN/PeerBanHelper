@@ -209,7 +209,7 @@ public final class Deluge extends AbstractDownloader {
 
     private void setBanListFull(Collection<IPAddress> fullList) {
         try {
-            this.client.replaceBannedPeers(fullList.stream().flatMap(ipaddr->remapBanListAddress(ipaddr).stream().map(IPAddress::toCompressedString)).distinct().toList());
+            this.client.replaceBannedPeers(fullList.stream().flatMap(ipaddr -> remapBanListAddress(ipaddr).stream().map(IPAddress::toCompressedString)).distinct().toList());
         } catch (DelugeException e) {
             log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
         }

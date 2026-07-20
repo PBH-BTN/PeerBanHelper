@@ -90,18 +90,18 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
             put("content", content);
             put("template", "markdown");
         }};
-        
+
         RequestBody requestBody = RequestBody.create(
                 JsonUtil.getGson().toJson(args),
                 MediaType.parse("application/json")
         );
-        
+
         Request request = new Request.Builder()
                 .url("https://www.pushplus.plus/send")
                 .post(requestBody)
                 .header("Content-Type", "application/json")
                 .build();
-        
+
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + response.body().string());

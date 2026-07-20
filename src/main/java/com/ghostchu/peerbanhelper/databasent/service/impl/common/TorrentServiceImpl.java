@@ -16,13 +16,13 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 @Slf4j
 @Service
 public class TorrentServiceImpl extends AbstractCommonService<TorrentMapper, TorrentEntity> implements TorrentService {
     private final Cache<@NotNull String, @NotNull TorrentEntity> instanceCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .expireAfterAccess(Duration.ofMinutes(5))
             .maximumSize(1000)
             .softValues()
             .build();

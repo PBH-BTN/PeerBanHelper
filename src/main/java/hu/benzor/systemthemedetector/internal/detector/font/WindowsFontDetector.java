@@ -1,10 +1,10 @@
 package hu.benzor.systemthemedetector.internal.detector.font;
 
-import java.util.Optional;
-
 import hu.benzor.systemthemedetector.api.theme.Theme.Font;
 import hu.benzor.systemthemedetector.internal.command.CommandOutputLineMapper;
 import hu.benzor.systemthemedetector.internal.command.DummyCommandOutputLineMapper;
+
+import java.util.Optional;
 
 public final class WindowsFontDetector extends FontDetector {
 

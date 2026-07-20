@@ -1,10 +1,5 @@
 package hu.benzor.systemthemedetector;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
-
 import hu.benzor.systemthemedetector.api.environment.DesktopEnvironment;
 import hu.benzor.systemthemedetector.api.environment.Platform;
 import hu.benzor.systemthemedetector.api.listener.ListenerHandle;
@@ -15,6 +10,11 @@ import hu.benzor.systemthemedetector.api.theme.Theme.Font;
 import hu.benzor.systemthemedetector.internal.detector.DetectorFactory;
 import hu.benzor.systemthemedetector.internal.detector.ThemeDetector;
 import hu.benzor.systemthemedetector.internal.environment.EnvironmentDetector;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 public class SystemThemeDetector {
 

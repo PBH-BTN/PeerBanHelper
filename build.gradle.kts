@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "4.0.1"
-    id("com.install4j.gradle") version "13.0" apply false
+    id("com.install4j.gradle") version "13.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.4.0"
@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.4.0"
+version = "9.4.2"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -45,10 +45,12 @@ repositories {
     }
 }
 
-val flatlafVersion = "3.7.1"
-val nettyVersion = "4.2.15.Final"
+val flatlafVersion = "3.7.2"
+val nettyVersion = "4.2.16.Final"
 val sqliteVersion = "3.53.2.0"
 val springVersion = "7.0.8"
+val flywayVersion = "12.11.0"
+val oshiVersion = "7.4.0"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -56,7 +58,7 @@ configurations.all {
 
 dependencyManagement {
     imports {
-        mavenBom("com.baomidou:mybatis-plus-bom:3.5.16")
+        mavenBom("com.baomidou:mybatis-plus-bom:3.5.17")
     }
 }
 dependencies {
@@ -71,7 +73,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}:natives-android")
     implementation("com.h2database:h2:2.3.232")
-    implementation("org.postgresql:postgresql:42.7.12")
+    implementation("org.postgresql:postgresql:42.7.13")
     implementation("com.mysql:mysql-connector-j:9.7.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
@@ -86,14 +88,17 @@ dependencies {
     implementation("org.mybatis:mybatis-spring:4.1.0")
 
     // Annotations
-    implementation("org.flywaydb:flyway-core:11.20.3")
-    implementation("org.flywaydb:flyway-mysql:11.20.3")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.3")
+    implementation("org.flywaydb:flyway-core:${flywayVersion}")
+    implementation("org.flywaydb:flyway-mysql:${flywayVersion}")
+    implementation("org.flywaydb:flyway-database-postgresql:${flywayVersion}")
     compileOnly("org.jetbrains:annotations:26.1.0")
 
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
-    implementation("io.javalin:javalin:7.2.2")
+    // Javalin
+    implementation("io.javalin:javalin:7.2.2") {
+        exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
+    }
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.1.0")
     // Expression engine
@@ -101,14 +106,9 @@ dependencies {
 
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
-//    // System monitoring
-//    implementation("com.github.oshi:oshi-core:6.12.0") {
-//        exclude(group = "net.java.dev.jna", module = "jna-platform")
-//        exclude(group = "net.java.dev.jna", module = "jna")
-//    }
-//    // System monitoring for supported platforms
-    implementation("com.github.oshi:oshi-common:7.3.2")
-    runtimeOnly("com.github.oshi:oshi-core-ffm:7.3.2")
+    // Operating System and Hardware Information
+    implementation("com.github.oshi:oshi-common:${oshiVersion}")
+    runtimeOnly("com.github.oshi:oshi-core-ffm:${oshiVersion}")
     // Markdown
     implementation("org.commonmark:commonmark:0.29.0")
     // Compression
@@ -116,8 +116,8 @@ dependencies {
     // DNS
     implementation("dnsjava:dnsjava:3.6.5")
     // UI - FlatLaf
-    implementation("com.formdev:flatlaf-extras:$flatlafVersion")
-    implementation("com.formdev:flatlaf:$flatlafVersion")
+    implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
+    implementation("com.formdev:flatlaf:${flatlafVersion}")
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
     // Utilities
@@ -146,7 +146,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.37")
+    implementation("ch.qos.logback:logback-classic:1.5.38")
     implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
@@ -158,17 +158,26 @@ dependencies {
 
     // Netty
     implementation("io.netty:netty-transport:${nettyVersion}")
-    implementation("io.netty:netty-transport-native-epoll:${nettyVersion}")
-    implementation("io.netty:netty-transport-native-kqueue:${nettyVersion}")
-    implementation("io.netty:netty-transport-native-io_uring:${nettyVersion}")
+    compileOnly("io.netty:netty-transport-native-epoll:${nettyVersion}")
+    runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-aarch_64")
+    runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-riscv64")
+    compileOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-aarch_64")
+    runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-riscv64")
+    compileOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}")
+    runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-x86_64")
+    runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
 
     // SWT (provided scope - for compilation only)
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:13.0")
+    compileOnly("com.install4j:install4j-runtime:13.0.2")
 
-    implementation(platform("io.sentry:sentry-bom:8.47.0")) //import bom
+    // sentry
+    implementation(platform("io.sentry:sentry-bom:8.48.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
@@ -177,7 +186,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.1"))
+    testImplementation(platform("org.junit:junit-bom:6.1.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
@@ -295,7 +304,7 @@ tasks.register<Exec>("compileInstall4jCI") {
         ?: "/opt/install4j"
 
     commandLine(
-        "$install4jHome/bin/install4jc",
+        "${install4jHome}/bin/install4jc",
         "--release=${project.version}",
         "-g",
         "-d", layout.buildDirectory.dir("media").get().asFile.absolutePath,
@@ -309,7 +318,7 @@ tasks.register<Exec>("compileInstall4jCI") {
 
     doFirst {
         if (!file(install4jHome).exists()) {
-            throw GradleException("Install4j not found at: $install4jHome. Please set install4j.home property or INSTALL4J_HOME environment variable.")
+            throw GradleException("Install4j not found at: ${install4jHome}. Please set install4j.home property or INSTALL4J_HOME environment variable.")
         }
     }
 }
@@ -325,7 +334,7 @@ tasks.register<Exec>("compileInstall4jDev") {
         ?: "/opt/install4j"
 
     commandLine(
-        "$install4jHome/bin/install4jc",
+        "${install4jHome}/bin/install4jc",
         "--release=${project.version}",
         "-g",
         "-d", layout.buildDirectory.dir("media").get().asFile.absolutePath,
@@ -339,7 +348,7 @@ tasks.register<Exec>("compileInstall4jDev") {
 
     doFirst {
         if (!file(install4jHome).exists()) {
-            throw GradleException("Install4j not found at: $install4jHome. Please set install4j.home property or INSTALL4J_HOME environment variable.")
+            throw GradleException("Install4j not found at: ${install4jHome}. Please set install4j.home property or INSTALL4J_HOME environment variable.")
         }
     }
 }

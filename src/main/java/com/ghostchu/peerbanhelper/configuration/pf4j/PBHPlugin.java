@@ -16,7 +16,7 @@ public abstract class PBHPlugin extends Plugin {
     public abstract TranslationComponent getPluginDisplayName();
 
     @Nullable
-    public TranslationComponent getPluginDescription(){
+    public TranslationComponent getPluginDescription() {
         return null;
     }
 }

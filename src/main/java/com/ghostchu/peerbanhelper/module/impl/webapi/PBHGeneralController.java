@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import oshi.hardware.HardwareAbstractionLayer;
+import oshi.software.common.os.linux.LinuxOperatingSystem;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -239,12 +240,16 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         os.put("network", network);
         try {
             SystemInfoProviderWrapper.find().ifPresent(provider -> {
-                var operatingSystem = provider.getOperatingSystem();
-                os.put("version", String.valueOf(operatingSystem));
+                var versionInfo = provider.getOperatingSystem().getVersionInfo();
+                if (provider.getOperatingSystem() instanceof LinuxOperatingSystem) {
+                    os.put("version", versionInfo.getBuildNumber() != null ? versionInfo.getBuildNumber() : String.valueOf(versionInfo));
+                } else {
+                    os.put("version", versionInfo.getVersion() != null ? versionInfo.getVersion() : String.valueOf(versionInfo));
+                }
                 var mem = generateSystemMemoryData(provider.getHardware());
                 os.put("memory", mem);
             });
-        }catch (Throwable _){
+        } catch (Throwable _) {
             os.put("version", "N/A");
         }
         return os;
@@ -380,7 +385,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             }
         }
         yamlConfiguration.load(configFile);
-        Map<String, Object> newData = GSON.fromJson(context.body(), Map.class);
+        Map<String, Object> newData = GSON.fromJson(context.body(), new TypeToken<Map<String, Object>>() {}.getType());
         mergeYaml(yamlConfiguration, newData, "_", "-");
         yamlConfiguration.save(configFile);
         //moduleMatchCache.invalidateAll();

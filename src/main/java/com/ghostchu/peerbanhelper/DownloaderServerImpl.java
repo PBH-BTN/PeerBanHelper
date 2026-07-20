@@ -16,16 +16,13 @@ import com.ghostchu.peerbanhelper.event.banwave.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.banwave.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
-import com.ghostchu.peerbanhelper.module.*;
+import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
-import com.ghostchu.peerbanhelper.util.Pair;
-import com.ghostchu.peerbanhelper.util.WatchDog;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
-import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -85,9 +82,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private boolean globalPaused = false;
     private final AlertManager alertManager;
     private final ExecutorService mainWorkStealingService = Executors.newWorkStealingPool();
-
-    private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors() - 1));
-    private final ExecutorService digestEnergyCompute = Executors.newWorkStealingPool(Math.max(8, Runtime.getRuntime().availableProcessors() - 1));
+    private final ExecutorService scheduleEnergy = Executors.newWorkStealingPool(Math.clamp(Runtime.getRuntime().availableProcessors(), ExternalSwitch.parseInt("pbh.digestSession.scheduleEnergy.min", 2), ExternalSwitch.parseInt("pbh.digestSession.scheduleEnergy.max", 4)));
+    private final ExecutorService digestEnergyCompute = Executors.newWorkStealingPool(Math.clamp(Runtime.getRuntime().availableProcessors() / 2, ExternalSwitch.parseInt("pbh.digestSession.digestEnergyCompute.min", 2), ExternalSwitch.parseInt("pbh.digestSession.digestEnergyCompute.max", 8)));
     private final ExecutorService digestEnergyIO = Executors.newVirtualThreadPerTaskExecutor();
 
 
@@ -131,7 +127,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         if (BAN_WAVE_SERVICE != null) {
             BAN_WAVE_SERVICE.shutdown();
         }
-        if(banWaveWatchDog != null){
+        if (banWaveWatchDog != null) {
             banWaveWatchDog.close();
         }
         this.metrics.close();

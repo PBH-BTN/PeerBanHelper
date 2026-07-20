@@ -66,6 +66,18 @@ jobs:
         with:
           name: installer-dist
           path: build/media
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: PeerBanHelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: build/media
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: peerbanhelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: build/media
       - uses: shallwefootball/s3-upload-action@master
         with:
           aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
@@ -93,7 +105,8 @@ jobs:
         uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v8
         with:
-          name: spk-dist
+          pattern: peerbanhelper-*.spk
+          skip-decompress: true
           path: build/media
       - name: Upload SPK to SPKRepo
         run: |
@@ -131,42 +144,6 @@ jobs:
       statuses: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v8
-        with:
-          name: gradle-dist
-          path: build/
-      - uses: actions/download-artifact@v8
-        with:
-          name: installer-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: spk-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: deb-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: portable-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-13.4-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-14.1-dist
-          path: build/media
-      - uses: actions/download-artifact@v8
-        with:
-          name: freebsd-pkg-15.1-dist
-          path: build/media
-      - name: Zip medias for create torrent
-        run: tar -zcvf PeerBanHelper_Installers.tar.gz build/media/
-      - name: Install mktorrent
-        run: sudo apt-get install -y mktorrent
       - name: Determine version
         id: set_version
         run: |
@@ -176,33 +153,54 @@ jobs:
             SHORT_SHA=$(git rev-parse --short "${{ github.sha }}")
             echo "version=sha-$SHORT_SHA" >> $GITHUB_OUTPUT
           fi
-      - name: Create copy of Installers archive
-        run: cp PeerBanHelper_Installers.tar.gz "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: PeerBanHelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: "${{ steps.set_version.outputs.version }}"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: peerbanhelper*
+          merge-multiple: true
+          skip-decompress: true
+          path: "${{ steps.set_version.outputs.version }}"
+      - name: Install torrenttools
+        run: |
+          echo "2d15f8ab3cee5ebb392e3fb219b186cc99efc7224b08b39d298c54e894401a19 torrenttools" > torrenttools.sha256
+          wget https://github.com/fbdtemme/torrenttools/releases/download/v0.6.2/torrenttools-0.6.2-linux-x86_64.AppImage -O torrenttools
+          sha256sum -c torrenttools.sha256
+          chmod +x torrenttools
       - name: Make torrent
         run: |
-          mktorrent -t 8 \
+          APPIMAGE_EXTRACT_AND_RUN=1 ./torrenttools create --simple-progress \
+          -t 8 \
+          -v hybrid \
           -a udp://tracker.opentrackr.org:1337/announce \
-          -a udp://tracker.publicbt.com:80/announce \
-          -a udp://tracker.openbittorrent.com:80/announce \
-          -a https://sparkle.ghostchu-services.top/announce \
-          -a udp://opentracker.io:6969/announce \
-          -a wss://tracker.openwebtorrent.com:443/announce \
+             udp://tracker.publicbt.com:80/announce \
+             udp://tracker.openbittorrent.com:80/announce \
+             https://sparkle.ghostchu-services.top/announce \
+             udp://opentracker.io:6969/announce \
+             wss://tracker.openwebtorrent.com:443/announce \
           -c "PeerBanHelper/${{ github.ref }} (${{ github.sha }}) on ${{ github.repository }}. Published by ${{ github.repository_owner }}." \
-          -w "https://github.com/${{ github.repository }}/releases/download/${{ steps.set_version.outputs.version }}/PeerBanHelper_Installers.tar.gz" \
+          -w "https://github.com/${{ github.repository }}/releases/download/" \
+             "https://gh-proxy.org/https://github.com/${{ github.repository }}/releases/download/" \
+             "https://v4.gh-proxy.org/https://github.com/${{ github.repository }}/releases/download/" \
+             "https://v6.gh-proxy.org/https://github.com/${{ github.repository }}/releases/download/" \
+             "https://cdn.gh-proxy.org/https://github.com/${{ github.repository }}/releases/download/" \
           -o peerbanhelper.torrent \
-          "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
+          "${{ steps.set_version.outputs.version }}"
       - uses: actions/upload-artifact@v7
         with:
-          name: torrent-dist
-          path: |
-            peerbanhelper.torrent
-            PeerBanHelper_Installers.tar.gz
-        id: project
-      - uses: alexellis/upload-assets@0.4.1
+          archive: false
+          if-no-files-found: error
+          path: peerbanhelper.torrent
+      - uses: alexellis/upload-assets@0.5.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          DIST: ${{ steps.set_version.outputs.version }}
         with:
-          asset_paths: '["build/media/PeerBanHelper_*", "build/media/peerbanhelper_*", "build/media/peerbanhelper-*", "build/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
+          asset_paths: '["${{ env.DIST }}/PeerBanHelper*", "${{ env.DIST }}/peerbanhelper*", "peerbanhelper.torrent"]'
 
   Publish_Changelog:
     name: Publish Changelog to Forum

@@ -50,6 +50,6 @@ public final class StringLengthMatcher extends AbstractJsonMatcher {
 
     @Override
     public String metadata() {
-        return String.format("min: %d, max: %d",min,max);
+        return String.format("min: %d, max: %d", min, max);
     }
 }

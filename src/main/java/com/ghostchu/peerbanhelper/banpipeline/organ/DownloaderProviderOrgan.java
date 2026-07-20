@@ -17,7 +17,7 @@ public class DownloaderProviderOrgan extends BanOrgan<Void, Downloader> {
     public DownloaderProviderOrgan(
             DownloaderManager downloaderManager,
             Executor schedEnergy, Executor digestEnergy, BanOrgan<?, Void> in, BiConsumer<BanOrgan<Void, Downloader>,
-            BanOrganCallback<Void>> gastroscopy, long maxDigestDuration, TimeUnit digestTimeUnit){
+                    BanOrganCallback<Void>> gastroscopy, long maxDigestDuration, TimeUnit digestTimeUnit) {
         super(schedEnergy, digestEnergy, in, gastroscopy, maxDigestDuration, digestTimeUnit);
         outlet.addAll(downloaderManager.getDownloaders());
     }

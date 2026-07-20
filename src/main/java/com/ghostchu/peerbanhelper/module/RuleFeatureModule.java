@@ -10,8 +10,8 @@ public interface RuleFeatureModule extends FeatureModule {
     /**
      * 检查一个特定的 Torrent 和 Peer 是否应该封禁
      *
-     * @param torrent             Torrent
-     * @param peer                Peer
+     * @param torrent Torrent
+     * @param peer    Peer
      * @return 规则检查结果
      */
     @NotNull

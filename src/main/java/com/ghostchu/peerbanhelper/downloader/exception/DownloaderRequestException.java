@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.exception;
 
-public class DownloaderRequestException extends RuntimeException{
+public class DownloaderRequestException extends RuntimeException {
     public DownloaderRequestException(String message) {
         super(message);
     }

@@ -27,7 +27,7 @@ public class StringUtils {
      */
     public static String substringBefore(String original, String before) {
         if (original == null || before == null) return original;
-        
+
         int index = original.indexOf(before);
         if (index == -1) return original;
 

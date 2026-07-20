@@ -1,14 +1,14 @@
 package hu.benzor.systemthemedetector.internal.listener;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import hu.benzor.systemthemedetector.api.theme.Theme;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Slf4j
 public class ThemeChangeListener<T extends Theme> implements Runnable {
@@ -27,18 +27,18 @@ public class ThemeChangeListener<T extends Theme> implements Runnable {
         previousTheme = themeSupplier.get().orElse(null);
         Optional.ofNullable(previousTheme).ifPresent(callback);
     }
-    
+
     @Override
     public void run() {
         Optional<T> currentTheme = themeSupplier.get();
         currentTheme
-            .filter(curr -> !curr.equals(previousTheme))
-            .ifPresent(
-                curr -> {
-                    callback.accept(curr);
-                    previousTheme = curr;
-                }
-            );
+                .filter(curr -> !curr.equals(previousTheme))
+                .ifPresent(
+                        curr -> {
+                            callback.accept(curr);
+                            previousTheme = curr;
+                        }
+                );
     }
 
     public static <T extends Theme> ThemeChangeListenerBuilder<T> builder(Class<T> type) {

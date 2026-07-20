@@ -1,11 +1,11 @@
 package hu.benzor.systemthemedetector.internal.detector.appearance;
 
-import java.util.Optional;
-
 import hu.benzor.systemthemedetector.api.theme.Theme.Appearance;
 import hu.benzor.systemthemedetector.internal.command.CommandOutputLineMapper;
 import hu.benzor.systemthemedetector.internal.command.FilteredCommandOutputLineMapper;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 @Slf4j
 public final class MacOsAppearanceDetector extends AppearanceDetector {
@@ -14,10 +14,10 @@ public final class MacOsAppearanceDetector extends AppearanceDetector {
 
     public MacOsAppearanceDetector() {
         ProcessBuilder pb = new ProcessBuilder(
-            "defaults",
-            "read",
-            "-g",
-            "AppleInterfaceStyle"
+                "defaults",
+                "read",
+                "-g",
+                "AppleInterfaceStyle"
         );
         outputLineMapper = new FilteredCommandOutputLineMapper(pb, true);
     }

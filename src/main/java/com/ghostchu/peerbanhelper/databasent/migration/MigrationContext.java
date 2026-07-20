@@ -1,9 +1,14 @@
 package com.ghostchu.peerbanhelper.databasent.migration;
 
+import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
+import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDBManager;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +18,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
+@Slf4j
 public class MigrationContext {
     /**
      * Batch size for reading from SQLite and inserting to target DB
@@ -79,5 +85,28 @@ public class MigrationContext {
         if (logInterval == 0) logInterval = 100;
 
         return (current - lastLogged) >= logInterval;
+    }
+
+    /**
+     * Generate SQL to synchronize auto increment value after migration.
+     *
+     * @param tableName table name
+     */
+    public static void fixAutoIncrement(String tableName) throws SQLException {
+        DatabaseType databaseType = DatabaseDriverConfig.databaseDriver.getType();
+        if (databaseType == DatabaseType.POSTGRES) {
+            try (Connection conn = DatabaseDriverConfig.databaseDriver.getDataSource().getConnection();
+                 var stmt = conn.createStatement()) {
+                String sql = """
+                        SELECT setval(
+                            pg_get_serial_sequence('%s', 'id'),
+                            COALESCE((SELECT MAX(id) FROM %s), 1),
+                            true
+                        );
+                        """.formatted(tableName, tableName);
+                log.debug(sql);
+                stmt.execute(sql);
+            }
+        }
     }
 }

@@ -27,7 +27,7 @@ public class NioHandler implements ForwarderIOHandler {
 
     @Override
     public ForwarderIOHandlerType ioHandlerType() {
-        return ForwarderIOHandlerType.IO_URING;
+        return ForwarderIOHandlerType.NIO;
     }
 
     @Override

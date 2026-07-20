@@ -15,8 +15,8 @@ import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.util.Base64;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 public final class NtfyPushProvider extends AbstractPushProvider {
 

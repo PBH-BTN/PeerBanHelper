@@ -3,7 +3,7 @@
     <a-typography-text>{{ t('page.oobe.advance.description') }}</a-typography-text>
     <a-form :model="pageConfig">
       <a-form-item field="pageConfig.known" :label="t('page.oobe.advance.known')">
-        <a-switch v-model="pageConfig.known" @change="switchChange"></a-switch>
+        <a-switch v-model="pageConfig.known" @change="switchChange" disabled></a-switch>
       </a-form-item>
     </a-form>
     <a-form

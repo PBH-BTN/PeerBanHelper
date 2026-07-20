@@ -25,15 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule implements Reloadable, BatchMonitorFeatureModule {
     private final Cache<@NotNull HostAndPort, @NotNull ConnectionInfo> idleConnections = CacheBuilder.newBuilder()
-            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .expireAfterAccess(Duration.ofMinutes(5))
             .softValues()
             .build();
     private long banDuration;

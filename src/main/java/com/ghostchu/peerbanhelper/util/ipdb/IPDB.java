@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -117,19 +116,19 @@ public final class IPDB implements AutoCloseable {
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
         try {
             var data = geoCN2.query(address);
-            if(data != null){
+            if (data != null) {
                 geoData.mergeFrom(data, true);
             }
         } catch (IllegalStateException e) {
-            try{
+            try {
                 var data = geoCN1.query(address);
-                if(data != null){
+                if (data != null) {
                     geoData.mergeFrom(data, true);
                 }
-            }catch ( IOException ioe1){
+            } catch (IOException ioe1) {
                 Sentry.captureException(ioe1);
             }
-        } catch (IOException ioe){
+        } catch (IOException ioe) {
             Sentry.captureException(ioe);
         }
     }
@@ -428,7 +427,7 @@ public final class IPDB implements AutoCloseable {
     public static final class MaxMindNodeCache implements NodeCache {
         private final static Cache<@NotNull CacheKey, @NotNull DecodedValue> cache = CacheBuilder.newBuilder()
                 .maximumSize(2000)
-                .expireAfterAccess(1, TimeUnit.HOURS)
+                .expireAfterAccess(Duration.ofHours(1))
                 .build();
 
         @SneakyThrows

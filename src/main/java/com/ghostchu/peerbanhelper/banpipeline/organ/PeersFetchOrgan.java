@@ -20,14 +20,14 @@ public class PeersFetchOrgan extends BanOrgan<FetchedTorrent, FetchedPeersBatch>
     @Override
     public void digest(FetchedTorrent input, Consumer<FetchedPeersBatch> outlet, PipelineTask<?> wrapper) throws RuntimeException {
         try {
-            wrapper.setComment(false, "Fetching peers for torrent: " + input.torrent().getId()+", waiting Semaphore...");
+            wrapper.setComment(false, "Fetching peers for torrent: " + input.torrent().getId() + ", waiting Semaphore...");
             input.downloader().getConcurrentRequestControlSemaphore().acquire();
-            wrapper.setComment(true, "Fetching peers for torrent: " + input.torrent().getId()+", execute HTTP requests...");
+            wrapper.setComment(true, "Fetching peers for torrent: " + input.torrent().getId() + ", execute HTTP requests...");
             var peers = input.downloader().getPeers(input.torrent());
-            wrapper.setComment(false, "Fetching peers for torrent: " + input.torrent().getId()+", waiting for outlet...");
+            wrapper.setComment(false, "Fetching peers for torrent: " + input.torrent().getId() + ", waiting for outlet...");
             outlet.accept(new FetchedPeersBatch(input.downloader(), input.torrent(), peers));
         } catch (InterruptedException _) {
-           Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
         } finally {
             input.downloader().getConcurrentRequestControlSemaphore().release();
         }

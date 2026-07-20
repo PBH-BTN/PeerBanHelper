@@ -1,32 +1,32 @@
-/* 
- *              weupnp - Trivial upnp java library 
+/*
+ *              weupnp - Trivial upnp java library
  *
  * Copyright (C) 2008 Alessandro Bahgat Shehata, Daniele Castagna
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- * 
+ *
  * Alessandro Bahgat Shehata - ale dot bahgat at gmail dot com
  * Daniele Castagna - daniele dot castagna at gmail dot com
- * 
+ *
  */
 package org.bitlet.weupnp;
 
 /**
  * A <tt>PortMappingEntry</tt> is the class used to represent port mappings on
  * the GatewayDevice.
- *
+ * <p>
  * A port mapping on the GatewayDevice will allow all packets directed to port
  * <tt>externalPort</tt> of the external IP address of the GatewayDevice
  * using the specified <tt>protocol</tt> to be redirected to port
@@ -77,6 +77,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the internal port for this mapping
+     *
      * @return the {@link #internalPort}
      */
     public int getInternalPort() {
@@ -85,6 +86,7 @@ public class PortMappingEntry {
 
     /**
      * Sets the {@link #internalPort}
+     *
      * @param internalPort the port to use
      */
     public void setInternalPort(int internalPort) {
@@ -93,6 +95,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the external (remote) port for this mapping
+     *
      * @return the {@link #externalPort}
      */
     public int getExternalPort() {
@@ -101,6 +104,7 @@ public class PortMappingEntry {
 
     /**
      * Sets the {@link #externalPort}
+     *
      * @param externalPort the port to use
      */
     public void setExternalPort(int externalPort) {
@@ -109,6 +113,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the remote host this mapping is associated with
+     *
      * @return the {@link #remoteHost}
      */
     public String getRemoteHost() {
@@ -117,6 +122,7 @@ public class PortMappingEntry {
 
     /**
      * Sets the {@link #remoteHost}
+     *
      * @param remoteHost the host to set
      */
     public void setRemoteHost(String remoteHost) {
@@ -125,6 +131,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the internal host this mapping is associated with
+     *
      * @return the {@param internalClient}
      */
     public String getInternalClient() {
@@ -133,6 +140,7 @@ public class PortMappingEntry {
 
     /**
      * Sets the {@link #internalClient}
+     *
      * @param internalClient the client to set
      */
     public void setInternalClient(String internalClient) {
@@ -141,6 +149,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the protocol associated with this mapping
+     *
      * @return {@link #protocol}
      */
     public String getProtocol() {
@@ -149,6 +158,7 @@ public class PortMappingEntry {
 
     /**
      * Sets the {@link #protocol} associated with this mapping
+     *
      * @param protocol one of <tt>TCP</tt> or <tt>UDP</tt>
      */
     public void setProtocol(String protocol) {
@@ -157,6 +167,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the enabled flag (<tt>"1"</tt> if enabled, <tt>"0"</tt> otherwise)
+     *
      * @return {@link #enabled}
      */
     public String getEnabled() {
@@ -165,6 +176,7 @@ public class PortMappingEntry {
 
     /**
      * Sets the {@link #enabled} flag
+     *
      * @param enabled <tt>"1"</tt> for enabled, <tt>"0"</tt> for disabled
      */
     public void setEnabled(String enabled) {
@@ -173,6 +185,7 @@ public class PortMappingEntry {
 
     /**
      * Gets the port mapping description
+     *
      * @return {@link #portMappingDescription}
      */
     public String getPortMappingDescription() {
@@ -181,6 +194,7 @@ public class PortMappingEntry {
 
     /**
      * Sets the {@link #portMappingDescription}
+     *
      * @param portMappingDescription the description to set
      */
     public void setPortMappingDescription(String portMappingDescription) {

@@ -2,13 +2,12 @@ package com.ghostchu.peerbanhelper.module;
 
 import io.javalin.http.sse.SseClient;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public abstract class AbstractSSEFeatureModule extends AbstractFeatureModule {
-    protected final List<SseClient> sseClients = Collections.synchronizedList(new ArrayList<>());
+    protected final List<SseClient> sseClients = new CopyOnWriteArrayList<>();
 
     /**
      * Adds new SseClient to sseClients list, and mark it keepAlive.
@@ -22,11 +21,11 @@ public abstract class AbstractSSEFeatureModule extends AbstractFeatureModule {
         sseClient.keepAlive();
     }
 
-    protected void iterateSseClients(Consumer<? super SseClient> clients){
+    protected void iterateSseClients(Consumer<? super SseClient> clients) {
         this.sseClients.forEach(clients);
     }
 
-    protected void onClose(SseClient sseClient){
+    protected void onClose(SseClient sseClient) {
         this.sseClients.remove(sseClient);
     }
 }

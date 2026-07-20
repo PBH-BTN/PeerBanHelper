@@ -11,11 +11,7 @@ import com.ghostchu.peerbanhelper.banpipeline.data.FetchedPeersBatch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.module.CheckResult;
-import com.ghostchu.peerbanhelper.module.FeatureModule;
-import com.ghostchu.peerbanhelper.module.ModuleManager;
-import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.module.RuleFeatureModule;
+import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
@@ -72,8 +68,8 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
                     }
                     try {
                         if (ruleFeatureModule.isThreadSafe()) {
-                            wrapper.setComment(false,prefix + "Executing: thread-safe");
-                            var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader,wrapper));
+                            wrapper.setComment(false, prefix + "Executing: thread-safe");
+                            var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader, wrapper));
                             wrapper.setComment(false, prefix + "Waiting: until outlet have space");
                             outlet.accept(result);
                         } else {
@@ -81,7 +77,7 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
                                 wrapper.setComment(false, prefix + "Waiting for thread lock (non-thread-safe)");
                                 ruleFeatureModule.getThreadLock().lock();
                                 wrapper.setComment(false, prefix + "Executing: non-thread-safe");
-                                var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader,wrapper));
+                                var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader, wrapper));
                                 wrapper.setComment(false, prefix + "Waiting: until outlet have space");
                                 outlet.accept(result);
                             } finally {

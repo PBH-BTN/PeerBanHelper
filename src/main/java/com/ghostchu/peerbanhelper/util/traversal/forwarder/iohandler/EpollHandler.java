@@ -19,7 +19,7 @@ public class EpollHandler implements ForwarderIOHandler {
 
     @Override
     public ForwarderIOHandlerType ioHandlerType() {
-        return ForwarderIOHandlerType.IO_URING;
+        return ForwarderIOHandlerType.EPOLL;
     }
 
     @Override

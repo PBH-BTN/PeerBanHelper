@@ -30,7 +30,7 @@ public class PoWClient implements AutoCloseable {
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     long nonce = new SecureRandom().nextLong() + threadId;
                     while (!found.get()) {
-                        if(Thread.currentThread().isInterrupted()){
+                        if (Thread.currentThread().isInterrupted()) {
                             return;
                         }
                         digest.reset();

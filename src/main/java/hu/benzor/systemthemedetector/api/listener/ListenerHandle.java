@@ -1,10 +1,10 @@
 package hu.benzor.systemthemedetector.api.listener;
 
-import java.util.Optional;
-import java.util.concurrent.ScheduledFuture;
-
 import hu.benzor.systemthemedetector.api.theme.Theme;
 import lombok.Getter;
+
+import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
 
 public class ListenerHandle<T extends Theme> {
 

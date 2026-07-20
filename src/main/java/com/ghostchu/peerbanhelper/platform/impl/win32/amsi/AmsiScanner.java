@@ -24,7 +24,9 @@ public class AmsiScanner implements MalwareScanner {
      */
     private final Arena arena = Arena.ofShared();
 
-    /** 句柄值（opaque pointer）存储在 Arena 分配的 segment 中 */
+    /**
+     * 句柄值（opaque pointer）存储在 Arena 分配的 segment 中
+     */
     private final MemorySegment amsiContext;
     private final MemorySegment amsiSession;
 
@@ -101,7 +103,7 @@ public class AmsiScanner implements MalwareScanner {
         try (Arena callArena = Arena.ofConfined()) {
             MemorySegment resultOut = callArena.allocate(ValueLayout.JAVA_INT);
             MemorySegment stringWStr = toWStr(callArena, content);
-            MemorySegment labelWStr  = toWStr(callArena, "StringScan");
+            MemorySegment labelWStr = toWStr(callArena, "StringScan");
 
             AmsiLib.amsiScanString(amsiContext, stringWStr, labelWStr, amsiSession, resultOut);
             return resultOut.get(ValueLayout.JAVA_INT, 0) >= 32768;

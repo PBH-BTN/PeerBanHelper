@@ -23,6 +23,7 @@ import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.UnauthorizedResponse;
 import io.javalin.http.staticfiles.JavalinStaticResourceHandler;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
@@ -39,9 +40,9 @@ import org.slf4j.event.Level;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -58,7 +59,7 @@ public final class JavalinWebContainer implements Reloadable {
     @Getter
     private String token;
     private final Cache<@NotNull IPAddress, @NotNull AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
-            .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
+            .expireAfterWrite(Duration.ofMillis(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000)))
             .build();
     private final Cache<@NotNull IPAddress, @NotNull Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
@@ -120,7 +121,11 @@ public final class JavalinWebContainer implements Reloadable {
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ), null));
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.FORBIDDEN);
+                    ctx.status(HttpStatus.FORBIDDEN); // TODO: Switch to UNAUTHORIZED
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
+                })
+                .exception(UnauthorizedResponse.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.UNAUTHORIZED);
                     ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
                 })
                 .exception(NeedInitException.class, (e, ctx) -> {
@@ -220,7 +225,7 @@ public final class JavalinWebContainer implements Reloadable {
                 .options("/*", ctx -> ctx.status(200))
                 .after(ctx -> {
                     if (ctx.attribute("skipAfter") != null) return;
-                    ctx.header("Server", Main.getUserAgent());
+                    ctx.header("Server", Main.getServerFingerprint());
                 });
     }
 
@@ -323,8 +328,13 @@ public final class JavalinWebContainer implements Reloadable {
     public RoutesConfig routes() {
         return this.javalin.unsafe.routes;
     }
+
     public String reqLocale(Context context) {
-        for (AcceptLanguages requestLocale : requestLocales(context)) {
+        return reqLocale(context.header("Accept-Language"));
+    }
+
+    public String reqLocale(String headerLocale) {
+        for (AcceptLanguages requestLocale : requestLocales(headerLocale)) {
             String pbhCode = requestLocale.code.toLowerCase(Locale.ROOT).replace("-", "_");
             if (TextManager.INSTANCE_HOLDER.getAvailableLanguages().contains(pbhCode)) {
                 return pbhCode;
@@ -334,7 +344,10 @@ public final class JavalinWebContainer implements Reloadable {
     }
 
     private List<AcceptLanguages> requestLocales(Context context) {
-        String headerLocale = context.header("Accept-Language");
+        return requestLocales(context.header("Accept-Language"));
+    }
+
+    private List<AcceptLanguages> requestLocales(String headerLocale) {
         if (headerLocale == null) {
             return List.of(new AcceptLanguages(Main.DEF_LOCALE, 1.0f));
         }

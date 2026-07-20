@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
-import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -18,9 +17,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -28,7 +27,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class IPDBManager {
     private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000), TimeUnit.MILLISECONDS)
+            .expireAfterAccess(Duration.ofMillis(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000)))
             .maximumSize(ExternalSwitch.parseInt("pbh.geoIpCache.size", 300))
             .softValues()
             .build();
@@ -41,7 +40,9 @@ public class IPDBManager {
     public IPDBManager(HTTPUtil hTTPUtil, Laboratory laboratory, BackgroundTaskManager backgroundTaskManager) {
         this.hTTPUtil = hTTPUtil;
         this.backgroundTaskManager = backgroundTaskManager;
-        CompletableFuture.runAsync(this::setupIPDB);
+        if (!ExternalSwitch.parseBoolean("pbh.forceDisableIPDB")) {
+            CompletableFuture.runAsync(this::setupIPDB);
+        }
     }
 
     private void setupIPDB() {
@@ -88,5 +89,6 @@ public class IPDBManager {
         }
     }
 
-    public record IPDBResponse(LazyLoad<IPGeoData> geoData) { }
+    public record IPDBResponse(LazyLoad<IPGeoData> geoData) {
+    }
 }

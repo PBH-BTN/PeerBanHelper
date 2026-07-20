@@ -1,27 +1,32 @@
-/* 
- *              weupnp - Trivial upnp java library 
+/*
+ *              weupnp - Trivial upnp java library
  *
  * Copyright (C) 2008 Alessandro Bahgat Shehata, Daniele Castagna
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- * 
+ *
  * Alessandro Bahgat Shehata - ale dot bahgat at gmail dot com
  * Daniele Castagna - daniele dot castagna at gmail dot com
- * 
+ *
  */
 package org.bitlet.weupnp;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -33,11 +38,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 /**
  * A <tt>GatewayDevice</tt> is a class that abstracts UPnP-compliant gateways
  * <p/>
@@ -48,12 +48,12 @@ import org.xml.sax.helpers.XMLReaderFactory;
  */
 public class GatewayDevice {
 
-	/**
-	 * Receive timeout when requesting data from device
-	 */
+    /**
+     * Receive timeout when requesting data from device
+     */
     private static final int DEFAULT_HTTP_RECEIVE_TIMEOUT = 7000;
-    
-	private String st;
+
+    private String st;
     private String location;
     private String serviceType;
     private String serviceTypeCIF;
@@ -168,7 +168,7 @@ public class GatewayDevice {
      * @param action  the specific action to perform
      * @param args    the command arguments
      * @return the response to the performed command, as a name-value map.
-     *         In case errors occur, the returned map will be <i>empty.</i>
+     * In case errors occur, the returned map will be <i>empty.</i>
      * @throws IOException  on communication errors
      * @throws SAXException if errors occur while parsing the response
      */
@@ -245,7 +245,7 @@ public class GatewayDevice {
      * @throws IOException
      * @throws SAXException
      * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-     *      java.lang.String, java.util.Map)
+     * java.lang.String, java.util.Map)
      */
     public boolean isConnected() throws IOException, SAXException {
         Map<String, String> nameValue = simpleUPnPcommand(controlURL,
@@ -266,7 +266,7 @@ public class GatewayDevice {
      * @throws IOException
      * @throws SAXException
      * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-     *      java.lang.String, java.util.Map)
+     * java.lang.String, java.util.Map)
      */
     public String getExternalIPAddress() throws IOException, SAXException {
         Map<String, String> nameValue = simpleUPnPcommand(controlURL,
@@ -288,7 +288,7 @@ public class GatewayDevice {
      * @throws IOException
      * @throws SAXException
      * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-     *      java.lang.String, java.util.Map)
+     * java.lang.String, java.util.Map)
      * @see PortMappingEntry
      */
     public boolean addPortMapping(int externalPort, int internalPort,
@@ -327,7 +327,7 @@ public class GatewayDevice {
      * @todo consider refactoring this method to make it consistent with
      * Java practices (return the port mapping)
      * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-     *      java.lang.String, java.util.Map)
+     * java.lang.String, java.util.Map)
      * @see PortMappingEntry
      */
     public boolean getSpecificPortMappingEntry(int externalPort,
@@ -381,7 +381,7 @@ public class GatewayDevice {
      * @todo consider refactoring this method to make it consistent with
      * Java practices (return the port mapping)
      * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-     *      java.lang.String, java.util.Map)
+     * java.lang.String, java.util.Map)
      * @see PortMappingEntry
      */
     public boolean getGenericPortMappingEntry(int index,
@@ -638,6 +638,7 @@ public class GatewayDevice {
 
     /**
      * Gets the timeout for actions on the device.
+     *
      * @return timeout in milliseconds
      */
     public static int getHttpReadTimeout() {
@@ -646,6 +647,7 @@ public class GatewayDevice {
 
     /**
      * Sets the timeout for actions on the device.
+     *
      * @param milliseconds the new timeout in milliseconds
      */
     public static void setHttpReadTimeout(int milliseconds) {

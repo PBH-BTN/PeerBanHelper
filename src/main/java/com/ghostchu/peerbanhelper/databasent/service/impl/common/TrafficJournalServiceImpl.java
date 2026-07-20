@@ -33,7 +33,7 @@ public class TrafficJournalServiceImpl extends AbstractCommonService<TrafficJour
         TrafficJournalEntity entityInDb = baseMapper.selectOne(new LambdaQueryWrapper<TrafficJournalEntity>()
                 .eq(TrafficJournalEntity::getDownloader, downloader)
                 .eq(TrafficJournalEntity::getTimestamp, timestamp));
-        if (entityInDb == null){
+        if (entityInDb == null) {
             entityInDb = new TrafficJournalEntity();
             entityInDb.setTimestamp(timestamp);
             entityInDb.setDownloader(downloader);

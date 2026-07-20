@@ -24,7 +24,7 @@ public final class PBHStatisticsResponse extends DelugeResponse {
 
     @NoArgsConstructor
     @Data
-    public static class StatisticsResponseDTO{
+    public static class StatisticsResponseDTO {
         @SerializedName("stats_last_timestamp")
         private Long statsLastTimestamp;
         @SerializedName("total_payload_download")

@@ -133,7 +133,7 @@ public final class ModuleManagerImpl implements ModuleManager {
         // 只返回实际已启用的模块
         synchronized (modules) {
             return modules.stream()
-                    .filter(module->module.getModuleStatus().getType() == ModuleStatusType.ENABLED)
+                    .filter(module -> module.getModuleStatus().getType() == ModuleStatusType.ENABLED)
                     .toList();
         }
     }
@@ -172,7 +172,7 @@ public final class ModuleManagerImpl implements ModuleManager {
                     Main.getEventBus().post(moduleUnregisterEvent);
                     module.disable();
                 }
-            }catch (Throwable e){
+            } catch (Throwable e) {
                 log.error("Unable to reload module {} due to configuration change", module.getName(), e);
             }
         }

@@ -5,15 +5,12 @@ import com.ghostchu.peerbanhelper.event.program.logger.NewLogEntryCreatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractSSEFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebUILogEntryDTO;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
-import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.eventbus.Subscribe;
 import io.javalin.http.Context;
 import io.javalin.http.sse.SseClient;
-import io.javalin.websocket.WsConfig;
-import io.javalin.websocket.WsContext;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +30,7 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
 
     @Override
     public @NotNull String getName() {
-        return "WebAPI - Logs)";
+        return "WebAPI - Logs";
     }
 
     @Override
@@ -64,7 +61,7 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
                 e.content(),
                 e.seq()
         )).toList();
-        list.forEach(logEntry -> sseClient.sendEvent(logEntryKey, logEntry));
+        list.forEach(sseClient::sendEvent);
     }
 
     @Subscribe
@@ -76,7 +73,13 @@ public final class PBHLogsController extends AbstractSSEFeatureModule {
                 event.entry().content(),
                 event.entry().seq()
         );
-        iterateSseClients(sse-> sse.sendEvent(logEntryKey, logEntry));
+        iterateSseClients(sse -> {
+            try {
+                sse.sendEvent(logEntry);
+            } catch (Exception e) {
+                log.debug("Failed to send logs to SSE client", e);
+            }
+        });
     }
 
     private void handleLogs(Context ctx) {

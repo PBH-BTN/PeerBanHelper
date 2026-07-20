@@ -45,7 +45,7 @@ public class BanList {
 
     @Nullable
     public AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata> remove(@NotNull PeerAddress address) {
-       return remove(address.getAddress());
+        return remove(address.getAddress());
     }
 
     @Nullable
@@ -162,7 +162,7 @@ public class BanList {
     public void addAll(@NotNull Map<IPAddress, BanMetadata> map) {
         try {
             lock.writeLock().lock();
-            map.forEach((k,v)-> delegate.put(k.toPrefixBlock(), v));
+            map.forEach((k, v) -> delegate.put(k.toPrefixBlock(), v));
         } finally {
             lock.writeLock().unlock();
         }

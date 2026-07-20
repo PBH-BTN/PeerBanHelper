@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 
 public interface BatchMonitorFeatureModule extends FeatureModule {
     /**

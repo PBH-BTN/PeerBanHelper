@@ -18,9 +18,9 @@
       <a-radio-group v-model="dbType" @change="onDBTypeChanged">
         <a-space>
           <a-radio value="sqlite">SQLite</a-radio>
-          <a-radio value="h2">H2</a-radio>
-          <a-radio value="mysql">MySQL</a-radio>
-          <a-radio value="postgresql">PostgreSQL</a-radio></a-space
+          <a-radio value="h2" disabled>H2</a-radio>
+          <a-radio value="mysql" disabled>MySQL</a-radio>
+          <a-radio value="postgresql" disabled>PostgreSQL</a-radio></a-space
         >
       </a-radio-group>
     </a-form-item>

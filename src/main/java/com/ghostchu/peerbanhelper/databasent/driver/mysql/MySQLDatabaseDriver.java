@@ -16,7 +16,7 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
     public MySQLDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         BeeDataSourceConfig config = new BeeDataSourceConfig();
-        
+
         String host = section.getString("host");
         int port = section.getInt("port");
         String database = section.getString("database");
@@ -31,16 +31,16 @@ public class MySQLDatabaseDriver extends AbstractDatabaseDriver {
         config.setMaxActive(10);
         config.setMaxWait(30000);
         config.setIntervalOfClearTimeout(600000L);
-        
+
         // 连接池验证配置
         config.setAliveTestSql("SELECT 1");
-        
+
         // 启用公平排队 (FIFO)
         config.setFairMode(true);
 
         // 手动关闭连接池
         config.setRegisterJvmHook(false);
-        
+
         // MySQL 优化参数
         config.addConnectionFactoryProperty("cachePrepStmts", "true");
         config.addConnectionFactoryProperty("prepStmtCacheSize", "250");

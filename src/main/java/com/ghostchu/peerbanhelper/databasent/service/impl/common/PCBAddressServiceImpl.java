@@ -20,30 +20,30 @@ public class PCBAddressServiceImpl extends AbstractCanDirtyCommonService<PCBAddr
     }
 
     @Override
-	public List<PCBAddressEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
+    public List<PCBAddressEntity> fetchFromDatabase(@NotNull String torrentId, @NotNull String downloader) {
         return baseMapper.selectList(new LambdaQueryWrapper<PCBAddressEntity>()
                 .eq(PCBAddressEntity::getTorrentId, torrentId)
                 .eq(PCBAddressEntity::getDownloader, downloader));
-	}
+    }
 
-	@Override
+    @Override
     public PCBAddressEntity fetchFromDatabase(@NotNull String torrentId, @NotNull InetAddress ip, int port, @NotNull String downloader) {
         return baseMapper.selectOne(new LambdaQueryWrapper<PCBAddressEntity>()
                 .eq(PCBAddressEntity::getTorrentId, torrentId)
                 .eq(PCBAddressEntity::getIp, ip)
                 .eq(PCBAddressEntity::getPort, port)
                 .eq(PCBAddressEntity::getDownloader, downloader));
-	}
+    }
 
-	@Override
+    @Override
     public int deleteEntry(@NotNull String torrentId, @NotNull InetAddress ip) {
         return baseMapper.delete(new LambdaQueryWrapper<PCBAddressEntity>()
                 .eq(PCBAddressEntity::getTorrentId, torrentId)
                 .eq(PCBAddressEntity::getIp, ip));
-	}
+    }
 
-	@Override
+    @Override
     public long cleanupDatabase(OffsetDateTime timestamp) {
         return splitBatchDelete(new LambdaQueryWrapper<PCBAddressEntity>().select(PCBAddressEntity::getId).lt(PCBAddressEntity::getLastTimeSeen, timestamp));
-	}
+    }
 }

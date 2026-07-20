@@ -11,5 +11,5 @@ public record CheckResult(
         @NotNull TranslationComponent rule,
         @NotNull TranslationComponent reason,
         @NotNull StructuredData<String, Object> structuredData
-        ) {
+) {
 }

@@ -29,9 +29,9 @@ public class StunClientHandler extends SimpleChannelInboundHandler<DatagramPacke
     /**
      * Executes a single STUN transaction asynchronously.
      *
-     * @param request        The STUN message to send.
-     * @param remoteAddress  The destination address.
-     * @param channel        The channel to send the message on.
+     * @param request       The STUN message to send.
+     * @param remoteAddress The destination address.
+     * @param channel       The channel to send the message on.
      * @return A CompletableFuture that will be completed with the response message or an exception.
      */
     public CompletableFuture<StunMessage> doTransaction(StunMessage request, InetSocketAddress remoteAddress, Channel channel) {

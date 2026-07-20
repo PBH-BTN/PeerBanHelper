@@ -24,13 +24,13 @@ public class P6spyLogger extends FormattedLogger {
 
     @Override
     public void logException(Exception e) {
-        if(P6SPY_CONSOLE_ENABLE)
-          log.error("P6Spy error logging", e);
+        if (P6SPY_CONSOLE_ENABLE)
+            log.error("P6Spy error logging", e);
     }
 
     @Override
     public void logText(String text) {
-        if(P6SPY_CONSOLE_ENABLE)
+        if (P6SPY_CONSOLE_ENABLE)
             log.debug("[P6Spy] {}", text);
     }
 
@@ -52,7 +52,7 @@ public class P6spyLogger extends FormattedLogger {
             }
             //super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);
             if (category == Category.OUTAGE) {
-                if(P6SPY_CONSOLE_ENABLE)
+                if (P6SPY_CONSOLE_ENABLE)
                     log.debug("[P6Spy] >>! OUTAGE/SLOW !<< {} | {} | took {} ms | {}\n{}", now, category.getName(), elapsed, prepared, MiscUtil.getAllThreadTrace());
                 SentryEvent event = new SentryEvent();
                 Message msg = new Message();
@@ -71,7 +71,7 @@ public class P6spyLogger extends FormattedLogger {
                 event.setThreads(SentryUtils.getSentryThreads());
                 Sentry.captureEvent(event);
             }
-            if(P6SPY_CONSOLE_ENABLE)
+            if (P6SPY_CONSOLE_ENABLE)
                 log.debug("[P6Spy] {} | {} | took {} ms | {}", now, category.getName(), elapsed, sql);
         } catch (Throwable th) { // make sure SQL can execute even exception fired
             Sentry.captureException(th);

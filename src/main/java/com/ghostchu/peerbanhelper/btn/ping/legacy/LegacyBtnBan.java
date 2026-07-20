@@ -21,5 +21,5 @@ public final class LegacyBtnBan {
     @SerializedName("peer")
     private LegacyBtnPeer peer;
     @SerializedName("structured_data")
-    private StructuredData<String,Object> structuredData;
+    private StructuredData<String, Object> structuredData;
 }
