@@ -106,7 +106,7 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
             Optional<String> ptr;
 //            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
             try {
-                task.setComment(true, "Running PTR dns lookup for: "+ peer.getPeerAddress());
+                task.setComment(true, "Running PTR dns lookup for: " + peer.getPeerAddress());
                 ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 ptr = Optional.empty();

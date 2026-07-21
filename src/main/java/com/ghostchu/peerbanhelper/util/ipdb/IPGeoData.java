@@ -104,13 +104,13 @@ public final class IPGeoData {
             if (other.number != null) {
                 this.number = this.number == null ? other.number : (overwrite ? other.number : this.number);
             }
-            if(other.organization != null) {
+            if (other.organization != null) {
                 this.organization = this.organization == null ? other.organization : (overwrite ? other.organization : this.organization);
             }
-            if(other.ipAddress != null) {
+            if (other.ipAddress != null) {
                 this.ipAddress = this.ipAddress == null ? other.ipAddress : (overwrite ? other.ipAddress : this.ipAddress);
             }
-            if(other.network != null) {
+            if (other.network != null) {
                 this.network = this.network == null ? other.network : this.network.mergeFrom(other.network, overwrite);
             }
             return this;
@@ -129,7 +129,7 @@ public final class IPGeoData {
                 if (other.ipAddress != null) {
                     this.ipAddress = this.ipAddress == null ? other.ipAddress : (overwrite ? other.ipAddress : this.ipAddress);
                 }
-                if(other.prefixLength != null) {
+                if (other.prefixLength != null) {
                     this.prefixLength = this.prefixLength == null ? other.prefixLength : (overwrite ? other.prefixLength : this.prefixLength);
                 }
                 return this;
@@ -150,7 +150,7 @@ public final class IPGeoData {
             if (other.isp != null) {
                 this.isp = this.isp == null ? other.isp : (overwrite ? other.isp : this.isp);
             }
-            if(other.netType != null) {
+            if (other.netType != null) {
                 this.netType = this.netType == null ? other.netType : (overwrite ? other.netType : this.netType);
             }
             return this;

@@ -98,9 +98,9 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
                     int port = uri.getPort();
                     String host = uri.getHost();
                     try {
-                       InetAddress addr = InetAddress.getByName(host);
-                       // check addr if is localhost
-                        if(addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isSiteLocalAddress()) {
+                        InetAddress addr = InetAddress.getByName(host);
+                        // check addr if is localhost
+                        if (addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isSiteLocalAddress()) {
                             return port;
                         }
                     } catch (UnknownHostException e) {

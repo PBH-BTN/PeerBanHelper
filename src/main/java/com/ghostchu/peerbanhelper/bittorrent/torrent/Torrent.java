@@ -76,11 +76,11 @@ public interface Torrent {
      * @return 不可逆匿名识别符
      */
     @NotNull
-    default String getHashedIdentifier(){
+    default String getHashedIdentifier() {
         return InfoHashUtil.getHashedIdentifier(getHash());
     }
 
-    default boolean isSeeding(){
+    default boolean isSeeding() {
         return getProgress() >= 1.0d;
     }
 

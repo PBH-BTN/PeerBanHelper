@@ -64,7 +64,7 @@ public final class PBHConfigUpdater {
                     }
                 } catch (Exception e) {
                     log.info("Error while executing upgrade script: method={}, target_ver={}", method.getName(), updateScript.version(), e);
-                }finally {
+                } finally {
                     anyUpgradeExecuted = true;
                 }
                 yaml.set(CONFIG_VERSION_KEY, updateScript.version());
@@ -74,7 +74,7 @@ public final class PBHConfigUpdater {
                 Sentry.captureException(throwable);
             }
         }
-        if(anyUpgradeExecuted) {
+        if (anyUpgradeExecuted) {
             log.info("Saving configuration changes for {}...", configUpdateScript.getClass().getName());
             try {
                 migrateComments(yaml, bundle);

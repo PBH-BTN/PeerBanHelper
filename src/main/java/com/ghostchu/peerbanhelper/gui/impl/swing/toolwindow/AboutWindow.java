@@ -166,7 +166,7 @@ public class AboutWindow {
                     contentItems.add(new ClearCommand());
                 } else if ("[window_maximized]".equals(line)) { // 新增命令检测
                     contentItems.add(new WindowMaximizedCommand());
-                }else if ("[play_midi]".equals(line)){
+                } else if ("[play_midi]".equals(line)) {
                     contentItems.add(new PlayMidiCommand());
                 } else {
                     for (Map.Entry<String, String> entry : replaces.entrySet()) {
@@ -384,7 +384,7 @@ public class AboutWindow {
                 textPane.setText("");
             } else if (item instanceof WindowMaximizedCommand) { // 处理最大化命令
                 SwingUtilities.invokeLater(() -> frame.setExtendedState(Frame.MAXIMIZED_BOTH));
-            } else if (item instanceof PlayMidiCommand){
+            } else if (item instanceof PlayMidiCommand) {
                 try {
                     playMidi();
                 } catch (Exception ignored) {

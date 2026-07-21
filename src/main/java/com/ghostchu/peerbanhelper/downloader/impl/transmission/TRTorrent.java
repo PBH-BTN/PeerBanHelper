@@ -22,17 +22,17 @@ public final class TRTorrent implements Torrent {
     }
 
     @Override
-    public  @NotNull String getId() {
+    public @NotNull String getId() {
         return String.valueOf(backend.getId());
     }
 
     @Override
-    public  @NotNull String getName() {
+    public @NotNull String getName() {
         return backend.getName();
     }
 
     @Override
-    public  @NotNull String getHash() {
+    public @NotNull String getHash() {
         return backend.getHashString();
     }
 

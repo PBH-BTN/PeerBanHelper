@@ -32,11 +32,11 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -51,11 +51,10 @@ public final class PBHPlusController extends AbstractFeatureModule {
     @Autowired
     private LocalKeyManager localKeyManager;
     private final Cache<String, PoWServer> powCaptcha = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
+            .expireAfterWrite(Duration.ofHours(1))
             .build();
     private final int powCaptchaDifficultyBits = 5;
     private final String powCaptchaAlgorithm = "SHA-1";
-
 
 
     @Override

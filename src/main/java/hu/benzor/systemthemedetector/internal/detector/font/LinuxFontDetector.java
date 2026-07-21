@@ -1,30 +1,30 @@
 package hu.benzor.systemthemedetector.internal.detector.font;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import hu.benzor.systemthemedetector.api.environment.DesktopEnvironment;
 import hu.benzor.systemthemedetector.api.theme.Theme.Font;
 import hu.benzor.systemthemedetector.internal.command.CommandOutputLineMapper;
 import hu.benzor.systemthemedetector.internal.command.FilteredCommandOutputLineMapper;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Slf4j
 public final class LinuxFontDetector extends FontDetector {
 
     private static final Pattern cmdOutputPattern = Pattern.compile(
-        "^'(.+?)(?:,?\\s+)(\\d+(?:\\.\\d+)?)'$"
+            "^'(.+?)(?:,?\\s+)(\\d+(?:\\.\\d+)?)'$"
     );
-    
+
     private final CommandOutputLineMapper outputLineMapper;
 
     public LinuxFontDetector(DesktopEnvironment desktop) {
         ProcessBuilder pb = new ProcessBuilder(
-            "gsettings",
-            "get",
-            getDconfInterfaceSchema(desktop),
-            "font-name"
+                "gsettings",
+                "get",
+                getDconfInterfaceSchema(desktop),
+                "font-name"
         );
         this.outputLineMapper = new FilteredCommandOutputLineMapper(pb);
     }
@@ -39,7 +39,7 @@ public final class LinuxFontDetector extends FontDetector {
         /*
          * We expect font strings of the scheme "'Noto Sans 10'"" or "'Noto Sans, 10'"" (with the single quotes).
          * It seems that if the font is set from KDE, then the name might be separated from the number by a comma.
-         * 
+         *
          * The name can be of any number of words, might also contain weight (e.g. Fira Sans Medium), and the
          * number at the end may contain decimal digits.
          */
@@ -58,7 +58,7 @@ public final class LinuxFontDetector extends FontDetector {
         } catch (IllegalArgumentException e) {
             log.debug("Font size is not a valid number: {}", fontSizeStr);
             return Optional.empty();
-        } 
+        }
     }
 
     private static String getDconfInterfaceSchema(DesktopEnvironment desktop) {

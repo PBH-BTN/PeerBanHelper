@@ -70,12 +70,12 @@ public final class PushManagerImpl implements Reloadable, PushManager {
     private void reloadConfig() {
         List<PushProvider> registered = new ArrayList<>();
         var config = Main.getMainConfig().getConfigurationSection("push-notification");
-        if(config == null) return;
+        if (config == null) return;
         config.getKeys(false).forEach(provider -> {
             try {
                 var section = config.getConfigurationSection(provider);
                 registered.add(createPushProvider(provider, section.getString("type"), section));
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("Unable to load Push Provider: {}", provider, e);
             }
         });
@@ -85,8 +85,9 @@ public final class PushManagerImpl implements Reloadable, PushManager {
 
     @Override
     public boolean addPushProvider(PushProvider provider) {
-       return providerList.add(provider);
+        return providerList.add(provider);
     }
+
     @Override
     public boolean removePushProvider(PushProvider provider) {
         return providerList.remove(provider);

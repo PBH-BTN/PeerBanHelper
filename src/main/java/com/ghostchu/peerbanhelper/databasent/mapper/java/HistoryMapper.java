@@ -12,26 +12,26 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 public interface HistoryMapper extends BaseMapper<HistoryEntity> {
-	IPage<PeerBanCount> getBannedIpsWithFilter(IPage<PeerBanCount> page, @Param("filter") String filter);
+    IPage<PeerBanCount> getBannedIpsWithFilter(IPage<PeerBanCount> page, @Param("filter") String filter);
 
-	IPage<PeerBanCount> getBannedIpsWithoutFilter(IPage<PeerBanCount> page);
+    IPage<PeerBanCount> getBannedIpsWithoutFilter(IPage<PeerBanCount> page);
 
-	long countDistinctIpWithFilter(@Param("filter") String filter);
+    long countDistinctIpWithFilter(@Param("filter") String filter);
 
     @Select("SELECT COUNT(DISTINCT ip) FROM history")
-	long countDistinctIp();
+    long countDistinctIp();
 
-	List<UniversalFieldNumResult> countField(
-			@Param("field") String field,
-			@Param("percentFilter") double percentFilter,
-			@Param("downloader") String downloader,
-			@Param("substringLength") Integer substringLength);
+    List<UniversalFieldNumResult> countField(
+            @Param("field") String field,
+            @Param("percentFilter") double percentFilter,
+            @Param("downloader") String downloader,
+            @Param("substringLength") Integer substringLength);
 
-	List<UniversalFieldNumResult> sumField(
-			@Param("field") String field,
-			@Param("percentFilter") double percentFilter,
-			@Param("downloader") String downloader,
-			@Param("substringLength") Integer substringLength);
+    List<UniversalFieldNumResult> sumField(
+            @Param("field") String field,
+            @Param("percentFilter") double percentFilter,
+            @Param("downloader") String downloader,
+            @Param("substringLength") Integer substringLength);
 
     List<TorrentCount> countByTorrentIds(@Param("torrentIds") List<Long> torrentIds);
 

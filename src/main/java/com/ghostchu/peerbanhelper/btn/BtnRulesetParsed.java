@@ -96,7 +96,7 @@ public final class BtnRulesetParsed {
         raw.forEach((k, v) -> {
             DualIPv4v6AssociativeTries<String> tries = new DualIPv4v6AssociativeTries<>();
             v.stream().map(IPAddressUtil::getIPAddress).forEach(tries::add);
-            rules.put(k,new IPMatcher(version, k, List.of(tries)));
+            rules.put(k, new IPMatcher(version, k, List.of(tries)));
         });
         return rules;
     }
@@ -107,7 +107,7 @@ public final class BtnRulesetParsed {
         return rules;
     }
 
-    public long size(){
+    public long size() {
         // check all categories and all value's collections's size
         return peerIdRules.values().stream().mapToLong(List::size).sum() +
                 clientNameRules.values().stream().mapToLong(List::size).sum() +

@@ -48,8 +48,8 @@ public class EarlyStartupHandler implements Handler {
             String line = "[%s] [%s/%s]: %s".formatted(timestamp, entry.thread(), entry.level(), entry.content());
             String cssClass = "log-line " + getLogClass(entry.level());
             html.append("<div class='").append(cssClass).append("'>")
-                .append(escapeHtml(line))
-                .append("</div>");
+                    .append(escapeHtml(line))
+                    .append("</div>");
         }
         html.append("</div>");
         return html.toString();
@@ -66,9 +66,9 @@ public class EarlyStartupHandler implements Handler {
 
     private String escapeHtml(String text) {
         return text.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#39;");
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 }

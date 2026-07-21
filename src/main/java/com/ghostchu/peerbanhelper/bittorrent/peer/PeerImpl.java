@@ -33,7 +33,7 @@ public final class PeerImpl implements Peer {
     }
 
     @Override
-    public  @NotNull PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         return peerAddress;
     }
 

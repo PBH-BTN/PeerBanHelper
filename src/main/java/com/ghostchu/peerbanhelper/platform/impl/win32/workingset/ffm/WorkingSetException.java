@@ -10,37 +10,37 @@ public class WorkingSetException extends Exception {
 
     /**
      * -- GETTER --
-     *  获取Windows错误代码
+     * 获取Windows错误代码
      *
      * @return Windows错误代码，如果没有则返回0
      */
     private final int errorCode;
-    
+
     /**
      * 构造函数
-     * 
+     *
      * @param message 异常消息
      */
     public WorkingSetException(String message) {
         super(message);
         this.errorCode = 0;
     }
-    
+
     /**
      * 构造函数
-     * 
+     *
      * @param message 异常消息
-     * @param cause 原因异常
+     * @param cause   原因异常
      */
     public WorkingSetException(String message, Throwable cause) {
         super(message, cause);
         this.errorCode = 0;
     }
-    
+
     /**
      * 构造函数
-     * 
-     * @param message 异常消息
+     *
+     * @param message   异常消息
      * @param errorCode Windows错误代码
      */
     public WorkingSetException(String message, int errorCode) {

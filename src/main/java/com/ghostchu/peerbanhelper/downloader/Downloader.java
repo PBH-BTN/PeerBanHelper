@@ -19,8 +19,10 @@ public interface Downloader {
 
     @NotNull
     YamlConfiguration saveDownloader();
+
     @NotNull
     JsonObject saveDownloaderJson();
+
     @NotNull
     String getEndpoint();
 
@@ -41,6 +43,7 @@ public interface Downloader {
      */
     @NotNull
     String getName();
+
     @NotNull
     String getId();
 
@@ -109,6 +112,7 @@ public interface Downloader {
 
     /**
      * 获取指定 Torrent 的 Tracker 列表
+     *
      * @param torrent Torrent
      * @return Tracker 列表
      */
@@ -117,7 +121,8 @@ public interface Downloader {
 
     /**
      * 设置指定 Torrent 的 Tracker 列表
-     * @param torrent Torrent
+     *
+     * @param torrent  Torrent
      * @param trackers Tracker 列表
      */
     void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers);
@@ -165,6 +170,7 @@ public interface Downloader {
 
     /**
      * 获取下载器扩展特性标记
+     *
      * @return 扩展特性标记列表
      */
     @NotNull
@@ -209,6 +215,7 @@ public interface Downloader {
 
     /**
      * 获取当前下载器的限速配置
+     *
      * @return 限速配置，如果不支持或者请求错误，则可能返回 null
      */
     @Nullable
@@ -216,11 +223,13 @@ public interface Downloader {
 
     /**
      * 设置当前下载器的限速配置
+     *
      * @param speedLimiter 限速配置
      */
     void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter);
 
     int getBTProtocolPort();
+
     void setBTProtocolPort(int port);
 
     void close();

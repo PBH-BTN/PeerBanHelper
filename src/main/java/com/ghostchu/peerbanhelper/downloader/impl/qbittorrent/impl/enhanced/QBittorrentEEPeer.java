@@ -103,19 +103,19 @@ public final class QBittorrentEEPeer implements Peer {
     @Override
     public String toString() {
         return "QBEEPeer{" +
-               "client='" + client + '\'' +
-               ", connection='" + connection + '\'' +
-               ", dlSpeed=" + dlSpeed +
-               ", downloaded=" + downloaded +
-               ", files='" + files + '\'' +
-               ", flags='" + flags + '\'' +
-               ", ip='" + ip + '\'' +
-               ", peerIdClient='" + peerIdClient + '\'' +
-               ", port=" + port +
-               ", progress=" + progress +
-               ", upSpeed=" + upSpeed +
-               ", uploaded=" + uploaded +
-               ", shadowBanned=" + shadowBanned +
+                "client='" + client + '\'' +
+                ", connection='" + connection + '\'' +
+                ", dlSpeed=" + dlSpeed +
+                ", downloaded=" + downloaded +
+                ", files='" + files + '\'' +
+                ", flags='" + flags + '\'' +
+                ", ip='" + ip + '\'' +
+                ", peerIdClient='" + peerIdClient + '\'' +
+                ", port=" + port +
+                ", progress=" + progress +
+                ", upSpeed=" + upSpeed +
+                ", uploaded=" + uploaded +
+                ", shadowBanned=" + shadowBanned +
                 ", peerAddress=" + peerAddress + '}';
     }
 }

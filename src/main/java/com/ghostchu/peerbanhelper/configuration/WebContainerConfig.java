@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WebContainerConfig {
     @Bean
-    public JavalinWebContainer webContainer(){
+    public JavalinWebContainer webContainer() {
         return Main.getWebContainer();
     }
 }

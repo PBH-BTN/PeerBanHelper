@@ -62,6 +62,11 @@ public class HistoryMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         // Query with JOIN to get module and rule names
         String selectQuery = """

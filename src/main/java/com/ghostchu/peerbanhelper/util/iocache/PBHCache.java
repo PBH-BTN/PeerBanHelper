@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Queue;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 @Slf4j
-public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cache<K,V> {
+public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cache<K, V> {
     private final Cache<@NotNull K, @NotNull V> delegate;
     private final @Nullable Consumer<Stream<Pair<@NotNull K, @NotNull V>>> removeCallback;
     private final AtomicBoolean receiveNotification = new AtomicBoolean(true);
@@ -34,10 +35,10 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
             builder.maximumSize(maxCapacity);
         }
         if (expireWriteMillis != null) {
-            builder.expireAfterWrite(expireWriteMillis, TimeUnit.MILLISECONDS);
+            builder.expireAfterWrite(Duration.ofMillis(expireWriteMillis));
         }
         if (expireAccessMillis != null) {
-            builder.expireAfterAccess(expireAccessMillis, TimeUnit.MILLISECONDS);
+            builder.expireAfterAccess(Duration.ofMillis(expireAccessMillis));
         }
         if (weakKey) {
             builder.weakKeys();
@@ -97,8 +98,8 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
         if (removeCallback == null) return;
         //noinspection ConstantValue
         removeCallback.accept(delegate.asMap().entrySet().stream()
-                .filter(entry->entry.getKey() != null && entry.getValue() != null)
-                .map(entry->Pair.of(entry.getKey(), entry.getValue())));
+                .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue())));
     }
 
     @Override

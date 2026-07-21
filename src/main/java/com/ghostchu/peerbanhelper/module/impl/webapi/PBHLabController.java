@@ -73,9 +73,9 @@ public final class PBHLabController extends AbstractFeatureModule {
         var id = context.pathParam("id");
         var activated = context.bodyAsClass(ExperimentPutBody.class);
         Boolean bool = null;
-        if("true".equalsIgnoreCase(activated.getStatus())){
+        if ("true".equalsIgnoreCase(activated.getStatus())) {
             bool = true;
-        } else if("false".equalsIgnoreCase(activated.getStatus())){
+        } else if ("false".equalsIgnoreCase(activated.getStatus())) {
             bool = false;
         }
         laboratory.setExperimentActivated(id, bool);

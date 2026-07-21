@@ -5,5 +5,6 @@ import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 
 public interface TrackedSwarmMapper extends BaseMapper<TrackedSwarmEntity> {
     void resetTable();
+
     void upsert(TrackedSwarmEntity entity);
 }

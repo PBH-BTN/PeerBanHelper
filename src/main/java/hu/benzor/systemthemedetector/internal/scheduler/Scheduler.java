@@ -1,13 +1,9 @@
 package hu.benzor.systemthemedetector.internal.scheduler;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import java.util.concurrent.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Scheduler {
@@ -19,12 +15,12 @@ public class Scheduler {
 
     static {
         Runtime.getRuntime().addShutdownHook(
-            new Thread(
-                () -> {
-                    scheduler.shutdownNow();
-                    executor.shutdownNow();
-                }
-            )
+                new Thread(
+                        () -> {
+                            scheduler.shutdownNow();
+                            executor.shutdownNow();
+                        }
+                )
         );
     }
 

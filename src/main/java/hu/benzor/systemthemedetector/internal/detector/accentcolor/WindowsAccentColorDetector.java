@@ -1,11 +1,11 @@
 package hu.benzor.systemthemedetector.internal.detector.accentcolor;
 
-import java.util.Optional;
-
 import hu.benzor.systemthemedetector.api.theme.Theme.AccentColor;
 import hu.benzor.systemthemedetector.internal.command.CommandOutputLineMapper;
 import hu.benzor.systemthemedetector.internal.command.FilteredCommandOutputLineMapper;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 @Slf4j
 public final class WindowsAccentColorDetector extends AccentColorDetector {
@@ -14,11 +14,11 @@ public final class WindowsAccentColorDetector extends AccentColorDetector {
 
     public WindowsAccentColorDetector() {
         ProcessBuilder pb = new ProcessBuilder(
-            "reg",
-            "query",
-            "HKCU\\Software\\Microsoft\\Windows\\DWM",
-            "/v",
-            "ColorizationColor"
+                "reg",
+                "query",
+                "HKCU\\Software\\Microsoft\\Windows\\DWM",
+                "/v",
+                "ColorizationColor"
         );
         outputLineMapper = new FilteredCommandOutputLineMapper(pb, "ColorizationColor");
     }

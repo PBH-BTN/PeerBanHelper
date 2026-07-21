@@ -13,9 +13,9 @@ import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -25,14 +25,14 @@ public class ModuleMatchCache {
             .maximumWeight(ExternalSwitch.parseLong("pbh.moduleMatchCache.weight", 5000L))
             .weigher((key, value) -> {
                 if (value == AbstractRuleFeatureModule.HANDSHAKING_CHECK_RESULT
-                    || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
-                    || value == AbstractRuleFeatureModule.OK_CHECK_RESULT) {
+                        || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
+                        || value == AbstractRuleFeatureModule.OK_CHECK_RESULT) {
                     return 1;
                 }
                 return 5;
             })
             .softValues()
-            .expireAfterAccess(ExternalSwitch.parseLong("pbh.modulematchcache.timeout", 600000), TimeUnit.MILLISECONDS)
+            .expireAfterAccess(Duration.ofMillis(ExternalSwitch.parseLong("pbh.modulematchcache.timeout", 600000)))
             .build();
 
     public ModuleMatchCache() {

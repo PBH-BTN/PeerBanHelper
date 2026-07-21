@@ -22,7 +22,7 @@ public final class WindowsEcoQosAPI implements EcoQosAPI {
             }
             log.info(tlUI(Lang.IN_ECOMODE_DESCRIPTION));
             ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("eco-mode", 10, tlUI(Lang.IN_ECOMODE_SHORT)));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.warn("Unable to apply Windows EcoQosAPI feature", e);
             Sentry.captureException(e);
         }

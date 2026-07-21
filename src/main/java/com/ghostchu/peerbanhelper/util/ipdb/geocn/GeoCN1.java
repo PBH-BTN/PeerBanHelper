@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.util.ipdb.geocn;
 
-import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.maxmind.db.*;
@@ -14,7 +13,7 @@ import java.net.InetAddress;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class GeoCN1 implements AutoCloseable{
+public class GeoCN1 implements AutoCloseable {
 
     private final Reader reader;
 

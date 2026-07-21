@@ -79,7 +79,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         boolean enabled = shouldModuleEnabled() && SystemInfoProviderWrapper.find().isPresent();
         return ModuleStatus.builder()
                 .type(enabled ? ModuleStatusType.ENABLED : ModuleStatusType.DISABLED)
-                .description(enabled ? new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_ENABLED): new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_DISABLED))
+                .description(enabled ? new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_ENABLED) : new TranslationComponent(Lang.MODULE_STATUS_DESCRIPTION_DISABLED))
                 .build();
     }
 
@@ -109,7 +109,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         var section = Main.getMainConfig().getConfigurationSection("auto-stun");
         if (section == null) throw new IllegalStateException("Auto-stun configuration section not found");
 
-        if(autoStunConfigForm.isEnabled() && !SystemInfoProviderWrapper.isAvailable()){
+        if (autoStunConfigForm.isEnabled() && !SystemInfoProviderWrapper.isAvailable()) {
             throw new IllegalStateException("Unable to enable Auto-stun configuration, platform not supported.");
         }
 
