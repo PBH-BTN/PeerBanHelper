@@ -16,8 +16,8 @@ public final class MsgUtil {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat stf = new SimpleDateFormat("HH:mm:ss");
 
-    public static String escapeSql(String sql){
-        if(sql == null) return null;
+    public static String escapeSql(String sql) {
+        if (sql == null) return null;
         return sql.replace("'", "''");
     }
 
@@ -50,10 +50,10 @@ public final class MsgUtil {
 
     public static String threadInfoToString(ThreadInfo info) {
         StringBuilder sb = new StringBuilder("\"" + info.getThreadName() + "\"" +
-                                             (info.isDaemon() ? " daemon" : "") +
-                                             " prio=" + info.getPriority() +
-                                             " Id=" + info.getThreadId() + " " +
-                                             info.getThreadState());
+                (info.isDaemon() ? " daemon" : "") +
+                " prio=" + info.getPriority() +
+                " Id=" + info.getThreadId() + " " +
+                info.getThreadState());
         if (info.getLockName() != null) {
             sb.append(" on ").append(info.getLockName());
         }

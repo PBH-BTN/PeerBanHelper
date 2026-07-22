@@ -106,12 +106,12 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             try {
                 if (downloader.login().success()) {
                     var speedLimiter = downloader.getSpeedLimiter();
-                    if(speedLimiter == null) continue;
-                    if(!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
+                    if (speedLimiter == null) continue;
+                    if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.TRAFFIC_STATS)) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
                     DownloaderSpeedLimiter newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
-                    if(Main.getMeta().isSnapshotOrBeta()) {
+                    if (Main.getMeta().isSnapshotOrBeta()) {
                         log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload()) + "/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload()) + "/s", calculatedData));
                     }
                 }
@@ -150,7 +150,6 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                             MsgUtil.humanReadableByteCountBin(dailyTrafficCapping)));
         }
     }
-
 
 
     @Override

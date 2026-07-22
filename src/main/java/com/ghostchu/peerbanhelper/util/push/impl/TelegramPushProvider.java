@@ -74,18 +74,18 @@ public final class TelegramPushProvider extends AbstractPushProvider {
         map.put("text", markdown);
         map.put("photo", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         map.put("parse_mode", "Markdown");
-        
+
         RequestBody requestBody = RequestBody.create(
                 JsonUtil.getGson().toJson(map),
                 MediaType.parse("application/json")
         );
-        
+
         Request request = new Request.Builder()
                 .url("https://api.telegram.org/bot" + config.getToken() + "/sendPhoto")
                 .post(requestBody)
                 .header("Content-Type", "application/json")
                 .build();
-        
+
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 String responseBody = response.body().string();
@@ -97,9 +97,10 @@ public final class TelegramPushProvider extends AbstractPushProvider {
         }
         return true;
     }
+
     @AllArgsConstructor
     @Data
-    public static class Config{
+    public static class Config {
         private String token;
         private String chatId;
     }

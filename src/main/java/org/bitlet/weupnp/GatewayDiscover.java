@@ -23,29 +23,12 @@
  */
 package org.bitlet.weupnp;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
 
 /**
  * Handles the discovery of GatewayDevices, via the {@link org.bitlet.weupnp.GatewayDiscover#discover()} method.
@@ -76,18 +59,18 @@ public class GatewayDiscover {
      * The gateway types the discover have to search.
      */
     private final String[] searchTypes;
-    
+
     /**
      * The default gateway types to use in search
      */
     private static final String[] DEFAULT_SEARCH_TYPES =
-        {
-            "urn:schemas-upnp-org:device:InternetGatewayDevice:1",
-            "urn:schemas-upnp-org:service:WANIPConnection:1",
-            "urn:schemas-upnp-org:service:WANPPPConnection:1"
-        };
-            
-    
+            {
+                    "urn:schemas-upnp-org:device:InternetGatewayDevice:1",
+                    "urn:schemas-upnp-org:service:WANIPConnection:1",
+                    "urn:schemas-upnp-org:service:WANPPPConnection:1"
+            };
+
+
     /**
      * A map of the GatewayDevices discovered so far.
      * The assumption is that a machine is connected to up to a Gateway Device
@@ -96,8 +79,8 @@ public class GatewayDiscover {
     private final Map<InetAddress, GatewayDevice> devices = new HashMap<>();
 
     /*
-      *  Thread class for sending a search datagram and process the response.
-      */
+     *  Thread class for sending a search datagram and process the response.
+     */
     private class SendDiscoveryThread extends Thread {
         final InetAddress ip;
         final String searchMessage;
@@ -173,9 +156,9 @@ public class GatewayDiscover {
 
     /**
      * Constructor.
-     * 
+     * <p>
      * By default it's looking for 3 types of gateways.
-     * 
+     *
      */
     public GatewayDiscover() {
         this(DEFAULT_SEARCH_TYPES);
@@ -183,16 +166,16 @@ public class GatewayDiscover {
 
     /**
      * Constructor of the gateway discover service.
-     * 
+     *
      * @param st The search type you are looking for
      */
     public GatewayDiscover(String st) {
         this(new String[]{st});
     }
-    
+
     /**
      * Constructor.
-     * 
+     *
      * @param types The search types the discover have to look for
      */
     public GatewayDiscover(String[] types) {
@@ -201,6 +184,7 @@ public class GatewayDiscover {
 
     /**
      * Gets the timeout for socket connections of the initial broadcast request.
+     *
      * @return timeout in milliseconds
      */
     public int getTimeout() {
@@ -209,6 +193,7 @@ public class GatewayDiscover {
 
     /**
      * Sets the timeout for socket connections of the initial broadcast request.
+     *
      * @param milliseconds the new timeout in milliseconds
      */
     public void setTimeout(int milliseconds) {
@@ -252,7 +237,7 @@ public class GatewayDiscover {
                 threads.add(thread);
                 thread.start();
                 // 提高成功率
-                SendDiscoveryThread thread_delay = new SendDiscoveryThread(ip, searchMessage, timeout/2);
+                SendDiscoveryThread thread_delay = new SendDiscoveryThread(ip, searchMessage, timeout / 2);
                 threads.add(thread_delay);
                 thread_delay.start();
             }
@@ -319,7 +304,7 @@ public class GatewayDiscover {
      * Gets the first connected gateway
      *
      * @return the first GatewayDevice which is connected to the network, or
-     *         null if none present
+     * null if none present
      */
     public GatewayDevice getValidGateway() {
 

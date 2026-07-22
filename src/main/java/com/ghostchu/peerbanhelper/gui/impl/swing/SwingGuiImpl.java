@@ -147,15 +147,11 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         //FlatIntelliJLaf.setup();
         setupSwingDefaultFonts();
         Main.getEventBus().register(this);
-        if(colorDetector != null) {
+        if (colorDetector != null) {
             try {
                 // 这玩意儿能空指针？
                 colorDetector.onAppearanceChange(appearance -> {
-                    if (appearance == Theme.Appearance.DARK) {
-                        this.updateTheme(true);
-                    } else {
-                        this.updateTheme(false);
-                    }
+                    this.updateTheme(appearance == Theme.Appearance.DARK);
                 });
                 this.updateTheme(colorDetector.getAppearance().orElse(Theme.Appearance.LIGHT) == Theme.Appearance.DARK);
             } catch (Exception e) {
@@ -167,9 +163,9 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public boolean isDarkMode() {
-        if(colorDetector != null) {
+        if (colorDetector != null) {
             return colorDetector.getAppearance().orElse(Theme.Appearance.LIGHT) == Theme.Appearance.DARK;
-        }else{
+        } else {
             return false;
         }
     }

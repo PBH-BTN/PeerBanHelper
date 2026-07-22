@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.databasent.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
 import com.ghostchu.peerbanhelper.databasent.service.impl.common.TrafficJournalServiceImpl;
 import com.ghostchu.peerbanhelper.databasent.table.TrafficJournalEntity;

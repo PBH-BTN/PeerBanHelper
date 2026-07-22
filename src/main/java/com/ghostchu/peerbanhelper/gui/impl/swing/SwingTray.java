@@ -54,10 +54,10 @@ public final class SwingTray {
 
     public void set(List<JMenuItem> items) {
         jPopupMenu.removeAll();
-        items.forEach(ele->{
-            if(ele == null) {
+        items.forEach(ele -> {
+            if (ele == null) {
                 jPopupMenu.addSeparator();
-            }else{
+            } else {
                 jPopupMenu.add(ele);
             }
         });

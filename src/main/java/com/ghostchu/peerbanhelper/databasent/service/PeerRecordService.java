@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.databasent.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 import com.ghostchu.peerbanhelper.databasent.dto.ClientAnalyseResult;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTimeSeen;
 import com.ghostchu.peerbanhelper.databasent.dto.IPAddressTotalTraffic;

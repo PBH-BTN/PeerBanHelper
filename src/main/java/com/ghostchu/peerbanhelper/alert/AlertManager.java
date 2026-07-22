@@ -11,18 +11,21 @@ public interface AlertManager {
 
     /**
      * 移除已发布的警报
+     *
      * @param identifier 标识符
      */
     void markAlertAsRead(@NotNull String identifier);
 
     /**
      * 检查指定标识符的警报是否存在且处于未读状态
+     *
      * @param identifier 标识符
      */
     boolean identifierAlertExists(@NotNull String identifier);
 
     /**
      * 检查指定标识符的警报是否存在，无论是否已读
+     *
      * @param identifier 标识符
      */
     boolean identifierAlertExistsIncludeRead(@NotNull String identifier);
@@ -40,9 +43,10 @@ public interface AlertManager {
 
     /**
      * 获取当前所有未读警报中最高等级的警报等级
+     *
      * @return 当前所有未读警报中最高等级的警报等级，如果没有未读警报则返回 null
      */
-     @Nullable AlertLevel getHighestUnreadAlertLevel();
+    @Nullable AlertLevel getHighestUnreadAlertLevel();
 
-     @NotNull List<AlertEntity> getUnreadAlerts();
+    @NotNull List<AlertEntity> getUnreadAlerts();
 }

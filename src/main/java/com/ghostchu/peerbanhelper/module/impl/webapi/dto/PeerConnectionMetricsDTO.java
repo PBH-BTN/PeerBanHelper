@@ -30,7 +30,7 @@ public class PeerConnectionMetricsDTO {
     private long utpSocket; // 使用 uTP 协议的 Peer 数量
     private long tcpSocket; // 使用 TCP (BT) 协议的 Peer 数量
 
-    public static PeerConnectionMetricsDTO from(@NotNull PeerConnectionMetricsEntity peerConnectionMetricsEntity){
+    public static PeerConnectionMetricsDTO from(@NotNull PeerConnectionMetricsEntity peerConnectionMetricsEntity) {
         return new PeerConnectionMetricsDTO(
                 peerConnectionMetricsEntity.getTimeframeAt().toInstant().toEpochMilli(),
                 peerConnectionMetricsEntity.getTotalConnections(),

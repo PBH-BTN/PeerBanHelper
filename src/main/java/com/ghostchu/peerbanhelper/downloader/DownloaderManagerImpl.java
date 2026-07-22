@@ -98,7 +98,7 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
 
     @Override
     public Downloader createDownloader(String id, JsonObject downloaderSection) {
-        var builder =  httpUtil.newBuilder();
+        var builder = httpUtil.newBuilder();
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
             case "qbittorrent" ->

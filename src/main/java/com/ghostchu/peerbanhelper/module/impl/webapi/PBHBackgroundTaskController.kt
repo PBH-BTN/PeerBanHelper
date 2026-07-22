@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi
 
-import com.ghostchu.peerbanhelper.module.AbstractWebSocketFeatureModule
+import com.ghostchu.peerbanhelper.module.AbstractSSEFeatureModule
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskDTO
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEvent
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskEventType
@@ -10,14 +10,13 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager
 import com.ghostchu.peerbanhelper.util.backgroundtask.TaskStatusListener
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer
 import com.ghostchu.peerbanhelper.web.Role
-import io.javalin.websocket.WsConfig
-import io.javalin.websocket.WsContext
+import io.javalin.http.sse.SseClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
+class PBHBackgroundTaskController : AbstractSSEFeatureModule() {
     private val logger = LoggerFactory.getLogger(PBHBackgroundTaskController::class.java)
 
     @Autowired
@@ -37,10 +36,7 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
     override fun getConfigName(): String = "webapi-background-tasks"
 
     override fun onEnable() {
-        webContainer.routes()
-            .wsBeforeUpgrade("/api/tasks/stream", this::beforeUpgrade)
-            .ws("/api/tasks/stream", this::handleTaskStream, Role.USER_READ)
-
+        webContainer.routes().sse("/api/tasks/live", this::handleSseConnection, Role.USER_READ)
         backgroundTaskManager.addStatusListener(statusListener)
     }
 
@@ -48,17 +44,17 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
         backgroundTaskManager.removeStatusListener(statusListener)
     }
 
-    private fun handleTaskStream(wsConfig: WsConfig) {
-        acceptWebSocket(wsConfig) { ctx ->
-            sendCurrentTasks(ctx)
-        }
+    private fun handleSseConnection(sseClient: SseClient) {
+        sendCurrentTasks(sseClient)
+        registerSseManagement(sseClient)
     }
 
-    private fun sendCurrentTasks(ctx: WsContext) {
-        val lang = locale(ctx)
+
+    private fun sendCurrentTasks(sseClient: SseClient) {
+        val lang = locale(sseClient.ctx())
         for (task in backgroundTaskManager.getTaskList()) {
             try {
-                ctx.send(
+                sseClient.sendEvent(
                     BackgroundTaskEvent(
                         BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
                             id = task.id,
@@ -73,30 +69,33 @@ class PBHBackgroundTaskController : AbstractWebSocketFeatureModule() {
                     )
                 )
             } catch (e: Exception) {
-                logger.error("Failed to send task status to WebSocket client", e)
+                logger.error("Failed to send task status to SSE client", e)
             }
         }
     }
 
     private fun broadcastTaskUpdate(task: BackgroundTask) {
-        for (session in wsSessions) {
-            try {
-                val lang = locale(session)
-                val response = BackgroundTaskEvent(
-                    BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
-                        id = task.id,
-                        title = tl(lang, task.title),
-                        statusText = if (task.statusText != null) tl(lang, task.statusText!!) else null,
-                        status = task.status,
-                        barType = task.barType,
-                        progress = task.progress,
-                        current = task.current,
-                        max = task.max
+        iterateSseClients { sseClient ->
+            run {
+                try {
+                    val lang = locale(sseClient.ctx())
+                    sseClient.sendEvent(
+                        BackgroundTaskEvent(
+                            BackgroundTaskEventType.UPDATED, BackgroundTaskDTO(
+                                id = task.id,
+                                title = tl(lang, task.title),
+                                statusText = if (task.statusText != null) tl(lang, task.statusText!!) else null,
+                                status = task.status,
+                                barType = task.barType,
+                                progress = task.progress,
+                                current = task.current,
+                                max = task.max
+                            )
+                        )
                     )
-                )
-                session.send(response)
-            } catch (e: Exception) {
-                logger.debug("Failed to send task update to WebSocket client", e)
+                } catch (e: Exception) {
+                    logger.debug("Failed to send task update to SSE client", e)
+                }
             }
         }
     }

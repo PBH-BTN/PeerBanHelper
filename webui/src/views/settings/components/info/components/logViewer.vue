@@ -141,14 +141,18 @@ const list = computed(() =>
 )
 
 const logList = ref<typeof List>()
-const ws = new StreamLogger()
+const stream = new StreamLogger()
 const changeAutoRefresh = async (enable: boolean | string | number) => {
   try {
     if (enable) {
       console.log('open auto refresh')
-      return ws.open(
-        logBuffer.value.length > 0 ? logBuffer.value[logBuffer.value.length - 1]!.offset : 0,
+      return stream.open(
         (newLog) => {
+          const lastLog = logBuffer.value[logBuffer.value.length - 1]
+          if (newLog.time <= lastLog?.time && newLog.offset < lastLog?.offset) {
+            // load lastest log only
+            return
+          }
           logBuffer.value.push(newLog)
           modules.value.add(newLog.thread)
           console.log('scroll to', logBuffer.value.length - 1)
@@ -165,7 +169,7 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
         }
       )
     } else {
-      ws.close()
+      stream.close()
       return true
     }
   } catch (e) {
@@ -199,7 +203,7 @@ const getThreadColor = (thread: string) => {
 
 onBeforeUnmount(() => {
   console.log('close ws')
-  ws.close()
+  stream.close()
 })
 
 const showThreadName = ref(false)

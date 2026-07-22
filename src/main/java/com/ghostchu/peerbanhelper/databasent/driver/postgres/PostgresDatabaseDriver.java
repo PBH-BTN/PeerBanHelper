@@ -16,7 +16,7 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
     public PostgresDatabaseDriver(@NotNull ConfigurationSection section) throws IOException {
         super();
         BeeDataSourceConfig config = new BeeDataSourceConfig();
-        
+
         String host = section.getString("host");
         int port = section.getInt("port");
         String database = section.getString("database");
@@ -40,7 +40,7 @@ public class PostgresDatabaseDriver extends AbstractDatabaseDriver {
 
         // 手动关闭连接池
         config.setRegisterJvmHook(false);
-        
+
         // PostgreSQL 事务中 schema/catalog 变更支持
         config.setForceDirtyWhenSetSchema(true);
 

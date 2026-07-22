@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Slf4j
 @Service
 public class BanListServiceImpl extends AbstractCommonService<BanListMapper, BanListEntity> implements BanListService {
@@ -42,11 +43,11 @@ public class BanListServiceImpl extends AbstractCommonService<BanListMapper, Ban
         List<BanListEntity> entityList = new ArrayList<>();
         banlist.forEach((key, value) -> entityList.add(new BanListEntity(
                 key.toCompressedString(), JsonUtil.tiny().toJson(value))));
-        Integer integer = transactionTemplate.execute(_->{
+        Integer integer = transactionTemplate.execute(_ -> {
             baseMapper.delete(null);
             return baseMapper.insert(entityList).size();
         });
-        if(integer == null){
+        if (integer == null) {
             return 0;
         }
         return integer;

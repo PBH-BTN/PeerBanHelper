@@ -163,6 +163,12 @@ public class DatabaseMigrationCoordinator {
                 }
             }
 
+            for (TableMigrator migrator : migrators) {
+                if (migrator.isAutoIncrement()) {
+                    MigrationContext.fixAutoIncrement(migrator.getTableName());
+                }
+            }
+
             long duration = System.currentTimeMillis() - startTime;
             log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_FINISHED, context.getTotalRecordsMigrated(), duration / 1000));
         }
@@ -207,7 +213,7 @@ public class DatabaseMigrationCoordinator {
         }
 
         File zipFile = new File(sqliteDbFile.getParentFile(),
-                                sqliteDbFile.getName() + ".zip");
+                sqliteDbFile.getName() + ".zip");
 
         log.info("Archiving SQLite database to: {}", zipFile.getAbsolutePath());
         log.info(tlUI(Lang.DBNT_MIGRATOR_ARCHIVING_LEGACY_TO, zipFile.getAbsolutePath()));

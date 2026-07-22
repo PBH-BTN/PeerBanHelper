@@ -12,11 +12,7 @@ import java.lang.management.ThreadMXBean;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
 @Slf4j
@@ -84,7 +80,7 @@ public final class MiscUtil {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface ni = networkInterfaces.nextElement();
-                if(ni.isLoopback() || ni.isPointToPoint() || ni.isVirtual())
+                if (ni.isLoopback() || ni.isPointToPoint() || ni.isVirtual())
                     continue;
                 byte[] mac = ni.getHardwareAddress();
                 if (mac != null) {

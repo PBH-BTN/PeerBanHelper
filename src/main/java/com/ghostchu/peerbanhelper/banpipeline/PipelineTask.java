@@ -33,9 +33,9 @@ public class PipelineTask<T> {
 
     @Override
     public String toString() {
-        if(io){
+        if (io) {
             return "[Task] (" + organ.getClass().getSimpleName() + ") " + comment;
-        }else{
+        } else {
             return "[Task >IO<] (" + organ.getClass().getSimpleName() + ") " + comment;
         }
     }

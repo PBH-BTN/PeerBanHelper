@@ -60,7 +60,7 @@ Before reporting issues, check [FAQ](https://docs.pbh-btn.com/docs/faq)
 
 ## Need Help?
 
-Join our [QQ Group](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn) or [Telegram Group](https://t.me/+_t3Nt5GZ6bJmYjBl)!
+Join our [QQ Group](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn) or [Telegram Group](https://t.me/+TfjwEmsUKhZjMTI1)!
 
 ## Disclaimer
 

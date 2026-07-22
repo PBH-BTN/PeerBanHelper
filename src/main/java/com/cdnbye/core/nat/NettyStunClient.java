@@ -181,7 +181,7 @@ public class NettyStunClient {
      * Checks if the STUN response came from a different IP/port than the original request destination.
      * This is used to verify that the STUN server properly honored the CHANGE-REQUEST attribute.
      *
-     * @param response The STUN response message
+     * @param response              The STUN response message
      * @param originalRemoteAddress The original destination address where the request was sent
      * @return true if the response came from a different address, false otherwise
      */

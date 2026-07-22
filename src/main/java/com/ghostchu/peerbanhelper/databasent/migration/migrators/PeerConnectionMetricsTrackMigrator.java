@@ -47,6 +47,11 @@ public class PeerConnectionMetricsTrackMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = """
                 SELECT timeframeAt, downloader, torrent_id, address, port,

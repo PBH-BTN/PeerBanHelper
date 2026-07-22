@@ -78,7 +78,7 @@ public final class LegacyBtnAbilitySubmitPeers extends AbstractBtnAbility {
                     .post(body)
                     .header("Content-Encoding", "gzip")
                     .build();
-                    
+
             try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
                 if (!response.isSuccessful()) {
                     String responseBody = response.body().string();

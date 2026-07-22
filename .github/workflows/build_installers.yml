@@ -19,7 +19,7 @@ jobs:
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
-          version: 13.0.1
+          version: 13.0.2
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Restore install4j cache
         uses: actions/cache@v6

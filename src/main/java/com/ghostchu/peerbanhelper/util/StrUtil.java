@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 public final class StrUtil {
     private static final Pattern capitalPattern = Pattern.compile("^.");
+
     public static String toLowerCaseRoot(String str) {
         return str.toLowerCase(Locale.ROOT);
     }

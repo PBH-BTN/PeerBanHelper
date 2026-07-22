@@ -38,8 +38,6 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     private JavalinWebContainer javalinWebContainer;
 
 
-
-
     /**
      * 如果返回 false，则不初始化任何配置文件相关对象
      *

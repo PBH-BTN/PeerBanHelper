@@ -71,18 +71,18 @@ public final class PushDeerPushProvider extends AbstractPushProvider {
         map.put("text", title);
         map.put("desp", content);
         map.put("type", "markdown");
-        
+
         RequestBody requestBody = RequestBody.create(
                 JsonUtil.getGson().toJson(map),
                 MediaType.parse("application/json")
         );
-        
+
         Request request = new Request.Builder()
                 .url(config.getEndpoint())
                 .post(requestBody)
                 .header("Content-Type", "application/json")
                 .build();
-        
+
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("HTTP Failed while sending push messages to PushDeer: " + response.body().string());

@@ -32,7 +32,7 @@ public class WindowTitle {
             joiner.setEmptyValue("");
             ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
             String newTitle = builder.append(joiner).toString();
-            if(parent.getTitle().equals(newTitle)) {
+            if (parent.getTitle().equals(newTitle)) {
                 return; // no change
             }
             SwingUtilities.invokeLater(() -> parent.setTitle(newTitle));

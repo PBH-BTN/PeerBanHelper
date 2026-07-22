@@ -1,13 +1,13 @@
 package hu.benzor.systemthemedetector.internal.detector.appearance;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import hu.benzor.systemthemedetector.api.theme.Theme.Appearance;
 import hu.benzor.systemthemedetector.internal.command.CommandOutputLineMapper;
 import hu.benzor.systemthemedetector.internal.command.FilteredCommandOutputLineMapper;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public final class LinuxAppearanceDetector extends AppearanceDetector {
@@ -18,15 +18,15 @@ public final class LinuxAppearanceDetector extends AppearanceDetector {
 
     public LinuxAppearanceDetector() {
         ProcessBuilder pb = new ProcessBuilder(
-            "gdbus",
-            "call",
-            "--session",
-            "--timeout=1000",
-            "--dest=org.freedesktop.portal.Desktop",
-            "--object-path=/org/freedesktop/portal/desktop",
-            "--method=org.freedesktop.portal.Settings.ReadOne",
-            "org.freedesktop.appearance",
-            "color-scheme"
+                "gdbus",
+                "call",
+                "--session",
+                "--timeout=1000",
+                "--dest=org.freedesktop.portal.Desktop",
+                "--object-path=/org/freedesktop/portal/desktop",
+                "--method=org.freedesktop.portal.Settings.ReadOne",
+                "org.freedesktop.appearance",
+                "color-scheme"
         );
         outputLineMapper = new FilteredCommandOutputLineMapper(pb);
     }

@@ -249,7 +249,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 var mem = generateSystemMemoryData(provider.getHardware());
                 os.put("memory", mem);
             });
-        }catch (Throwable _){
+        } catch (Throwable _) {
             os.put("version", "N/A");
         }
         return os;
@@ -385,7 +385,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             }
         }
         yamlConfiguration.load(configFile);
-        Map<String, Object> newData = GSON.fromJson(context.body(), Map.class);
+        Map<String, Object> newData = GSON.fromJson(context.body(), new TypeToken<Map<String, Object>>() {}.getType());
         mergeYaml(yamlConfiguration, newData, "_", "-");
         yamlConfiguration.save(configFile);
         //moduleMatchCache.invalidateAll();

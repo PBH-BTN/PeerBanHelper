@@ -1,13 +1,13 @@
-import type { Log } from '@/api/model/log'
-import { WebSocketHandler } from './websocket'
 import type { CommonResponse } from '@/api/model/common'
+import type { Log } from '@/api/model/log'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
+import { SSEHandler } from './eventstream'
 import { getCommonHeader } from './utils'
-export class StreamLogger extends WebSocketHandler<Log> {
+export class StreamLogger extends SSEHandler<Log> {
   constructor() {
     const endpointStore = useEndpointStore()
-    super(endpointStore.endpoint, 'api/logs/stream', endpointStore.authToken)
+    super(endpointStore.endpoint, 'api/logs/live', endpointStore.authToken)
   }
 }
 

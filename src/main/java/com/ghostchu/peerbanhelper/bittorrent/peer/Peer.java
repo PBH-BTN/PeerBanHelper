@@ -76,6 +76,7 @@ public interface Peer extends Comparable<Peer> {
 
     /**
      * 对等体是否连接中或者握手中（总之就是还没准备好传输数据）
+     *
      * @return 是否连接中或者握手中
      */
     boolean isHandshaking();

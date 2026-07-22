@@ -1,4 +1,3 @@
-
 package com.ghostchu.peerbanhelper.banpipeline.organ;
 
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;

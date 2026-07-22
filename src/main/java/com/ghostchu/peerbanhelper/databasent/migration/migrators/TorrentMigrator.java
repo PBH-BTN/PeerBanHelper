@@ -46,6 +46,11 @@ public class TorrentMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = "SELECT id, infoHash, name, size, privateTorrent FROM torrents";
         long count = 0;
@@ -81,7 +86,7 @@ public class TorrentMigrator implements TableMigrator {
                     batch.clear();
 
                     if (MigrationContext.shouldLogProgress(count, totalCount, lastLogged)) {
-                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "torrent", MigrationContext.formatProgress(count, totalCount)));
+                        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_PROGRESS, count, totalCount, "torrents", MigrationContext.formatProgress(count, totalCount)));
 
                         lastLogged = count;
                     }
@@ -95,7 +100,7 @@ public class TorrentMigrator implements TableMigrator {
             }
         }
 
-        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "torrent"));
+        log.info(tlUI(Lang.DBNT_MIGRATOR_MIGRATING_COMPLETED, count, "torrents"));
         context.incrementTotalRecords(count);
         return count;
     }

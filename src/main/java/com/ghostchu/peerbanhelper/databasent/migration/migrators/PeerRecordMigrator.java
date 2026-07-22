@@ -51,6 +51,11 @@ public class PeerRecordMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = """
                 SELECT address, port, torrent_id, downloader, peerId, clientName,

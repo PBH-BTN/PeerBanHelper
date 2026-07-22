@@ -154,7 +154,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
             btnNetwork.getServer().scheduleUnBanPeer(unbanPeer.getIpAddress());
             btnNetwork.getAlertManager().publishAlert(false,
                     AlertLevel.INFO,
-                    "btn-allowlist-unbanned-peer-"+unbanPeer.getIpAddress().toCompressedString()+ UUID.randomUUID(),
+                    "btn-allowlist-unbanned-peer-" + unbanPeer.getIpAddress().toCompressedString() + UUID.randomUUID(),
                     new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_TITLE),
                     new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_DESCRIPTION,
                             unbanPeer.getIpAddress().toCompressedString(),
@@ -162,7 +162,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
                             unbanPeer.getBanMetadata().getRule(),
                             unbanPeer.getBanMetadata().getDescription(),
                             unbanPeer.getResult().comment())
-                    );
+            );
             log.info(tlUI(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_PEER, unbanPeer.getBanMetadata(), unbanPeer.getResult().comment()));
         }
     }

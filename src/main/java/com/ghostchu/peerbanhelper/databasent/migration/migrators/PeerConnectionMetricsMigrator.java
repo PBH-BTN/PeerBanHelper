@@ -41,6 +41,11 @@ public class PeerConnectionMetricsMigrator implements TableMigrator {
     }
 
     @Override
+    public boolean isAutoIncrement() {
+        return true;
+    }
+
+    @Override
     public long migrate(Connection sqliteConnection, MigrationContext context) throws Exception {
         String selectQuery = """
                 SELECT timeframeAt, downloader, totalConnections, incomingConnections,

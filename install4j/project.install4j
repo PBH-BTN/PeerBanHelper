@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="13.0.1" transformSequenceNumber="13">
+<install4j version="13.0.2" transformSequenceNumber="13">
   <directoryPresets config="../native/qt6" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="9.4.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="25" javaMaxVersion="25">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="${compiler:publisherName}" publisherWeb="https://github.com/PBH-BTN" version="9.4.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="25" javaMaxVersion="25">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
@@ -16,6 +16,7 @@
       <variable name="startupFlagPlatform" value="-XX:+UseCompactObjectHeaders -XX:SoftMaxHeapSize=386M -Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseG1GC -XX:G1PeriodicGCInterval=60000 -XX:MaxHeapFreeRatio=15 -XX:MinHeapFreeRatio=5 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatform}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" />
       <variable name="startupFlagPlatformNoGUI" value="-XX:+UseCompactObjectHeaders -XX:SoftMaxHeapSize=386M -Djdk.attach.allowAttachSelf=true -XX:MaxRAMPercentage=85.0 -XX:+UseG1GC -XX:G1PeriodicGCInterval=60000 -XX:MaxHeapFreeRatio=15 -XX:MinHeapFreeRatio=5 -Xss512k -XX:+UseStringDeduplication -XX:-ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/macos-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/linux-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
       <variable name="jvmOptionsFile" value="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideWindows="true" valueWindows="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideMacos="true" valueMacos="${user.home}/Library/Application Support/PeerBanHelper" overrideUnix="true" valueUnix="${user.home}/.config/PeerBanHelper" />
+      <variable name="publisherName" value="PBH-BTN Community" />
     </variables>
     <jreBundles jdkProviderId="JBR" release="25/25.0.3-b508.16" />
   </application>
