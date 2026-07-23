@@ -9,7 +9,7 @@ import java.util.List;
 public record FetchedPeersBatch(
         Downloader downloader,
         Torrent torrent,
-        List<Peer> peers
+        List<? extends Peer> peers
 ) {
 
 }
