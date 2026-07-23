@@ -51,7 +51,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     }
 
     @Override
-    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<? extends Peer> peers, @NotNull PipelineTask<?> task) {
         try {
             task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
             connectionMetricsTrackDao.syncPeers(downloader, torrent, peers);

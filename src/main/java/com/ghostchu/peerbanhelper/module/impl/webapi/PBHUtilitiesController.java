@@ -72,8 +72,8 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
                     for (Torrent torrent : downloader.getAllTorrents()) {
                         executor.submit(() -> {
                             try {
-                                List<Tracker> liveTrackers = downloader.getTrackers(torrent);
-                                List<Tracker> newTrackers = createTrackerListForReplace(dto.from(), dto.to(), liveTrackers);
+                                List<? extends Tracker> liveTrackers = downloader.getTrackers(torrent);
+                                List<? extends Tracker> newTrackers = createTrackerListForReplace(dto.from(), dto.to(), liveTrackers);
                                 if (newTrackers != null) {
                                     downloader.setTrackers(torrent, newTrackers);
                                     count.incrementAndGet();
@@ -100,7 +100,7 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
      * @return 如果有任何修改则返回新的 Tracker 列表，否则返回 null
      */
     @Nullable
-    private List<Tracker> createTrackerListForReplace(String from, String to, List<Tracker> trackers) {
+    private List<Tracker> createTrackerListForReplace(String from, String to, List<? extends Tracker> trackers) {
         boolean anyModification = false;
         List<Tracker> newTrackers = new ArrayList<>();
         for (Tracker tracker : trackers) {

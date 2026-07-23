@@ -13,17 +13,17 @@ import java.util.List;
 @Data
 public class A2Task implements Torrent {
     private BittorrentType bittorrent;
-    private Long completedLength;
-    private String connections;
-    private Long downloadSpeed;
+    private long completedLength;
+    private long connections;
+    private long downloadSpeed;
     private List<FilesType> files;
     private String gid;
     private String infoHash;
-    private Long numSeeders;
-    private Long seeder;
-    private Long status;
-    private Long totalLength;
-    private Long uploadSpeed;
+    private long numSeeders;
+    private boolean seeder;
+    private String status;
+    private long totalLength;
+    private long uploadSpeed;
 
     @Override
     public @NotNull String getId() {
@@ -81,7 +81,7 @@ public class A2Task implements Torrent {
     @Data
     public static class BittorrentType {
         private List<List<String>> announceList;
-        private Integer creationDate;
+        private long creationDate;
         private InfoType info;
         private String magnetLink;
         private String mode;
@@ -90,11 +90,11 @@ public class A2Task implements Torrent {
     @NoArgsConstructor
     @Data
     public static class FilesType {
-        private String completedLength;
-        private String index;
-        private String length;
+        private long completedLength;
+        private long index;
+        private long length;
         private String path;
-        private String selected;
+        private boolean selected;
         private List<Object> uris;
     }
 

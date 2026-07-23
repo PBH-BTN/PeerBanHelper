@@ -187,7 +187,7 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers) {
         StringJoiner trackersJoiner = new StringJoiner("\n\n"); // 空一行
         trackers.forEach(t -> trackersJoiner.add(t.toString()));
         RqTorrentSet set = RqTorrentSet.builder()

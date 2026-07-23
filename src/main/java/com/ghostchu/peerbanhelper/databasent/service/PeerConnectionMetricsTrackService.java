@@ -18,6 +18,6 @@ public interface PeerConnectionMetricsTrackService extends IService<PeerConnecti
 
     int deleteEntries(@NotNull List<PeerConnectionMetricsTrackEntity> entities);
 
-    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) throws ExecutionException;
+    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers) throws ExecutionException;
 
 }

@@ -87,7 +87,7 @@ public class PeerRecordingServiceModule extends AbstractFeatureModule implements
     }
 
     @Override
-    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<? extends Peer> peers, @NotNull PipelineTask<?> task) {
         task.setComment(true, "Update Peers into diskWriteCache, and flush to disk if needed.");
         peers.stream().filter(peer -> {
                     var clientName = peer.getClientName();

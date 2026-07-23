@@ -17,6 +17,6 @@ public interface BatchMonitorFeatureModule extends FeatureModule {
      * @param torrent    种子
      * @param peers      对等体列表
      */
-    default void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
+    default void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<? extends Peer> peers, @NotNull PipelineTask<?> task) {
     }
 }

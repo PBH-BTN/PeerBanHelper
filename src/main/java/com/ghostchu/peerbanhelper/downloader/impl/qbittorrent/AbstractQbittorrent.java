@@ -377,8 +377,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
-        List<Tracker> trackerList = getTrackers(torrent);
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers) {
+        List<? extends Tracker> trackerList = getTrackers(torrent);
         removeTracker(torrent, trackerList);
         addTracker(torrent, trackers);
     }
@@ -455,7 +455,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         }
     }
 
-    private void addTracker(Torrent torrent, List<Tracker> newAdded) {
+    private void addTracker(Torrent torrent, List<? extends Tracker> newAdded) {
         StringJoiner joiner = new StringJoiner("\n");
         newAdded.forEach(t -> {
             if (t.getTrackersInGroup() != null) {
@@ -485,7 +485,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         }
     }
 
-    private void removeTracker(Torrent torrent, List<Tracker> trackers) throws IllegalStateException {
+    private void removeTracker(Torrent torrent, List<? extends Tracker> trackers) throws IllegalStateException {
         StringJoiner joiner = new StringJoiner("|");
         trackers.forEach(t -> t.getTrackersInGroup().forEach(joiner::add));
 
