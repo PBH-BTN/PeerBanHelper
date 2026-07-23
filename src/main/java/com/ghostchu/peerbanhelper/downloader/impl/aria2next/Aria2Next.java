@@ -2,9 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.aria2next;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
-import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
@@ -21,29 +19,29 @@ import com.ghostchu.peerbanhelper.util.jsonrpc.JsonRpcRequest;
 import com.ghostchu.peerbanhelper.util.jsonrpc.JsonRpcResponse;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.GsonTypes;
 import com.google.gson.reflect.TypeToken;
 import com.vdurmont.semver4j.Semver;
 import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
+@Slf4j
 public final class Aria2Next extends AbstractDownloader {
     private final OkHttpClient httpClient;
     private final Config config;
@@ -146,75 +144,104 @@ public final class Aria2Next extends AbstractDownloader {
 
     @Override
     public @NotNull List<? extends Torrent> getTorrents() {
-        var req = buildRpcRequest("aria2.tellActive", List.of(
-                "gid", "status", "totalLength", "completedLength",
-                "uploadLength", "bitfield", "downloadSpeed",
-                "uploadSpeed", "infoHash", "numSeeders",
-                "seeder", "pieceLength", "numPieces", "connections",
-                "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
-                "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
-        ));
-        return sendRpcRequestList(req, A2Task.class);
+        try {
+            var req = buildRpcRequest("aria2.tellActive", List.of(List.of(
+                    "gid", "status", "totalLength", "completedLength",
+                    "uploadLength", "bitfield", "downloadSpeed",
+                    "uploadSpeed", "infoHash", "numSeeders",
+                    "seeder", "pieceLength", "numPieces", "connections",
+                    "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
+                    "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
+            )));
+            return sendRpcRequest(req, new TypeToken<List<A2Task>>() {
+            });
+        } catch (DownloaderRequestException e) {
+            log.error("Error on request", e);
+            return Collections.emptyList();
+        }
     }
 
     @Override
     public @NotNull List<? extends Torrent> getAllTorrents() {
-        var active = buildRpcRequest("aria2.tellActive", List.of(
-                "gid", "status", "totalLength", "completedLength",
-                "uploadLength", "bitfield", "downloadSpeed",
-                "uploadSpeed", "infoHash", "numSeeders",
-                "seeder", "pieceLength", "numPieces", "connections",
-                "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
-                "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
-        ));
-        List<A2Task> torrents = new ArrayList<>(sendRpcRequestList(active, A2Task.class));
-        var waiting = buildRpcRequest("aria2.tellWaiting", List.of(
-                "gid", "status", "totalLength", "completedLength",
-                "uploadLength", "bitfield", "downloadSpeed",
-                "uploadSpeed", "infoHash", "numSeeders",
-                "seeder", "pieceLength", "numPieces", "connections",
-                "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
-                "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
-        ));
-        torrents.addAll(sendRpcRequestList(waiting, A2Task.class));
-        var stopped = buildRpcRequest("aria2.tellStopped", List.of(
-                "gid", "status", "totalLength", "completedLength",
-                "uploadLength", "bitfield", "downloadSpeed",
-                "uploadSpeed", "infoHash", "numSeeders",
-                "seeder", "pieceLength", "numPieces", "connections",
-                "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
-                "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
-        ));
-        torrents.addAll(sendRpcRequestList(stopped, A2Task.class));
-        return torrents;
+        List<A2Task> torrents = new ArrayList<>(20);
+        try {
+            var active = buildRpcRequest("aria2.tellActive", List.of(List.of(
+                    "gid", "status", "totalLength", "completedLength",
+                    "uploadLength", "bitfield", "downloadSpeed",
+                    "uploadSpeed", "infoHash", "numSeeders",
+                    "seeder", "pieceLength", "numPieces", "connections",
+                    "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
+                    "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
+            )));
+            torrents.addAll(sendRpcRequest(active, new TypeToken<List<A2Task>>() {
+            }));
+            var waiting = buildRpcRequest("aria2.tellWaiting", List.of(List.of(
+                    "gid", "status", "totalLength", "completedLength",
+                    "uploadLength", "bitfield", "downloadSpeed",
+                    "uploadSpeed", "infoHash", "numSeeders",
+                    "seeder", "pieceLength", "numPieces", "connections",
+                    "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
+                    "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
+            )));
+            torrents.addAll(sendRpcRequest(waiting, new TypeToken<List<A2Task>>() {
+            }));
+            var stopped = buildRpcRequest("aria2.tellStopped", List.of(List.of(
+                    "gid", "status", "totalLength", "completedLength",
+                    "uploadLength", "bitfield", "downloadSpeed",
+                    "uploadSpeed", "infoHash", "numSeeders",
+                    "seeder", "pieceLength", "numPieces", "connections",
+                    "errorCode", "errorMessage", "followedBy", "following", "belongsTo",
+                    "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
+            )));
+            torrents.addAll(sendRpcRequest(stopped, new TypeToken<List<A2Task>>() {
+            }));
+            return torrents;
+        } catch (DownloaderRequestException e) {
+            log.error("Error on request", e);
+            return torrents;
+        }
     }
 
     @Override
     public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
-        var requestPeers = buildRpcRequest("aria2.getPeers", List.of(
-                torrent.getId()
-        ));
-        // Aria2 出于某种原因决定用 [ [ {peerobject} ] ] 的方式返回数据，我直接似了
-        List<A2Peer> peers;
-
-       return peers;
+        try {
+            var requestPeers = buildRpcRequest("aria2.getPeers", List.of(
+                    torrent.getId()
+            ));
+            return sendRpcRequest(requestPeers, new TypeToken<List<A2Peer>>() {
+            });
+        } catch (DownloaderRequestException e) {
+            log.error("Error on request", e);
+            return Collections.emptyList();
+        }
     }
 
     @Override
     public @NotNull List<? extends Tracker> getTrackers(@NotNull Torrent torrent) {
-        return ((A2Task)torrent).getBittorrent().getAnnounceList().stream()
+        return ((A2Task) torrent).getBittorrent().getAnnounceList().stream()
                 .map(TrackerImpl::new)
                 .toList();
     }
 
     @Override
-    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers) {
 
     }
 
     @Override
     public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
-
+        String text = fullList.stream()
+                        .flatMap(i->remapBanListAddress(i, true).stream())
+                .map(IPAddress::toCompressedString)
+                                .collect(Collectors.joining("\n"));
+        try {
+            var setBanList = sendRpcRequest(buildRpcRequest("aria2.changeGlobalOption",
+                    List.of(Map.of("bt-peer-blocklist", text))
+            ), new TypeToken<>() {
+            });
+        }catch (DownloaderRequestException e){
+            log.error("Error on request", e);
+        }
     }
 
     @Override
@@ -243,49 +270,57 @@ public final class Aria2Next extends AbstractDownloader {
 
     }
 
-    private A2GlobalOptions getGlobalOptions() {
+    private A2GlobalOptions getGlobalOptions() throws DownloaderRequestException {
         var req = buildRpcRequest("aria2.getGlobalOption", null);
         return sendRpcRequest(req, A2GlobalOptions.class);
     }
 
 
-    private <T> T sendRpcRequest(Request request, Class<T> clazz) {
+    private <T> T sendRpcRequest(Request request, Type dataType) throws DownloaderRequestException {
         try (Response resp = httpClient.newCall(request).execute()) {
             if (!resp.isSuccessful()) {
-                throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_UNHANDLED_EXCEPTION, getName(), resp.code(), resp.body()));
+                throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_JSONRPC_REQUEST_FAILED, getName(), getEndpoint(), resp.code(), "N/A", resp.body() != null ? resp.body().string() : ""));
             }
+
             String responseBody = resp.body().string();
-            Type responseType = GsonTypes.newParameterizedTypeWithOwner(null, JsonRpcResponse.class, clazz);
+            System.out.println(responseBody);
+            // 使用 Gson 的 TypeToken.getParameterized 构建 JsonRpcResponse<dataType>
+            Type responseType = TypeToken.getParameterized(JsonRpcResponse.class, dataType).getType();
             JsonRpcResponse<T> response = JsonUtil.standard().fromJson(responseBody, responseType);
-            if (response.getResult() != null) {
-                return response.getResult();
+
+            // 正确的 JsonRPC 判断标准：优先看 error 字段是否非空
+            if (response.getError() != null) {
+                throw new DownloaderRequestException(tlUI(
+                        Lang.DOWNLOADER_JSONRPC_REQUEST_FAILED,
+                        config.getName(),
+                        config.getEndpoint(),
+                        resp.code(),
+                        response.getError().getCode(),
+                        response.getError().getMessage()
+                ));
             }
-            throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_JSONRPC_REQUEST_FAILED, config.getName(), config.getEndpoint(), resp.code(), response.getError().getCode(), response.getError().getMessage()));
+
+            return response.getResult();
         } catch (Exception e) {
+            if (e instanceof DownloaderRequestException ex) {
+                throw ex;
+            }
             throw new DownloaderRequestException(e);
         }
     }
 
+    /**
+     * 重载方法：兼容传入普通 Class 的情况（如 String.class, MyDTO.class）
+     */
+    private <T> T sendRpcRequest(Request request, Class<T> clazz) throws DownloaderRequestException {
+        return sendRpcRequest(request, (Type) clazz);
+    }
 
-    private <T> List<T> sendRpcRequestList(Request request, Class<T> clazz) {
-        try (Response resp = httpClient.newCall(request).execute()) {
-            if (!resp.isSuccessful()) {
-                // 注意：resp.body().string() 只能调用一次，这里如果用了，后面解析就会拿不到数据
-                // 建议这里只打印 code，或者先把 body 存成字符串
-                String errorBody = resp.body() != null ? resp.body().string() : "";
-                throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_UNHANDLED_EXCEPTION, getName(), resp.code(), errorBody));
-            }
-            String responseBody = resp.body().string();
-            Type listType = GsonTypes.newParameterizedTypeWithOwner(null, List.class, clazz);
-            Type responseType = GsonTypes.newParameterizedTypeWithOwner(null, JsonRpcResponse.class, listType);
-            JsonRpcResponse<List<T>> response = JsonUtil.standard().fromJson(responseBody, responseType);
-            if (response.getResult() != null) {
-                return response.getResult(); // 此时 result 的实际类型就是 List<T> 了
-            }
-            throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_JSONRPC_REQUEST_FAILED, config.getName(), config.getEndpoint(), resp.code(), response.getError().getCode(), response.getError().getMessage()));
-        } catch (Exception e) {
-            throw new DownloaderRequestException(e);
-        }
+    /**
+     * 重载方法：支持通过 TypeToken 传入复杂泛型类型（如 List<User>, List<List<String>>）
+     */
+    private <T> T sendRpcRequest(Request request, TypeToken<T> typeToken) throws DownloaderRequestException {
+        return sendRpcRequest(request, typeToken.getType());
     }
 
     /**
@@ -328,7 +363,7 @@ public final class Aria2Next extends AbstractDownloader {
 
         public static Aria2Next.Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Aria2Next.Config config = new Aria2Next.Config();
-            config.setType("Aria2Next");
+            config.setType("aria2next");
             config.setEndpoint(section.getString("endpoint"));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -345,7 +380,7 @@ public final class Aria2Next extends AbstractDownloader {
 
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "Aria2Next");
+            section.set("type", "aria2next");
             section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("token", token);

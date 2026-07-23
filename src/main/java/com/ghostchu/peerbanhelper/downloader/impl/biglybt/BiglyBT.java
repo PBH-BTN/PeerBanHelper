@@ -329,7 +329,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers) {
         StringBuilder sb = new StringBuilder();
         for (Tracker tracker : trackers) {
             tracker.getTrackersInGroup().forEach(t -> sb.append(t).append("\n"));

@@ -125,7 +125,7 @@ public interface Downloader {
      * @param torrent  Torrent
      * @param trackers Tracker 列表
      */
-    void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers);
+    void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers);
 
     /**
      * 设置并使新的 BanList 生效

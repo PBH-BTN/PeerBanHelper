@@ -1,94 +1,87 @@
 package com.ghostchu.peerbanhelper.downloader.impl.aria2next.bean;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.google.gson.annotations.SerializedName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigInteger;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-
-@AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class A2Peer implements Peer {
-    private Boolean amChoking;
+
+    @JsonProperty("amChoking")
+    private boolean amChoking;
+    @JsonProperty("amInterested")
+    private boolean amInterested;
+    @JsonProperty("bitfield")
     private String bitfield;
-    private Long downloadSpeed;
+    @JsonProperty("completedLength")
+    private long completedLength;
+    @JsonProperty("downloadSpeed")
+    private long downloadSpeed;
+    @JsonProperty("downloaded")
+    private long downloaded;
+    @JsonProperty("flags")
+    private String flags;
+    @JsonProperty("handshaking")
+    private boolean handshaking;
+    @JsonProperty("incoming")
+    private boolean incoming;
+    @JsonProperty("ip")
     private String ip;
-    private Boolean peerChoking;
-    @SerializedName("peerId")
-    private String peerIdEncoded;
-    private Integer port;
-    private Boolean seeder;
-    private Long uploadSpeed;
+    @JsonProperty("optimisticUnchoke")
+    private boolean optimisticUnchoke;
+    @JsonProperty("peerChoking")
+    private boolean peerChoking;
+    @JsonProperty("peerClientName")
+    private String peerClientName;
+    @JsonProperty("peerId")
+    private String peerId;
+    @JsonProperty("peerInterested")
+    private boolean peerInterested;
+    @JsonProperty("port")
+    private int port;
+    @JsonProperty("progress")
+    private double progress;
+    @JsonProperty("seeder")
+    private boolean seeder;
+    @JsonProperty("snubbed")
+    private boolean snubbed;
+    @JsonProperty("uploadSpeed")
+    private long uploadSpeed;
+    @JsonProperty("uploaded")
+    private long uploaded;
+    private transient PeerAddress peerAddress;
 
     @Override
     public @NotNull PeerAddress getPeerAddress() {
-        return new PeerAddress(ip, port, ip);
-    }
-
-    public String getPeerId(){
-        return URLDecoder.decode(peerIdEncoded, StandardCharsets.ISO_8859_1);
+        if (this.peerAddress == null) {
+            this.peerAddress = new PeerAddress(ip, port, ip);
+        }
+        return this.peerAddress;
     }
 
     @Override
     public @Nullable String getClientName() {
-        return "";
+        return peerClientName;
     }
 
     @Override
-    public long getDownloaded() {
-        return 0;
-    }
-
-    @Override
-    public long getUploaded() {
-        return 0;
-    }
-
-    @Override
-    public double getProgress() {
-        return 0;
-    }
-
-    @Override
-    public @Nullable PeerFlag getFlags() {
-        return null;
-    }
-
-    @Override
-    public boolean isHandshaking() {
-        return false;
-    }
-
-    public double getPercent(){
-      return calculateProgress(bitfield);
-    }
-
-    public static double calculateProgress(String hexBitfield) {
-        if (hexBitfield == null || hexBitfield.isEmpty()) {
-            return 0.0;
-        }
-        // 1. 一个十六进制字符代表 4 个比特 (bits)
-        int totalBits = hexBitfield.length() * 4;
-        // 2. 将十六进制字符串转换为 BigInteger
-        // 核心痛点：如果 bitfield 以 0 开头（例如 "0f...")，
-        // new BigInteger(hex, 16) 会吞掉高位的 0，导致总长度变短。
-        // 但 totalBits = hexBitfield.length() * 4 已经锁定了正确的“理论总分片数”。
-        BigInteger bi = new BigInteger(hexBitfield, 16);
-        // 3. 统计二进制中 1 的个数（即已下载的分片数）
-        // bitCount() 方法在 BigInteger 中专门用来数 1 的个数
-        int downloadedPieces = bi.bitCount();
-        // 4. 计算百分比
-        double progress = ((double) downloadedPieces / totalBits) * 100;
-        // 保留两位小数
-        return Math.round(progress * 100.0) / 100.0;
+    public PeerFlag getFlags() {
+        return PeerFlag.builder()
+                .choked(amChoking)
+                .remoteChoked(peerChoking)
+                .interesting(amInterested)
+                .remoteInterested(peerInterested)
+                .remoteInterested(peerInterested)
+                .handshake(handshaking)
+                .localConnection(!incoming)
+                .snubbed(snubbed)
+                .seed(seeder)
+                .build();
     }
 }

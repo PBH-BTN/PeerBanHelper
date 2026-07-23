@@ -193,7 +193,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers) {
 
     }
 
