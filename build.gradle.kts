@@ -51,6 +51,7 @@ val sqliteVersion = "3.53.2.0"
 val springVersion = "7.0.8"
 val flywayVersion = "12.11.0"
 val oshiVersion = "7.4.0"
+val okhttpVersion = "5.4.0"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -153,8 +154,9 @@ dependencies {
     implementation("com.spotify:completable-futures:0.3.6")
 
     // HTTP client
-    implementation("com.squareup.okhttp3:okhttp:5.4.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
+    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
+    implementation("com.squareup.okhttp3:logging-interceptor:${okhttpVersion}")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:${okhttpVersion}")
 
     // Netty
     implementation("io.netty:netty-transport:${nettyVersion}")

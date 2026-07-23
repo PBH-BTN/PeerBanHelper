@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.dns.GroupedFallbackDns;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import okhttp3.dnsoverhttps.DnsOverHttps;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okio.*;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +30,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -51,12 +50,15 @@ public final class HTTPUtil implements Reloadable {
     private Proxy proxyInstance;
     private final NetworkReachability networkReachability = new NetworkReachability();
     private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("HTTPUtil-Reachability").factory());
+    private Dns dohDns = Dns.SYSTEM;
+
 
     public HTTPUtil() {
         Main.getReloadManager().register(this);
         reloadConfig();
         sched.scheduleAtFixedRate(this::checkReachability, 0, 1, TimeUnit.HOURS);
     }
+
 
     private void checkReachability() {
         var client = newBuilder()
@@ -83,8 +85,59 @@ public final class HTTPUtil implements Reloadable {
         } catch (IOException e) {
             networkReachability.setAccessToGlobalNetwork(false);
         }
+
+
+        // DNS
+        List<InetAddress> bootstrapDns = new ArrayList<>();
+        bootstrapDns.add(InetAddress.ofLiteral("223.5.5.5")); // AliDNS
+        bootstrapDns.add(InetAddress.ofLiteral("119.29.29.29")); // Dnspod DNS
+        bootstrapDns.add(InetAddress.ofLiteral("114.114.114.114")); // 114 DNS
+        bootstrapDns.add(InetAddress.ofLiteral("166.111.68.130")); // TUNA DNS6666
+        bootstrapDns.add(InetAddress.ofLiteral("8.8.8.8")); // Google DNS
+        bootstrapDns.add(InetAddress.ofLiteral("1.1.1.1")); // CloudFlare DNS
+        var groupedFallbackDns = new GroupedFallbackDns(
+                networkReachability.getAccessToGlobalNetwork() ? List.of(new DnsOverHttps.Builder()
+                                .bootstrapDnsHosts(bootstrapDns)
+                                .url(Objects.requireNonNull(HttpUrl.parse("https://dns.google/dns-query"))).build(),
+                        new DnsOverHttps.Builder()
+                                .bootstrapDnsHosts(bootstrapDns)
+                                .url(Objects.requireNonNull(HttpUrl.parse("https://1.1.1.1/dns-query"))).build(),
+                        new DnsOverHttps.Builder()
+                                .bootstrapDnsHosts(bootstrapDns)
+                                .url(Objects.requireNonNull(HttpUrl.parse("https://dns.quad9.net/dns-query"))).build(),
+                        new DnsOverHttps.Builder()
+                                .bootstrapDnsHosts(bootstrapDns)
+                                .url(Objects.requireNonNull(HttpUrl.parse("https://common.dot.dns.yandex.net/dns-query"))).build()
+                ) : Collections.emptyList(),
+                networkReachability.getAccessToChinaNetwork() ? List.of(
+                        new DnsOverHttps.Builder()
+                                .bootstrapDnsHosts(bootstrapDns)
+                                .url(Objects.requireNonNull(HttpUrl.parse("https://dns.alidns.com/dns-query"))).build(),
+                        new DnsOverHttps.Builder()
+                                .bootstrapDnsHosts(bootstrapDns)
+                                .url(Objects.requireNonNull(HttpUrl.parse("https://doh.pub/dns-query"))).build(),
+                        new DnsOverHttps.Builder()
+                                .bootstrapDnsHosts(bootstrapDns)
+                                .url(Objects.requireNonNull(HttpUrl.parse("https://doh.360.cn/dns-query"))).build()
+                ) : Collections.emptyList(),
+                6 * 1000
+        );
+        if (Main.getMainConfig().getBoolean("proxy.doh") && ExternalSwitch.parseBoolean("pbh.dns.doh", true)) {
+            this.dohDns = groupedFallbackDns;
+        } else {
+            this.dohDns = Dns.SYSTEM;
+        }
     }
 
+    /**
+     * 获取 DOH DNS 解析器
+     *
+     * @return DOH DNS 解析器
+     */
+    @NotNull
+    public Dns getDoHDns() {
+        return dohDns;
+    }
 
     @Override
     public ReloadResult reloadModule() {

@@ -37,6 +37,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 47)
+    public void doh(YamlConfiguration bundle) {
+        conf.set("proxy.doh", true);
+    }
+
     @UpdateScript(version = 46)
     public void updateGeoCN(YamlConfiguration bundle) {
         conf.set("ip-database.database-geocn", "GeoCN");
