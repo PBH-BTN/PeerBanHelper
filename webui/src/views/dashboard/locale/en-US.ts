@@ -82,6 +82,10 @@ export default {
   'page.dashboard.peerList.column.speed': 'Speed',
   'page.dashboard.peerList.column.uploadedDownloaded': 'Uploaded/Downloaded',
   'page.dashboard.peerList.column.progress': 'Progress',
+  'page.dashboard.peerList.column.actions': 'Actions',
+  'page.dashboard.peerList.action.block': 'Block',
+  'page.dashboard.peerList.action.block.confirm':
+    'Are you sure you want to add {ip} to IP-based blocking rules?',
   'page.dashboard.peerList.column.flags.P': 'μtp',
   'page.dashboard.peerList.column.flags.D': 'Currently downloading (interested and not choked)',
   'page.dashboard.peerList.column.flags.d':

@@ -87,15 +87,36 @@
           </a-tooltip>
         </p>
       </template>
+      <template #actions="{ record }">
+        <a-tooltip :content="t('page.dashboard.peerList.action.block')" position="top" mini>
+          <a-popconfirm
+            :content="
+              t('page.dashboard.peerList.action.block.confirm', {
+                ip: formatIPAddressPort(record.peer.address.ip, record.peer.address.port)
+              })
+            "
+            type="warning"
+            @before-ok="() => handleBlockPeer(record.peer.address.ip)"
+          >
+            <a-button shape="circle" type="text" status="danger">
+              <template #icon>
+                <icon-stop />
+              </template>
+            </a-button>
+          </a-popconfirm>
+        </a-tooltip>
+      </template>
     </a-table>
   </a-modal>
 </template>
 <script setup lang="ts">
 import CountryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
+import { addBlackList } from '@/service/blacklist'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
+import { Message, type TableData, type TableSortable } from '@arco-design/web-vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
@@ -123,40 +144,99 @@ const { data, loading, run, cancel } = useRequest(getPeer, {
   manual: true,
   pollingInterval: 1000
 })
+type PeerListRow = {
+  peer: {
+    address: { ip: string; port: number }
+    flags: string
+    id: string
+    clientName: string
+    uploadSpeed: number
+    downloadSpeed: number
+    uploaded: number
+    downloaded: number
+    progress: number
+  }
+}
+const comparePeerString = (a?: string, b?: string) => (a ?? '').localeCompare(b ?? '')
+const comparePeerNumber = (a?: number, b?: number) => (a ?? 0) - (b ?? 0)
+const asPeerListRow = (row: TableData) => row as unknown as PeerListRow
 const columns = [
   {
     title: () => t('page.dashboard.peerList.column.address'),
     slotName: 'peerAddress',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: (a: TableData, b: TableData) =>
+        comparePeerString(asPeerListRow(a).peer.address.ip, asPeerListRow(b).peer.address.ip) ||
+        comparePeerNumber(asPeerListRow(a).peer.address.port, asPeerListRow(b).peer.address.port)
+    },
     width: 320
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
     slotName: 'flags',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: (a: TableData, b: TableData) =>
+        comparePeerString(asPeerListRow(a).peer.flags, asPeerListRow(b).peer.flags)
+    },
     width: 110
   },
   {
     title: 'Peer ID',
     dataIndex: 'peer.id',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: (a: TableData, b: TableData) =>
+        comparePeerString(asPeerListRow(a).peer.id, asPeerListRow(b).peer.id)
+    },
     width: 100
   },
   {
     title: () => t('page.dashboard.peerList.column.clientName'),
     dataIndex: 'peer.clientName',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: (a: TableData, b: TableData) =>
+        comparePeerString(asPeerListRow(a).peer.clientName, asPeerListRow(b).peer.clientName)
+    },
     width: 300
   },
   {
     title: () => t('page.dashboard.peerList.column.speed'),
     slotName: 'speed',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: (a: TableData, b: TableData) =>
+        comparePeerNumber(asPeerListRow(a).peer.uploadSpeed, asPeerListRow(b).peer.uploadSpeed) ||
+        comparePeerNumber(asPeerListRow(a).peer.downloadSpeed, asPeerListRow(b).peer.downloadSpeed)
+    },
     width: 140
   },
   {
     title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
     slotName: 'uploadDownload',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: (a: TableData, b: TableData) =>
+        comparePeerNumber(asPeerListRow(a).peer.uploaded, asPeerListRow(b).peer.uploaded) ||
+        comparePeerNumber(asPeerListRow(a).peer.downloaded, asPeerListRow(b).peer.downloaded)
+    },
     width: 140
   },
   {
     title: () => t('page.dashboard.peerList.column.progress'),
     slotName: 'progress',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as TableSortable['sortDirections'],
+      sorter: (a: TableData, b: TableData) =>
+        comparePeerNumber(asPeerListRow(a).peer.progress, asPeerListRow(b).peer.progress)
+    },
+    width: 100
+  },
+  {
+    title: () => t('page.dashboard.peerList.column.actions'),
+    slotName: 'actions',
     width: 100
   }
 ]
@@ -164,6 +244,26 @@ const parseFlags = (flags: string) =>
   flags
     .split(' ')
     .map((flag) => flag + ' - ' + t('page.dashboard.peerList.column.flags.' + flag.trim()))
+
+const handleBlockPeer = async (ip: string) => {
+  try {
+    const resp = await addBlackList(ip, 'ip')
+    if (!resp.success) {
+      throw new Error(resp.message)
+    }
+    Message.success({ content: resp.message, resetOnHover: true })
+    return true
+  } catch (error: unknown) {
+    Message.error({
+      content:
+        error instanceof Error
+          ? error.message
+          : t('page.dashboard.clientStatus.card.status.unknown'),
+      resetOnHover: true
+    })
+    return false
+  }
+}
 </script>
 
 <style scoped>
