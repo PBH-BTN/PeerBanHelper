@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PushWrapperDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -135,7 +136,7 @@ public final class PBHPushController extends AbstractFeatureModule {
             return;
         }
         try {
-            var testResult = pushProvider.push(tl(locale(ctx), Lang.PUSH_PROVIDER_TEST_TITLE), tl(locale(ctx), Lang.PUSH_PROVIDER_TEST_DESCRIPTION, name, pushProvider.getConfigType()));
+            var testResult = pushProvider.push(tl(locale(ctx), Lang.PUSH_PROVIDER_TEST_TITLE), tl(locale(ctx), Lang.PUSH_PROVIDER_TEST_DESCRIPTION, name, pushProvider.getConfigType()), AlertLevel.INFO);
             if (testResult) {
                 ctx.json(new StdResp(true, tl(locale(ctx), Lang.PUSH_PROVIDER_API_TEST_OK), null));
             } else {

@@ -58,7 +58,8 @@ const colorList: Record<PushType, CSSProperties['color']> = {
   [PushType.Bark]: '#a4a6ab',
   [PushType.PushDeer]: '#00d8ff',
   [PushType.Gotify]: '#007ACC',
-  [PushType.Ntfy]: '#57A773'
+  [PushType.Ntfy]: '#57A773',
+  [PushType.Webhook]: '#696969'
 }
 const avatarList: Record<PushType, string> = {
   [PushType.Email]: 'M',
@@ -68,7 +69,8 @@ const avatarList: Record<PushType, string> = {
   [PushType.Bark]: 'B',
   [PushType.PushDeer]: 'D',
   [PushType.Gotify]: 'G',
-  [PushType.Ntfy]: 'N'
+  [PushType.Ntfy]: 'N',
+  [PushType.Webhook]: 'W'
 }
 const emits = defineEmits<{
   (e: 'deleted'): void

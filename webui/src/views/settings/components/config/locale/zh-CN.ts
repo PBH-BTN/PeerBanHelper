@@ -125,6 +125,7 @@ export default {
   'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
   'page.settings.tab.config.push.form.type.gotify': 'Gotify',
   'page.settings.tab.config.push.form.type.ntfy': 'Ntfy',
+  'page.settings.tab.config.push.form.type.webhook': 'Webhook',
 
   'page.settings.tab.config.push.form.stmp.host': '主机',
   'page.settings.tab.config.push.form.stmp.port': '端口号',
@@ -156,6 +157,28 @@ export default {
   'page.settings.tab.config.push.form.ntfy.token': '访问令牌',
   'page.settings.tab.config.push.form.ntfy.priority': '优先级',
   'page.settings.tab.config.push.form.ntfy.tags': '标签',
+
+  'page.settings.tab.config.push.form.webhook.url': 'URL',
+  'page.settings.tab.config.push.form.webhook.url.placeholder': '请输入 Webhook 地址',
+  'page.settings.tab.config.push.form.webhook.url.error.required': '请输入 Webhook 地址',
+  'page.settings.tab.config.push.form.webhook.url.error.invalidSchema':
+    'Webhook 地址必须以 http:// 或 https:// 开头',
+  'page.settings.tab.config.push.form.webhook.url.error.invalidUrl': 'Webhook 地址格式不正确',
+  'page.settings.tab.config.push.form.webhook.method': '请求方法',
+  'page.settings.tab.config.push.form.webhook.content_type': '内容类型',
+  'page.settings.tab.config.push.form.webhook.body_template': '消息模板',
+  'page.settings.tab.config.push.form.webhook.body_template.placeholder':
+    '请输入消息模板，支持变量：{l}title{r}、{l}content{r}、{l}level{r}、{l}date{r}、{l}time{r}、{l}datetime{r}、{l}channelName{r}',
+  'page.settings.tab.config.push.form.webhook.body_template.tooltip':
+    '支持变量：{l}title{r} {l}content{r} {l}level{r} {l}date{r} {l}time{r} {l}datetime{r} {l}channelName{r}\n额外说明：{l}level{r}: TIP, *INFO*, WARN, ERROR, FATAL',
+  'page.settings.tab.config.push.form.webhook.headers': '自定义请求头',
+  'page.settings.tab.config.push.form.webhook.headers.key': 'Header 名称',
+  'page.settings.tab.config.push.form.webhook.headers.value': 'Header 值',
+  'page.settings.tab.config.push.form.webhook.headers.add': '新增请求头',
+  'page.settings.tab.config.push.form.webhook.headers.error.emptyKey': 'Header 名称不能为空',
+  'page.settings.tab.config.push.form.webhook.headers.error.duplicateKey': 'Header 名称不能重复',
+  'page.settings.tab.config.push.form.webhook.variables': '可用变量',
+  'page.settings.tab.config.push.form.webhook.variables.tip': '以下变量可直接使用',
 
   'page.settings.tab.config.push.form.action.ok': '确定',
   'page.settings.tab.config.push.form.action.cancel': '取消',
