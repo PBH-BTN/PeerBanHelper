@@ -53,7 +53,12 @@ public class GroupedFallbackDns implements Dns {
                 // 中国组也失败了
             }
         }
-        return Dns.SYSTEM.lookup(hostname);
+
+        if (globalGroup.isEmpty() && chinaGroup.isEmpty()) { // ????
+            return Dns.SYSTEM.lookup(hostname);
+        }
+
+        throw new UnknownHostException("All DoH servers failed for: " + hostname);
     }
 
     /**
