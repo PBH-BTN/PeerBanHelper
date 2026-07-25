@@ -207,3 +207,60 @@ database:
   username: "peerbanhelper"
   password: "peerbanhelper"
   database: "peerbanhelper"
+
+# 此章节配置 PeerBanHelper 用于 DNS 查询的设置 - This section can configure the settings that used by PeerBanHelper for DNS queries
+dns-settings:
+  # 启动 DNS，仅支持传统 UDP DNS。此处的 DNS 仅用于解析下面的 DoH 查询服务器域名
+  # Bootstrap DNS, only support traditional UDP DNS. This DNS is only used to resolve the domain names of DoH query servers below.
+  bootstrap-dns:
+    - 8.8.8.8
+    - 1.1.1.1
+    - 114.114.114.114
+    - 101.6.6.6
+    #- 223.5.5.5 - Observed Polluted at 2026/07/23 DNS population event and not recovered in long period, non-trust
+    #- 119.29.29.29 - Observed Polluted at 2026/07/23 DNS population event in long period, non-trust
+  # 分组设置，允许您创建和管理多个 DNS 组以用于不同用途
+  # Group settings, allow you to create and manage multiple DNS for different purposes
+  # 请注意：仅支持传统 UDP DNS 和 DoH 服务器，DoT/DoQ 目前暂不支持
+  # Note: Only support traditional UDP DNS and DoH servers, DoT/DoQ is not supported yet.
+  # 关键字 “SYSTEM” 将用于解析到目前操作系统使用 DNS 设置服务器列表
+  # The keyword "SYSTEM" will be used to resolve to the current operating system's DNS settings server list
+  # 您可以自行创建新的组，但请确保在路由器中使用正确的组名。若此处的组已被删除但在路由器中仍然使用该组名，则将会引发错误
+  # You can create new groups by yourself, but please make sure to use the correct group name in router. If the group is deleted here but still used in router, it will cause error.
+  groups:
+    preferred:
+      - "https://dns.google/dns-query"
+      - "https://1.1.1.1/dns-query"
+      - "https://dns-unfiltered.adguard.com/dns-query"
+      - "https://dns.quad9.net/dns-query"
+      - "https://common.dot.dns.yandex.net/dns-query"
+      - "https://v.recipes/dns-cn"
+    fallback:
+      - "https://doh.360.cn/dns-query"
+      - "https://dns.alidns.com/dns-query"
+      - "https://doh.pub/dns-query"
+      - "https://doh.apad.pro/dns-query"
+      - "SYSTEM"
+    bt-ptr:
+      - "SYSTEM"
+  # 此处允许您配置路由到不同 DNS 查询模块的
+  router:
+    # 所有 PeerBanHelper 中未指定类型的 DNS 查询将使用此组进行查询
+    # All DNS queries that are not specified in PeerBanHelper will use this group for query
+    default:
+      - "preferred"
+      - "fallback"
+    # 用于 BitTorrent PTR 查询的组，此组可能出现高并发查询，建议使用本地 DNS 服务器或高性能的 DoH 服务器
+    # Used for BitTorrent PTR query, this group may have high concurrent queries, it is recommended to use local DNS server or high-performance DoH server
+    ptr:
+      - "bt-ptr"
+    # 用于解析 BitTorrent Threat Network 服务器的组
+    # Used for resolving BitTorrent Threat Network server
+    btn:
+      - "preferred"
+      - "fallback"
+    # 用于解析订阅规则的组
+    # Used for resolving subscription rules
+    rule-sub:
+      - "preferred"
+      - "fallback"

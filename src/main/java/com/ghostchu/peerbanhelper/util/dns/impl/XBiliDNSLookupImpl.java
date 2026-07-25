@@ -1,7 +1,8 @@
-package com.ghostchu.peerbanhelper.util.dns;
+package com.ghostchu.peerbanhelper.util.dns.impl;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
+import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +22,11 @@ import java.util.concurrent.Executors;
 
 @Slf4j
 @Component
-public final class DNSLookupImpl implements Reloadable, DNSLookup {
+public final class XBiliDNSLookupImpl implements Reloadable, DNSLookup {
     private volatile ExtendedResolver resolver;
     private volatile boolean bootComplete = false;
 
-    public DNSLookupImpl() {
+    public XBiliDNSLookupImpl() {
         reloadConfig();
         Main.getReloadManager().register(this);
     }

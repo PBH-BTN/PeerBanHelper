@@ -1,8 +1,9 @@
 package com.ghostchu.peerbanhelper.util.dns;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import com.ghostchu.peerbanhelper.util.dns.impl.PTRLookup;
+import okhttp3.Dns;
 
 public interface DNSLookup {
-    CompletableFuture<Optional<String>> ptr(String query);
+    Dns getDns(String route);
+    PTRLookup getPTRLookup(String route);
 }
