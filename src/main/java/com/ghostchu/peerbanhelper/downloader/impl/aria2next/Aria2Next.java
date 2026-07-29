@@ -154,7 +154,7 @@ public final class Aria2Next extends AbstractDownloader {
                     "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
             )));
             return sendRpcRequest(req, new TypeToken<List<A2Task>>() {
-            });
+            }).stream().filter(t -> t.getBittorrent() != null).toList();
         } catch (DownloaderRequestException e) {
             log.error("Error on request", e);
             return Collections.emptyList();
@@ -174,7 +174,7 @@ public final class Aria2Next extends AbstractDownloader {
                     "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
             )));
             torrents.addAll(sendRpcRequest(active, new TypeToken<List<A2Task>>() {
-            }));
+            }).stream().filter(t -> t.getBittorrent() != null).toList());
             var waiting = buildRpcRequest("aria2.tellWaiting", List.of(List.of(
                     "gid", "status", "totalLength", "completedLength",
                     "uploadLength", "bitfield", "downloadSpeed",
@@ -184,7 +184,7 @@ public final class Aria2Next extends AbstractDownloader {
                     "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
             )));
             torrents.addAll(sendRpcRequest(waiting, new TypeToken<List<A2Task>>() {
-            }));
+            }).stream().filter(t -> t.getBittorrent() != null).toList());
             var stopped = buildRpcRequest("aria2.tellStopped", List.of(List.of(
                     "gid", "status", "totalLength", "completedLength",
                     "uploadLength", "bitfield", "downloadSpeed",
@@ -194,7 +194,7 @@ public final class Aria2Next extends AbstractDownloader {
                     "dir", "bittorrent", "verifiedLength", "verifyIntegrityPending", "files"
             )));
             torrents.addAll(sendRpcRequest(stopped, new TypeToken<List<A2Task>>() {
-            }));
+            }).stream().filter(t -> t.getBittorrent() != null).toList());
             return torrents;
         } catch (DownloaderRequestException e) {
             log.error("Error on request", e);
@@ -387,7 +387,6 @@ public final class Aria2Next extends AbstractDownloader {
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             config.setPaused(section.getBoolean("paused", false));
-            config.setIncludeEd2k(section.getBoolean("include-ed2k", false));
             return config;
         }
 
@@ -401,7 +400,6 @@ public final class Aria2Next extends AbstractDownloader {
             section.set("ignore-private", ignorePrivate);
             section.set("verify-ssl", verifySsl);
             section.set("paused", paused);
-            section.set("include-ed2k", includeEd2k);
             return section;
         }
     }
