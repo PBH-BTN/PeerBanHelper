@@ -13,5 +13,11 @@ public class A2GlobalOptions {
     private Long maxDownloadLimit;
     @SerializedName("max-overall-upload-limit")
     private Long maxUploadLimit;
+    @SerializedName("listen-port")
+    private Integer listenPort;
+    @SerializedName("max-overall-upload-limit")
+    private Long maxOverallUploadLimit;
+    @SerializedName("ax-overall-download-limit")
+    private Long maxOverallDownloadLimit;
 
 }
