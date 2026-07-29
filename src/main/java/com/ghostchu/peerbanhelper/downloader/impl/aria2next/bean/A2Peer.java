@@ -67,7 +67,7 @@ public class A2Peer implements Peer {
 
     @Override
     public @Nullable String getClientName() {
-        return peerClientName;
+        return peerClientName == null ? "" : peerClientName;
     }
 
     @Override
