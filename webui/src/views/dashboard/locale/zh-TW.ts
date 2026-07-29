@@ -71,6 +71,8 @@ export default {
     '在低於 qBittorrent 5.x 版本上時啟用此開關可能增加下載器的 WebAPI 壓力',
   'page.dashboard.editModal.biglybt': '請先安裝 {url}',
   'page.dashboard.editModal.biglybt.url': '外掛程式',
+  'page.dashboard.editModal.aria2next.warning': '請注意 {url} {not} 原版 Aria2',
+  'page.dashboard.editModal.aria2next.warning.not': '不是',
   'page.dashboard.editModal.transmission.discourage':
     '警告：Transmission 適配器已被廢棄，並將在將來的版本移除。https://github.com/PBH-BTN/PeerBanHelper/issues/382',
   'page.dashboard.editModal.label.paused': '暫停檢查',
