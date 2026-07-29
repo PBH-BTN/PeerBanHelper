@@ -73,6 +73,8 @@ export default {
   'page.dashboard.editModal.biglybt.url': 'here',
   'page.dashboard.editModal.transmission.discourage':
     'Warning: Support for Transmission is deprecated, support will be removed in the future. https://github.com/PBH-BTN/PeerBanHelper/issues/382',
+  'page.dashboard.editModal.aria2next.warning': 'Please note that {url} is {not} original Aria2',
+  'page.dashboard.editModal.aria2next.warning.not': 'NOT',
   'page.dashboard.editModal.label.paused': 'Pause',
   'page.dashboard.peerList.title': 'Active Peer List for ',
   'page.dashboard.peerList.column.address': 'Address',
