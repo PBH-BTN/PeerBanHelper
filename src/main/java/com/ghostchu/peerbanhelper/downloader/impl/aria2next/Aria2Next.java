@@ -235,7 +235,10 @@ public final class Aria2Next extends AbstractDownloader {
                     List.of(fullList.stream().flatMap(i -> remapBanListAddress(i, true).stream())
                             .map(IPAddress::toCompressedString).toList())
             ), A2SetBtPeerBlocklist.class);
-            log.debug("Aria2Next downloader {} now at revision {} with {} rows", this.config.getEndpoint(), setBanList.getResult().getRevision(), setBanList.getResult().getRuleCount());
+//            if(setBanList.getResult() == null){
+//                setBanList.
+//            }
+            log.debug("Aria2Next downloader {} now at revision {} with {} rows", this.config.getEndpoint(), setBanList.getRevision(), setBanList.getRuleCount());
         } catch (DownloaderRequestException e) {
             log.error("Error on request", e);
         }
