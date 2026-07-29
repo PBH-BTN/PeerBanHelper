@@ -383,7 +383,6 @@ public final class Aria2Next extends AbstractDownloader {
             }
             config.setName(section.getString("name", alternativeName));
             config.setToken(section.getString("token", ""));
-            config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             config.setPaused(section.getBoolean("paused", false));
@@ -396,7 +395,6 @@ public final class Aria2Next extends AbstractDownloader {
             section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("token", token);
-            section.set("increment-ban", incrementBan);
             section.set("ignore-private", ignorePrivate);
             section.set("verify-ssl", verifySsl);
             section.set("paused", paused);
