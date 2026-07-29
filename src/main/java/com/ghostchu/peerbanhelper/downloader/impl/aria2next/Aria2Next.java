@@ -208,10 +208,9 @@ public final class Aria2Next extends AbstractDownloader {
             var requestPeers = buildRpcRequest("aria2.getPeers", List.of(
                     torrent.getId()
             ));
-            var peers = sendRpcRequest(requestPeers, new TypeToken<List<A2Peer>>() {
+            // peers.forEach(p -> System.out.println(p.toString()));
+            return sendRpcRequest(requestPeers, new TypeToken<List<A2Peer>>() {
             });
-            peers.forEach(p -> System.out.println(p.toString()));
-            return peers;
         } catch (DownloaderRequestException e) {
             log.error("Error on request", e);
             return Collections.emptyList();
@@ -297,7 +296,7 @@ public final class Aria2Next extends AbstractDownloader {
             }
 
             String responseBody = resp.body().string();
-            System.out.println(responseBody);
+            log.debug("Aria2Next RPC Response: {}" ,responseBody);
             // 使用 Gson 的 TypeToken.getParameterized 构建 JsonRpcResponse<dataType>
             Type responseType = TypeToken.getParameterized(JsonRpcResponse.class, dataType).getType();
             JsonRpcResponse<T> response = JsonUtil.standard().fromJson(responseBody, responseType);
@@ -321,21 +320,6 @@ public final class Aria2Next extends AbstractDownloader {
             }
             throw new DownloaderRequestException(e);
         }
-    }
-
-    private Type wrapPrimitive(Type type) {
-        if (type instanceof Class<?> clazz && clazz.isPrimitive()) {
-            if (clazz == int.class) return Integer.class;
-            if (clazz == long.class) return Long.class;
-            if (clazz == boolean.class) return Boolean.class;
-            if (clazz == double.class) return Double.class;
-            if (clazz == float.class) return Float.class;
-            if (clazz == byte.class) return Byte.class;
-            if (clazz == short.class) return Short.class;
-            if (clazz == char.class) return Character.class;
-            if (clazz == void.class) return Void.class;
-        }
-        return type;
     }
 
     /**
