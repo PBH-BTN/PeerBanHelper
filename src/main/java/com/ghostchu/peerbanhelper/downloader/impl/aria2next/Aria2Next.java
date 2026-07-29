@@ -368,11 +368,9 @@ public final class Aria2Next extends AbstractDownloader {
         private String type;
         private String endpoint;
         private String token;
-        private boolean incrementBan;
         private boolean verifySsl;
         private boolean ignorePrivate;
         private boolean paused;
-        private boolean includeEd2k;
 
         public static Aria2Next.Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Aria2Next.Config config = new Aria2Next.Config();
