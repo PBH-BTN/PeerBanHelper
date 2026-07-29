@@ -230,16 +230,13 @@ public final class Aria2Next extends AbstractDownloader {
 
     @Override
     public void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
-        String text = fullList.stream()
-                        .flatMap(i->remapBanListAddress(i, true).stream())
-                .map(IPAddress::toCompressedString)
-                                .collect(Collectors.joining("\n"));
         try {
-            var setBanList = sendRpcRequest(buildRpcRequest("aria2.changeGlobalOption",
-                    List.of(Map.of("bt-peer-blocklist", text))
+            var setBanList = sendRpcRequest(buildRpcRequest("aria2.setBtPeerBlocklist",
+                    List.of(fullList.stream().flatMap(i -> remapBanListAddress(i, true).stream())
+                            .map(IPAddress::toCompressedString).toList())
             ), new TypeToken<>() {
             });
-        }catch (DownloaderRequestException e){
+        } catch (DownloaderRequestException e) {
             log.error("Error on request", e);
         }
     }
