@@ -255,12 +255,15 @@ public final class Aria2Next extends AbstractDownloader {
     @Override
     public void setSpeedLimiter(@NotNull DownloaderSpeedLimiter speedLimiter) {
         try {
-            var setBanList = sendRpcRequest(buildRpcRequest("aria2.changeGlobalOption",
+            var setSpeedLimit = sendRpcRequest(buildRpcRequest("aria2.changeGlobalOption",
                     List.of(
-                            Map.of("max-overall-upload-limit", speedLimiter.isUploadUnlimited() ? 0 :  speedLimiter.upload(),
+                            Map.of("max-overall-upload-limit", speedLimiter.isUploadUnlimited() ? 0 : speedLimiter.upload(),
                                     "max-overall-download-limit", speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download()
                             )
                     )), String.class); //  "result": "OK"
+            if (!"OK".equalsIgnoreCase(setSpeedLimit)) {
+                throw new IllegalStateException("The Aria2Next downloader " + this.getEndpoint() + " returns non OK result for setSpeedLimiter: " + setSpeedLimit);
+            }
         } catch (DownloaderRequestException e) {
             log.error("Error on request", e);
         }
