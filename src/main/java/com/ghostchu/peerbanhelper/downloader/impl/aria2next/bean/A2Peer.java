@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 @NoArgsConstructor
 @Data
 public class A2Peer implements Peer {
@@ -63,6 +66,10 @@ public class A2Peer implements Peer {
             this.peerAddress = new PeerAddress(ip, port, ip);
         }
         return this.peerAddress;
+    }
+
+    public String getPeerId() {
+        return URLDecoder.decode(peerId, StandardCharsets.ISO_8859_1);
     }
 
     @Override
