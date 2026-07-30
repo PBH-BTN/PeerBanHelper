@@ -68,13 +68,14 @@ public class A2Peer implements Peer {
         return this.peerAddress;
     }
 
+    @NotNull
     public String getPeerId() {
         if(peerId == null) peerId = "";
         return URLDecoder.decode(peerId, StandardCharsets.ISO_8859_1);
     }
 
     @Override
-    public @Nullable String getClientName() {
+    public @NotNull String getClientName() {
         return peerClientName == null ? "" : peerClientName;
     }
 
