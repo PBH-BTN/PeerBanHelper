@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.downloader.impl.aria2next.Aria2Next;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
 import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.BitComet;
 import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
@@ -90,6 +91,8 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
                     downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             case "bitcomet" ->
                     downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "aria2next" ->
+                    downloader = Aria2Next.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -113,6 +116,8 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
                     downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             case "bitcomet" ->
                     downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
+            case "aria2next" ->
+                    downloader = Aria2Next.loadFromConfig(id, downloaderSection, alertManager, httpUtil, natAddressProviderRegistry);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;

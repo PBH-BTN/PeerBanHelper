@@ -152,16 +152,16 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getTorrents() {
+    public @NotNull List<? extends Torrent> getTorrents() {
         return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
-    public @NotNull List<Torrent> getAllTorrents() {
+    public @NotNull List<? extends Torrent> getAllTorrents() {
         return fetchTorrents(false, true);
     }
 
-    public List<Torrent> fetchTorrents(boolean onlyActiveTorrent, boolean includePrivate) {
+    public List<? extends Torrent> fetchTorrents(boolean onlyActiveTorrent, boolean includePrivate) {
         RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.SIZE_WHEN_DONE, Fields.TRACKER_LIST, Fields.TRACKER_STATS, Fields.IS_PRIVATE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
         return rsp.getArgs().getTorrents().stream()
@@ -176,19 +176,18 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
-        TRTorrent trTorrent = (TRTorrent) torrent;
-        return trTorrent.getPeers();
+    public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
+        return ((TRTorrent) torrent).getPeers();
     }
 
     @Override
-    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Tracker> getTrackers(@NotNull Torrent torrent) {
         TRTorrent trTorrent = (TRTorrent) torrent;
         return trTorrent.getTrackers();
     }
 
     @Override
-    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers) {
         StringJoiner trackersJoiner = new StringJoiner("\n\n"); // 空一行
         trackers.forEach(t -> trackersJoiner.add(t.toString()));
         RqTorrentSet set = RqTorrentSet.builder()
