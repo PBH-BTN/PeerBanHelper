@@ -81,7 +81,7 @@ public final class Aria2Next extends AbstractDownloader {
     @Override
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.UNBAN_IP,
-                DownloaderFeatureFlag.TRAFFIC_STATS,
+                //DownloaderFeatureFlag.TRAFFIC_STATS,
                 DownloaderFeatureFlag.RANGE_BAN_IP);
     }
 
