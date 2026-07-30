@@ -69,6 +69,7 @@ public class A2Peer implements Peer {
     }
 
     public String getPeerId() {
+        if(peerId == null) peerId = "";
         return URLDecoder.decode(peerId, StandardCharsets.ISO_8859_1);
     }
 
