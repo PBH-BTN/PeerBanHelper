@@ -17,47 +17,47 @@ import java.nio.charset.StandardCharsets;
 public class A2Peer implements Peer {
 
     @JsonProperty("amChoking")
-    private Boolean amChoking;
+    private boolean amChoking;
     @JsonProperty("amInterested")
-    private Boolean amInterested;
+    private boolean amInterested;
     @JsonProperty("bitfield")
     private String bitfield;
     @JsonProperty("completedLength")
-    private Long completedLength;
+    private long completedLength;
     @JsonProperty("downloadSpeed")
-    private Long downloadSpeed;
+    private long downloadSpeed;
     @JsonProperty("downloaded")
-    private Long downloaded;
+    private long downloaded;
     @JsonProperty("flags")
     private String flags;
     @JsonProperty("handshaking")
-    private Boolean handshaking;
+    private boolean handshaking;
     @JsonProperty("incoming")
-    private Boolean incoming;
+    private boolean incoming;
     @JsonProperty("ip")
     private String ip;
     @JsonProperty("optimisticUnchoke")
-    private Boolean optimisticUnchoke;
+    private boolean optimisticUnchoke;
     @JsonProperty("peerChoking")
-    private Boolean peerChoking;
+    private boolean peerChoking;
     @JsonProperty("peerClientName")
     private String peerClientName;
     @JsonProperty("peerId")
     private String peerId;
     @JsonProperty("peerInterested")
-    private Boolean peerInterested;
+    private boolean peerInterested;
     @JsonProperty("port")
-    private Integer port;
+    private int port;
     @JsonProperty("progress")
-    private Double progress;
+    private double progress;
     @JsonProperty("seeder")
-    private Boolean seeder;
+    private boolean seeder;
     @JsonProperty("snubbed")
-    private Boolean snubbed;
+    private boolean snubbed;
     @JsonProperty("uploadSpeed")
-    private Long uploadSpeed;
+    private long uploadSpeed;
     @JsonProperty("uploaded")
-    private Long uploaded;
+    private long uploaded;
     private transient PeerAddress peerAddress;
 
     @Override
@@ -93,32 +93,31 @@ public class A2Peer implements Peer {
 
     @Override
     public boolean isHandshaking() {
-        return handshaking != null && handshaking;
+        return handshaking;
     }
 
     @Override
     public double getProgress() {
-        return progress != null ? progress : -1;
+        return progress;
     }
-
 
     @Override
     public long getDownloadSpeed() {
-        return downloadSpeed != null ? downloadSpeed : -1;
+        return downloadSpeed;
     }
 
     @Override
     public long getDownloaded() {
-        return downloaded != null ? downloaded : -1;
+        return downloaded;
     }
 
     @Override
     public long getUploadSpeed() {
-        return uploadSpeed != null ? uploadSpeed : -1;
+        return uploadSpeed;
     }
 
     @Override
     public long getUploaded() {
-        return uploaded != null ? uploaded : -1;
+        return uploaded;
     }
 }

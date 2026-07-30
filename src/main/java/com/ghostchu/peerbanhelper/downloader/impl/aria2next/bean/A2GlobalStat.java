@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class A2GlobalStat {
-    private Long downloadSpeed;
-    private Long uploadSpeed;
-    private Long numActive;
-    private Long numWaiting;
-    private Long numStopped;
-    private Long numStoppedTotal;
+    private long downloadSpeed;
+    private long uploadSpeed;
+    private long numActive;
+    private long numWaiting;
+    private long numStopped;
+    private long numStoppedTotal;
 }
