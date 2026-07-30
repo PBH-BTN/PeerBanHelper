@@ -84,7 +84,6 @@ public class A2Peer implements Peer {
                 .remoteChoked(peerChoking)
                 .interesting(amInterested)
                 .remoteInterested(peerInterested)
-                .remoteInterested(peerInterested)
                 .handshake(handshaking)
                 .localConnection(!incoming)
                 .snubbed(snubbed)
