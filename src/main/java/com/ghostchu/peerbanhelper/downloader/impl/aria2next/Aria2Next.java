@@ -240,9 +240,6 @@ public final class Aria2Next extends AbstractDownloader {
                     List.of(fullList.stream().flatMap(i -> remapBanListAddress(i, true).stream())
                             .map(IPAddress::toCompressedString).toList())
             ), A2SetBtPeerBlocklist.class);
-//            if(setBanList.getResult() == null){
-//                setBanList.
-//            }
             log.debug("Aria2Next downloader {} now at revision {} with {} rows", this.config.getEndpoint(), setBanList.getRevision(), setBanList.getRuleCount());
         } catch (DownloaderRequestException e) {
             log.error("Error on request", e);
@@ -300,7 +297,7 @@ public final class Aria2Next extends AbstractDownloader {
             }
 
             String responseBody = resp.body().string();
-            System.out.println("Aria2Next RPC Response: "+responseBody);
+            log.debug("Aria2Next RPC Response: {}", responseBody);
             // 使用 Gson 的 TypeToken.getParameterized 构建 JsonRpcResponse<dataType>
             Type responseType = TypeToken.getParameterized(JsonRpcResponse.class, dataType).getType();
             JsonRpcResponse<T> response = JsonUtil.standard().fromJson(responseBody, responseType);
