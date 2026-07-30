@@ -97,6 +97,10 @@ public final class Aria2Next extends AbstractDownloader {
                 JsonRpcResponse<A2Version> rpcResponse = JsonUtil.standard().fromJson(responseBody, responseType);
                 var result = rpcResponse.getResult();
                 if (result != null && result.getVersion() != null) {
+                    if(!"aria2-next".equals(result.getProduct())){
+                        log.debug("Connected Aria2RPC server validation failure: {}", result);
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.MISSING_COMPONENTS, new TranslationComponent(Lang.DOWNLOADER_ARIA2NEXT_INCORRECT_PRODUCT));
+                    }
                     this.lastSemver = new Semver(result.getVersion(), Semver.SemverType.LOOSE);
                     return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
                 }
@@ -296,7 +300,7 @@ public final class Aria2Next extends AbstractDownloader {
             }
 
             String responseBody = resp.body().string();
-            log.debug("Aria2Next RPC Response: {}" ,responseBody);
+            System.out.println("Aria2Next RPC Response: "+responseBody);
             // 使用 Gson 的 TypeToken.getParameterized 构建 JsonRpcResponse<dataType>
             Type responseType = TypeToken.getParameterized(JsonRpcResponse.class, dataType).getType();
             JsonRpcResponse<T> response = JsonUtil.standard().fromJson(responseBody, responseType);
