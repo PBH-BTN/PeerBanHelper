@@ -20,6 +20,7 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
+import inet.ipaddr.IPAddressString;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @Component
 public final class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
+    private static final IPAddress TEREDO_PREFIX = new IPAddressString("2001::/32").getAddress();
     @Autowired
     private PeerBanHelper peerBanHelper;
     private int ipv4Prefix;
@@ -107,6 +109,9 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
+        if (isTeredo(peerAddress)) {
+            return pass();
+        }
         AtomicReference<CheckResult> reference = new AtomicReference<>(null);
         IPAddress finalPeerAddress = peerAddress;
         task.setComment(false, "Iterating banList for related ban entries.");
@@ -115,6 +120,9 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 return;
             }
             if (bannedMeta.isBanForDisconnect()) {
+                return;
+            }
+            if (isTeredo(bannedAddr)) {
                 return;
             }
             if (finalPeerAddress.isIPv4() != bannedAddr.isIPv4()) {
@@ -140,5 +148,8 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         return Objects.requireNonNullElseGet(result, this::pass);
     }
 
+    private static boolean isTeredo(IPAddress address) {
+        return address.isIPv6() && TEREDO_PREFIX.contains(address);
+    }
 
 }
