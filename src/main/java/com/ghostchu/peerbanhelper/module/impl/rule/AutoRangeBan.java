@@ -21,6 +21,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import inet.ipaddr.ipv4.IPv4Address;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -110,7 +111,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             peerAddress = peerAddress.toIPv4();
         }
         if (isTeredo(peerAddress)) {
-            return pass();
+            peerAddress = extractTeredoIPv4(peerAddress);
         }
         AtomicReference<CheckResult> reference = new AtomicReference<>(null);
         IPAddress finalPeerAddress = peerAddress;
@@ -122,21 +123,22 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             if (bannedMeta.isBanForDisconnect()) {
                 return;
             }
+            IPAddress effectiveBannedAddr = bannedAddr;
             if (isTeredo(bannedAddr)) {
-                return;
+                effectiveBannedAddr = extractTeredoIPv4(bannedAddr);
             }
-            if (finalPeerAddress.isIPv4() != bannedAddr.isIPv4()) {
+            if (finalPeerAddress.isIPv4() != effectiveBannedAddr.isIPv4()) {
                 return;
             }
             String addressType = "UNKNOWN";
-            IPAddress bannedCidr = bannedAddr;
-            if (bannedAddr.isIPv4()) {
+            IPAddress bannedCidr = effectiveBannedAddr;
+            if (effectiveBannedAddr.isIPv4()) {
                 addressType = "IPv4/" + ipv4Prefix;
-                bannedCidr = bannedAddr.toPrefixBlock(ipv4Prefix);
+                bannedCidr = effectiveBannedAddr.toPrefixBlock(ipv4Prefix);
             }
-            if (bannedAddr.isIPv6()) {
+            if (effectiveBannedAddr.isIPv6()) {
                 addressType = "IPv6/" + ipv6Prefix;
-                bannedCidr = bannedAddr.toPrefixBlock(ipv6Prefix);
+                bannedCidr = effectiveBannedAddr.toPrefixBlock(ipv6Prefix);
             }
             if (bannedCidr.contains(finalPeerAddress)) {
                 reference.set(new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, finalPeerAddress.toString(),
@@ -150,6 +152,15 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
 
     private static boolean isTeredo(IPAddress address) {
         return address.isIPv6() && TEREDO_PREFIX.contains(address);
+    }
+
+    private static IPAddress extractTeredoIPv4(IPAddress teredoAddress) {
+        byte[] bytes = teredoAddress.getBytes();
+        byte[] ipv4Bytes = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            ipv4Bytes[i] = (byte) (~bytes[12 + i]);
+        }
+        return new IPv4Address(ipv4Bytes);
     }
 
 }
