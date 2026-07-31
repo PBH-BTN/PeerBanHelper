@@ -125,7 +125,11 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             }
             IPAddress effectiveBannedAddr = bannedAddr;
             if (isTeredo(bannedAddr)) {
-                effectiveBannedAddr = extractTeredoIPv4(bannedAddr);
+                Integer prefixLen = bannedAddr.getPrefixLength();
+                if (prefixLen != null && prefixLen < 128) {
+                    return;
+                }
+                effectiveBannedAddr = extractTeredoIPv4(bannedAddr.withoutPrefixLength());
             }
             if (finalPeerAddress.isIPv4() != effectiveBannedAddr.isIPv4()) {
                 return;
