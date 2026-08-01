@@ -131,7 +131,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                     return;
                 }
                 Integer prefixLen = bannedAddr.getPrefixLength();
-                if (prefixLen != null && prefixLen < 128) {
+                if (bannedAddr.isMultiple() || (prefixLen != null && prefixLen < 128)) {
                     return;
                 }
                 effectiveBannedAddr = extractTeredoIPv4(bannedAddr.withoutPrefixLength());
@@ -164,12 +164,8 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     private static IPAddress extractTeredoIPv4(IPAddress teredoAddress) {
-        byte[] bytes = teredoAddress.getBytes();
-        byte[] ipv4Bytes = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            ipv4Bytes[i] = (byte) (~bytes[12 + i]);
-        }
-        return new IPv4Address(ipv4Bytes);
+        IPv4Address encodedIPv4 = teredoAddress.toIPv6().getEmbeddedIPv4Address();
+        return new IPv4Address(~encodedIPv4.intValue());
     }
 
 }
