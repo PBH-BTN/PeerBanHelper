@@ -21,7 +21,6 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
-import inet.ipaddr.ipv4.IPv4Address;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +39,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     private PeerBanHelper peerBanHelper;
     private int ipv4Prefix;
     private int ipv6Prefix;
+    private boolean teredoEnabled;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
@@ -83,7 +83,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     private void handleWebAPI(Context ctx) {
-        ctx.json(new StdResp(true, null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix)));
+        ctx.json(new StdResp(true, null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix, "teredo", teredoEnabled)));
     }
 
     @Override
@@ -94,6 +94,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     private void reloadConfig() {
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
+        this.teredoEnabled = getConfig().getBoolean("teredo", true);
         this.banDuration = getConfig().getLong("ban-duration", 0);
         getCache().invalidateAll();
     }
@@ -107,11 +108,13 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             return pass();
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
-        if (peerAddress.isIPv4Convertible()) {
-            peerAddress = peerAddress.toIPv4();
-        }
         if (isTeredo(peerAddress)) {
-            peerAddress = extractTeredoIPv4(peerAddress);
+            if (!teredoEnabled) {
+                return pass();
+            }
+            peerAddress = peerAddress.toIPv4();
+        } else if (peerAddress.isIPv4Convertible()) {
+            peerAddress = peerAddress.toIPv4();
         }
         AtomicReference<CheckResult> reference = new AtomicReference<>(null);
         IPAddress finalPeerAddress = peerAddress;
@@ -125,11 +128,14 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             }
             IPAddress effectiveBannedAddr = bannedAddr;
             if (isTeredo(bannedAddr)) {
+                if (!teredoEnabled) {
+                    return;
+                }
                 Integer prefixLen = bannedAddr.getPrefixLength();
                 if (prefixLen != null && prefixLen < 128) {
                     return;
                 }
-                effectiveBannedAddr = extractTeredoIPv4(bannedAddr.withoutPrefixLength());
+                effectiveBannedAddr = bannedAddr.withoutPrefixLength().toIPv4();
             }
             if (finalPeerAddress.isIPv4() != effectiveBannedAddr.isIPv4()) {
                 return;
@@ -156,15 +162,6 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
 
     private static boolean isTeredo(IPAddress address) {
         return address.isIPv6() && TEREDO_PREFIX.contains(address);
-    }
-
-    private static IPAddress extractTeredoIPv4(IPAddress teredoAddress) {
-        byte[] bytes = teredoAddress.getBytes();
-        byte[] ipv4Bytes = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            ipv4Bytes[i] = (byte) (~bytes[12 + i]);
-        }
-        return new IPv4Address(ipv4Bytes);
     }
 
 }

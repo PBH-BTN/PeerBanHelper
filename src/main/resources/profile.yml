@@ -259,6 +259,11 @@ module:
     # IPV6 前缀长度
     # IPV6 prefix length
     ipv6: 48
+    # 是否解析 Teredo 地址内嵌的 IPv4 地址用于范围封禁
+    # 禁用后，Teredo 地址将被直接跳过，不参与范围封禁
+    # Whether to parse the embedded IPv4 address in Teredo addresses for range ban
+    # When disabled, Teredo addresses will be skipped entirely
+    teredo: true
   # 启用来自 BTN 网络的规则
   # Enable the network rules from BTN server, only works when you configured BTN server in config.yml
   btn:

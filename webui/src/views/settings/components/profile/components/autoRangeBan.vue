@@ -42,6 +42,13 @@
         :max="128"
       ></a-input-number>
     </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.autoRangeBan.teredo')"
+      field="model.teredo"
+      :tooltip="t('page.settings.tab.profile.module.autoRangeBan.teredoTips')"
+    >
+      <a-switch v-model="model.teredo" />
+    </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">
