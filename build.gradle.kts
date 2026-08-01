@@ -5,7 +5,7 @@ plugins {
     id("com.install4j.gradle") version "13.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.4.0"
+    kotlin("plugin.lombok") version "2.4.10"
     id("io.freefair.lombok") version "9.5.0"
 }
 
@@ -47,10 +47,10 @@ repositories {
 
 val flatlafVersion = "3.7.2"
 val nettyVersion = "4.2.16.Final"
-val sqliteVersion = "3.53.2.0"
+val sqliteVersion = "3.53.2.1"
 val springVersion = "7.0.8"
 val flywayVersion = "12.11.0"
-val oshiVersion = "7.4.0"
+val oshiVersion = "7.4.3"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -102,7 +102,7 @@ dependencies {
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.1.0")
     // Expression engine
-    implementation("com.googlecode.aviator:aviator:5.4.3")
+    implementation("com.googlecode.aviator:aviator:5.4.4")
 
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
