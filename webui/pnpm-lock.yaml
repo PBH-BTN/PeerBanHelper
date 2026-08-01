@@ -19,7 +19,7 @@ importers:
         version: 3.4.5
       '@formatjs/intl-durationformat':
         specifier: ^0.10.8
-        version: 0.10.17
+        version: 0.10.18
       '@guolao/vue-monaco-editor':
         specifier: ^1.6.0
         version: 1.6.0(monaco-editor@0.55.1)(vue@3.5.40(typescript@6.0.3))
@@ -349,11 +349,11 @@ packages:
   '@formatjs/fast-memoize@3.1.7':
     resolution: {integrity: sha512-zXfhLpvA6T7+efdt9JLbBwZ00tT7NsBMDVnDu8rpHeNNv8KfRZAMo2gkG0k9lK/Nzc//3kJ9pImsfuJxk3KhUA==}
 
-  '@formatjs/intl-durationformat@0.10.17':
-    resolution: {integrity: sha512-YXm0u5WMaSQ8Gr3th33RFNzoI24nMDScg6iZ9EQZk2CNY3Sg19qklq+FQIuuQEbrDwBlQGrMSDE97m4mETnOxw==}
+  '@formatjs/intl-durationformat@0.10.18':
+    resolution: {integrity: sha512-Wyn7TYW1c5EORLuh6IeAyEpaJf6GmvHPN7TXjJj3VT0bl9U2/zv/A518R+5lYtCmXLmmxX7DYz4iKSKzoKkR7g==}
 
-  '@formatjs/intl-localematcher@0.8.12':
-    resolution: {integrity: sha512-5H3r5ZJ2jZqHEv9K343lvHmeMDKMxssawAVD2H4J9xtu0ZXb6MlNxwLqdwBxJSHFU0C24KSZnffgmAi+59mK4A==}
+  '@formatjs/intl-localematcher@0.8.13':
+    resolution: {integrity: sha512-kHEAFOkeJSPNi7c5PaKaRjxcBrJwzzt81ifUu+8uve1EDW/VJl83KsxmqgqNZLzcFEhSliZGvx3+pk/RH0IOmg==}
 
   '@guolao/vue-monaco-editor@1.6.0':
     resolution: {integrity: sha512-w2IiJ6eJGGeuIgCK6EKZOAfhHTTUB5aZwslzwGbZ5e89Hb4avx6++GkLTW8p84Sng/arFMjLPPxSBI56cFudyQ==}
@@ -2762,12 +2762,12 @@ snapshots:
 
   '@formatjs/fast-memoize@3.1.7': {}
 
-  '@formatjs/intl-durationformat@0.10.17':
+  '@formatjs/intl-durationformat@0.10.18':
     dependencies:
       '@formatjs/bigdecimal': 0.2.7
-      '@formatjs/intl-localematcher': 0.8.12
+      '@formatjs/intl-localematcher': 0.8.13
 
-  '@formatjs/intl-localematcher@0.8.12':
+  '@formatjs/intl-localematcher@0.8.13':
     dependencies:
       '@formatjs/fast-memoize': 3.1.7
 
