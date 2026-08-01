@@ -127,7 +127,7 @@ dependencies {
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.5.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.3.1")
+    implementation("de.siegmar:fastcsv:4.4.0")
     // Jackson
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
