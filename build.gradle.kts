@@ -100,7 +100,7 @@ dependencies {
         exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
     }
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:5.1.0")
+    implementation("com.maxmind.geoip2:geoip2:5.2.0")
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.3")
 
