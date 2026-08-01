@@ -51,6 +51,7 @@ val sqliteVersion = "3.53.2.1"
 val springVersion = "7.0.8"
 val flywayVersion = "13.1.0"
 val oshiVersion = "7.4.3"
+val jettyVersion = "12.1.11"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -99,6 +100,9 @@ dependencies {
     implementation("io.javalin:javalin:7.2.2") {
         exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
     }
+    // jetty
+    implementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
+    implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}")
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.2.0")
     // Expression engine
