@@ -146,7 +146,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.38")
+    implementation("ch.qos.logback:logback-classic:1.6.1")
     implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
