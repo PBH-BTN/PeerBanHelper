@@ -37,7 +37,7 @@
     "mitt": "^3.0.1",
     "monaco-editor": "^0.55.1",
     "normalize.css": "^8.0.1",
-    "pinia": "^3.0.4",
+    "pinia": "^4.0.0",
     "url-join": "^5.0.0",
     "uuid": "^14.0.0",
     "vue": "^3.5.34",
