@@ -20,7 +20,7 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.IPAddressString;
+import inet.ipaddr.ipv4.IPv4Address;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @Component
 public final class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
-    private static final IPAddress TEREDO_PREFIX = new IPAddressString("2001::/32").getAddress();
     @Autowired
     private PeerBanHelper peerBanHelper;
     private int ipv4Prefix;
@@ -112,7 +111,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             if (!teredoEnabled) {
                 return pass();
             }
-            peerAddress = peerAddress.toIPv4();
+            peerAddress = extractTeredoIPv4(peerAddress);
         } else if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
@@ -135,7 +134,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 if (prefixLen != null && prefixLen < 128) {
                     return;
                 }
-                effectiveBannedAddr = bannedAddr.withoutPrefixLength().toIPv4();
+                effectiveBannedAddr = extractTeredoIPv4(bannedAddr.withoutPrefixLength());
             }
             if (finalPeerAddress.isIPv4() != effectiveBannedAddr.isIPv4()) {
                 return;
@@ -161,7 +160,16 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     private static boolean isTeredo(IPAddress address) {
-        return address.isIPv6() && TEREDO_PREFIX.contains(address);
+        return address.isIPv6() && address.toIPv6().isTeredo();
+    }
+
+    private static IPAddress extractTeredoIPv4(IPAddress teredoAddress) {
+        byte[] bytes = teredoAddress.getBytes();
+        byte[] ipv4Bytes = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            ipv4Bytes[i] = (byte) (~bytes[12 + i]);
+        }
+        return new IPv4Address(ipv4Bytes);
     }
 
 }
