@@ -33,7 +33,7 @@
     "is-in-subnet": "^4.0.1",
     "is-ip": "^5.0.1",
     "lodash": "^4.18.1",
-    "markdown-it": "^14.1.1",
+    "markdown-it": "^15.0.0",
     "mitt": "^3.0.1",
     "monaco-editor": "^0.55.1",
     "normalize.css": "^8.0.1",
