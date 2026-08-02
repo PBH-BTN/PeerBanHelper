@@ -100,9 +100,12 @@ export default {
   'page.settings.tab.profile.module.autoRangeBan.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 prefix length',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 prefix length',
-  'page.settings.tab.profile.module.autoRangeBan.teredo': 'Parse Teredo embedded IPv4',
+  'page.settings.tab.profile.module.autoRangeBan.teredo': 'Teredo address handling',
   'page.settings.tab.profile.module.autoRangeBan.teredoTips':
-    'When enabled, the client IPv4 address embedded in Teredo addresses will be extracted and used for range ban; when disabled, Teredo addresses will be skipped entirely',
+    'parse: Extract embedded IPv4 for range ban; skip: Skip Teredo addresses; original: Treat as regular IPv6 addresses',
+  'page.settings.tab.profile.module.autoRangeBan.teredoParse': 'Parse embedded IPv4',
+  'page.settings.tab.profile.module.autoRangeBan.teredoSkip': 'Skip',
+  'page.settings.tab.profile.module.autoRangeBan.teredoOriginal': 'Original (IPv6)',
 
   'page.settings.tab.profile.module.btn.enable.tips':
     'Enable the network rules from BTN server, only works when you configured BTN server in config.yml',

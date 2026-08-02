@@ -91,9 +91,12 @@ export default {
   'page.settings.tab.profile.module.autoRangeBan.useGlobalBanTime': '使用全域封禁時間',
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 前綴長度',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 前綴長度',
-  'page.settings.tab.profile.module.autoRangeBan.teredo': '解析 Teredo 內嵌 IPv4',
+  'page.settings.tab.profile.module.autoRangeBan.teredo': 'Teredo 位址處理',
   'page.settings.tab.profile.module.autoRangeBan.teredoTips':
-    '啟用後，Teredo 位址中內嵌的用戶端 IPv4 位址將被提取並用於範圍封禁；停用後，Teredo 位址將被直接跳過',
+    'parse: 解析內嵌 IPv4 用於範圍封禁；skip: 跳過 Teredo 位址；original: 作為普通 IPv6 位址處理',
+  'page.settings.tab.profile.module.autoRangeBan.teredoParse': '解析內嵌 IPv4',
+  'page.settings.tab.profile.module.autoRangeBan.teredoSkip': '跳過',
+  'page.settings.tab.profile.module.autoRangeBan.teredoOriginal': '原始行為 (IPv6)',
 
   'page.settings.tab.profile.module.btn.enable.tips':
     '啟用來自 BTN 網路的規則，僅在 config.yml 中配置了 BTN 服務器時生效',

@@ -38,7 +38,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     private PeerBanHelper peerBanHelper;
     private int ipv4Prefix;
     private int ipv6Prefix;
-    private boolean teredoEnabled;
+    private String teredoMode;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
@@ -82,7 +82,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     private void handleWebAPI(Context ctx) {
-        ctx.json(new StdResp(true, null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix, "teredo", teredoEnabled)));
+        ctx.json(new StdResp(true, null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix, "teredo", teredoMode)));
     }
 
     @Override
@@ -93,7 +93,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     private void reloadConfig() {
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
-        this.teredoEnabled = getConfig().getBoolean("teredo", true);
+        this.teredoMode = getConfig().getString("teredo", "parse");
         this.banDuration = getConfig().getLong("ban-duration", 0);
         getCache().invalidateAll();
     }
@@ -108,10 +108,14 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
         if (isTeredo(peerAddress)) {
-            if (!teredoEnabled) {
-                return pass();
+            switch (teredoMode) {
+                case "skip" -> {
+                    return pass();
+                }
+                case "parse" -> peerAddress = extractTeredoIPv4(peerAddress);
+                default -> {
+                }
             }
-            peerAddress = extractTeredoIPv4(peerAddress);
         } else if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
@@ -127,14 +131,20 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             }
             IPAddress effectiveBannedAddr = bannedAddr;
             if (isTeredo(bannedAddr)) {
-                if (!teredoEnabled) {
-                    return;
+                switch (teredoMode) {
+                    case "skip" -> {
+                        return;
+                    }
+                    case "parse" -> {
+                        Integer prefixLen = bannedAddr.getPrefixLength();
+                        if (bannedAddr.isMultiple() || (prefixLen != null && prefixLen < 128)) {
+                            return;
+                        }
+                        effectiveBannedAddr = extractTeredoIPv4(bannedAddr.withoutPrefixLength());
+                    }
+                    default -> {
+                    }
                 }
-                Integer prefixLen = bannedAddr.getPrefixLength();
-                if (bannedAddr.isMultiple() || (prefixLen != null && prefixLen < 128)) {
-                    return;
-                }
-                effectiveBannedAddr = extractTeredoIPv4(bannedAddr.withoutPrefixLength());
             }
             if (finalPeerAddress.isIPv4() != effectiveBannedAddr.isIPv4()) {
                 return;

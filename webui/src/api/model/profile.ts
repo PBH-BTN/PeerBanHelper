@@ -89,7 +89,7 @@ export interface AutoRangeBan {
   ban_duration: BanDuration
   ipv4: number
   ipv6: number
-  teredo: boolean
+  teredo: string
 }
 
 export interface Btn {
