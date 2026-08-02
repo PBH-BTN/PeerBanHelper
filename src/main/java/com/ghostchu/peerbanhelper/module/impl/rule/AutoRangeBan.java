@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -20,7 +21,6 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.ipv4.IPv4Address;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -107,7 +107,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             return pass();
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
-        if (isTeredo(peerAddress)) {
+        if (IPAddressUtil.isTeredo(peerAddress)) {
             peerAddress = resolveTeredo(peerAddress);
             if (peerAddress == null) {
                 return pass();
@@ -127,7 +127,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 return;
             }
             IPAddress resolvedAddr = bannedAddr;
-            if (isTeredo(bannedAddr)) {
+            if (IPAddressUtil.isTeredo(bannedAddr)) {
                 resolvedAddr = resolveTeredo(bannedAddr);
                 if (resolvedAddr == null) {
                     return;
@@ -149,7 +149,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             if (bannedCidr.contains(finalPeerAddress)) {
                 StructuredData structuredData = StructuredData.create()
                         .add("relatedBannedAddress", resolvedAddr.toCompressedString());
-                if (isTeredo(bannedAddr)) {
+                if (IPAddressUtil.isTeredo(bannedAddr)) {
                     structuredData.add("teredoMode", teredoMode)
                             .add("originalBannedAddress", bannedAddr.toCompressedString());
                 }
@@ -176,19 +176,10 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 if (teredoAddress.isMultiple() || (prefixLen != null && prefixLen < 128)) {
                     yield null;
                 }
-                yield extractTeredoIPv4(teredoAddress.withoutPrefixLength());
+                yield IPAddressUtil.extractTeredoIPv4(teredoAddress.withoutPrefixLength());
             }
             default -> teredoAddress;
         };
-    }
-
-    private static boolean isTeredo(IPAddress address) {
-        return address.isIPv6() && address.toIPv6().isTeredo();
-    }
-
-    private static IPAddress extractTeredoIPv4(IPAddress teredoAddress) {
-        IPv4Address encodedIPv4 = teredoAddress.toIPv6().getEmbeddedIPv4Address();
-        return new IPv4Address(~encodedIPv4.intValue());
     }
 
 }
