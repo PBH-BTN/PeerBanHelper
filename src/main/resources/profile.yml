@@ -142,6 +142,15 @@ module:
     # 64 = 常见的 ISP 为单个接入用户分配的前缀长度
     # 64 = The common prefix length that ISP allocate for one user
     ipv6-prefix-length: 56
+    # Teredo 地址处理模式
+    # parse: 解析内嵌 IPv4 用于前缀分组（默认）
+    # skip: 跳过 Teredo 地址，不参与检查
+    # original: 作为普通 IPv6 地址处理（原始行为）
+    # Teredo address handling mode
+    # parse: Parse embedded IPv4 for prefix grouping (default)
+    # skip: Skip Teredo addresses entirely
+    # original: Treat as regular IPv6 addresses (original behavior)
+    teredo: parse
     ban-duration: 2592000000
     # 启用持久化记录
     # Enable persist recording
@@ -313,6 +322,15 @@ module:
     # keep-hunting为true时有效，和cache-lifespan相似，对被猎杀IP的缓存持续时间
     # Only works when keep-hunting enabled, similar as cache-lifespan
     keep-hunting-time: 2592000
+    # Teredo 地址处理模式
+    # parse: 解析内嵌 IPv4 用于子网分组（默认）
+    # skip: 跳过 Teredo 地址，不参与检查
+    # original: 作为普通 IPv6 地址处理（原始行为）
+    # Teredo address handling mode
+    # parse: Parse embedded IPv4 for subnet grouping (default)
+    # skip: Skip Teredo addresses entirely
+    # original: Treat as regular IPv6 addresses (original behavior)
+    teredo: parse
   # 规则引擎，支持 AviatorScript 语言 - User script, support AviatorScript
   # 提供在 PBH 上自行编程编写规则的能力 - Provide programming ability on PBH
   expression-engine:

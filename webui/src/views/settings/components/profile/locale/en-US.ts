@@ -87,6 +87,9 @@ export default {
     'This option will allow PCB ban the Peer from downloader for disconnect it, this will heat up progress reset check quickly.',
   'page.settings.tab.profile.module.progressCheatBlocker.fastPCBTestPercentage':
     'Fast PCB test threshold',
+  'page.settings.tab.profile.module.progressCheatBlocker.teredo': 'Teredo address handling',
+  'page.settings.tab.profile.module.progressCheatBlocker.teredoTips':
+    'parse: Extract embedded IPv4 for prefix grouping; skip: Skip Teredo addresses; original: Treat as regular IPv6 addresses',
 
   'page.settings.tab.profile.module.ipAddressBlocker.title': 'IP address/port blacklist',
   'page.settings.tab.profile.module.ipAddressBlocker.useGlobalBanTime': 'Use global ban duration',
@@ -124,6 +127,9 @@ export default {
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting.tips':
     'If a specific IP flagged multi-dialing, ignore the caching span and keep searching other IPs in same subnet',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time': 'Keep hunting time',
+  'page.settings.tab.profile.module.multiDialingBlocker.teredo': 'Teredo address handling',
+  'page.settings.tab.profile.module.multiDialingBlocker.teredoTips':
+    'parse: Extract embedded IPv4 for subnet grouping; skip: Skip Teredo addresses; original: Treat as regular IPv6 addresses',
 
   'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript rule engine',
   'page.settings.tab.profile.module.expressionEngine.tips':

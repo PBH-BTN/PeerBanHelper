@@ -79,6 +79,9 @@ export default {
     '此選項將允許 PCB 在 Peer 下載指定量的資料後，將其短暫的封禁一段時間以便斷開其連接，這有助於快速預熱進度重設檢查',
   'page.settings.tab.profile.module.progressCheatBlocker.fastPCBTestPercentage':
     '快速 PCB 測試啟動閾值',
+  'page.settings.tab.profile.module.progressCheatBlocker.teredo': 'Teredo 位址處理',
+  'page.settings.tab.profile.module.progressCheatBlocker.teredoTips':
+    'parse: 解析內嵌 IPv4 用於前綴分組；skip: 跳過 Teredo 位址；original: 作為普通 IPv6 位址處理',
 
   'page.settings.tab.profile.module.ipAddressBlocker.title': 'IP 位址封禁',
   'page.settings.tab.profile.module.ipAddressBlocker.useGlobalBanTime': '使用全域封禁時間',
@@ -114,6 +117,9 @@ export default {
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting.tips':
     '如果某IP已判定為多撥，無視快取時間限制繼續搜尋其同夥',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time': '追獵時間',
+  'page.settings.tab.profile.module.multiDialingBlocker.teredo': 'Teredo 位址處理',
+  'page.settings.tab.profile.module.multiDialingBlocker.teredoTips':
+    'parse: 解析內嵌 IPv4 用於子網分組；skip: 跳過 Teredo 位址；original: 作為普通 IPv6 位址處理',
 
   'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript 規則引擎',
   'page.settings.tab.profile.module.expressionEngine.tips':

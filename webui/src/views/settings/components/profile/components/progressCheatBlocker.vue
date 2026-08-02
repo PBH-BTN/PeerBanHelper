@@ -153,6 +153,23 @@
         <br />{{ fastPCBTestPercentage }}%
       </a-space>
     </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.progressCheatBlocker.teredo')"
+      field="model.teredo"
+      :tooltip="t('page.settings.tab.profile.module.progressCheatBlocker.teredoTips')"
+    >
+      <a-select v-model="model.teredo" style="width: 12em">
+        <a-option value="parse">{{
+          t('page.settings.tab.profile.module.autoRangeBan.teredoParse')
+        }}</a-option>
+        <a-option value="skip">{{
+          t('page.settings.tab.profile.module.autoRangeBan.teredoSkip')
+        }}</a-option>
+        <a-option value="original">{{
+          t('page.settings.tab.profile.module.autoRangeBan.teredoOriginal')
+        }}</a-option>
+      </a-select>
+    </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">

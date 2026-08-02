@@ -159,4 +159,19 @@ public final class IPAddressUtil {
         IPv4Address encodedIPv4 = teredoAddress.toIPv6().getEmbeddedIPv4Address();
         return new IPv4Address(~encodedIPv4.intValue());
     }
+
+    /**
+     * 根据模式解析 Teredo 地址，调用前应先用 isTeredo() 判断。
+     * 返回 null 表示应跳过（skip 模式）；返回原地址表示 original 模式；返回 IPv4 表示 parse 模式。
+     *
+     * @param teredoAddress Teredo 地址
+     * @param mode          处理模式：parse / skip / original
+     */
+    public static IPAddress resolveTeredo(IPAddress teredoAddress, String mode) {
+        return switch (mode) {
+            case "skip" -> null;
+            case "parse" -> extractTeredoIPv4(teredoAddress);
+            default -> teredoAddress;
+        };
+    }
 }

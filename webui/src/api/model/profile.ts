@@ -59,6 +59,7 @@ export interface ProgressCheatBlocker {
   max_wait_duration: number
   fast_pcb_test_percentage: number
   fast_pcb_test_block_duration: number
+  teredo: string
 }
 
 export interface IpAddressBlocker {
@@ -107,6 +108,7 @@ export interface MultiDialingBlocker {
   cache_lifespan: number
   keep_hunting: boolean
   keep_hunting_time: number
+  teredo: string
 }
 
 export interface ExpressionEngine {
