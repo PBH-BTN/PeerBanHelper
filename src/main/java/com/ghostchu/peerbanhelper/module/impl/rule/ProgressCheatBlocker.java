@@ -212,6 +212,9 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         // 处理 IPV6
         IPAddress peerPrefix;
         IPAddress peerIp = peer.getPeerAddress().getAddress();
+        if (IPAddressUtil.isTeredo(peerIp)) {
+            peerIp = IPAddressUtil.extractTeredoIPv4(peerIp);
+        }
         if (peerIp.isIPv4()) {
             peerPrefix = peerIp.toPrefixBlock(ipv4PrefixLength);
         } else {

@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -148,6 +149,9 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
         String torrentName = torrent.getName();
         String torrentId = torrent.getId();
         IPAddress peerAddress = peer.getPeerAddress().getAddress();
+        if (IPAddressUtil.isTeredo(peerAddress)) {
+            peerAddress = IPAddressUtil.extractTeredoIPv4(peerAddress);
+        }
         String peerIpStr = peerAddress.toString();
         IPAddress peerSubnet = peerAddress.isIPv4() ? peerAddress.toPrefixBlock(subnetMaskLength) : peerAddress.toPrefixBlock(subnetMaskV6Length);
         try {

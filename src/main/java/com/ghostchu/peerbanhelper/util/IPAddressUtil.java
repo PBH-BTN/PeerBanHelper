@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import inet.ipaddr.ipv4.IPv4Address;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
@@ -142,5 +143,20 @@ public final class IPAddressUtil {
             addrs.add(address.toIPv4());
         }
         return addrs;
+    }
+
+    /**
+     * 判断地址是否为 Teredo 地址 (2001:0000::/32)
+     */
+    public static boolean isTeredo(IPAddress address) {
+        return address.isIPv6() && address.toIPv6().isTeredo();
+    }
+
+    /**
+     * 从 Teredo 地址中提取内嵌的客户端 IPv4 地址（按位取反解码）
+     */
+    public static IPAddress extractTeredoIPv4(IPAddress teredoAddress) {
+        IPv4Address encodedIPv4 = teredoAddress.toIPv6().getEmbeddedIPv4Address();
+        return new IPv4Address(~encodedIPv4.intValue());
     }
 }
