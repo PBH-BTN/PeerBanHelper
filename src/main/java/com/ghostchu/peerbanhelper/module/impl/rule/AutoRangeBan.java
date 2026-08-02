@@ -107,9 +107,11 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             return pass();
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
-        peerAddress = resolveTeredo(peerAddress);
-        if (peerAddress == null) {
-            return pass();
+        if (isTeredo(peerAddress)) {
+            peerAddress = resolveTeredo(peerAddress);
+            if (peerAddress == null) {
+                return pass();
+            }
         }
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
@@ -124,9 +126,12 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             if (bannedMeta.isBanForDisconnect()) {
                 return;
             }
-            IPAddress resolvedAddr = resolveTeredo(bannedAddr);
-            if (resolvedAddr == null) {
-                return;
+            IPAddress resolvedAddr = bannedAddr;
+            if (isTeredo(bannedAddr)) {
+                resolvedAddr = resolveTeredo(bannedAddr);
+                if (resolvedAddr == null) {
+                    return;
+                }
             }
             if (finalPeerAddress.isIPv4() != resolvedAddr.isIPv4()) {
                 return;
@@ -158,25 +163,22 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     /**
-     * 根据 teredoMode 配置解析 Teredo 地址。
+     * 根据 teredoMode 配置解析 Teredo 地址，调用前应先用 isTeredo() 判断。
      * 返回 null 表示应跳过该地址（skip 模式或不可解析的前缀块）；
-     * 返回原地址表示非 Teredo 或 original 模式；
+     * 返回原地址表示 original 模式；
      * 返回提取的 IPv4 表示 parse 模式。
      */
-    private IPAddress resolveTeredo(IPAddress address) {
-        if (!isTeredo(address)) {
-            return address;
-        }
+    private IPAddress resolveTeredo(IPAddress teredoAddress) {
         return switch (teredoMode) {
             case "skip" -> null;
             case "parse" -> {
-                Integer prefixLen = address.getPrefixLength();
-                if (address.isMultiple() || (prefixLen != null && prefixLen < 128)) {
+                Integer prefixLen = teredoAddress.getPrefixLength();
+                if (teredoAddress.isMultiple() || (prefixLen != null && prefixLen < 128)) {
                     yield null;
                 }
-                yield extractTeredoIPv4(address.withoutPrefixLength());
+                yield extractTeredoIPv4(teredoAddress.withoutPrefixLength());
             }
-            default -> address;
+            default -> teredoAddress;
         };
     }
 
