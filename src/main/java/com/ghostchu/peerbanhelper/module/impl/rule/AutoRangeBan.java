@@ -148,7 +148,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             }
             if (bannedCidr.contains(finalPeerAddress)) {
                 StructuredData structuredData = StructuredData.create()
-                        .add("relatedBannedAddress", bannedAddr.toCompressedString());
+                        .add("relatedBannedAddress", resolvedAddr.toCompressedString());
                 if (isTeredo(bannedAddr)) {
                     structuredData.add("teredoMode", teredoMode)
                             .add("originalBannedAddress", bannedAddr.toCompressedString());
