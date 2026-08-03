@@ -82,6 +82,7 @@ public final class Aria2Next extends AbstractDownloader {
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.UNBAN_IP,
                 //DownloaderFeatureFlag.TRAFFIC_STATS,
+                DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT,
                 DownloaderFeatureFlag.RANGE_BAN_IP);
     }
 
@@ -277,6 +278,15 @@ public final class Aria2Next extends AbstractDownloader {
     @Override
     public void setBTProtocolPort(int port) {
         // do nothing
+        try {
+            var changeListenPort = sendRpcRequest(buildRpcRequest("aria2.changeGlobalOption",
+                    List.of(
+                            Map.of("listen-port",port)
+                    )), String.class); //  "result": "OK"
+            // todo: process returns
+        } catch (DownloaderRequestException e) {
+            log.error("Error on request", e);
+        }
     }
 
     @Override
