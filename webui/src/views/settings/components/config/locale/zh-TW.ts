@@ -168,8 +168,6 @@ export default {
   'page.settings.tab.config.push.form.webhook.method': '請求方法',
   'page.settings.tab.config.push.form.webhook.content_type': '內容類型',
   'page.settings.tab.config.push.form.webhook.body_template': '消息模板',
-  'page.settings.tab.config.push.form.webhook.body_template.placeholder':
-    '請輸入消息模板，支援變數：{l}title{r}、{l}content{r}、{l}level{r}、{l}date{r}、{l}time{r}、{l}datetime{r}、{l}channelName{r}',
   'page.settings.tab.config.push.form.webhook.body_template.tooltip':
     '支援變數：{l}title{r} {l}content{r} {l}level{r} {l}date{r} {l}time{r} {l}datetime{r} {l}channelName{r}\n額外說明：{l}level{r}: TIP, *INFO*, WARN, ERROR, FATAL',
   'page.settings.tab.config.push.form.webhook.headers': '自訂請求頭',
@@ -178,8 +176,6 @@ export default {
   'page.settings.tab.config.push.form.webhook.headers.add': '新增請求頭',
   'page.settings.tab.config.push.form.webhook.headers.error.emptyKey': 'Header 名稱不能為空',
   'page.settings.tab.config.push.form.webhook.headers.error.duplicateKey': 'Header 名稱不能重複',
-  'page.settings.tab.config.push.form.webhook.variables': '可用變數',
-  'page.settings.tab.config.push.form.webhook.variables.tip': '以下變數可直接使用',
 
   'page.settings.tab.config.push.form.action.ok': '確定',
   'page.settings.tab.config.push.form.action.cancel': '取消',

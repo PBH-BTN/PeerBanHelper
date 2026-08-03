@@ -172,8 +172,6 @@ export default {
   'page.settings.tab.config.push.form.webhook.method': 'HTTP Method',
   'page.settings.tab.config.push.form.webhook.content_type': 'Content Type',
   'page.settings.tab.config.push.form.webhook.body_template': 'Message Template',
-  'page.settings.tab.config.push.form.webhook.body_template.placeholder':
-    'Enter message template, supported variables: {l}title{r}, {l}content{r}, {l}level{r}, {l}date{r}, {l}time{r}, {l}datetime{r}, {l}channelName{r}',
   'page.settings.tab.config.push.form.webhook.body_template.tooltip':
     'Supported variables: {l}title{r} {l}content{r} {l}level{r} {l}date{r} {l}time{r} {l}datetime{r} {l}channelName{r}\nNote: {l}level{r}: TIP, *INFO*, WARN, ERROR, FATAL',
   'page.settings.tab.config.push.form.webhook.headers': 'Custom Headers',
@@ -183,9 +181,6 @@ export default {
   'page.settings.tab.config.push.form.webhook.headers.error.emptyKey': 'Header name is required',
   'page.settings.tab.config.push.form.webhook.headers.error.duplicateKey':
     'Header name cannot be duplicated',
-  'page.settings.tab.config.push.form.webhook.variables': 'Available Variables',
-  'page.settings.tab.config.push.form.webhook.variables.tip':
-    'You can use the following variables directly',
 
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',
