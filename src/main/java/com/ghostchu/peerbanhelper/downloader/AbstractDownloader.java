@@ -54,7 +54,7 @@ public abstract class AbstractDownloader implements Downloader {
 
     @Override
     public PeerAddress convertIfTeredo(PeerAddress peerAddress) {
-        if (!Main.getMainConfig().getBoolean("banlist-remapping.teredo")) {
+        if (!Main.getMainConfig().getBoolean("ip-remapping.teredo")) {
             return peerAddress;
         }
         IPAddress ipAddress = peerAddress.getAddress();

@@ -39,7 +39,7 @@ public final class MainConfigUpdateScript {
 
     @UpdateScript(version = 47)
     public void teredoSupport(YamlConfiguration bundle) {
-        conf.set("banlist-remapping.teredo", false);
+        conf.set("ip-remapping.teredo", false);
     }
 
     @UpdateScript(version = 46)
