@@ -38,7 +38,14 @@ public class DatabaseSchemaInitializer {
                     .validateOnMigrate(ExternalSwitch.parseBoolean("dbnt.flyway.validateOnMigrate", true))
                     .load();
 
-            flyway.migrate();
+            try {
+                flyway.migrate();
+            } catch (Exception e) {
+                log.error(tlUI(Lang.DBNT_FLYWAY_ERROR), e);
+                flyway.repair();
+                flyway.migrate();
+            }
+
             // 2. Run Repeat Scripts
             log.debug("Running repeat scripts for {}", migrationType);
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();

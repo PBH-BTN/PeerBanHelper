@@ -175,7 +175,7 @@ jobs:
         run: |
           APPIMAGE_EXTRACT_AND_RUN=1 ./torrenttools create --simple-progress \
           -t 8 \
-          -v hybrid \
+          -v 1 \
           -a udp://tracker.opentrackr.org:1337/announce \
              udp://tracker.publicbt.com:80/announce \
              udp://tracker.openbittorrent.com:80/announce \
