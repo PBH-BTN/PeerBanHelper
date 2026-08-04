@@ -161,7 +161,7 @@ public final class Aria2Next extends AbstractDownloader {
             return sendRpcRequest(req, new TypeToken<List<A2Task>>() {
             }).stream().filter(t -> t.getBittorrent() != null).toList();
         } catch (DownloaderRequestException e) {
-            log.error("Error on request", e);
+            log.error("Error on request while getting torrents", e);
             return Collections.emptyList();
         }
     }
@@ -202,7 +202,7 @@ public final class Aria2Next extends AbstractDownloader {
             }).stream().filter(t -> t.getBittorrent() != null).toList());
             return torrents;
         } catch (DownloaderRequestException e) {
-            log.error("Error on request", e);
+            log.error("Error on request while getting all torrents", e);
             return torrents;
         }
     }
@@ -217,7 +217,7 @@ public final class Aria2Next extends AbstractDownloader {
             return sendRpcRequest(requestPeers, new TypeToken<List<A2Peer>>() {
             });
         } catch (DownloaderRequestException e) {
-            log.error("Error on request", e);
+            log.error("Error on request while getting peers", e);
             return Collections.emptyList();
         }
     }
@@ -243,7 +243,7 @@ public final class Aria2Next extends AbstractDownloader {
             ), A2SetBtPeerBlocklist.class);
             log.debug("Aria2Next downloader {} now at revision {} with {} rows", this.config.getEndpoint(), setBanList.getRevision(), setBanList.getRuleCount());
         } catch (DownloaderRequestException e) {
-            log.error("Error on request", e);
+            log.error("Error on request while setting banlist", e);
         }
     }
 
@@ -266,7 +266,7 @@ public final class Aria2Next extends AbstractDownloader {
                 throw new IllegalStateException("The Aria2Next downloader " + this.getEndpoint() + " returns non OK result for setSpeedLimiter: " + setSpeedLimit);
             }
         } catch (DownloaderRequestException e) {
-            log.error("Error on request", e);
+            log.error("Error on request while set speed limtier", e);
         }
     }
 
@@ -285,7 +285,7 @@ public final class Aria2Next extends AbstractDownloader {
                     )), String.class); //  "result": "OK"
             // todo: process returns
         } catch (DownloaderRequestException e) {
-            log.error("Error on request", e);
+            log.error("Error on request while set bt protocol port", e);
         }
     }
 
