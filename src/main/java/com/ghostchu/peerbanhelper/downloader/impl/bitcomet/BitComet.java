@@ -509,8 +509,7 @@ public final class BitComet extends AbstractDownloader {
                     .stream()
                     .filter(dto -> peerGroupsFilter.contains(dto.getGroup()));
             return stream.map(peer -> new PeerImpl(
-                    natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
-
+                    convertIfTeredo(natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()))),
                     ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),

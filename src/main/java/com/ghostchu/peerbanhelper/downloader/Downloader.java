@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -43,6 +44,10 @@ public interface Downloader {
      */
     @NotNull
     String getName();
+
+    PeerAddress convertIfTeredo(PeerAddress peerAddress);
+
+    boolean isTeredo(IPAddress ipAddress);
 
     @NotNull
     String getId();

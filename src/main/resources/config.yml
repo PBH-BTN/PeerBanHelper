@@ -1,4 +1,4 @@
-config-version: 46
+config-version: 47
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -187,6 +187,9 @@ banlist-remapping:
     # Prefix Length，将会使用该长度将主机地址置为0，并生成对应的 CIDR 表达式
     # Prefix Length, the host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression
     remap-range: 52
+  # 转换 Teredo 地址为原始 IPv4 地址处理，不影响下载器基于原始 Teredo 地址的封禁行为
+  # Convert Teredo address to original IPv4 address for processing, does not affect the downloader's ban behavior based on the original Teredo address
+  teredo: false
 # 隐私设置 - Privacy Settings
 privacy:
   # 允许向 PBH-BTN 发送匿名统计信息，以便改进 PeerBanHelper 质量，此数据不包含任何个人信息

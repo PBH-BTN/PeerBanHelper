@@ -622,15 +622,14 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
-                    if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
+                    if (qbPeer.getIp() == null || qbPeer.getIp().isBlank()) {
                         continue;
                     }
                     if (s.contains(".onion") || s.contains(".i2p")) {
                         continue;
                     }
-                    qbPeer.getPeerAddress().setRawIp(s);
-                    qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
-
+                    qbPeer.setRawIp(s);
+                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(qbPeer.getPeerAddress())));
                     peersList.add(qbPeer);
                 }
                 return peersList;

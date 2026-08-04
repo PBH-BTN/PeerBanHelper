@@ -215,7 +215,9 @@ public final class Aria2Next extends AbstractDownloader {
             ));
             // peers.forEach(p -> System.out.println(p.toString()));
             return sendRpcRequest(requestPeers, new TypeToken<List<A2Peer>>() {
-            });
+            }).stream()
+                    .peek(peer-> peer.setPeerAddress(convertIfTeredo(natTranslate(peer.getPeerAddress()))))
+                    .toList();
         } catch (DownloaderRequestException e) {
             log.error("Error on request while getting peers", e);
             return Collections.emptyList();

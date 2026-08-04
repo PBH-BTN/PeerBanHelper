@@ -37,6 +37,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 47)
+    public void teredoSupport(YamlConfiguration bundle) {
+        conf.set("banlist-remapping.teredo", false);
+    }
+
     @UpdateScript(version = 46)
     public void updateGeoCN(YamlConfiguration bundle) {
         conf.set("ip-database.database-geocn", "GeoCN");

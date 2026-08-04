@@ -15,9 +15,9 @@ public final class TRPeer implements Peer {
     private final Peers backend;
     private final transient PeerAddress peerAddress;
 
-    public TRPeer(Peers backend, Function<PeerAddress, PeerAddress> natConverter) {
+    public TRPeer(Peers backend, Function<PeerAddress, PeerAddress> natConverter,  Function<PeerAddress, PeerAddress> teredoConverter) {
         this.backend = backend;
-        this.peerAddress = natConverter.apply(new PeerAddress(backend.getAddress(), backend.getPort(), backend.getAddress()));
+        this.peerAddress = teredoConverter.apply(natConverter.apply(new PeerAddress(backend.getAddress(), backend.getPort(), backend.getAddress())));
     }
 
     @Override
