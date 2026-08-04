@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.AbstractQbittorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPeer;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPreferences;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -116,10 +117,10 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                 for (String s : peers.keySet()) {
                     JsonObject singlePeerObject = peers.getAsJsonObject(s);
                     QBittorrentEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentEEPeer.class);
-                    if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
+                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
-                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
+                    if (qbPeer.getIp() == null || qbPeer.getIp().isBlank()) {
                         continue;
                     }
                     if (s.contains(".onion") || s.contains(".i2p")) {
@@ -128,8 +129,8 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     if (qbPeer.getShadowBanned() != null && qbPeer.getShadowBanned()) {
                         continue; // 当做不存在处理
                     }
-                    qbPeer.getPeerAddress().setRawIp(s);
-                    qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
+                    qbPeer.setRawIp(s);
+                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(qbPeer.getPeerAddress())));
                     peersList.add(qbPeer);
                 }
                 return peersList;

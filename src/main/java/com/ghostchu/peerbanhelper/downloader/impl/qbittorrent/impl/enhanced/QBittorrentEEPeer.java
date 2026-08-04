@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
+@Getter
 public final class QBittorrentEEPeer implements Peer {
     @SerializedName("client")
     private String client;
@@ -40,17 +41,10 @@ public final class QBittorrentEEPeer implements Peer {
     @Getter
     @SerializedName("shadowbanned")
     private Boolean shadowBanned;
-    private transient PeerAddress peerAddress;
+    private PeerAddress peerAddress;
+    private String rawIp;
 
     public QBittorrentEEPeer() {
-    }
-
-    @Override
-    public @NotNull PeerAddress getPeerAddress() {
-        if (this.peerAddress == null) {
-            this.peerAddress = new PeerAddress(ip, port, ip);
-        }
-        return this.peerAddress;
     }
 
     @Override
