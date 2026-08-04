@@ -50,7 +50,7 @@ val nettyVersion = "4.2.16.Final"
 val sqliteVersion = "3.53.2.0"
 val springVersion = "7.0.8"
 val flywayVersion = "12.11.0"
-val oshiVersion = "7.4.0"
+val oshiVersion = "7.4.3"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
