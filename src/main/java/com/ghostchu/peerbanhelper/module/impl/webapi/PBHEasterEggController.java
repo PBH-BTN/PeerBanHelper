@@ -41,6 +41,8 @@ public final class PBHEasterEggController extends AbstractFeatureModule {
         urls.add("https://store.steampowered.com/app/391540/Undertale/");
         urls.add("https://store.steampowered.com/app/646570/Slay_the_Spire/");
         urls.add("https://store.steampowered.com/app/457140/_/");
+        urls.add("https://www.bilibili.com/video/BV1nB3u6tEHD");
+
     }
 
     @Override
