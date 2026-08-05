@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
@@ -619,7 +620,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 for (String s : peers.keySet()) {
                     JsonObject singlePeerObject = peers.getAsJsonObject(s);
                     QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);
-                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
+                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection())
+                            || "HTTPS".equalsIgnoreCase(qbPeer.getConnection())
+                            || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
                     if (qbPeer.getIp() == null || qbPeer.getIp().isBlank()) {
@@ -629,7 +632,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                         continue;
                     }
                     qbPeer.setRawIp(s);
-                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(qbPeer.getPeerAddress())));
+                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp()))));
                     peersList.add(qbPeer);
                 }
                 return peersList;

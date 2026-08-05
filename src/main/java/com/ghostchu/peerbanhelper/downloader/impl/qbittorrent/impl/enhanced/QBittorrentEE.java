@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import inet.ipaddr.IPAddress;
@@ -130,7 +131,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                         continue; // 当做不存在处理
                     }
                     qbPeer.setRawIp(s);
-                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(qbPeer.getPeerAddress())));
+                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp()))));
                     peersList.add(qbPeer);
                 }
                 return peersList;
