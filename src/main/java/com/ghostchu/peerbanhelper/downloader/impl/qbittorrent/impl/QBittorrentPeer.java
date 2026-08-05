@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 @Getter
 @ToString
-public class QBittorrentPeer implements Peer {
+public final class QBittorrentPeer implements Peer {
     @SerializedName("client")
     private String client;
     @Getter
