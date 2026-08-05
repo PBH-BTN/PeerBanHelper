@@ -73,7 +73,7 @@
           </a-grid>
         </a-radio-group>
       </a-form-item>
-      <component :is="formMap[form.type]" v-model="form.config" />
+      <component :is="formMap[form.type]" ref="activeFormRef" v-model="form.config" />
     </a-form>
   </a-modal>
 </template>
@@ -142,9 +142,13 @@ const emits = defineEmits<{
 }>()
 
 const formRef = ref<InstanceType<typeof Form>>()
+const activeFormRef = ref<{ validate?: () => boolean }>()
 const handleBeforeOk = async () => {
   const validateError = await formRef.value?.validate()
   if (validateError) {
+    return false
+  }
+  if (activeFormRef.value?.validate?.() === false) {
     return false
   }
   try {
@@ -195,6 +199,9 @@ const handleOk = async () => {
 const handleTest = async () => {
   const validateError = await formRef.value?.validate()
   if (validateError) {
+    return
+  }
+  if (activeFormRef.value?.validate?.() === false) {
     return
   }
   testLoading.value = true

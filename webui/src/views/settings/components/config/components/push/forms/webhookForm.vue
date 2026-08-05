@@ -39,6 +39,7 @@
     field="config.body_template"
     :label="t('page.settings.tab.config.push.form.webhook.body_template')"
     required
+    :rules="bodyTemplateRules"
   >
     <div class="textarea-wrapper">
       <div class="editor-container">
@@ -47,6 +48,7 @@
           :theme="darkStore.isDark ? 'vs-dark' : 'vs'"
           :language="contentTypeLanguage"
           :options="editorOptions"
+          @mount="onEditorMount"
         />
       </div>
       <a-tooltip position="right">
@@ -70,7 +72,11 @@
   <a-form-item
     field="config.headers"
     :label="t('page.settings.tab.config.push.form.webhook.headers')"
-    :rules="[{ validator: headersValidator }]"
+    :help="
+      hasNonAsciiHeaderValue
+        ? t('page.settings.tab.config.push.form.webhook.headers.error.nonAsciiValue')
+        : undefined
+    "
   >
     <a-space direction="vertical" style="width: 100%">
       <a-button @click="addHeader">
@@ -88,17 +94,32 @@
         <template #item="{ item }">
           <a-list-item>
             <div class="header-row">
-              <a-input
-                v-model="headerRows[item.index]!.key"
-                class="header-input"
-                :placeholder="t('page.settings.tab.config.push.form.webhook.headers.key')"
-                allow-clear
-              />
+              <div class="header-field">
+                <a-input
+                  v-model="headerRows[item.index]!.key"
+                  class="header-input"
+                  :placeholder="t('page.settings.tab.config.push.form.webhook.headers.key')"
+                  :error="
+                    headerTouched[item.index]?.key && Boolean(headerRowErrors[item.index]?.key)
+                  "
+                  allow-clear
+                  @blur="markHeaderTouched(item.index, 'key')"
+                />
+                <transition name="form-blink" appear>
+                  <div
+                    v-if="headerTouched[item.index]?.key && headerRowErrors[item.index]?.key"
+                    class="header-row-error"
+                  >
+                    {{ headerRowErrors[item.index]!.key }}
+                  </div>
+                </transition>
+              </div>
               <a-input
                 v-model="headerRows[item.index]!.value"
                 class="header-input"
                 :placeholder="t('page.settings.tab.config.push.form.webhook.headers.value')"
                 allow-clear
+                @blur="markHeaderTouched(item.index, 'value')"
               />
             </div>
             <template #actions>
@@ -122,17 +143,19 @@
 
 <script setup lang="ts">
 import { WebhookContentType, WebhookMethod, type WebhookConfig } from '@/api/model/push'
+import { formInjectionKey, type FormContext } from '@arco-design/web-vue/es/form/context'
 import type { FieldRule } from '@arco-design/web-vue'
 import { VueMonacoEditor, loader } from '@guolao/vue-monaco-editor'
 import * as monaco from 'monaco-editor'
 import { useDarkStore } from '@/stores/dark'
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 loader.config({ monaco })
 
 const { t } = useI18n()
 const model = defineModel<WebhookConfig>({ required: true })
+const formCtx = inject<FormContext>(formInjectionKey)
 
 if (model.value.url === undefined) model.value.url = ''
 if (model.value.method === undefined) model.value.method = WebhookMethod.POST
@@ -193,10 +216,45 @@ const editorOptions = {
   tabSize: 2
 }
 
+const isValidJson = (value: string) => {
+  try {
+    JSON.parse(value)
+    return true
+  } catch {
+    return false
+  }
+}
+
+const isJsonTemplate = computed(() => model.value.content_type === WebhookContentType.JSON)
+
+const bodyTemplateRules: FieldRule<string> = {
+  validator: (value, callback) => {
+    if (isJsonTemplate.value && value && !isValidJson(value)) {
+      return callback(
+        t('page.settings.tab.config.push.form.webhook.body_template.error.invalidJson')
+      )
+    }
+    callback()
+  }
+}
+
+const validateBodyTemplate = () => {
+  if (formCtx?.validateField) formCtx.validateField('config.body_template')
+}
+
+const onEditorMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+  editor.onDidBlurEditorWidget(() => {
+    validateBodyTemplate()
+  })
+}
+
 const createHeaderRows = (headers: Record<string, string> = {}) =>
   Object.entries(headers).map(([key, value]) => ({ key, value }))
 
 const headerRows = ref<HeaderRow[]>(createHeaderRows(model.value.headers))
+const headerTouched = ref<{ key: boolean; value: boolean }[]>(
+  headerRows.value.map(() => ({ key: false, value: false }))
+)
 const currentPage = ref(1)
 const pageSize = computed(() => 5)
 
@@ -227,36 +285,59 @@ watch(headerRows, () => syncHeadersToModel(), { deep: true })
 watch(model, (value) => {
   if (value.headers === undefined) value.headers = {}
   headerRows.value = createHeaderRows(value.headers)
+  headerTouched.value = headerRows.value.map(() => ({ key: false, value: false }))
   currentPage.value = 1
 })
 
 const addHeader = () => {
   headerRows.value.push({ key: '', value: '' })
+  headerTouched.value.push({ key: false, value: false })
   currentPage.value = Math.ceil(headerRows.value.length / pageSize.value)
 }
 
 const removeHeader = (index: number) => {
   headerRows.value.splice(index, 1)
+  headerTouched.value.splice(index, 1)
   const lastPage = Math.max(1, Math.ceil(headerRows.value.length / pageSize.value))
   if (currentPage.value > lastPage) currentPage.value = lastPage
 }
 
-const headersValidator = (_: unknown, callback: (error?: string) => void) => {
+const markHeaderTouched = (index: number, field: 'key' | 'value') => {
+  const target = headerTouched.value[index]
+  if (target) target[field] = true
+}
+
+const hasNonAsciiHeaderValue = computed(() =>
+  headerRows.value.some((row) => /[^\x00-\x7F]/.test(row.value))
+)
+
+const headerRowErrors = computed(() => {
   const names = new Set<string>()
-  for (const row of headerRows.value) {
+  return headerRows.value.map((row) => {
     const key = row.key.trim()
     if (!key && row.value.trim()) {
-      return callback(t('page.settings.tab.config.push.form.webhook.headers.error.emptyKey'))
+      return { key: t('page.settings.tab.config.push.form.webhook.headers.error.emptyKey') }
     }
-    if (!key) continue
+    if (!key) return { key: '' }
+    if (/[^\x21-\x7E]/.test(key)) {
+      return { key: t('page.settings.tab.config.push.form.webhook.headers.error.invalidKey') }
+    }
     const normalizedKey = key.toLowerCase()
     if (names.has(normalizedKey)) {
-      return callback(t('page.settings.tab.config.push.form.webhook.headers.error.duplicateKey'))
+      return { key: t('page.settings.tab.config.push.form.webhook.headers.error.duplicateKey') }
     }
     names.add(normalizedKey)
-  }
-  callback()
+    return { key: '' }
+  })
+})
+
+const validate = () => {
+  validateBodyTemplate()
+  headerTouched.value = headerTouched.value.map(() => ({ key: true, value: true }))
+  return !headerRowErrors.value.some((error) => error.key)
 }
+
+defineExpose({ validate })
 </script>
 
 <style scoped>
@@ -288,7 +369,23 @@ const headersValidator = (_: unknown, callback: (error?: string) => void) => {
   gap: 8px;
 }
 
+.header-field {
+  flex: 1;
+  min-width: 0;
+}
+
 .header-input {
   flex: 1;
+}
+
+.header-row-error {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgb(var(--danger-6));
+}
+
+:deep(.arco-form-item-message-help) {
+  color: rgb(var(--warning-6));
 }
 </style>

@@ -169,12 +169,18 @@ export default {
   'page.settings.tab.config.push.form.webhook.body_template': '消息模板',
   'page.settings.tab.config.push.form.webhook.body_template.tooltip':
     '支持变量：{l}title{r} {l}content{r} {l}level{r} {l}date{r} {l}time{r} {l}datetime{r} {l}channelName{r}\n额外说明：{l}level{r}: TIP, *INFO*, WARN, ERROR, FATAL',
+  'page.settings.tab.config.push.form.webhook.body_template.error.invalidJson':
+    '消息模板不是有效的 JSON',
   'page.settings.tab.config.push.form.webhook.headers': '自定义请求头',
   'page.settings.tab.config.push.form.webhook.headers.key': 'Header 名称',
   'page.settings.tab.config.push.form.webhook.headers.value': 'Header 值',
   'page.settings.tab.config.push.form.webhook.headers.add': '新增请求头',
   'page.settings.tab.config.push.form.webhook.headers.error.emptyKey': 'Header 名称不能为空',
   'page.settings.tab.config.push.form.webhook.headers.error.duplicateKey': 'Header 名称不能重复',
+  'page.settings.tab.config.push.form.webhook.headers.error.invalidKey':
+    'Header 名称只能包含 ASCII 可见字符（33-126）',
+  'page.settings.tab.config.push.form.webhook.headers.error.nonAsciiValue':
+    "Header 值包含非 ASCII 字符，请按 RFC 8187 编码，例如 UTF-8''%E4%BD%A0%E5%A5%BD",
 
   'page.settings.tab.config.push.form.action.ok': '确定',
   'page.settings.tab.config.push.form.action.cancel': '取消',

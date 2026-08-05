@@ -174,6 +174,8 @@ export default {
   'page.settings.tab.config.push.form.webhook.body_template': 'Message Template',
   'page.settings.tab.config.push.form.webhook.body_template.tooltip':
     'Supported variables: {l}title{r} {l}content{r} {l}level{r} {l}date{r} {l}time{r} {l}datetime{r} {l}channelName{r}\nNote: {l}level{r}: TIP, *INFO*, WARN, ERROR, FATAL',
+  'page.settings.tab.config.push.form.webhook.body_template.error.invalidJson':
+    'Message template is not valid JSON',
   'page.settings.tab.config.push.form.webhook.headers': 'Custom Headers',
   'page.settings.tab.config.push.form.webhook.headers.key': 'Header Name',
   'page.settings.tab.config.push.form.webhook.headers.value': 'Header Value',
@@ -181,6 +183,10 @@ export default {
   'page.settings.tab.config.push.form.webhook.headers.error.emptyKey': 'Header name is required',
   'page.settings.tab.config.push.form.webhook.headers.error.duplicateKey':
     'Header name cannot be duplicated',
+  'page.settings.tab.config.push.form.webhook.headers.error.invalidKey':
+    'Header name may only contain ASCII characters (33-126)',
+  'page.settings.tab.config.push.form.webhook.headers.error.nonAsciiValue':
+    "Header value contains non-ASCII characters. Please encode it per RFC 8187, e.g. UTF-8''%E4%BD%A0%E5%A5%BD",
 
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',
