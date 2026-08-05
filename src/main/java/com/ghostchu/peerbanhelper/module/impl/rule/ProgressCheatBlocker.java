@@ -89,7 +89,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
     private double fastPcbTestPercentage;
-    private final Object cacheDBLoadingLock = new Object();
     @Autowired
     private TransactionTemplate transactionTemplate;
     @Autowired
@@ -470,14 +469,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         CacheKeyPrefix cacheKeyPrefix = new CacheKeyPrefix(downloader, torrentId, peerAddressPrefix);
         CacheKeyAddr cacheKeyAddr = new CacheKeyAddr(downloader, torrentId, peerAddressIp);
         try {
-            synchronized (cacheDBLoadingLock) {
                 PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
                     PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
                         rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
                         rangeEntity.setDirty(true);
-                        pcbRangeDao.saveOrUpdateIfDirty(rangeEntity);
+                        pcbRangeDao.upsert(rangeEntity);
                     }
                     return rangeEntity;
                 });
@@ -487,12 +485,11 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
                         pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
                         pcbAddressEntity.setDirty(true);
-                        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
+                        pcbAddressDao.upsert(pcbAddressEntity);
                     }
                     return pcbAddressEntity;
                 });
                 return Pair.of(prefixEntity, addrEntity);
-            }
         } catch (ExecutionException e) {
             Sentry.captureException(e);
             throw new RuntimeException(e.getCause());
@@ -500,15 +497,19 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
-        synchronized (cacheDBLoadingLock) {
-            pcbRangeDao.saveOrUpdateIfDirty(stream.map(Pair::getRight).toList());
-        }
+        stream.map(Pair::getRight).forEach(entity->{
+            if(entity.isDirty()){
+                pcbRangeDao.upsert(entity);
+            }
+        });
     }
 
     private void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
-        synchronized (cacheDBLoadingLock) {
-            pcbAddressDao.saveOrUpdateIfDirty(stream.map(Pair::getRight).toList());
-        }
+        stream.map(Pair::getRight).forEach(entity->{
+            if(entity.isDirty()){
+                pcbAddressDao.upsert(entity);
+            }
+        });
     }
 
 //    @NotNull

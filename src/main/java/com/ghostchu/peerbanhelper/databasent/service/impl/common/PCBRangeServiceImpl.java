@@ -48,4 +48,9 @@ public class PCBRangeServiceImpl extends AbstractCanDirtyCommonService<PCBRangeM
                 .select(PCBRangeEntity::getId)
                 .lt(PCBRangeEntity::getLastTimeSeen, timestamp));
     }
+
+    @Override
+    public int upsert(@NotNull PCBRangeEntity pcbRangeEntity) {
+        return baseMapper.upsert(pcbRangeEntity);
+    }
 }
