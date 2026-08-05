@@ -17,30 +17,30 @@
         fast_pcb_test_execute_at,
         last_torrent_completed_size
         ) VALUES (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?
-        ) AS new
+        #{range},
+        #{torrentId},
+        #{lastReportProgress},
+        #{lastReportUploaded},
+        #{trackingUploadedIncreaseTotal},
+        #{rewindCounter},
+        #{progressDifferenceCounter},
+        #{firstTimeSeen},
+        #{lastTimeSeen},
+        #{downloader},
+        #{banDelayWindowEndAt},
+        #{fastPcbTestExecuteAt},
+        #{lastTorrentCompletedSize}
+        )
         ON DUPLICATE KEY UPDATE
-        last_report_progress = new.last_report_progress,
-        last_report_uploaded = new.last_report_uploaded,
-        tracking_uploaded_increase_total = new.tracking_uploaded_increase_total,
-        rewind_counter = new.rewind_counter,
-        progress_difference_counter = new.progress_difference_counter,
-        first_time_seen = new.first_time_seen,
-        last_time_seen = new.last_time_seen,
-        ban_delay_window_end_at = new.ban_delay_window_end_at,
-        fast_pcb_test_execute_at = new.fast_pcb_test_execute_at,
-        last_torrent_completed_size = new.last_torrent_completed_size;
+        last_report_progress = #{lastReportProgress},
+        last_report_uploaded = #{lastReportUploaded},
+        tracking_uploaded_increase_total = #{trackingUploadedIncreaseTotal},
+        rewind_counter = #{rewindCounter},
+        progress_difference_counter = #{progressDifferenceCounter},
+        first_time_seen = #{firstTimeSeen},
+        last_time_seen = #{lastTimeSeen},
+        ban_delay_window_end_at = #{banDelayWindowEndAt},
+        fast_pcb_test_execute_at = #{fastPcbTestExecuteAt},
+        last_torrent_completed_size = #{lastTorrentCompletedSize};
     </insert>
 </mapper>
