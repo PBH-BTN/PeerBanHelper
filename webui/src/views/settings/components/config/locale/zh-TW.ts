@@ -181,7 +181,7 @@ export default {
   'page.settings.tab.config.push.form.webhook.headers.error.invalidKey':
     'Header 名稱只能包含 ASCII 可見字元（33-126）',
   'page.settings.tab.config.push.form.webhook.headers.error.nonAsciiValue':
-    "Header 值包含非 ASCII 字元，請依 RFC 8187 編碼，例如 UTF-8''%E4%BD%A0%E5%A5%BD",
+    'Header 值包含非 ASCII 字元，後端將依 RFC 8187 編碼後發送',
 
   'page.settings.tab.config.push.form.action.ok': '確定',
   'page.settings.tab.config.push.form.action.cancel': '取消',

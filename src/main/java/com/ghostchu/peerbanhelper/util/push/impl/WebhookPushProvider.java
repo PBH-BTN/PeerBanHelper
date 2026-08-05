@@ -195,9 +195,46 @@ public final class WebhookPushProvider extends AbstractPushProvider {
         }
         config.getHeaders().forEach((headerKey, headerValue) -> {
             if (headerKey != null && !headerKey.isBlank() && headerValue != null) {
-                requestBuilder.header(headerKey, headerValue);
+                requestBuilder.header(headerKey, encodeHeaderValue(headerValue));
             }
         });
+    }
+
+    /**
+     * Encodes non-ASCII characters in a header value per RFC 8187, so that the resulting value
+     * is valid for okhttp / HTTP/1.1 headers. Only encodes when the value actually contains
+     * non-ASCII bytes; pure-ASCII values pass through unchanged (and an encoded value never
+     * re-encodes, so repeated sends are safe).
+     *
+     * @see <a href="https://www.rfc-editor.org/info/rfc8187">RFC 8187</a>
+     */
+    private String encodeHeaderValue(String value) {
+        if (value == null || value.isBlank()) {
+            return value;
+        }
+        boolean needsEncoding = false;
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) > 0x7E) {
+                needsEncoding = true;
+                break;
+            }
+        }
+        if (!needsEncoding) {
+            return value;
+        }
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        StringBuilder sb = new StringBuilder("UTF-8''");
+        for (byte b : bytes) {
+            int c = b & 0xFF;
+            if (c > 0x7E) {
+                sb.append('%');
+                sb.append(Character.toUpperCase(Character.forDigit((c >> 4) & 0xF, 16)));
+                sb.append(Character.toUpperCase(Character.forDigit(c & 0xF, 16)));
+            } else {
+                sb.append((char) c);
+            }
+        }
+        return sb.toString();
     }
 
     private String renderTemplate(String template, String title, String content, String contentType, boolean urlEncode, AlertLevel level) {

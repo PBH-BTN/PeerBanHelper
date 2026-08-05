@@ -186,7 +186,7 @@ export default {
   'page.settings.tab.config.push.form.webhook.headers.error.invalidKey':
     'Header name may only contain ASCII characters (33-126)',
   'page.settings.tab.config.push.form.webhook.headers.error.nonAsciiValue':
-    "Header value contains non-ASCII characters. Please encode it per RFC 8187, e.g. UTF-8''%E4%BD%A0%E5%A5%BD",
+    'Header value contains non-ASCII characters. It will be encoded per RFC 8187 when sent.',
 
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',
