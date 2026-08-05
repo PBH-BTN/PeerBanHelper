@@ -475,7 +475,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
                         rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
                         rangeEntity.setDirty(true);
-                        pcbRangeDao.upsert(rangeEntity);
+                        //pcbRangeDao.upsert(rangeEntity);
                     }
                     return rangeEntity;
                 });
@@ -485,7 +485,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
                         pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
                         pcbAddressEntity.setDirty(true);
-                        pcbAddressDao.upsert(pcbAddressEntity);
+                        //pcbAddressDao.upsert(pcbAddressEntity);
                     }
                     return pcbAddressEntity;
                 });
