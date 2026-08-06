@@ -99,10 +99,26 @@ public final class IPDB implements AutoCloseable {
 
     public IPGeoData query(InetAddress address) {
         IPGeoData geoData = new IPGeoData();
-        geoData.setAs(queryAS(address));
-        geoData.setCountry(queryCountry(address));
-        geoData.setCity(queryCity(address));
-        geoData.setNetwork(queryNetwork(address));
+        try {
+            geoData.setAs(queryAS(address));
+        } catch (Exception e) {
+            log.debug("Unable to query AS", e);
+        }
+        try {
+            geoData.setCountry(queryCountry(address));
+        } catch (Exception e) {
+            log.debug("Unable to query Country", e);
+        }
+        try {
+            geoData.setCity(queryCity(address));
+        } catch (Exception e) {
+            log.debug("Unable to query City", e);
+        }
+        try {
+            geoData.setNetwork(queryNetwork(address));
+        } catch (Exception e) {
+            log.debug("Unable to query Network", e);
+        }
         if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
             String iso = geoData.getCountry().getIso();
             if ("CN".equalsIgnoreCase(iso) || "TW".equalsIgnoreCase(iso)
