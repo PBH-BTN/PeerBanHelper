@@ -46,12 +46,12 @@ repositories {
 }
 
 val flatlafVersion = "3.7.2"
-val nettyVersion = "4.2.16.Final"
+val nettyVersion = "4.2.17.Final"
 val sqliteVersion = "3.53.2.1"
 val springVersion = "7.0.8"
 val flywayVersion = "13.1.0"
-val oshiVersion = "7.4.3"
-val jettyVersion = "12.1.11"
+val oshiVersion = "7.4.4"
+val jettyVersion = "12.1.12"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -190,7 +190,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
