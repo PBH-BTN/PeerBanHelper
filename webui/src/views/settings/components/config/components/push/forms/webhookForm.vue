@@ -225,11 +225,9 @@ const isValidJson = (value: string) => {
   }
 }
 
-const isJsonTemplate = computed(() => model.value.content_type === WebhookContentType.JSON)
-
 const bodyTemplateRules: FieldRule<string> = {
   validator: (value, callback) => {
-    if (isJsonTemplate.value && value && !isValidJson(value)) {
+    if (model.value.content_type === WebhookContentType.JSON && value && !isValidJson(value)) {
       return callback(
         t('page.settings.tab.config.push.form.webhook.body_template.error.invalidJson')
       )
@@ -238,13 +236,9 @@ const bodyTemplateRules: FieldRule<string> = {
   }
 }
 
-const validateBodyTemplate = () => {
-  if (formCtx?.validateField) formCtx.validateField('config.body_template')
-}
-
 const onEditorMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
   editor.onDidBlurEditorWidget(() => {
-    validateBodyTemplate()
+    formCtx?.validateField('config.body_template')
   })
 }
 
@@ -332,7 +326,7 @@ const headerRowErrors = computed(() => {
 })
 
 const validate = () => {
-  validateBodyTemplate()
+  formCtx?.validateField('config.body_template')
   headerTouched.value = headerTouched.value.map(() => ({ key: true, value: true }))
   return !headerRowErrors.value.some((error) => error.key)
 }
