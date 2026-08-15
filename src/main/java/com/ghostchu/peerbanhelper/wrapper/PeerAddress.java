@@ -75,12 +75,12 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof PeerAddress that)) return false;
-        return teredoClientUdpPort == that.teredoClientUdpPort && port == that.port && natTranslated == that.natTranslated && teredoTranslated == that.teredoTranslated && Objects.equals(downloaderRawIp, that.downloaderRawIp) && Objects.equals(downloaderRawPort, that.downloaderRawPort) && Objects.equals(teredoClientIp, that.teredoClientIp) && Objects.equals(ip, that.ip);
+        return teredoClientUdpPort == that.teredoClientUdpPort && port == that.port && natTranslated == that.natTranslated && teredoTranslated == that.teredoTranslated && Objects.equals(downloaderRawIp, that.downloaderRawIp) && Objects.equals(downloaderRawPort, that.downloaderRawPort) && Objects.equals(teredoClientIp, that.teredoClientIp) && Objects.equals(nattedClientIp, that.nattedClientIp) && nattedClientPort == that.nattedClientPort && Objects.equals(ip, that.ip);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(downloaderRawIp, downloaderRawPort, teredoClientIp, teredoClientUdpPort, ip, port, natTranslated, teredoTranslated);
+        return Objects.hash(downloaderRawIp, downloaderRawPort, teredoClientIp, teredoClientUdpPort, nattedClientIp, nattedClientPort, ip, port, natTranslated, teredoTranslated);
     }
 
     @Override
