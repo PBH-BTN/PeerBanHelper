@@ -5,15 +5,13 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ghostchu.peerbanhelper.util.helpstatus.CanDirty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.concurrent.locks.ReentrantLock;
 
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
@@ -24,6 +22,8 @@ import java.time.OffsetDateTime;
 public final class PCBRangeEntity extends AbstractCanDirtyEntity implements Serializable, CanDirty {
     @Serial
     private static final long serialVersionUID = 1L;
+    @Getter
+    private final transient ReentrantLock serialAccessLock = new ReentrantLock();
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;

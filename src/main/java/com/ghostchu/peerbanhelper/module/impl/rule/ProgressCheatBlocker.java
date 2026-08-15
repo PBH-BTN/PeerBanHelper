@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
-import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
@@ -46,6 +45,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -93,8 +94,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private TransactionTemplate transactionTemplate;
     @Autowired
     private BackgroundTaskManager backgroundTaskManager;
-    @Autowired
-    private BanList banList;
+    private final ReadWriteLock cacheLoadingLock = new ReentrantReadWriteLock();
 
 
     @Override
@@ -223,89 +223,96 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         task.setComment(false, "Executing and determining whether to ban the peer based on loaded data and current report.");
         PCBRangeEntity rangeEntity = pair.getLeft();
         PCBAddressEntity addressEntity = pair.getRight();
-        long computedUploadedIncremental; // 上传增量
-        if (peer.getUploaded() < addressEntity.getLastReportUploaded()) {
-            computedUploadedIncremental = peer.getUploaded();
-        } else {
-            computedUploadedIncremental = peer.getUploaded() - addressEntity.getLastReportUploaded();
-        }
-        // 累加 IP、IP段 上传增量
-        addressEntity.setTrackingUploadedIncreaseTotal(addressEntity.getTrackingUploadedIncreaseTotal() + computedUploadedIncremental);
-        rangeEntity.setTrackingUploadedIncreaseTotal(rangeEntity.getTrackingUploadedIncreaseTotal() + computedUploadedIncremental);
-        // 获取真实已上传量（下载器报告、IP增量总计，段增量总计，三者取最大）
-        final long computedUploaded = Math.max(peer.getUploaded(), Math.max(addressEntity.getTrackingUploadedIncreaseTotal(), rangeEntity.getTrackingUploadedIncreaseTotal()));
         try {
-            final long torrentSize = torrent.getSize();
-            final long completedSize = torrent.getCompletedSize();
-            final long computedCompletedSize = Math.max(completedSize, Math.max(rangeEntity.getLastTorrentCompletedSize(), addressEntity.getLastTorrentCompletedSize()));
-            // 过滤
-            if (torrentSize <= 0) {
+            rangeEntity.getSerialAccessLock().lock();
+            addressEntity.getSerialAccessLock().lock();
+            long computedUploadedIncremental; // 上传增量
+            if (peer.getUploaded() < addressEntity.getLastReportUploaded()) {
+                computedUploadedIncremental = peer.getUploaded();
+            } else {
+                computedUploadedIncremental = peer.getUploaded() - addressEntity.getLastReportUploaded();
+            }
+            // 累加 IP、IP段 上传增量
+            addressEntity.setTrackingUploadedIncreaseTotal(addressEntity.getTrackingUploadedIncreaseTotal() + computedUploadedIncremental);
+            rangeEntity.setTrackingUploadedIncreaseTotal(rangeEntity.getTrackingUploadedIncreaseTotal() + computedUploadedIncremental);
+            // 获取真实已上传量（下载器报告、IP增量总计，段增量总计，三者取最大）
+            final long computedUploaded = Math.max(peer.getUploaded(), Math.max(addressEntity.getTrackingUploadedIncreaseTotal(), rangeEntity.getTrackingUploadedIncreaseTotal()));
+            try {
+                final long torrentSize = torrent.getSize();
+                final long completedSize = torrent.getCompletedSize();
+                final long computedCompletedSize = Math.max(completedSize, Math.max(rangeEntity.getLastTorrentCompletedSize(), addressEntity.getLastTorrentCompletedSize()));
+                // 过滤
+                if (torrentSize <= 0) {
+                    return pass();
+                }
+                if (!isUploadingToPeer(peer)) {
+                    return pass();
+                }
+                var structuredData = StructuredData.create()
+                        .add("torrentSize", torrentSize)
+                        .add("completedSize", completedSize)
+                        .add("computedCompletedSize", computedCompletedSize)
+                        .add("peerReportUploaded", peer.getUploaded())
+                        .add("peerLastReportUploaded", addressEntity.getLastReportUploaded())
+                        .add("prefixLastReportUploaded", rangeEntity.getLastReportUploaded())
+                        .add("peerTrackingUploadedIncreaseTotal", addressEntity.getTrackingUploadedIncreaseTotal())
+                        .add("prefixTrackingUploadedIncreaseTotal", rangeEntity.getTrackingUploadedIncreaseTotal())
+                        .add("actualUploaded", computedUploaded)
+                        .add("uploadedIncremental", computedUploadedIncremental)
+                        .add("fileTooSmall", fileTooSmall(torrentSize))
+                        .add("fastPcbTestPercentage", fastPcbTestPercentage);
+                // 快速 PCB 测试
+                {
+                    task.setComment(false, "Run fastPcbTest for " + prefix);
+                    CheckResult result = fastPcbTest(addressEntity, rangeEntity, computedUploaded, torrentSize, structuredData, downloader);
+                    if (result != null) return result;
+                }
+                // 计算进度信息
+                final double computedProgress = (double) computedUploaded / torrentSize; // 实际进度
+                final double clientReportedProgress = peer.getProgress(); // 客户端汇报进度
+                structuredData.add("computedProgress", computedProgress);
+                structuredData.add("clientReportedProgress", clientReportedProgress);
+                // 过量下载检查
+                // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
+                {
+                    task.setComment(false, "Run excessiveClientTest for " + prefix);
+                    CheckResult result = excessiveClient(computedUploaded, torrentSize, structuredData, rangeEntity, addressEntity, completedSize, computedCompletedSize);
+                    if (result != null) return result;
+                }
+                // 如果客户端报告自己进度更多，则跳过检查
+                if (computedProgress <= clientReportedProgress) {
+                    return pass();
+                }
+                // 计算进度差异
+                // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
+                {
+                    task.setComment(false, "Run differenceTest for " + prefix);
+                    CheckResult result = differenceTest(rangeEntity, addressEntity, clientReportedProgress, computedProgress, structuredData, torrentSize, peer);
+                    if (result != null) return result;
+                }
+                {
+                    task.setComment(false, "Run progressRewindTest for " + prefix);
+                    CheckResult result = progressRewind(peer, structuredData, rangeEntity, addressEntity, clientReportedProgress, computedProgress, torrentSize);
+                    if (result != null) return result;
+                }
+                //return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
                 return pass();
+            } finally {
+                // 无论如何都写入缓存，同步更改
+                addressEntity.setLastReportUploaded(peer.getUploaded());
+                if (peer.getProgress() != 0.0d) { // 不要保存 0.0d 的，避免覆盖库中数据，导致触发 PCB 立刻封禁
+                    addressEntity.setLastReportProgress(peer.getProgress());
+                    rangeEntity.setLastReportProgress(peer.getProgress());
+                }
+                addressEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), addressEntity.getLastTorrentCompletedSize()));
+                addressEntity.setLastTimeSeen(OffsetDateTime.now());
+                rangeEntity.setLastReportUploaded(peer.getUploaded());
+                rangeEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), rangeEntity.getLastTorrentCompletedSize()));
+                rangeEntity.setLastTimeSeen(OffsetDateTime.now());
             }
-            if (!isUploadingToPeer(peer)) {
-                return pass();
-            }
-            var structuredData = StructuredData.create()
-                    .add("torrentSize", torrentSize)
-                    .add("completedSize", completedSize)
-                    .add("computedCompletedSize", computedCompletedSize)
-                    .add("peerReportUploaded", peer.getUploaded())
-                    .add("peerLastReportUploaded", addressEntity.getLastReportUploaded())
-                    .add("prefixLastReportUploaded", rangeEntity.getLastReportUploaded())
-                    .add("peerTrackingUploadedIncreaseTotal", addressEntity.getTrackingUploadedIncreaseTotal())
-                    .add("prefixTrackingUploadedIncreaseTotal", rangeEntity.getTrackingUploadedIncreaseTotal())
-                    .add("actualUploaded", computedUploaded)
-                    .add("uploadedIncremental", computedUploadedIncremental)
-                    .add("fileTooSmall", fileTooSmall(torrentSize))
-                    .add("fastPcbTestPercentage", fastPcbTestPercentage);
-            // 快速 PCB 测试
-            {
-                task.setComment(false, "Run fastPcbTest for " + prefix);
-                CheckResult result = fastPcbTest(addressEntity, rangeEntity, computedUploaded, torrentSize, structuredData, downloader);
-                if (result != null) return result;
-            }
-            // 计算进度信息
-            final double computedProgress = (double) computedUploaded / torrentSize; // 实际进度
-            final double clientReportedProgress = peer.getProgress(); // 客户端汇报进度
-            structuredData.add("computedProgress", computedProgress);
-            structuredData.add("clientReportedProgress", clientReportedProgress);
-            // 过量下载检查
-            // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
-            {
-                task.setComment(false, "Run excessiveClientTest for " + prefix);
-                CheckResult result = excessiveClient(computedUploaded, torrentSize, structuredData, rangeEntity, addressEntity, completedSize, computedCompletedSize);
-                if (result != null) return result;
-            }
-            // 如果客户端报告自己进度更多，则跳过检查
-            if (computedProgress <= clientReportedProgress) {
-                return pass();
-            }
-            // 计算进度差异
-            // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
-            {
-                task.setComment(false, "Run differenceTest for " + prefix);
-                CheckResult result = differenceTest(rangeEntity, addressEntity, clientReportedProgress, computedProgress, structuredData, torrentSize, peer);
-                if (result != null) return result;
-            }
-            {
-                task.setComment(false, "Run progressRewindTest for " + prefix);
-                CheckResult result = progressRewind(peer, structuredData, rangeEntity, addressEntity, clientReportedProgress, computedProgress, torrentSize);
-                if (result != null) return result;
-            }
-            //return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
-            return pass();
         } finally {
-            // 无论如何都写入缓存，同步更改
-            addressEntity.setLastReportUploaded(peer.getUploaded());
-            if (peer.getProgress() != 0.0d) { // 不要保存 0.0d 的，避免覆盖库中数据，导致触发 PCB 立刻封禁
-                addressEntity.setLastReportProgress(peer.getProgress());
-                rangeEntity.setLastReportProgress(peer.getProgress());
-            }
-            addressEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), addressEntity.getLastTorrentCompletedSize()));
-            addressEntity.setLastTimeSeen(OffsetDateTime.now());
-            rangeEntity.setLastReportUploaded(peer.getUploaded());
-            rangeEntity.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), rangeEntity.getLastTorrentCompletedSize()));
-            rangeEntity.setLastTimeSeen(OffsetDateTime.now());
+            addressEntity.getSerialAccessLock().unlock();
+            rangeEntity.getSerialAccessLock().unlock();
         }
     }
 
@@ -469,7 +476,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         CacheKeyPrefix cacheKeyPrefix = new CacheKeyPrefix(downloader, torrentId, peerAddressPrefix);
         CacheKeyAddr cacheKeyAddr = new CacheKeyAddr(downloader, torrentId, peerAddressIp);
         try {
-                PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
+            cacheLoadingLock.readLock().lock();
+            PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
+                try {
+                    cacheLoadingLock.writeLock().lock();
                     PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
                     if (rangeEntity == null) {
                         log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
@@ -478,8 +488,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         //pcbRangeDao.upsert(rangeEntity);
                     }
                     return rangeEntity;
-                });
-                PCBAddressEntity addrEntity = addrCache.get(cacheKeyAddr, () -> {
+                } finally {
+                    cacheLoadingLock.writeLock().unlock();
+                }
+            });
+            PCBAddressEntity addrEntity = addrCache.get(cacheKeyAddr, () -> {
+                try {
+                    cacheLoadingLock.writeLock().lock();
                     PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
                     if (pcbAddressEntity == null) {
                         log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
@@ -488,26 +503,41 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         //pcbAddressDao.upsert(pcbAddressEntity);
                     }
                     return pcbAddressEntity;
-                });
-                return Pair.of(prefixEntity, addrEntity);
+                } finally {
+                    cacheLoadingLock.writeLock().unlock();
+                }
+            });
+            return Pair.of(prefixEntity, addrEntity);
         } catch (ExecutionException e) {
             Sentry.captureException(e);
             throw new RuntimeException(e.getCause());
+        } finally {
+            cacheLoadingLock.readLock().unlock();
         }
     }
 
     private void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
-        stream.map(Pair::getRight).forEach(entity->{
-            if(entity.isDirty()){
-                pcbRangeDao.upsert(entity);
+        stream.map(Pair::getRight).forEach(entity -> {
+            if (entity.isDirty()) {
+                try {
+                    entity.getSerialAccessLock().lock();
+                    pcbRangeDao.upsert(entity);
+                } finally {
+                    entity.getSerialAccessLock().unlock();
+                }
             }
         });
     }
 
     private void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
-        stream.map(Pair::getRight).forEach(entity->{
-            if(entity.isDirty()){
-                pcbAddressDao.upsert(entity);
+        stream.map(Pair::getRight).forEach(entity -> {
+            if (entity.isDirty()) {
+                try {
+                    entity.getSerialAccessLock().lock();
+                    pcbAddressDao.upsert(entity);
+                } finally {
+                    entity.getSerialAccessLock().unlock();
+                }
             }
         });
     }
