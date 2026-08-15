@@ -51,7 +51,7 @@ val sqliteVersion = "3.53.2.1"
 val springVersion = "7.0.8"
 val flywayVersion = "13.2.0"
 val oshiVersion = "7.4.4"
-val jettyVersion = "12.1.12"
+// val jettyVersion = "12.1.12"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -97,12 +97,12 @@ dependencies {
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
     // Javalin
-    implementation("io.javalin:javalin:7.2.2") {
+    implementation("io.javalin:javalin:7.2.3") {
         exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
     }
     // jetty
-    implementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
-    implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}")
+    // implementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
+    // implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}")
     // GeoIP
     implementation("com.maxmind.geoip2:geoip2:5.2.0")
     // Expression engine
@@ -129,7 +129,7 @@ dependencies {
     implementation("com.google.guava:guava:33.6.0-jre")
     implementation("com.github.seancfoley:ipaddress:5.6.2")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
-    implementation("org.apache.commons:commons-collections4:4.5.0")
+    implementation("org.apache.commons:commons-collections4:4.6.0")
     // CSV
     implementation("de.siegmar:fastcsv:4.4.0")
     // Jackson
@@ -150,7 +150,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.6.1")
+    implementation("ch.qos.logback:logback-classic:1.6.2")
     implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
@@ -181,7 +181,7 @@ dependencies {
     compileOnly("com.install4j:install4j-runtime:13.0.2")
 
     // sentry
-    implementation(platform("io.sentry:sentry-bom:8.52.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.53.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
