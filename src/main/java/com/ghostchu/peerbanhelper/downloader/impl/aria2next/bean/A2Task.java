@@ -42,6 +42,7 @@ public class A2Task implements Torrent {
 
     @Override
     public double getProgress() {
+        if(totalLength <= 0) return 0.0;
         return (double) completedLength / totalLength;
     }
 
