@@ -9,15 +9,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class A2GlobalOptions {
-    @SerializedName("max-overall-download-limit")
+    @SerializedName("max-download-limit")
     private long maxDownloadLimit;
-    @SerializedName("max-overall-upload-limit")
+    @SerializedName("max-upload-limit")
     private long maxUploadLimit;
     @SerializedName("listen-port")
     private int listenPort;
     @SerializedName("max-overall-upload-limit")
     private long maxOverallUploadLimit;
-    @SerializedName("ax-overall-download-limit")
+    @SerializedName("max-overall-download-limit")
     private long maxOverallDownloadLimit;
 
 }
