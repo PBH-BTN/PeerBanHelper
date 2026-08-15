@@ -19,7 +19,7 @@ import java.util.Objects;
 public final class PeerAddress implements Comparable<PeerAddress>, Serializable {
 
     private String downloaderRawIp;
-    private String downloaderRawPort;
+    private Integer downloaderRawPort;
 
     private String teredoClientIp;
     private int teredoClientUdpPort;
@@ -38,7 +38,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
     public PeerAddress(String ip, int port, String rawIp) {
         this.ip = ip;
         this.downloaderRawIp = rawIp;
-        this.downloaderRawPort = ip;
+        this.downloaderRawPort = port;
         this.port = port;
     }
 
