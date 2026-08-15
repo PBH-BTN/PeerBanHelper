@@ -51,6 +51,8 @@ public class PCBRangeServiceImpl extends AbstractCanDirtyCommonService<PCBRangeM
 
     @Override
     public int upsert(@NotNull PCBRangeEntity pcbRangeEntity) {
-        return baseMapper.upsert(pcbRangeEntity);
+        int changes = baseMapper.upsert(pcbRangeEntity);
+        pcbRangeEntity.setDirty(false);
+        return changes;
     }
 }

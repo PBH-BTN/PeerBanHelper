@@ -49,6 +49,8 @@ public class PCBAddressServiceImpl extends AbstractCanDirtyCommonService<PCBAddr
 
     @Override
     public int upsert(@NotNull PCBAddressEntity pcbAddressEntity) {
-        return baseMapper.upsert(pcbAddressEntity);
+        int changes = baseMapper.upsert(pcbAddressEntity);
+        pcbAddressEntity.setDirty(false);
+        return changes;
     }
 }
