@@ -24,6 +24,9 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
     private String teredoClientIp;
     private int teredoClientUdpPort;
 
+    private String nattedClientIp;
+    private int nattedClientPort;
+
 
     private String ip;
     private transient IPAddress address;
@@ -52,6 +55,8 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
     public PeerAddress setNat(String nattedIp, int nattedPort) {
         this.ip = nattedIp;
         this.port = nattedPort;
+        this.nattedClientIp = nattedIp;
+        this.nattedClientPort = nattedPort;
         this.natTranslated = true;
         this.address = null; // clear cached address
         return this;
@@ -60,6 +65,8 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
     public PeerAddress setTeredo(String teredoIp, int teredoPort) {
         this.ip = teredoIp;
         this.port = teredoPort;
+        this.teredoClientIp = teredoIp;
+        this.teredoClientUdpPort = teredoPort;
         this.teredoTranslated = true;
         this.address = null; // clear cached address;
         return this;
