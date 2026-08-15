@@ -37,7 +37,6 @@
         tracking_uploaded_increase_total = #{trackingUploadedIncreaseTotal},
         rewind_counter = #{rewindCounter},
         progress_difference_counter = #{progressDifferenceCounter},
-        first_time_seen = #{firstTimeSeen},
         last_time_seen = #{lastTimeSeen},
         ban_delay_window_end_at = #{banDelayWindowEndAt},
         fast_pcb_test_execute_at = #{fastPcbTestExecuteAt},
