@@ -72,7 +72,7 @@ Users bear full responsibility for consequences arising from software usage. Dev
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.dera.page/#PBH-BTN/PeerBanHelper&Date)
 
 ## Tools
 

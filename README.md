@@ -78,7 +78,7 @@ PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P �
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.dera.page/#PBH-BTN/PeerBanHelper&Date)
 
 ## Tools
 
