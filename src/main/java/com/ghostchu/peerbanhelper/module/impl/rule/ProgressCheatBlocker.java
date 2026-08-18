@@ -496,7 +496,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         }
     }
 
-    private void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
+    private synchronized void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
         stream.map(Pair::getRight).forEach(entity->{
             if(entity.isDirty()){
                 pcbRangeDao.upsert(entity);
@@ -504,7 +504,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         });
     }
 
-    private void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
+    private synchronized void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
         stream.map(Pair::getRight).forEach(entity->{
             if(entity.isDirty()){
                 pcbAddressDao.upsert(entity);
