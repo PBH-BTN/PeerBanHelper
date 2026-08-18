@@ -497,19 +497,26 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private synchronized void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
-        stream.map(Pair::getRight).forEach(entity->{
-            if(entity.isDirty()){
-                pcbRangeDao.upsert(entity);
-            }
+        transactionTemplate.execute((a)->{
+            stream.map(Pair::getRight).forEach(entity->{
+                if(entity.isDirty()){
+                    pcbRangeDao.upsert(entity);
+                }
+            });
+            return null;
         });
     }
 
     private synchronized void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
-        stream.map(Pair::getRight).forEach(entity->{
-            if(entity.isDirty()){
-                pcbAddressDao.upsert(entity);
-            }
+        transactionTemplate.execute((a)->{
+            stream.map(Pair::getRight).forEach(entity->{
+                if(entity.isDirty()){
+                    pcbAddressDao.upsert(entity);
+                }
+            });
+            return null;
         });
+
     }
 
 //    @NotNull
