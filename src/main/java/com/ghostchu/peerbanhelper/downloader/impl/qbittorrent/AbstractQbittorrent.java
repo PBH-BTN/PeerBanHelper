@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
@@ -265,16 +266,16 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Torrent> getTorrents() {
+    public @NotNull List<? extends Torrent> getTorrents() {
         return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
-    public @NotNull List<Torrent> getAllTorrents() {
+    public @NotNull List<? extends Torrent> getAllTorrents() {
         return fetchTorrents(false, true);
     }
 
-    private List<Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
+    private List<? extends Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
         List<QBittorrentTorrent> allTorrents = new ArrayList<>();
         Set<String> seenHashes = new HashSet<>(); // 用于检测重复
         int pageSize = 100; // 每页大小
@@ -345,7 +346,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Tracker> getTrackers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/torrents/trackers?hash=" + torrent.getId())
@@ -377,8 +378,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
-        List<Tracker> trackerList = getTrackers(torrent);
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers) {
+        List<? extends Tracker> trackerList = getTrackers(torrent);
         removeTracker(torrent, trackerList);
         addTracker(torrent, trackers);
     }
@@ -455,7 +456,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         }
     }
 
-    private void addTracker(Torrent torrent, List<Tracker> newAdded) {
+    private void addTracker(Torrent torrent, List<? extends Tracker> newAdded) {
         StringJoiner joiner = new StringJoiner("\n");
         newAdded.forEach(t -> {
             if (t.getTrackersInGroup() != null) {
@@ -485,7 +486,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         }
     }
 
-    private void removeTracker(Torrent torrent, List<Tracker> trackers) throws IllegalStateException {
+    private void removeTracker(Torrent torrent, List<? extends Tracker> trackers) throws IllegalStateException {
         StringJoiner joiner = new StringJoiner("|");
         trackers.forEach(t -> t.getTrackersInGroup().forEach(joiner::add));
 
@@ -600,7 +601,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())
@@ -619,18 +620,19 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 for (String s : peers.keySet()) {
                     JsonObject singlePeerObject = peers.getAsJsonObject(s);
                     QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);
-                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
+                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection())
+                            || "HTTPS".equalsIgnoreCase(qbPeer.getConnection())
+                            || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
-                    if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
+                    if (qbPeer.getIp() == null || qbPeer.getIp().isBlank()) {
                         continue;
                     }
                     if (s.contains(".onion") || s.contains(".i2p")) {
                         continue;
                     }
-                    qbPeer.getPeerAddress().setRawIp(s);
-                    qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
-
+                    qbPeer.setRawIp(s);
+                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp()))));
                     peersList.add(qbPeer);
                 }
                 return peersList;

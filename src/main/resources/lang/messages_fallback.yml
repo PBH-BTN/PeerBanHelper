@@ -575,3 +575,6 @@ BTN_CONFIG_STATUS_SUCCESSFUL_READ_ONLY: "已成功连接到 BTN 服务器 (只�
 MODULE_CHECK_UNEXCEPTED_EXCEPTION: "[谴责] 检查模块 {} [{}] 执行时在不允许抛出异常的区域抛出了运行时异常，请与此模块开发者联系，所有模块必须在其作用域内完成异常处理，不得抛出运行时错误！"
 DIGESTION_SYSTEM_DIGEST_RUNTIME_EXCEPTION: "[错误] 封禁线程的一个数据处理过程出现了未知错误，请将此错误报告给开发者。"
 DIGESTION_SYSTEM_WATCH_EARLY_WARNING: "[WatchDog] 封禁线程即将达到设定的硬超时限制，这通常意味着当前任务出现停滞。如果此问题频繁发生，将可能影响 PeerBanHelper 正常运行。以下是当前封禁流水线系统状态信息: \n{}"
+DOWNLOADER_JSONRPC_REQUEST_FAILED: "[错误] 在下载器 {} ({}) 上执行 JsonRPC 请求时发生错误：{} - {}: {}"
+
+DOWNLOADER_ARIA2NEXT_INCORRECT_PRODUCT: "[错误] 当前连接到的 Aria2 RPC 服务器不是 Aria2Next。PeerBanHelper 仅支持 Aria2Next 分支，官方版本和其它 Aria2 分支因技术限制不受支持。"

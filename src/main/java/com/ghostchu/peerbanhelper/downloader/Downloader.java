@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -43,6 +44,10 @@ public interface Downloader {
      */
     @NotNull
     String getName();
+
+    PeerAddress convertIfTeredo(PeerAddress peerAddress);
+
+    boolean isTeredo(IPAddress ipAddress);
 
     @NotNull
     String getId();
@@ -91,7 +96,7 @@ public interface Downloader {
      * @return 返回所有活动的 Torrents
      */
     @NotNull
-    List<Torrent> getTorrents();
+    List<? extends Torrent> getTorrents();
 
     /**
      * 获取此下载器的所有 Torrents
@@ -99,7 +104,7 @@ public interface Downloader {
      * @return 返回所有的 Torrents
      */
     @NotNull
-    List<Torrent> getAllTorrents();
+    List<? extends Torrent> getAllTorrents();
 
     /**
      * 获取指定 Torrent 的对等体列表
@@ -108,7 +113,7 @@ public interface Downloader {
      * @return 对等体列表
      */
     @NotNull
-    List<Peer> getPeers(@NotNull Torrent torrent);
+    List<? extends Peer> getPeers(@NotNull Torrent torrent);
 
     /**
      * 获取指定 Torrent 的 Tracker 列表
@@ -117,7 +122,7 @@ public interface Downloader {
      * @return Tracker 列表
      */
     @NotNull
-    List<Tracker> getTrackers(@NotNull Torrent torrent);
+    List<? extends Tracker> getTrackers(@NotNull Torrent torrent);
 
     /**
      * 设置指定 Torrent 的 Tracker 列表
@@ -125,7 +130,7 @@ public interface Downloader {
      * @param torrent  Torrent
      * @param trackers Tracker 列表
      */
-    void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers);
+    void setTrackers(@NotNull Torrent torrent, @NotNull List<? extends Tracker> trackers);
 
     /**
      * 设置并使新的 BanList 生效
