@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.databasent.service;
 
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
+import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;
@@ -15,4 +16,6 @@ public interface PCBAddressService extends CommonCanDirtyService<PCBAddressEntit
     int deleteEntry(@NotNull String torrentId, @NotNull InetAddress ip);
 
     long cleanupDatabase(OffsetDateTime timestamp);
+
+    int upsert(@NotNull PCBAddressEntity pcbAddressEntity);
 }

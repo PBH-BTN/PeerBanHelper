@@ -22,7 +22,8 @@ export enum ClientTypeEnum {
   Transmission = 'transmission',
   BiglyBT = 'biglybt',
   Deluge = 'deluge',
-  BitComet = 'bitcomet'
+  BitComet = 'bitcomet',
+  Aria2Next = 'aria2next'
 }
 
 export interface ScanDownloaderInfo {
@@ -231,6 +232,7 @@ export type downloaderConfig =
   | biglybtConfig
   | delugeConfig
   | bitCometConfig
+  | aria2NextConfig
 
 export interface qBittorrentConfig {
   type: ClientTypeEnum.qBittorrent
@@ -313,6 +315,16 @@ export interface bitCometConfig {
   password: string
   httpVersion: string
   incrementBan: boolean
+  verifySsl: boolean
+  ignorePrivate: boolean
+  paused: boolean
+}
+
+export interface aria2NextConfig {
+  type: ClientTypeEnum.Aria2Next
+  name: string
+  endpoint: string
+  token: string
   verifySsl: boolean
   ignorePrivate: boolean
   paused: boolean

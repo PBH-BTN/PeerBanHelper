@@ -12,8 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
+@Getter
 @ToString
-public final class QBittorrentPeer implements Peer {
+public class QBittorrentPeer implements Peer {
     @SerializedName("client")
     private String client;
     @Getter
@@ -37,18 +38,10 @@ public final class QBittorrentPeer implements Peer {
     private long upSpeed;
     @SerializedName("uploaded")
     private long uploaded;
-    private transient PeerAddress peerAddress;
+    private PeerAddress peerAddress;
     private String rawIp;
 
     public QBittorrentPeer() {
-    }
-
-    @Override
-    public @NotNull PeerAddress getPeerAddress() {
-        if (this.peerAddress == null) {
-            this.peerAddress = new PeerAddress(ip, port, ip);
-        }
-        return this.peerAddress;
     }
 
     @Override

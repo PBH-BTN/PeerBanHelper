@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.AbstractQbittorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPeer;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPreferences;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -13,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import inet.ipaddr.IPAddress;
@@ -96,7 +98,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
     }
 
     @Override
-    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+    public @NotNull List<? extends Peer> getPeers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())
@@ -116,10 +118,10 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                 for (String s : peers.keySet()) {
                     JsonObject singlePeerObject = peers.getAsJsonObject(s);
                     QBittorrentEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentEEPeer.class);
-                    if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
+                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
-                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
+                    if (qbPeer.getIp() == null || qbPeer.getIp().isBlank()) {
                         continue;
                     }
                     if (s.contains(".onion") || s.contains(".i2p")) {
@@ -128,8 +130,8 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     if (qbPeer.getShadowBanned() != null && qbPeer.getShadowBanned()) {
                         continue; // 当做不存在处理
                     }
-                    qbPeer.getPeerAddress().setRawIp(s);
-                    qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
+                    qbPeer.setRawIp(s);
+                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp()))));
                     peersList.add(qbPeer);
                 }
                 return peersList;

@@ -166,7 +166,7 @@ public final class IdleConnectionDosProtection extends AbstractRuleFeatureModule
     }
 
     @Override
-    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<? extends Peer> peers, @NotNull PipelineTask<?> task) {
         var allPeers = peers.stream()
                 .map(peer -> HostAndPort.fromParts(peer.getPeerAddress().getIp(), peer.getPeerAddress().getPort()))
                 .toList();

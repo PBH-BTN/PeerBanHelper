@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -17,30 +18,31 @@ import java.util.Objects;
 @Slf4j
 public final class PeerAddress implements Comparable<PeerAddress>, Serializable {
 
+    private String downloaderRawIp;
+    private Integer downloaderRawPort;
+
+    private String teredoClientIp;
+    private int teredoClientUdpPort;
+
+    private String nattedClientIp;
+    private int nattedClientPort;
+
+
     private String ip;
-    private String rawIp;
-    private String noNatIP;
     private transient IPAddress address;
     /**
      * 端口可能为 0 （代表未设置）
      */
     private int port;
-    private int noNatPort;
+
+    private boolean natTranslated;
+    private boolean teredoTranslated;
 
     public PeerAddress(String ip, int port, String rawIp) {
         this.ip = ip;
-        this.rawIp = rawIp;
-        this.noNatIP = ip;
+        this.downloaderRawIp = rawIp;
+        this.downloaderRawPort = port;
         this.port = port;
-        this.noNatPort = port;
-    }
-
-    public PeerAddress setNat(String nattedIp, int nattedPort) {
-        this.ip = nattedIp;
-        this.rawIp = nattedIp;
-        this.port = nattedPort;
-        this.address = null; // clear cached address
-        return this;
     }
 
     public IPAddress getAddress() {
@@ -50,31 +52,46 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
         return address;
     }
 
-    @Override
-    public String toString() {
-        return HostAndPort.fromParts(ip, port).toString();
+    public PeerAddress setNat(String nattedIp, int nattedPort) {
+        this.ip = nattedIp;
+        this.port = nattedPort;
+        this.nattedClientIp = nattedIp;
+        this.nattedClientPort = nattedPort;
+        this.natTranslated = true;
+        this.address = null; // clear cached address
+        return this;
+    }
+
+    public PeerAddress setTeredo(String teredoIp, int teredoPort) {
+        this.ip = teredoIp;
+        this.port = teredoPort;
+        this.teredoClientIp = teredoIp;
+        this.teredoClientUdpPort = teredoPort;
+        this.teredoTranslated = true;
+        this.address = null; // clear cached address;
+        return this;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PeerAddress that = (PeerAddress) o;
-        return port == that.port && Objects.equals(ip, that.ip);
+        if (!(o instanceof PeerAddress that)) return false;
+        return port == that.port && Objects.equals(downloaderRawIp, that.downloaderRawIp) && Objects.equals(downloaderRawPort, that.downloaderRawPort) && Objects.equals(ip, that.ip) && Objects.equals(address, that.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ip, port);
+        return Objects.hash(downloaderRawIp, downloaderRawPort, ip, address, port);
     }
 
     @Override
-    public int compareTo(PeerAddress o) {
-        int r = ip.compareTo(o.ip);
-        if (r == 0) {
-            return Integer.compare(port, o.port);
-        }
-        return r;
+    public int compareTo(@NonNull PeerAddress o) {
+        // downloaderRaw, then ip, then port
+        int cmp = downloaderRawIp.compareTo(o.downloaderRawIp);
+        if (cmp != 0) return cmp;
+        cmp = Integer.compare(downloaderRawPort, o.downloaderRawPort);
+        if (cmp != 0) return cmp;
+        cmp = ip.compareTo(o.ip);
+        if (cmp != 0) return cmp;
+        return Integer.compare(port, o.port);
     }
-
 }

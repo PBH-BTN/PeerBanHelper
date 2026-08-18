@@ -5,12 +5,12 @@ plugins {
     id("com.install4j.gradle") version "13.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.4.0"
+    kotlin("plugin.lombok") version "2.4.10"
     id("io.freefair.lombok") version "9.5.0"
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.4.3"
+version = "9.5.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -46,11 +46,12 @@ repositories {
 }
 
 val flatlafVersion = "3.7.2"
-val nettyVersion = "4.2.16.Final"
-val sqliteVersion = "3.53.2.0"
+val nettyVersion = "4.2.17.Final"
+val sqliteVersion = "3.53.2.1"
 val springVersion = "7.0.8"
-val flywayVersion = "12.11.0"
-val oshiVersion = "7.4.3"
+val flywayVersion = "13.2.0"
+val oshiVersion = "7.4.4"
+// val jettyVersion = "12.1.12"
 
 configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
@@ -74,7 +75,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}:natives-android")
     implementation("com.h2database:h2:2.3.232")
     implementation("org.postgresql:postgresql:42.7.13")
-    implementation("com.mysql:mysql-connector-j:9.7.0") {
+    implementation("com.mysql:mysql-connector-j:26.7.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
 
@@ -96,13 +97,16 @@ dependencies {
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
     // Javalin
-    implementation("io.javalin:javalin:7.2.2") {
+    implementation("io.javalin:javalin:7.2.3") {
         exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
     }
+    // jetty
+    // implementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
+    // implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}")
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:5.1.0")
+    implementation("com.maxmind.geoip2:geoip2:5.2.0")
     // Expression engine
-    implementation("com.googlecode.aviator:aviator:5.4.3")
+    implementation("com.googlecode.aviator:aviator:5.4.4")
 
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")
@@ -110,7 +114,7 @@ dependencies {
     implementation("com.github.oshi:oshi-common:${oshiVersion}")
     runtimeOnly("com.github.oshi:oshi-core-ffm:${oshiVersion}")
     // Markdown
-    implementation("org.commonmark:commonmark:0.29.0")
+    implementation("org.commonmark:commonmark:0.30.0")
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
@@ -125,9 +129,9 @@ dependencies {
     implementation("com.google.guava:guava:33.6.0-jre")
     implementation("com.github.seancfoley:ipaddress:5.6.2")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
-    implementation("org.apache.commons:commons-collections4:4.5.0")
+    implementation("org.apache.commons:commons-collections4:4.6.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.3.1")
+    implementation("de.siegmar:fastcsv:4.4.0")
     // Jackson
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
@@ -146,7 +150,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.38")
+    implementation("ch.qos.logback:logback-classic:1.6.2")
     implementation("org.slf4j:jcl-over-slf4j:2.0.18")
 
     // Async utilities
@@ -161,11 +165,11 @@ dependencies {
     compileOnly("io.netty:netty-transport-native-epoll:${nettyVersion}")
     runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-x86_64")
     runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-aarch_64")
-    runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-riscv64")
+    //runtimeOnly("io.netty:netty-transport-native-epoll:${nettyVersion}:linux-riscv64")
     compileOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}")
     runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-x86_64")
     runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-aarch_64")
-    runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-riscv64")
+    //runtimeOnly("io.netty:netty-transport-native-io_uring:${nettyVersion}:linux-riscv64")
     compileOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}")
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-x86_64")
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
@@ -177,7 +181,7 @@ dependencies {
     compileOnly("com.install4j:install4j-runtime:13.0.2")
 
     // sentry
-    implementation(platform("io.sentry:sentry-bom:8.48.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.53.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
@@ -186,7 +190,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("p6spy:p6spy:3.9.1")
     // Test dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")

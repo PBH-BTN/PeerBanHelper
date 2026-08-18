@@ -108,7 +108,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     }
 
     @Override
-    public void onPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull PipelineTask<?> task) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers, @NotNull PipelineTask<?> task) {
         try {
             for (Peer peer : peers) {
                 if (peer.isHandshaking()) continue;

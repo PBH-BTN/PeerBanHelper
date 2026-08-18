@@ -26,6 +26,7 @@
               <a-option :value="ClientTypeEnum.BiglyBT">BiglyBT</a-option>
               <a-option :value="ClientTypeEnum.Deluge">Deluge</a-option>
               <a-option :value="ClientTypeEnum.BitComet">BitComet</a-option>
+              <a-option :value="ClientTypeEnum.Aria2Next">Aria2-Next</a-option>
               <a-option :value="ClientTypeEnum.Transmission">Transmission</a-option>
             </a-select>
             <template v-if="config.downloader.config.type === ClientTypeEnum.BiglyBT" #extra>
@@ -81,6 +82,7 @@ const transmissionForm = defineAsyncComponent(() => import('@/components/forms/t
 const biglybtForm = defineAsyncComponent(() => import('@/components/forms/biglybt.vue'))
 const delugeForm = defineAsyncComponent(() => import('@/components/forms/deluge.vue'))
 const bitCometForm = defineAsyncComponent(() => import('@/components/forms/bitcomet.vue'))
+const aria2NextForm = defineAsyncComponent(() => import('@/components/forms/aria2next.vue'))
 
 const formMap = {
   [ClientTypeEnum.qBittorrent]: qbittorrentForm,
@@ -88,7 +90,8 @@ const formMap = {
   [ClientTypeEnum.Transmission]: transmissionForm,
   [ClientTypeEnum.BiglyBT]: biglybtForm,
   [ClientTypeEnum.Deluge]: delugeForm,
-  [ClientTypeEnum.BitComet]: bitCometForm
+  [ClientTypeEnum.BitComet]: bitCometForm,
+  [ClientTypeEnum.Aria2Next]: aria2NextForm
 }
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })

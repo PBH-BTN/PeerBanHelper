@@ -67,7 +67,7 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
     }
 
     @Override
-    public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) throws ExecutionException {
+    public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers) throws ExecutionException {
         TorrentEntity torrentEntity = torrentService.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),

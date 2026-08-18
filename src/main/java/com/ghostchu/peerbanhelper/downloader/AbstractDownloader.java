@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -10,6 +11,8 @@ import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
+import inet.ipaddr.ipv4.IPv4Address;
+import inet.ipaddr.ipv6.IPv6Address;
 import io.sentry.Sentry;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,6 +50,28 @@ public abstract class AbstractDownloader implements Downloader {
         var translate = natAddressProvider.translate(inetSocketAddress);
         if (translate == null) return peerAddress;
         return peerAddress.setNat(translate.getHostString(), translate.getPort());
+    }
+
+    @Override
+    public PeerAddress convertIfTeredo(PeerAddress peerAddress) {
+        if (!Main.getMainConfig().getBoolean("ip-remapping.teredo")) {
+            return peerAddress;
+        }
+        IPAddress ipAddress = peerAddress.getAddress();
+        if (!isTeredo(peerAddress.getAddress())) return peerAddress;
+        IPv6Address v6 = ipAddress.toIPv6();
+        IPAddress clientIpv4Address = new IPv4Address(~v6.getEmbeddedIPv4Address().intValue());
+        // update port to teredo port that encoded in teredo address
+        int clientOutboundUdpPort = (~v6.getSegment(5).getValue().intValue()) & 0xFFFF;
+        peerAddress.setTeredo(clientIpv4Address.toNormalizedString(), clientOutboundUdpPort);
+        peerAddress.setAddress(clientIpv4Address);
+        return peerAddress;
+    }
+
+    @Override
+    public boolean isTeredo(IPAddress ipAddress) {
+        if (!ipAddress.isIPv6()) return false;
+        return ipAddress.toIPv6().isTeredo();
     }
 
     @Override

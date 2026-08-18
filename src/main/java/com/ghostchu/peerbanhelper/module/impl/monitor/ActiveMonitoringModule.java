@@ -160,7 +160,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
     @Override
-    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<Peer> peers, @NotNull PipelineTask<?> task) {
+    public void onPeersRetrieved(@NotNull Downloader downloader, Torrent torrent, List<? extends Peer> peers, @NotNull PipelineTask<?> task) {
         BatchMonitorFeatureModule.super.onPeersRetrieved(downloader, torrent, peers, task);
     }
 }
