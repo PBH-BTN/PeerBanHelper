@@ -1,0 +1,1 @@
+import{gt as e}from"./echarts-BQof8adY.js";import{v as t}from"./libs-BJifFiYu.js";var n=t(`dark`,()=>{let t=e(!1);return{isDark:t,setDark:e=>{t.value=e}}});export{n as t};
