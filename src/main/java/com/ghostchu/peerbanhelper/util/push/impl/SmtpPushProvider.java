@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push.impl;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
 import com.google.gson.JsonObject;
@@ -142,7 +143,7 @@ public final class SmtpPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) {
+    public boolean push(String title, String content, AlertLevel level) {
         try {
             sendMail(config.getReceivers(), title, content);
             return true;

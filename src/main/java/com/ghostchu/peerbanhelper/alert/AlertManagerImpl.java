@@ -108,7 +108,7 @@ public final class AlertManagerImpl implements AlertManager {
             alertEntity.setCreateAt(OffsetDateTime.now());
             alertDao.saveOrUpdate(alertEntity);
             if (push) {
-                if (!pushManager.pushMessage("[PeerBanHelper/" + level.name() + "] " + tlUI(title), tlUI(content))) {
+                if (!pushManager.pushMessage("[PeerBanHelper/" + level.name() + "] " + tlUI(title), tlUI(content), level)) {
                     log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT_VIA_PROVIDERS));
                 }
             }

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push.impl;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
@@ -22,6 +23,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
     private final HTTPUtil httpUtil;
+    private static final String ICON_URL ="https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png";
 
     public NtfyPushProvider(String name, Config config, HTTPUtil httpUtil) {
         this.name = name;
@@ -71,7 +73,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) {
+    public boolean push(String title, String content, AlertLevel level) {
 
         RequestBody requestBody = RequestBody.create(
                 content,
@@ -85,7 +87,7 @@ public final class NtfyPushProvider extends AbstractPushProvider {
                 .post(requestBody)
                 .header("Title", encodedTitle)
                 .header("Priority", String.valueOf(config.getPriority()))
-                .header("Icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
+                .header("Icon", ICON_URL);
 
         if (config.getToken() != null && !config.getToken().isBlank()) {
             builder.header("Authorization", "Bearer " + config.getToken());
@@ -103,6 +105,16 @@ public final class NtfyPushProvider extends AbstractPushProvider {
             throw new IllegalStateException("Failed to send push message to Ntfy", e);
         }
         return true;
+    }
+
+    private int mapLevelToPriority(AlertLevel level) {
+        return switch (level) {
+            case TIP -> 1;
+            case INFO -> 2;
+            case WARN -> 3;
+            case ERROR -> 4;
+            case FATAL -> 5;
+        };
     }
 
     @AllArgsConstructor
