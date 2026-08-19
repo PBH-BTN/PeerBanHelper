@@ -75,18 +75,23 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof PeerAddress that)) return false;
-        return teredoClientUdpPort == that.teredoClientUdpPort && port == that.port && natTranslated == that.natTranslated && teredoTranslated == that.teredoTranslated && Objects.equals(downloaderRawIp, that.downloaderRawIp) && Objects.equals(downloaderRawPort, that.downloaderRawPort) && Objects.equals(teredoClientIp, that.teredoClientIp) && Objects.equals(nattedClientIp, that.nattedClientIp) && nattedClientPort == that.nattedClientPort && Objects.equals(ip, that.ip);
+        return port == that.port && Objects.equals(downloaderRawIp, that.downloaderRawIp) && Objects.equals(downloaderRawPort, that.downloaderRawPort) && Objects.equals(ip, that.ip) && Objects.equals(address, that.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(downloaderRawIp, downloaderRawPort, teredoClientIp, teredoClientUdpPort, nattedClientIp, nattedClientPort, ip, port, natTranslated, teredoTranslated);
+        return Objects.hash(downloaderRawIp, downloaderRawPort, ip, address, port);
     }
 
     @Override
     public int compareTo(@NonNull PeerAddress o) {
-        int ipCompare = this.getAddress().compareTo(o.getAddress());
-        if (ipCompare != 0) return ipCompare;
-        return Integer.compare(this.port, o.port);
+        // downloaderRaw, then ip, then port
+        int cmp = downloaderRawIp.compareTo(o.downloaderRawIp);
+        if (cmp != 0) return cmp;
+        cmp = Integer.compare(downloaderRawPort, o.downloaderRawPort);
+        if (cmp != 0) return cmp;
+        cmp = ip.compareTo(o.ip);
+        if (cmp != 0) return cmp;
+        return Integer.compare(port, o.port);
     }
 }
