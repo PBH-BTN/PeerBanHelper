@@ -383,6 +383,8 @@ jobs:
           context: .
           file: ./Dockerfile-Release
           push: true
+          provenance: false
+          sbom: false
           platforms: |
             linux/amd64
             linux/arm64/v8

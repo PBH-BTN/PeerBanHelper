@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.push;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.push.impl.*;
@@ -47,6 +48,8 @@ public final class PushManagerImpl implements Reloadable, PushManager {
             case "pushdeer" -> provider = PushDeerPushProvider.loadFromYaml(name, section, httpUtil);
             case "gotify" -> provider = GotifyPushProvider.loadFromYaml(name, section, httpUtil);
             case "ntfy" -> provider = NtfyPushProvider.loadFromYaml(name, section, httpUtil);
+            case "webhook" -> provider = WebhookPushProvider.loadFromYaml(name, section, httpUtil);
+            default -> provider = null;
         }
         return provider;
     }
@@ -63,6 +66,8 @@ public final class PushManagerImpl implements Reloadable, PushManager {
             case "pushdeer" -> provider = PushDeerPushProvider.loadFromJson(name, jsonObject, httpUtil);
             case "gotify" -> provider = GotifyPushProvider.loadFromJson(name, jsonObject, httpUtil);
             case "ntfy" -> provider = NtfyPushProvider.loadFromJson(name, jsonObject, httpUtil);
+            case "webhook" -> provider = WebhookPushProvider.loadFromJson(name, jsonObject, httpUtil);
+            default -> provider = null;
         }
         return provider;
     }
@@ -104,11 +109,11 @@ public final class PushManagerImpl implements Reloadable, PushManager {
     }
 
     @Override
-    public boolean pushMessage(String title, String description) {
+    public boolean pushMessage(String title, String description, AlertLevel level) {
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         providerList.forEach(pushProvider -> {
             try {
-                if (pushProvider.push(title, description)) {
+                if (pushProvider.push(title, description, level)) {
                     anySuccess.set(true);
                 }
             } catch (Exception e) {
