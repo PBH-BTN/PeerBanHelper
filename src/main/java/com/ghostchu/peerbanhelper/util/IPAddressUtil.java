@@ -1,9 +1,12 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.google.common.net.HostAndPort;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import inet.ipaddr.ipv4.IPv4Address;
+import inet.ipaddr.ipv6.IPv6Address;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
@@ -133,6 +136,14 @@ public final class IPAddressUtil {
         return generateRemappedPairIfPossible(banAddress);
     }
 
+    public static HostAndPort extractTeredo(IPAddress ipAddress) {
+        IPv6Address v6 = ipAddress.toIPv6();
+        IPAddress clientIpv4Address = new IPv4Address(~v6.getEmbeddedIPv4Address().intValue());
+        // update port to teredo port that encoded in teredo address
+        int clientOutboundUdpPort = (~v6.getSegment(5).getValue().intValue()) & 0xFFFF;
+        return HostAndPort.fromParts(clientIpv4Address.toNormalizedString(), clientOutboundUdpPort);
+    }
+
     private static List<IPAddress> generateRemappedPairIfPossible(IPAddress address) {
         List<IPAddress> addrs = new ArrayList<>(2);
         addrs.add(address);
@@ -140,6 +151,11 @@ public final class IPAddressUtil {
             addrs.add(address.toIPv6());
         } else if (address.isIPv6() && address.isIPv4Convertible()) { // 如果是 IPV6 且可以映射 IPV4，则为其生成原始 IPV4 地址
             addrs.add(address.toIPv4());
+        } else if (address.isIPv6() && address.toIPv6().isWellKnownIPv4Translatable()  // 如果是 NAT64 地址，则为其生成原始 IPV4 地址
+                && Main.getMainConfig().getBoolean("ip-remapping.nat64", true)) {
+            addrs.add(address.toIPv6().getEmbeddedIPv4Address());
+        } else if (address.isIPv6() && address.toIPv6().isTeredo()) { // 如果是 Teredo，生成原始 IPV4 地址
+            addrs.add(getIPAddress(extractTeredo(address).getHost()));
         }
         return addrs;
     }

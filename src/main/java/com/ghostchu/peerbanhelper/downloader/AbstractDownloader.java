@@ -93,11 +93,8 @@ public abstract class AbstractDownloader implements Downloader {
         }
         IPAddress ipAddress = peerAddress.getAddress();
         if (!isTeredo(peerAddress.getAddress())) return peerAddress;
-        IPv6Address v6 = ipAddress.toIPv6();
-        IPAddress clientIpv4Address = new IPv4Address(~v6.getEmbeddedIPv4Address().intValue());
-        // update port to teredo port that encoded in teredo address
-        int clientOutboundUdpPort = (~v6.getSegment(5).getValue().intValue()) & 0xFFFF;
-        peerAddress.applyTeredo(clientIpv4Address.toNormalizedString(), clientOutboundUdpPort);
+        var teredo = IPAddressUtil.extractTeredo(ipAddress);
+        peerAddress.applyTeredo(teredo.getHost(), teredo.getPort());
         peerAddress.clearAddressCache();
         return peerAddress;
     }
