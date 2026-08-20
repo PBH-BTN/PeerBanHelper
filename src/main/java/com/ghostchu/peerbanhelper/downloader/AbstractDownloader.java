@@ -82,7 +82,6 @@ public abstract class AbstractDownloader implements Downloader {
         IPv6Address v6 = ipAddress.toIPv6();
         if(!v6.isWellKnownIPv4Translatable()) return peerAddress;
         peerAddress.applyNat(v6.getEmbeddedIPv4Address().toCompressedString(), peerAddress.getPort());
-        peerAddress.setIp(v6.getEmbeddedIPv4Address().toCompressedString());
         peerAddress.clearAddressCache();
         return peerAddress;
     }
