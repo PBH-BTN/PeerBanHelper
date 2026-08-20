@@ -127,7 +127,7 @@ public final class IPAddressUtil {
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
-        if (ipv6RemappingEnabled && banAddress.isIPv6() && !address.toIPv6().isWellKnownIPv4Translatable()) { // 排除 NAT64 地址
+        if (ipv6RemappingEnabled && banAddress.isIPv6() && !banAddress.toIPv6().isWellKnownIPv4Translatable()) { // 排除 NAT64 地址
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
