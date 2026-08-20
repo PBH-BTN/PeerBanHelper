@@ -215,5 +215,7 @@ ip-remapping:
   # Convert NAT64 address to original IPv4 address for processing
   nat64:
     enabled: true
+    # NAT64 识别网络，处于以下网络中的地址将被视为 NAT64 地址，并将被转换为原始 IPv4 地址。若配置错误，将导致 IP 识别混乱，出现未定义行为
+    # NAT64 identification network, addresses in the following networks will be treated as NAT64 addresses and converted to original IPv4 addresses. If configured incorrectly, it will cause IP recognition confusion and undefined behavior.
     prefix:
       - "64:ff9b::/96" # Well-known prefix
