@@ -37,6 +37,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 48)
+    public void nat64Support(YamlConfiguration bundle) {
+        conf.set("ip-remapping.nat64", false);
+    }
+
     @UpdateScript(version = 47)
     public void teredoSupport(YamlConfiguration bundle) {
         conf.set("ip-remapping.teredo", false);

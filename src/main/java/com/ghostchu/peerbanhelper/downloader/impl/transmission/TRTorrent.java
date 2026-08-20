@@ -15,12 +15,10 @@ import java.util.stream.Collectors;
 public final class TRTorrent implements Torrent {
     private final Torrents backend;
     private final Function<PeerAddress, PeerAddress> natConverter;
-    private final Function<PeerAddress, PeerAddress> teredoConverter;
 
-    public TRTorrent(Torrents backend, Function<PeerAddress, PeerAddress> natConverter, Function<PeerAddress, PeerAddress> teredoConverter) {
+    public TRTorrent(Torrents backend, Function<PeerAddress, PeerAddress> addressConverter) {
         this.backend = backend;
-        this.natConverter = natConverter;
-        this.teredoConverter = teredoConverter;
+        this.natConverter = addressConverter;
     }
 
     @Override
@@ -70,7 +68,7 @@ public final class TRTorrent implements Torrent {
 
     @NotNull
     public List<Peer> getPeers() {
-        return backend.getPeers().stream().map(backend -> new TRPeer(backend, natConverter, teredoConverter)).collect(Collectors.toList());
+        return backend.getPeers().stream().map(backend -> new TRPeer(backend, natConverter)).collect(Collectors.toList());
     }
 
     public Integer getPeerLimit() {

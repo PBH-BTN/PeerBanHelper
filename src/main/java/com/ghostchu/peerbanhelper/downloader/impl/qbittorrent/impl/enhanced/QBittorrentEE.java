@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.AbstractQbittorrent;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPeer;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPreferences;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -131,7 +130,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                         continue; // 当做不存在处理
                     }
                     qbPeer.setRawIp(s);
-                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp()))));
+                    qbPeer.setPeerAddress(addressTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp())));
                     peersList.add(qbPeer);
                 }
                 return peersList;
