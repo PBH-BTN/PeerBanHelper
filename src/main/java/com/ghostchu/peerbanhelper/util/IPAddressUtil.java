@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.google.common.net.HostAndPort;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
@@ -26,6 +28,20 @@ import java.util.List;
  */
 public final class IPAddressUtil {
     private static final IPAddress INVALID_ADDRESS_MISSINGNO = new IPAddressString("127.123.123.123").getAddress();
+    private static @NotNull List<IPAddress> nat64PrefixList = List.of(new IPAddressString("64:ff9b::/96").getAddress());
+
+    public static ReloadResult reload() {
+        var prefixList64 = new ArrayList<IPAddress>();
+        for (String s : Main.getMainConfig().getStringList("ip-remapping.nat64.prefix")) {
+            try {
+                prefixList64.add(new IPAddressString(s).getAddress());
+            } catch (Exception e) {
+                log.error("Unable to parse NAT64 prefix {}", s, e);
+            }
+        }
+        nat64PrefixList = prefixList64;
+        return new ReloadResult(ReloadStatus.SUCCESS, null, null);
+    }
 
     /**
      * 将字符串转换为 IPAddress 对象，并自动进行 IPV4 in IPV6 提取转换
@@ -109,6 +125,15 @@ public final class IPAddressUtil {
         } else {
             throw new IllegalArgumentException("Invalid address length: " + localAddress.length);
         }
+    }
+
+    public static IPAddress extractIfNAT64(@NotNull IPAddress ipAddress) {
+        for (var prefix : nat64PrefixList) {
+            if (prefix.contains(ipAddress)) {
+                return ipAddress.toIPv6().getEmbeddedIPv4Address();
+            }
+        }
+        return ipAddress;
     }
 
     @NotNull

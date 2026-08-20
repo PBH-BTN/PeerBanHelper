@@ -213,4 +213,7 @@ ip-remapping:
   teredo: false
   # 转换 NAT64 地址为原始 IPv4 地址处理
   # Convert NAT64 address to original IPv4 address for processing
-  nat64: true
+  nat64:
+    enabled: true
+    prefix:
+      - "64:ff9b::/96" # Well-known prefix

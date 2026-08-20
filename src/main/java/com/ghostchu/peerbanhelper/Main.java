@@ -144,6 +144,7 @@ public class Main {
                     DEF_LOCALE = defLocaleTag;
                 }
             }
+            registerStaticReloadable();
             loadPlatform();
             setupHttpServer();
             pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
@@ -173,6 +174,14 @@ public class Main {
             throw throwable;
         }
 
+    }
+
+    private static void registerStaticReloadable() {
+        try {
+            reloadManager.register(IPAddressUtil.class.getDeclaredMethod("reload"));
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void setupHttpServer() {
