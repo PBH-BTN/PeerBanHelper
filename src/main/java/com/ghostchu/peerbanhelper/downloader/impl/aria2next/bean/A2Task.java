@@ -32,6 +32,13 @@ public class A2Task implements Torrent {
 
     @Override
     public @NotNull String getName() {
+        if (bittorrent.getInfo() == null) {
+            if (files != null && !files.isEmpty()) {
+                return files.getFirst().getPath();
+            } else {
+                return "<METADATA> " + gid;
+            }
+        }
         return bittorrent.getInfo().getName();
     }
 
@@ -42,7 +49,7 @@ public class A2Task implements Torrent {
 
     @Override
     public double getProgress() {
-        if(totalLength <= 0) return 0.0;
+        if (totalLength <= 0) return 0.0;
         return (double) completedLength / totalLength;
     }
 
@@ -77,6 +84,7 @@ public class A2Task implements Torrent {
     public static class InfoType {
         private String name;
     }
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
@@ -87,6 +95,7 @@ public class A2Task implements Torrent {
         private String magnetLink;
         private String mode;
     }
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
