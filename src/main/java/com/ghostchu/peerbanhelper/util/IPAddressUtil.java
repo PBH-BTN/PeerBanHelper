@@ -121,13 +121,13 @@ public final class IPAddressUtil {
         banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
         boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
-        if (banAddress.isIPv4() && ipv4RemappingEnabled) {
+        if (ipv4RemappingEnabled && banAddress.isIPv4()) {
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
-        if (banAddress.isIPv6() && ipv6RemappingEnabled) {
+        if (ipv6RemappingEnabled && banAddress.isIPv6() && !address.toIPv6().isWellKnownIPv4Translatable()) { // 排除 NAT64 地址
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
