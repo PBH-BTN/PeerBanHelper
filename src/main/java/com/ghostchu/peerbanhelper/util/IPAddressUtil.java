@@ -128,6 +128,7 @@ public final class IPAddressUtil {
     }
 
     public static IPAddress extractIfNAT64(@NotNull IPAddress ipAddress) {
+        if (!Main.getMainConfig().getBoolean("ip-remapping.nat64.enabled", true)) return ipAddress;
         for (var prefix : nat64PrefixList) {
             if (prefix.contains(ipAddress)) {
                 return ipAddress.toIPv6().getEmbeddedIPv4Address();
