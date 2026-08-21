@@ -45,26 +45,55 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     @NotNull
-    public PeerAddress natTranslate(PeerAddress peerAddress) {
+    public PeerAddress addressTranslate(PeerAddress peerAddress) {
+        /* Built-In NAT Translate (AutoSTUN etc.) */
+        convertIfManagedByBuiltInNat(peerAddress);
+        /* Teredo Translate */
+        convertIfTeredo(peerAddress);
+        /* NAT64 Translate */
+        convertIfNat64(peerAddress);
+        /* IPv4 Unified */
+        convertIfV4Convertable(peerAddress);
+        return peerAddress;
+    }
+
+    private PeerAddress convertIfManagedByBuiltInNat(PeerAddress peerAddress) {
         InetSocketAddress inetSocketAddress = new InetSocketAddress(peerAddress.getIp(), peerAddress.getPort());
         var translate = natAddressProvider.translate(inetSocketAddress);
         if (translate == null) return peerAddress;
-        return peerAddress.setNat(translate.getHostString(), translate.getPort());
+        peerAddress.applyNat(translate.getHostString(), translate.getPort());
+        return peerAddress;
     }
 
-    @Override
-    public PeerAddress convertIfTeredo(PeerAddress peerAddress) {
+    private PeerAddress convertIfV4Convertable(PeerAddress peerAddress) {
+        if (peerAddress.getAddress().isIPv4Convertible() && !peerAddress.getAddress().isIPv4()) {
+            peerAddress.setIp(peerAddress.getAddress().toIPv4().toNormalizedString());
+            peerAddress.clearAddressCache();
+        }
+        return peerAddress;
+    }
+
+    private PeerAddress convertIfNat64(PeerAddress peerAddress) {
+        boolean originalv4 = peerAddress.getAddress().isIPv4();
+        if (originalv4) return peerAddress; // 跳过 V4 处理
+        // v6
+        var extracted = IPAddressUtil.extractIfNAT64(peerAddress.getAddress());
+        if (extracted.isIPv4()) { // v6 变 v4 了，证明 NAT64 进行了处理
+            peerAddress.applyNat(extracted.toNormalizedString(), peerAddress.getPort());
+            peerAddress.clearAddressCache();
+        }
+        return peerAddress;
+    }
+
+    private PeerAddress convertIfTeredo(PeerAddress peerAddress) {
         if (!Main.getMainConfig().getBoolean("ip-remapping.teredo")) {
             return peerAddress;
         }
         IPAddress ipAddress = peerAddress.getAddress();
         if (!isTeredo(peerAddress.getAddress())) return peerAddress;
-        IPv6Address v6 = ipAddress.toIPv6();
-        IPAddress clientIpv4Address = new IPv4Address(~v6.getEmbeddedIPv4Address().intValue());
-        // update port to teredo port that encoded in teredo address
-        int clientOutboundUdpPort = (~v6.getSegment(5).getValue().intValue()) & 0xFFFF;
-        peerAddress.setTeredo(clientIpv4Address.toNormalizedString(), clientOutboundUdpPort);
-        peerAddress.setAddress(clientIpv4Address);
+        var teredo = IPAddressUtil.extractTeredo(ipAddress);
+        peerAddress.applyTeredo(teredo.getHost(), teredo.getPort());
+        peerAddress.clearAddressCache();
         return peerAddress;
     }
 

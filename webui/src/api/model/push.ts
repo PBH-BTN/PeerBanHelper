@@ -6,7 +6,8 @@ export enum PushType {
   Bark = 'bark',
   PushDeer = 'pushdeer',
   Gotify = 'gotify',
-  Ntfy = 'ntfy'
+  Ntfy = 'ntfy',
+  Webhook = 'webhook'
 }
 
 export enum SMTPEncryption {
@@ -14,6 +15,16 @@ export enum SMTPEncryption {
   StartTLS = 'STARTTLS',
   EnforceStartTLS = 'ENFORCE_STARTTLS',
   SSLTLS = 'SSLTLS'
+}
+
+export enum WebhookMethod {
+  GET = 'GET',
+  POST = 'POST'
+}
+
+export enum WebhookContentType {
+  JSON = 'application/json',
+  PlainText = 'text/plain'
 }
 
 interface SMTPConfigBase {
@@ -79,6 +90,14 @@ export interface NtfyConfig {
   tags?: string
 }
 
+export interface WebhookConfig {
+  url: string
+  method: WebhookMethod
+  content_type: WebhookContentType
+  body_template: string
+  headers: Record<string, string>
+}
+
 export type PushConfig = {
   name: string
 } & (
@@ -90,4 +109,5 @@ export type PushConfig = {
   | { type: PushType.PushDeer; config: PushDeerConfig }
   | { type: PushType.Gotify; config: GotifyConfig }
   | { type: PushType.Ntfy; config: NtfyConfig }
+  | { type: PushType.Webhook; config: WebhookConfig }
 )

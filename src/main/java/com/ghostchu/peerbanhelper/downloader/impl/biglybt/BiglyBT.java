@@ -391,7 +391,7 @@ public final class BiglyBT extends AbstractDownloader {
                     peer.setIp(peer.getIp().substring(1));
                 }
                 peersList.add(new PeerImpl(
-                        convertIfTeredo(natTranslate(new PeerAddress(peer.getIp(), peer.getPort(), peer.getIp()))),
+                        addressTranslate(new PeerAddress(peer.getIp(), peer.getPort(), peer.getIp())),
                         peerId,
                         peer.getClient(),
                         peer.getStats().getRtDownloadSpeed(),

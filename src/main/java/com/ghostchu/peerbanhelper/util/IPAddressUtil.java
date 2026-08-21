@@ -1,9 +1,14 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.google.common.net.HostAndPort;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import inet.ipaddr.ipv4.IPv4Address;
+import inet.ipaddr.ipv6.IPv6Address;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
@@ -23,6 +28,20 @@ import java.util.List;
  */
 public final class IPAddressUtil {
     private static final IPAddress INVALID_ADDRESS_MISSINGNO = new IPAddressString("127.123.123.123").getAddress();
+    private static @NotNull List<IPAddress> nat64PrefixList = List.of(new IPAddressString("64:ff9b::/96").getAddress());
+
+    public static ReloadResult reload() {
+        var prefixList64 = new ArrayList<IPAddress>();
+        for (String s : Main.getMainConfig().getStringList("ip-remapping.nat64.prefix")) {
+            try {
+                prefixList64.add(new IPAddressString(s).getAddress());
+            } catch (Exception e) {
+                log.error("Unable to parse NAT64 prefix {}", s, e);
+            }
+        }
+        nat64PrefixList = prefixList64;
+        return new ReloadResult(ReloadStatus.SUCCESS, null, null);
+    }
 
     /**
      * 将字符串转换为 IPAddress 对象，并自动进行 IPV4 in IPV6 提取转换
@@ -108,6 +127,16 @@ public final class IPAddressUtil {
         }
     }
 
+    public static IPAddress extractIfNAT64(@NotNull IPAddress ipAddress) {
+        if (!Main.getMainConfig().getBoolean("ip-remapping.nat64.enabled", true)) return ipAddress;
+        for (var prefix : nat64PrefixList) {
+            if (prefix.contains(ipAddress)) {
+                return ipAddress.toIPv6().getEmbeddedIPv4Address();
+            }
+        }
+        return ipAddress;
+    }
+
     @NotNull
     public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress) {
         return remapBanListAddress(banAddress, true);
@@ -118,19 +147,27 @@ public final class IPAddressUtil {
         banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
         boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
-        if (banAddress.isIPv4() && ipv4RemappingEnabled) {
+        if (ipv4RemappingEnabled && banAddress.isIPv4()) {
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
-        if (banAddress.isIPv6() && ipv6RemappingEnabled) {
+        if (ipv6RemappingEnabled && banAddress.isIPv6() && !banAddress.toIPv6().isWellKnownIPv4Translatable()) { // 排除 NAT64 地址
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
         return generateRemappedPairIfPossible(banAddress);
+    }
+
+    public static HostAndPort extractTeredo(IPAddress ipAddress) {
+        IPv6Address v6 = ipAddress.toIPv6();
+        IPAddress clientIpv4Address = new IPv4Address(~v6.getEmbeddedIPv4Address().intValue());
+        // update port to teredo port that encoded in teredo address
+        int clientOutboundUdpPort = (~v6.getSegment(5).getValue().intValue()) & 0xFFFF;
+        return HostAndPort.fromParts(clientIpv4Address.toNormalizedString(), clientOutboundUdpPort);
     }
 
     private static List<IPAddress> generateRemappedPairIfPossible(IPAddress address) {
@@ -140,6 +177,11 @@ public final class IPAddressUtil {
             addrs.add(address.toIPv6());
         } else if (address.isIPv6() && address.isIPv4Convertible()) { // 如果是 IPV6 且可以映射 IPV4，则为其生成原始 IPV4 地址
             addrs.add(address.toIPv4());
+        } else if (address.isIPv6() && address.toIPv6().isWellKnownIPv4Translatable()  // 如果是 NAT64 地址，则为其生成原始 IPV4 地址
+                && Main.getMainConfig().getBoolean("ip-remapping.nat64", true)) {
+            addrs.add(address.toIPv6().getEmbeddedIPv4Address());
+        } else if (address.isIPv6() && address.toIPv6().isTeredo()) { // 如果是 Teredo，生成原始 IPV4 地址
+            addrs.add(getIPAddress(extractTeredo(address).getHost()));
         }
         return addrs;
     }

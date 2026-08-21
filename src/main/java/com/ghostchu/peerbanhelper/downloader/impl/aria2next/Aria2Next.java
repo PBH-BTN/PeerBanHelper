@@ -37,7 +37,6 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -216,7 +215,7 @@ public final class Aria2Next extends AbstractDownloader {
             // peers.forEach(p -> System.out.println(p.toString()));
             return sendRpcRequest(requestPeers, new TypeToken<List<A2Peer>>() {
             }).stream()
-                    .peek(peer-> peer.setPeerAddress(convertIfTeredo(natTranslate(peer.getPeerAddress()))))
+                    .peek(peer-> peer.setPeerAddress(addressTranslate(peer.getPeerAddress())))
                     .toList();
         } catch (DownloaderRequestException e) {
             log.error("Error on request while getting peers", e);

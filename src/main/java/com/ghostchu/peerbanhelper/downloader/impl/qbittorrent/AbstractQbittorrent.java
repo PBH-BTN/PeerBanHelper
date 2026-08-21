@@ -632,7 +632,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                         continue;
                     }
                     qbPeer.setRawIp(s);
-                    qbPeer.setPeerAddress(convertIfTeredo(natTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp()))));
+                    qbPeer.setPeerAddress(addressTranslate(new PeerAddress(qbPeer.getIp(), qbPeer.getPort(), qbPeer.getRawIp())));
                     peersList.add(qbPeer);
                 }
                 return peersList;
