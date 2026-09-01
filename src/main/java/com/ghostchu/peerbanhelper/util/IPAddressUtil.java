@@ -30,6 +30,10 @@ public final class IPAddressUtil {
     private static final IPAddress INVALID_ADDRESS_MISSINGNO = new IPAddressString("127.123.123.123").getAddress();
     private static @NotNull List<IPAddress> nat64PrefixList = List.of(new IPAddressString("64:ff9b::/96").getAddress());
 
+    static {
+        reload();
+    }
+
     public static ReloadResult reload() {
         var prefixList64 = new ArrayList<IPAddress>();
         for (String s : Main.getMainConfig().getStringList("ip-remapping.nat64.prefix")) {
@@ -157,14 +161,18 @@ public final class IPAddressUtil {
         banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
         boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
-        if (ipv4RemappingEnabled && banAddress.isIPv4() || isNAT64(banAddress.toIPv6())) {
+        if (ipv4RemappingEnabled && (banAddress.isIPv4() || isNAT64(banAddress.toIPv6()))) {
             if (isNAT64(banAddress.toIPv6())) {
                 banAddress = extractIfNAT64(banAddress.toIPv6());
             }
-            int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
-            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
-                return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
-            return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
+            if (banAddress.isIPv4()) {
+                int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
+                if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
+                    return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
+                return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
+            } else {
+                log.warn("Unexpected: banAddress is not IPv4 after NAT64 extraction: {}", banAddress);
+            }
         }
         if (ipv6RemappingEnabled && banAddress.isIPv6() && !isNAT64(banAddress.toIPv6())) { // 排除 NAT64 地址
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
