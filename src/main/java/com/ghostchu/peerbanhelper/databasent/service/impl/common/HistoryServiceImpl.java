@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.HistoryMapper;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.util.SQLHelper;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -95,7 +96,7 @@ public class HistoryServiceImpl extends AbstractCommonService<HistoryMapper, His
             case "peer_downloaded" -> "h.peer_downloaded";
             case "peer_progress" -> "h.peer_progress";
             case "time" -> "h.ban_at";
-            default -> field; // Fallback to original, assuming it's a valid column or expression
+            default -> SQLHelper.checkSQLInjectionAndReturnSafe(field); // Fallback to original, assuming it's a valid column or expression
         };
     }
 

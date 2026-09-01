@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.databasent.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleOffsetDateTimeIntKVDTO;
+import com.ghostchu.peerbanhelper.util.SQLHelper;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -201,7 +202,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private void handleHistoryNumberAccess(Context ctx) {
         // 过滤 X% 以下的数据
         String type = ctx.queryParam("type");
-        String field = ctx.queryParam("field");
+        String field = SQLHelper.checkSQLInjectionAndReturnSafe(ctx.queryParam("field"));
         double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
         String downloader = ctx.queryParam("downloader");
         Integer substringLength = null;
@@ -213,9 +214,6 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         }
         if (field == null) {
             throw new IllegalArgumentException("field cannot be null");
-        }
-        if (SqlInjectionUtils.check(field)) {
-            throw new IllegalArgumentException("Detected dangerous SQL injection");
         }
         List<UniversalFieldNumResult> results = switch (type) {
             case "count" -> historyService.countField(field, filter, downloader, substringLength);

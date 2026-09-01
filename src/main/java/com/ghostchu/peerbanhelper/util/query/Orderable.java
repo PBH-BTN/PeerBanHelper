@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.util.query;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
+import com.ghostchu.peerbanhelper.util.SQLHelper;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import io.javalin.http.Context;
@@ -69,10 +70,7 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             return null;
         }
         for (Map.Entry<String, Boolean> entry : entrySet()) {
-            if (SqlInjectionUtils.check(entry.getKey())) {
-                throw new IllegalArgumentException("Detected dangerous SQL injection");
-            }
-            queryBuilder.orderBy(true, entry.getValue(), remapping.getOrDefault(entry.getKey(), entry.getKey()));
+            queryBuilder.orderBy(true, entry.getValue(), SQLHelper.checkSQLInjectionAndReturnSafe(remapping.getOrDefault(entry.getKey(), entry.getKey())));
         }
         return queryBuilder;
     }
@@ -80,13 +78,10 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
     public String generateOrderBy() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Boolean> entry : entrySet()) {
-            if (SqlInjectionUtils.check(entry.getKey())) {
-                throw new IllegalArgumentException("Detected dangerous SQL injection");
-            }
             if (!sb.isEmpty()) {
                 sb.append(", ");
             }
-            sb.append(remapping.getOrDefault(entry.getKey(), entry.getKey()))
+            sb.append(SQLHelper.checkSQLInjectionAndReturnSafe(remapping.getOrDefault(entry.getKey(), entry.getKey())))
                     .append(" ")
                     .append(entry.getValue() ? "ASC" : "DESC");
         }
