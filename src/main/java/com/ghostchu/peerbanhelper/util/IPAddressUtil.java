@@ -20,7 +20,9 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 /**
@@ -131,6 +133,7 @@ public final class IPAddressUtil {
         }
     }
 
+    @Nullable
     public static IPAddress extractIfNAT64(@NotNull IPAddress ipAddress) {
         if (!Main.getMainConfig().getBoolean("ip-remapping.nat64.enabled", true)) return ipAddress;
         for (var prefix : nat64PrefixList) {
@@ -138,7 +141,7 @@ public final class IPAddressUtil {
                 return ipAddress.toIPv6().getEmbeddedIPv4Address();
             }
         }
-        return ipAddress;
+        return null;
     }
 
     public static boolean isNAT64(@NotNull IPAddress ipAddress) {
@@ -158,29 +161,32 @@ public final class IPAddressUtil {
 
     @NotNull
     public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress, boolean supportRangeBan) {
+        Set<IPAddress> addresses = new HashSet<>();
         banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
+        IPAddress nat64Extracted = extractIfNAT64(banAddress);
+        addresses.add(banAddress);
+        addresses.add(nat64Extracted);
         boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
-        if (ipv4RemappingEnabled && (banAddress.isIPv4() || isNAT64(banAddress.toIPv6()))) {
-            if (isNAT64(banAddress.toIPv6())) {
-                banAddress = extractIfNAT64(banAddress.toIPv6());
-            }
-            if (banAddress.isIPv4()) {
-                int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
-                if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
-                    return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
-                return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
+        if (ipv4RemappingEnabled && (banAddress.isIPv4() || nat64Extracted != null)) {
+            IPAddress addressToUse = nat64Extracted != null ? nat64Extracted : banAddress;
+            int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
+            if (addressToUse.getPrefixLength() != null && addressToUse.getPrefixLength() <= remapRange) {
+                addresses.addAll(generateRemappedPairIfPossible(addressToUse.toPrefixBlock()));
             } else {
-                log.warn("Unexpected: banAddress is not IPv4 after NAT64 extraction: {}", banAddress);
+                addresses.addAll(generateRemappedPairIfPossible(addressToUse.toPrefixBlock(remapRange)));
             }
         }
-        if (ipv6RemappingEnabled && banAddress.isIPv6() && !isNAT64(banAddress.toIPv6())) { // 排除 NAT64 地址
+        if (ipv6RemappingEnabled && banAddress.isIPv6() && nat64Extracted == null) { // 排除 NAT64 地址
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
-            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
-                return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
-            return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
+            if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange) {
+                addresses.addAll(generateRemappedPairIfPossible(banAddress.toPrefixBlock()));
+            } else {
+                addresses.addAll(generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange)));
+            }
         }
-        return generateRemappedPairIfPossible(banAddress);
+        addresses.addAll(generateRemappedPairIfPossible(banAddress));
+        return addresses.stream().distinct().toList();
     }
 
     public static HostAndPort extractTeredo(IPAddress ipAddress) {

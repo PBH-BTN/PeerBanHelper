@@ -78,7 +78,7 @@ public abstract class AbstractDownloader implements Downloader {
         if (originalv4) return peerAddress; // 跳过 V4 处理
         // v6
         var extracted = IPAddressUtil.extractIfNAT64(peerAddress.getAddress());
-        if (extracted.isIPv4()) { // v6 变 v4 了，证明 NAT64 进行了处理
+        if (extracted != null) {
             peerAddress.applyNat(extracted.toNormalizedString(), peerAddress.getPort());
             peerAddress.clearAddressCache();
         }
