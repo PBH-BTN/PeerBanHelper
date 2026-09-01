@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 public class SQLHelper {
-    private final static Pattern SAFE_FIELD_NAME = Pattern.compile("^[a-zA-Z0-9_\\-.]+$");
+    private final static Pattern SAFE_FIELD_NAME = Pattern.compile("^[a-zA-Z0-9_.]+$");
 
     public static String checkSafeFieldName(@Nullable String fieldName) {
         if(!isSafeFieldName(fieldName)) {
