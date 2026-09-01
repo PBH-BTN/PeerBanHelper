@@ -96,7 +96,7 @@ public class HistoryServiceImpl extends AbstractCommonService<HistoryMapper, His
             case "peer_downloaded" -> "h.peer_downloaded";
             case "peer_progress" -> "h.peer_progress";
             case "time" -> "h.ban_at";
-            default -> SQLHelper.checkSQLInjectionAndReturnSafe(field); // Fallback to original, assuming it's a valid column or expression
+            default -> SQLHelper.checkSafeFieldName(SQLHelper.checkSQLInjection(field)); // Fallback to original, assuming it's a valid column or expression
         };
     }
 

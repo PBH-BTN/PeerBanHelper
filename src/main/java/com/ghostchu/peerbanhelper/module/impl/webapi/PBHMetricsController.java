@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldDateResult;
 import com.ghostchu.peerbanhelper.databasent.dto.UniversalFieldNumResult;
@@ -202,7 +201,7 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private void handleHistoryNumberAccess(Context ctx) {
         // 过滤 X% 以下的数据
         String type = ctx.queryParam("type");
-        String field = SQLHelper.checkSQLInjectionAndReturnSafe(ctx.queryParam("field"));
+        String field = SQLHelper.checkSQLInjection(ctx.queryParam("field"));
         double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
         String downloader = ctx.queryParam("downloader");
         Integer substringLength = null;

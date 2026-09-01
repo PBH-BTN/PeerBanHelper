@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.util.query;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import com.ghostchu.peerbanhelper.util.SQLHelper;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -70,7 +69,10 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             return null;
         }
         for (Map.Entry<String, Boolean> entry : entrySet()) {
-            queryBuilder.orderBy(true, entry.getValue(), SQLHelper.checkSQLInjectionAndReturnSafe(remapping.getOrDefault(entry.getKey(), entry.getKey())));
+            queryBuilder.orderBy(true, entry.getValue(),
+                    SQLHelper.checkSafeFieldName(
+                            SQLHelper.checkSQLInjection(remapping.getOrDefault(entry.getKey(), entry.getKey())))
+            );
         }
         return queryBuilder;
     }
@@ -81,7 +83,7 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             if (!sb.isEmpty()) {
                 sb.append(", ");
             }
-            sb.append(SQLHelper.checkSQLInjectionAndReturnSafe(remapping.getOrDefault(entry.getKey(), entry.getKey())))
+            sb.append(SQLHelper.checkSafeFieldName(SQLHelper.checkSQLInjection(remapping.getOrDefault(entry.getKey(), entry.getKey()))))
                     .append(" ")
                     .append(entry.getValue() ? "ASC" : "DESC");
         }
