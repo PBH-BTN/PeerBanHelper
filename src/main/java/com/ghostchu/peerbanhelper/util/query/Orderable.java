@@ -1,15 +1,18 @@
 package com.ghostchu.peerbanhelper.util.query;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import io.javalin.http.Context;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Slf4j
 @Getter
 public class Orderable extends LinkedHashMap<String, Boolean> {
     private final BiMap<String, String> remapping = HashBiMap.create();
@@ -66,6 +69,9 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             return null;
         }
         for (Map.Entry<String, Boolean> entry : entrySet()) {
+            if (SqlInjectionUtils.check(entry.getKey())) {
+                throw new IllegalArgumentException("Detected dangerous SQL injection");
+            }
             queryBuilder.orderBy(true, entry.getValue(), remapping.getOrDefault(entry.getKey(), entry.getKey()));
         }
         return queryBuilder;
@@ -74,6 +80,9 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
     public String generateOrderBy() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Boolean> entry : entrySet()) {
+            if (SqlInjectionUtils.check(entry.getKey())) {
+                throw new IllegalArgumentException("Detected dangerous SQL injection");
+            }
             if (!sb.isEmpty()) {
                 sb.append(", ");
             }
