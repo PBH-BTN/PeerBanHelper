@@ -165,7 +165,9 @@ public final class IPAddressUtil {
         banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
         IPAddress nat64Extracted = extractIfNAT64(banAddress);
         addresses.add(banAddress);
-        addresses.add(nat64Extracted);
+        if(nat64Extracted != null){
+            addresses.add(nat64Extracted);
+        }
         boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
         if (ipv4RemappingEnabled && (banAddress.isIPv4() || nat64Extracted != null)) {
