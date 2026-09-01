@@ -179,7 +179,7 @@ public final class IPAddressUtil {
                 addresses.addAll(generateRemappedPairIfPossible(addressToUse.toPrefixBlock(remapRange)));
             }
         }
-        if (ipv6RemappingEnabled && banAddress.isIPv6() && nat64Extracted == null) { // 排除 NAT64 地址
+        if (ipv6RemappingEnabled && (banAddress.isIPv6() && nat64Extracted == null)) { // 排除 NAT64 地址
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange) {
                 addresses.addAll(generateRemappedPairIfPossible(banAddress.toPrefixBlock()));
