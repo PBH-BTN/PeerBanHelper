@@ -38,7 +38,7 @@ public final class IPAddressUtil {
         var prefixList64 = new ArrayList<IPAddress>();
         for (String s : Main.getMainConfig().getStringList("ip-remapping.nat64.prefix")) {
             try {
-                prefixList64.add(new IPAddressString(s).getAddress());
+                prefixList64.add(new IPAddressString(s).toAddress());
             } catch (Exception e) {
                 log.error("Unable to parse NAT64 prefix {}", s, e);
             }
