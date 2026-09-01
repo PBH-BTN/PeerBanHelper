@@ -137,6 +137,16 @@ public final class IPAddressUtil {
         return ipAddress;
     }
 
+    public static boolean isNAT64(@NotNull IPAddress ipAddress) {
+        if (!Main.getMainConfig().getBoolean("ip-remapping.nat64.enabled", true)) return false;
+        for (var prefix : nat64PrefixList) {
+            if (prefix.contains(ipAddress)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @NotNull
     public static List<IPAddress> remapBanListAddress(@NotNull IPAddress banAddress) {
         return remapBanListAddress(banAddress, true);
@@ -147,13 +157,16 @@ public final class IPAddressUtil {
         banAddress = banAddress.isIPv4Convertible() ? banAddress.toIPv4() : banAddress.toIPv6();
         boolean ipv4RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv4.enabled");
         boolean ipv6RemappingEnabled = supportRangeBan && Main.getMainConfig().getBoolean("banlist-remapping.ipv6.enabled");
-        if (ipv4RemappingEnabled && banAddress.isIPv4()) {
+        if (ipv4RemappingEnabled && banAddress.isIPv4() || isNAT64(banAddress.toIPv6())) {
+            if (isNAT64(banAddress.toIPv6())) {
+                banAddress = extractIfNAT64(banAddress.toIPv6());
+            }
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv4.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
             return generateRemappedPairIfPossible(banAddress.toPrefixBlock(remapRange));
         }
-        if (ipv6RemappingEnabled && banAddress.isIPv6() && !banAddress.toIPv6().isWellKnownIPv4Translatable()) { // 排除 NAT64 地址
+        if (ipv6RemappingEnabled && banAddress.isIPv6() && !isNAT64(banAddress.toIPv6())) { // 排除 NAT64 地址
             int remapRange = Main.getMainConfig().getInt("banlist-remapping.ipv6.remap-range");
             if (banAddress.getPrefixLength() != null && banAddress.getPrefixLength() <= remapRange)
                 return generateRemappedPairIfPossible(banAddress.toPrefixBlock());
