@@ -45,8 +45,6 @@ public interface Downloader {
     @NotNull
     String getName();
 
-    PeerAddress convertIfTeredo(PeerAddress peerAddress);
-
     boolean isTeredo(IPAddress ipAddress);
 
     @NotNull

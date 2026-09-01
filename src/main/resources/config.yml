@@ -1,4 +1,4 @@
-config-version: 47
+config-version: 48
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -211,3 +211,11 @@ ip-remapping:
   # 转换 Teredo 地址为原始 IPv4 地址处理，不影响下载器基于原始 Teredo 地址的封禁行为
   # Convert Teredo address to original IPv4 address for processing, does not affect the downloader's ban behavior based on the original Teredo address
   teredo: false
+  # 转换 NAT64 地址为原始 IPv4 地址处理
+  # Convert NAT64 address to original IPv4 address for processing
+  nat64:
+    enabled: true
+    # NAT64 识别网络，处于以下网络中的地址将被视为 NAT64 地址，并将被转换为原始 IPv4 地址。若配置错误，将导致 IP 识别混乱，出现未定义行为
+    # NAT64 identification network, addresses in the following networks will be treated as NAT64 addresses and converted to original IPv4 addresses. If configured incorrectly, it will cause IP recognition confusion and undefined behavior.
+    prefix:
+      - "64:ff9b::/96" # Well-known prefix

@@ -67,10 +67,13 @@
             <a-radio :value="PushType.Ntfy">{{
               t('page.settings.tab.config.push.form.type.' + PushType.Ntfy)
             }}</a-radio>
+            <a-radio :value="PushType.Webhook">{{
+              t('page.settings.tab.config.push.form.type.' + PushType.Webhook)
+            }}</a-radio>
           </a-grid>
         </a-radio-group>
       </a-form-item>
-      <component :is="formMap[form.type]" v-model="form.config" />
+      <component :is="formMap[form.type]" ref="activeFormRef" v-model="form.config" />
     </a-form>
   </a-modal>
 </template>
@@ -128,6 +131,9 @@ const formMap: Record<PushType, Component> = {
   ),
   [PushType.Ntfy]: defineAsyncComponent(
     () => import('@/views/settings/components/config/components/push/forms/ntfyForm.vue')
+  ),
+  [PushType.Webhook]: defineAsyncComponent(
+    () => import('@/views/settings/components/config/components/push/forms/webhookForm.vue')
   )
 }
 
@@ -136,9 +142,13 @@ const emits = defineEmits<{
 }>()
 
 const formRef = ref<InstanceType<typeof Form>>()
+const activeFormRef = ref<{ validate?: () => boolean }>()
 const handleBeforeOk = async () => {
   const validateError = await formRef.value?.validate()
   if (validateError) {
+    return false
+  }
+  if (activeFormRef.value?.validate?.() === false) {
     return false
   }
   try {
@@ -189,6 +199,9 @@ const handleOk = async () => {
 const handleTest = async () => {
   const validateError = await formRef.value?.validate()
   if (validateError) {
+    return
+  }
+  if (activeFormRef.value?.validate?.() === false) {
     return
   }
   testLoading.value = true

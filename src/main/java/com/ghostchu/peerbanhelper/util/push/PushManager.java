@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.google.gson.JsonObject;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
@@ -16,7 +17,7 @@ public interface PushManager {
 
     void savePushProviders() throws IOException;
 
-    boolean pushMessage(String title, String description);
+    boolean pushMessage(String title, String description, AlertLevel level);
 
     java.util.List<PushProvider> getProviderList();
 }

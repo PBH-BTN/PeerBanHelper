@@ -172,7 +172,7 @@ public final class Transmission extends AbstractDownloader {
                     return true;
                 })
                 .filter(t -> includePrivate || !t.getIsPrivate())
-                .map(backend -> new TRTorrent(backend, this::natTranslate, this::convertIfTeredo)).collect(Collectors.toList());
+                .map(backend -> new TRTorrent(backend, this::addressTranslate)).collect(Collectors.toList());
     }
 
     @Override

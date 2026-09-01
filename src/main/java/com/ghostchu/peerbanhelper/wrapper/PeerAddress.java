@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.google.common.net.HostAndPort;
 import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +28,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
 
 
     private String ip;
+
     private transient IPAddress address;
     /**
      * 端口可能为 0 （代表未设置）
@@ -52,7 +52,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
         return address;
     }
 
-    public PeerAddress setNat(String nattedIp, int nattedPort) {
+    public PeerAddress applyNat(String nattedIp, int nattedPort) {
         this.ip = nattedIp;
         this.port = nattedPort;
         this.nattedClientIp = nattedIp;
@@ -62,7 +62,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
         return this;
     }
 
-    public PeerAddress setTeredo(String teredoIp, int teredoPort) {
+    public PeerAddress applyTeredo(String teredoIp, int teredoPort) {
         this.ip = teredoIp;
         this.port = teredoPort;
         this.teredoClientIp = teredoIp;
@@ -93,5 +93,14 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
         cmp = ip.compareTo(o.ip);
         if (cmp != 0) return cmp;
         return Integer.compare(port, o.port);
+    }
+
+    @Deprecated(forRemoval = true)
+    public void setAddress(IPAddress address) {
+        throw new IllegalStateException("This field is cached, use clearAddressCache() to clear the cache instead.");
+    }
+
+    public void clearAddressCache() {
+        this.address = null;
     }
 }

@@ -1,15 +1,18 @@
 package com.ghostchu.peerbanhelper.util.query;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ghostchu.peerbanhelper.util.SQLHelper;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import io.javalin.http.Context;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Slf4j
 @Getter
 public class Orderable extends LinkedHashMap<String, Boolean> {
     private final BiMap<String, String> remapping = HashBiMap.create();
@@ -66,7 +69,10 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             return null;
         }
         for (Map.Entry<String, Boolean> entry : entrySet()) {
-            queryBuilder.orderBy(true, entry.getValue(), remapping.getOrDefault(entry.getKey(), entry.getKey()));
+            queryBuilder.orderBy(true, entry.getValue(),
+                    SQLHelper.checkSafeFieldName(
+                            SQLHelper.checkSQLInjection(remapping.getOrDefault(entry.getKey(), entry.getKey())))
+            );
         }
         return queryBuilder;
     }
@@ -77,7 +83,7 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             if (!sb.isEmpty()) {
                 sb.append(", ");
             }
-            sb.append(remapping.getOrDefault(entry.getKey(), entry.getKey()))
+            sb.append(SQLHelper.checkSafeFieldName(SQLHelper.checkSQLInjection(remapping.getOrDefault(entry.getKey(), entry.getKey()))))
                     .append(" ")
                     .append(entry.getValue() ? "ASC" : "DESC");
         }
