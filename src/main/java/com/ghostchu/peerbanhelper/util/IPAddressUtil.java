@@ -190,7 +190,7 @@ public final class IPAddressUtil {
             addrs.add(address.toIPv6());
         } else if (address.isIPv6() && address.isIPv4Convertible()) { // 如果是 IPV6 且可以映射 IPV4，则为其生成原始 IPV4 地址
             addrs.add(address.toIPv4());
-        } else if (address.isIPv6() && address.toIPv6().isWellKnownIPv4Translatable()  // 如果是 NAT64 地址，则为其生成原始 IPV4 地址
+        } else if (address.isIPv6() && isNAT64(address.toIPv6())  // 如果是 NAT64 地址，则为其生成原始 IPV4 地址
                 && Main.getMainConfig().getBoolean("ip-remapping.nat64", true)) {
             addrs.add(address.toIPv6().getEmbeddedIPv4Address());
         } else if (address.isIPv6() && address.toIPv6().isTeredo()) { // 如果是 Teredo，生成原始 IPV4 地址
