@@ -39,7 +39,7 @@ public final class MainConfigUpdateScript {
 
     @UpdateScript(version = 48)
     public void nat64Support(YamlConfiguration bundle) {
-        conf.set("ip-remapping.nat64", false);
+        conf.set("ip-remapping.nat64", bundle.getConfigurationSection("ip-remapping.nat64"));
     }
 
     @UpdateScript(version = 47)

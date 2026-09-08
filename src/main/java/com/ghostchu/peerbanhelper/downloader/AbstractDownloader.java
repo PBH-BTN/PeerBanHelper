@@ -66,7 +66,7 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     private PeerAddress convertIfV4Convertable(PeerAddress peerAddress) {
-        if(peerAddress.getAddress().isIPv4Convertible() && !peerAddress.getAddress().isIPv4()){
+        if (peerAddress.getAddress().isIPv4Convertible() && !peerAddress.getAddress().isIPv4()) {
             peerAddress.setIp(peerAddress.getAddress().toIPv4().toNormalizedString());
             peerAddress.clearAddressCache();
         }
@@ -74,16 +74,14 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     private PeerAddress convertIfNat64(PeerAddress peerAddress) {
-        if (!Main.getMainConfig().getBoolean("ip-remapping.nat64")) {
-            return peerAddress;
+        boolean originalv4 = peerAddress.getAddress().isIPv4();
+        if (originalv4) return peerAddress; // 跳过 V4 处理
+        // v6
+        var extracted = IPAddressUtil.extractIfNAT64(peerAddress.getAddress());
+        if (extracted != null) {
+            peerAddress.applyNat(extracted.toNormalizedString(), peerAddress.getPort());
+            peerAddress.clearAddressCache();
         }
-        IPAddress ipAddress = peerAddress.getAddress();
-        if (!ipAddress.isIPv6()) return peerAddress;
-        IPv6Address v6 = ipAddress.toIPv6();
-        if(!v6.isWellKnownIPv4Translatable()) return peerAddress;
-        peerAddress.applyNat(v6.getEmbeddedIPv4Address().toCompressedString(), peerAddress.getPort());
-        peerAddress.setIp(v6.getEmbeddedIPv4Address().toCompressedString());
-        peerAddress.clearAddressCache();
         return peerAddress;
     }
 
