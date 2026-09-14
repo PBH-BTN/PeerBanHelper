@@ -24,7 +24,7 @@
     >
       <a-spin />
     </div>
-    <editor v-else v-model="content" :view-only="viewOnly" />
+    <ScriptEditor v-else ref="scriptEditorRef" v-model="content" :view-only="viewOnly" />
     <template v-if="!viewOnly" #footer>
       <a-space fill style="display: flex; justify-content: space-between">
         <a-form ref="formRef" :model="form" :disabled="!isNew" auto-label-width>
@@ -64,7 +64,7 @@ import { Message, type Form } from '@arco-design/web-vue'
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import editor from './editor/index.vue'
+import ScriptEditor from './editor/index.vue'
 const { t } = useI18n()
 
 const visible = ref(false)
@@ -100,6 +100,7 @@ defineExpose({
   }
 })
 const formRef = ref<typeof Form>()
+const scriptEditorRef = ref<InstanceType<typeof ScriptEditor>>()
 
 const handleOk = async () => {
   // 只读模式直接返回
@@ -114,6 +115,10 @@ const handleOk = async () => {
       return false
     }
     if (!form.name.endsWith('.av')) form.name = form.name + '.av'
+  }
+  if (!scriptEditorRef.value?.validate()) {
+    Message.error(t('page.rule.custom-script.detail.syntaxError'))
+    return false
   }
   const result = await UpsertScript(form.name, content.value)
   if (result.success) {
