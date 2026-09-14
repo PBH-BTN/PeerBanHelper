@@ -49,6 +49,11 @@ class ScriptEngineManager(
         return engine.compileScript(file, fallbackName, scriptContent)
     }
 
+    fun validateScriptSyntax(fileName: String, scriptContent: String): Boolean {
+        val engine = getEngineByFileName(fileName) ?: return false
+        return engine.validateScriptSyntax(fileName, scriptContent)
+    }
+
     /**
      * 处理脚本执行结果
      */

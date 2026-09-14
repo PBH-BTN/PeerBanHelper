@@ -53,15 +53,22 @@ type editor = Parameters<onMountF>[0] // monacoEditor.editor.IStandaloneCodeEdit
 const editorRef = shallowRef<editor>()
 const monacoRef = shallowRef<MonacoEditor>()
 const grammarParser = new GrammarParser()
+let lastValidatedValue: string | undefined
+let hasCachedValidation = false
+let lastValidationResult = true
 
 const setMarkers = (value: string | undefined) => {
   const editorModel = editorRef.value?.getModel()
   const monaco = monacoRef.value
-  if (!editorModel || !monaco) return []
+  if (!editorModel || !monaco) return true
+  if (hasCachedValidation && value === lastValidatedValue) return lastValidationResult
 
   if (!value) {
     monaco.editor.setModelMarkers(editorModel, AV, [])
-    return []
+    lastValidatedValue = value
+    hasCachedValidation = true
+    lastValidationResult = true
+    return lastValidationResult
   }
 
   const code = value.endsWith('\n') ? value : `${value}\n`
@@ -82,10 +89,13 @@ const setMarkers = (value: string | undefined) => {
   })
 
   monaco.editor.setModelMarkers(editorModel, AV, markers)
-  return markers
+  lastValidatedValue = value
+  hasCachedValidation = true
+  lastValidationResult = markers.length === 0
+  return lastValidationResult
 }
 
-const validate = () => setMarkers(model.value).length === 0
+const validate = () => setMarkers(model.value)
 
 const handleMount: onMountF = (editor, monaco) => {
   editorRef.value = editor
