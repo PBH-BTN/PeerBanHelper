@@ -22,7 +22,6 @@ public final class SwtBrowserCanvas extends Canvas {
     private Shell shell;
     private Browser browser;
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
-    private double dpiScaleFactor = 1.0;
     private boolean browserInitialized = false;
 
     public SwtBrowserCanvas() {
@@ -82,16 +81,19 @@ public final class SwtBrowserCanvas extends Canvas {
         }
     }
 
-    private void calculateDPIScaleFactor() {
+
+
+    private double calculateDPIScaleFactor() {
         int dpi = display.getDPI().x;
         int standardDPI = 96; // Windows 标准 DPI
-        this.dpiScaleFactor = (double) dpi / standardDPI;
+        return (double) dpi / standardDPI;
     }
 
     private void updateBrowserSize() {
         if (browser != null && !browser.isDisposed() && browserInitialized) {
             // 获取 Canvas 的实际大小并应用 DPI 缩放
             Dimension canvasSize = this.getSize();
+            double dpiScaleFactor = calculateDPIScaleFactor();
             if (canvasSize.width > 0 && canvasSize.height > 0) {
                 int scaledWidth = (int) (canvasSize.width / dpiScaleFactor);
                 int scaledHeight = (int) (canvasSize.height / dpiScaleFactor);
