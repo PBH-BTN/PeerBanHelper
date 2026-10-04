@@ -175,7 +175,7 @@ dependencies {
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
 
     // SWT (provided scope - for compilation only)
-    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
+    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.135.0")
 
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:13.0.2")
