@@ -13,8 +13,6 @@ import org.eclipse.swt.widgets.Shell;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
 import java.util.concurrent.CountDownLatch;
 
 @Slf4j
@@ -44,13 +42,6 @@ public final class SwtBrowserCanvas extends Canvas {
                     }
                 });
             }
-        });
-        this.addHierarchyListener(_ -> {
-            EventQueue.invokeLater(() -> {
-                if (browserInitialized && display != null && !display.isDisposed()) {
-                    display.asyncExec(this::updateBrowserSize);
-                }
-            });
         });
     }
 
@@ -142,8 +133,6 @@ public final class SwtBrowserCanvas extends Canvas {
             display.asyncExec(this::updateBrowserSize);
         }
     }
-
-
 
     private Thread createEventLoop() {
         var thread = new Thread() {
