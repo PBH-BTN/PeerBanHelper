@@ -45,6 +45,13 @@ public final class SwtBrowserCanvas extends Canvas {
                 });
             }
         });
+        this.addHierarchyListener(_ -> {
+            EventQueue.invokeLater(() -> {
+                if (browserInitialized && display != null && !display.isDisposed()) {
+                    display.asyncExec(this::updateBrowserSize);
+                }
+            });
+        });
     }
 
     private void setupHiDPISupport() {
@@ -59,21 +66,15 @@ public final class SwtBrowserCanvas extends Canvas {
         countDownLatch.await();
         display.syncExec(() -> {
             display.setData("org.eclipse.swt.internal.win32.Edge.useDarkPreferedColorScheme", Main.getGuiManager().isDarkMode());
-
+            // 计算 DPI 缩放比例
+            calculateDPIScaleFactor();
             this.shell = SWT_AWT.new_Shell(display, this);
-            // 设置无边距的 FillLayout，让 Browser 自动铺满 Shell
-            org.eclipse.swt.layout.FillLayout layout = new org.eclipse.swt.layout.FillLayout();
-            layout.marginWidth = 0;
-            layout.marginHeight = 0;
-            this.shell.setLayout(layout);
-
             try {
                 this.browser = new Browser(this.shell, SWT.NONE);
                 this.browser.setVisible(true);
                 this.browser.setUrl(Main.getPbhServerAddress());
                 this.browserInitialized = true;
-
-                // 应用正确的大小和位置
+                // 应用正确的大小
                 updateBrowserSize();
             } catch (SWTError e) {
                 this.browserInitialized = false;
@@ -89,33 +90,29 @@ public final class SwtBrowserCanvas extends Canvas {
         }
     }
 
+
+
+    private double calculateDPIScaleFactor() {
+        int dpi = display.getDPI().x;
+        int standardDPI = 96; // Windows 标准 DPI
+        return (double) dpi / standardDPI;
+    }
+
     private void updateBrowserSize() {
         if (browser != null && !browser.isDisposed() && browserInitialized) {
-            // 获取 Canvas 逻辑尺寸
+            // 获取 Canvas 的实际大小并应用 DPI 缩放
             Dimension canvasSize = this.getSize();
+            double dpiScaleFactor = calculateDPIScaleFactor();
             if (canvasSize.width > 0 && canvasSize.height > 0) {
+                int scaledWidth = (int) (canvasSize.width / dpiScaleFactor);
+                int scaledHeight = (int) (canvasSize.height / dpiScaleFactor);
 
-                // 获取当前屏幕的 DPI 缩放比例
-                java.awt.GraphicsConfiguration gc = this.getGraphicsConfiguration();
-                double scaleX = 1.0;
-                double scaleY = 1.0;
-                if (gc != null) {
-                    java.awt.geom.AffineTransform transform = gc.getDefaultTransform();
-                    scaleX = transform.getScaleX();
-                    scaleY = transform.getScaleY();
-                }
+                browser.setSize(scaledWidth, scaledHeight);
+                shell.setSize(scaledWidth, scaledHeight);
 
-                // 计算 SWT 原生窗口所需的物理像素尺寸
-                int physicalWidth = (int) Math.round(canvasSize.width * scaleX);
-                int physicalHeight = (int) Math.round(canvasSize.height * scaleY);
-
-                // 应用到 SWT Shell 和 Browser
-                shell.setLocation(0, 0);
-                shell.setSize(physicalWidth, physicalHeight);
-                browser.setLocation(0, 0);
-                browser.setSize(physicalWidth, physicalHeight);
+                // 强制重新布局
+                shell.layout(true, true);
             }
-            shell.layout(true, true);
         }
     }
 
@@ -145,6 +142,7 @@ public final class SwtBrowserCanvas extends Canvas {
             display.asyncExec(this::updateBrowserSize);
         }
     }
+
 
 
     private Thread createEventLoop() {

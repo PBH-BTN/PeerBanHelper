@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow;
 
-import com.formdev.flatlaf.util.SwingUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.program.webserver.WebServerStartedEvent;
@@ -21,12 +20,8 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,13 +76,6 @@ public final class SwingMainWindow extends JFrame {
                 Sentry.captureException(e);
             }
         }
-        addPropertyChangeListener("graphicsConfiguration", evt -> {
-            GraphicsConfiguration newGC = (GraphicsConfiguration) evt.getNewValue();
-            if (newGC != null) {
-                SwingUtilities.updateComponentTreeUI(this);
-                tabs.forEach(WindowTab::onWindowResize);
-            }
-        });
         //this.webuiTab = new WebUITab(this);
         Main.getEventBus().register(this);
 
