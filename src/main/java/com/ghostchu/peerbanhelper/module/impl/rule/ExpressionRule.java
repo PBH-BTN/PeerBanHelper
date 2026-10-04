@@ -153,6 +153,12 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 Sentry.captureException(e);
             }
         }
+        var scriptContent = new String(content, StandardCharsets.UTF_8);
+        if (!scriptEngineManager.validateScriptSyntax(scriptId, scriptContent)) {
+            context.status(HttpStatus.BAD_REQUEST);
+            context.json(new StdResp(false, tl(locale(context), Lang.RULE_ENGINE_BAD_EXPRESSION), null));
+            return;
+        }
         Files.write(readFile.toPath(), content, StandardOpenOption.CREATE);
         context.json(new StdResp(true, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_SAVED), null));
         reloadConfig();

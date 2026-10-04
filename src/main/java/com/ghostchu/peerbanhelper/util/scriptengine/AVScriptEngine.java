@@ -119,7 +119,9 @@ public final class AVScriptEngine implements ScriptEngine {
                     }
                 }
             }
-            AviatorEvaluator.getInstance().validate(scriptContent);
+            if (!validateScriptSyntax(fallbackName, scriptContent)) {
+                return null;
+            }
             Expression expression = AviatorEvaluator.getInstance().compile(scriptContent, true);
             return new AVCompiledScript(
                     file,
@@ -134,6 +136,17 @@ public final class AVScriptEngine implements ScriptEngine {
         } catch (Exception e) {
             log.warn("Script Engine unable to compile the script: {}", fallbackName, e);
             return null;
+        }
+    }
+
+    @Override
+    public boolean validateScriptSyntax(String fallbackName, String scriptContent) {
+        try {
+            AviatorEvaluator.getInstance().validate(scriptContent);
+            return true;
+        } catch (Exception e) {
+            log.warn("Script Engine unable to validate the script: {}", fallbackName, e);
+            return false;
         }
     }
 

@@ -22,6 +22,7 @@ export default {
   'page.rule.custom-script.detail.loading': '正在加载编辑器，这可能需要一些时间...',
   'page.rule.custom-script.detail.failed': '无法加载编辑器',
   'page.rule.custom-script.detail.failed.tips': '请检查网络连接或者刷新页面重试',
+  'page.rule.custom-script.detail.syntaxError': '脚本包含语法错误，请修复后再保存',
   'page.rule.custom-script.detail.action.ok': '确定',
   'page.rule.custom-script.detail.action.cancel': '取消',
   'page.rule.custom-script.warning': '安全警告',

@@ -2754,6 +2754,9 @@ export default class DSLParser extends Parser {
         case 12:
           this.state = 131
           this.expression(0)
+          if (this._input.LA(1) !== DSLParser.SemiColon) {
+            this.notifyErrorListeners("missing ';'", this._input.LT(1), undefined)
+          }
           this.state = 133
           this._errHandler.sync(this)
           if (this._interp.adaptivePredict(this._input, 6, this._ctx) === 1) {
@@ -3338,12 +3341,12 @@ export default class DSLParser extends Parser {
       this.enterOuterAlt(localctx, 1)
       this.state = 276
       this.match(DSLParser.IfKeyword)
-      this.state = 278
-      this._errHandler.sync(this)
-      let la_ = this._interp.adaptivePredict(this._input, 30, this._ctx)
-      if (la_ === 1) {
+      const hasParentheses = this._input.LA(1) === DSLParser.OpenParen
+      if (hasParentheses) {
         this.state = 277
         this.match(DSLParser.OpenParen)
+      } else {
+        this.notifyErrorListeners("missing '('", this._input.LT(1), undefined)
       }
       this.state = 280
       this.expression(0)
@@ -3353,6 +3356,8 @@ export default class DSLParser extends Parser {
       if (_la === DSLParser.CloseParen) {
         this.state = 281
         this.match(DSLParser.CloseParen)
+      } else if (hasParentheses) {
+        this.notifyErrorListeners("missing ')'", this._input.LT(1), undefined)
       }
 
       this.state = 284
@@ -3372,7 +3377,7 @@ export default class DSLParser extends Parser {
 
       this.state = 292
       this._errHandler.sync(this)
-      la_ = this._interp.adaptivePredict(this._input, 33, this._ctx)
+      const la_ = this._interp.adaptivePredict(this._input, 33, this._ctx)
       if (la_ === 1) {
         this.state = 291
         this.elseStatement()
@@ -3950,6 +3955,9 @@ export default class DSLParser extends Parser {
       } else if (la_ === 2) {
         this.state = 410
         this.functionDeclaration()
+      }
+      if (this._input.LA(1) !== DSLParser.SemiColon) {
+        this.notifyErrorListeners("missing ';'", this._input.LT(1), undefined)
       }
       this.state = 416
       this._errHandler.sync(this)

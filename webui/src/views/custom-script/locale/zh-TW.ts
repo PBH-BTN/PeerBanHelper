@@ -21,6 +21,7 @@ export default {
   'page.rule.custom-script.detail.loading': '正在載入編輯器，這可能需要一些時間...',
   'page.rule.custom-script.detail.failed': '無法載入編輯器',
   'page.rule.custom-script.detail.failed.tips': '請檢查網路連線或者重新整理頁面重試',
+  'page.rule.custom-script.detail.syntaxError': '腳本包含語法錯誤，請修正後再儲存',
   'page.rule.custom-script.detail.action.ok': '確定',
   'page.rule.custom-script.detail.action.cancel': '取消',
   'page.rule.custom-script.warning': '安全警告',
