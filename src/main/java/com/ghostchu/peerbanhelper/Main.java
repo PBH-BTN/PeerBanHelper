@@ -503,7 +503,7 @@ public class Main {
         } catch (Throwable e) {
             log.debug("Unable to get OS build number and code name", e);
         }
-        userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
+        userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION).replaceAll("[^\\x20-\\x7E]", "");
         return userAgent;
     }
     public static String getServerFingerprint() {
