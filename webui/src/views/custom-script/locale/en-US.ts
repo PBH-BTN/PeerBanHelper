@@ -24,6 +24,8 @@ export default {
   'page.rule.custom-script.detail.failed': 'Unable to load editor',
   'page.rule.custom-script.detail.failed.tips':
     'Please check your network connection or refresh the page to try again',
+  'page.rule.custom-script.detail.syntaxError':
+    'The script contains syntax errors. Fix them before saving.',
   'page.rule.custom-script.detail.action.ok': 'Ok',
   'page.rule.custom-script.detail.action.cancel': 'Cancel',
   'page.rule.custom-script.warning': 'Security Warning',
