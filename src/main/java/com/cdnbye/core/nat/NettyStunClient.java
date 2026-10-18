@@ -1,5 +1,6 @@
 package com.cdnbye.core.nat;
 
+import com.google.common.net.InetAddresses;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -8,7 +9,10 @@ import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -72,7 +76,27 @@ public class NettyStunClient {
      * Executes the STUN test sequence asynchronously.
      */
     private static void executeStunLogic(StunClientHandler handler, Channel channel, String stunHost, int stunPort, String localIP, CompletableFuture<StunResult> finalResultFuture) {
-        InetSocketAddress remoteAddress = new InetSocketAddress(stunHost, stunPort);
+        InetAddress v4StunServerAddr = null;
+        try {
+            InetAddress[] addrs = InetAddress.getAllByName(stunHost);
+            for (InetAddress addr : addrs) {
+                if (addr instanceof Inet4Address ipv4) {
+                    v4StunServerAddr = ipv4;
+                    break;
+                }
+            }
+        } catch (UnknownHostException e) {
+            log.debug("No valid DNS addresses found for StunServer: {}", stunHost);
+            finalResultFuture.complete(new StunResult(NatType.UdpBlocked, null));
+            return;
+        }
+
+        if(v4StunServerAddr == null){
+            log.debug("No IPv4 addresses found for StunServer: {}", stunHost);
+            finalResultFuture.complete(new StunResult(NatType.UdpBlocked, null));
+        }
+
+        InetSocketAddress remoteAddress = new InetSocketAddress(v4StunServerAddr, stunPort);
 
         // Test I
         StunMessage test1Request = new StunMessage(StunMessageType.BindingRequest);
