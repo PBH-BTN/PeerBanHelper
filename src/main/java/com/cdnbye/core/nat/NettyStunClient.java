@@ -87,13 +87,13 @@ public class NettyStunClient {
             }
         } catch (UnknownHostException e) {
             log.debug("No valid DNS addresses found for StunServer: {}", stunHost);
-            finalResultFuture.complete(new StunResult(NatType.UdpBlocked, null));
+            finalResultFuture.complete(new StunResult(NatType.Unknown, null));
             return;
         }
 
         if(v4StunServerAddr == null){
             log.debug("No IPv4 addresses found for StunServer: {}", stunHost);
-            finalResultFuture.complete(new StunResult(NatType.UdpBlocked, null));
+            finalResultFuture.complete(new StunResult(NatType.Unknown, null));
         }
 
         InetSocketAddress remoteAddress = new InetSocketAddress(v4StunServerAddr, stunPort);
