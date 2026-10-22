@@ -5,7 +5,7 @@ plugins {
     id("com.install4j.gradle") version "13.1.1" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.4.10"
+    kotlin("plugin.lombok") version "2.4.21"
     id("io.freefair.lombok") version "9.8.2"
 }
 
@@ -46,9 +46,9 @@ repositories {
 }
 
 val flatlafVersion = "3.7.2"
-val nettyVersion = "4.2.17.Final"
-val sqliteVersion = "3.53.2.1"
-val springVersion = "7.0.8"
+val nettyVersion = "4.2.19.Final"
+val sqliteVersion = "3.53.4.0"
+val springVersion = "7.0.10"
 val flywayVersion = "13.11.1"
 val oshiVersion = "7.4.4"
 // val jettyVersion = "12.1.12"
@@ -68,13 +68,13 @@ dependencies {
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
-    implementation("com.github.chris2018998:beecp:5.2.2")
+    implementation("com.github.chris2018998:beecp:5.2.3")
     implementation("org.springframework:spring-tx:${springVersion}")
     implementation("org.springframework:spring-jdbc:${springVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}:natives-android")
     implementation("com.h2database:h2:2.3.232")
-    implementation("org.postgresql:postgresql:42.7.13")
+    implementation("org.postgresql:postgresql:42.7.14")
     implementation("com.mysql:mysql-connector-j:26.10.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
@@ -133,7 +133,7 @@ dependencies {
     // CSV
     implementation("de.siegmar:fastcsv:4.4.0")
     // Jackson
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.core:jackson-core")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
@@ -150,8 +150,8 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.6.2")
-    implementation("org.slf4j:jcl-over-slf4j:2.0.18")
+    implementation("ch.qos.logback:logback-classic:1.6.5")
+    implementation("org.slf4j:jcl-over-slf4j:2.0.20")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
@@ -181,7 +181,7 @@ dependencies {
     compileOnly("com.install4j:install4j-runtime:13.1.1")
 
     // sentry
-    implementation(platform("io.sentry:sentry-bom:8.61.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.61.1")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
