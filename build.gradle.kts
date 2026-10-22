@@ -157,7 +157,7 @@ dependencies {
     implementation("com.spotify:completable-futures:0.3.6")
 
     // HTTP client
-    implementation("com.squareup.okhttp3:okhttp:5.4.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.1")
     implementation("com.squareup.okhttp3:logging-interceptor:5.5.1")
 
     // Netty
