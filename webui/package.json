@@ -36,7 +36,7 @@
     "lodash": "^4.18.1",
     "markdown-it": "^15.0.0",
     "mitt": "^3.0.1",
-    "monaco-editor": "^0.56.0",
+    "monaco-editor": "^0.57.0",
     "normalize.css": "^8.0.1",
     "pinia": "^4.0.0",
     "url-join": "^5.0.0",
