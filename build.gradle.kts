@@ -158,7 +158,7 @@ dependencies {
 
     // HTTP client
     implementation("com.squareup.okhttp3:okhttp:5.4.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.5.1")
 
     // Netty
     implementation("io.netty:netty-transport:${nettyVersion}")
