@@ -33,7 +33,7 @@
             <!-- <mbd :width="228" :height="83" /> -->
           </a>
         </a-space>
-        <a-split :size="0.5" disabled style="width: 100%">
+        <a-split :size="0.5" :min="0" :max="1" disabled style="width: 100%">
           <template #first>
             <a-space direction="vertical" size="small" style="max-width: 20rem; height: 6rem">
               <a-typography-text type="secondary">{{ t('plus.activeTips') }}</a-typography-text>
