@@ -18,7 +18,7 @@
       <variable name="jvmOptionsFile" value="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideWindows="true" valueWindows="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideMacos="true" valueMacos="${user.home}/Library/Application Support/PeerBanHelper" overrideUnix="true" valueUnix="${user.home}/.config/PeerBanHelper" />
       <variable name="publisherName" value="PBH-BTN Community" />
     </variables>
-    <jreBundles jdkProviderId="JBR" release="25/25.0.4.1-b635.70" />
+    <jreBundles jdkProviderId="JBR" release="25/25.0.4.1-b635.79" />
   </application>
   <files keepModificationTimes="true">
     <filesets>
