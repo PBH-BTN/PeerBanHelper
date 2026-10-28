@@ -125,7 +125,7 @@
                   "
                 >
                   <a-link
-                    :href="`https://2ip.io/analytics/asn-list/?asnId=${data.data.geo?.as?.number}`"
+                    :href="`https://2ip.io/analytics/asn-list/?asnId=${data?.data.geo?.as?.number}`"
                     :hoverable="false"
                   >
                     <icon-info-circle />
@@ -221,11 +221,11 @@
             </a-collapse-item>
           </a-collapse>
         </a-space>
-        <a-result v-else status="500" :title="t('page.ipList.error')" :subtitle="error.message">
+        <a-result v-else status="500" :title="t('page.ipList.error')" :subtitle="error?.message">
           <a-typography style="background: var(--color-fill-2); padding: 24px">
             <a-typography-paragraph>Details:</a-typography-paragraph>
             <ul>
-              <li v-for="line of error.stack?.split('\n')" :key="line">{{ line }}</li>
+              <li v-for="line of error?.stack?.split('\n')" :key="line">{{ line }}</li>
             </ul>
           </a-typography>
         </a-result>

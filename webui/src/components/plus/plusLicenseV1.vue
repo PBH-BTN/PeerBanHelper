@@ -1,5 +1,5 @@
 <template>
-  <a-split :size="0.65" disabled direction="horizontal" style="width: 100%">
+  <a-split :size="0.65" :min="0" :max="1" disabled direction="horizontal" style="width: 100%">
     <template #first>
       <a-descriptions :column="1">
         <template #title>

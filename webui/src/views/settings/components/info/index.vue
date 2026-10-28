@@ -5,7 +5,7 @@
       {{ t('page.settings.tab.info.title') }}
     </a-typography-title>
     <!--Peerbanhelper info-->
-    <a-split :size="0.5" disabled>
+    <a-split :size="0.5" :min="0" :max="1" disabled>
       <template #first>
         <a-descriptions
           :column="1"
@@ -68,7 +68,7 @@
     </a-split>
     <a-divider />
     <!---Network Info-->
-    <a-split :size="0.5" disabled>
+    <a-split :size="0.5" :min="0" :max="1" disabled>
       <template #first>
         <a-descriptions
           :column="1"
@@ -147,7 +147,7 @@
         {{ t('page.settings.tab.info.log.button') }}
       </a-button>
     </a-space>
-    <a-split :size="0.5" disabled>
+    <a-split :size="0.5" :min="0" :max="1" disabled>
       <template #first>
         <!--Peerbanhelper info-->
         <a-descriptions
@@ -161,7 +161,7 @@
               v-if="data?.data.peerbanhelper.commit_id"
               :href="`https://github.com/Ghost-chu/PeerBanHelper/commit/${data?.data.peerbanhelper.commit_id}`"
             >
-              {{ data.data.peerbanhelper.commit_id.substring(0, 8) }} </a-link
+              {{ data?.data.peerbanhelper.commit_id.substring(0, 8) }} </a-link
             ><span v-else>N/A</span>)
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.version.webui')">
@@ -298,7 +298,7 @@
       </template>
     </a-split>
     <a-divider />
-    <a-split :size="0.5" disabled>
+    <a-split :size="0.5" :min="0" :max="1" disabled>
       <template #first>
         <!---Network Info-->
         <a-descriptions
