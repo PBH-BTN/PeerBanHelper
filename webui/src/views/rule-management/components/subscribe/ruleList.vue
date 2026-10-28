@@ -42,15 +42,7 @@
           <a-switch
             v-model="record.enabled"
             :before-change="
-              async (newStatus: string | number | boolean) => {
-                const result = await ToggleRuleEnable(record.ruleId, newStatus as boolean)
-                if (!result.success) {
-                  Message.error({ content: result.message, resetOnHover: true })
-                  return false
-                }
-                refresh()
-                return true
-              }
+              (newStatus: string | number | boolean) => handleToggle(record.ruleId, newStatus)
             "
           />
         </a-space>
@@ -174,6 +166,15 @@ const handleEdit = (record: ruleBrief) => {
 }
 const handleAdd = () => {
   editModal.value?.showModal(true, () => refresh())
+}
+const handleToggle = async (ruleId: string, newStatus: string | number | boolean) => {
+  const result = await ToggleRuleEnable(ruleId, newStatus as boolean)
+  if (!result.success) {
+    Message.error({ content: result.message, resetOnHover: true })
+    return false
+  }
+  refresh()
+  return true
 }
 const handleRefresh = (ruleId: string) =>
   RefreshRule(ruleId).then((result) => {

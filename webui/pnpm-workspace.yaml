@@ -2,5 +2,9 @@ allowBuilds:
   less: true
   esbuild: true
   vue-demi: false
+minimumReleaseAgeExclude:
+  - '@types/lodash@4.17.27'
+  - npm-run-all2@9.0.4
+  - vite@8.3.5
 patchedDependencies:
   vue-request@2.0.4: patches/vue-request@2.0.4.patch

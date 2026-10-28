@@ -4,8 +4,7 @@
     "config:recommended"
   ],
   "ignoreDeps": [
-    "com.h2database:h2",
-    "@arco-design/web-vue"
+    "com.h2database:h2"
   ],
   "baseBranchPatterns": [
     "dev"

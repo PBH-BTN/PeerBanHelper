@@ -2,11 +2,11 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "4.0.1"
-    id("com.install4j.gradle") version "13.0.2" apply false
+    id("com.install4j.gradle") version "13.1.1" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
-    kotlin("plugin.lombok") version "2.4.10"
-    id("io.freefair.lombok") version "9.5.0"
+    kotlin("plugin.lombok") version "2.4.21"
+    id("io.freefair.lombok") version "9.8.2"
 }
 
 group = "com.ghostchu.peerbanhelper"
@@ -46,11 +46,11 @@ repositories {
 }
 
 val flatlafVersion = "3.7.2"
-val nettyVersion = "4.2.17.Final"
-val sqliteVersion = "3.53.2.1"
-val springVersion = "7.0.8"
-val flywayVersion = "13.2.0"
-val oshiVersion = "7.4.4"
+val nettyVersion = "4.2.19.Final"
+val sqliteVersion = "3.53.4.0"
+val springVersion = "7.0.10"
+val flywayVersion = "13.11.1"
+val oshiVersion = "7.7.2"
 // val jettyVersion = "12.1.12"
 
 configurations.all {
@@ -68,14 +68,14 @@ dependencies {
         exclude(group="commons-logging", module="commons-logging")
     }
     // Database
-    implementation("com.github.chris2018998:beecp:5.2.2")
+    implementation("com.github.chris2018998:beecp:5.2.3")
     implementation("org.springframework:spring-tx:${springVersion}")
     implementation("org.springframework:spring-jdbc:${springVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}:natives-android")
     implementation("com.h2database:h2:2.3.232")
-    implementation("org.postgresql:postgresql:42.7.13")
-    implementation("com.mysql:mysql-connector-j:26.7.0") {
+    implementation("org.postgresql:postgresql:42.7.14")
+    implementation("com.mysql:mysql-connector-j:26.10.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
 
@@ -114,7 +114,7 @@ dependencies {
     implementation("com.github.oshi:oshi-common:${oshiVersion}")
     runtimeOnly("com.github.oshi:oshi-core-ffm:${oshiVersion}")
     // Markdown
-    implementation("org.commonmark:commonmark:0.30.0")
+    implementation("org.commonmark:commonmark:0.31.0")
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
@@ -126,14 +126,14 @@ dependencies {
     implementation("com.ghostchu:simplereloadlib:1.1.2")
     // Utilities
     implementation("com.google.code.gson:gson:2.14.0")
-    implementation("com.google.guava:guava:33.6.0-jre")
+    implementation("com.google.guava:guava:33.7.2-jre")
     implementation("com.github.seancfoley:ipaddress:5.6.2")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.6.0")
     // CSV
     implementation("de.siegmar:fastcsv:4.4.0")
     // Jackson
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.core:jackson-core")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
@@ -150,15 +150,15 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.6.2")
-    implementation("org.slf4j:jcl-over-slf4j:2.0.18")
+    implementation("ch.qos.logback:logback-classic:1.6.5")
+    implementation("org.slf4j:jcl-over-slf4j:2.0.20")
 
     // Async utilities
     implementation("com.spotify:completable-futures:0.3.6")
 
     // HTTP client
-    implementation("com.squareup.okhttp3:okhttp:5.4.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.1")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.5.1")
 
     // Netty
     implementation("io.netty:netty-transport:${nettyVersion}")
@@ -175,13 +175,13 @@ dependencies {
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
 
     // SWT (provided scope - for compilation only)
-    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
+    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.135.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:13.0.2")
+    compileOnly("com.install4j:install4j-runtime:13.1.1")
 
     // sentry
-    implementation(platform("io.sentry:sentry-bom:8.53.0")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.61.1")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
@@ -193,8 +193,8 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
+    testImplementation("org.mockito:mockito-core:5.24.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
 
 }
 
