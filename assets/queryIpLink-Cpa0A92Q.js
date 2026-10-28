@@ -1,0 +1,1 @@
+import{Ht as e,X as t,j as n,q as r,w as i}from"./echarts-C4WrKLiz.js";var a=[`href`],o=n({__name:`queryIpLink`,props:{ip:{},style:{type:[Boolean,null,String,Object,Array],default:()=>void 0}},setup(n){return(o,s)=>(r(),i(`a`,{style:e([{"text-decoration":`none`,cursor:`pointer`},n.style]),href:`ipHistory?ip=${n.ip}`},[t(o.$slots,`default`)],12,a))}});export{o as t};

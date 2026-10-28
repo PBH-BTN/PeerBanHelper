@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./uuid-C5eaLpyl.js","./rolldown-runtime-CNOWq4Kh.js"])))=>i.map(i=>d[i]);
+import{n as e}from"./monacoEditor-DCxcTxNu.js";var t=async()=>crypto.randomUUID?crypto.randomUUID():(await e(()=>import(`./uuid-C5eaLpyl.js`).then(e=>e.t),__vite__mapDeps([0,1]),import.meta.url)).v4();export{t};
