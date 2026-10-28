@@ -159,7 +159,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             context.json(new StdResp(false, tl(locale(context), Lang.RULE_ENGINE_BAD_EXPRESSION), null));
             return;
         }
-        Files.write(readFile.toPath(), content, StandardOpenOption.CREATE);
+        Files.write(readFile.toPath(), content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
         context.json(new StdResp(true, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_SAVED), null));
         reloadConfig();
     }

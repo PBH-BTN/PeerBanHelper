@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
@@ -53,6 +54,7 @@ public final class BitComet extends AbstractDownloader {
     private Semver serverVersion;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
     private final List<String> peerGroupsFilter = List.of("peers_connected", "ltseeds_connected");
+    private final int fetchTorrentsLimit = ExternalSwitch.parseInt("pbh.bitcomet.fetchTorrentsLimit", 50);
 
     public BitComet(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         super(id, alertManager, natAddressProvider);
@@ -285,8 +287,11 @@ public final class BitComet extends AbstractDownloader {
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
-        requirements.put("start", 0);
-        requirements.put("limit", Integer.MAX_VALUE - 1);
+
+        // BitComet 2.23
+        requirements.put("keyword", "");
+        requirements.put("query_mode", "stateless");
+        requirements.put("validate_task_ids", Collections.emptyList());
         return fetchTorrents(requirements, !config.isIgnorePrivate());
     }
 
@@ -298,75 +303,95 @@ public final class BitComet extends AbstractDownloader {
         requirements.put("sort_order", "unsorted");
         requirements.put("tag_filter", "ALL");
         requirements.put("task_type", "ALL");
-        requirements.put("start", 0);
-        requirements.put("limit", Integer.MAX_VALUE - 1);
+
+        // BitComet 2.23
+        requirements.put("keyword", "");
+        requirements.put("query_mode", "stateless");
+        requirements.put("validate_task_ids", Collections.emptyList());
         return fetchTorrents(requirements, true);
     }
 
 
     public List<? extends Torrent> fetchTorrents(Map<String, Object> requirements, boolean includePrivate) {
-        RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(requirements), MediaType.get("application/json"));
-        Request request = new Request.Builder()
-                .url(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint())
-                .post(requestBody)
-                .header("Authorization", "Bearer " + this.deviceToken)
-                .build();
+        List<Torrent> torrents = new ArrayList<>();
+        long start = -fetchTorrentsLimit; // 设置为负数，首次循环会变成 0
+        while (true) {
+            start += fetchTorrentsLimit;
+            Map<String, Object> subRequestRequirements = new HashMap<>(requirements);
+            subRequestRequirements.put("start", start);
+            subRequestRequirements.put("limit", fetchTorrentsLimit);
+            String jsonBody = JsonUtil.standard().toJson(subRequestRequirements);
+            System.out.println(jsonBody);
+            RequestBody requestBody = RequestBody.create(jsonBody, MediaType.get("application/json"));
+            Request request = new Request.Builder()
+                    .url(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint())
+                    .post(requestBody)
+                    .header("Authorization", "Bearer " + this.deviceToken)
+                    .build();
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    log.warn(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST), response.code(), response.body().string());
+                    continue; // 跳过此页，转下页继续尝试
+                }
+                String resp = response.body().string();
+                System.out.println(resp);
+                var taskListResponse = JsonUtil.standard().fromJson(resp, BCTaskListResponse.class);
+                Semaphore semaphore = new Semaphore(3);
+                List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(taskListResponse.getTasks().stream()
+                        .filter(t -> "BT".equals(t.getType()))
+                        .map(torrent -> CompletableFuture.supplyAsync(() -> {
+                            try {
+                                semaphore.acquire();
+                                Map<String, String> taskIds = new HashMap<>();
+                                taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
+                                RequestBody taskRequestBody = RequestBody.create(JsonUtil.standard().toJson(taskIds), MediaType.get("application/json"));
+                                Request taskRequest = new Request.Builder()
+                                        .url(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint())
+                                        .post(taskRequestBody)
+                                        .header("Authorization", "Bearer " + this.deviceToken)
+                                        .build();
 
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST, response.code(), response.body().string()));
-            }
-            var taskListResponse = JsonUtil.standard().fromJson(response.body().string(), BCTaskListResponse.class);
-
-            Semaphore semaphore = new Semaphore(3);
-            List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(taskListResponse.getTasks().stream()
-                    .filter(t -> "BT".equals(t.getType()))
-                    .map(torrent -> CompletableFuture.supplyAsync(() -> {
-                        try {
-                            semaphore.acquire();
-                            Map<String, String> taskIds = new HashMap<>();
-                            taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
-                            RequestBody taskRequestBody = RequestBody.create(JsonUtil.standard().toJson(taskIds), MediaType.get("application/json"));
-                            Request taskRequest = new Request.Builder()
-                                    .url(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint())
-                                    .post(taskRequestBody)
-                                    .header("Authorization", "Bearer " + this.deviceToken)
-                                    .build();
-
-                            try (Response taskResponse = httpClient.newCall(taskRequest).execute()) {
-                                if (!taskResponse.isSuccessful()) {
-                                    log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY));
-                                    return null;
+                                try (Response taskResponse = httpClient.newCall(taskRequest).execute()) {
+                                    if (!taskResponse.isSuccessful()) {
+                                        log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY));
+                                        return null;
+                                    }
+                                    return JsonUtil.standard().fromJson(taskResponse.body().string(), BCTaskTorrentResponse.class);
                                 }
-                                return JsonUtil.standard().fromJson(taskResponse.body().string(), BCTaskTorrentResponse.class);
+                            } catch (IOException | InterruptedException e) {
+                                log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
+                                if (e instanceof InterruptedException) {
+                                    Thread.currentThread().interrupt();
+                                }
+                                return null;
+                            } finally {
+                                semaphore.release();
                             }
-                        } catch (IOException | InterruptedException e) {
-                            log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
-                            if (e instanceof InterruptedException) {
-                                Thread.currentThread().interrupt();
-                            }
-                            return null;
-                        } finally {
-                            semaphore.release();
-                        }
-                    }, parallelService)).toList()).join();
-            return torrentResponses.stream()
-                    .filter(Objects::nonNull)
-                    .map(torrent -> new TorrentImpl(Long.toString(torrent.getTask().getTaskId()),
-                            torrent.getTask().getTaskName(),
-                            torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
-                            torrent.getTaskDetail().getTotalSize(),
-                            torrent.getTask().getSelectedDownloadedSize(),
-                            torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
-                            torrent.getTask().getUploadRate(),
-                            torrent.getTask().getDownloadRate(),
-                            torrent.getTaskDetail().getTorrentPrivate()
-                    ))
-                    .filter(torrent -> includePrivate || !torrent.isPrivate())
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+                        }, parallelService)).toList()).join();
+                List<? extends Torrent> torrentsRetrieved = torrentResponses.stream()
+                        .filter(Objects::nonNull)
+                        .map(torrent -> new TorrentImpl(Long.toString(torrent.getTask().getTaskId()),
+                                torrent.getTask().getTaskName(),
+                                torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
+                                torrent.getTaskDetail().getTotalSize(),
+                                torrent.getTask().getSelectedDownloadedSize(),
+                                torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
+                                torrent.getTask().getUploadRate(),
+                                torrent.getTask().getDownloadRate(),
+                                torrent.getTaskDetail().getTorrentPrivate()
+                        ))
+                        .filter(torrent -> includePrivate || !torrent.isPrivate())
+                        .toList();
+                if (torrentsRetrieved.isEmpty()) {
+                    break;
+                }
+                torrents.addAll(torrentsRetrieved);
+            } catch (IOException e) {
+                log.debug("Unprocessed BitComet request", e);
+                continue;
+            }
         }
+        return torrents;
     }
 
     @Override
