@@ -15,6 +15,8 @@ set "JAVAW_EXEC=%JAVA_BIN%\javaw.exe"
 start "" "%JAVAW_EXEC%"^
  -XX:+UseCompactObjectHeaders^
  --enable-native-access=ALL-UNNAMED^
+ -Dcom.sun.net.ssl.checkRevocation=true^
+ -Dcom.sun.security.enableCRLDP=true^
  -Djdk.attach.allowAttachSelf=true^
  -XX:MaxRAMPercentage=85.0^
  -XX:SoftMaxHeapSize=386M^
