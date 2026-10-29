@@ -15,8 +15,6 @@ set "JAVA_EXEC=%JAVA_BIN%\java.exe"
  -XX:+UseCompactObjectHeaders^
  --enable-native-access=ALL-UNNAMED^
  -Djdk.attach.allowAttachSelf=true^
- -Dcom.sun.net.ssl.checkRevocation=true^
- -Dcom.sun.security.enableCRLDP=true^
  -XX:MaxRAMPercentage=85.0^
  -XX:SoftMaxHeapSize=386M^
  -XX:+UseG1GC^
