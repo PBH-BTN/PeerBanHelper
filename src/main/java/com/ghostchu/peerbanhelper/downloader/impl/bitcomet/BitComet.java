@@ -321,20 +321,22 @@ public final class BitComet extends AbstractDownloader {
             subRequestRequirements.put("start", start);
             subRequestRequirements.put("limit", fetchTorrentsLimit);
             String jsonBody = JsonUtil.standard().toJson(subRequestRequirements);
-            System.out.println(jsonBody);
+            //System.out.println(jsonBody);
             RequestBody requestBody = RequestBody.create(jsonBody, MediaType.get("application/json"));
             Request request = new Request.Builder()
                     .url(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint())
                     .post(requestBody)
                     .header("Authorization", "Bearer " + this.deviceToken)
                     .build();
+            log.debug("BitComet fetchTorrents request: {}", jsonBody);
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
                     log.warn(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST), response.code(), response.body().string());
                     continue; // 跳过此页，转下页继续尝试
                 }
                 String resp = response.body().string();
-                System.out.println(resp);
+                //System.out.println(resp);
+                log.debug("BitComet fetchTorrents response: {}", resp);
                 var taskListResponse = JsonUtil.standard().fromJson(resp, BCTaskListResponse.class);
                 Semaphore semaphore = new Semaphore(3);
                 List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(taskListResponse.getTasks().stream()
