@@ -67,6 +67,13 @@ export default {
   'page.settings.tab.config.banlistRemapping.ipv6.remap_range.tips':
     '将会使用该长度将主机地址置为0，并生成对应的 CIDR 表达式（范围 0-128）',
 
+  'page.settings.tab.config.banlistPrefill.title': '封禁列表预处理',
+  'page.settings.tab.config.banlistPrefill.description':
+    '从提供封禁地址的规则源中提前收集已知恶意 IP，并与运行时动态封禁列表分开管理。',
+  'page.settings.tab.config.banlistPrefill.enabled': '预先添加已知的恶意 IP 地址',
+  'page.settings.tab.config.banlistPrefill.enabled.tips':
+    '规则订阅或 BTN 等规则源更新后，会重新合并预填充列表，并在下一次检查时向下载器应用完整封禁列表。',
+
   'page.settings.tab.config.btn.enable': '启用 BTN 模块',
   'page.settings.tab.config.btn.doc': '使用前请阅读文档：',
   'page.settings.tab.config.btn.enableSubmit': '启用提交',

@@ -49,6 +49,8 @@
           <a-divider />
           <banlistRemapping v-model="form.banlist_remapping" />
           <a-divider />
+          <banlistPrefill v-model="form.banlist_prefill" />
+          <a-divider />
           <btn v-model="form.btn" />
           <a-divider />
           <network v-model:proxy="form.proxy" v-model:resolvers="form.resolvers" />
@@ -78,6 +80,7 @@ import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 
 import { Message } from '@arco-design/web-vue'
+import banlistPrefill from './components/banlistPrefill.vue'
 import banlistRemapping from './components/banlistRemapping.vue'
 import btn from './components/btn.vue'
 import ipDatabase from './components/ipDatabase.vue'
@@ -96,6 +99,7 @@ const form = reactive({
   lookup: {},
   persist: {},
   btn: {},
+  banlist_prefill: {},
   banlist_remapping: {},
   ip_database: {},
   privacy: {},

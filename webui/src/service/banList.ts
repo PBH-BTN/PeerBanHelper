@@ -4,6 +4,8 @@ import { type CommonResponse, type CommonResponseWithPage } from '@/api/model/co
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 
+export type BanListSource = 'primary' | 'prefilled'
+
 export async function getBanList(
   limit: number,
   search?: string,
@@ -37,6 +39,7 @@ export async function getBanListPaginated(params: {
   page: number
   pageSize?: number
   search?: string
+  source?: BanListSource
 }): Promise<CommonResponseWithPage<BanList[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -48,6 +51,9 @@ export async function getBanListPaginated(params: {
   }
   if (params.search && params.search.trim() !== '') {
     url.searchParams.set('search', encodeURIComponent(params.search.trim()))
+  }
+  if (params.source) {
+    url.searchParams.set('source', params.source)
   }
 
   return fetch(url, {
