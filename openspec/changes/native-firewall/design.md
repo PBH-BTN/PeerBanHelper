@@ -30,6 +30,8 @@ com.ghostchu.peerbanhelper.platform
     FirewallBackend.java
     FirewallException.java
     FirewallFactory.java
+    FirewallManager.java
+    UnsupportedFirewall.java
   impl/linux/firewall/
     LinuxFirewall.java
     NftablesNative.java
@@ -41,7 +43,6 @@ com.ghostchu.peerbanhelper.platform
   impl/macos/firewall/
     MacOsFirewall.java
     PfNative.java
-  impl/UnsupportedFirewall.java
 ```
 
 The public contract remains in `platform.firewall`. Native libraries, memory
@@ -69,8 +70,8 @@ the corresponding native transaction commits. External edits to the
 PeerBanHelper-owned namespace are outside the contract; the namespace is
 process-private and named clearly so administrators can identify it.
 
-The initial API accepts exact `InetAddress` values. CIDR ranges and subnet
-normalization are intentionally deferred.
+The initial API accepts exact `InetAddress` values. CIDR ranges, subnet
+normalization, and scoped link-local IPv6 addresses are intentionally deferred.
 
 ## Capability Model
 
@@ -143,42 +144,40 @@ address conditions are used for both directions, and the action is block. Each
 list mutation runs inside a WFP transaction (`begin`, changes, `commit`), with
 `abort` on failure.
 
-The dynamic session is the primary crash-cleanup mechanism: when the process
-dies, WFP releases the session and its dynamic objects. Startup also probes for
-orphaned PeerBanHelper WFP objects and removes only objects whose readable
-namespace identifies a dead process. Mutations require elevation and the
-Windows Filtering Platform service to be running.
+The dynamic session is the crash-cleanup mechanism: when the process dies, WFP
+releases the session and all objects added during it. Opening the next session
+therefore starts without leftover PeerBanHelper filters. Mutations require
+elevation and the Windows Filtering Platform service to be running.
 
 ## macOS: PF
 
-The macOS backend attempts a direct FFM binding to the PF device/ioctl interface
-and owns a process-unique anchor with a `peerbanhelper` name. It installs PF block
-rules for both directions and both address families.
+The current macOS module binds libc through FFM and probes `/dev/pf`. PF is
+present, but effective rules require either a referenced PF anchor in the system
+ruleset or a signed Network Extension. Neither lifecycle can be installed
+non-disruptively by this change.
 
-PF ABI structures vary by macOS version. The backend must validate the platform
-and required ioctl layout before advertising availability. If the ABI cannot be
-verified, the backend reports `available=false` with a precise reason and does
-not fall back to parsing or executing a shell command. Graceful shutdown removes
-the anchor; startup scans only dead-process anchors matching the PeerBanHelper
-prefix.
+The backend therefore reports `available=false`, no filtering support, and a
+reason. It never modifies the system PF ruleset and never advertises a false
+blocking capability. A future macOS implementation must add an operator-managed
+anchor or ship a signed Network Extension with a verifiable cleanup contract.
 
 ## Lifecycle
 
-1. Platform creation selects a backend without mutating the firewall.
-2. Optional activation is requested by PeerBanHelper and performs startup orphan
-   cleanup before creating the current namespace.
-3. A service-owned shutdown hook is installed immediately after activation so a
+1. Platform creation selects and activates the backend.
+2. Backend activation performs any startup orphan cleanup before creating the
+   current process-owned namespace.
+3. A `FirewallManager` registers a shutdown hook immediately after activation so a
    partial startup failure still has a best-effort cleanup path.
 4. `PeerBanHelper.shutdown()` calls `close()` before dependent network services
-   are torn down.
+   are torn down; the manager then removes its hook.
 5. `close()` deletes native rules, closes engine handles and confined arenas,
    and becomes a no-op on repeated calls.
 
 Crash cleanup is best-effort by nature. WFP dynamic sessions provide OS-driven
-teardown. Persistent nftables and PF state is removed on the next startup by the
-dead-PID sweep. The implementation must document this distinction through the
-capability model rather than claiming that an untrappable process kill can run
-in-process cleanup.
+teardown. Persistent nftables state is removed on the next startup by the
+dead-PID sweep. macOS advertises no native firewall and therefore creates no
+state to clean. The capability model documents these differences rather than
+claiming that an untrappable process kill can run in-process cleanup.
 
 ## Integration
 
@@ -193,14 +192,16 @@ backend contract.
 
 ## Validation
 
-- Unit tests validate normalization, deduplication, transactional rollback,
-  idempotent close, unsupported capability reporting, and namespace parsing.
+- Unit tests validate normalization, deduplication, idempotent close,
+  unsupported capability reporting, namespace parsing, and WFP ABI layout.
 - Linux integration tests require a disposable namespace/container with
   `CAP_NET_ADMIN` and verify IPv4/IPv6 input and output blocking.
 - Windows integration tests require elevation and verify provider/filter cleanup
   after graceful exit and process termination.
-- macOS integration tests require a disposable host and a verified PF ABI.
-- Every backend test asserts that unrelated system firewall rules are preserved.
+- macOS remains capability-probe-only and has no integration test that claims
+  enforcement.
+- Privileged integration tests are opt-in through environment variables and use
+  TEST-NET addresses. They have not been run in this development environment.
 
 ## Approval and Commit Plan
 
@@ -214,6 +215,5 @@ Each module below is a separate human approval and commit boundary:
 6. PeerBanHelper lifecycle integration.
 7. Unit/integration tests and operator documentation.
 
-No Java implementation begins until the human operator approves the first
-module explicitly. The final pull request description must be written manually
-by a human.
+The human operator explicitly approved implementation. The final pull request
+description must be written manually by a human.
