@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
+import com.ghostchu.peerbanhelper.banlist.BanlistRuleProvider;
+import com.ghostchu.peerbanhelper.banlist.BanlistRuleProviderRegistry;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.RuleSubLogService;
@@ -55,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,23 +73,26 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @Getter
-public final class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
+public final class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable, BanlistRuleProvider {
     private final RuleSubLogService ruleSubLogsDao;
     private final ModuleMatchCache moduleMatchCache;
+    private final BanlistRuleProviderRegistry providerRegistry;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private long banDuration;
     private ScheduledFuture<?> reloadConfigTask; // 保留此字段用于 changeCheckInterval() 方法
     @Autowired
     private HTTPUtil httpUtil;
-    private boolean preloadBanList;
     @Autowired
     private BackgroundTaskManager backgroundTaskManager;
 
-    public IPBlackRuleList(RuleSubLogService ruleSubLogsDao, ModuleMatchCache moduleMatchCache) {
+    public IPBlackRuleList(RuleSubLogService ruleSubLogsDao, ModuleMatchCache moduleMatchCache,
+                           BanlistRuleProviderRegistry providerRegistry) {
         super();
         this.ruleSubLogsDao = ruleSubLogsDao;
         this.moduleMatchCache = moduleMatchCache;
+        this.providerRegistry = providerRegistry;
+        this.providerRegistry.register(this);
     }
 
     @Override
@@ -102,6 +108,25 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
     @Override
     public @NotNull String getConfigName() {
         return "ip-address-blocker-rules";
+    }
+
+    @Override
+    public @NotNull String getBanlistProviderName() {
+        return getName();
+    }
+
+    @Override
+    public @NotNull Map<IPAddress, String> getBanlist() {
+        Map<IPAddress, String> result = new HashMap<>();
+        if (ipBanMatchers == null) {
+            return result;
+        }
+        for (IPMatcher matcher : ipBanMatchers) {
+            matcher.copyAddresses().forEach((address, comment) ->
+                    result.merge(address, comment == null ? "" : comment,
+                            (left, right) -> left + "\n" + right));
+        }
+        return result;
     }
 
     @Override
@@ -163,9 +188,8 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         getCache().invalidateAll();
         try {
             this.banDuration = getConfig().getLong("ban-duration", 0);
-            this.preloadBanList = getConfig().getBoolean("preload-banlist", false);
             if (null == ipBanMatchers) {
-                ipBanMatchers = new ArrayList<>();
+                ipBanMatchers = new CopyOnWriteArrayList<>();
             }
             ConfigurationSection config = getConfig();
             // 读取检查间隔
@@ -205,7 +229,10 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         }
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
-            ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
+            boolean removed = ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
+            if (removed) {
+                notifyBanlistUpdated();
+            }
             // 未启用跳过更新逻辑
             return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), null);
         }
@@ -228,6 +255,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                         try {
                                             fileToIPList(ruleFile, ipAddresses);
                                             ipBanMatchers.add(new IPMatcher(ruleId, name, List.of(ipAddresses)));
+                                            notifyBanlistUpdated();
                                             log.warn(tlUI(Lang.IP_BAN_RULE_USE_CACHE, name));
                                             result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_USE_CACHE, name), null));
                                         } catch (IOException ex) {
@@ -279,6 +307,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                     // 更新日志
                                     ruleSubLogsDao.save(new RuleSubLogEntity(null, ruleId, OffsetDateTime.now(), ent_count, updateType));
                                     result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATED, name), null));
+                                    notifyBanlistUpdated();
                                 } else {
                                     result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
                                 }
@@ -518,9 +547,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         reloadConfigTask = registerScheduledTask(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
-    private void preloadBanList() {
-
-    }
 }
 
 

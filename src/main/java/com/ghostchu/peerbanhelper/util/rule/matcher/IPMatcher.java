@@ -13,13 +13,15 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class IPMatcher extends RuleMatcher<DualIPv4v6AssociativeTries<String>> {
-    private DualIPv4v6AssociativeTries<String> ips;
+    private volatile DualIPv4v6AssociativeTries<String> ips;
 
     public IPMatcher(String ruleId, String ruleName, List<DualIPv4v6AssociativeTries<String>> ruleData) {
         super(ruleId, ruleName, ruleData);
@@ -38,7 +40,19 @@ public class IPMatcher extends RuleMatcher<DualIPv4v6AssociativeTries<String>> {
     }
 
     public long size() {
-        return ips.size();
+        var snapshot = ips;
+        return snapshot == null ? 0 : snapshot.size();
+    }
+
+    @NotNull
+    public Map<IPAddress, String> copyAddresses() {
+        Map<IPAddress, String> addresses = new HashMap<>();
+        var snapshot = ips;
+        if (snapshot == null) {
+            return addresses;
+        }
+        snapshot.forEach(ip -> addresses.put(ip, snapshot.get(ip)));
+        return addresses;
     }
 
     @Override

@@ -58,6 +58,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
             ipMatcher.setData("BTN DenyList (Local Cache)", List.of(associativeTries));
             ruleVersion = cacheVersion;
             log.debug("[BTN DenyList] Loaded {} IP rules from cache file. Cached version: {}", loaded, cacheVersion);
+            btnNetwork.notifyBanlistUpdated();
         }
     }
 
@@ -113,6 +114,7 @@ public final class BtnAbilityIPDenyList extends AbstractBtnAbility {
                     var loaded = stringToIPList(responseBody, associativeTries);
                     this.ipMatcher.setData("BTN DenyList (Remote)", List.of(associativeTries));
                     Main.getEventBus().post(new BtnRuleUpdateEvent());
+                    btnNetwork.notifyBanlistUpdated();
                     ruleVersion = response.header("X-BTN-ContentVersion", "unknown");
                     metadataDao.set("btn.ability.ip_denylist.cache.version", ruleVersion);
                     metadataDao.set("btn.ability.ip_denylist.cache.value", responseBody);

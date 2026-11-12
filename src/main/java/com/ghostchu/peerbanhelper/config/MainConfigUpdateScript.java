@@ -37,6 +37,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 49)
+    public void banlistPrefill(YamlConfiguration bundle) {
+        conf.set("banlist-prefill", bundle.getConfigurationSection("banlist-prefill"));
+    }
+
     @UpdateScript(version = 48)
     public void nat64Support(YamlConfiguration bundle) {
         conf.set("ip-remapping.nat64", bundle.getConfigurationSection("ip-remapping.nat64"));
