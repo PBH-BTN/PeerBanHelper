@@ -122,7 +122,7 @@ public class PeerBanHelper implements Reloadable {
             var platform = Main.getPlatform();
             if (platform == null) return;
             var firewallCapabilities = platform.getFirewall().capabilities();
-            log.info("Native firewall backend: available={}, backend={}, inbound={}, outbound={}, ipv4={}, ipv6={}, processFiltering={}",
+            log.debug("Native firewall backend: available={}, backend={}, inbound={}, outbound={}, ipv4={}, ipv6={}, processFiltering={}",
                     firewallCapabilities.available(),
                     firewallCapabilities.backend(),
                     firewallCapabilities.inbound(),
