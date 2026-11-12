@@ -1,7 +1,7 @@
 import type {
-  CommonResponse,
-  CommonResponseWithoutData,
-  CommonResponseWithPage
+    CommonResponse,
+    CommonResponseWithoutData,
+    CommonResponseWithPage
 } from '@/api/model/common'
 import type { EditableResult, Script } from '@/api/model/script'
 import { useEndpointStore } from '@/stores/endpoint'
@@ -25,7 +25,7 @@ export async function GetScriptList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, 'api/expression-engine/scripts'),
+    urlJoin(endpointStore.endpoint, '/api/expression-engine/scripts'),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -41,7 +41,7 @@ export async function GetScriptContent(id: string): Promise<CommonResponse<strin
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/expression-engine/${id}`), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, `/api/expression-engine/${id}`), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     return res.json()
   })
@@ -52,7 +52,7 @@ export async function CheckScriptEditable(): Promise<CommonResponse<EditableResu
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/expression-engine/editable`),
+    urlJoin(endpointStore.endpoint, `/api/expression-engine/editable`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
@@ -64,7 +64,7 @@ export async function DeleteScript(id: string): Promise<CommonResponseWithoutDat
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/expression-engine/${id}`), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, `/api/expression-engine/${id}`), location.href)
   return fetch(url, { headers: getCommonHeader(), method: 'DELETE' }).then((res) => {
     return res.json()
   })
@@ -78,7 +78,7 @@ export async function UpsertScript(
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/expression-engine/${name}`),
+    urlJoin(endpointStore.endpoint, `/api/expression-engine/${name}`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader(), method: 'PUT', body: content }).then((res) => {

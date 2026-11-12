@@ -1,8 +1,8 @@
+import type { CommonResponseWithPage } from '@/api/model/common'
 import type { rankItem } from '@/api/model/topban'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
-import type { CommonResponseWithPage } from '@/api/model/common'
 
 export async function getRanks(params: {
   page: number
@@ -12,7 +12,7 @@ export async function getRanks(params: {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/bans/ranks'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/bans/ranks'), location.href)
   url.searchParams.set('page', String(params.page))
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))

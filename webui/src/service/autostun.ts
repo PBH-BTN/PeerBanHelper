@@ -18,7 +18,7 @@ export async function getAutoSTUNStatus(): Promise<CommonResponse<AutoSTUNStatus
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/autostun/status'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/autostun/status'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -31,7 +31,7 @@ export async function saveAutoSTUNConfig(
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/autostun/config'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/autostun/config'), location.href)
   return fetch(url, {
     method: 'PUT',
     headers: getCommonHeader(),
@@ -46,7 +46,7 @@ export async function getAutoSTUNTunnels(): Promise<CommonResponse<TunnelData[]>
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/autostun/tunnels'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/autostun/tunnels'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -87,7 +87,7 @@ export async function refreshNATType(): Promise<
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/autostun/refreshNatType'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/autostun/refreshNatType'), location.href)
   return fetch(url, {
     method: 'POST',
     headers: getCommonHeader()
@@ -101,7 +101,7 @@ export async function restartAutoSTUN(): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/autostun/restart'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/autostun/restart'), location.href)
   return fetch(url, {
     method: 'POST',
     headers: getCommonHeader()

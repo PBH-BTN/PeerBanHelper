@@ -1,10 +1,10 @@
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import type {
-  ClientStatus,
-  CreateDownloadRequest,
-  Downloader,
-  PeerInfo,
-  Torrent
+    ClientStatus,
+    CreateDownloadRequest,
+    Downloader,
+    PeerInfo,
+    Torrent
 } from '@/api/model/downloader'
 import type { Statistic } from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'
@@ -15,7 +15,7 @@ export async function getClientStatus(id: string): Promise<CommonResponse<Client
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/downloaders/${encodeURIComponent(id)}/status`),
+    urlJoin(endpointStore.endpoint, `/api/downloaders/${encodeURIComponent(id)}/status`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {

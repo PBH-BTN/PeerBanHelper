@@ -15,7 +15,7 @@ export async function GetTorrentInfoList(params: {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/torrent/query'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/torrent/query'), location.href)
   url.searchParams.set('page', String(params.page))
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
@@ -43,7 +43,7 @@ export async function GetTorrentAccessHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/torrent/${params.infoHash}/accessHistory`),
+    urlJoin(endpointStore.endpoint, `/api/torrent/${params.infoHash}/accessHistory`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -70,7 +70,7 @@ export async function GetTorrentBanHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/torrent/${params.infoHash}/banHistory`),
+    urlJoin(endpointStore.endpoint, `/api/torrent/${params.infoHash}/banHistory`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -92,7 +92,7 @@ export async function GetIPBasicData(ip: string): Promise<CommonResponse<IPBasic
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(ip)}`),
+    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(ip)}`),
     location.href
   )
 
@@ -112,7 +112,7 @@ export async function GetIPAccessHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(params.ip)}/accessHistory`),
+    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(params.ip)}/accessHistory`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -139,7 +139,7 @@ export async function GetIPBanHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(params.ip)}/banHistory`),
+    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(params.ip)}/banHistory`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -161,7 +161,7 @@ export async function GetBTNIPData(ip: string): Promise<CommonResponse<BTNIPQuer
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(ip)}/btnQuery`),
+    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(ip)}/btnQuery`),
     location.href
   )
 

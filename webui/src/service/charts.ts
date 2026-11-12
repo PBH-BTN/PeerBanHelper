@@ -1,11 +1,11 @@
 import type { CommonResponse } from '@/api/model/common'
 import type {
-  AnalysisField,
-  BanTrends,
-  GeoIP,
-  SessionDayBucket,
-  Traffic,
-  Trends
+    AnalysisField,
+    BanTrends,
+    GeoIP,
+    SessionDayBucket,
+    Traffic,
+    Trends
 } from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
@@ -27,7 +27,7 @@ export async function getAnalysisDataByField(
     query.append('downloader', downloader)
   }
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/statistic/analysis/field?` + query.toString()),
+    urlJoin(endpointStore.endpoint, `/api/statistic/analysis/field?` + query.toString()),
     location.href
   )
 
@@ -45,7 +45,7 @@ export async function getGeoIPData(
 ): Promise<CommonResponse<GeoIP>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/chart/geoIpInfo`), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, `/api/chart/geoIpInfo`), location.href)
 
   // Convert dates to Unix timestamp in milliseconds
   const startAtTimestamp = startAt.getTime()
@@ -79,7 +79,7 @@ export async function getBanTrends(
     query.append('downloader', downloader)
   }
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/statistic/analysis/banTrends?` + query.toString()),
+    urlJoin(endpointStore.endpoint, `/api/statistic/analysis/banTrends?` + query.toString()),
     location.href
   )
 
@@ -104,7 +104,7 @@ export async function getTrends(
     query.append('downloader', downloader)
   }
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/chart/trend?` + query.toString()),
+    urlJoin(endpointStore.endpoint, `/api/chart/trend?` + query.toString()),
     location.href
   )
 
@@ -129,7 +129,7 @@ export async function getTraffic(
     query.append('downloader', downloader)
   }
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/chart/traffic?` + query.toString()),
+    urlJoin(endpointStore.endpoint, `/api/chart/traffic?` + query.toString()),
     location.href
   )
 
@@ -154,7 +154,7 @@ export async function getSessionDayBucket(
     query.append('downloader', downloader)
   }
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/chart/sessionAnalyse?` + query.toString()),
+    urlJoin(endpointStore.endpoint, `/api/chart/sessionAnalyse?` + query.toString()),
     location.href
   )
 

@@ -10,7 +10,7 @@ export async function GetExperimentList(): Promise<
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/laboratory/experiments'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/laboratory/experiments'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -25,7 +25,7 @@ export async function SetExperimentStatus(
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/laboratory/experiment/${id}`),
+    urlJoin(endpointStore.endpoint, `/api/laboratory/experiment/${id}`),
     location.href
   )
   return fetch(url, {
@@ -44,7 +44,7 @@ export async function SetLabConfig(config: {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/laboratory/config`), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, `/api/laboratory/config`), location.href)
   return fetch(url, {
     method: 'POST',
     headers: getCommonHeader(),
