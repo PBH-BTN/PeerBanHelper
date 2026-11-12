@@ -34,7 +34,7 @@ public class DownloaderLoginOrgan extends BanOrgan<Downloader, Downloader> {
     @Override
     public void digest(Downloader downloader, Consumer<Downloader> outlet, PipelineTask<?> wrapper) throws RuntimeException {
         wrapper.setComment(true, "Try to login downloader: " + downloader.getName() + " (" + downloader.getEndpoint() + ").");
-        var loginResult = requestLock.withWriteLock(downloader, downloader::login);
+        var loginResult = requestLock.withLock(downloader, downloader::login);
         wrapper.setComment(false, "Processing downloader: " + downloader.getName() + " (" + downloader.getEndpoint() + ") login result...");
         if (!loginResult.success()) {
             if (loginResult.status() != DownloaderLoginResult.Status.PAUSED) {

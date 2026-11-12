@@ -716,7 +716,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                      boolean applyFullList,
                                      @NotNull Collection<BanMetadata> added,
                                      @NotNull Collection<BanMetadata> removed) {
-        return downloaderRequestLock.withWriteLock(downloader, () -> {
+        return downloaderRequestLock.withLock(downloader, () -> {
             try {
                 DownloaderLoginResult loginResult = downloader.login();
                 if (!loginResult.success()) {

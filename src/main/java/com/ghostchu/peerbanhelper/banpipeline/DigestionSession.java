@@ -99,7 +99,6 @@ public class DigestionSession implements AutoCloseable {
                 scheduleEnergy,
                 digestEnergyIO,
                 downloaderLoginOrgan,
-                downloaderRequestLock,
                 null,
                 60, TimeUnit.SECONDS
         );
@@ -109,7 +108,6 @@ public class DigestionSession implements AutoCloseable {
                 scheduleEnergy,
                 digestEnergyIO,
                 torrentsFetchOrgan,
-                downloaderRequestLock,
                 null,
                 60, TimeUnit.SECONDS
         );
