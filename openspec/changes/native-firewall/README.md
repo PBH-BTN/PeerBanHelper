@@ -29,7 +29,9 @@ return an immutable snapshot of the last committed list.
 - Requirement: an installed `libnftables` shared library and effective
   `CAP_NET_ADMIN` (normally root or an explicit container capability).
 - Namespace: `peerbanhelper_firewall_<pid>_<token>` in the `inet` family.
-- Crash cleanup: the next startup removes matching tables whose PID is dead.
+- Lifetime: `flags owner` without `persist`; the kernel removes the table when
+  the PeerBanHelper netlink socket or process closes.
+- Compatibility cleanup: startup removes old unowned tables whose PID is dead.
 - Process filtering: not provided.
 
 ### Windows
@@ -57,9 +59,10 @@ reason and does not modify the host PF configuration.
 backend is activated. Normal application shutdown also calls `close()` before
 dependent network services are stopped. Native teardown is idempotent.
 
-For an untrappable process kill, Linux leaves the nftables table until the next
-startup detects that the owner PID is dead. Windows removes dynamic WFP objects
-when the session ends. macOS creates no enforcement state.
+For an untrappable process kill, Linux and Windows rely on kernel/OS ownership:
+nftables removes the process-owned table when the owning socket closes, and WFP
+removes dynamic objects when the session ends. macOS creates no enforcement
+state.
 
 ## Verification
 

@@ -65,8 +65,8 @@ public final class LinuxFirewall implements Firewall {
                 true,
                 false,
                 true,
-                FirewallCrashCleanup.NEXT_START_SWEEP,
-                "nftables system-wide filtering; orphan cleanup runs on the next start"
+                FirewallCrashCleanup.PROCESS_OWNED,
+                "nftables system-wide filtering in a process-owned table; the kernel removes it when the owner exits"
         );
     }
 
@@ -202,8 +202,12 @@ public final class LinuxFirewall implements Firewall {
     }
 
     private void createNamespace() {
-        nativeApi.run("""
-                add table inet %1$s
+        nativeApi.run(createNamespaceCommand(tableName, ipv4Set(), ipv6Set()));
+    }
+
+    static String createNamespaceCommand(String tableName, String ipv4Set, String ipv6Set) {
+        return """
+                add table inet %1$s { flags owner; }
                 add set inet %1$s %2$s { type ipv4_addr; }
                 add set inet %1$s %3$s { type ipv6_addr; }
                 add chain inet %1$s input { type filter hook input priority 0; policy accept; }
@@ -212,7 +216,7 @@ public final class LinuxFirewall implements Firewall {
                 add rule inet %1$s input ip6 saddr @%3$s drop
                 add rule inet %1$s output ip daddr @%2$s drop
                 add rule inet %1$s output ip6 daddr @%3$s drop
-                """.formatted(tableName, ipv4Set(), ipv6Set()));
+                """.formatted(tableName, ipv4Set, ipv6Set);
     }
 
     private void removeDeadNamespaces() {
@@ -319,7 +323,7 @@ public final class LinuxFirewall implements Firewall {
                 true,
                 false,
                 true,
-                FirewallCrashCleanup.NEXT_START_SWEEP,
+                FirewallCrashCleanup.PROCESS_OWNED,
                 detail
         ));
     }

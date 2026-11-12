@@ -22,6 +22,8 @@ start without disturbing active PeerBanHelper instances.
   - macOS: probe PF through its native device/ioctl interface; report unsupported
     until a non-disruptive anchor or signed Network Extension lifecycle exists.
 - Block both inbound and outbound traffic for IPv4 and IPv6 addresses.
+- Prefer ownership-bound native objects so process termination cleans up rules
+  without relying on persisted firewall configuration.
 - Report feature support explicitly, including system-wide filtering,
   inbound/outbound support, address families, privilege requirements, process
   filtering, and crash-cleanup behavior.

@@ -5,6 +5,11 @@ package com.ghostchu.peerbanhelper.platform.firewall;
  */
 public enum FirewallCrashCleanup {
     /**
+     * The kernel ties the firewall object to the process owner and removes it
+     * when the owning socket or session closes.
+     */
+    PROCESS_OWNED,
+    /**
      * The OS owns the firewall session and removes its objects when the process exits.
      */
     DYNAMIC_SESSION,

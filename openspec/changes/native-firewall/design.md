@@ -127,11 +127,17 @@ Input rules drop matching IPv4/IPv6 sources; output rules drop matching
 IPv4/IPv6 destinations. The table and chains carry an accept policy so unrelated
 traffic remains untouched.
 
-Mutations are submitted as one libnftables transaction. Startup cleanup lists
-tables with the `peerbanhelper_firewall_` prefix, extracts the PID, and removes a
-table only when that process is no longer alive. This avoids deleting an active
-PeerBanHelper instance. Library absence or missing `CAP_NET_ADMIN` is reported as
-unavailable/privilege-required.
+The table is created with `flags owner` and without `persist`. The kernel binds
+it to the libnftables netlink socket, so normal close and abnormal process
+termination both remove the table automatically. If the running nftables/kernel
+combination does not support owner tables, activation fails rather than falling
+back to a persistent table.
+
+Mutations are submitted as one libnftables transaction. Startup cleanup still
+lists tables with the `peerbanhelper_firewall_` prefix, extracts the PID, and
+removes a table only when that process is no longer alive. This is a compatibility
+sweep for older PeerBanHelper versions and does not delete active instances.
+Library absence or missing `CAP_NET_ADMIN` is reported as unavailable.
 
 ## Windows: Windows Filtering Platform
 
@@ -173,11 +179,10 @@ anchor or ship a signed Network Extension with a verifiable cleanup contract.
 5. `close()` deletes native rules, closes engine handles and confined arenas,
    and becomes a no-op on repeated calls.
 
-Crash cleanup is best-effort by nature. WFP dynamic sessions provide OS-driven
-teardown. Persistent nftables state is removed on the next startup by the
-dead-PID sweep. macOS advertises no native firewall and therefore creates no
-state to clean. The capability model documents these differences rather than
-claiming that an untrappable process kill can run in-process cleanup.
+Crash cleanup is best-effort by nature. WFP dynamic sessions and nftables owner
+tables provide OS-driven teardown. The Linux dead-PID sweep exists only for
+legacy namespaces created without ownership. macOS advertises no native firewall
+and therefore creates no state to clean.
 
 ## Integration
 

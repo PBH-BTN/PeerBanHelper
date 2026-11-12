@@ -37,6 +37,7 @@
 - [x] Add input/output chains and IPv4/IPv6 sets.
 - [x] Implement atomic add, remove, replace, and clear.
 - [x] Implement query from the committed managed snapshot.
+- [x] Use a process-owned, non-persistent nftables table.
 - [x] Sweep dead-process nftables namespaces at startup.
 - [x] Report missing library or capability accurately.
 
