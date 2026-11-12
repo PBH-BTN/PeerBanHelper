@@ -58,9 +58,8 @@ class WfpStructuresTest {
             MemorySegment addressAndMask = condition
                     .get(ADDRESS, WfpStructures.CONDITION_VALUE_DATA)
                     .reinterpret(8);
-            assertArrayEquals(addressBytes, addressAndMask.asSlice(0, 4).toArray(JAVA_BYTE));
-            assertArrayEquals(new byte[]{-1, -1, -1, -1},
-                    addressAndMask.asSlice(4, 4).toArray(JAVA_BYTE));
+            assertEquals(0x0A141E28, addressAndMask.get(JAVA_INT, 0));
+            assertEquals(-1, addressAndMask.get(JAVA_INT, 4));
         }
     }
 

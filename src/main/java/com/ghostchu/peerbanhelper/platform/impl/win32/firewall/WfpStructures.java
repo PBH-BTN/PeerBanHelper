@@ -206,10 +206,9 @@ final class WfpStructures {
         if (address instanceof Inet4Address) {
             MemorySegment addressAndMask = arena.allocate(8, 4);
             byte[] raw = address.getAddress();
-            MemorySegment.copy(MemorySegment.ofArray(raw), 0, addressAndMask, 0, raw.length);
-            for (long offset = 4; offset < 8; offset++) {
-                addressAndMask.set(JAVA_BYTE, offset, (byte) 0xFF);
-            }
+            int hostOrderAddress = ByteBuffer.wrap(raw).getInt();
+            addressAndMask.set(JAVA_INT, 0, hostOrderAddress);
+            addressAndMask.set(JAVA_INT, 4, -1);
             condition.set(JAVA_INT, CONDITION_VALUE_TYPE, FWP_V4_ADDR_MASK);
             condition.set(ADDRESS, CONDITION_VALUE_DATA, addressAndMask);
             return;
