@@ -73,14 +73,14 @@ public final class LinuxFirewall implements Firewall {
     public static Firewall create() {
         String privilegeFailure = checkNetAdminCapability();
         if (privilegeFailure != null) {
-            return new UnsupportedFirewall(FirewallBackend.NFTABLES, privilegeFailure);
+            return unavailable(privilegeFailure);
         }
         try {
             return new LinuxFirewall();
         } catch (Throwable throwable) {
             String detail = "nftables backend unavailable: " + throwable.getMessage();
             log.debug("Unable to initialize nftables firewall backend", throwable);
-            return new UnsupportedFirewall(FirewallBackend.NFTABLES, detail);
+            return unavailable(detail);
         }
     }
 
@@ -306,6 +306,22 @@ public final class LinuxFirewall implements Firewall {
 
     private static boolean isProcessAlive(long pid) {
         return ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false);
+    }
+
+    private static Firewall unavailable(String detail) {
+        return new UnsupportedFirewall(new FirewallCapabilities(
+                FirewallBackend.NFTABLES,
+                false,
+                true,
+                true,
+                true,
+                true,
+                true,
+                false,
+                true,
+                FirewallCrashCleanup.NEXT_START_SWEEP,
+                detail
+        ));
     }
 
     private static String checkNetAdminCapability() {

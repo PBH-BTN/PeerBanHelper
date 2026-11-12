@@ -121,6 +121,15 @@ public class PeerBanHelper implements Reloadable {
         Thread.startVirtualThread(() -> {
             var platform = Main.getPlatform();
             if (platform == null) return;
+            var firewallCapabilities = platform.getFirewall().capabilities();
+            log.info("Native firewall backend: available={}, backend={}, inbound={}, outbound={}, ipv4={}, ipv6={}, processFiltering={}",
+                    firewallCapabilities.available(),
+                    firewallCapabilities.backend(),
+                    firewallCapabilities.inbound(),
+                    firewallCapabilities.outbound(),
+                    firewallCapabilities.ipv4(),
+                    firewallCapabilities.ipv6(),
+                    firewallCapabilities.processFiltering());
             var ecoQosAPI = platform.getEcoQosAPI();
             if (ecoQosAPI != null && Main.getMainConfig().getBoolean("performance.windows-ecoqos-api")) {
                 ecoQosAPI.apply();
@@ -189,6 +198,15 @@ public class PeerBanHelper implements Reloadable {
 
     public void shutdown() {
         // place some clean code here
+        var platform = Main.getPlatform();
+        if (platform != null) {
+            try {
+                platform.getFirewall().close();
+            } catch (Exception e) {
+                log.warn("Unable to clean up the native firewall", e);
+                Sentry.captureException(e);
+            }
+        }
         downloaderServer.close();
         moduleManager.unregisterAll();
         CommonUtil.getScheduler().shutdown();
