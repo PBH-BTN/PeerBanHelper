@@ -99,8 +99,8 @@ public class PeerBanHelper implements Reloadable {
         Main.getReloadManager().register(this);
         registerModules();
         sendSnapshotAlert();
-        downloaderServer.load();
         downloaderServer.loadBanListToMemory();
+        downloaderServer.load();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
         Main.getEventBus().post(new PBHServerStartedEvent());

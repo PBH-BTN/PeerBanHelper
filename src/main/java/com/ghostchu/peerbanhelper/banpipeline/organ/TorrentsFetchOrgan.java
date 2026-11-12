@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
 import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.banpipeline.data.FetchedTorrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderRequestLock;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Executor;
@@ -13,14 +14,20 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class TorrentsFetchOrgan extends BanOrgan<Downloader, FetchedTorrent> {
-    public TorrentsFetchOrgan(Executor schedEnergy, Executor digestEnergy, @Nullable BanOrgan<?, Downloader> in, @Nullable BiConsumer<BanOrgan<Downloader, FetchedTorrent>, BanOrganCallback<Downloader>> gastroscopy, long maxDigestDuration, TimeUnit digestTimeUnit) {
+    private final DownloaderRequestLock requestLock;
+
+    public TorrentsFetchOrgan(Executor schedEnergy, Executor digestEnergy, @Nullable BanOrgan<?, Downloader> in,
+                              DownloaderRequestLock requestLock,
+                              @Nullable BiConsumer<BanOrgan<Downloader, FetchedTorrent>, BanOrganCallback<Downloader>> gastroscopy,
+                              long maxDigestDuration, TimeUnit digestTimeUnit) {
         super(schedEnergy, digestEnergy, in, gastroscopy, maxDigestDuration, digestTimeUnit);
+        this.requestLock = requestLock;
     }
 
     @Override
     public void digest(Downloader input, Consumer<FetchedTorrent> outlet, PipelineTask<?> future) throws RuntimeException {
         future.setComment(true, "Requesting downloader: " + input.getName() + "(" + input.getEndpoint() + ") for Torrents....");
-        input.getTorrents().forEach(t -> {
+        requestLock.withReadLock(input, input::getTorrents).forEach(t -> {
             future.setComment(false, "Waiting until outlet have space.");
             outlet.accept(new FetchedTorrent(input, t));
         });
