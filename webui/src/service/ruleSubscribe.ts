@@ -1,7 +1,7 @@
 import type {
-    CommonResponse,
-    CommonResponseWithoutData,
-    CommonResponseWithPage
+  CommonResponse,
+  CommonResponseWithoutData,
+  CommonResponseWithPage
 } from '@/api/model/common'
 import type { ruleBrief, updateLog } from '@/api/model/ruleSubscribe'
 import { useEndpointStore } from '@/stores/endpoint'

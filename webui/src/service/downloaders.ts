@@ -1,10 +1,10 @@
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import type {
-    ClientStatus,
-    CreateDownloadRequest,
-    Downloader,
-    PeerInfo,
-    Torrent
+  ClientStatus,
+  CreateDownloadRequest,
+  Downloader,
+  PeerInfo,
+  Torrent
 } from '@/api/model/downloader'
 import type { Statistic } from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'

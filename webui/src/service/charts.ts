@@ -1,11 +1,11 @@
 import type { CommonResponse } from '@/api/model/common'
 import type {
-    AnalysisField,
-    BanTrends,
-    GeoIP,
-    SessionDayBucket,
-    Traffic,
-    Trends
+  AnalysisField,
+  BanTrends,
+  GeoIP,
+  SessionDayBucket,
+  Traffic,
+  Trends
 } from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'

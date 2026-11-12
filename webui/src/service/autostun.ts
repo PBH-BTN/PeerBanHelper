@@ -87,7 +87,10 @@ export async function refreshNATType(): Promise<
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, '/api/autostun/refreshNatType'), location.href)
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, '/api/autostun/refreshNatType'),
+    location.href
+  )
   return fetch(url, {
     method: 'POST',
     headers: getCommonHeader()
