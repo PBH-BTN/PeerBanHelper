@@ -12,6 +12,13 @@ import java.util.Set;
 public final class UnsupportedFirewall implements Firewall {
     private final FirewallCapabilities capabilities;
 
+    public UnsupportedFirewall(@NotNull FirewallCapabilities capabilities) {
+        if (capabilities.available()) {
+            throw new IllegalArgumentException("An unsupported firewall cannot be available");
+        }
+        this.capabilities = capabilities;
+    }
+
     public UnsupportedFirewall(@NotNull FirewallBackend backend, @NotNull String detail) {
         this.capabilities = new FirewallCapabilities(
                 backend,
