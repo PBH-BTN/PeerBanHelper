@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.platform.impl.win32.firewall;
 import com.ghostchu.peerbanhelper.platform.firewall.Firewall;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.net.InetAddress;
 import java.util.Set;
@@ -12,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @EnabledIfEnvironmentVariable(named = "PBH_WFP_INTEGRATION", matches = "true")
+@EnabledOnOs(OS.WINDOWS)
 class WindowsFirewallIntegrationTest {
     @Test
     void managesTestNetAddressesAndClosesCleanly() throws Exception {

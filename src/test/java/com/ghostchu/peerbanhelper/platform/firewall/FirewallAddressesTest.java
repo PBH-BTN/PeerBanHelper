@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.platform.firewall;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,5 +28,12 @@ class FirewallAddressesTest {
 
         assertEquals(List.of(address), List.copyOf(snapshot));
         assertThrows(UnsupportedOperationException.class, snapshot::clear);
+    }
+
+    @Test
+    void scopedIpv6IsRejected() throws Exception {
+        Inet6Address scoped = Inet6Address.getByAddress(null, new byte[16], 1);
+        assertThrows(IllegalArgumentException.class,
+                () -> FirewallAddresses.normalize(List.of(scoped)));
     }
 }

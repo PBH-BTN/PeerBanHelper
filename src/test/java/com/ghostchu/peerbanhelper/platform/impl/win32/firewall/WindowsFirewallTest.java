@@ -3,8 +3,11 @@ package com.ghostchu.peerbanhelper.platform.impl.win32.firewall;
 import com.ghostchu.peerbanhelper.platform.firewall.Firewall;
 import com.ghostchu.peerbanhelper.platform.firewall.FirewallBackend;
 import com.ghostchu.peerbanhelper.platform.firewall.FirewallCrashCleanup;
+import com.ghostchu.peerbanhelper.platform.firewall.FirewallFactory;
 import com.ghostchu.peerbanhelper.platform.firewall.FirewallUnavailableException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -15,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@EnabledOnOs(OS.WINDOWS)
 class WindowsFirewallTest {
     @Test
     void nonElevatedProcessReportsUnavailableWithoutCreatingFilters() throws Exception {
@@ -36,5 +40,16 @@ class WindowsFirewallTest {
                 FirewallUnavailableException.class,
                 () -> firewall.add(List.of(InetAddress.ofLiteral("192.0.2.1")))
         );
+    }
+
+    @Test
+    void factorySelectsWfpOutsideAnElevatedContext() {
+        assumeFalse(WindowsPrivileges.isElevated(), "factory integration requires a non-elevated process");
+        Firewall firewall = FirewallFactory.create();
+        var capabilities = firewall.capabilities();
+
+        assertFalse(capabilities.available());
+        assertEquals(FirewallBackend.WINDOWS_FILTERING_PLATFORM, capabilities.backend());
+        assertEquals(FirewallCrashCleanup.DYNAMIC_SESSION, capabilities.crashCleanup());
     }
 }

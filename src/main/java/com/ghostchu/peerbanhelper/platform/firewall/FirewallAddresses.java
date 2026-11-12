@@ -24,6 +24,10 @@ public final class FirewallAddresses {
             if (!(address instanceof Inet4Address) && !(address instanceof Inet6Address)) {
                 throw new IllegalArgumentException("Unsupported address type: " + address);
             }
+            if (address instanceof Inet6Address inet6Address
+                    && (inet6Address.getScopedInterface() != null || inet6Address.getScopeId() != 0)) {
+                throw new IllegalArgumentException("Scoped IPv6 addresses are not supported: " + address);
+            }
             normalized.add(address);
         }
         return Collections.unmodifiableSet(normalized);
