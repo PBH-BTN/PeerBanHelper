@@ -17,6 +17,36 @@
               </a-input-number>
             </a-form-item>
             <a-form-item
+              :label="t('page.settings.tab.profile.form.banlistCommitInterval')"
+              field="banlist_commit_interval"
+              required
+            >
+              <a-input-number
+                v-model="form.banlist_commit_interval"
+                :min="1000"
+                style="width: 200px"
+              >
+                <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
+              </a-input-number>
+              <template #extra> ={{ formatMilliseconds(form.banlist_commit_interval) }} </template>
+            </a-form-item>
+            <a-form-item
+              :label="t('page.settings.tab.profile.form.banlistApplyGracePeriod')"
+              field="banlist_apply_grace_period"
+              required
+            >
+              <a-input-number
+                v-model="form.banlist_apply_grace_period"
+                :min="0"
+                style="width: 200px"
+              >
+                <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
+              </a-input-number>
+              <template #extra>
+                ={{ formatMilliseconds(form.banlist_apply_grace_period) }}
+              </template>
+            </a-form-item>
+            <a-form-item
               :label="t('page.settings.tab.profile.form.globalBanDuration')"
               field="ban_duration"
               required
@@ -177,6 +207,8 @@ const { t } = useI18n()
 const form = reactive({
   config_version: 0,
   check_interval: 0,
+  banlist_commit_interval: 0,
+  banlist_apply_grace_period: 0,
   ban_duration: 0,
   ignore_peers_from_addresses: [] as string[],
   module: {

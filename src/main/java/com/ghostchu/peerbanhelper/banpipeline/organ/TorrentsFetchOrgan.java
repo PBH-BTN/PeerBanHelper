@@ -13,7 +13,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class TorrentsFetchOrgan extends BanOrgan<Downloader, FetchedTorrent> {
-    public TorrentsFetchOrgan(Executor schedEnergy, Executor digestEnergy, @Nullable BanOrgan<?, Downloader> in, @Nullable BiConsumer<BanOrgan<Downloader, FetchedTorrent>, BanOrganCallback<Downloader>> gastroscopy, long maxDigestDuration, TimeUnit digestTimeUnit) {
+    public TorrentsFetchOrgan(Executor schedEnergy, Executor digestEnergy, @Nullable BanOrgan<?, Downloader> in,
+                              @Nullable BiConsumer<BanOrgan<Downloader, FetchedTorrent>, BanOrganCallback<Downloader>> gastroscopy,
+                              long maxDigestDuration, TimeUnit digestTimeUnit) {
         super(schedEnergy, digestEnergy, in, gastroscopy, maxDigestDuration, digestTimeUnit);
     }
 

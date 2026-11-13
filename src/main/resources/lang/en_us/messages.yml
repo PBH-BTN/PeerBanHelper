@@ -75,6 +75,8 @@ DOWNLOAD_PROGRESS_DETERMINED: "Download progress: downloaded {}/{} bytes, progre
 DOWNLOAD_PROGRESS: "Download progress: downloaded {} bytes"
 DOWNLOAD_COMPLETED: "Download progress: completed! Total transferred {} bytes of data"
 BAN_WAVE_CHECK_COMPLETED: "Completed check from {} downloaders with {} active torrents and {} peers. Banned {} peers and unbanned {} expired bans ({}ms)"
+PEER_POLLING_COMPLETED: "Completed peer polling from {} downloaders with {} active torrents and {} peers. Queued {} ban operations ({}ms)"
+BANLIST_COMMIT_COMPLETED: "Submitted the ban list to {} downloaders. Added {} peers and removed {} peers ({}ms)"
 WATCH_DOG_HUNGRY: "[Warning] WatchDog Service {} not reset within the specified time {}. Last status {}. Dumping process thread information, please send to PeerBanHelper developers to assist in fixing this issue"
 WATCH_DOG_CALLBACK_BLOCKED: "[Error] WatchDog Service callback thread unresponsive, forced exit from callback"
 BAN_WAVE_WATCH_DOG_TITLE: "PeerBanHelper attempting to recover from an exception"

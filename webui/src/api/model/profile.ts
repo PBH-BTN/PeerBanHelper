@@ -1,6 +1,8 @@
 export interface Profile {
   config_version: number
   check_interval: number
+  banlist_commit_interval: number
+  banlist_apply_grace_period: number
   ban_duration: number
   ignore_peers_from_addresses: string[]
   module: Module

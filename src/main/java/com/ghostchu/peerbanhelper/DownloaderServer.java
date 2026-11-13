@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.banpipeline.PeerCheckService;
+import com.ghostchu.peerbanhelper.banpipeline.data.CheckResultBatch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -19,6 +21,8 @@ public interface DownloaderServer {
 
     void scheduleBanPeerNoAssign(@NotNull PeerAddress addr);
 
+    void scheduleBanPeerNoAssign(@NotNull CheckResultBatch checkResult);
+
     void scheduleUnBanPeer(@NotNull PeerAddress peer);
 
     void scheduleUnBanPeer(@NotNull IPAddress peer);
@@ -26,6 +30,8 @@ public interface DownloaderServer {
     Map<PeerAddress, List<PeerMetadata>> getLivePeersSnapshot();
 
     @NotNull BanList getBanList();
+
+    @NotNull PeerCheckService getPeerCheckService();
 
     void setGlobalPaused(boolean globalPaused);
 

@@ -2,6 +2,8 @@ export default {
   'page.settings.tab.profile.save': '儲存',
   'page.settings.tab.profile.base.title': '全域配置',
   'page.settings.tab.profile.form.checkInterval': '檢查頻率',
+  'page.settings.tab.profile.form.banlistCommitInterval': 'BanList 提交間隔',
+  'page.settings.tab.profile.form.banlistApplyGracePeriod': 'BanList 套用寬限期',
   'page.settings.tab.profile.unit.ms': '毫秒',
   'page.settings.tab.profile.unit.s': '秒',
   'page.settings.tab.profile.unit.bytes': '位元組',
