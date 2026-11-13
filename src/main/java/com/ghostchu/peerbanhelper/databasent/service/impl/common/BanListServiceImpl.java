@@ -41,7 +41,7 @@ public class BanListServiceImpl extends AbstractCommonService<BanListMapper, Ban
     @Override
     public int saveBanList(@NotNull BanList banlist) {
         List<BanListEntity> entityList = new ArrayList<>();
-        banlist.forEach((key, value) -> entityList.add(new BanListEntity(
+        banlist.getPrimaryBanList().forEach((key, value) -> entityList.add(new BanListEntity(
                 key.toCompressedString(), JsonUtil.tiny().toJson(value))));
         Integer integer = transactionTemplate.execute(_ -> {
             baseMapper.delete(null);

@@ -11,13 +11,19 @@
         <a-space wrap>
           <a-typography-text bold copyable>
             {{
-              formatIPAddressPort(
-                item.banMetadata.peer.address.ip,
-                item.banMetadata.peer.address.port
-              )
+              source === 'prefilled'
+                ? item.banMetadata.peer.address.ip
+                : formatIPAddressPort(
+                    item.banMetadata.peer.address.ip,
+                    item.banMetadata.peer.address.port
+                  )
             }}
           </a-typography-text>
+          <a-tag v-if="source === 'prefilled'" color="gray">
+            {{ t('page.banlist.prefilled.tag') }}
+          </a-tag>
           <a-tooltip
+            v-else
             :content="
               item.banMetadata.peer.id
                 ? item.banMetadata.peer.id
@@ -36,6 +42,7 @@
         <div>
           <a-button-group class="hover-display-btn">
             <AsyncMethod
+              v-if="isPrimary"
               v-slot="{ run, loading }"
               once
               :async-fn="() => handleUnban(item.banMetadata.peer.address.ip)"
@@ -57,13 +64,25 @@
         </div>
       </a-space>
     </template>
-    <a-descriptions-item :label="t('page.banlist.banlist.listItem.banTime')" :span="6">
+    <a-descriptions-item
+      v-if="isPrimary"
+      :label="t('page.banlist.banlist.listItem.banTime')"
+      :span="6"
+    >
       {{ d(item.banMetadata.banAt, 'long') }}
     </a-descriptions-item>
-    <a-descriptions-item :label="t('page.banlist.banlist.listItem.expireTime')" :span="6">
+    <a-descriptions-item
+      v-if="isPrimary"
+      :label="t('page.banlist.banlist.listItem.expireTime')"
+      :span="6"
+    >
       {{ d(item.banMetadata.unbanAt, 'long') }}
     </a-descriptions-item>
-    <a-descriptions-item :label="t('page.banlist.banlist.listItem.snapshot')" :span="6">
+    <a-descriptions-item
+      v-if="isPrimary"
+      :label="t('page.banlist.banlist.listItem.snapshot')"
+      :span="6"
+    >
       <icon-arrow-up class="green" />
       {{ formatFileSize(item.banMetadata.peer.uploaded) }}
       <icon-arrow-down class="red" />
@@ -138,7 +157,11 @@
     >
       {{ item.ipGeoData?.network?.netType }}
     </a-descriptions-item>
-    <a-descriptions-item :label="t('page.banlist.banlist.listItem.location')" :span="12">
+    <a-descriptions-item
+      v-if="isPrimary"
+      :label="t('page.banlist.banlist.listItem.location')"
+      :span="12"
+    >
       <!-- 这里非常离奇，只要用了a-typography-text就会被下面一行覆盖，怀疑框架有毛病 -->
       <a-tooltip :content="item.banMetadata.torrent.hash" position="bottom">
         <a-typography-text style="margin-bottom: 0" :ellipsis="{ showTooltip: true }">
@@ -164,19 +187,26 @@
 import type { BanList } from '@/api/model/banlist'
 import AsyncMethod from '@/components/asyncMethod.vue'
 import CountryFlag from '@/components/countryFlag.vue'
-import { unbanIP } from '@/service/banList'
+import { unbanIP, type BanListSource } from '@/service/banList'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
 import { Message } from '@arco-design/web-vue'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, d } = useI18n()
-defineProps<{
-  item: BanList
-}>()
+const props = withDefaults(
+  defineProps<{
+    item: BanList
+    source?: BanListSource
+  }>(),
+  {
+    source: 'primary'
+  }
+)
+const isPrimary = computed(() => props.source === 'primary')
 const descriptionLayout = useResponsiveState(
   ref({
     md: 1

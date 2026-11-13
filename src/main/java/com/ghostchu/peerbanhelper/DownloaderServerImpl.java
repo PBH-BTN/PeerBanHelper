@@ -150,7 +150,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         if (!Main.getMainConfig().getBoolean("persist.banlist")) {
             return;
         }
-        this.banList.reset();
+        this.banList.resetPrimary();
         try {
             Map<IPAddress, BanMetadata> data = banListDao.readBanList();
             this.banList.addAll(data);
