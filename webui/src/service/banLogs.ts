@@ -2,6 +2,7 @@ import type { BanLog } from '@/api/model/banlogs'
 import type { CommonResponseWithPage } from '@/api/model/common'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
+import { reactive } from 'vue'
 import { getCommonHeader } from './utils'
 import { snapshotCommentCounts } from './btnCommentCounts'
 
@@ -26,16 +27,22 @@ export async function getBanlogs(params: {
 
   return fetch(url, { headers }).then(async (res) => {
     endpointStore.assertResponseLogin(res)
-    const result: CommonResponseWithPage<BanLog> = await res.json()
+    const result = reactive<CommonResponseWithPage<BanLog>>(await res.json())
     if (result.success && Array.isArray(result.data?.results)) {
-      const counts = snapshotCommentCounts(
-        endpoint,
-        headers,
-        result.data.results.map((row) => row.peerIp)
-      )
-      for (const row of result.data.results) {
-        row.btnCommentCount = counts.get(row.peerIp)
+      const rows = result.data.results
+      const updateCounts = (counts: Map<string, number>) => {
+        for (const row of rows) {
+          row.btnCommentCount = counts.get(row.peerIp) ?? 0
+        }
       }
+      updateCounts(
+        snapshotCommentCounts(
+          endpoint,
+          headers,
+          rows.map((row) => row.peerIp),
+          updateCounts
+        )
+      )
     }
     return result
   })
