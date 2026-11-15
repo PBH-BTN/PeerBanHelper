@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DatabaseNtConfigDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.DownloaderDiscovery;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -98,7 +99,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         }
         YamlConfiguration conf = Main.getMainConfig();
         conf.set("server.token", token);
-        conf.save(Main.getMainConfigFile());
+        AtomicFileWriter.saveYaml(conf, Main.getMainConfigFile());
         webContainer.setToken(token);
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         String id = draftDownloader.get("id").getAsString();
@@ -127,7 +128,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                 conf.set("btn.app-id", btn.get("app_id").getAsString());
             if (btn.has("app_secret") && !btn.get("app_secret").isJsonNull())
                 conf.set("btn.app-secret", btn.get("app_secret").getAsString());
-            conf.save(Main.getMainConfigFile());
+            AtomicFileWriter.saveYaml(conf, Main.getMainConfigFile());
         }
         if (parser.has("database")) {
             JsonObject database = parser.get("database").getAsJsonObject();
@@ -157,7 +158,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
                     conf.set("database.password", database.get("password").getAsString());
                 }
             }
-            conf.save(Main.getMainConfigFile());
+            AtomicFileWriter.saveYaml(conf, Main.getMainConfigFile());
             if (needRestart) {
                 handleRestart(ctx);
             }

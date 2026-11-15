@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.push;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.push.impl.*;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -105,7 +106,7 @@ public final class PushManagerImpl implements Reloadable, PushManager {
             clientSection.set(pushProvider.getName(), pushProvider.saveYaml());
         }
         Main.getMainConfig().set("push-notification", clientSection);
-        Main.getMainConfig().save(Main.getMainConfigFile());
+        AtomicFileWriter.saveYaml(Main.getMainConfig(), Main.getMainConfigFile());
     }
 
     @Override

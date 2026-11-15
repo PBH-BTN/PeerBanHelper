@@ -544,11 +544,15 @@ public class Main {
         File profile = new File(configDirectory, "profile.yml");
         if (!config.exists()) {
             exists = false;
-            Files.copy(Main.class.getResourceAsStream("/config.yml"), config.toPath());
+            try (var defaults = Main.class.getResourceAsStream("/config.yml")) {
+                AtomicFileWriter.write(config.toPath(), defaults.readAllBytes());
+            }
         }
         if (!profile.exists()) {
             exists = false;
-            Files.copy(Main.class.getResourceAsStream("/profile.yml"), profile.toPath());
+            try (var defaults = Main.class.getResourceAsStream("/profile.yml")) {
+                AtomicFileWriter.write(profile.toPath(), defaults.readAllBytes());
+            }
         }
         return exists;
     }

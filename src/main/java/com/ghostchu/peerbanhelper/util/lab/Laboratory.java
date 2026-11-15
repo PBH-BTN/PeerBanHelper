@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.lab;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -30,15 +31,12 @@ public class Laboratory {
         // Generate a number from hashCode in range 0-4
         this.experimentalGroup = Math.abs(hashCode % 5);
         this.labConfigFile = new File(Main.getConfigDirectory(), "laboratory.yml");
-        boolean firstInstall = false;
-        if (!labConfigFile.exists()) {
-            labConfigFile.createNewFile();
-            firstInstall = true;
-        }
-        this.labConfig = YamlConfiguration.loadConfiguration(labConfigFile);
+        boolean firstInstall = !labConfigFile.exists();
+        this.labConfig = firstInstall ? new YamlConfiguration() : YamlConfiguration.loadConfiguration(labConfigFile);
         if (firstInstall) {
-            setEnabled(true);
-            setConfigVersion(LATEST_VERSION);
+            labConfig.set("enabled", true);
+            labConfig.set("config-version", LATEST_VERSION);
+            saveLabConfig();
         }
         checkConfigUpdate();
         for (Experiments value : Experiments.values()) {
@@ -91,7 +89,7 @@ public class Laboratory {
 
     private void saveLabConfig() {
         try {
-            labConfig.save(this.labConfigFile);
+            AtomicFileWriter.saveYaml(labConfig, this.labConfigFile);
         } catch (IOException e) {
             log.info("Unable to save laboratory configuration", e);
         }

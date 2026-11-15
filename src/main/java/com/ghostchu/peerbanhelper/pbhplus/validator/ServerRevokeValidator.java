@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.pbhplus.validator;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.LocalKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -154,7 +155,7 @@ public class ServerRevokeValidator implements LicenseRevokeValidator {
         try {
             byte[] data = JsonUtil.standard().toJson(entry).getBytes(StandardCharsets.UTF_8);
             byte[] encrypted = RSAUtils.encryptByPrivateKey(data, localKeyManager.getLocalKeyPair().orElseThrow().getKey().getEncoded());
-            Files.write(cacheFile.toPath(), encrypted);
+            AtomicFileWriter.write(cacheFile.toPath(), encrypted);
             log.debug("Cached result for license hash {}: {}", licenseHash, revoked);
         } catch (Exception e) {
             log.debug("Failed to cache result for license hash {}: {}", licenseHash, e.getMessage());

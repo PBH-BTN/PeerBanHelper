@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.pbhplus;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
@@ -80,8 +81,8 @@ public class LocalKeyManager {
             var map = RSAUtils.genKeyPair();
             var privateKeyObj = (RSAPrivateKey) map.get(RSAUtils.PRIVATE_KEY);
             var publicKeyObj = (RSAPublicKey) map.get(RSAUtils.PUBLIC_KEY);
-            Files.write(privateKeyFile.toPath(), privateKeyObj.getEncoded());
-            Files.write(publicKeyFile.toPath(), publicKeyObj.getEncoded());
+            AtomicFileWriter.write(privateKeyFile.toPath(), privateKeyObj.getEncoded());
+            AtomicFileWriter.write(publicKeyFile.toPath(), publicKeyObj.getEncoded());
         }
         // read to RSAPrivateKey
         byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());

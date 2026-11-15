@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.config;
 
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.google.common.io.CharStreams;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +81,7 @@ public final class PBHConfigUpdater {
                 migrateComments(yaml, bundle);
                 String newContent = yaml.saveToString();
                 if (!newContent.equals(oldContent)) {
-                    yaml.save(file);
+                    AtomicFileWriter.saveYaml(yaml, file);
                 }
             } catch (IOException e) {
                 log.error("Failed to save configuration!", e);
