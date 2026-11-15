@@ -13,6 +13,10 @@ import java.util.concurrent.TimeoutException;
 public final class MainJumpLoader {
     public static void main(String[] args) {
         // Do something before real Main class
+        // Avoid counting io_uring completion waits as I/O wait on supported kernels.
+        if (System.getProperty("io.netty.iouring.enterNoIoWaitEnabled") == null) {
+            System.setProperty("io.netty.iouring.enterNoIoWaitEnabled", "true");
+        }
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {
             System.setProperty("sun.net.useExclusiveBind", "false"); // 修复 AutoSTUN 端口问题
             boolean setupCharsets = true;
