@@ -56,6 +56,7 @@ export interface ProgressCheatBlocker {
   ban_duration: BanDuration
   enable_persist: boolean
   persist_duration: number
+  data_flush_interval: number
   max_wait_duration: number
   fast_pcb_test_percentage: number
   fast_pcb_test_block_duration: number
@@ -159,6 +160,8 @@ export interface SessionAnalyse {
 export interface SwarmTracking {
   enabled: boolean
   data_flush_interval: number
+  data_retention_time: number
+  data_cleanup_interval: number
 }
 
 export interface PeerRecording {

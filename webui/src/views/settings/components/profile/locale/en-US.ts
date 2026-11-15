@@ -1,4 +1,16 @@
 export default {
+  'page.settings.tab.profile.module.progressCheatBlocker.dataFlushInterval':
+    'Progress tracking flush interval',
+  'page.settings.tab.profile.module.progressCheatBlocker.dataFlushInterval.tips':
+    'How often to save pending progress records to the database, in milliseconds.',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataRetentionTime':
+    'Inactive peer retention',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataRetentionTime.tips':
+    'Remove peers after this period without an observation. Set to 0 to disable expiry.',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataCleanupInterval':
+    'Expired peer cleanup interval',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataCleanupInterval.tips':
+    'How often to remove expired peers. Set to 0 to disable scheduled cleanup.',
   'page.settings.tab.profile.save': 'Save',
   'page.settings.tab.profile.base.title': 'Global Config',
   'page.settings.tab.profile.form.checkInterval': 'Check Interval',

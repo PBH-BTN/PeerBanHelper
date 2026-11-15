@@ -28,6 +28,18 @@
           :format-tooltip="(value: number) => `${value}%`"
         />
         <br />{{ maximumDifference }}%
+        <a-form-item
+          :label="t('page.settings.tab.profile.module.progressCheatBlocker.dataFlushInterval')"
+          :tooltip="
+            t('page.settings.tab.profile.module.progressCheatBlocker.dataFlushInterval.tips')
+          "
+          field="model.data_flush_interval"
+        >
+          <a-input-number v-model="model.data_flush_interval" :min="1" style="width: 200px">
+            <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }}</template>
+          </a-input-number>
+          <template #extra> ={{ formatMilliseconds(model.data_flush_interval) }}</template>
+        </a-form-item>
       </a-space>
     </a-form-item>
     <a-form-item

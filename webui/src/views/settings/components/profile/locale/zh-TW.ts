@@ -1,4 +1,15 @@
 export default {
+  'page.settings.tab.profile.module.progressCheatBlocker.dataFlushInterval': '進度記錄寫入間隔',
+  'page.settings.tab.profile.module.progressCheatBlocker.dataFlushInterval.tips':
+    '將待寫入的進度記錄批次儲存到資料庫的間隔，單位為毫秒。',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataRetentionTime':
+    '未活動 Peer 保留時間',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataRetentionTime.tips':
+    'Peer 超過此時間未被觀察到就會被清除，0 停用過期清理。',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataCleanupInterval':
+    '過期 Peer 清理間隔',
+  'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataCleanupInterval.tips':
+    '檢查並清理過期 Peer 的間隔，0 停用定時清理。',
   'page.settings.tab.profile.save': '儲存',
   'page.settings.tab.profile.base.title': '全域配置',
   'page.settings.tab.profile.form.checkInterval': '檢查頻率',
