@@ -2,6 +2,7 @@ import type { DownloaderBasicInfo } from './downloader'
 
 export interface BanList {
   address: string
+  btnCommentCount?: number
   banMetadata: BanMetadata
   ipGeoData?: IPGeoData
 }
