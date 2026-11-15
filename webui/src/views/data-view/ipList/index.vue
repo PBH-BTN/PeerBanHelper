@@ -10,14 +10,18 @@
       <a-input-search
         v-model="searchInput"
         search-button
-        placeholder="192.168.1.1...."
+        placeholder="192.168.1.1 / 192.168.1.0/24"
         class="searchBox"
         :loading="loading"
         @search="handleSearch"
       />
     </div>
     <div class="result-container center">
+      <a-card v-if="isCidr" class="result-card">
+        <btnDataPanel :key="currentIp" :ip="currentIp" />
+      </a-card>
       <a-card
+        v-else
         v-show="data?.data || error"
         class="result-card"
         :style="{ minWidth: data?.data.found ? '1150px' : '400px' }"
@@ -217,7 +221,11 @@
                 <icon-plus v-if="!active" />
                 <icon-minus v-else />
               </template>
-              <btnDataPanel :ip="currentIp" />
+              <btnDataPanel
+                :key="currentIp"
+                :ip="currentIp"
+                :initial-tab="showComments ? 'comments' : undefined"
+              />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -254,17 +262,20 @@ const { data, loading, run, error } = useRequest(GetIPBasicData, {
   manual: true
 })
 const currentIp = ref<string>('')
+const isCidr = computed(() => currentIp.value.includes('/'))
 
 const endpointStore = useEndpointStore()
 
 const activatedTab = ref<(string | number)[]>([])
 
 const { query } = useRoute()
+const showComments = query.tab === 'comments'
 
-const handleSearch = (value: string) => {
+const handleSearch = (input: string) => {
+  const value = input.trim()
   if (value) {
     data.value = undefined
-    activatedTab.value = []
+    activatedTab.value = showComments ? ['3'] : []
     if (value !== query.ip) {
       const search = new URLSearchParams(window.location.search)
       search.set('ip', value)
@@ -275,7 +286,7 @@ const handleSearch = (value: string) => {
       )
     }
     currentIp.value = value
-    run(value)
+    if (!isCidr.value) run(value)
   }
 }
 onMounted(async () => {

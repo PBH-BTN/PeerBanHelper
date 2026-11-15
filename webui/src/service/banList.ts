@@ -3,6 +3,7 @@ import { type CommonResponse, type CommonResponseWithPage } from '@/api/model/co
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
+import { snapshotCommentCounts } from './btnCommentCounts'
 
 export async function getBanList(
   limit: number,
@@ -37,11 +38,13 @@ export async function getBanListPaginated(params: {
   page: number
   pageSize?: number
   search?: string
-}): Promise<CommonResponseWithPage<BanList[]>> {
+}): Promise<CommonResponseWithPage<BanList>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, '/api/bans'), location.href)
+  const endpoint = endpointStore.endpoint
+  const headers = getCommonHeader()
+  const url = new URL(urlJoin(endpoint, '/api/bans'), location.href)
   url.searchParams.set('page', String(params.page))
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
@@ -51,10 +54,21 @@ export async function getBanListPaginated(params: {
   }
 
   return fetch(url, {
-    headers: getCommonHeader()
-  }).then((res) => {
+    headers
+  }).then(async (res) => {
     endpointStore.assertResponseLogin(res)
-    return res.json()
+    const result: CommonResponseWithPage<BanList> = await res.json()
+    if (result.success && Array.isArray(result.data?.results)) {
+      const counts = snapshotCommentCounts(
+        endpoint,
+        headers,
+        result.data.results.map((row) => row.banMetadata.peer.address.ip)
+      )
+      for (const row of result.data.results) {
+        row.btnCommentCount = counts.get(row.banMetadata.peer.address.ip)
+      }
+    }
+    return result
   })
 }
 

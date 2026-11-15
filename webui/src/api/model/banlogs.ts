@@ -2,6 +2,7 @@ export interface BanLog {
   banAt: number
   unbanAt: Date
   peerIp: string
+  btnCommentCount?: number
   peerPort: number
   peerId: string
   peerClientName: string
