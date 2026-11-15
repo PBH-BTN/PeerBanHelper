@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.downloader;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
-import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -122,7 +122,7 @@ public abstract class AbstractDownloader implements Downloader {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.PAUSED, new TranslationComponent(Lang.DOWNLOADER_PAUSED));
         }
         if (nextLoginTry >= System.currentTimeMillis()) {
-            alertManager.publishAlert(BuiltinNotification.DOWNLOADER_CONNECTION.id(),
+            alertManager.publishAlert(BuiltinNotifications.DOWNLOADER_CONNECTION.id(),
                     AlertLevel.WARN,
                     "downloader-too-many-failed-attempt-" + getId(),
                     new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE, getName()),

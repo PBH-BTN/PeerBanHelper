@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
-import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.banpipeline.DigestionSession;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
@@ -530,7 +530,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private void watchDogHungry() {
         log.error(MiscUtil.getAllThreadTrace());
         registerBanWaveTimer();
-        alertManager.publishAlert(BuiltinNotification.WATCHDOG.id(), AlertLevel.WARN, null,
+        alertManager.publishAlert(BuiltinNotifications.WATCHDOG.id(), AlertLevel.WARN, null,
                 new TranslationComponent(Lang.BAN_WAVE_WATCH_DOG_TITLE),
                 new TranslationComponent(Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION));
     }

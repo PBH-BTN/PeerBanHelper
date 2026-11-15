@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -421,7 +421,7 @@ public final class JavalinWebContainer implements Reloadable {
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
             var alerts = alertManager;
             if (!silent && alerts != null) {
-                alerts.publishAlert(BuiltinNotification.WEB_LOGIN.id(), AlertLevel.INFO, null,
+                alerts.publishAlert(BuiltinNotifications.WEB_LOGIN.id(), AlertLevel.INFO, null,
                         new TranslationComponent(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
                         new TranslationComponent(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
             }

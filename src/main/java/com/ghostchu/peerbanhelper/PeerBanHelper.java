@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
-import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
@@ -137,7 +137,7 @@ public class PeerBanHelper implements Reloadable {
             var bean = ManagementFactory.getRuntimeMXBean();
             if (!bean.getVmVendor().contains("JetBrains")) {
                 if (!alertManager.identifierAlertExistsIncludeRead("incompatibility-jre-windows-liberica")) {
-                    alertManager.publishAlert(BuiltinNotification.JAVA_COMPATIBILITY.id(), AlertLevel.WARN,
+                    alertManager.publishAlert(BuiltinNotifications.JAVA_COMPATIBILITY.id(), AlertLevel.WARN,
                             "incompatibility-jre-windows-liberica",
                             new TranslationComponent(Lang.JBR_REQUIRED_TITLE),
                             new TranslationComponent(Lang.JBR_REQUIRED_DESCRIPTION, bean.getVmVendor(), bean.getVmVersion()));
@@ -156,7 +156,7 @@ public class PeerBanHelper implements Reloadable {
             ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("unsupported-platform", 10, tlUI(Lang.TITLE_INCOMPATIBLE_PLATFORM)));
             log.warn(tlUI(Lang.INCOMPATIBLE_BITNESS_LOG));
             if (!alertManager.identifierAlertExistsIncludeRead("incomaptible-bitness")) {
-                alertManager.publishAlert(BuiltinNotification.BITNESS.id(), AlertLevel.WARN, "incomaptible-bitness", new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_TITLE), new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
+                alertManager.publishAlert(BuiltinNotifications.BITNESS.id(), AlertLevel.WARN, "incomaptible-bitness", new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_TITLE), new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
             }
         }
         if (ExternalSwitch.parseBoolean("pbh.app-v")) {
@@ -180,7 +180,7 @@ public class PeerBanHelper implements Reloadable {
 
     private void sendSnapshotAlert() {
         if (Main.getMeta().isSnapshotOrBeta()) {
-            alertManager.publishAlert(BuiltinNotification.SNAPSHOT.id(), AlertLevel.INFO, "unstable-alert", new TranslationComponent(Lang.ALERT_SNAPSHOT), new TranslationComponent(Lang.ALERT_SNAPSHOT_DESCRIPTION));
+            alertManager.publishAlert(BuiltinNotifications.SNAPSHOT.id(), AlertLevel.INFO, "unstable-alert", new TranslationComponent(Lang.ALERT_SNAPSHOT), new TranslationComponent(Lang.ALERT_SNAPSHOT_DESCRIPTION));
         } else {
             alertManager.markAlertAsRead("unstable-alert");
         }

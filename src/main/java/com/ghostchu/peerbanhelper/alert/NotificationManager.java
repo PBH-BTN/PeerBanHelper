@@ -47,16 +47,19 @@ public final class NotificationManager implements Reloadable {
         return thread;
     });
 
-    public NotificationManager(PushManagerImpl pushManager) {
+    public NotificationManager(PushManagerImpl pushManager, List<NotificationCategory> initialCategories) {
         this.pushManager = pushManager;
-        for (var builtin : BuiltinNotification.values()) {
-            registerCategory(builtin.category());
-        }
+        initialCategories.forEach(this::registerCategory);
         loadRoutes();
         Main.getReloadManager().register(this);
         deliveries.allowCoreThreadTimeOut(true);
     }
 
+    /**
+     * Registers a category supplied at runtime. Plugins should register from start(),
+     * publish through AlertManager with the category ID, and unregister from stop().
+     * Use a stable ID namespaced by the plugin ID. Routing rules survive unregistering.
+     */
     public void registerCategory(NotificationCategory category) {
         if (categories.putIfAbsent(category.id(), category) != null) {
             throw new IllegalArgumentException("Notification category already registered: " + category.id());

@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.btn.ability.impl;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
-import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.databasent.service.MetadataService;
@@ -153,7 +153,7 @@ public final class BtnAbilityIPAllowList extends AbstractBtnAbility {
         });
         for (UnbanPeerTask unbanPeer : unbanPeers) {
             btnNetwork.getServer().scheduleUnBanPeer(unbanPeer.getIpAddress());
-            btnNetwork.getAlertManager().publishAlert(BuiltinNotification.BTN_UNBAN.id(),
+            btnNetwork.getAlertManager().publishAlert(BuiltinNotifications.BTN_UNBAN.id(),
                     AlertLevel.INFO,
                     "btn-allowlist-unbanned-peer-" + unbanPeer.getIpAddress().toCompressedString() + UUID.randomUUID(),
                     new TranslationComponent(Lang.BTN_ABILITY_ALLOW_LIST_UNBAN_ALERT_TITLE),
