@@ -1,21 +1,17 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
-import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
-import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BatchMonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
-import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -29,7 +25,6 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -55,7 +50,7 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
         try {
             task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
             connectionMetricsTrackDao.syncPeers(downloader, torrent, peers);
-        } catch (ExecutionException e) {
+        } catch (RuntimeException e) {
             log.warn("Failed to record torrent peers for session analyse", e);
             Sentry.captureException(e);
         }
@@ -82,17 +77,12 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     }
 
     private void flushData() {
-        long deleted = 0;
-        connectionMetricsTrackDao.flushAll();
-        OffsetDateTime startOfToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
-        List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().ne(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
-        List<PeerConnectionMetricsEntity> aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
-        connectionMetricDao.saveAggregating(aggNotInTheDayList, true);
-        deleted += connectionMetricsTrackDao.deleteEntries(listNotInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
-        List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().eq(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
-        List<PeerConnectionMetricsEntity> aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
-        connectionMetricDao.saveAggregating(aggInTheDayList, false);
-        deleted += connectionMetricsTrackDao.deleteEntries(listInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
+        try {
+            connectionMetricsTrackDao.aggregatePending();
+        } catch (RuntimeException e) {
+            log.warn("Unable to aggregate session metrics", e);
+            Sentry.captureException(e);
+        }
     }
 
     private void cleanup() {
@@ -115,11 +105,6 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     @Override
     public void onDisable() {
         flushData();
-        try {
-            connectionMetricsTrackDao.closeCache();
-        } catch (Exception e) {
-            log.warn("Unable to close session analyse cache instance", e);
-        }
     }
 
 

@@ -17,9 +17,6 @@ import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +26,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,18 +56,20 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
     }
 
     @Override
-    public void flushToDatabase(PeerRecordCachingEntire t) {
-        var torrent = t.torrent;
+    public void flushToDatabase(Collection<PeerRecordCachingEntire> records) {
+        Map<String, TorrentEntity> torrentIds = new HashMap<>();
+        for (var record : records) {
+            var torrent = record.torrent;
+            torrentIds.computeIfAbsent(torrent.getHash(), hash -> torrentDao.createIfNotExists(
+                    new TorrentEntity(null, hash, torrent.getName(), torrent.getSize(), torrent.isPrivateTorrent())));
+        }
+        transactionTemplate.executeWithoutResult(status -> records.forEach(record ->
+                writeRecord(record, torrentIds.get(record.torrent.getHash()).getId())));
+    }
+
+    private void writeRecord(PeerRecordCachingEntire t, long torrentId) {
         var peer = t.peer;
-        var downloader = t.downloader;
-        var timestamp = t.timestamp;
-        TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
-                null,
-                torrent.getHash(),
-                torrent.getName(),
-                torrent.getSize(),
-                torrent.isPrivateTorrent()
-        ));
+        var peerId = peer.getId();
         InetAddress inet = peer.getAddress().getAddress().toInetAddress();
         var lazyLoader = ipdbManager.queryIPDB(inet).geoData();
         var peerGeoIp = lazyLoader.get();
@@ -76,22 +77,21 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
                 null,
                 inet,
                 peer.toPeerAddress().getPort(),
-                torrentEntity.getId(),
-                downloader,
-                peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
+                torrentId,
+                t.downloader,
+                peerId != null && peerId.length() > 8 ? peerId.substring(0, 8) : peerId,
                 peer.getClientName(),
-                peer.getUploaded(),
+                t.uploaded,
                 peer.getUploaded(),
                 peer.getUploadSpeed(),
-                peer.getDownloaded(),
+                t.downloaded,
                 peer.getDownloaded(),
                 peer.getDownloadSpeed(),
                 peer.getFlags(),
-                timestamp,
-                timestamp,
+                t.firstSeen,
+                t.timestamp,
                 peerGeoIp
-        ));
-        t.setDirty(false);
+        ), t.firstUploaded, t.firstDownloaded);
     }
 
     @Override
@@ -179,15 +179,39 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
                 .lt(PeerRecordEntity::getLastTimeSeen, before));
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class PeerRecordCachingEntire {
+        private final OffsetDateTime firstSeen;
         private OffsetDateTime timestamp;
-        private String downloader;
-        private TorrentWrapper torrent;
+        private final String downloader;
+        private final TorrentWrapper torrent;
         private PeerWrapper peer;
-        private boolean dirty;
+        private final long firstUploaded;
+        private final long firstDownloaded;
+        private long uploaded;
+        private long downloaded;
+
+        public PeerRecordCachingEntire(OffsetDateTime seenAt, String downloader, TorrentWrapper torrent, PeerWrapper peer) {
+            this.firstSeen = seenAt;
+            this.timestamp = seenAt;
+            this.downloader = downloader;
+            this.torrent = torrent;
+            this.peer = peer;
+            this.firstUploaded = peer.getUploaded();
+            this.firstDownloaded = peer.getDownloaded();
+            this.uploaded = firstUploaded;
+            this.downloaded = firstDownloaded;
+        }
+
+        public void observe(OffsetDateTime seenAt, PeerWrapper snapshot) {
+            uploaded += increment(peer.getUploaded(), snapshot.getUploaded());
+            downloaded += increment(peer.getDownloaded(), snapshot.getDownloaded());
+            timestamp = seenAt;
+            peer = snapshot;
+        }
+
+        private static long increment(long previous, long current) {
+            return current >= previous ? current - previous : current;
+        }
     }
 
 }

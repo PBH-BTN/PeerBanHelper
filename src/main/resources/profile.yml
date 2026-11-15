@@ -1,4 +1,4 @@
-config-version: 42
+config-version: 43
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -158,6 +158,8 @@ module:
     # 单位：ms 默认值：1209600000 （14 天）
     # Time unit: ms, default: 1209600000 (14 days)
     persist-duration: 1209600000
+    # Progress tracking flush interval in milliseconds
+    data-flush-interval: 180000
     # 封禁前最长等待时间
     # Max duration before ban
     # 有时由于下载器网络原因，Peer 可能无法及时同步其进度信息
@@ -474,6 +476,10 @@ module:
     swarm-tracking:
       enabled: true
       data-flush-interval: 3600000
+      # Time to retain an unseen peer in milliseconds (0 disables expiry)
+      data-retention-time: 86400000
+      # Cleanup interval in milliseconds (0 disables scheduled cleanup)
+      data-cleanup-interval: 3600000
     # 对等体跟踪记录服务 - Peer Recording Service
     # 持续跟踪和记录 Peer 的状态、会话、传输、偏移量等数据，为按 IP、Torrent 聚合数据分析和图表生成、BTN 跨用户 Peer 跟踪能力提供数据支持
     # Continuously track and record the status, session, transfer, offset and other data of Peers, provide data support for IP and Torrent aggregated data analysis and chart generation, BTN cross-user Peer tracking capabilities

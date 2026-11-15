@@ -9,14 +9,16 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.ExecutionException;
+import java.time.OffsetDateTime;
 
 public interface TrackedSwarmService extends IService<TrackedSwarmEntity> {
     @NotNull Page<TrackedSwarmEntity> getPendingSubmitTrackedPeers(@NotNull Pageable pageable, long idAfterThan);
 
-    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull Peer peer) throws ExecutionException;
+    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull Peer peer);
 
     void flushAll();
+
+    void removeInactive(OffsetDateTime cutoff);
 
     void closeCache() throws Exception;
 

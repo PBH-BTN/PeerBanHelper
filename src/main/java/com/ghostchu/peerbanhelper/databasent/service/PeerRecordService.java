@@ -15,13 +15,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public interface PeerRecordService extends IService<PeerRecordEntity> {
     List<PeerRecordEntity> getRecordsBetween(OffsetDateTime start, OffsetDateTime end, String downloader);
 
-    void flushToDatabase(PeerRecordServiceImpl.PeerRecordCachingEntire tasks);
+    void flushToDatabase(Collection<PeerRecordServiceImpl.PeerRecordCachingEntire> records);
 
     long sessionBetween(@NotNull String downloader, @NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt);
 
