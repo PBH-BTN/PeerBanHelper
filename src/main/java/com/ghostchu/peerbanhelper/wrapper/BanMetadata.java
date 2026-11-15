@@ -31,25 +31,26 @@ public class BanMetadata extends PeerMetadata implements Serializable {
 
     public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, Torrent torrent, Peer peer, TranslationComponent rule,
                        TranslationComponent description, StructuredData<String, Object> structuredData) {
-        super(downloader, torrent, peer);
-        this.context = context;
-        this.randomId = randomId;
-        this.banAt = banAt;
-        this.unbanAt = unbanAt;
-        this.banForDisconnect = banForDisconnect;
-        this.excludeFromDisplay = excludeFromDisplay;
-        this.excludeFromReport = excludeFromReport;
-        this.rule = rule;
-        this.description = description;
-        this.structuredData = structuredData;
+        this(context, randomId, downloader, banAt, unbanAt, banForDisconnect, excludeFromReport,
+                excludeFromDisplay, new TorrentWrapper(torrent), new PeerWrapper(peer), rule, description, structuredData);
     }
 
     public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, OffsetDateTime banAt, OffsetDateTime unbanAt, boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
                        TranslationComponent description, StructuredData<String, Object> structuredData) {
-        super(downloader, torrent, peer);
-        this.context = context;
         this.randomId = randomId;
         this.banAt = banAt;
+        refresh(context, downloader, unbanAt, banForDisconnect, excludeFromReport, excludeFromDisplay,
+                torrent, peer, rule, description, structuredData);
+    }
+
+    public void refresh(String context, DownloaderBasicInfo downloader, OffsetDateTime unbanAt,
+                        boolean banForDisconnect, boolean excludeFromReport, boolean excludeFromDisplay,
+                        TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
+                        TranslationComponent description, StructuredData<String, Object> structuredData) {
+        setDownloader(downloader);
+        setTorrent(torrent);
+        setPeer(peer);
+        this.context = context;
         this.unbanAt = unbanAt;
         this.banForDisconnect = banForDisconnect;
         this.excludeFromDisplay = excludeFromDisplay;
