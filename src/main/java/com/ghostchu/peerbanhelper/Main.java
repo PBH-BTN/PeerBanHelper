@@ -207,9 +207,7 @@ public class Main {
             webContainer.start(host, httpdPort, token);
         } catch (JavalinBindException e) {
             if (e.getMessage().contains("Port already in use")) {
-                if ("install4j".equals(ExternalSwitch.parse("pbh.release"))
-                        && !"console".equals(guiType) && SystemTray.isSupported()
-                        && isAddressInUse(e)) {
+                if (!"console".equals(guiType) && isAddressInUse(e)) {
                     // Javalin stops its default server on failure and cannot restart the same instance.
                     webContainer.setupJavalin();
                     webContainer.start(host, 0, token);
