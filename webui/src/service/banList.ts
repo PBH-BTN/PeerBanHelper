@@ -2,6 +2,7 @@ import { type BanList, type UnbanResult } from '@/api/model/banlist'
 import { type CommonResponse, type CommonResponseWithPage } from '@/api/model/common'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
+import { reactive } from 'vue'
 import { getCommonHeader } from './utils'
 import { snapshotCommentCounts } from './btnCommentCounts'
 
@@ -57,16 +58,22 @@ export async function getBanListPaginated(params: {
     headers
   }).then(async (res) => {
     endpointStore.assertResponseLogin(res)
-    const result: CommonResponseWithPage<BanList> = await res.json()
+    const result = reactive<CommonResponseWithPage<BanList>>(await res.json())
     if (result.success && Array.isArray(result.data?.results)) {
-      const counts = snapshotCommentCounts(
-        endpoint,
-        headers,
-        result.data.results.map((row) => row.banMetadata.peer.address.ip)
-      )
-      for (const row of result.data.results) {
-        row.btnCommentCount = counts.get(row.banMetadata.peer.address.ip)
+      const rows = result.data.results
+      const updateCounts = (counts: Map<string, number>) => {
+        for (const row of rows) {
+          row.btnCommentCount = counts.get(row.banMetadata.peer.address.ip) ?? 0
+        }
       }
+      updateCounts(
+        snapshotCommentCounts(
+          endpoint,
+          headers,
+          rows.map((row) => row.banMetadata.peer.address.ip),
+          updateCounts
+        )
+      )
     }
     return result
   })
