@@ -1,7 +1,8 @@
 <template>
-  <a-space direction="vertical" fill>
+  <a-space direction="vertical" :size="16" fill>
     <a-select
       v-model="scope"
+      class="comment-scope"
       :aria-label="t('page.ipList.btn.commentScope')"
       :options="details.lookup.commentScopes.map((item) => item.scope)"
       @change="resetPage"
@@ -10,7 +11,7 @@
       t('page.ipList.btn.commentsReadOnly')
     }}</a-alert>
     <a-alert v-if="error" type="error">{{ error }}</a-alert>
-    <a-space direction="vertical" fill>
+    <a-space direction="vertical" :size="16" fill>
       <a-space v-if="replyTo || editing">
         <a-tag
           >{{ editing ? t('page.ipList.btn.edit') : t('page.ipList.btn.reply') }} #{{
@@ -36,7 +37,7 @@
       </a-button>
     </a-space>
     <a-spin :loading="loading" style="width: 100%">
-      <a-space direction="vertical" fill>
+      <a-space direction="vertical" :size="16" fill>
         <a-empty v-if="!records.length && !loading" />
         <a-card v-for="comment in records" :key="comment.id" size="small">
           <template #title>
@@ -202,6 +203,10 @@ watch([scope, page], load, { immediate: true })
 </script>
 
 <style scoped>
+.comment-scope {
+  width: min(100%, 22rem);
+}
+
 .comment-content {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

@@ -15,7 +15,7 @@ export default {
   'page.ipList.btn.geoEnd': 'End of range location and network',
   'page.ipList.btn.comments': 'Comments',
   'page.ipList.btn.commentScope': 'Comment scope',
-  'page.ipList.btn.commentsReadOnly': 'Sparkle3 is not accepting comments from this account.',
+  'page.ipList.btn.commentsReadOnly': 'The BTN server is not accepting comments from this account.',
   'page.ipList.btn.anonymous': 'Anonymous',
   'page.ipList.btn.reply': 'Reply',
   'page.ipList.btn.edit': 'Edit',
@@ -29,7 +29,8 @@ export default {
   'page.ipList.btn.moderation.FAILED': 'Review failed',
   'page.ipList.title': 'IP Query',
   'page.ipList.description':
-    'Here you can view all the information related to an IP, including its access history, ban history, and its geographical location information.',
+    'Look up BTN records, network details, and comments for an IP address or CIDR range.',
+  'page.ipList.label.localData': 'Local records',
   'page.ipList.label.firstTimeSeen': 'First Seen',
   'page.ipList.label.lastTimeSeen': 'Last Seen',
   'page.ipList.label.banCount': 'Ban Count',

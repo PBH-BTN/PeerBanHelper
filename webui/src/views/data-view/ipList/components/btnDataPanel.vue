@@ -1,7 +1,7 @@
 <template>
-  <a-card :bordered="false">
+  <div>
     <a-spin :loading="loading" style="width: 100%">
-      <a-space v-if="data?.data" direction="vertical" fill>
+      <a-space v-if="data?.data" direction="vertical" :size="24" fill>
         <btnIpDetails v-if="query?.details" :lookup="query.details.lookup" />
         <a-descriptions>
           <a-descriptions-item :label="t('page.ipList.btn.labels')">
@@ -20,14 +20,9 @@
         </a-descriptions>
 
         <!-- Tabs展示 -->
-        <a-tabs :default-active-key="initialTab">
+        <a-tabs :default-active-key="initialTab" lazy-load class="activity-tabs">
           <!-- Bans Tab -->
-          <a-tab-pane
-            v-if="data.data.bans"
-            key="bans"
-            class="tab"
-            :title="t('page.ipList.btn.bans')"
-          >
+          <a-tab-pane v-if="data.data.bans" key="bans" :title="t('page.ipList.btn.bans')">
             <a-space direction="vertical" fill>
               <a-grid :cols="24" :row-gap="16">
                 <a-grid-item :span="{ xs: 12, sm: 8 }">
@@ -61,12 +56,7 @@
           </a-tab-pane>
 
           <!-- Swarms Tab -->
-          <a-tab-pane
-            v-if="data.data.swarms"
-            key="swarms"
-            class="tab"
-            :title="t('page.ipList.btn.swarms')"
-          >
+          <a-tab-pane v-if="data.data.swarms" key="swarms" :title="t('page.ipList.btn.swarms')">
             <a-space direction="vertical" fill>
               <a-grid :cols="24" :row-gap="16">
                 <a-grid-item :span="{ xs: 12, sm: 6 }">
@@ -104,12 +94,7 @@
           </a-tab-pane>
 
           <!-- Traffic Tab -->
-          <a-tab-pane
-            v-if="data.data.traffic"
-            key="traffic"
-            class="tab"
-            :title="t('page.ipList.btn.traffic')"
-          >
+          <a-tab-pane v-if="data.data.traffic" key="traffic" :title="t('page.ipList.btn.traffic')">
             <a-grid :cols="24" :row-gap="16">
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
@@ -274,7 +259,7 @@
         </a-table>
       </a-modal>
     </a-spin>
-  </a-card>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -466,8 +451,8 @@ const swarmsColumns = [
 .green {
   color: rgb(var(--green-5));
 }
-.tab {
-  margin-left: 16px;
+.activity-tabs :deep(.arco-tabs-content) {
+  padding-top: 20px;
 }
 </style>
 
