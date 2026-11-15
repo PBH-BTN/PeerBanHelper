@@ -118,6 +118,7 @@ export default {
   'page.settings.tab.config.push.routing.none': 'No delivery',
   'page.settings.tab.config.push.routing.save': 'Save',
   'page.settings.tab.config.push.routing.saved': 'Notification rule saved',
+  'page.settings.tab.config.push.routing.retry': 'Retry',
   'page.settings.tab.config.push.routing.loadFailed': 'Could not load notification settings',
   'page.settings.tab.config.push.routing.saveFailed': 'Could not save notification rule',
   'page.settings.tab.config.push.routing.desktop': 'Desktop notification',

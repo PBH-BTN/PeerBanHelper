@@ -1,6 +1,11 @@
 <template>
   <a-spin :loading="loading" style="display: block">
-    <a-alert v-if="loadFailed" type="error">{{ t(prefix + 'loadFailed') }}</a-alert>
+    <a-alert v-if="loadFailed" type="error">
+      <a-space wrap>
+        {{ t(prefix + 'loadFailed') }}
+        <a-button size="small" @click="refresh">{{ t(prefix + 'retry') }}</a-button>
+      </a-space>
+    </a-alert>
     <a-space v-else direction="vertical" fill>
       <a-typography-text>{{ t(prefix + 'description') }}</a-typography-text>
       <a-card v-for="[group, rules] in groups" :key="group" :title="label('group.' + group, group)">

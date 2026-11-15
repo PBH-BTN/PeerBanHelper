@@ -114,6 +114,7 @@ export default {
   'page.settings.tab.config.push.routing.none': '不投递',
   'page.settings.tab.config.push.routing.save': '保存',
   'page.settings.tab.config.push.routing.saved': '通知规则已保存',
+  'page.settings.tab.config.push.routing.retry': '重试',
   'page.settings.tab.config.push.routing.loadFailed': '无法加载通知设置',
   'page.settings.tab.config.push.routing.saveFailed': '无法保存通知规则',
   'page.settings.tab.config.push.routing.desktop': '桌面通知',

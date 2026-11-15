@@ -417,10 +417,13 @@ public final class JavalinWebContainer implements Reloadable {
         var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
         counter.set(0);
         if (LOGIN_SESSION_TIMETABLE.getIfPresent(ipBlock) == null) {
-            LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
             var alerts = alertManager;
-            if (!silent && alerts != null) {
+            if (!silent && alerts == null) {
+                return;
+            }
+            LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
+            if (!silent) {
                 alerts.publishAlert(BuiltinNotifications.WEB_LOGIN.id(), AlertLevel.INFO, null,
                         new TranslationComponent(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
                         new TranslationComponent(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));

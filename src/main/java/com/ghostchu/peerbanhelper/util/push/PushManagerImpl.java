@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -117,10 +118,17 @@ public final class PushManagerImpl implements Reloadable, PushManager {
                 || (existingId != null && !existingId.equals(previousId))) {
             return false;
         }
-        var next = new LinkedHashMap<>(providers);
-        next.put(previousId == null ? "push:" + UUID.randomUUID() : previousId, provider);
-        persist(next);
-        return true;
+        var config = Main.getMainConfig();
+        synchronized (config) {
+            var configured = config.getConfigurationSection(CONFIG_KEY);
+            if (existingId == null && configured != null && configured.getKeys(false).contains(provider.getName())) {
+                return false;
+            }
+            var next = new LinkedHashMap<>(providers);
+            next.put(previousId == null ? "push:" + UUID.randomUUID() : previousId, provider);
+            persist(config, next);
+            return true;
+        }
     }
 
     public synchronized boolean deleteProvider(String name) throws IOException {
@@ -130,7 +138,7 @@ public final class PushManagerImpl implements Reloadable, PushManager {
         }
         var next = new LinkedHashMap<>(providers);
         next.remove(id);
-        persist(next);
+        persist(Main.getMainConfig(), next);
         return true;
     }
 
@@ -140,8 +148,7 @@ public final class PushManagerImpl implements Reloadable, PushManager {
                 .map(Map.Entry::getKey).findFirst().orElse(null);
     }
 
-    private void persist(Map<String, PushProvider> next) throws IOException {
-        var config = Main.getMainConfig();
+    private void persist(YamlConfiguration config, Map<String, PushProvider> next) throws IOException {
         synchronized (config) {
             var previous = config.getConfigurationSection(CONFIG_KEY);
             var replacement = new MemoryConfiguration();
@@ -152,6 +159,8 @@ public final class PushManagerImpl implements Reloadable, PushManager {
                         var section = previous.getConfigurationSection(name);
                         if (section != null) {
                             replacement.createSection(name, section.getValues(true));
+                        } else {
+                            replacement.set(name, previous.get(name));
                         }
                     }
                 }
