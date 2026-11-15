@@ -37,6 +37,16 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 49)
+    public void updateMode(YamlConfiguration bundle) {
+        if (!conf.contains("updates.mode")) {
+            conf.set("updates.mode", bundle.getString("updates.mode"));
+        }
+        if (!conf.contains("updates.install4j-mirrors")) {
+            conf.set("updates.install4j-mirrors", bundle.getStringList("updates.install4j-mirrors"));
+        }
+    }
+
     @UpdateScript(version = 48)
     public void nat64Support(YamlConfiguration bundle) {
         conf.set("ip-remapping.nat64", bundle.getConfigurationSection("ip-remapping.nat64"));

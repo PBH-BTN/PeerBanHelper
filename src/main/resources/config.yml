@@ -1,4 +1,4 @@
-config-version: 48
+config-version: 49
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -6,6 +6,13 @@ config-version: 48
 # zh_cn Chinese Simplified (简体中文)
 # zh_tw Chinese Traditional (繁體中文)
 language: default
+
+# MANUAL, AUTOMATIC or DISABLED. AUTOMATIC requires a supported installer.
+updates:
+  mode: MANUAL
+  # Ordered HTTPS fallbacks. Each base URL serves updates.xml and the installer files.
+  install4j-mirrors:
+    - https://github.com/PBH-BTN/PeerBanHelper/releases/latest/download/
 # GUI 实现
 # auto 由 PeerBanHelper 选择最佳 GUI 实现
 # swing 使用 Java Swing GUI 和 Flatlaf 实现，支持全部平台 (推荐)

@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
+import com.ghostchu.peerbanhelper.util.update.UpdateService;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -72,6 +73,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private StunManager bTStunManager;
     @Autowired
     private HTTPUtil hTTPUtil;
+    @Autowired
+    private UpdateService updates;
 
     @Override
     public boolean isConfigurable() {
@@ -91,6 +94,10 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.routes()
+                .get("/api/updates", ctx -> ctx.json(new StdResp(true, null, updates.status())), Role.USER_READ)
+                .put("/api/updates/mode", this::configureUpdates, Role.USER_WRITE)
+                .post("/api/updates/check", ctx -> updateResponse(ctx, updates.check()), Role.USER_WRITE)
+                .post("/api/updates/install", this::installUpdate, Role.USER_WRITE)
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
                 .post("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_WRITE)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
@@ -103,6 +110,31 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
     }
 
+
+    private record UpdateModeRequest(UpdateService.Mode mode) {}
+    private record InstallUpdateRequest(String id) {}
+
+    private void configureUpdates(Context context) throws IOException {
+        var request = context.bodyAsClass(UpdateModeRequest.class);
+        try {
+            updates.configure(request == null ? null : request.mode());
+            updateResponse(context, true);
+        } catch (IllegalArgumentException e) {
+            context.status(HttpStatus.BAD_REQUEST).json(new StdResp(false, e.getMessage(), updates.status()));
+        }
+    }
+
+    private void installUpdate(Context context) {
+        var request = context.bodyAsClass(InstallUpdateRequest.class);
+        updateResponse(context, request != null && updates.install(request.id()));
+    }
+
+    private void updateResponse(Context context, boolean accepted) {
+        if (!accepted) {
+            context.status(HttpStatus.CONFLICT);
+        }
+        context.json(new StdResp(accepted, null, updates.status()));
+    }
 
     private void handleRefreshNatStatus(@NotNull Context context) {
         Thread.ofVirtual().name("Refresh NAT Status").start(() -> bTStunManager.refreshNatType());
