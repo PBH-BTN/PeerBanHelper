@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -103,7 +104,7 @@ public final class CrashManager {
             Sentry.captureEvent(event);
         }
 
-        alertManager.publishAlert(true, AlertLevel.FATAL, "peerbanhelper-crash-recovery-" + UUID.randomUUID(),
+        alertManager.publishAlert(BuiltinNotification.CRASH_RECOVERY.id(), AlertLevel.FATAL, "peerbanhelper-crash-recovery-" + UUID.randomUUID(),
                 new TranslationComponent(Lang.CRASH_MANAGER_CRASH_RECOVERY_ALERT_TITLE),
                 new TranslationComponent(Lang.CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION,
                         pid,

@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.NotificationManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PushWrapperDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -20,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -32,6 +33,8 @@ public final class PBHPushController extends AbstractFeatureModule {
     private JavalinWebContainer webContainer;
     @Autowired
     private PushManagerImpl pushManager;
+    @Autowired
+    private NotificationManager notifications;
 
     @Override
     public boolean isConfigurable() {
@@ -51,6 +54,8 @@ public final class PBHPushController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.routes()
+                .get("/api/notifications/settings", ctx -> ctx.json(new StdResp(true, null, notifications.settings())), Role.USER_READ)
+                .put("/api/notifications/routes/{category}", this::handleNotificationRule, Role.USER_WRITE)
                 .get("/api/push", this::handlePushProviderList, Role.USER_READ)
                 .put("/api/push", this::handlePushProviderPut, Role.USER_WRITE)
                 .patch("/api/push/{pushName}", ctx -> handlePushProviderPatch(ctx, ctx.pathParam("pushName")), Role.USER_WRITE)
@@ -58,6 +63,33 @@ public final class PBHPushController extends AbstractFeatureModule {
                 .delete("/api/push/{pushName}", ctx -> handlePushProviderDelete(ctx, ctx.pathParam("pushName")), Role.USER_WRITE);
     }
 
+
+    private void handleNotificationRule(Context ctx) {
+        try {
+            var body = JsonParser.parseString(ctx.body()).getAsJsonObject();
+            var useDefault = body.get("useDefault");
+            var selected = body.get("channelIds");
+            if (useDefault == null || !useDefault.isJsonPrimitive() || !useDefault.getAsJsonPrimitive().isBoolean()
+                    || selected == null || !selected.isJsonArray()) {
+                throw new IllegalArgumentException("Invalid notification rule");
+            }
+            var ids = new HashSet<String>();
+            for (var element : selected.getAsJsonArray()) {
+                if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
+                    throw new IllegalArgumentException("Invalid notification channel ID");
+                }
+                ids.add(element.getAsString());
+            }
+            notifications.saveRule(ctx.pathParam("category"), useDefault.getAsBoolean(), ids);
+            ctx.json(new StdResp(true, null, null));
+        } catch (IllegalArgumentException | IllegalStateException | com.google.gson.JsonParseException e) {
+            ctx.status(HttpStatus.BAD_REQUEST).json(new StdResp(false, e.getMessage(), null));
+        } catch (IOException e) {
+            log.error("Unable to save notification rule", e);
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new StdResp(false,
+                    tl(locale(ctx), Lang.PUSH_PROVIDER_API_CREATION_FAILED_IO_EXCEPTION), null));
+        }
+    }
 
     private void handlePushProviderPut(Context ctx) {
         JsonObject draftPushProvider = JsonParser.parseString(ctx.body()).getAsJsonObject();
@@ -72,50 +104,40 @@ public final class PBHPushController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_ADD_FAILURE), null));
             return;
         }
-        if (pushManager.addPushProvider(pushProvider)) {
-            ctx.status(HttpStatus.CREATED);
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.PUSH_PROVIDER_API_CREATED), null));
-        } else {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_CREATION_FAILED_ALREADY_EXISTS), null));
-        }
-        try {
-            pushManager.savePushProviders();
-        } catch (IOException e) {
-            log.error("Internal server error, unable to create push provider due an I/O exception", e);
-            Sentry.captureException(e);
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_CREATION_FAILED_IO_EXCEPTION), null));
-        }
+        saveProvider(ctx, null, pushProvider);
     }
 
     private void handlePushProviderPatch(Context ctx, String pushProviderName) {
-        JsonObject draftProvider = JsonParser.parseString(ctx.body()).getAsJsonObject();
-        String name = draftProvider.get("name").getAsString();
+        JsonObject draft = JsonParser.parseString(ctx.body()).getAsJsonObject();
+        String name = draft.get("name").getAsString();
         if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
-        JsonObject config = draftProvider.get("config").getAsJsonObject();
-        PushProvider pushProvider = pushManager.createPushProvider(name, draftProvider.get("type").getAsString(), config);
-        if (pushProvider == null) {
+        PushProvider provider = pushManager.createPushProvider(name, draft.get("type").getAsString(),
+                draft.getAsJsonObject("config"));
+        if (provider == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_UPDATE_FAILURE), null));
             return;
         }
-        // 可能重命名了？
-        List.copyOf(pushManager.getProviderList()).stream() // Copy 一下来避免并发修改错误
-                .filter(d -> d.getName().equals(pushProviderName))
-                .forEach(d -> pushManager.removePushProvider(d));
-        if (pushManager.addPushProvider(pushProvider)) {
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.PUSH_PROVIDER_API_UPDATED), null));
-        } else {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_UPDATE_FAILURE_ALREADY_EXISTS), null));
-        }
+        saveProvider(ctx, pushProviderName, provider);
+    }
+
+    private void saveProvider(Context ctx, String previousName, PushProvider provider) {
+        boolean creating = previousName == null;
         try {
-            pushManager.savePushProviders();
+            if (!pushManager.updateProvider(previousName, provider)) {
+                ctx.status(HttpStatus.BAD_REQUEST);
+                ctx.json(new StdResp(false, tl(locale(ctx), creating
+                        ? Lang.PUSH_PROVIDER_API_CREATION_FAILED_ALREADY_EXISTS
+                        : Lang.PUSH_PROVIDER_API_UPDATE_FAILURE_ALREADY_EXISTS), null));
+                return;
+            }
+            ctx.status(creating ? HttpStatus.CREATED : HttpStatus.OK);
+            ctx.json(new StdResp(true, tl(locale(ctx), creating
+                    ? Lang.PUSH_PROVIDER_API_CREATED : Lang.PUSH_PROVIDER_API_UPDATED), null));
         } catch (IOException e) {
-            log.error("Internal server error, unable to update push manager due an I/O exception", e);
+            log.error("Unable to save push provider", e);
             Sentry.captureException(e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_CREATION_FAILED_IO_EXCEPTION), null));
@@ -150,16 +172,12 @@ public final class PBHPushController extends AbstractFeatureModule {
     }
 
     private void handlePushProviderDelete(Context ctx, String pushProviderName) {
-        Optional<PushProvider> selected = pushManager.getProviderList().stream().filter(d -> d.getName().equals(pushProviderName)).findFirst();
-        if (selected.isEmpty()) {
-            ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_REMOVE_NOT_EXISTS), null));
-            return;
-        }
-        PushProvider pushProvider = selected.get();
-        pushManager.removePushProvider(pushProvider);
         try {
-            pushManager.savePushProviders();
+            if (!pushManager.deleteProvider(pushProviderName)) {
+                ctx.status(HttpStatus.NOT_FOUND);
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_REMOVE_NOT_EXISTS), null));
+                return;
+            }
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.PUSH_PROVIDER_API_REMOVE_SAVED), null));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);

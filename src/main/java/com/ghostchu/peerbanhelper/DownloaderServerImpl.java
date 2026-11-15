@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
 import com.ghostchu.peerbanhelper.banpipeline.DigestionSession;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
@@ -38,7 +40,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -529,7 +530,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private void watchDogHungry() {
         log.error(MiscUtil.getAllThreadTrace());
         registerBanWaveTimer();
-        Main.getGuiManager().createNotification(Level.WARN, tlUI(Lang.BAN_WAVE_WATCH_DOG_TITLE), tlUI(Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION));
+        alertManager.publishAlert(BuiltinNotification.WATCHDOG.id(), AlertLevel.WARN, null,
+                new TranslationComponent(Lang.BAN_WAVE_WATCH_DOG_TITLE),
+                new TranslationComponent(Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION));
     }
 
 

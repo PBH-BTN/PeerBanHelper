@@ -3,6 +3,10 @@ package com.ghostchu.peerbanhelper.web;
 import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotification;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.pbhplus.LicenseManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
@@ -35,7 +39,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.event.Level;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,6 +81,12 @@ public final class JavalinWebContainer implements Reloadable {
             return JsonUtil.standard().fromJson(json, targetType);
         }
     };
+
+    private volatile AlertManager alertManager;
+
+    public void setAlertManager(AlertManager alertManager) {
+        this.alertManager = alertManager;
+    }
 
     public JavalinWebContainer() {
         reloadConfig();
@@ -410,10 +419,11 @@ public final class JavalinWebContainer implements Reloadable {
         if (LOGIN_SESSION_TIMETABLE.getIfPresent(ipBlock) == null) {
             LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
-            if (!silent) {
-                Main.getGuiManager().createNotification(Level.INFO,
-                        tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
-                        tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
+            var alerts = alertManager;
+            if (!silent && alerts != null) {
+                alerts.publishAlert(BuiltinNotification.WEB_LOGIN.id(), AlertLevel.INFO, null,
+                        new TranslationComponent(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
+                        new TranslationComponent(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
             }
         }
     }
