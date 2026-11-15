@@ -143,7 +143,7 @@ interface Peer {
   /**
    * BitTorrent BEP 标志，https://github.com/PBH-BTN/quick-references/blob/main/utp_flags.md
    */
-  flags: PeerFlags
+  flags: string | null
   /**
    * BitTorrent BEP PeerID
    */
@@ -160,17 +160,6 @@ interface Peer {
    * 上传速度（单位由下载器决定），单位通常为bytes/s
    */
   uploadSpeed: number
-}
-
-/**
- * Peer Flags
- */
-interface PeerFlags {
-  bitset: number
-  /**
-   * 标准 libTorrent 标志，不管下载器原始 Flags 如何，PBH 总是将其转换为 LT 的 Flags
-   */
-  ltStdString: string
 }
 
 /**
