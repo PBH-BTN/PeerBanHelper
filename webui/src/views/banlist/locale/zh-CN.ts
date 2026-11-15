@@ -1,6 +1,7 @@
 export default {
   'page.banlist.banlist': '封禁名单',
   'page.banlist.banlist.description': '以下是封禁列表（按时间倒序排列）',
+  'page.banlist.banlist.filterReason': '按封禁原因筛选',
   'page.banlist.banlist.searchPlaceHolder': '搜索...',
   'page.banlist.banlist.listItem.reserveDNSLookup': '反向 DNS 解析',
   'page.banlist.banlist.listItem.banTime': '封禁时间',

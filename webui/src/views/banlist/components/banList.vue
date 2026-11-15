@@ -12,6 +12,17 @@
             {{ t('page.banlist.banlist.listItem.unbanall') }}
           </a-button>
         </a-popconfirm>
+        <a-select
+          v-if="reasons"
+          :model-value="reason"
+          :options="reasons"
+          :aria-label="t('page.banlist.banlist.filterReason')"
+          :placeholder="t('page.banlist.banlist.filterReason')"
+          :style="{ width: '220px' }"
+          allow-clear
+          allow-search
+          @update:model-value="handleReasonChange"
+        />
         <a-input-search
           :style="{ width: '250px' }"
           :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
@@ -62,19 +73,14 @@ import { usePagination } from 'vue-request'
 import banListItem from './banListItem.vue'
 const endpointState = useEndpointStore()
 const searchString = ref('')
+const reason = ref<string>()
 const { t } = useI18n()
 
 const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
   usePagination(
     getBanListPaginated,
     {
-      defaultParams: [
-        {
-          page: 1,
-          pageSize: 10,
-          search: ''
-        }
-      ],
+      defaultParams: [{ page: 1, pageSize: 10 }],
       pagination: {
         currentKey: 'page',
         pageSizeKey: 'pageSize',
@@ -105,17 +111,25 @@ const handleUnban = async (address: string) => {
 watch(
   () => endpointState.endpoint,
   () => {
-    refresh()
+    handleReasonChange()
   }
 )
 
-run({ page: 1, pageSize: 10, search: '' })
-
 const list = computed(() => data.value?.data.results ?? [])
+const reasons = computed(() => data.value?.data.reasons)
+
+const runFirstPage = () => {
+  run({ page: 1, pageSize: pageSize.value, search: searchString.value, reason: reason.value })
+}
+
+const handleReasonChange = (value?: unknown) => {
+  reason.value = typeof value === 'string' ? value : undefined
+  runFirstPage()
+}
+
 const debouncedSearch = useDebounceFn((v: string) => {
   searchString.value = v
-  changeCurrent(1)
-  run({ page: 1, pageSize: pageSize.value, search: v })
+  runFirstPage()
 }, 300)
 
 const handleSearch = (v: string) => {

@@ -1,4 +1,5 @@
 export default {
+  'page.banlist.banlist.filterReason': 'Filter by ban reason',
   'page.banlist.banlist': 'Ban List',
   'page.banlist.banlist.description': 'Following is the ban list (sorted by time descending)',
   'page.banlist.banlist.searchPlaceHolder': 'Search...',

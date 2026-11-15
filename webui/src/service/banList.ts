@@ -1,5 +1,5 @@
 import { type BanList, type UnbanResult } from '@/api/model/banlist'
-import { type CommonResponse, type CommonResponseWithPage } from '@/api/model/common'
+import { type CommonResponse, type Pagination } from '@/api/model/common'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -37,7 +37,8 @@ export async function getBanListPaginated(params: {
   page: number
   pageSize?: number
   search?: string
-}): Promise<CommonResponseWithPage<BanList[]>> {
+  reason?: string
+}): Promise<CommonResponse<Pagination<BanList[]> & { reasons?: string[] }>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
@@ -48,6 +49,9 @@ export async function getBanListPaginated(params: {
   }
   if (params.search && params.search.trim() !== '') {
     url.searchParams.set('search', encodeURIComponent(params.search.trim()))
+  }
+  if (params.reason !== undefined) {
+    url.searchParams.set('reason', params.reason)
   }
 
   return fetch(url, {
