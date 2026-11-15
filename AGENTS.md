@@ -140,3 +140,8 @@ Gradle 输出 `build/libs/PeerBanHelper.jar` 和 `build/libraries/`，分发时�
 | 平台二进制资源 | `platform-natives/` 按 OS 和架构分目录，`cpp-src/` 保存 Windows JNI 源码及手工构建说明。更改原生资源时核对加载位置、目标架构及其实际打包工作流。 |
 | 验证夹具 | `test/fakeqb.py` 提供模拟下载器，`test/test-db/` 提供配置和旧 SQLite 数据。CI 的 `test/test-db.sh` 会移动 JAR 和夹具并替换数据库类型占位符，复现时在可丢弃的工作副本中运行。脚本名称、变量和数据库矩阵以 `build_gradle.yml` 为准。`src/test/resources/testdata/scripts/` 含 Aviator 输入夹具。 |
 | CI 与贡献工具 | `.github/workflows/` 将 WebUI 构建、JVM 测试和分发拆为可复用工作流；PR 与发布入口分别查 `jvm-ci-pr.yml`、`webui.yml`、`jvm-ci.yml` 和 `jvm-release.yml`。贡献分工见 `.github/CODEOWNERS` 及 PR 模板。OpenSpec 配置在 `openspec/`，命令模板在 `.claude/`、`.github/prompts/` 和 `.github/skills/`。遇到历史 Maven、Java 21 或旧 lint 说明时，用当前脚本和工作流核对。 |
+## 提交规范
+
+- 完成变更并执行相关验证后，为本次工作创建 Git commit。仅提交本次任务涉及的改动。
+- 同一任务同时涉及前端和后端时，将两部分拆成独立 commit。
+- 由 Agent 创建的 commit 必须在提交消息末尾添加 `Co-authored-by: 名称 <邮箱>`，并与正文之间留一个空行。Codex 沿用仓库已有的 `Co-authored-by: codex <codex@chatgpt.com>`。
