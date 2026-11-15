@@ -206,6 +206,8 @@ DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter configuration autofix
 DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter configuration autofix failed."
 DOWNLOADER_BC_VERSION_UNACCEPTABLE: "The current BitComet version is not supported, please upgrade to {} or higher."
 JAVALIN_PORT_IN_USE: "Bind to port {} already in use. It could caused by: (1)More than one PBH instance is running (for example: Install as System Service); (2)Other application using this port (e.g Uplay, Ubisoft connect)"
+JAVALIN_TEMPORARY_PORT_TITLE: "Temporary WebUI port"
+JAVALIN_TEMPORARY_PORT_DESCRIPTION: "WebUI port {} is in use. This session is using temporary port {}."
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "Bind to port {} failed (system require privileges on this port). Pick another WebUI port or run PeerBanHelper as Administrator/root."
 SPRING_CONTEXT_LOADING: "Spring Context initializing context to start PeerBanHelper up, it may take a while on low-end devices"
 PBH_STARTUP_FATAL_ERROR: "PeerBanHelper encountered fatal error during startup, unable to continue"

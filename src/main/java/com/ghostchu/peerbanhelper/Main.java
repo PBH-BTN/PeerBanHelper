@@ -147,9 +147,19 @@ public class Main {
             }
             registerStaticReloadable();
             loadPlatform();
-            setupHttpServer();
-            pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-            initGUI(args);
+            String guiType = resolveGuiType(args);
+            int requestedPort = ExternalSwitch.parseInt("pbh.port", mainConfig.getInt("server.http"));
+            boolean temporaryPort = setupHttpServer(guiType, requestedPort);
+            pbhServerAddress = temporaryPort
+                    ? "http://127.0.0.1:" + webContainer.getJavalin().port()
+                    : mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
+            initGUI(args, guiType);
+            if (temporaryPort) {
+                String title = tlUI(Lang.JAVALIN_TEMPORARY_PORT_TITLE);
+                String description = tlUI(Lang.JAVALIN_TEMPORARY_PORT_DESCRIPTION, requestedPort, webContainer.getJavalin().port());
+                log.warn(description);
+                guiManager.createNotification(org.slf4j.event.Level.WARN, title, description);
+            }
             Thread.ofPlatform().name("Bootstrap").start(() -> {
                 try {
                     guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
@@ -185,19 +195,26 @@ public class Main {
         }
     }
 
-    private static void setupHttpServer() {
+    private static boolean setupHttpServer(String guiType, int httpdPort) {
         webContainer = new JavalinWebContainer();
         String token = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.token"));
         String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("server.address"));
         if ("0.0.0.0".equals(host) || "::".equals(host) || "localhost".equals(host)) {
             host = null;
         }
-        int httpdPort = ExternalSwitch.parseInt("pbh.port", Main.getMainConfig().getInt("server.http"));
         try {
             webContainer.setupJavalin();
             webContainer.start(host, httpdPort, token);
         } catch (JavalinBindException e) {
             if (e.getMessage().contains("Port already in use")) {
+                if ("install4j".equals(ExternalSwitch.parse("pbh.release"))
+                        && !"console".equals(guiType) && SystemTray.isSupported()
+                        && isAddressInUse(e)) {
+                    // Javalin stops its default server on failure and cannot restart the same instance.
+                    webContainer.setupJavalin();
+                    webContainer.start(host, 0, token);
+                    return true;
+                }
                 log.error(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort));
                 throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort), e);
             } else if (e.getMessage().contains("require elevated privileges")) {
@@ -208,6 +225,17 @@ public class Main {
                 log.error("Unable to start Javalin http server", e);
             }
         }
+        return false;
+    }
+
+    private static boolean isAddressInUse(Throwable failure) {
+        for (Throwable cause = failure.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof BindException && cause.getMessage() != null
+                    && cause.getMessage().startsWith("Address already in use")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void setupSentry() {
@@ -457,7 +485,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(shutdownThread);
     }
 
-    private static void initGUI(String[] args) {
+    private static String resolveGuiType(String[] args) {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
@@ -468,10 +496,14 @@ public class Main {
         } else if (Arrays.stream(args).anyMatch("qt"::equalsIgnoreCase)) {
             guiType = "qt";
         }
-        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch("nogui"::equalsIgnoreCase)) {
+        if (GraphicsEnvironment.isHeadless() || !Desktop.isDesktopSupported()
+                || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch("nogui"::equalsIgnoreCase)) {
             guiType = "console";
         }
+        return guiType;
+    }
 
+    private static void initGUI(String[] args, String guiType) {
         switch (guiType) {
             //case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
             case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));

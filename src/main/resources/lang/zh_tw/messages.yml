@@ -206,6 +206,8 @@ DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter 配置自動修正成
 DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter 配置自動修正失敗"
 DOWNLOADER_BC_VERSION_UNACCEPTABLE: "目前使用的 BitComet 版本不受支援，請升級到 {} 或者更高版本"
 JAVALIN_PORT_IN_USE: "埠監聽失敗，埠 {} 已被其它行程占用。這可能是因為：(1)有兩個 PeerBanHelper 正在執行（特別是您可能選擇了安裝為系統服務，這種情況下將會自動啟動）(2)其它程式正在使用此埠（如 Uplay/Ubisoft Connect）；請跟隨故障排除指南解決此問題。https://docs.pbh-btn.com/docs/faq"
+JAVALIN_TEMPORARY_PORT_TITLE: "WebUI 連接埠已暫時更換"
+JAVALIN_TEMPORARY_PORT_DESCRIPTION: "WebUI 連接埠 {} 已被占用，本次啟動改用暫時連接埠 {}。"
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "埠監聽失敗，監聽 {} 埠需要權限提升。請更換一個 WebUI 埠或以管理員身份執行 PeerBanHelper"
 SPRING_CONTEXT_LOADING: "Spring Context 正在進行上下文裝配以啟動 PeerBanHelper，在低端裝置上可能需要一段時間"
 PBH_STARTUP_FATAL_ERROR: "PeerBanHelper 啟動過程中遇到致命錯誤，無法繼續啟動"
