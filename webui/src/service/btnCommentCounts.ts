@@ -4,7 +4,7 @@ import urlJoin from 'url-join'
 const cache = new Map<string, { count: number; expires: number }>()
 const cacheLifetime = 5 * 60_000
 const maxCacheSize = 4000
-let requestInFlight: Promise<Map<string, number>> | undefined
+let requestInFlight: Promise<void> | undefined
 let retryAfter = 0
 
 export function snapshotCommentCounts(
@@ -43,15 +43,19 @@ export function snapshotCommentCounts(
   }
 
   if (onUpdate) {
-    const mergeCounts = (updated: Map<string, number>) => {
-      onUpdate(new Map([...counts, ...updated]))
-    }
-    void request.then((updated) => {
+    void request.then(() => {
+      // Recheck the cache so a page opened during another batch can request its own misses.
       if (activeRequest) {
-        // Recheck only the misses after the pending request finishes.
-        mergeCounts(snapshotCommentCounts(endpoint, headers, missing, mergeCounts))
+        onUpdate(snapshotCommentCounts(endpoint, headers, addresses, onUpdate))
       } else {
-        mergeCounts(updated)
+        const completedAt = Date.now()
+        const updated = new Map(
+          addresses.map((address) => {
+            const entry = cache.get(cacheKey(address))
+            return [address, entry && entry.expires > completedAt ? entry.count : 0]
+          })
+        )
+        onUpdate(updated)
       }
     })
   }
@@ -65,7 +69,6 @@ async function fetchCommentCounts(
   missing: string[],
   cacheKey: (address: string) => string
 ) {
-  const counts = new Map<string, number>()
   try {
     const url = new URL(urlJoin(endpoint, '/api/peer/btnCommentCounts'), location.href)
     for (let offset = 0; offset < missing.length; offset += 50) {
@@ -86,13 +89,11 @@ async function fetchCommentCounts(
         if (typeof count !== 'number' || !Number.isSafeInteger(count) || count < 0) {
           throw new Error('Invalid comment count response')
         }
-        return [address, count] as const
+        return [cacheKey(address), { count, expires }] as const
       })
-      for (const [address, count] of entries) {
-        counts.set(address, count)
-        const key = cacheKey(address)
+      for (const [key, entry] of entries) {
         cache.delete(key)
-        cache.set(key, { count, expires })
+        cache.set(key, entry)
       }
       while (cache.size > maxCacheSize) {
         const oldest = cache.keys().next()
@@ -104,5 +105,4 @@ async function fetchCommentCounts(
     retryAfter = Date.now() + 60_000
     console.warn('Unable to fetch BTN comment counts', error)
   }
-  return counts
 }
