@@ -4,7 +4,7 @@
     hide-cancel
     closable
     unmount-on-close
-    width="auto"
+    width="min(1600px, 95vw)"
     @ok="handleOk"
     @close="cancel()"
   >
@@ -12,8 +12,8 @@
     <a-table
       :columns="columns"
       :data="data?.data"
-      :loading="!loading && !data"
-      style="width: 1600px"
+      :loading="loading && !data"
+      :scroll="{ x: 1450 }"
       :virtual-list-props="{ height: 500 }"
       :pagination="false"
     >
@@ -38,33 +38,29 @@
           </div>
         </a-space>
       </template>
-      <template #speed="{ record }">
-        <a-space fill style="justify-content: space-between">
-          <a-space fill direction="vertical">
-            <a-typography-text>
-              <icon-arrow-up class="green" />
-              {{ formatFileSize(record.peer.uploadSpeed) }}/s
-            </a-typography-text>
-            <a-typography-text>
-              <icon-arrow-down class="red" />
-              {{ formatFileSize(record.peer.downloadSpeed) }}/s
-            </a-typography-text>
-          </a-space>
-        </a-space>
+      <template #uploadSpeed="{ record }">
+        {{ formatFileSize(record.peer.uploadSpeed) }}/s
       </template>
-      <template #uploadDownload="{ record }">
-        <a-space fill style="justify-content: space-between">
-          <a-space fill direction="vertical">
-            <a-typography-text
-              ><icon-arrow-up class="green" />
-              {{ formatFileSize(record.peer.uploaded) }}</a-typography-text
-            >
-            <a-typography-text
-              ><icon-arrow-down class="red" />
-              {{ formatFileSize(record.peer.downloaded) }}</a-typography-text
-            >
-          </a-space>
-        </a-space>
+      <template #downloadSpeed="{ record }">
+        {{ formatFileSize(record.peer.downloadSpeed) }}/s
+      </template>
+      <template #uploaded="{ record }">
+        {{ formatFileSize(record.peer.uploaded) }}
+      </template>
+      <template #downloaded="{ record }">
+        {{ formatFileSize(record.peer.downloaded) }}
+      </template>
+      <template #actions="{ record }">
+        <a-tooltip :content="t('page.dashboard.peerList.block')">
+          <a-button
+            type="text"
+            status="danger"
+            :aria-label="t('page.dashboard.peerList.block')"
+            @click="confirmBlock(record.peer.address.ip)"
+          >
+            <template #icon><icon-stop /></template>
+          </a-button>
+        </a-tooltip>
       </template>
       <template #progress="{ record }">
         <a-space>
@@ -91,11 +87,14 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import type { PeerInfo } from '@/api/model/downloader'
 import CountryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
+import { addBlackList } from '@/service/blacklist'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'
 import { formatIPAddressPort } from '@/utils/string'
+import { Message, Modal, type TableColumnData, type TableSortable } from '@arco-design/web-vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
@@ -106,6 +105,7 @@ const tid = ref('')
 const tname = ref('')
 defineExpose({
   showModal: (downloaderId: string, torrentId: string, torrentName: string) => {
+    data.value = undefined
     downloader.value = downloaderId
     tid.value = torrentId
     tname.value = torrentName
@@ -123,41 +123,108 @@ const { data, loading, run, cancel } = useRequest(getPeer, {
   manual: true,
   pollingInterval: 1000
 })
-const columns = [
+const confirmBlock = (ip: string) => {
+  Modal.confirm({
+    title: t('page.dashboard.peerList.block'),
+    content: t('page.dashboard.peerList.block.confirm', { ip }),
+    okText: t('page.dashboard.peerList.block'),
+    okButtonProps: { status: 'danger' },
+    onBeforeOk: async () => {
+      try {
+        const response = await addBlackList(ip, 'ip')
+        if (response.success) {
+          Message.success(t('page.dashboard.peerList.block.success', { ip }))
+          return true
+        }
+        Message.error(response.message || t('page.dashboard.peerList.block.error'))
+      } catch {
+        Message.error(t('page.dashboard.peerList.block.error'))
+      }
+      return false
+    }
+  })
+}
+
+const collator = new Intl.Collator(undefined, { numeric: true })
+const sortableBy = (value: (peer: PeerInfo['peer']) => string | number): TableSortable => ({
+  sortDirections: ['ascend', 'descend'],
+  sorter: (a, b, { direction }) => {
+    const left = value(a.peer)
+    const right = value(b.peer)
+    const order =
+      typeof left === 'number' && typeof right === 'number'
+        ? left - right
+        : collator.compare(String(left), String(right))
+    return direction === 'descend' ? -order : order
+  }
+})
+
+const columns: TableColumnData[] = [
   {
     title: () => t('page.dashboard.peerList.column.address'),
+    dataIndex: 'peer.address.ip',
     slotName: 'peerAddress',
-    width: 320
+    width: 300,
+    sortable: sortableBy(({ address }) => formatIPAddressPort(address.ip, address.port))
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
+    dataIndex: 'peer.flags',
     slotName: 'flags',
-    width: 110
+    width: 100,
+    sortable: sortableBy(({ flags }) => flags ?? '')
   },
   {
     title: 'Peer ID',
     dataIndex: 'peer.id',
-    width: 100
+    width: 140,
+    sortable: sortableBy(({ id }) => id ?? '')
   },
   {
     title: () => t('page.dashboard.peerList.column.clientName'),
     dataIndex: 'peer.clientName',
-    width: 300
+    width: 220,
+    sortable: sortableBy(({ clientName }) => clientName ?? '')
   },
   {
-    title: () => t('page.dashboard.peerList.column.speed'),
-    slotName: 'speed',
-    width: 140
+    title: () => t('page.dashboard.peerList.column.uploadSpeed'),
+    dataIndex: 'peer.uploadSpeed',
+    slotName: 'uploadSpeed',
+    width: 120,
+    sortable: sortableBy(({ uploadSpeed }) => uploadSpeed)
   },
   {
-    title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
-    slotName: 'uploadDownload',
-    width: 140
+    title: () => t('page.dashboard.peerList.column.downloadSpeed'),
+    dataIndex: 'peer.downloadSpeed',
+    slotName: 'downloadSpeed',
+    width: 130,
+    sortable: sortableBy(({ downloadSpeed }) => downloadSpeed)
+  },
+  {
+    title: () => t('page.dashboard.peerList.column.uploaded'),
+    dataIndex: 'peer.uploaded',
+    slotName: 'uploaded',
+    width: 110,
+    sortable: sortableBy(({ uploaded }) => uploaded)
+  },
+  {
+    title: () => t('page.dashboard.peerList.column.downloaded'),
+    dataIndex: 'peer.downloaded',
+    slotName: 'downloaded',
+    width: 120,
+    sortable: sortableBy(({ downloaded }) => downloaded)
   },
   {
     title: () => t('page.dashboard.peerList.column.progress'),
+    dataIndex: 'peer.progress',
     slotName: 'progress',
-    width: 100
+    width: 130,
+    sortable: sortableBy(({ progress }) => progress)
+  },
+  {
+    title: () => t('page.dashboard.peerList.column.actions'),
+    slotName: 'actions',
+    width: 80
   }
 ]
 const parseFlags = (flags: string) =>
@@ -165,13 +232,3 @@ const parseFlags = (flags: string) =>
     .split(' ')
     .map((flag) => flag + ' - ' + t('page.dashboard.peerList.column.flags.' + flag.trim()))
 </script>
-
-<style scoped>
-.red {
-  color: rgb(var(--red-5));
-}
-
-.green {
-  color: rgb(var(--green-5));
-}
-</style>
