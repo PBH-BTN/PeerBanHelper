@@ -22,10 +22,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -79,7 +80,27 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
         javalinWebContainer.routes()
                 .get("/api/modules/swarm-tracking/details", this::handleDetails, Role.USER_READ);
         trackedSwarmDao.resetTable();
-        registerScheduledTask(trackedSwarmDao::flushAll, 0, getConfig().getLong("data-flush-interval"), TimeUnit.MILLISECONDS);
+        long flushInterval = Math.max(1, getConfig().getLong("data-flush-interval", 3_600_000));
+        registerScheduledTask(() -> runMaintenance(trackedSwarmDao::flushAll), 0, flushInterval, TimeUnit.MILLISECONDS);
+        long cleanupInterval = getConfig().getLong("data-cleanup-interval", 3_600_000);
+        if (cleanupInterval > 0) {
+            registerScheduledTask(() -> runMaintenance(this::cleanup), cleanupInterval, cleanupInterval, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void runMaintenance(Runnable action) {
+        try {
+            action.run();
+        } catch (RuntimeException e) {
+            log.warn("Swarm tracking maintenance failed", e);
+        }
+    }
+
+    private void cleanup() {
+        long retention = getConfig().getLong("data-retention-time", 86_400_000);
+        if (retention > 0) {
+            trackedSwarmDao.removeInactive(OffsetDateTime.now().minus(retention, ChronoUnit.MILLIS));
+        }
     }
 
     private void handleDetails(@NotNull Context context) {
@@ -115,7 +136,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
                 task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
                 trackedSwarmDao.syncPeers(downloader, torrent, peer);
             }
-        } catch (ExecutionException e) {
+        } catch (RuntimeException e) {
             Sentry.captureException(e);
             log.error("Unable update tracked peers in SQLite temporary table", e);
         }

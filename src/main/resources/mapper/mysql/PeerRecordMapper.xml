@@ -94,14 +94,14 @@
 
         uploaded = CASE
         WHEN #{e.lastTimeSeen} &lt; last_time_seen THEN uploaded
-        WHEN (#{e.uploaded} - uploaded_offset) &lt; 0
+        WHEN #{firstUploaded} &lt; uploaded_offset
         THEN uploaded + #{e.uploaded}
         ELSE uploaded + #{e.uploaded} - uploaded_offset
         END,
 
         downloaded = CASE
         WHEN #{e.lastTimeSeen} &lt; last_time_seen THEN downloaded
-        WHEN (#{e.downloaded} - downloaded_offset) &lt; 0
+        WHEN #{firstDownloaded} &lt; downloaded_offset
         THEN downloaded + #{e.downloaded}
         ELSE downloaded + #{e.downloaded} - downloaded_offset
         END,

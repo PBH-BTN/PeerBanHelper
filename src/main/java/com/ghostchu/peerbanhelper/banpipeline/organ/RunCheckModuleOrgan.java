@@ -56,6 +56,11 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
             var torrent = input.torrent();
             var peers = input.peers();
             var prefix = "[" + ruleFeatureModule.getName() + "] (" + torrent.getId() + "): ";
+            try {
+                ruleFeatureModule.preparePeers(downloader, torrent, peers);
+            } catch (RuntimeException e) {
+                log.warn(tlUI(Lang.MODULE_CHECK_UNEXCEPTED_EXCEPTION, ruleFeatureModule.getName(), ruleFeatureModule.getClass().getName()), e);
+            }
             AtomicInteger newSpawned = new AtomicInteger();
             peers.forEach(peer -> {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {

@@ -8,16 +8,11 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public interface PeerConnectionMetricsTrackService extends IService<PeerConnectionMetricsTrackEntity> {
 
-    void flushAll();
+    void aggregatePending();
 
-    void closeCache() throws Exception;
-
-    int deleteEntries(@NotNull List<PeerConnectionMetricsTrackEntity> entities);
-
-    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers) throws ExecutionException;
+    void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers);
 
 }

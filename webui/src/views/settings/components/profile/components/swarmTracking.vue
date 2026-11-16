@@ -13,7 +13,9 @@
         t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval')
       "
       :tooltip="
-        t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval')
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataFlushInterval.tips'
+        )
       "
       field="model.data_flush_interval"
     >
@@ -21,6 +23,40 @@
         <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }}</template>
       </a-input-number>
       <template #extra> ={{ formatMilliseconds(model.data_flush_interval) }}</template>
+    </a-form-item>
+    <a-form-item
+      v-if="model.enabled"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataRetentionTime')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataRetentionTime.tips'
+        )
+      "
+      field="model.data_retention_time"
+    >
+      <a-input-number v-model="model.data_retention_time" :min="0" style="width: 200px">
+        <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }}</template>
+      </a-input-number>
+      <template #extra> ={{ formatMilliseconds(model.data_retention_time) }}</template>
+    </a-form-item>
+    <a-form-item
+      v-if="model.enabled"
+      :label="
+        t('page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataCleanupInterval')
+      "
+      :tooltip="
+        t(
+          'page.settings.tab.profile.module.peerAnalyseService.swarmTracking.dataCleanupInterval.tips'
+        )
+      "
+      field="model.data_cleanup_interval"
+    >
+      <a-input-number v-model="model.data_cleanup_interval" :min="0" style="width: 200px">
+        <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }}</template>
+      </a-input-number>
+      <template #extra> ={{ formatMilliseconds(model.data_cleanup_interval) }}</template>
     </a-form-item>
   </a-space>
 </template>

@@ -34,5 +34,6 @@ public interface PeerRecordMapper extends BaseMapper<PeerRecordEntity> {
                                 @Param("end") java.time.OffsetDateTime end,
                                 @Param("downloader") String downloader);
 
-    int upsert(@Param("e") PeerRecordEntity entity);
+    int upsert(@Param("e") PeerRecordEntity entity, @Param("firstUploaded") long firstUploaded,
+               @Param("firstDownloaded") long firstDownloaded);
 }

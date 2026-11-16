@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -21,7 +22,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
-import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -43,34 +43,20 @@ import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
-    private final PBHCache<@NotNull CacheKeyPrefix, @NotNull PCBRangeEntity> prefixCache = new PBHCache<>(
-            1024,
-            null,
-            180 * 1000L,
-            false,
-            false,
-            true,
-            this::batchFlushBackDatabasePrefix
-    );
-    private final PBHCache<@NotNull CacheKeyAddr, @NotNull PCBAddressEntity> addrCache = new PBHCache<>(
-            1024,
-            null,
-            180 * 1000L,
-            false,
-            false,
-            true,
-            this::batchFlushBackDatabaseAddr
-    );
+    private static final int CACHE_SIZE = 1024;
+    private static final int PREFETCH_SIZE = 100;
+    private final LinkedHashMap<CacheKeyPrefix, PCBRangeEntity> prefixCache = new LinkedHashMap<>(16, 0.75f, true);
+    private final LinkedHashMap<CacheKeyAddr, PCBAddressEntity> addrCache = new LinkedHashMap<>(16, 0.75f, true);
     private long torrentMinimumSize;
     private boolean blockExcessiveClients;
     private double excessiveThreshold;
@@ -112,18 +98,22 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         reloadConfig();
         webContainer.routes()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ);
-        CommonUtil.getBgCleanupScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        registerScheduledTask(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        long interval = Math.max(1, getConfig().getLong("data-flush-interval", 180_000));
+        registerScheduledTask(this::flushSafely, interval, interval, TimeUnit.MILLISECONDS);
         Main.getReloadManager().register(this);
         Main.getEventBus().register(this);
     }
 
 
     @Subscribe
-    public void onPeerUnBan(PeerUnbanEvent event) {
+    public synchronized void onPeerUnBan(PeerUnbanEvent event) {
         transactionTemplate.execute(_ -> {
             event.getUnbannedPeers().forEach((addr, meta) -> pcbAddressDao.deleteEntry(meta.getTorrent().getId(), addr.toInetAddress()));
             return null;
         });
+        event.getUnbannedPeers().forEach((addr, meta) -> addrCache.keySet().removeIf(key ->
+                key.torrentId().equals(meta.getTorrent().getId()) && key.peerAddressIp().equals(addr.toInetAddress())));
         log.debug("Deleted unbanned peers");
     }
 
@@ -134,9 +124,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     try {
                         log.info(tlUI(Lang.MODULE_PCB_DELETING_EXPIRED_DATA));
                         var ofd = OffsetDateTime.now().minus(persistDuration, ChronoUnit.MILLIS);
-                        long deleted = 0;
-                        deleted += pcbRangeDao.cleanupDatabase(ofd);
-                        deleted += pcbAddressDao.cleanupDatabase(ofd);
+                        long deleted = deleteExpired(ofd);
                         log.info(tlUI(Lang.MODULE_PCB_DELETED_EXPIRED_DATA, deleted));
                     } catch (Throwable e) {
                         log.error("Unable to remove expired data from database", e);
@@ -178,8 +166,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         Main.getEventBus().unregister(this);
         Main.getReloadManager().unregister(this);
         try {
-            prefixCache.close();
-            addrCache.close();
+            flushTracking();
         } catch (Exception e) {
             log.warn("Unable to close cache instance", e);
         }
@@ -204,19 +191,13 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
 
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
+    public synchronized @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
         if (isHandShaking(peer)) {
             return handshaking();
         }
         // 处理 IPV6
-        IPAddress peerPrefix;
         IPAddress peerIp = peer.getPeerAddress().getAddress();
-        if (peerIp.isIPv4()) {
-            peerPrefix = peerIp.toPrefixBlock(ipv4PrefixLength);
-        } else {
-            peerPrefix = peerIp.toPrefixBlock(ipv6PrefixLength);
-        }
-        String peerPrefixString = peerPrefix.toString();
+        String peerPrefixString = prefixOf(peerIp);
         var prefix = String.format("%s,%s,%s,%s,%s", downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
         task.setComment(true, "Loading data from DB for: " + prefix);
         var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
@@ -464,95 +445,148 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         return torrentSize < torrentMinimumSize;
     }
 
+    private String prefixOf(IPAddress address) {
+        return address.toPrefixBlock(address.isIPv4() ? ipv4PrefixLength : ipv6PrefixLength).toString();
+    }
+
+    @Override
+    public synchronized void preparePeers(Downloader downloader, Torrent torrent, List<? extends Peer> peers) {
+        var missingRanges = new LinkedHashSet<String>();
+        var missingAddresses = new LinkedHashSet<CacheKeyAddr>();
+        int rangeLimit = Math.min(PREFETCH_SIZE, CACHE_SIZE - prefixCache.size());
+        int addressLimit = Math.min(PREFETCH_SIZE, CACHE_SIZE - addrCache.size());
+        for (Peer peer : peers) {
+            if (missingRanges.size() >= rangeLimit && missingAddresses.size() >= addressLimit) break;
+            if (isHandShaking(peer)) continue;
+            var address = peer.getPeerAddress();
+            var ip = address.getAddress();
+            if (missingRanges.size() < rangeLimit) {
+                var prefix = prefixOf(ip);
+                if (!prefixCache.containsKey(new CacheKeyPrefix(downloader.getId(), torrent.getId(), prefix))) {
+                    missingRanges.add(prefix);
+                }
+            }
+            if (missingAddresses.size() < addressLimit) {
+                var key = new CacheKeyAddr(downloader.getId(), torrent.getId(), ip.toInetAddress(), address.getPort());
+                if (!addrCache.containsKey(key)) {
+                    missingAddresses.add(key);
+                }
+            }
+        }
+
+        if (!missingRanges.isEmpty()) {
+            var found = pcbRangeDao.list(new LambdaQueryWrapper<PCBRangeEntity>()
+                    .eq(PCBRangeEntity::getDownloader, downloader.getId())
+                    .eq(PCBRangeEntity::getTorrentId, torrent.getId())
+                    .in(PCBRangeEntity::getRange, missingRanges));
+            for (var entity : found) {
+                prefixCache.put(new CacheKeyPrefix(downloader.getId(), torrent.getId(), entity.getRange()), entity);
+                missingRanges.remove(entity.getRange());
+            }
+            for (var prefix : missingRanges) {
+                var key = new CacheKeyPrefix(downloader.getId(), torrent.getId(), prefix);
+                prefixCache.put(key, newRange(key));
+            }
+        }
+        if (!missingAddresses.isEmpty()) {
+            var found = pcbAddressDao.list(new LambdaQueryWrapper<PCBAddressEntity>()
+                    .eq(PCBAddressEntity::getDownloader, downloader.getId())
+                    .eq(PCBAddressEntity::getTorrentId, torrent.getId())
+                    .and(group -> missingAddresses.forEach(key -> group.or(match -> match
+                            .eq(PCBAddressEntity::getIp, key.peerAddressIp())
+                            .eq(PCBAddressEntity::getPort, key.port())))));
+            for (var entity : found) {
+                var key = new CacheKeyAddr(downloader.getId(), torrent.getId(), entity.getIp(), entity.getPort());
+                addrCache.put(key, entity);
+                missingAddresses.remove(key);
+            }
+            for (var key : missingAddresses) {
+                addrCache.put(key, newAddress(key));
+            }
+        }
+    }
+
     @NotNull
     private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp, int port) {
-        CacheKeyPrefix cacheKeyPrefix = new CacheKeyPrefix(downloader, torrentId, peerAddressPrefix);
-        CacheKeyAddr cacheKeyAddr = new CacheKeyAddr(downloader, torrentId, peerAddressIp);
+        var prefixKey = new CacheKeyPrefix(downloader, torrentId, peerAddressPrefix);
+        var addressKey = new CacheKeyAddr(downloader, torrentId, peerAddressIp, port);
+        var prefix = prefixCache.get(prefixKey);
+        var address = addrCache.get(addressKey);
+        if ((prefix == null && prefixCache.size() >= CACHE_SIZE)
+                || (address == null && addrCache.size() >= CACHE_SIZE)) {
+            flushTracking();
+            if (prefix == null && prefixCache.size() >= CACHE_SIZE) {
+                for (int count = 0; count < PREFETCH_SIZE; count++) prefixCache.pollFirstEntry();
+            }
+            if (address == null && addrCache.size() >= CACHE_SIZE) {
+                for (int count = 0; count < PREFETCH_SIZE; count++) addrCache.pollFirstEntry();
+            }
+        }
+        if (prefix == null) {
+            prefix = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
+            if (prefix == null) prefix = newRange(prefixKey);
+            prefixCache.put(prefixKey, prefix);
+        }
+        if (address == null) {
+            address = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
+            if (address == null) address = newAddress(addressKey);
+            addrCache.put(addressKey, address);
+        }
+        return Pair.of(prefix, address);
+    }
+
+    private PCBRangeEntity newRange(CacheKeyPrefix key) {
+        var now = OffsetDateTime.now();
+        return new PCBRangeEntity(null, key.peerAddressPrefix(), key.torrentId(), 0, 0, 0, 0, 0, now, now,
+                key.downloader(), TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
+    }
+
+    private PCBAddressEntity newAddress(CacheKeyAddr key) {
+        var now = OffsetDateTime.now();
+        return new PCBAddressEntity(null, key.peerAddressIp(), key.port(), key.torrentId(), 0, 0, 0, 0, 0,
+                now, now, key.downloader(), TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
+    }
+
+    private void flushSafely() {
         try {
-            PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
-                PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
-                if (rangeEntity == null) {
-                    log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
-                    rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
-                    rangeEntity.setDirty(true);
-                    //pcbRangeDao.upsert(rangeEntity);
-                }
-                return rangeEntity;
-            });
-            PCBAddressEntity addrEntity = addrCache.get(cacheKeyAddr, () -> {
-                PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
-                if (pcbAddressEntity == null) {
-                    log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
-                    pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
-                    pcbAddressEntity.setDirty(true);
-                    //pcbAddressDao.upsert(pcbAddressEntity);
-                }
-                return pcbAddressEntity;
-            });
-            return Pair.of(prefixEntity, addrEntity);
-        } catch (ExecutionException e) {
-            Sentry.captureException(e);
-            throw new RuntimeException(e.getCause());
+            flushTracking();
+        } catch (RuntimeException e) {
+            log.warn("Unable to flush progress tracking state", e);
         }
     }
 
-    private synchronized void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
+    private synchronized void flushTracking() {
+        var ranges = prefixCache.values().stream().filter(PCBRangeEntity::isDirty).toList();
+        var addresses = addrCache.values().stream().filter(PCBAddressEntity::isDirty).toList();
+        if (ranges.isEmpty() && addresses.isEmpty()) return;
         try {
-            transactionTemplate.execute((a) -> {
-                stream.map(Pair::getRight).forEach(entity -> {
-                    if (entity.isDirty()) {
-                        pcbRangeDao.upsert(entity);
-                    }
-                });
-                return null;
+            transactionTemplate.executeWithoutResult(status -> {
+                ranges.forEach(pcbRangeDao::upsert);
+                addresses.forEach(pcbAddressDao::upsert);
             });
-        } catch (Exception e) {
-            log.warn("Unable to flush PCBRangeEntity cache back to database, retry in single...", e);
-            stream.map(Pair::getRight).forEach(entity -> {
-                if (entity.isDirty()) {
-                    pcbRangeDao.upsert(entity);
-                }
-            });
+        } catch (RuntimeException e) {
+            ranges.forEach(entity -> entity.setDirty(true));
+            addresses.forEach(entity -> entity.setDirty(true));
+            throw e;
         }
     }
 
-    private synchronized void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
-        try {
-            transactionTemplate.execute((a) -> {
-                stream.map(Pair::getRight).forEach(entity -> {
-                    if (entity.isDirty()) {
-                        pcbAddressDao.upsert(entity);
-                    }
-                });
-                return null;
-            });
-        } catch (Exception e) {
-            log.warn("Unable to flush PCBAddressEntity cache back to database, retry in single...", e);
-            stream.map(Pair::getRight).forEach(entity -> {
-                if (entity.isDirty()) {
-                    pcbAddressDao.upsert(entity);
-                }
-            });
-        }
-
+    private synchronized long deleteExpired(OffsetDateTime cutoff) {
+        flushTracking();
+        long deleted = pcbRangeDao.cleanupDatabase(cutoff) + pcbAddressDao.cleanupDatabase(cutoff);
+        prefixCache.values().removeIf(entity -> entity.getLastTimeSeen().isBefore(cutoff));
+        addrCache.values().removeIf(entity -> entity.getLastTimeSeen().isBefore(cutoff));
+        return deleted;
     }
 
-//    @NotNull
-//    private Pair<PCBRangeEntity, PCBAddressEntity> flushBackDatabase(PCBRangeEntity pcbRangeEntity, PCBAddressEntity pcbAddressEntity) {
-//        pcbRangeDao.saveOrUpdateIfDirty(pcbRangeEntity);
-//        pcbAddressDao.saveOrUpdateIfDirty(pcbAddressEntity);
-//        return Pair.of(pcbRangeEntity, pcbAddressEntity);
-//    }
-
-    private String percent(double d) {
-        return MsgUtil.getPercentageFormatter().format(d);
+    private String percent(double value) {
+        return MsgUtil.getPercentageFormatter().format(value);
     }
-
 
     record CacheKeyPrefix(String downloader, String torrentId, String peerAddressPrefix) {
     }
 
-    record CacheKeyAddr(String downloader, String torrentId, InetAddress peerAddressIp) {
+    record CacheKeyAddr(String downloader, String torrentId, InetAddress peerAddressIp, int port) {
     }
 }
 

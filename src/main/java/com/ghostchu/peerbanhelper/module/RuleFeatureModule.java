@@ -6,7 +6,12 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public interface RuleFeatureModule extends FeatureModule {
+    default void preparePeers(Downloader downloader, Torrent torrent, List<? extends Peer> peers) {
+    }
+
     /**
      * 检查一个特定的 Torrent 和 Peer 是否应该封禁
      *

@@ -25,6 +25,17 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 43)
+    public void addTrackingTimingSettings(YamlConfiguration bundled) {
+        for (String key : List.of("module.progress-cheat-blocker.data-flush-interval",
+                "module.peer-analyse-service.swarm-tracking.data-retention-time",
+                "module.peer-analyse-service.swarm-tracking.data-cleanup-interval")) {
+            if (!conf.contains(key)) {
+                conf.set(key, bundled.get(key));
+            }
+        }
+    }
+
     @UpdateScript(version = 42)
     public void addGopeedBtRules() {
         List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");
