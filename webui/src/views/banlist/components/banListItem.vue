@@ -34,20 +34,19 @@
           </a-tooltip>
         </a-space>
         <div>
-          <a-button-group>
+          <a-button-group class="hover-display-btn">
             <AsyncMethod
               v-slot="{ run, loading }"
               once
               :async-fn="() => handleUnban(item.banMetadata.peer.address.ip)"
             >
-              <a-button class="hover-display-btn" type="outline" :loading="loading" @click="run">
+              <a-button type="outline" :loading="loading" @click="run">
                 {{ t('page.banlist.banlist.listItem.unban') }}
               </a-button>
             </AsyncMethod>
             <a-tooltip :content="t('page.banlist.banlist.listItem.threatAnalyse')">
               <a-button
                 type="outline"
-                :class="{ 'hover-display-btn': !item.btnCommentCount }"
                 target="_blank"
                 :href="'ipHistory?ip=' + item.banMetadata.peer.address.ip"
               >
@@ -226,8 +225,7 @@ a {
   opacity: 0;
 }
 
-.banlist-item:hover .hover-display-btn,
-.hover-display-btn:focus-visible {
+.banlist-item:hover .hover-display-btn {
   transition: opacity 0.15s ease-in-out;
   opacity: 1;
 }
