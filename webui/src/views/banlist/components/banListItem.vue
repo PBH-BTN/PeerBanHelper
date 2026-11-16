@@ -51,7 +51,6 @@
                 :href="'ipHistory?ip=' + item.banMetadata.peer.address.ip"
               >
                 <template #icon><icon-search /></template>
-                <template v-if="item.btnCommentCount">{{ item.btnCommentCount }}</template>
               </a-button>
             </a-tooltip>
           </a-button-group>

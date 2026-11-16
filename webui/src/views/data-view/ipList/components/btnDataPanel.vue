@@ -2,7 +2,6 @@
   <a-card :bordered="false">
     <a-spin :loading="loading" style="width: 100%">
       <a-space v-if="data?.data" direction="vertical" fill>
-        <btnIpDetails v-if="query?.details" :lookup="query.details.lookup" />
         <a-descriptions>
           <a-descriptions-item :label="t('page.ipList.btn.labels')">
             <a-tag
@@ -20,14 +19,9 @@
         </a-descriptions>
 
         <!-- Tabs展示 -->
-        <a-tabs :default-active-key="initialTab">
+        <a-tabs default-active-key="bans">
           <!-- Bans Tab -->
-          <a-tab-pane
-            v-if="data.data.bans"
-            key="bans"
-            class="tab"
-            :title="t('page.ipList.btn.bans')"
-          >
+          <a-tab-pane key="bans" class="tab" :title="t('page.ipList.btn.bans')">
             <a-space direction="vertical" fill>
               <a-grid :cols="24" :row-gap="16">
                 <a-grid-item :span="{ xs: 12, sm: 8 }">
@@ -61,12 +55,7 @@
           </a-tab-pane>
 
           <!-- Swarms Tab -->
-          <a-tab-pane
-            v-if="data.data.swarms"
-            key="swarms"
-            class="tab"
-            :title="t('page.ipList.btn.swarms')"
-          >
+          <a-tab-pane key="swarms" class="tab" :title="t('page.ipList.btn.swarms')">
             <a-space direction="vertical" fill>
               <a-grid :cols="24" :row-gap="16">
                 <a-grid-item :span="{ xs: 12, sm: 6 }">
@@ -104,12 +93,7 @@
           </a-tab-pane>
 
           <!-- Traffic Tab -->
-          <a-tab-pane
-            v-if="data.data.traffic"
-            key="traffic"
-            class="tab"
-            :title="t('page.ipList.btn.traffic')"
-          >
+          <a-tab-pane key="traffic" class="tab" :title="t('page.ipList.btn.traffic')">
             <a-grid :cols="24" :row-gap="16">
               <a-grid-item :span="{ xs: 12, sm: 6 }">
                 <a-statistic
@@ -159,11 +143,7 @@
           </a-tab-pane>
 
           <!-- Torrents Tab -->
-          <a-tab-pane
-            v-if="data.data.torrents"
-            key="torrents"
-            :title="t('page.ipList.btn.torrents')"
-          >
+          <a-tab-pane key="torrents" :title="t('page.ipList.btn.torrents')">
             <a-grid :cols="24" :row-gap="16">
               <a-grid-item :span="{ xs: 12, sm: 12 }">
                 <a-statistic
@@ -184,13 +164,6 @@
               </a-grid-item>
             </a-grid>
           </a-tab-pane>
-          <a-tab-pane
-            v-if="query?.details?.lookup.commentAccess.visible"
-            key="comments"
-            :title="t('page.ipList.btn.comments')"
-          >
-            <btnComments :key="ip" :details="query.details" />
-          </a-tab-pane>
         </a-tabs>
       </a-space>
 
@@ -208,7 +181,7 @@
       >
         <a-table
           :columns="bansColumns"
-          :data="data?.data?.bans?.records"
+          :data="data?.data.bans.records"
           :pagination="{ pageSize: 10 }"
           :scroll="{ x: 1200 }"
           size="small"
@@ -243,7 +216,7 @@
       >
         <a-table
           :columns="swarmsColumns"
-          :data="data?.data?.swarms?.records"
+          :data="data?.data.swarms.records"
           :pagination="{ pageSize: 10 }"
           :scroll="{ x: 1200 }"
           size="small"
@@ -278,59 +251,24 @@
 </template>
 
 <script setup lang="ts">
-import { getBtnLookup } from '@/service/btnIpQuery'
 import { GetBTNIPData } from '@/service/data'
 import { formatFileSize } from '@/utils/file'
 import { useDebounceFn } from '@vueuse/core'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import btnComments from './btnComments.vue'
-import btnIpDetails from './btnIpDetails.vue'
 
 const { t, d } = useI18n()
 
 const props = defineProps<{
   ip: string
-  initialTab?: string
 }>()
 
 const showBansModal = ref(false)
 const showSwarmsModal = ref(false)
 
-const {
-  data: query,
-  loading,
-  error,
-  run
-} = useRequest(
-  async (ip: string) => {
-    const response = await getBtnLookup(ip)
-    if (response?.success) {
-      return {
-        details: response.data,
-        activity: { ...response, data: response.data.lookup.activity }
-      }
-    }
-    if (response || ip.includes('/')) {
-      throw new Error(response?.message || t('page.ipList.btn.error'))
-    }
-    return { activity: await GetBTNIPData(ip) }
-  },
-  { manual: true }
-)
-
-const data = computed(() => query.value?.activity)
-const initialTab = computed(() => {
-  if (props.initialTab === 'comments' && query.value?.details?.lookup.commentAccess.visible) {
-    return 'comments'
-  }
-  const activity = data.value?.data
-  return (
-    ['bans', 'swarms', 'traffic', 'torrents'].find(
-      (key) => activity?.[key as 'bans' | 'swarms' | 'traffic' | 'torrents']
-    ) ?? 'comments'
-  )
+const { data, loading, error, run } = useRequest(GetBTNIPData, {
+  manual: true
 })
 
 const debouncedRun = useDebounceFn((ip: string) => {

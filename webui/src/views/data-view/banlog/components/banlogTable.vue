@@ -36,15 +36,6 @@
           {{ formatIPAddressPort(record.peerIp, record.peerPort) }}
         </queryIpLink>
       </a-typography-text>
-      <a-link
-        v-if="record.btnCommentCount"
-        :href="'ipHistory?tab=comments&ip=' + encodeURIComponent(record.peerIp)"
-        :aria-label="t('page.ipList.btn.comments')"
-        class="comment-count"
-        target="_blank"
-      >
-        <icon-message /> {{ record.btnCommentCount }}
-      </a-link>
     </template>
     <template #peerStatus="{ record }">
       <a-space fill style="justify-content: space-between">
@@ -229,9 +220,5 @@ const sorterChange = (dataIndex: string, direction: string) => {
 }
 .green {
   color: rgb(var(--green-5));
-}
-.comment-count {
-  margin-inline-start: 6px;
-  white-space: nowrap;
 }
 </style>
