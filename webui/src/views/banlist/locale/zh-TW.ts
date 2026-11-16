@@ -1,6 +1,11 @@
 export default {
   'page.banlist.banlist': '封禁名單',
   'page.banlist.banlist.description': '以下是封禁列表（按時間倒序排列）',
+  'page.banlist.prefilled.title': '預填充封禁列表',
+  'page.banlist.prefilled.collapsed': '預設摺疊',
+  'page.banlist.prefilled.description':
+    '以下內容由規則訂閱、BTN 等封禁規則提供者預先合併生成，與執行時動態封禁列表分開管理',
+  'page.banlist.prefilled.tag': '預填充',
   'page.banlist.banlist.searchPlaceHolder': '搜尋...',
   'page.banlist.banlist.listItem.reserveDNSLookup': '反向 DNS 解析',
   'page.banlist.banlist.listItem.banTime': '封禁時間',

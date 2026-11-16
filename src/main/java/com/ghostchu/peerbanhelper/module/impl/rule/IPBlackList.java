@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
+import com.ghostchu.peerbanhelper.banlist.BanlistRuleProvider;
+import com.ghostchu.peerbanhelper.banlist.BanlistRuleProviderRegistry;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -38,7 +40,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 
-public final class IPBlackList extends AbstractRuleFeatureModule implements Reloadable {
+public final class IPBlackList extends AbstractRuleFeatureModule implements Reloadable, BanlistRuleProvider {
+    private final BanlistRuleProviderRegistry providerRegistry;
     private Set<IPAddress> ips;
     private Set<Integer> ports;
     private Set<Long> asns;
@@ -50,6 +53,11 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private Set<String> cities;
     @Autowired
     private IPDBManager iPDBManager;
+
+    public IPBlackList(BanlistRuleProviderRegistry providerRegistry) {
+        this.providerRegistry = providerRegistry;
+        this.providerRegistry.register(this);
+    }
 
     @Override
     public @NotNull String getName() {
@@ -64,6 +72,22 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     @Override
     public boolean isConfigurable() {
         return true;
+    }
+
+    @Override
+    public @NotNull String getBanlistProviderName() {
+        return getName();
+    }
+
+    @Override
+    public @NotNull Map<IPAddress, String> getBanlist() {
+        Map<IPAddress, String> result = new HashMap<>();
+        if (ips == null) {
+            return result;
+        }
+        ips.stream().filter(Objects::nonNull)
+                .forEach(ip -> result.put(ip, ip.toCompressedString()));
+        return result;
     }
 
     @Override
@@ -160,6 +184,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         if (parsed == null)
             throw new IllegalArgumentException("Argument ip parse failed");
         if (ips.removeIf(ipAddress -> ipAddress.equals(parsed))) {
+            notifyBanlistUpdated();
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
@@ -202,6 +227,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private void handleIPPut(Context context) throws IOException {
         IPAddress ipAddress = parseIPAddressFromReq(context);
         ips.add(ipAddress);
+        notifyBanlistUpdated();
         context.status(HttpStatus.CREATED);
         context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
@@ -292,6 +318,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         this.cities = new HashSet<>(getConfig().getStringList("cities"));
         this.networkType = new HashSet<>(getConfig().getStringList("net-type"));
         getCache().invalidateAll();
+        notifyBanlistUpdated();
     }
 
     @Override

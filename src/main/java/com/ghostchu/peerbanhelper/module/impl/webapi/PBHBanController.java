@@ -22,6 +22,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import inet.ipaddr.IPAddress;
@@ -98,7 +99,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
         List<IPAddress> pendingRemovals = new ArrayList<>();
         if (request.contains("*")) {
-            pendingRemovals.addAll(banList.copyKeySet());
+            pendingRemovals.addAll(banList.copyPrimaryKeySet());
             downloaderServer.getNeedReApplyBanList().set(true);
         } else {
             for (String s : request) {
@@ -158,13 +159,19 @@ public final class PBHBanController extends AbstractFeatureModule {
                 Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
         String search = ctx.queryParam("search");
         if (search != null) search = URLDecoder.decode(search, StandardCharsets.UTF_8);
+        String source = Objects.requireNonNullElse(ctx.queryParam("source"), "all");
         /* ---------------- Pagination path ---------------- */
         Pageable pageable = new Pageable(ctx); // reads page & pageSize
 
         // We always sort by ban time (desc) as default
         var banStream = getBanResponseStream(ctx.req().getLocale().toString(),
                 ignoreBanForDisconnect,
-                search);
+                search,
+                switch (source) {
+                    case "primary" -> banList.toPrimaryMap();
+                    case "prefilled" -> banList.toPrefilledMap();
+                    default -> banList.toMap();
+                });
 
         List<BanDTO> allResults = banStream.toList();
         long total = allResults.size();
@@ -183,8 +190,9 @@ public final class PBHBanController extends AbstractFeatureModule {
 
     }
 
-    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, boolean ignoreBanForDisconnect, String search) {
-        var banResponseList = banList.toMap()
+    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, boolean ignoreBanForDisconnect, String search,
+                                                         Map<IPAddress, BanMetadata> bans) {
+        var banResponseList = bans
                 .entrySet()
                 .stream()
                 .filter(b -> {

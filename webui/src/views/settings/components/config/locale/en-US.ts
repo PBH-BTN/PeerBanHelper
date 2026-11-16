@@ -69,6 +69,14 @@ export default {
   'page.settings.tab.config.banlistRemapping.ipv6.remap_range.tips':
     'The host part of IP address will be set to 0 with this length, and generate corresponding CIDR expression (0-128)',
 
+  'page.settings.tab.config.banlistPrefill.title': 'Ban List Preprocessing',
+  'page.settings.tab.config.banlistPrefill.description':
+    'Collect known malicious IP addresses from ban list rule providers ahead of time, separately from the runtime dynamic ban list.',
+  'page.settings.tab.config.banlistPrefill.enabled':
+    'Pre-add known malicious IP addresses',
+  'page.settings.tab.config.banlistPrefill.enabled.tips':
+    'When rule subscriptions, BTN, or other rule providers update, PBH will rebuild the prefilled list and apply the complete ban list to downloaders during the next check.',
+
   'page.settings.tab.config.btn.enable': 'Enable BTN',
   'page.settings.tab.config.btn.doc': 'Read the document first:',
   'page.settings.tab.config.btn.enableSubmit': 'Enable submit',

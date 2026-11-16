@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.btn;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.banlist.BanlistRuleProvider;
+import com.ghostchu.peerbanhelper.banlist.BanlistRuleProviderRegistry;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.impl.*;
 import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
@@ -18,12 +20,14 @@ import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.pow.PoWClient;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
+import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import inet.ipaddr.IPAddress;
 import io.sentry.Sentry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,7 +55,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 // 特别注意：该类不允许静态初始化任何内容
-public final class BtnNetwork implements Reloadable {
+public final class BtnNetwork implements Reloadable, BanlistRuleProvider {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
 
@@ -91,6 +95,7 @@ public final class BtnNetwork implements Reloadable {
     private final HTTPUtil httpUtil;
     @Getter
     private final ModuleMatchCache moduleMatchCache;
+    private final BanlistRuleProviderRegistry providerRegistry;
     private boolean enabled;
     private String powCaptchaEndpoint;
     private long nextConfigAttemptTime = 0;
@@ -98,7 +103,8 @@ public final class BtnNetwork implements Reloadable {
 
     public BtnNetwork(ScriptEngineManager scriptEngineManager, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
                       MetadataService metadataDao, HistoryService historyDao, TrackedSwarmService trackedSwarmDao, TorrentService torrentService,
-                      PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager) {
+                      PeerRecordService peerRecordService, BackgroundTaskManager backgroundTaskManager, AlertManager alertManager,
+                      BanlistRuleProviderRegistry providerRegistry) {
         this.peerRecordService = peerRecordService;
         this.server = downloaderServer;
         this.scriptEngineManager = scriptEngineManager;
@@ -110,6 +116,8 @@ public final class BtnNetwork implements Reloadable {
         this.torrentDao = torrentService;
         this.backgroundTaskManager = backgroundTaskManager;
         this.alertManager = alertManager;
+        this.providerRegistry = providerRegistry;
+        this.providerRegistry.register(this);
         Main.getReloadManager().register(this);
         Main.getEventBus().register(this);
     }
@@ -127,6 +135,35 @@ public final class BtnNetwork implements Reloadable {
 
     public boolean isEnableBTN() {
         return Main.getMainConfig().getBoolean("btn.enabled");
+    }
+
+    @Override
+    public @NotNull String getBanlistProviderName() {
+        return "BTN";
+    }
+
+    @Override
+    public @NotNull Map<IPAddress, String> getBanlist() {
+        Map<IPAddress, String> result = new HashMap<>();
+        var denyList = abilities.get(BtnAbilityIPDenyList.class);
+        if (denyList instanceof BtnAbilityIPDenyList denyListAbility) {
+            mergeMatcher(result, denyListAbility.getIpMatcher(), "BTN DenyList");
+        }
+        var rules = abilities.get(BtnAbilityRules.class);
+        if (rules instanceof BtnAbilityRules rulesAbility && rulesAbility.getBtnRule() != null) {
+            rulesAbility.getBtnRule().getIpRules().forEach((category, matcher) ->
+                    mergeMatcher(result, matcher, "BTN " + category));
+        }
+        return result;
+    }
+
+    private void mergeMatcher(Map<IPAddress, String> target, IPMatcher matcher, String fallbackDescription) {
+        matcher.copyAddresses().forEach((address, comment) -> {
+            String description = comment == null || comment.isBlank()
+                    ? fallbackDescription
+                    : fallbackDescription + ": " + comment;
+            target.merge(address, description, (left, right) -> left + "\n" + right);
+        });
     }
 
     public synchronized void reloadConfig() {
@@ -148,8 +185,13 @@ public final class BtnNetwork implements Reloadable {
     }
 
     private void resetAbilities() {
+        boolean shouldNotify = abilities.containsKey(BtnAbilityIPDenyList.class)
+                || abilities.containsKey(BtnAbilityRules.class);
         abilities.values().forEach(BtnAbility::unload);
         abilities.clear();
+        if (shouldNotify) {
+            notifyBanlistUpdated();
+        }
     }
 
     private void resetScheduler() {
@@ -196,8 +238,7 @@ public final class BtnNetwork implements Reloadable {
                 }
                 boolean useLegacyAbilities = min_protocol_version < 20;
                 resetScheduler();
-                abilities.values().forEach(BtnAbility::unload);
-                abilities.clear();
+                resetAbilities();
                 if (json.has("proof_of_work_captcha") && !json.isJsonNull()) {
                     JsonObject powCaptcha = json.get("proof_of_work_captcha").getAsJsonObject();
                     this.powCaptchaEndpoint = powCaptcha.get("endpoint").getAsString();
@@ -249,6 +290,7 @@ public final class BtnNetwork implements Reloadable {
                         log.error(tlUI(Lang.UNABLE_LOAD_BTN_ABILITY, a.getClass().getSimpleName()), e);
                     }
                 });
+                notifyBanlistUpdated();
                 configSuccess.set(true);
                 configResult = submit ? new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL) : new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL_READ_ONLY);
             } catch (Throwable e) {
