@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.text;
 
 public enum Lang {
+    SOFTWARE_UPDATE_CHECK,
+    SOFTWARE_UPDATE_PREPARE,
     DISCOVER_NEW_CLIENT,
     WAIT_FOR_MODULES_STARTUP,
     MODULE_REGISTER,

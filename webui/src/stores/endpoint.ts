@@ -1,11 +1,10 @@
-import type { GlobalConfig, mainfest, release } from '@/api/model/manifest'
+import type { GlobalConfig, mainfest } from '@/api/model/manifest'
 import type { LicenseManifest } from '@/api/model/plus'
 import { basePath } from '@/router'
 import { IncorrectTokenError, login, NeedInitError } from '@/service/login'
 import { getPBHPlusStatus, setPHBPlusKey } from '@/service/plus'
 import {
   GetGlobalConfig,
-  getLatestVersion,
   getManifest,
   GetManifestError,
   UpdateGlobalConfig
@@ -34,11 +33,9 @@ export function isModuleEnable(
 
 export const useEndpointStore = defineStore('endpoint', () => {
   const endpoint = useStorage('endpoint', import.meta.env.VITE_APP_BASE_URL)
-  const accessToken = useStorage('accessToken', '')
   const storageAuthToken = useStorage('authToken', '', undefined, { writeDefaults: false })
   const authToken = ref<string>(storageAuthToken.value)
 
-  const latestVersion = ref<release>()
   const serverAvailable = ref(newPromiseLock<void>())
   const pushLock = () => {
     const lock = newPromiseLock<void>()
@@ -49,7 +46,6 @@ export const useEndpointStore = defineStore('endpoint', () => {
   const serverManifest = ref<mainfest | null>()
   const status = ref<'checking' | 'needLogin' | 'pass' | 'fail' | 'needInit'>('checking')
   const error = ref<Error | null>(null)
-  const checkUpgradeError = ref<Error | null>(null)
   const emitter = ref(mitt())
 
   const setAuthToken = async (token: string | null, rememberPassword = false) => {
@@ -138,22 +134,6 @@ export const useEndpointStore = defineStore('endpoint', () => {
     serverManifest.value = await getManifest(endpoint.value)
   }
 
-  const setAccessToken = async (value: string) => {
-    accessToken.value = value
-    try {
-      await serverAvailable.value
-      const latestRelease = await getLatestVersion()
-      latestVersion.value = {
-        tagName: latestRelease.tag_name,
-        url: latestRelease.html_url,
-        changeLog: latestRelease.body ?? ''
-      }
-    } catch (err) {
-      checkUpgradeError.value = err as Error
-      console.error('Failed to get version:', err)
-    }
-  }
-
   const plusStatus = ref<LicenseManifest | null>()
   const getPlusStatus = async () => {
     const result = await getPBHPlusStatus()
@@ -199,7 +179,6 @@ export const useEndpointStore = defineStore('endpoint', () => {
   }
 
   setTimeout(async () => getPlusStatus())
-  setTimeout(async () => setAccessToken(accessToken.value), 3000)
   setTimeout(async () => {
     await getGlobalConfig()
   })
@@ -215,11 +194,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
     loading: computed(() => status.value === 'checking'),
     status: readonly(status),
     error: readonly(error),
-    checkUpgradeError: readonly(checkUpgradeError),
-    accessToken: readonly(accessToken),
-    latestVersion: readonly(latestVersion),
     setEndpoint,
-    setAccessToken,
     authToken: readonly(authToken),
     setAuthToken,
     plusStatus,

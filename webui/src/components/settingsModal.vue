@@ -31,18 +31,6 @@
           <template #suffix> ms </template>
         </a-input-number>
       </a-form-item>
-      <a-form-item field="accessToken" label="Github Access Token:" validate-trigger="input">
-        <template #extra>
-          <i18n-t keypath="settings.modal.accessTokenTips">
-            <template #here>
-              <a href="https://github.com/settings/tokens">{{
-                t('settings.modal.accessTokenTips.here')
-              }}</a>
-            </template>
-          </i18n-t>
-        </template>
-        <a-input v-model="form.accessToken" allow-clear />
-      </a-form-item>
     </a-form>
   </a-modal>
 </template>
@@ -62,8 +50,7 @@ const loading = computed(() => endPointStore.loading)
 
 const form = ref({
   endpoint: endPointStore.endpointSaved,
-  interval: autoUpdateState.interval,
-  accessToken: endPointStore.accessToken
+  interval: autoUpdateState.interval
 })
 
 const { t } = useI18n()
@@ -81,7 +68,6 @@ defineExpose({
 const handleOk = () => {
   if (loading.value) return
   autoUpdateState.interval = form.value.interval
-  endPointStore.setAccessToken(form.value.accessToken)
   return endPointStore.setEndpoint(form.value.endpoint)
 }
 const handleCancel = () => {

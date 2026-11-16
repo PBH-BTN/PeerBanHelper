@@ -576,3 +576,5 @@ DIGESTION_SYSTEM_WATCH_EARLY_WARNING: "[WatchDog] The ban thread is about to rea
 DOWNLOADER_JSONRPC_REQUEST_FAILED: "[Error] An error occurred while executing a JsonRPC request on downloader {} ({}): {} - {}: {}"
 
 DOWNLOADER_ARIA2NEXT_INCORRECT_PRODUCT: "[Error] The currently connected Aria2 RPC server is not Aria2Next. PeerBanHelper only supports the Aria2Next branch; the official version and other Aria2 branches are not supported due to technical limitations."
+SOFTWARE_UPDATE_CHECK: "Check for PeerBanHelper updates"
+SOFTWARE_UPDATE_PREPARE: "Prepare PeerBanHelper update"
