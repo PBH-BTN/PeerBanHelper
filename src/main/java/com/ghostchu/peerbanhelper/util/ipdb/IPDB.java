@@ -17,7 +17,6 @@ import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.model.CountryResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
-import io.sentry.Sentry;
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -26,7 +25,6 @@ import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okio.Okio;
 import org.jetbrains.annotations.NotNull;
 import org.tukaani.xz.XZInputStream;
 
@@ -36,11 +34,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -288,16 +285,13 @@ public final class IPDB implements AutoCloseable {
                     IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/PBH-BTN/GeoLite.mmdb/releases/latest/download/", databaseName, true);
                     IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", databaseName, true);
                     IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);
-                    Path tmp = Files.createTempFile(databaseName, ".mmdb");
-                    downloadFile(tmp, databaseName, task, callback, mirror1, mirror3, mirror4).join();
-                    if (!tmp.toFile().exists()) {
+                    if (!downloadFile(target.toPath(), databaseName, task, callback, mirror1, mirror3, mirror4).join()) {
                         if (isMmdbNeverDownloaded(target)) {
                             throw new IllegalStateException("Download mmdb database failed!");
                         } else {
                             log.warn(tlUI(Lang.IPDB_EXISTS_UPDATE_FAILED, databaseName));
                         }
                     }
-                    Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
         )).join();
     }
@@ -319,90 +313,82 @@ public final class IPDB implements AutoCloseable {
         return System.currentTimeMillis() - target.lastModified() > updateInterval;
     }
 
-    private CompletableFuture<Void> downloadFile(Path path, String databaseName, BackgroundTask bgTask, java.util.function.Consumer<BackgroundTask> callback, IPDBDownloadSource... mirrorList) {
-        return downloadFile(Arrays.stream(mirrorList).collect(Collectors.toList()), path, databaseName, bgTask, callback);
-    }
-
-    private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName, BackgroundTask bgTask, java.util.function.Consumer<BackgroundTask> callback) {
-        return CompletableFuture.runAsync(() -> {
-            IPDBDownloadSource mirror = mirrorList.removeFirst();
-            // 创建带有进度追踪器的 HTTP 客户端
-            bgTask.setStatusText(new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB_DESCRIPTION, mirror.getIPDBUrl()));
-            callback.accept(bgTask);
-            Request request = new Request.Builder()
-                    .url(mirror.getIPDBUrl())
-                    .get()
-                    .build();
-            try (Response response = httpClient.newCall(request).execute()) {
-                var body = response.body();
-                long totalSize = body.contentLength();
-                long totalRead = 0;
-                bgTask.setMax(totalSize);
-                if (totalSize <= 0) {
-                    bgTask.setBarType(BackgroundTaskProgressBarType.INDETERMINATE);
-                } else {
-                    bgTask.setBarType(BackgroundTaskProgressBarType.DETERMINATE);
-                }
-                callback.accept(bgTask);
-                if (response.code() == 200) {
-                    if (mirror.supportXzip()) {
-                        try {
-                            File tmp = File.createTempFile(databaseName, ".tmp");
-                            try (XZInputStream gzipInputStream = new XZInputStream(body.byteStream());
-                                 FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
-                                byte[] buffer = new byte[1024];
-                                int len;
-                                while ((len = gzipInputStream.read(buffer)) > 0) {
-                                    totalRead += len;
-                                    fileOutputStream.write(buffer, 0, len);
-                                    bgTask.setCurrent(totalRead);
-                                    callback.accept(bgTask);
-                                }
-                            }
-                            bgTask.setBarType(BackgroundTaskProgressBarType.INDETERMINATE);
-                            callback.accept(bgTask);
-                            // validate mmdb
-                            validateMMDB(tmp);
-                            Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                            log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
-                            return;
-                        } catch (IOException e) {
-                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED, databaseName), e);
+    private CompletableFuture<Boolean> downloadFile(Path path, String databaseName, BackgroundTask bgTask, java.util.function.Consumer<BackgroundTask> callback, IPDBDownloadSource... mirrorList) {
+        return CompletableFuture.supplyAsync(() -> {
+            Path target = path.toAbsolutePath();
+            for (int i = 0; i < mirrorList.length; i++) {
+                IPDBDownloadSource mirror = mirrorList[i];
+                Path tmp = null;
+                try {
+                    bgTask.setCurrent(0);
+                    bgTask.setStatusText(new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB_DESCRIPTION, mirror.getIPDBUrl()));
+                    callback.accept(bgTask);
+                    Request request = new Request.Builder().url(mirror.getIPDBUrl()).get().build();
+                    // Keep staging files on the target filesystem so replacement can be atomic.
+                    tmp = Files.createTempFile(target.getParent(), target.getFileName() + "-", ".tmp");
+                    try (Response response = httpClient.newCall(request).execute()) {
+                        if (response.code() != 200) {
+                            throw new IOException("HTTP " + response.code() + " from " + mirror.getIPDBUrl());
                         }
+                        var body = response.body();
+                        if (body == null) {
+                            throw new IOException("Empty response body from " + mirror.getIPDBUrl());
+                        }
+                        long totalSize = body.contentLength();
+                        bgTask.setMax(totalSize);
+                        bgTask.setBarType(totalSize <= 0 ? BackgroundTaskProgressBarType.INDETERMINATE : BackgroundTaskProgressBarType.DETERMINATE);
+                        callback.accept(bgTask);
+                        try (InputStream input = mirror.supportXzip() ? new XZInputStream(body.byteStream()) : body.byteStream();
+                             OutputStream output = Files.newOutputStream(tmp)) {
+                            byte[] buffer = new byte[8192];
+                            long totalRead = 0;
+                            int len;
+                            while ((len = input.read(buffer)) != -1) {
+                                output.write(buffer, 0, len);
+                                totalRead += len;
+                                bgTask.setCurrent(totalRead);
+                                callback.accept(bgTask);
+                            }
+                        }
+                    }
+                    bgTask.setBarType(BackgroundTaskProgressBarType.INDETERMINATE);
+                    callback.accept(bgTask);
+                    // Validate both compressed and uncompressed downloads before touching the old database.
+                    validateMMDB(tmp.toFile());
+                    Files.move(tmp, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                    log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
+                    return true;
+                } catch (Exception e) {
+                    log.warn(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, mirror.getIPDBUrl() + ": " + e.getMessage()), e);
+                    if (i + 1 < mirrorList.length) {
+                        log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
                     } else {
-                        // 直接保存文件
-                        try (var source = body.source();
-                             var sink = Okio.buffer(Okio.sink(path))) {
-                            sink.writeAll(source);
-                            log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
-                            return;
+                        bgTask.setStatus(BackgroundTaskStatus.FAILED);
+                        bgTask.setStatusText(new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB_FAILED_DESCRIPTION, e.getMessage()));
+                        callback.accept(bgTask);
+                    }
+                } finally {
+                    if (tmp != null) {
+                        try {
+                            Files.deleteIfExists(tmp);
+                        } catch (IOException e) {
+                            log.warn("Unable to delete temporary IP database {}", tmp, e);
                         }
                     }
                 }
-
-                if (!mirrorList.isEmpty()) {
-                    log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                    downloadFile(mirrorList, path, databaseName, bgTask, callback).join();
-                    return;
-                }
-                log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, response.code() + " - " + response.body().string()));
-            } catch (Exception e) {
-                if (!mirrorList.isEmpty()) {
-                    log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                    downloadFile(mirrorList, path, databaseName, bgTask, callback).join();
-                    return;
-                }
-                log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
-                bgTask.setStatus(BackgroundTaskStatus.FAILED);
-                bgTask.setStatusText(new TranslationComponent(Lang.IPDB_DOWNLOAD_MMDB_FAILED_DESCRIPTION, e.getMessage()));
-                callback.accept(bgTask);
             }
+            return false;
         });
     }
 
-    private void validateMMDB(File tmp) throws IOException {
+    private void validateMMDB(File tmp) throws IOException, InvalidNetworkException {
         try (InputStream is = new FileInputStream(tmp);
              var reader = new Reader(is, NoCache.getInstance())) {
+            // Opening a reader only validates metadata; also decode records to detect corrupt data/tree pointers.
+            var networks = reader.networks(Map.class);
+            while (networks.hasNext()) {
+                networks.next();
+            }
             log.debug("Validate mmdb {} success: {}", tmp.getName(), reader.getMetadata().databaseType());
         }
     }

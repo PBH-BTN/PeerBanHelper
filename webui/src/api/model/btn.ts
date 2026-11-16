@@ -62,8 +62,75 @@ export interface BTNTorrents {
 export interface BTNIPQuery {
   color: string
   labels: string[]
-  bans: BTNBans
-  swarms: BTNSwarms
-  traffic: BTNTraffic
-  torrents: BTNTorrents
+  bans: BTNBans | null
+  swarms: BTNSwarms | null
+  traffic: BTNTraffic | null
+  torrents: BTNTorrents | null
+}
+
+export interface BTNIPGeo {
+  country: string | null
+  province: string | null
+  city: string | null
+  district: string | null
+  asn: string | null
+  asnOrganization: string | null
+  asnNetwork: string | null
+  isp: string | null
+  networkType: string | null
+}
+
+export interface BTNCommentAccess {
+  visible: boolean
+  publishingEnabled: boolean
+  moderationEnabled: boolean
+  maxLength: number
+  hourlyLimit: number
+}
+
+export interface BTNIPLookup {
+  canComment: boolean
+  lookup: {
+    normalizedAddress: string
+    canonicalCidr: string
+    rangeStart: string
+    rangeEnd: string
+    totalAddresses: string
+    expandedAddress: string
+    binaryAddress: string
+    decimalAddress: string | null
+    reverseDnsName: string
+    flags: string[]
+    globallyRoutable: boolean
+    geoStart: BTNIPGeo | null
+    geoEnd: BTNIPGeo | null
+    activity: BTNIPQuery
+    defaultCommentScope: string
+    commentScopes: { prefix: number; scope: string }[]
+    commentAccess: BTNCommentAccess
+  }
+}
+
+export interface BTNIPComment {
+  id: number
+  parentId: number | null
+  network: string
+  authorNickname: string | null
+  content: string
+  revision: number
+  createdAt: string
+  moderationStatus: string
+  moderationReason: string | null
+  canEdit: boolean
+  canDelete: boolean
+  history: { revision: number; content: string; createdAt: string }[]
+}
+
+export interface BTNIPCommentPage {
+  records: BTNIPComment[]
+  current: number
+  size: number
+  total: number
+  scope: string
+  access: BTNCommentAccess
 }

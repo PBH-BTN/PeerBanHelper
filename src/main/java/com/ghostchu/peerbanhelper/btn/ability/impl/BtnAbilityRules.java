@@ -121,13 +121,12 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                     setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
                     return;
                 }
+                String responseBody = response.body().string();
                 if (!response.isSuccessful()) {
-                    String responseBody = response.body().string();
                     log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
                     setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
                 } else {
                     try {
-                        String responseBody = response.body().string();
                         BtnRuleset btr = JsonUtil.getGson().fromJson(responseBody, BtnRuleset.class);
                         this.btnRule = new BtnRulesetParsed(scriptEngineManager, btr, scriptExecute);
                         Main.getEventBus().post(new BtnRuleUpdateEvent());
@@ -136,7 +135,6 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                         setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
                         btnNetwork.getModuleMatchCache().invalidateAll();
                     } catch (JsonSyntaxException e) {
-                        String responseBody = response.body().string();
                         setLastStatus(false, new TranslationComponent("JsonSyntaxException: " + response.code() + " - " + responseBody));
                         log.error("Unable to parse BtnRule as a valid Json object: {}-{}", response.code(), responseBody, e);
                     }

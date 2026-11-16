@@ -6,14 +6,22 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,17 +29,34 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public final class BtnAbilityIpQuery extends AbstractBtnAbility {
+    public static final int MAX_COMMENT_COUNT_BATCH = 50;
+    private static final MediaType JSON = MediaType.get("application/json");
     private final BtnNetwork btnNetwork;
     private final String endpoint;
     private final boolean powCaptcha;
+    private final boolean commentCountsPowCaptcha;
+    @Getter
+    private final HttpUrl lookupEndpoint;
+    @Getter
+    private final HttpUrl commentsEndpoint;
+    @Getter
+    private final HttpUrl commentCountsEndpoint;
+    private final Cache<String, Long> commentCountCache = CacheBuilder.newBuilder()
+            .maximumSize(4096)
+            .expireAfterWrite(Duration.ofMinutes(1))
+            .build();
+    private final ReentrantLock commentCountRequest = new ReentrantLock();
     @Getter
     private final String iframeEndpoint;
 
@@ -39,6 +64,11 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         this.btnNetwork = btnNetwork;
         this.endpoint = ability.get("endpoint").getAsString();
         this.powCaptcha = ability.has("pow_captcha") && ability.get("pow_captcha").getAsBoolean();
+        this.lookupEndpoint = optionalUrl(ability, "lookup_endpoint");
+        this.commentsEndpoint = optionalUrl(ability, "comments_endpoint");
+        this.commentCountsEndpoint = optionalUrl(ability, "comment_counts_endpoint");
+        this.commentCountsPowCaptcha = ability.has("comment_counts_pow_captcha")
+                && ability.get("comment_counts_pow_captcha").getAsBoolean();
         this.iframeEndpoint = ability.has("iframe_endpoint") ? ability.get("iframe_endpoint").getAsString() : null;
     }
 
@@ -83,9 +113,140 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
         }
     }
 
+    private static HttpUrl optionalUrl(JsonObject ability, String key) {
+        JsonElement value = ability.get(key);
+        return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()
+                ? HttpUrl.parse(value.getAsString())
+                : null;
+    }
+
+    public JsonObject lookup(String query) throws IOException {
+        return requestJson(new Request.Builder()
+                .url(lookupEndpoint.newBuilder().addQueryParameter("query", query).build()), powCaptcha);
+    }
+
+    public JsonObject listComments(String scope, int page) throws IOException {
+        return requestJson(new Request.Builder().url(commentsEndpoint.newBuilder()
+                .addQueryParameter("scope", scope)
+                .addQueryParameter("page", Integer.toString(page)).build()), powCaptcha);
+    }
+
+    public JsonObject createComment(CreateComment comment) throws IOException {
+        return requestJson(new Request.Builder().url(commentsEndpoint)
+                .post(jsonBody(comment)), powCaptcha);
+    }
+
+    public JsonObject updateComment(long id, UpdateComment comment) throws IOException {
+        return requestJson(new Request.Builder().url(commentUrl(id))
+                .put(jsonBody(comment)), powCaptcha);
+    }
+
+    public void deleteComment(long id) throws IOException {
+        requestJson(new Request.Builder().url(commentUrl(id)).delete(), powCaptcha);
+    }
+
+    private HttpUrl commentUrl(long id) {
+        return commentsEndpoint.newBuilder().addPathSegment(Long.toString(id)).build();
+    }
+
+    public Map<String, Long> queryCommentCounts(List<String> addresses) throws IOException {
+        if (addresses.isEmpty() || addresses.size() > MAX_COMMENT_COUNT_BATCH) {
+            throw new IllegalArgumentException("Expected between 1 and 50 IP addresses");
+        }
+        Map<String, Long> counts = new LinkedHashMap<>(commentCountCache.getAllPresent(addresses));
+        if (addresses.stream().allMatch(counts::containsKey)) {
+            return counts;
+        }
+        // Limits concurrent upstream batches across browser sessions, including the PoW solver.
+        if (!commentCountRequest.tryLock()) {
+            throw new UpstreamException(429, null);
+        }
+        try {
+            counts.putAll(commentCountCache.getAllPresent(addresses));
+            List<String> missing = addresses.stream().distinct().filter(ip -> !counts.containsKey(ip)).toList();
+            if (!missing.isEmpty()) {
+                JsonObject result = requestJson(new Request.Builder().url(commentCountsEndpoint)
+                        .post(jsonBody(missing)), commentCountsPowCaptcha);
+                Map<String, Long> fresh = new LinkedHashMap<>();
+                for (String ip : missing) {
+                    fresh.put(ip, readCount(result, ip));
+                }
+                commentCountCache.putAll(fresh);
+                counts.putAll(fresh);
+            }
+            return counts;
+        } finally {
+            commentCountRequest.unlock();
+        }
+    }
+
+    private static long readCount(JsonObject result, String ip) throws IOException {
+        JsonElement count = result.get(ip);
+        if (count != null && count.isJsonPrimitive() && count.getAsJsonPrimitive().isNumber()) {
+            try {
+                long value = count.getAsBigDecimal().longValueExact();
+                if (value >= 0) {
+                    return value;
+                }
+            } catch (ArithmeticException ignored) {
+                // Non-integral or out-of-range counts are invalid.
+            }
+        }
+        throw new IOException("Invalid BTN comment count response");
+    }
+
+    private RequestBody jsonBody(Object body) {
+        return RequestBody.create(JsonUtil.standard().toJson(body), JSON);
+    }
+
+    private JsonObject requestJson(Request.Builder builder, boolean requirePow) throws IOException {
+        if (requirePow) {
+            btnNetwork.gatherAndSolveCaptchaBlocking(builder, "ip_query");
+        }
+        try (Response response = btnNetwork.getHttpClient().newCall(builder.build()).execute()) {
+            if (response.code() == 204) {
+                return new JsonObject();
+            }
+            if (!response.isSuccessful()) {
+                String message = null;
+                if (response.code() == 400 || response.code() == 409 || response.code() == 429) {
+                    try {
+                        JsonElement field = JsonParser.parseString(response.body().string())
+                                .getAsJsonObject().get("message");
+                        if (field != null && field.isJsonPrimitive() && field.getAsJsonPrimitive().isString()) {
+                            message = field.getAsString();
+                        }
+                    } catch (JsonParseException | IllegalStateException ignored) {
+                        // Other BTN implementations may return a different error body.
+                    }
+                }
+                throw new UpstreamException(response.code(), message);
+            }
+            return JsonParser.parseString(response.body().string()).getAsJsonObject();
+        } catch (JsonParseException | IllegalStateException e) {
+            throw new IOException("Invalid BTN IP query response", e);
+        }
+    }
+
+    public record CreateComment(String scope, Long parentId, String content) {
+    }
+
+    public record UpdateComment(String content, Integer revision) {
+    }
+
+    public static final class UpstreamException extends IOException {
+        @Getter
+        private final int status;
+
+        private UpstreamException(int status, String message) {
+            super(message);
+            this.status = status;
+        }
+    }
+
     @Override
     public void unload() {
-
+        commentCountCache.invalidateAll();
     }
 
     @AllArgsConstructor

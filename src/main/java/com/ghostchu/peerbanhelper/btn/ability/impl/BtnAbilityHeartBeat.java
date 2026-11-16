@@ -89,7 +89,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                 lastResult = "default -> Failed: " + resp.code() + " - " + responseBody;
             } else {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_HEARTBEAT_SUCCESS));
-                ServerResponse data = JsonUtil.standard().fromJson(resp.body().charStream(), ServerResponse.class);
+                ServerResponse data = JsonUtil.standard().fromJson(responseBody, ServerResponse.class);
                 if (data != null && data.getExternalIp() != null) {
                     lastResult = "default -> " + (ExternalSwitch.parseBoolean("pbh.demoMode") ? "<REDACTED>" : data.getExternalIp());
                 } else {

@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.ghostchu.peerbanhelper"
-version = "9.5.2"
+version = "9.5.5"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -46,7 +46,7 @@ repositories {
 }
 
 val flatlafVersion = "3.7.2"
-val nettyVersion = "4.2.19.Final"
+val nettyVersion = "4.2.20.Final"
 val sqliteVersion = "3.53.4.0"
 val springVersion = "7.0.10"
 val flywayVersion = "13.11.1"
@@ -175,7 +175,7 @@ dependencies {
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
 
     // SWT (provided scope - for compilation only)
-    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.135.0")
+    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
 
     // install4j stuff
     compileOnly("com.install4j:install4j-runtime:13.1.1")
