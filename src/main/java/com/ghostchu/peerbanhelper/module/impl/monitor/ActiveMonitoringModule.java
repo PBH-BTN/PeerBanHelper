@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
@@ -140,7 +141,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             return;
         }
         if (!alertManager.identifierAlertExistsIncludeRead(identifier)) {
-            alertManager.publishAlert(true,
+            alertManager.publishAlert(BuiltinNotifications.TRAFFIC_LIMIT.id(),
                     AlertLevel.WARN,
                     identifier,
                     new TranslationComponent(Lang.MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_TITLE, dateString),

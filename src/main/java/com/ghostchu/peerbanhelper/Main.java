@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
@@ -158,6 +159,7 @@ public class Main {
                     applicationContext = new AnnotationConfigApplicationContext();
                     applicationContext.register(AppConfig.class);
                     applicationContext.refresh();
+                    webContainer.setAlertManager(applicationContext.getBean(AlertManager.class));
                     server = applicationContext.getBean(PeerBanHelper.class);
                     server.start();
                     log.info(tlUI(Lang.BOOT_TIME, System.currentTimeMillis() - bootSince));

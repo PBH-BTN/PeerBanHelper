@@ -33,13 +33,13 @@ public interface AlertManager {
     /**
      * 发布警报
      *
-     * @param push       是否使用推送渠道进行推送？否则只有 WebUI 能看到
+     * @param categoryId 注册的通知类别 ID
      * @param level      事件等级
      * @param identifier 事件标识符，同一个表示符在同一时间只能有一个未读的存在，如果已经有一个未读的相同标识符的警报存在，新的警报将被忽略; null 则随机生成一个
      * @param title      警报标题
      * @param content    警报内容
      */
-    void publishAlert(boolean push, @NotNull AlertLevel level, @NotNull String identifier, @NotNull TranslationComponent title, @NotNull TranslationComponent content);
+    void publishAlert(@NotNull String categoryId, @NotNull AlertLevel level, @Nullable String identifier, @NotNull TranslationComponent title, @NotNull TranslationComponent content);
 
     /**
      * 获取当前所有未读警报中最高等级的警报等级
