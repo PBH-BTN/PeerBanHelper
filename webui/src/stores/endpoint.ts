@@ -34,6 +34,10 @@ export function isModuleEnable(
 
 export const useEndpointStore = defineStore('endpoint', () => {
   const endpoint = useStorage('endpoint', import.meta.env.VITE_APP_BASE_URL)
+  const resolvedEndpoint = computed(() => {
+    if (endpoint.value) return endpoint.value
+    return new URL(basePath || '/', location.href).href
+  })
   const accessToken = useStorage('accessToken', '')
   const storageAuthToken = useStorage('authToken', '', undefined, { writeDefaults: false })
   const authToken = ref<string>(storageAuthToken.value)
@@ -100,10 +104,11 @@ export const useEndpointStore = defineStore('endpoint', () => {
     endpoint.value = value
     pushLock()
     try {
+      const manifestEndpoint = resolvedEndpoint.value
       serverManifest.value = await (options?.retryOnNetWorkFail
         ? networkFailRetryNotication(
             () =>
-              getManifest(value)
+              getManifest(manifestEndpoint)
                 .then((res) => [false, res] as const)
                 .catch((err) => {
                   if (GetManifestError.is(err) && !err.isApiWrong) return [true, null]
@@ -111,7 +116,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
                 }),
             () => new GetManifestError('Manual Cancel', true, true)
           )
-        : getManifest(value))
+        : getManifest(manifestEndpoint))
       try {
         await setAuthToken(authToken.value)
       } catch (err) {
@@ -135,7 +140,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
   }
 
   const refreshManifest = async () => {
-    serverManifest.value = await getManifest(endpoint.value)
+    serverManifest.value = await getManifest(resolvedEndpoint.value)
   }
 
   const setAccessToken = async (value: string) => {
@@ -205,11 +210,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
   })
   return {
     endpointSaved: readonly(endpoint),
-    endpoint: computed(() => {
-      if (endpoint.value) return endpoint.value
-      const baseUrl = new URL(basePath || '/', location.href)
-      return baseUrl.href
-    }),
+    endpoint: resolvedEndpoint,
     serverAvailable: readonly(serverAvailable),
     serverManifest: readonly(serverManifest),
     loading: computed(() => status.value === 'checking'),
