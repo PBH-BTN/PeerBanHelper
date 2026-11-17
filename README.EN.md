@@ -37,7 +37,7 @@ Additionally, PeerBanHelper downloads the GeoIP database on startup. Once loaded
 > All Docker-based downloaders must use host network driver. PBH requires real peer IPs - bridge mode is unsupported!
 
 - qBittorrent/qBittorrent **v4.5.0 or newer** (XDown not supported)
-- BiglyBT (requires [plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT))
+- BiglyBT (requires [plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT) 2.1.0 or later)
 - Deluge (requires [plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge))
 - Transmission **(v4.1.0-beta2 or newer required)**
 - BitComet **v2.18 or newer** (LTSeed anti-leech unsupported due to BitComet's limitation)
