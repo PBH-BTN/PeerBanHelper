@@ -13,8 +13,6 @@ import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.downloader.exception.DownloaderRequestException;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
-import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
-import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetListenPort;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetSpeedLimiterBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.CurrentListenPort;
@@ -33,7 +31,6 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.vdurmont.semver4j.Semver;
 import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import lombok.Data;
@@ -64,7 +61,6 @@ public final class BiglyBT extends AbstractDownloader {
     private final OkHttpClient httpClient;
     private final Config config;
     private final String connectorPayload;
-    private volatile boolean versioned;
     private BanStatus confirmed;
     private List<String> desiredBans;
 
@@ -198,19 +194,11 @@ public final class BiglyBT extends AbstractDownloader {
             try (Response resp = httpClient.newCall(request).execute()) {
                 if (resp.isSuccessful()) {
                     MetadataCallbackBean metadataCallbackBean = JsonUtil.standard().fromJson(resp.body().string(), MetadataCallbackBean.class);
-                    // 验证版本号
-                    var version = metadataCallbackBean.getPluginVersion();
-                    Semver semver = new Semver(version);
-                    // 检查是否大于等于 1.2.8
-                    if (semver.isLowerThan("1.3.0")) {
-                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.3.0"));
-                    }
-                    versioned = metadataCallbackBean.getProtocol() == 2;
-                    if (metadataCallbackBean.getProtocol() != 0 && !versioned) {
+                    if (metadataCallbackBean == null || metadataCallbackBean.getProtocol() != 2) {
                         return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS,
-                                new TranslationComponent("Unsupported BiglyBT adapter protocol"));
+                                new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "2.1.0"));
                     }
-                    boolean filtering = !versioned || recoverBans().filterEnabled();
+                    boolean filtering = recoverBans().filterEnabled();
                     RequestBody requestBody = RequestBody.create(connectorPayload, MediaType.get("application/json"));
                     Request setConnectorRequest = new Request.Builder()
                             .url(apiEndpoint + "/setconnector")
@@ -269,28 +257,19 @@ public final class BiglyBT extends AbstractDownloader {
     public synchronized void setBanList(@NotNull Collection<IPAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         List<String> previousBans = desiredBans;
         desiredBans = normalizeAddresses(fullList);
-        if (versioned) {
-            boolean delta = config.isIncrementBan() && !applyFullList && confirmed != null
-                    && previousBans != null && added != null && removed != null;
-            BanStatus base = confirmed;
-            confirmed = null;
-            if (delta) {
-                confirmed = requestBans("PATCH", new BanUpdate(base.instance(), base.revision(),
-                        difference(desiredBans, previousBans), difference(previousBans, desiredBans)));
-            }
-            if (confirmed == null) {
-                confirmed = replaceVersionedBans();
-            }
-            if (!confirmed.filterEnabled()) {
-                throw new IllegalStateException("BiglyBT IP filtering is disabled");
-            }
-            return;
-        }
+        boolean delta = config.isIncrementBan() && !applyFullList && confirmed != null
+                && previousBans != null && added != null && removed != null;
+        BanStatus base = confirmed;
         confirmed = null;
-        if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
-            setBanListIncrement(added);
-        } else {
-            setBanListFull(desiredBans);
+        if (delta) {
+            confirmed = requestBans("PATCH", new BanUpdate(base.instance(), base.revision(),
+                    difference(desiredBans, previousBans), difference(previousBans, desiredBans)));
+        }
+        if (confirmed == null) {
+            confirmed = replaceVersionedBans();
+        }
+        if (!confirmed.filterEnabled()) {
+            throw new IllegalStateException("BiglyBT IP filtering is disabled");
         }
     }
 
@@ -370,7 +349,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public @NotNull List<Torrent> getTorrents() {
-        return versioned ? fetchSnapshot() : fetchActiveTorrents();
+        return fetchSnapshot();
     }
 
     private List<Torrent> fetchActiveTorrents() {
@@ -574,33 +553,6 @@ public final class BiglyBT extends AbstractDownloader {
             return null;
         }
     }
-
-    private void setBanListIncrement(Collection<BanMetadata> added) {
-        var addresses = added.stream().map(ban -> ban.getPeer().getAddress().getAddress()).toList();
-        writeLegacyBans("POST", new BanBean(normalizeAddresses(addresses)));
-    }
-
-    private void setBanListFull(List<String> addresses) {
-        writeLegacyBans("PUT", new BanListReplacementBean(addresses, false));
-    }
-
-    private void writeLegacyBans(String method, Object update) {
-        RequestBody body = RequestBody.create(JsonUtil.getGson().toJson(update), MediaType.get("application/json"));
-        Request request = new Request.Builder().url(apiEndpoint + "/bans").method(method, body).build();
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("BiglyBT ban update returned HTTP " + response.code());
-            }
-            var result = JsonUtil.getGson().fromJson(response.body().charStream(), LegacyBanResult.class);
-            if (result == null || result.failed() == null || result.failed() != 0) {
-                throw new IllegalStateException("BiglyBT did not confirm the complete ban update");
-            }
-        } catch (IOException e) {
-            throw new DownloaderRequestException(e);
-        }
-    }
-
-    private record LegacyBanResult(Integer failed) {}
 
     @Override
     public void close() {

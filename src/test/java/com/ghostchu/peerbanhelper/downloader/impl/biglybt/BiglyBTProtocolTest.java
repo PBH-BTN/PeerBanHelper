@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.BuildMeta;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -102,40 +103,26 @@ class BiglyBTProtocolTest {
     }
 
     @Test
-    void legacyAdapterStillWorksAndReportsPartialBanFailures() throws Exception {
+    void legacyMetadataRequiresAnUpgradeBeforeAnyOtherRequest() throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        var expectedLegacyRoutes = new AtomicInteger();
+        var unexpected = new AtomicInteger();
         server.createContext("/", exchange -> {
-            switch (exchange.getRequestURI().getPath()) {
-                case "/metadata" -> reply(exchange, 200, "{\"pluginVersion\":\"2.0.3\"}");
-                case "/setconnector" -> reply(exchange, 200, "{}");
-                case "/downloads" -> {
-                    expectedLegacyRoutes.incrementAndGet();
-                    reply(exchange, 200, """
-                            [{"name":"idle","torrent":{"infoHash":"abcdef","size":1},"stats":{}}]
-                            """);
-                }
-                case "/download/abcdef/peers" -> {
-                    expectedLegacyRoutes.incrementAndGet();
-                    reply(exchange, 200, "{\"peers\":[]}");
-                }
-                case "/bans" -> reply(exchange, 200, "{\"success\":1,\"failed\":1}");
-                default -> reply(exchange, 404, "{}");
+            if (exchange.getRequestURI().getPath().equals("/metadata")) {
+                reply(exchange, 200, """
+                        {"pluginVersion":"2.0.3"}
+                        """);
+            } else {
+                unexpected.incrementAndGet();
+                reply(exchange, 404, "{}");
             }
         });
         server.start();
         try (var main = mockStatic(Main.class)) {
             main.when(Main::getMeta).thenReturn(new BuildMeta());
-            main.when(Main::getMainConfig).thenReturn(new YamlConfiguration());
             var adapter = connect(server);
             try {
-                assertTrue(adapter.login0().success());
-                var torrents = adapter.getTorrents();
-                assertEquals(1, torrents.size());
-                assertTrue(adapter.getPeers(torrents.getFirst()).isEmpty());
-                assertEquals(2, expectedLegacyRoutes.get());
-                var address = new IPAddressString("198.51.100.1").getAddress();
-                assertThrows(IllegalStateException.class, () -> adapter.setBanList(List.of(address), null, null, true));
+                assertEquals(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, adapter.login0().status());
+                assertEquals(0, unexpected.get());
             } finally {
                 adapter.close();
             }
