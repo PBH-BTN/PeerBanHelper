@@ -107,11 +107,11 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 .put("/api/peer/btnComments/{id}", this::handleBtnUpdateComment, Role.USER_WRITE)
                 .delete("/api/peer/btnComments/{id}", this::handleBtnDeleteComment, Role.USER_WRITE)
                 .post("/api/peer/btnCommentCounts", this::handleBtnCommentCounts, Role.USER_READ)
-                .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
-                .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ)
-                .get("/api/peer/{ip}/btnQueryIframe", this::handleBtnQueryIFrame, Role.USER_READ);
+                .get("/api/peer/info/{ip}", this::handleInfo, Role.USER_READ)
+                .get("/api/peer/accessHistory/{ip}", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/banHistory/{ip}", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/btnQuery/{ip}", this::handleBtnQuery, Role.USER_READ)
+                .get("/api/peer/btnQueryIframe/{ip}", this::handleBtnQueryIFrame, Role.USER_READ);
 
     }
 
