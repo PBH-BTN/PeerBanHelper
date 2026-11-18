@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 25
 
-      - uses: pnpm/action-setup@v6.1.0
+      - uses: pnpm/action-setup@v6.1.1
         name: Install pnpm
         with:
           version: 12.15.0

@@ -6,7 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.4.21"
-    id("io.freefair.lombok") version "9.8.2"
+    id("io.freefair.lombok") version "9.8.3"
 }
 
 group = "com.ghostchu.peerbanhelper"
@@ -46,7 +46,7 @@ repositories {
 }
 
 val flatlafVersion = "3.8"
-val nettyVersion = "4.2.20.Final"
+val nettyVersion = "4.2.21.Final"
 val sqliteVersion = "3.54.1.0"
 val springVersion = "7.0.10"
 val flywayVersion = "13.12.2"
@@ -59,7 +59,7 @@ configurations.all {
 
 dependencyManagement {
     imports {
-        mavenBom("com.baomidou:mybatis-plus-bom:3.5.17")
+        mavenBom("com.baomidou:mybatis-plus-bom:3.5.18")
     }
 }
 dependencies {
@@ -97,7 +97,7 @@ dependencies {
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
     // Javalin
-    implementation("io.javalin:javalin:7.2.3") {
+    implementation("io.javalin:javalin:7.2.4") {
         exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
     }
     // jetty
@@ -131,7 +131,7 @@ dependencies {
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.6.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.4.0")
+    implementation("de.siegmar:fastcsv:4.4.1")
     // Jackson
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
@@ -150,7 +150,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.6.5")
+    implementation("ch.qos.logback:logback-classic:1.6.7")
     implementation("org.slf4j:jcl-over-slf4j:2.0.20")
 
     // Async utilities
