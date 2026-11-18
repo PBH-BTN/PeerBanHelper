@@ -168,7 +168,8 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleBtnComments(Context ctx) {
         runBtnRequest(ctx, BtnAbilityIpQuery::getCommentsEndpoint, ability -> {
             int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
-            return ability.listComments(queryParameter(ctx, "scope"), Math.max(page, 1));
+            int pageSize = ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(BtnAbilityIpQuery.DEFAULT_COMMENT_PAGE_SIZE);
+            return ability.listComments(queryParameter(ctx, "scope"), Math.max(page, 1), pageSize);
         });
     }
 
