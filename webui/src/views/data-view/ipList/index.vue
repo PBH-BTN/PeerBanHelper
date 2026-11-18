@@ -287,10 +287,11 @@ const handleSearch = (input: string) => {
     if (!isCidr.value) run(value)
   }
 }
-onMounted(async () => {
-  if (query.ip) {
-    searchInput.value = query.ip as string
-    handleSearch(searchInput.value)
+onMounted(() => {
+  const ip = Array.isArray(query.ip) ? query.ip.find((value) => value?.trim()) : query.ip
+  if (ip) {
+    searchInput.value = ip
+    handleSearch(ip)
   }
 })
 
