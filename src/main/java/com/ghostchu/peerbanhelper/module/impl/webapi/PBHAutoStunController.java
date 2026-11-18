@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.module.ModuleStatusType;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.SystemInfoProviderWrapper;
 import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
@@ -116,7 +117,7 @@ public class PBHAutoStunController extends AbstractFeatureModule {
         section.set("enabled", autoStunConfigForm.isEnabled());
         section.set("use-friendly-loopback-mapping", autoStunConfigForm.isUseFriendlyLoopbackMapping());
         section.set("downloaders", autoStunConfigForm.getDownloaders());
-        Main.getMainConfig().save(Main.getMainConfigFile());
+        AtomicFileWriter.saveYaml(Main.getMainConfig(), Main.getMainConfigFile());
         bTStunManager.reloadModule();
         context.json(new StdResp(true, tl(locale(context), Lang.AUTOSTUN_CONFIG_REAPPLIED), null));
     }

@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.module.impl.rule.dto.DataUpdateResultDTO;
 import com.ghostchu.peerbanhelper.module.impl.rule.dto.IPBanResultDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
@@ -253,8 +254,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                 if (!tempHash.equals(ruleHash)) {
                                     // 规则文件不存在或者规则文件与临时文件sha256不一致则需要更新
                                     ent_count = stringToIPList(new String(dataUpdateResultDTO.data(), StandardCharsets.UTF_8), ipAddresses);
-                                    // 更新后重命名临时文件
-                                    Files.write(dataUpdateResultDTO.data(), ruleFile);
+                                    AtomicFileWriter.write(ruleFile.toPath(), dataUpdateResultDTO.data());
                                 } else {
                                     // 如果一致，但ipBanMatchers没有对应的规则内容，则加载内容
                                     if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {

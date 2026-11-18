@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.pbhplus.LocalKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V1License;
 import com.ghostchu.peerbanhelper.pbhplus.bean.V2License;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.pow.PoWServer;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -107,7 +108,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
                     if (!keyList.contains(input))
                         keyList.add(input);
                     Main.getMainConfig().set("pbh-plus-key", keyList);
-                    Main.getMainConfig().save(Main.getMainConfigFile());
+                    AtomicFileWriter.saveYaml(Main.getMainConfig(), Main.getMainConfigFile());
                     licenseManager.reloadModule();
                     context.json(new StdResp(true, tlUI(Lang.PBH_PLUS_LICENSE_UPDATED), null));
                 }
@@ -146,7 +147,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
         if (!keyList.contains(local)) {
             keyList.add(local);
             Main.getMainConfig().set("pbh-plus-key", keyList);
-            Main.getMainConfig().save(Main.getMainConfigFile());
+            AtomicFileWriter.saveYaml(Main.getMainConfig(), Main.getMainConfigFile());
         }
         licenseManager.reloadModule();
         context.json(new StdResp(true, tlUI(Lang.PBH_PLUS_LICENSE_UPDATED), null));
@@ -162,7 +163,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
         var keyList = Main.getMainConfig().getStringList("pbh-plus-key");
         if (keyList.remove(mappedLicense.getKeyText())) {
             Main.getMainConfig().set("pbh-plus-key", keyList);
-            Main.getMainConfig().save(Main.getMainConfigFile());
+            AtomicFileWriter.saveYaml(Main.getMainConfig(), Main.getMainConfigFile());
             licenseManager.reloadModule();
             context.json(new StdResp(true, tlUI(Lang.PBH_LICENSE_KEY_DELETED), null));
         } else {

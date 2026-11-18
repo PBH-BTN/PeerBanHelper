@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.pbhplus.backend.LicenseBackend;
 import com.ghostchu.peerbanhelper.pbhplus.bean.License;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.hash.Hashing;
@@ -50,7 +51,7 @@ public class LicenseManager implements Reloadable {
         }
         Main.getMainConfig().set("pbh-plus-key", keyTexts);
         try {
-            Main.getMainConfig().save(Main.getMainConfigFile());
+            AtomicFileWriter.saveYaml(Main.getMainConfig(), Main.getMainConfigFile());
         } catch (IOException e) {
             log.error("Unable to save main configuration file!", e);
             Sentry.captureException(e);

@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced.QBittorrentEE;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.traversal.NatAddressProviderRegistry;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -131,7 +132,7 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
             clientSection.set(downloader.getId(), downloader.saveDownloader());
         }
         Main.getMainConfig().set("client", clientSection);
-        Main.getMainConfig().save(Main.getMainConfigFile());
+        AtomicFileWriter.saveYaml(Main.getMainConfig(), Main.getMainConfigFile());
     }
 
     @Override
