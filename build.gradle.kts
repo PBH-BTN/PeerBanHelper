@@ -104,7 +104,7 @@ dependencies {
     // implementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
     // implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}")
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:5.2.0")
+    implementation("com.maxmind.geoip2:geoip2:5.3.0")
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.4")
 
