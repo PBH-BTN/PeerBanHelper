@@ -125,7 +125,7 @@ dependencies {
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
     // Utilities
-    implementation("com.google.code.gson:gson:2.14.0")
+    implementation("com.google.code.gson:gson:2.15.0")
     implementation("com.google.guava:guava:33.7.2-jre")
     implementation("com.github.seancfoley:ipaddress:5.6.2")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
