@@ -70,6 +70,8 @@ export interface BTNIPQuery {
 
 export interface BTNCommentAccess {
   visible: boolean
+  publishingEnabled: boolean
+  maxLength: number
 }
 
 export interface BTNIPLookup {

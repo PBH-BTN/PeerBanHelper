@@ -10,18 +10,28 @@
           {{ t('page.ipList.btn.commentTotal', { count: result.total }, result.total) }}
         </a-typography-text>
       </a-space>
-      <a-radio-group
-        v-model="scope"
-        type="button"
-        size="small"
-        class="scope-switch"
-        :aria-label="t('page.ipList.btn.commentScope')"
-        @change="run({ scope, page: 1, pageSize })"
-      >
-        <a-radio v-for="item in scopes" :key="item.scope" :value="item.scope"
-          >/{{ item.prefix }}</a-radio
+      <div class="comment-actions">
+        <a-button
+          size="small"
+          type="primary"
+          :disabled="!canPublish"
+          @click="composer?.addComment()"
         >
-      </a-radio-group>
+          <template #icon><icon-pen /></template>
+          {{ t('page.ipList.btn.addComment') }}
+        </a-button>
+        <a-radio-group
+          v-model="scope"
+          type="button"
+          size="small"
+          :aria-label="t('page.ipList.btn.commentScope')"
+          @change="run({ scope, page: 1, pageSize })"
+        >
+          <a-radio v-for="item in scopes" :key="item.scope" :value="item.scope"
+            >/{{ item.prefix }}</a-radio
+          >
+        </a-radio-group>
+      </div>
     </div>
     <a-skeleton v-if="loading" animation aria-busy="true">
       <a-space direction="vertical" fill aria-hidden="true">
@@ -72,25 +82,40 @@
               {{ t('page.ipList.btn.moderation.' + comment.moderationStatus) }}
             </a-tag>
             <a-tag>{{ comment.network }}</a-tag>
-            <a-popconfirm
-              v-if="comment.canDelete"
-              :content="t('page.ipList.btn.deleteConfirm')"
-              @ok="removeComment(comment.id)"
+          </a-space>
+        </template>
+        <template v-if="canReply(comment) || comment.canDelete" #actions>
+          <a-tooltip v-if="canReply(comment)" :content="t('page.ipList.btn.reply')">
+            <a-button
+              class="reply-action"
+              size="mini"
+              shape="circle"
+              type="text"
+              :aria-label="t('page.ipList.btn.reply')"
+              @click="composer?.replayComment(comment)"
             >
+              <template #icon><icon-reply /></template>
+            </a-button>
+          </a-tooltip>
+          <a-popconfirm
+            v-if="comment.canDelete"
+            :content="t('page.ipList.btn.deleteConfirm')"
+            @ok="removeComment(comment.id)"
+          >
+            <a-tooltip :content="t('page.ipList.btn.deleteComment')">
               <a-button
-                size="small"
+                class="delete-action"
+                size="mini"
+                shape="circle"
                 type="text"
-                status="danger"
                 :aria-label="t('page.ipList.btn.deleteComment')"
-                :title="t('page.ipList.btn.deleteComment')"
                 :loading="deletingId === comment.id"
                 :disabled="deletingId !== undefined || loading"
               >
                 <template #icon><icon-delete /></template>
               </a-button>
-            </a-popconfirm>
-            <span v-else class="delete-button-placeholder" aria-hidden="true"></span>
-          </a-space>
+            </a-tooltip>
+          </a-popconfirm>
         </template>
         <p class="comment-content">{{ comment.content }}</p>
         <a-alert
@@ -113,15 +138,25 @@
       />
     </a-space>
   </a-space>
+  <BtnCommentModal
+    ref="composer"
+    :scope="scope"
+    :scopes="scopes"
+    :can-publish="canPublish"
+    :max-length="result?.access?.maxLength"
+    @published="onPublished"
+  />
 </template>
 
 <script setup lang="ts">
+import type { BTNIPComment } from '@/api/model/btn'
 import { deleteBtnComment, getBtnComments } from '@/service/btnIpQuery'
 import { Message } from '@arco-design/web-vue'
 import dayjs from 'dayjs'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
+import BtnCommentModal from './btnCommentModal.vue'
 
 const { t } = useI18n()
 const props = defineProps<{ scopes: { scope: string; prefix: number }[] }>()
@@ -143,6 +178,24 @@ const {
   loadingDelay: 0,
   loadingKeep: 0
 })
+
+const canPublish = computed(
+  () =>
+    !loading.value &&
+    !error.value &&
+    result.value?.access?.visible === true &&
+    result.value.access.publishingEnabled
+)
+const composer = ref<InstanceType<typeof BtnCommentModal>>()
+
+function canReply(comment: BTNIPComment) {
+  return canPublish.value && comment.moderationStatus === 'APPROVED'
+}
+
+function onPublished(network: string) {
+  if (props.scopes.some((item) => item.scope === network)) scope.value = network
+  run({ scope: scope.value, page: 1, pageSize: pageSize.value })
+}
 
 const deletingId = ref<number>()
 
@@ -175,10 +228,16 @@ async function removeComment(id: number) {
   flex-wrap: wrap;
   gap: 8px 16px;
 }
-.scope-switch {
-  display: inline-flex;
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
   margin-inline-start: auto;
+}
+.comment-actions :deep(.arco-radio-group) {
+  display: inline-flex;
+  flex-wrap: wrap;
 }
 .comment-card :deep(.arco-card-header) {
   height: auto;
@@ -194,11 +253,20 @@ async function removeComment(id: number) {
 .comment-card :deep(.arco-card-header-extra) {
   margin-inline-start: auto;
 }
-.delete-button-placeholder {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  vertical-align: middle;
+.reply-action,
+.delete-action {
+  color: var(--color-text-3);
+  transition:
+    color 0.1s,
+    background-color 0.1s;
+}
+.reply-action:hover {
+  color: rgb(var(--primary-6));
+  background-color: rgb(var(--gray-2));
+}
+.delete-action:not(:disabled):hover {
+  color: rgb(var(--red-6));
+  background-color: rgb(var(--gray-2));
 }
 .comment-byline {
   font-weight: normal;
