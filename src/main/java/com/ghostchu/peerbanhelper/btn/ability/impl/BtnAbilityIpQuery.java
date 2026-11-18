@@ -194,7 +194,7 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
                 if (value >= 0) {
                     return value;
                 }
-            } catch (ArithmeticException ignored) {
+            } catch (ArithmeticException | NumberFormatException ignored) {
                 // Non-integral or out-of-range counts are invalid.
             }
         }

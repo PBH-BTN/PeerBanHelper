@@ -87,6 +87,24 @@ class BtnAbilityIpQueryTest {
     }
 
     @Test
+    void rejectsCountsWithOutOfRangeExponentsAsInvalidUpstreamResponses() throws IOException {
+        var config = config();
+        config.addProperty("comment_counts_endpoint", "http://localhost/ping/queryIp/commentCounts");
+        client(200, """
+                {"192.0.2.1":0,"192.0.2.2":1e9999999999}
+                """);
+        var ability = new BtnAbilityIpQuery(network, config);
+        var ips = List.of("192.0.2.1", "192.0.2.2");
+
+        assertThrows(IOException.class, () -> ability.queryCommentCounts(ips));
+
+        client(200, """
+                {"192.0.2.1":4,"192.0.2.2":0}
+                """);
+        assertEquals(Map.of("192.0.2.1", 4L, "192.0.2.2", 0L), ability.queryCommentCounts(ips));
+    }
+
+    @Test
     void rateLimitedBatchesCanBeRetriedAndDoNotPopulateCache() {
         var config = config();
         config.addProperty("comment_counts_endpoint", "http://localhost/ping/queryIp/commentCounts");
