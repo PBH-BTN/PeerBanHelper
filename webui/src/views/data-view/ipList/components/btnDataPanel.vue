@@ -1,7 +1,14 @@
 <template>
   <a-card :bordered="false">
-    <a-space direction="vertical" fill>
-      <a-spin v-if="loading" />
+    <a-skeleton v-if="loading && !query" animation aria-busy="true">
+      <a-skeleton-line
+        :rows="3"
+        :widths="['min(60%, 240px)', 'min(90%, 420px)', 'min(75%, 320px)']"
+        :line-height="24"
+        :line-spacing="20"
+      />
+    </a-skeleton>
+    <a-space v-else direction="vertical" fill>
       <a-alert v-if="error" type="error">
         {{ error.message || t('page.ipList.btn.error') }}
         <template #action
