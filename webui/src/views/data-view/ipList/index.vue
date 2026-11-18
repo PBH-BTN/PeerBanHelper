@@ -209,7 +209,7 @@
                 <icon-plus v-if="!active" />
                 <icon-minus v-else />
               </template>
-              <btnDataPanel :key="currentIp" :ip="peer?.address ?? currentIp" />
+              <btnDataPanel :key="searchRevision" :ip="peer?.address ?? currentIp" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -257,6 +257,7 @@ const {
   { manual: true }
 )
 const currentIp = ref<string>('')
+const searchRevision = ref(0)
 const isCidr = computed(() => currentIp.value.includes('/'))
 
 const endpointStore = useEndpointStore()
@@ -281,6 +282,7 @@ const handleSearch = (input: string) => {
       )
     }
     currentIp.value = value
+    searchRevision.value++
     activatedTab.value = isCidr.value ? ['3'] : []
     if (!isCidr.value) run(value)
   }
