@@ -49,7 +49,7 @@ val flatlafVersion = "3.7.2"
 val nettyVersion = "4.2.20.Final"
 val sqliteVersion = "3.53.4.0"
 val springVersion = "7.0.10"
-val flywayVersion = "13.11.1"
+val flywayVersion = "13.12.2"
 val oshiVersion = "7.7.2"
 // val jettyVersion = "12.1.12"
 
