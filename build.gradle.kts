@@ -50,7 +50,7 @@ val nettyVersion = "4.2.20.Final"
 val sqliteVersion = "3.54.1.0"
 val springVersion = "7.0.10"
 val flywayVersion = "13.12.2"
-val oshiVersion = "7.7.2"
+val oshiVersion = "7.8.0"
 // val jettyVersion = "12.1.12"
 
 configurations.all {
