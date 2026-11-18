@@ -92,7 +92,7 @@ export async function GetIPBasicData(ip: string): Promise<CommonResponse<IPBasic
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(ip)}`),
+    urlJoin(endpointStore.endpoint, `/api/peer/info/${encodeURIComponent(ip)}`),
     location.href
   )
 
@@ -112,7 +112,7 @@ export async function GetIPAccessHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(params.ip)}/accessHistory`),
+    urlJoin(endpointStore.endpoint, `/api/peer/accessHistory/${encodeURIComponent(params.ip)}`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -139,7 +139,7 @@ export async function GetIPBanHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(params.ip)}/banHistory`),
+    urlJoin(endpointStore.endpoint, `/api/peer/banHistory/${encodeURIComponent(params.ip)}`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -161,7 +161,7 @@ export async function GetBTNIPData(ip: string): Promise<CommonResponse<BTNIPQuer
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/peer/${encodeURIComponent(ip)}/btnQuery`),
+    urlJoin(endpointStore.endpoint, `/api/peer/btnQuery/${encodeURIComponent(ip)}`),
     location.href
   )
 
