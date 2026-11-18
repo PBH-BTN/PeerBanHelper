@@ -41,6 +41,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public final class BtnAbilityIpQuery extends AbstractBtnAbility {
     public static final int MAX_COMMENT_COUNT_BATCH = 50;
+    public static final int DEFAULT_COMMENT_PAGE_SIZE = 5;
     private static final MediaType JSON = MediaType.get("application/json");
     private final BtnNetwork btnNetwork;
     private final String endpoint;
@@ -126,9 +127,14 @@ public final class BtnAbilityIpQuery extends AbstractBtnAbility {
     }
 
     public JsonObject listComments(String scope, int page) throws IOException {
+        return listComments(scope, page, DEFAULT_COMMENT_PAGE_SIZE);
+    }
+
+    public JsonObject listComments(String scope, int page, int pageSize) throws IOException {
         return requestJson(new Request.Builder().url(commentsEndpoint.newBuilder()
                 .addQueryParameter("scope", scope)
-                .addQueryParameter("page", Integer.toString(page)).build()), powCaptcha);
+                .addQueryParameter("page", Integer.toString(page))
+                .addQueryParameter("size", Integer.toString(Math.clamp(pageSize, 1, 50))).build()), powCaptcha);
     }
 
     public JsonObject createComment(CreateComment comment) throws IOException {

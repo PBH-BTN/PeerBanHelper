@@ -10,122 +10,114 @@
       <a-input-search
         v-model="searchInput"
         search-button
-        placeholder="192.168.1.1...."
+        :placeholder="t('page.ipList.searchPlaceholder')"
         class="searchBox"
-        :loading="loading"
+        :loading="!isCidr && loading"
         @search="handleSearch"
       />
     </div>
     <div class="result-container center">
-      <a-card
-        v-show="data?.data || error"
-        class="result-card"
-        :style="{ minWidth: data?.data.found ? '1150px' : '400px' }"
-        hoverable
-      >
+      <a-card v-if="currentIp" class="result-card" hoverable>
         <a-space v-if="!error" direction="vertical" fill>
           <a-descriptions>
             <template #title>
               <a-space>
-                {{ data?.data.address }}
-                <a-tooltip v-if="!data?.data.found" :content="t('page.ipList.notfound.tips')">
+                {{ peer?.address ?? currentIp }}
+                <a-tooltip v-if="peer && !peer.found" :content="t('page.ipList.notfound.tips')">
                   <a-tag>Not found</a-tag>
                 </a-tooltip>
               </a-space>
             </template>
             <a-descriptions-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               :label="t('page.ipList.label.banCount')"
               :span="2"
             >
-              {{ data?.data.banCount }}
+              {{ peer?.banCount }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               :label="t('page.ipList.label.torrentAccessCount')"
               :span="2"
             >
-              {{ data?.data.torrentAccessCount }}
+              {{ peer?.torrentAccessCount }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               :label="t('page.ipList.label.uploadedToPeer')"
               :span="2"
             >
               <a-typography-text>
                 <icon-arrow-up class="green" />
-                {{ formatFileSize(data?.data.uploadedToPeer ?? 0) }}</a-typography-text
+                {{ formatFileSize(peer?.uploadedToPeer ?? 0) }}</a-typography-text
               >
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               :label="t('page.ipList.label.downloadedFromPeer')"
               :span="2"
             >
               <a-typography-text>
                 <icon-arrow-down class="red" />
-                {{ formatFileSize(data?.data.downloadedFromPeer ?? 0) }}</a-typography-text
+                {{ formatFileSize(peer?.downloadedFromPeer ?? 0) }}</a-typography-text
               >
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               :label="t('page.ipList.label.firstTimeSeen')"
               :span="2"
             >
-              {{ d(data?.data.firstTimeSeen ?? 0, 'long') }}
+              {{ d(peer?.firstTimeSeen ?? 0, 'long') }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               :label="t('page.ipList.label.lastTimeSeen')"
               :span="2"
             >
-              {{ d(data?.data.lastTimeSeen ?? 0, 'long') }}
+              {{ d(peer?.lastTimeSeen ?? 0, 'long') }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.geo?.country?.iso || data?.data.geo?.city?.name"
+              v-if="peer?.geo?.country?.iso || peer?.geo?.city?.name"
               :label="t('page.banlist.banlist.listItem.geo')"
               :span="2"
             >
-              <CountryFlag
-                v-if="data.data.geo?.country?.iso"
-                :iso="data.data.geo?.country?.iso ?? ''"
-              />
-              {{ `${data.data.geo?.country?.name ?? ''} ${data.data.geo?.city?.name ?? ''}` }}
+              <CountryFlag v-if="peer.geo?.country?.iso" :iso="peer.geo?.country?.iso ?? ''" />
+              {{ `${peer.geo?.country?.name ?? ''} ${peer.geo?.city?.name ?? ''}` }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.geo?.network?.isp"
+              v-if="peer?.geo?.network?.isp"
               :label="t('page.banlist.banlist.listItem.network.isp')"
               :span="1"
             >
-              {{ data.data.geo?.network?.isp }}
+              {{ peer.geo?.network?.isp }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.geo?.network?.netType"
+              v-if="peer?.geo?.network?.netType"
               :label="t('page.banlist.banlist.listItem.network.netType')"
               :span="2"
             >
-              {{ data.data.geo?.network?.netType }}
+              {{ peer.geo?.network?.netType }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.geo?.as"
+              v-if="peer?.geo?.as"
               :label="t('page.banlist.banlist.listItem.asn')"
               :span="2"
             >
               <a-space>
-                <a-typography-text> {{ data.data.geo?.as?.organization }}</a-typography-text>
-                <a-tag :color="getColor((data.data.geo?.as?.number ?? 0).toString())">{{
-                  data.data.geo?.as?.number
+                <a-typography-text> {{ peer.geo?.as?.organization }}</a-typography-text>
+                <a-tag :color="getColor((peer.geo?.as?.number ?? 0).toString())">{{
+                  peer.geo?.as?.number
                 }}</a-tag>
                 <a-tooltip
                   :content="
                     t('page.banlist.banlist.listItem.asn.subnet') +
-                    data.data.geo?.as?.network?.ipAddress +
+                    peer.geo?.as?.network?.ipAddress +
                     '/' +
-                    data.data.geo?.as?.network?.prefixLength
+                    peer.geo?.as?.network?.prefixLength
                   "
                 >
                   <a-link
-                    :href="`https://2ip.io/analytics/asn-list/?asnId=${data?.data.geo?.as?.number}`"
+                    :href="`https://2ip.io/analytics/asn-list/?asnId=${peer?.geo?.as?.number}`"
                     :hoverable="false"
                   >
                     <icon-info-circle />
@@ -133,7 +125,7 @@
                 </a-tooltip>
               </a-space>
             </a-descriptions-item>
-            <a-descriptions-item :span="8">
+            <a-descriptions-item v-if="peer" :span="8">
               <template #label>
                 <a-space>
                   {{ t('page.ipList.shortcut') }}
@@ -145,21 +137,21 @@
                 <a-button-group>
                   <a-button
                     target="_blank"
-                    :href="`https://ip.ping0.cc/ip/${searchInput}`"
+                    :href="`https://ip.ping0.cc/ip/${peer?.address ?? currentIp}`"
                     type="outline"
                   >
                     ping0
                   </a-button>
                   <a-button
                     target="_blank"
-                    :href="`https://search.censys.io/hosts/${searchInput}`"
+                    :href="`https://search.censys.io/hosts/${peer?.address ?? currentIp}`"
                     type="outline"
                   >
                     Censys
                   </a-button>
                   <a-button
                     target="_blank"
-                    :href="`https://ip.skk.moe/query?q=${searchInput}`"
+                    :href="`https://ip.skk.moe/query?q=${peer?.address ?? currentIp}`"
                     type="outline"
                   >
                     Sukka
@@ -170,7 +162,7 @@
           </a-descriptions>
           <a-collapse v-model:active-key="activatedTab" :bordered="false" destroy-on-hide>
             <a-collapse-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               key="1"
               :header="t('page.ipList.label.accessHistory')"
               :disabled="!pbhPlusActivited"
@@ -186,10 +178,10 @@
                   <a-tag size="small">Plus</a-tag>
                 </a-tooltip>
               </template>
-              <accessHistoryTable :ip="data.data.address" />
+              <accessHistoryTable :ip="peer.address" />
             </a-collapse-item>
             <a-collapse-item
-              v-if="data?.data.found"
+              v-if="peer?.found"
               key="2"
               :header="t('page.ipList.label.banHistory')"
               :disabled="!pbhPlusActivited"
@@ -205,10 +197,10 @@
                   <a-tag size="small">Plus</a-tag>
                 </a-tooltip>
               </template>
-              <banHistoryTable :ip="data.data.address" />
+              <banHistoryTable :ip="peer.address" />
             </a-collapse-item>
             <a-collapse-item
-              v-if="data === undefined || data.data.btnQueryAvailable"
+              v-if="isCidr || peer?.btnQueryAvailable"
               key="3"
               :header="t('page.ipList.label.btnData')"
               class="collapse-card"
@@ -217,7 +209,7 @@
                 <icon-plus v-if="!active" />
                 <icon-minus v-else />
               </template>
-              <btnDataPanel :ip="currentIp" />
+              <btnDataPanel :key="currentIp" :ip="peer?.address ?? currentIp" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -250,10 +242,22 @@ import btnDataPanel from './components/btnDataPanel.vue'
 
 const searchInput = ref('')
 const { t, d } = useI18n()
-const { data, loading, run, error } = useRequest(GetIPBasicData, {
-  manual: true
-})
+const {
+  data: peer,
+  loading,
+  run,
+  cancel,
+  error
+} = useRequest(
+  async (address: string) => {
+    const response = await GetIPBasicData(address)
+    if (!response.success) throw new Error(response.message)
+    return response.data
+  },
+  { manual: true }
+)
 const currentIp = ref<string>('')
+const isCidr = computed(() => currentIp.value.includes('/'))
 
 const endpointStore = useEndpointStore()
 
@@ -261,12 +265,14 @@ const activatedTab = ref<(string | number)[]>([])
 
 const { query } = useRoute()
 
-const handleSearch = (value: string) => {
+const handleSearch = (input: string) => {
+  const value = input.trim()
   if (value) {
-    data.value = undefined
-    activatedTab.value = []
-    if (value !== query.ip) {
-      const search = new URLSearchParams(window.location.search)
+    cancel()
+    peer.value = undefined
+    error.value = undefined
+    const search = new URLSearchParams(window.location.search)
+    if (value !== search.get('ip')) {
       search.set('ip', value)
       window.history.pushState(
         {},
@@ -275,7 +281,8 @@ const handleSearch = (value: string) => {
       )
     }
     currentIp.value = value
-    run(value)
+    activatedTab.value = isCidr.value ? ['3'] : []
+    if (!isCidr.value) run(value)
   }
 }
 onMounted(async () => {
@@ -326,7 +333,7 @@ const pbhPlusActivited = computed(() =>
   margin-top: 1em;
 }
 .result-card {
-  transition-property: all;
+  width: min(100%, 1150px);
   padding: 2em;
 }
 .red {
