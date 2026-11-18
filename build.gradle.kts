@@ -118,7 +118,7 @@ dependencies {
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
-    implementation("dnsjava:dnsjava:3.6.5")
+    implementation("dnsjava:dnsjava:3.7.1")
     // UI - FlatLaf
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
