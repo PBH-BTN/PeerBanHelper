@@ -13,7 +13,6 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -43,23 +42,6 @@ public class BanList {
             lock.writeLock().unlock();
         }
     }
-
-    BanRegistration registerBan(PeerAddress address, Function<BanMetadata, BanMetadata> update) {
-        var key = address.getAddress().toPrefixBlock();
-        lock.writeLock().lock();
-        try {
-            var existing = delegate.get(key);
-            var metadata = update.apply(existing);
-            if (existing == null) {
-                delegate.put(key, metadata);
-            }
-            return new BanRegistration(metadata, existing == null);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    record BanRegistration(BanMetadata metadata, boolean added) {}
 
     @Nullable
     public AssociativeAddressTrie.AssociativeTrieNode<? extends IPAddress, BanMetadata> remove(@NotNull PeerAddress address) {
