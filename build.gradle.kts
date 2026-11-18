@@ -2,7 +2,7 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "4.0.1"
-    id("com.install4j.gradle") version "13.1.1" apply false
+    id("com.install4j.gradle") version "13.1.3" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.4.21"
@@ -178,7 +178,7 @@ dependencies {
     compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:13.1.1")
+    compileOnly("com.install4j:install4j-runtime:13.1.3")
 
     // sentry
     implementation(platform("io.sentry:sentry-bom:8.65.0")) //import bom
