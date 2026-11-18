@@ -211,6 +211,7 @@
 import { LOCALE_OPTIONS } from '@/locale'
 import { useViewRoute, type DisabledState } from '@/router'
 import { useDarkStore } from '@/stores/dark'
+import { useEndpointStore } from '@/stores/endpoint'
 import useLocale from '@/stores/locale'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { useDark, useToggle } from '@vueuse/core'
@@ -251,6 +252,11 @@ const props = withDefaults(
     disableMenu: false
   }
 )
+
+const { emitter } = useEndpointStore()
+emitter.on('open-settings-modal', () => {
+  settingsModalRef.value?.showModal()
+})
 
 const ENABLED: DisabledState = { disabled: false, tips: '' }
 
