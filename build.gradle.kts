@@ -133,7 +133,7 @@ dependencies {
     // CSV
     implementation("de.siegmar:fastcsv:4.4.0")
     // Jackson
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.core:jackson-core")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
