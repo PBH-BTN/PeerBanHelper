@@ -641,7 +641,7 @@ public class Main {
 
             command.add("-cp");
             command.add(classpath);
-            command.add(Main.class.getName());
+            command.add(MainJumpLoader.class.getName());
 
             // Add original startup arguments
             if (startupArgs != null) {
