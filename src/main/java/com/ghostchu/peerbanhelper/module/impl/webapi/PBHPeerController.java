@@ -32,6 +32,9 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.net.HostAndPort;
+import com.google.gson.JsonParseException;
+import inet.ipaddr.IPAddressString;
+import okhttp3.HttpUrl;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +44,10 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -49,6 +55,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 @Slf4j
 public final class PBHPeerController extends AbstractFeatureModule {
+    private static final int MAX_QUERY_LENGTH = 128;
+    private static final int MAX_COMMENT_JSON_LENGTH = 64 * 1024;
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryService historyDao;
     private final PeerRecordService peerRecordDao;
@@ -93,11 +101,17 @@ public final class PBHPeerController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         javalinWebContainer.routes()
-                .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
-                .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
-                .get("/api/peer/{ip}/btnQuery", this::handleBtnQuery, Role.USER_READ)
-                .get("/api/peer/{ip}/btnQueryIframe", this::handleBtnQueryIFrame, Role.USER_READ);
+                .get("/api/peer/btnLookup", this::handleBtnLookup, Role.USER_READ)
+                .get("/api/peer/btnComments", this::handleBtnComments, Role.USER_READ)
+                .post("/api/peer/btnComments", this::handleBtnCreateComment, Role.USER_WRITE)
+                .put("/api/peer/btnComments/{id}", this::handleBtnUpdateComment, Role.USER_WRITE)
+                .delete("/api/peer/btnComments/{id}", this::handleBtnDeleteComment, Role.USER_WRITE)
+                .post("/api/peer/btnCommentCounts", this::handleBtnCommentCounts, Role.USER_READ)
+                .get("/api/peer/info/{ip}", this::handleInfo, Role.USER_READ)
+                .get("/api/peer/accessHistory/{ip}", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/banHistory/{ip}", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/btnQuery/{ip}", this::handleBtnQuery, Role.USER_READ)
+                .get("/api/peer/btnQueryIframe/{ip}", this::handleBtnQueryIFrame, Role.USER_READ);
 
     }
 
@@ -144,6 +158,129 @@ public final class PBHPeerController extends AbstractFeatureModule {
         BtnAbilityIpQuery queryAbility = (BtnAbilityIpQuery) ability;
         var query = queryAbility.query(ip);
         ctx.json(new StdResp(true, null, query));
+    }
+
+    private void handleBtnLookup(Context ctx) {
+        runBtnRequest(ctx, BtnAbilityIpQuery::getLookupEndpoint,
+                ability -> ability.lookup(queryParameter(ctx, "query")));
+    }
+
+    private void handleBtnComments(Context ctx) {
+        runBtnRequest(ctx, BtnAbilityIpQuery::getCommentsEndpoint, ability -> {
+            int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
+            int pageSize = ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(BtnAbilityIpQuery.DEFAULT_COMMENT_PAGE_SIZE);
+            return ability.listComments(queryParameter(ctx, "scope"), Math.max(page, 1), pageSize);
+        });
+    }
+
+    private void handleBtnCreateComment(Context ctx) {
+        runBtnRequest(ctx, BtnAbilityIpQuery::getCommentsEndpoint,
+                ability -> ability.createComment(readBody(ctx, BtnAbilityIpQuery.CreateComment.class)));
+    }
+
+    private void handleBtnUpdateComment(Context ctx) {
+        runBtnRequest(ctx, BtnAbilityIpQuery::getCommentsEndpoint,
+                ability -> ability.updateComment(commentId(ctx), readBody(ctx, BtnAbilityIpQuery.UpdateComment.class)));
+    }
+
+    private void handleBtnDeleteComment(Context ctx) {
+        runBtnRequest(ctx, BtnAbilityIpQuery::getCommentsEndpoint, ability -> {
+            ability.deleteComment(commentId(ctx));
+            return null;
+        });
+    }
+
+    private void handleBtnCommentCounts(Context ctx) {
+        runBtnRequest(ctx, BtnAbilityIpQuery::getCommentCountsEndpoint, ability -> {
+            String[] ips = readBody(ctx, String[].class);
+            if (ips.length == 0 || ips.length > BtnAbilityIpQuery.MAX_COMMENT_COUNT_BATCH) {
+                throw new IllegalArgumentException("Expected between 1 and 50 IP addresses");
+            }
+            Map<String, String> canonical = new LinkedHashMap<>();
+            for (String ip : ips) {
+                canonical.put(ip, canonicalHost(ip));
+            }
+            List<String> addresses = canonical.values().stream().distinct().toList();
+            Map<String, Long> counts = ability.queryCommentCounts(addresses);
+            Map<String, Long> result = new LinkedHashMap<>();
+            canonical.forEach((input, address) -> result.put(input, counts.get(address)));
+            return result;
+        });
+    }
+
+    private void runBtnRequest(Context ctx, Function<BtnAbilityIpQuery, HttpUrl> endpoint, BtnRequest request) {
+        var configured = btnNetwork == null ? null : btnNetwork.getAbilities().get(BtnAbilityIpQuery.class);
+        if (!(configured instanceof BtnAbilityIpQuery ability) || endpoint.apply(ability) == null) {
+            Lang message = btnNetwork == null ? Lang.BTN_NETWORK_NOT_ENABLED : Lang.BTN_ABILITY_IP_QUERY_NOT_PROVIDED;
+            ctx.status(501).json(new StdResp(false, tl(locale(ctx), message), null));
+            return;
+        }
+        try {
+            ctx.json(new StdResp(true, null, request.execute(ability)));
+        } catch (BtnAbilityIpQuery.UpstreamException e) {
+            // PBH uses 401/403 to signal a local session failure. Keep upstream failures distinct.
+            int status = switch (e.getStatus()) {
+                case 400, 409, 429 -> e.getStatus();
+                case 401, 403, 404 -> 422;
+                default -> 502;
+            };
+            String message = e.getMessage() == null
+                    ? tl(locale(ctx), Lang.BTN_REQUEST_FAILS, e.getStatus())
+                    : e.getMessage();
+            ctx.status(status).json(new StdResp(false, message, null));
+        } catch (IOException e) {
+            ctx.status(502).json(new StdResp(false, tl(locale(ctx), Lang.BTN_REQUEST_FAILS, 502), null));
+        }
+    }
+
+    private static String queryParameter(Context ctx, String key) {
+        String value = ctx.queryParam(key);
+        if (value == null || value.isBlank() || value.length() > MAX_QUERY_LENGTH) {
+            throw new IllegalArgumentException("An IP address or CIDR is required");
+        }
+        return value;
+    }
+
+    private static long commentId(Context ctx) {
+        long id = ctx.pathParamAsClass("id", Long.class).get();
+        if (id <= 0) {
+            throw new IllegalArgumentException("Invalid comment ID");
+        }
+        return id;
+    }
+
+    private static <T> T readBody(Context ctx, Class<T> type) {
+        if (ctx.body().length() > MAX_COMMENT_JSON_LENGTH) {
+            throw new IllegalArgumentException("Request body is too large");
+        }
+        try {
+            T body = ctx.bodyAsClass(type);
+            if (body != null) {
+                return body;
+            }
+        } catch (JsonParseException e) {
+            throw new IllegalArgumentException("Invalid JSON request body", e);
+        }
+        throw new IllegalArgumentException("A JSON request body is required");
+    }
+
+    private static String canonicalHost(String input) {
+        if (input == null || input.length() > MAX_QUERY_LENGTH || input.indexOf('%') >= 0) {
+            throw new IllegalArgumentException("Expected an IP address");
+        }
+        var address = new IPAddressString(input).getAddress();
+        if (address == null || address.isMultiple() || address.getNetworkPrefixLength() != null) {
+            throw new IllegalArgumentException("Expected an IP address");
+        }
+        if (address.isIPv4Convertible()) {
+            address = address.toIPv4();
+        }
+        return address.toCompressedString();
+    }
+
+    @FunctionalInterface
+    private interface BtnRequest {
+        Object execute(BtnAbilityIpQuery ability) throws IOException;
     }
 
     private void handleInfo(Context ctx) {

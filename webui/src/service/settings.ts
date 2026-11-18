@@ -10,7 +10,7 @@ export async function GetProfile(): Promise<CommonResponse<Profile>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/profile'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/general/profile'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -21,7 +21,7 @@ export async function SaveProfile(config: Profile): Promise<CommonResponseWithou
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/profile'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/general/profile'), location.href)
   return fetch(url, {
     headers: getCommonHeader(),
     method: 'PUT',
@@ -36,7 +36,7 @@ export async function GetConfig(): Promise<CommonResponse<Config>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/config'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/general/config'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -47,7 +47,7 @@ export async function SaveConfig(config: Config): Promise<CommonResponseWithoutD
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/config'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/general/config'), location.href)
   return fetch(url, {
     headers: getCommonHeader(),
     method: 'PUT',
@@ -63,7 +63,7 @@ export async function CheckModuleEnable(module: string): Promise<CommonResponse<
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, 'api/general/checkModuleAvailable'),
+    urlJoin(endpointStore.endpoint, '/api/general/checkModuleAvailable'),
     location.href
   )
   url.searchParams.set('module', module)
@@ -77,7 +77,7 @@ export async function GetRunningInfo(): Promise<CommonResponse<RunningInfo>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/status'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/general/status'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -88,7 +88,7 @@ export async function GetBtnStatus(): Promise<CommonResponse<BTNStatus>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/modules/btn'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/modules/btn'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -99,7 +99,7 @@ export async function GetHeapDumpFile() {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/heapdump'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/general/heapdump'), location.href)
   if (import.meta.env.DEV) url.searchParams.set('token', endpointStore.authToken)
   return url
 }

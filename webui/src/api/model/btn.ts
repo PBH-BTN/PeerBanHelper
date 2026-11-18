@@ -62,8 +62,43 @@ export interface BTNTorrents {
 export interface BTNIPQuery {
   color: string
   labels: string[]
-  bans: BTNBans
-  swarms: BTNSwarms
-  traffic: BTNTraffic
-  torrents: BTNTorrents
+  bans: BTNBans | null
+  swarms: BTNSwarms | null
+  traffic: BTNTraffic | null
+  torrents: BTNTorrents | null
+}
+
+export interface BTNCommentAccess {
+  visible: boolean
+  publishingEnabled: boolean
+  maxLength: number
+}
+
+export interface BTNIPLookup {
+  lookup: {
+    activity: BTNIPQuery | null
+    commentAccess?: BTNCommentAccess
+  }
+}
+
+export interface BTNIPComment {
+  id: number
+  parentId: number | null
+  network: string
+  authorNickname: string | null
+  content: string
+  createdAt: string
+  moderationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'FAILED'
+  moderationReason: string | null
+  self: boolean
+  canDelete: boolean
+}
+
+export interface BTNIPCommentPage {
+  records: BTNIPComment[]
+  current: number
+  size: number
+  total: number
+  scope: string
+  access?: BTNCommentAccess
 }

@@ -13,6 +13,7 @@ set "JAVAW_EXEC=%JAVA_BIN%\javaw.exe"
 :: ============================================================
 start "" "%JAVAW_EXEC%"^
  -XX:+UseCompactObjectHeaders^
+ -XX:-UseBASE64Intrinsics^
  --enable-native-access=ALL-UNNAMED^
  -Djdk.attach.allowAttachSelf=true^
  -XX:MaxRAMPercentage=85.0^

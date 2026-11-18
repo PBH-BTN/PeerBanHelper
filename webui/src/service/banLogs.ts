@@ -12,7 +12,7 @@ export async function getBanlogs(params: {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/bans/logs'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/bans/logs'), location.href)
   url.searchParams.set('page', String(params.page))
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))

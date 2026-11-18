@@ -34,7 +34,7 @@
         </a-descriptions-item>
         <a-descriptions-item
           v-if="endpointStore.plusStatus?.enabledFeatures.includes('paid')"
-          :span="3"
+          :span="2"
         >
           <a-button class="plus-button" type="outline" size="mini" @click="plusInfo?.showModal()">
             <icon-heart-fill />
