@@ -70,6 +70,7 @@ const { t } = useI18n()
 function initForm() {
   form.value.endpoint = endPointStore.endpointSaved
   form.value.interval = autoUpdateState.interval
+  form.value.accessToken = endPointStore.accessToken
 }
 
 defineExpose({
