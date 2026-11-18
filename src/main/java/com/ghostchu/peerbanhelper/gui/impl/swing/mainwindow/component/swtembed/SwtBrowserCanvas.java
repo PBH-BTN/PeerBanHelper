@@ -19,6 +19,7 @@ public final class SwtBrowserCanvas extends Canvas {
 
     private final boolean darkMode;
     private volatile boolean removed;
+    private volatile boolean terminated;
     private volatile String url;
     private volatile Dimension canvasSize = new Dimension();
 
@@ -59,6 +60,10 @@ public final class SwtBrowserCanvas extends Canvas {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public boolean isTerminated() {
+        return terminated;
     }
 
     private void runEventLoop() {
@@ -121,8 +126,12 @@ public final class SwtBrowserCanvas extends Canvas {
             }
         } finally {
             // Display owns the Shell and Browser and disposes both on the SWT thread.
-            if (display != null && !display.isDisposed()) {
-                display.dispose();
+            try {
+                if (display != null && !display.isDisposed()) {
+                    display.dispose();
+                }
+            } finally {
+                terminated = true;
             }
         }
     }
