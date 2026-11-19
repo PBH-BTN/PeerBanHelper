@@ -48,7 +48,7 @@ repositories {
 val flatlafVersion = "3.8"
 val nettyVersion = "4.2.21.Final"
 val sqliteVersion = "3.54.1.0"
-val springVersion = "7.0.10"
+val springVersion = "7.1.0"
 val flywayVersion = "13.13.0"
 val oshiVersion = "7.8.0"
 // val jettyVersion = "12.1.12"
