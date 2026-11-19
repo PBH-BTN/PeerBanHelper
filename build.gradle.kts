@@ -2,11 +2,11 @@ plugins {
     java
     application
     id("com.gorylenko.gradle-git-properties") version "4.0.1"
-    id("com.install4j.gradle") version "13.1.1" apply false
+    id("com.install4j.gradle") version "13.1.3" apply false
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm")
     kotlin("plugin.lombok") version "2.4.21"
-    id("io.freefair.lombok") version "9.8.2"
+    id("io.freefair.lombok") version "9.8.3"
 }
 
 group = "com.ghostchu.peerbanhelper"
@@ -45,12 +45,12 @@ repositories {
     }
 }
 
-val flatlafVersion = "3.7.2"
-val nettyVersion = "4.2.20.Final"
-val sqliteVersion = "3.53.4.0"
-val springVersion = "7.0.10"
-val flywayVersion = "13.11.1"
-val oshiVersion = "7.7.2"
+val flatlafVersion = "3.8"
+val nettyVersion = "4.2.21.Final"
+val sqliteVersion = "3.54.1.0"
+val springVersion = "7.1.0"
+val flywayVersion = "13.13.0"
+val oshiVersion = "7.8.0"
 // val jettyVersion = "12.1.12"
 
 configurations.all {
@@ -59,7 +59,7 @@ configurations.all {
 
 dependencyManagement {
     imports {
-        mavenBom("com.baomidou:mybatis-plus-bom:3.5.17")
+        mavenBom("com.baomidou:mybatis-plus-bom:3.5.18")
     }
 }
 dependencies {
@@ -97,14 +97,14 @@ dependencies {
     // Core dependencies
     implementation("com.vdurmont:semver4j:3.1.0")
     // Javalin
-    implementation("io.javalin:javalin:7.2.3") {
+    implementation("io.javalin:javalin:7.2.4") {
         exclude(group = "org.eclipse.jetty.ee10.websocket", module = "jetty-ee10-websocket-jetty-server")
     }
     // jetty
     // implementation("org.eclipse.jetty:jetty-server:${jettyVersion}")
     // implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}")
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:5.2.0")
+    implementation("com.maxmind.geoip2:geoip2:5.3.0")
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.4")
 
@@ -114,26 +114,26 @@ dependencies {
     implementation("com.github.oshi:oshi-common:${oshiVersion}")
     runtimeOnly("com.github.oshi:oshi-core-ffm:${oshiVersion}")
     // Markdown
-    implementation("org.commonmark:commonmark:0.31.0")
+    implementation("org.commonmark:commonmark:0.32.0")
     // Compression
     implementation("org.tukaani:xz:1.12")
     // DNS
-    implementation("dnsjava:dnsjava:3.6.5")
+    implementation("dnsjava:dnsjava:3.7.1")
     // UI - FlatLaf
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
     // Reload library
     implementation("com.ghostchu:simplereloadlib:1.1.2")
     // Utilities
-    implementation("com.google.code.gson:gson:2.14.0")
+    implementation("com.google.code.gson:gson:2.15.0")
     implementation("com.google.guava:guava:33.7.2-jre")
     implementation("com.github.seancfoley:ipaddress:5.6.2")
     implementation("org.bspfsystems:yamlconfiguration:3.0.4")
     implementation("org.apache.commons:commons-collections4:4.6.0")
     // CSV
-    implementation("de.siegmar:fastcsv:4.4.0")
+    implementation("de.siegmar:fastcsv:4.4.1")
     // Jackson
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.core:jackson-core")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
@@ -150,7 +150,7 @@ dependencies {
     }
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.6.5")
+    implementation("ch.qos.logback:logback-classic:1.6.8")
     implementation("org.slf4j:jcl-over-slf4j:2.0.20")
 
     // Async utilities
@@ -175,13 +175,13 @@ dependencies {
     runtimeOnly("io.netty:netty-transport-native-kqueue:${nettyVersion}:osx-aarch_64")
 
     // SWT (provided scope - for compilation only)
-    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.134.0")
+    compileOnly("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:3.135.0")
 
     // install4j stuff
-    compileOnly("com.install4j:install4j-runtime:13.1.1")
+    compileOnly("com.install4j:install4j-runtime:13.1.3")
 
     // sentry
-    implementation(platform("io.sentry:sentry-bom:8.61.1")) //import bom
+    implementation(platform("io.sentry:sentry-bom:8.65.0")) //import bom
     implementation("io.sentry:sentry")
     implementation("io.sentry:sentry-logback")
     implementation("io.sentry:sentry-jdbc")
