@@ -59,7 +59,7 @@
     "less": "^4.9.1",
     "lint-staged": "^17.6.0",
     "npm-run-all2": "^9.0.4",
-    "oxfmt": "^0.74.0",
+    "oxfmt": "^0.79.0",
     "oxlint": "^1.89.0",
     "typescript": "^6",
     "vite": "^8.3.5",
