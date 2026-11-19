@@ -127,22 +127,29 @@ public final class IPDB implements AutoCloseable {
     }
 
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
-        try {
-            var data = geoCN2.query(address);
-            if (data != null) {
-                geoData.mergeFrom(data, true);
+        if (geoCN2 != null) {
+            try {
+                var data = geoCN2.query(address);
+                if (data != null) {
+                    geoData.mergeFrom(data, true);
+                }
+                return;
+            } catch (IllegalStateException ignored) {
+                // Try the revision 1 reader for revision 1 data.
+            } catch (IOException e) {
+                log.debug("Unable to query GeoCN", e);
+                return;
             }
-        } catch (IllegalStateException e) {
+        }
+        if (geoCN1 != null) {
             try {
                 var data = geoCN1.query(address);
                 if (data != null) {
                     geoData.mergeFrom(data, true);
                 }
-            } catch (IOException ioe1) {
-                log.debug("Unable to query GeoCN", ioe1);
+            } catch (IOException e) {
+                log.debug("Unable to query GeoCN", e);
             }
-        } catch (IOException ioe) {
-            log.debug("Unable to query GeoCN", ioe);
         }
     }
 
@@ -235,7 +242,7 @@ public final class IPDB implements AutoCloseable {
         }
     }
 
-    private void loadMMDB() throws IOException {
+    private void loadMMDB() {
         this.languageTag = List.of(Main.DEF_LOCALE, "en");
         try {
             this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
@@ -247,6 +254,8 @@ public final class IPDB implements AutoCloseable {
             mmdbCityFile.delete();
             mmdbCityFile.deleteOnExit();
             log.error("Unable to load GeoIP City database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        } catch (IOException exception) {
+            log.warn("Unable to load GeoIP City database", exception);
         }
         try {
             this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
@@ -258,6 +267,8 @@ public final class IPDB implements AutoCloseable {
             mmdbASNFile.delete();
             mmdbASNFile.deleteOnExit();
             log.error("Unable to load GeoIP ASN database, the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        } catch (IOException exception) {
+            log.warn("Unable to load GeoIP ASN database", exception);
         }
         try {
             @Cleanup
@@ -267,6 +278,8 @@ public final class IPDB implements AutoCloseable {
             mmdbGeoCNFile.delete();
             mmdbGeoCNFile.deleteOnExit();
             log.error("Unable to load GeoCN database (version 2), the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        } catch (IOException exception) {
+            log.warn("Unable to load GeoCN database (version 2)", exception);
         }
         try {
             this.geoCN1 = new GeoCN1(mmdbGeoCNFile, new MaxMindNodeCache());
@@ -274,6 +287,8 @@ public final class IPDB implements AutoCloseable {
             mmdbGeoCNFile.delete();
             mmdbGeoCNFile.deleteOnExit();
             log.error("Unable to load GeoCN database (version 1), the file may be corrupted. It has been deleted and will be re-downloaded on next startup.", exception);
+        } catch (IOException exception) {
+            log.warn("Unable to load GeoCN database (version 1)", exception);
         }
     }
 
@@ -285,21 +300,14 @@ public final class IPDB implements AutoCloseable {
                     IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/PBH-BTN/GeoLite.mmdb/releases/latest/download/", databaseName, true);
                     IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", databaseName, true);
                     IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);
-                    if (!downloadFile(target.toPath(), databaseName, task, callback, mirror1, mirror3, mirror4).join()) {
-                        if (isMmdbNeverDownloaded(target)) {
-                            throw new IllegalStateException("Download mmdb database failed!");
-                        } else {
-                            log.warn(tlUI(Lang.IPDB_EXISTS_UPDATE_FAILED, databaseName));
-                        }
+                    if (!downloadFile(target.toPath(), databaseName, task, callback, mirror1, mirror3, mirror4).join()
+                            && target.exists()) {
+                        log.warn(tlUI(Lang.IPDB_EXISTS_UPDATE_FAILED, databaseName));
                     }
                 }
         )).join();
     }
 
-
-    private boolean isMmdbNeverDownloaded(File target) {
-        return !target.exists();
-    }
 
     private boolean needUpdateMMDB(File target) {
         if (!target.exists()) {

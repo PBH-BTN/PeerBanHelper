@@ -27,12 +27,9 @@ import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.google.common.util.concurrent.Striped;
 import com.spotify.futures.CompletableFutures;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.AssociativeAddressTrie;
@@ -53,7 +50,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -64,7 +60,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private final DualIPv4v6Tries ignoreAddresses = new DualIPv4v6Tries();
     private final Lock banWaveLock = new ReentrantLock();
-    private final Striped<Lock> banRegistrationLocks = Striped.lock(256);
     private final BanList banList;
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
     private final DownloaderManagerImpl downloaderManager;
@@ -234,35 +229,27 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             }
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist", false);
+            var banlistClone = banList.copyKeySet();
             downloaderBanDetailMap.forEach((downloader, details) -> {
                 try {
                     details.stream().map(detail -> CompletableFuture.runAsync(() -> {
                         try {
                             if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
-                                long actualBanDuration = detail.banDuration() > 0 ? detail.banDuration() : banDuration;
-                                var result = detail.result();
-                                var downloaderInfo = downloaderManager.getDownloadInfo(downloader.getId());
-                                var torrent = new TorrentWrapper(detail.torrent());
-                                var peer = new PeerWrapper(detail.peer());
-                                var registration = registerBan(detail.torrent(), detail.peer(), existing -> {
-                                    var now = OffsetDateTime.now();
-                                    var metadata = existing;
-                                    if (metadata == null) {
-                                        metadata = new BanMetadata();
-                                        metadata.setRandomId(UUID.randomUUID().toString().replace("-", ""));
-                                        metadata.setBanAt(now);
-                                    }
-                                    metadata.refresh(result.moduleContext().getName(), downloaderInfo,
-                                            now.plus(actualBanDuration, ChronoUnit.MILLIS),
-                                            result.action() == PeerAction.BAN_FOR_DISCONNECT, result.action().isExcludeFromReport(),
-                                            result.action().isExcludeFromDisplay(), torrent, peer,
-                                            result.rule(), result.reason(), result.structuredData());
-                                    return metadata;
-                                });
-                                if (registration.added()) {
-                                    bannedPeers.add(registration.metadata());
+                                long actualBanDuration = banDuration;
+                                if (detail.banDuration() > 0) {
+                                    actualBanDuration = detail.banDuration();
                                 }
-                                if (registration.added() && result.action() != PeerAction.BAN_FOR_DISCONNECT) {
+                                BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
+                                        UUID.randomUUID().toString().replace("-", "")
+                                        , downloaderManager.getDownloadInfo(downloader.getId()),
+                                        OffsetDateTime.now(), OffsetDateTime.now().plus(actualBanDuration, ChronoUnit.MILLIS),
+                                        detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
+                                        detail.result().action().isExcludeFromReport(),
+                                        detail.result().action().isExcludeFromDisplay(),
+                                        detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(), detail.result().structuredData());
+                                bannedPeers.add(banMetadata);
+                                banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
+                                if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
                                     log.info(tlUI(Lang.BAN_PEER,
                                             detail.peer().getPeerAddress(),
                                             detail.peer().getPeerId(),
@@ -397,36 +384,30 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         return LIVE_PEERS;
     }
 
-    private BanList.BanRegistration registerBan(Torrent torrent, Peer peer, Function<BanMetadata, BanMetadata> update) {
-        var address = peer.getPeerAddress();
-        // Keep the first history write ahead of any refresh for this ban.
-        var lock = banRegistrationLocks.get(address.getAddress().toPrefixBlock());
-        lock.lock();
-        try {
-            var registration = banList.registerBan(address, update);
-            applyBan(registration, torrent, peer);
-            return registration;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private void applyBan(BanList.BanRegistration registration, @NotNull Torrent torrentObj, @NotNull Peer peer) {
-        var banMetadata = registration.metadata();
-        if (!registration.added()) {
+    /**
+     * 以指定元数据封禁一个特定的对等体
+     *
+     * @param compareWith 对比 BanList，默认 BAN_LIST 或者 BAN_LIST 的克隆
+     * @param peer        对等体 IP 地址
+     * @param banMetadata 封禁元数据
+     */
+    private void banPeer(@NotNull Set<IPAddress> compareWith, @NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
+        if (compareWith.contains(peer.getPeerAddress().getAddress())) {
             log.error(tlUI(Lang.DUPLICATE_BAN, banMetadata));
             needReApplyBanList.set(true);
             log.warn(tlUI(Lang.SCHEDULED_FULL_BANLIST_APPLY));
-        } else {
-            metrics.recordPeerBan(peer.getPeerAddress().getAddress(), banMetadata);
-            banMetadata.setReverseLookup("N/A");
-            if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
-                dnsLookup.ptr(peer.getPeerAddress().getAddress().toReverseDNSLookupString()).thenAccept(hostName -> {
-                    if (hostName.isPresent() && !peer.getPeerAddress().getIp().equals(hostName.get())) {
+        }
+        banList.add(peer.getPeerAddress(), banMetadata);
+        metrics.recordPeerBan(peer.getPeerAddress().getAddress(), banMetadata);
+        banMetadata.setReverseLookup("N/A");
+        if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
+            dnsLookup.ptr(peer.getPeerAddress().getAddress().toReverseDNSLookupString()).thenAccept(hostName -> {
+                if (hostName.isPresent()) {
+                    if (!peer.getPeerAddress().getIp().equals(hostName.get())) {
                         banMetadata.setReverseLookup(hostName.get());
                     }
-                });
-            }
+                }
+            });
         }
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
     }
@@ -435,16 +416,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     public void scheduleBanPeerNoAssign(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
         Downloader downloader = downloaderManager.stream().filter(d -> d.getId().equals(banMetadata.getDownloader().id()))
                 .findFirst().orElseThrow();
-        registerBan(torrent, peer, existing -> {
-            if (existing == null) {
-                return banMetadata;
-            }
-            existing.refresh(banMetadata.getContext(), banMetadata.getDownloader(),
-                    banMetadata.getUnbanAt(), banMetadata.isBanForDisconnect(), banMetadata.isExcludeFromReport(),
-                    banMetadata.isExcludeFromDisplay(), banMetadata.getTorrent(), banMetadata.getPeer(),
-                    banMetadata.getRule(), banMetadata.getDescription(), banMetadata.getStructuredData());
-            return existing;
-        });
+        banPeer(banList.copyKeySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
                 downloader,
                 new BanDetail(torrent,

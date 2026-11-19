@@ -46,7 +46,8 @@ public class WebUITab implements WindowTab {
     }
 
     private void ensureBrowser() {
-        if (webBrowser == null && parent.isVisible()) {
+        if (parent.isVisible() && (webBrowser == null || webBrowser.isTerminated())) {
+            unregisterBrowser();
             webBrowser = new SwtBrowserCanvas(parent.getSwingGUI().isDarkMode(), getBrowserUrl());
             webuiPanel.add(webBrowser, BorderLayout.CENTER);
             webuiPanel.revalidate();
