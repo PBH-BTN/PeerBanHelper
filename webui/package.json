@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@arco-plugins/vite-vue": "^1.4.6",
-    "@tsconfig/node24": "^24.0.5",
+    "@tsconfig/node26": "^26.0.0",
     "@types/lodash": "^4.17.27",
     "@types/markdown-it": "^14.2.0",
     "@types/node": "^26.6.5",
