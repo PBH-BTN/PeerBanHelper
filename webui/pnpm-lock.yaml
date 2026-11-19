@@ -89,7 +89,7 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2(echarts@6.1.0)(vue@3.5.45(typescript@6.0.3))
       vue-i18n:
-        specifier: 11.4.22
+        specifier: ^11.4.16
         version: 11.4.22(vue@3.5.45(typescript@6.0.3))
       vue-request:
         specifier: ^2.0.4
