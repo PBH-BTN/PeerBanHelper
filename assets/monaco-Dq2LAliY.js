@@ -1,0 +1,1 @@
+import{C as e}from"./vendor-BCdFyxtg.js";import{t}from"./monacoEditor-C-vYN5dJ.js";e.config({monaco:t});
