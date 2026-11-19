@@ -20,3 +20,123 @@ This repository contains two components: a Java backend and a Vue.js frontend. T
 ## Frontend (Vue.js part)
 
 Not completed yet.
+
+
+## 项目概览与技术栈
+
+本文前部的人工参与、审批及 PR 要求继续适用。以下补充以仓库内的构建配置、CI 和源码为依据。文件头的 IDE 元数据保留，运行与构建入口见本节。
+
+- PeerBanHelper 连接受支持的 BitTorrent 下载器，读取任务和 Peer 快照，运行监控与封禁规则，并将封禁结果同步给下载器。应用提供桌面界面、WebUI 和无界面部署。
+- 后端使用 Java 25 和 Kotlin，由根目录的 Gradle Wrapper 与 Kotlin DSL 构建。Spring Framework 管理组件、事务和 JDBC，Javalin 提供 HTTP API 与静态页面，MyBatis-Plus 管理数据访问，Flyway 管理版本化迁移。桌面相关代码使用 Swing/FlatLaf 和 SWT，插件集成使用 PF4J。
+- WebUI 位于 `webui/`，采用 Vue 3、TypeScript、Vite、Arco Design Vue 和 Less。Vue Router 处理导航，Pinia 保存状态，vue-i18n 管理文案，vue-request 处理请求状态，ECharts 和 Monaco 分别用于图表和脚本编辑。
+- 依赖和环境版本以 `build.gradle.kts`、`settings.gradle.kts`、`gradle/wrapper/gradle-wrapper.properties`、`webui/package.json` 及对应工作流为准。
+
+## 后端代码地图与维护约定
+
+主要包路径为 `src/main/java/com/ghostchu/peerbanhelper/`，Java 与现有 Kotlin 源码都在此路径下。
+
+- `MainJumpLoader` 是 Gradle 和 JAR 声明的入口，应用初始化与本地配置加载可从 `Main` 追踪。全局配置和模块配置的发行模板分别为 `src/main/resources/config.yml` 和 `src/main/resources/profile.yml`。新增或改名配置键时，结合 `config/PBHConfigUpdater`、`MainConfigUpdateScript`、`ProfileUpdateScript` 核对已安装实例的升级与重载行为。
+- 下载器适配位于 `downloader/`，规则和监控模块位于 `module/`。一轮扫描可从 `DownloaderServerImpl` 到 `banpipeline/DigestionSession` 追踪，阶段实现位于 `banpipeline/organ/`，覆盖登录、抓取种子和 Peer、更新快照及运行监控与规则。涉及封禁状态时检查重复扫描、部分下载器失败和恢复后的状态同步。
+- HTTP 入口集中在 `module/impl/webapi/` 和 `web/JavalinWebContainer`。参考相邻控制器的路由注册、`Role`、异常处理和 `StdResp`，同时核对前端类型及调用方。涉及分页时检查参数、排序和分页元数据是否一致。
+- 数据访问位于 `databasent/`，按 `table/`、`mapper/`、`service/` 等层组织，SQL 映射位于 `src/main/resources/mapper/`。`configuration/DatabaseDriverConfig` 和 `DatabaseSchemaInitializer` 定义数据源及迁移入口。SQLite 是默认引擎，同时支持 PostgreSQL、MySQL 和 H2。按 `DatabaseType` 核对方言，H2 共用 MySQL 的 mapper、迁移和重复执行脚本目录。版本化 SQL 在 `src/main/resources/db/migration/`，独立执行的可重复 SQL 在 `src/main/resources/db/repeat/`。数据库结构变化应新增适用方言的迁移，并同步核对实体和映射。已发布版本的迁移应保留原 SQL，以维持 Flyway 校验和。
+- 后端文案位于 `src/main/resources/lang/`，包括 `zh_cn`、`zh_tw`、`en_us` 及 `messages_fallback.yml`。修改用户可见信息时核对对应键、语言版本和参数占位符。
+- 后端文件沿用相邻实现的风格，Java 通常使用四空格缩进，源码使用 UTF-8。复用同层已有的 Spring 注入、日志、资源关闭和生命周期处理。涉及配置、数据库或网络的变更，应在人工审核时说明对已有安装和运行状态的影响。
+
+## WebUI 目录与编码约定
+
+- `webui/src/views/` 按功能组织页面，可复用组件位于 `src/components/`。从相邻页面继承 Vue 单文件组件的 `<script setup lang="ts">` 写法、Arco 控件及加载、空结果和失败状态的处理。使用 `@/` 引用 `webui/src/`，配置见 Vite 和 TypeScript。
+- 在 `src/router/index.ts` 注册页面时，沿用现有路由元数据、导航与 base path 处理。路由使用 history 模式，Vite 构建使用相对资源路径。涉及路由或静态资源时检查部署前缀与直接刷新深层路由。
+- 在 `src/service/` 封装 API 请求，在 `src/api/model/` 定义接口类型，在 `src/stores/` 管理共享状态。常规 REST 请求参考 `service/banLogs.ts`，等待 `useEndpointStore().serverAvailable`，根据当前 endpoint 拼接 URL，复用 `getCommonHeader()` 和 `assertResponseLogin()`。认证、语言与时区随通用请求头传递。确认请求在 Vite 代理、用户自定义 endpoint 及后端托管页面下均能正确拼接。
+- 全局文案位于 `src/locale/`，功能专用文案沿用对应页面或模块的 `locale/`。修改文案时同步检查 `zh-CN`、`zh-TW`、`en-US` 的键和插值。
+- 格式规则以 `webui/.oxfmtrc.json` 为准，包含两空格缩进、单引号、省略语句末分号、无尾逗号和 100 字符打印宽度。当前 lint 脚本运行 oxfmt 和 oxlint。对局部改动保持格式化范围，避免全仓重排。
+- 在 `webui/` 使用 pnpm 管理依赖，并维护该目录下的锁文件。项目借助 `pnpm-workspace.yaml` 对 `vue-request@2.0.4` 应用补丁。依赖升级涉及该包时，检查补丁与锁文件是否仍匹配。
+
+## 开发、验证与打包
+
+| 场景 | 目录与命令 |
+| --- | --- |
+| 安装 WebUI 依赖 | `webui/` 中执行 `pnpm install`。CI 使用 Node.js 25 和 pnpm 12.15.0，复现 CI 时以工作流当前版本为准。 |
+| 启动 WebUI 开发服务 | `webui/` 中执行 `pnpm run dev`。`/api` 默认代理至 `http://127.0.0.1:9898`，启动前可通过环境变量 `PBH_ENDPOINT` 指定目标。 |
+| 检查 WebUI | `webui/` 中按影响范围执行 `pnpm run lint`、`pnpm run type-check`、`pnpm test`。测试使用 Node.js test runner，现有用例在 `webui/test/`。 |
+| 构建 WebUI | `webui/` 中执行 `pnpm run build`，包含类型检查，产物位于 `webui/dist/`。 |
+| 验证 JVM 构建 | 仓库根目录使用 JDK 25，运行 `./gradlew test` 或 `./gradlew build`。Windows PowerShell 使用 `.\gradlew.bat test` 或 `.\gradlew.bat build`。测试任务使用 JUnit Platform，检查任务输出以确认实际执行了哪些用例。 |
+| 打包内置 WebUI | CI 先构建 WebUI，再将产物放入 `src/main/resources/static/` 后执行 Gradle 打包。根目录 `build.sh` 提供同类流程，会先删除该静态资源目录，运行前确认其中内容可重建。 |
+
+Gradle 输出 `build/libs/PeerBanHelper.jar` 和 `build/libraries/`，分发时按对应布局携带运行时依赖。安装包、容器和原生库分别参考 `install4j/`、`Dockerfile`、`Dockerfile-Release`、`platform-natives/` 及 `.github/workflows/`。
+
+验证按改动范围选择。界面改动检查相应页面及交互，API 改动核对后端响应与前端模型，配置或数据库改动关注全新安装与现有数据升级。提交前检查 diff，避免夹带本地数据、凭据、构建产物或无关工作区改动。
+
+
+## 子模块索引
+
+根目录 `settings.gradle.kts` 定义单个 JVM 构建项目，`webui/package.json` 定义独立的前端构建。下文以源码职责划分子模块。后端包相对于 `src/main/java/com/ghostchu/peerbanhelper/`，前端目录相对于 `webui/src/`。
+
+### 后端运行时与下载器
+
+| 子模块 | 入口、数据流及维护检查点 |
+| --- | --- |
+| 启动、重载与关闭 | `MainJumpLoader` 引导 `Main`，`PeerBanHelper` 协调功能模块、HTTP 服务和关闭流程。检查 `ExternalSwitch`、`AppConfig` 与 YAML 的实际读取点，启动参数、运行期重载及持久配置分别验证。 |
+| 下载器管理 | `DownloaderManagerImpl` 按 type 从配置或 API 数据创建适配器，`Downloader` 定义登录、任务、Peer 和封禁接口，`AbstractDownloader` 提供公共行为。修改适配器能力时同时检查 `DownloaderFeatureFlag`、运行状态、前端表单和历史类型别名。 |
+| qBittorrent 与 Enhanced Edition | `downloader/impl/qbittorrent/` 由 `AbstractQbittorrent` 提供共用实现，标准版与 `impl/enhanced/` 有各自适配。检查登录、Peer 字段、能力标记和封禁同步在两种客户端中的行为。 |
+| Transmission | `downloader/impl/transmission/Transmission` 使用同仓的 `cordelia.client.TrClient` 和 `cordelia.rpc` 请求模型。检查 RPC 会话更新、种子和 Peer 字段映射以及 blocklist 更新。 |
+| Deluge | `downloader/impl/deluge/Deluge` 使用同仓 `raccoonfink.deluge.DelugeServer`。配置兼容 `deluge` 与 `raccoonfink/deluge`，修改协议时核对扩展方法和响应模型。 |
+| BiglyBT | `downloader/impl/biglybt/BiglyBT` 使用本包的 Connector 数据、双向消息和网络 DTO。检查元数据回调与批量封禁、解封及替换列表的结果。 |
+| BitComet | `downloader/impl/bitcomet/BitComet` 通过 `BCEndpoint`、响应 DTO 和 `crypto/` 处理登录、任务和 IP 过滤。分别检查设备登录状态和任务、Peer 与 IP 过滤响应。 |
+| Aria2Next | `downloader/impl/aria2next/Aria2Next` 使用 JSON-RPC 和 `bean/` 协议模型。变更时核对任务、Peer、速度统计和 BT 封禁列表操作所需的扩展能力。 |
+| BitTorrent 领域模型 | `bittorrent/{torrent,peer,tracker}/` 抽象下载器对象，`wrapper/` 提供地址、Peer、种子及封禁元数据的包装。处理地址和端口时区分输入值、规范化值和持久化表示，核对 IPv4、IPv6、缺失端口及历史数据。 |
+| 封禁扫描与同步 | `DownloaderServerImpl` 调度 BanWave 并处理定时封禁、解封和下发。`DigestionSession` 串联下载器提供、登录、任务、Peer、快照、监控和规则阶段，随后按结果优先级归并。`BanList` 管理当前封禁状态。改动时追踪阶段超时、会话结束、重复 Peer、规则优先级、封禁事件及下载器同步结果。 |
+| 生命周期、事件和扩展 | `PeerBanHelper.registerModules()` 给出默认注册名单及依赖顺序，`ModuleManagerImpl` 处理启用、停用和模块事件。保持现有顺序，核对 `FeatureModule`、`event/{program,module,banwave,btn,gui}/` 及监听副作用。`configuration/pf4j/` 管理插件与 Spring 集成。以实际注册和配置判断可用功能，例如 `PBHPluginController` 当前留有实现但默认注册被注释。 |
+
+### 规则、监控与数据
+
+| 子模块 | 入口、数据流及维护检查点 |
+| --- | --- |
+| 本地匹配与订阅 | `module/impl/rule/` 内有 `IPBlackList`、`PeerIdBlacklist`、`ClientNameBlacklist` 与 `IPBlackRuleList`。匹配公用实现见 `util/rule/`，订阅接口见 `RuleSubController`，来源和更新日志走 `RuleSubInfoService`、`RuleSubLogService`。检查单条命中、订阅刷新失败、已有规则保留和 WebUI 可用性。检查 `PTRBlacklist` 等源码时以默认注册表确认启用状态。 |
+| 行为规则 | `ProgressCheatBlocker`、`MultiDialingBlocker`、`AutoRangeBan`、`IdleConnectionDosProtection`、`AntiVampire` 分别处理进度、多拨、网段、空闲连接和反吸血。`AbstractRuleFeatureModule`、`CheckResult`、`PeerAction` 定义结果契约。核对配置单位、边界值、采样或重置窗口，以及 `NO_ACTION`、`BAN_FOR_DISCONNECT`、`BAN`、`SKIP` 的下游处理。进度类持久状态同时检查 `PCBAddressService` 和 `PCBRangeService`。 |
+| 表达式规则 | `ExpressionRule` 使用 `util/scriptengine/` 中的管理器及编译、执行抽象，发行脚本在 `src/main/resources/scripts/`。脚本返回值转换以 `ScriptEngineManager` 为准。改动输入变量、返回约定或语法时同时核对前端编辑器和语法测试。 |
+| BTN | `btn/BtnNetwork` 管理配置和能力，`ability/impl/` 包含心跳、重配置、规则、允许/拒绝列表、查询和报告，`ping/` 保存提交模型及旧协议模型。`BtnNetworkOnline` 将其接入规则，控制器和设置页展示状态。核对能力协商、启停、重试、旧版 DTO 与实际发送字段。 |
+| 活跃监控 | `ActiveMonitoringModule` 与 `TrafficJournalService` 支撑流量历史。修改采样或聚合时检查下载器计数重置、累计值与增量的区分、日期切换和历史保留。 |
+| 会话分析 | `SessionAnalyseServiceModule` 与 `PeerConnectionMetricsService`、`PeerConnectionMetricsTrackService` 管理连接指标，由图表 API 消费。对照采样窗口、时间桶和会话明细的一致性。 |
+| Peer 历史与 Swarm 跟踪 | `PeerRecordingServiceModule`、`SwarmTrackingModule` 分别提供 Peer 记录及 Swarm 跟踪。追踪 `PeerRecordService`、`TorrentService` 与 `TrackedSwarmService`，核对地址、端口、种子关联、采样保留和 BTN 消费。 |
+| 封禁统计和告警 | `metric/BasicMetrics` 对应内存及持久实现，历史从 `HistoryService` 读取，当前封禁持久化由 `BanListService` 处理。`alert/AlertManagerImpl` 与 `AlertService` 处理告警及清理。检查同一事件的数据写入、刷新和保留期限。 |
+| 推送 | `util/push/` 实现渠道，`PBHPushController` 提供配置和测试入口，WebUI 的 `settings/components/config/components/push/` 包含各渠道表单。新增渠道时对照后端配置键、表单类型和测试发送。 |
+| 数据源、SQL 与旧数据 | `databasent/driver/` 封装各引擎，IP、JSON、日期时间等类型由对应 TypeHandler 转换。`mapper/java/` 声明接口，资源目录按方言提供 mapper。现有库升级还包含 `migration/DatabaseMigrationCoordinator`、`SQLiteSchemaUpgrader`、按表 migrator 和完成标记。改变列类型或实体字段时分别检查 Flyway 升级、新建数据库、旧 SQLite 夹具和各方言的读取。 |
+
+### API、平台与共享服务
+
+| 子模块 | 入口、数据流及维护检查点 |
+| --- | --- |
+| HTTP、启动等待与认证 | `configuration/WebContainerConfig`、`web/JavalinWebContainer`、`EarlyStartupHandler` 管理启动和静态资源托管。`PBHAuthenticateController`、`PBHOOBEController`、`PBHMetadataController` 分别处理认证、首次初始化和能力信息。改动时结合 `Role`、异常映射和前端端点状态验证未初始化、已初始化和令牌失效流程。 |
+| 实时流与后台任务 | `AbstractSSEFeatureModule`、`PBHLogsController`、`PBHBackgroundTaskController` 提供日志或任务流。`util/backgroundtask/` 定义任务模型和管理器，前端 `service/eventstream.ts` 封装 EventSource。检查连接关闭、重连、切换端点及任务失败后的表现。 |
+| GeoIP、DNS 和请求工具 | `util/ipdb/IPDBManager` 负责初始化、缓存和查询，`IPDB` 维护本地库及下载源，`geocn/` 封装地区查询实现。`util/dns/`、`HTTPUtil`、`IPAddressUtil` 是 DNS、HTTP 和地址处理入口。调整下载时检查备用源、临时文件失败清理及已有数据库连续可用；处理 OkHttp 响应时在生命周期内读取正文一次。 |
+| NAT、端口映射与实验室 | `util/traversal/btstun/` 管理 AutoSTUN，`stun/` 处理探测和隧道，`forwarder/` 管理转发及平台 I/O 实现，`util/portmapper/` 负责 UPnP。`PBHAutoStunController`、`PBHLabController` 与实验室设置页组成操作入口。核对探测状态、配置重载和端口、连接的释放。同仓 `com.cdnbye.core.nat`、`org.bitlet.weupnp` 分别是 STUN 和 UPnP 的依赖源码。 |
+| PBH Plus | `pbhplus/LicenseManager`、`LicenseParser`、`LocalKeyManager` 及 `backend/`、`validator/` 负责许可证与本地密钥。`PBHPlusController` 和前端 `service/plus.ts`、`components/plus/` 消费状态和功能门控。验证未激活、激活和许可证变化的行为。 |
+| 桌面与平台 | `gui/PBHGuiManager` 对接 console 与 Swing 实现，`gui/impl/swing/mainwindow/` 管理窗口、托盘、日志和 SWT WebUI。检查 Swing EDT、SWT 事件线程、浏览器资源释放及无界面运行。`platform/` 包含 POSIX 和 Windows 实现，Windows 相关能力包括 EcoQoS、内存工作集和 AMSI。同仓 `hu.benzor.systemthemedetector` 为桌面主题检测提供支持。 |
+| 文案、进程内交换和跨层工具 | `text/` 管理语言文件、翻译组件和后处理，`exchange/ExchangeMap` 保存进程内交换数据及显示标志。`util/json/`、`jsonrpc/`、`query/`、`logger/` 分别组织序列化、RPC、查询和日志公共代码。改变公共工具时先找全部调用方，尤其是存储值、API 字段与 UI 展示同时依赖的类型。 |
+
+### WebUI 功能模块
+
+| 子模块 | 页面、服务及后端入口 |
+| --- | --- |
+| 应用外壳、会话和路由 | `main.ts`、`App.vue`、`router/index.ts` 和 `stores/{endpoint,userStore,autoUpdate,dark,locale}.ts` 联动端点、导航、刷新、主题及语言。修改全局状态时检查会话恢复、切换服务器、模块禁用路由和直接打开深层链接。 |
+| 登录和首次初始化 | `views/login/` 与 `views/oobe/` 对应 `service/login.ts`、`service/init.ts` 及认证、OOBE 控制器。步骤定义在 `oobe/steps.ts`，表单覆盖令牌、下载器、数据库和 BTN。核对已初始化与初次设置下的入口。 |
+| 仪表盘 | `views/dashboard/` 包含下载器状态、编辑、任务和 Peer 弹窗及统计，结合 `service/downloaders.ts`、`PBHDownloaderController`、`PBHMetricsController`。维护时检查单下载器失败和轮询更新。 |
+| 当前封禁及排行 | `views/banlist/`、`views/ranks/` 使用 `service/banList.ts`、`service/ranks.ts` 和 `PBHBanController`。区分当前列表、历史数据和排行聚合，检查搜索、分页、排序及封禁操作后的刷新。 |
+| 历史数据 | `views/data-view/banlog/`、`torrentList/`、`ipList/` 分别展示封禁记录、种子历史和 IP 历史。`service/banLogs.ts`、`service/data.ts` 对应封禁、种子和 Peer 控制器。保持 IP、info hash、筛选和明细分页的一致性。 |
+| 图表 | `views/charts/` 通过 ECharts 展示趋势、字段及地理分布、流量和会话分析。参考 `service/charts.ts`、`service/ruleStatics.ts`、`PBHChartController` 和 `PBHMetricsController`。核对时间范围、时区、单位、缺失数据及功能门控。 |
+| 规则管理 | `views/rule-management/` 包含通用规则、订阅及网络类型组件。`service/blacklist.ts`、`service/ruleSubscribe.ts` 对接规则与订阅接口。检查订阅更新日志、启用状态和路由能力提示。 |
+| 自定义脚本 | `views/custom-script/` 的 Monaco 编辑器、语言提示和 `aviatorscript/grammar/` 与 `service/script.ts` 一起维护。编辑器语法回归可运行 `webui/test/grammar-parser.test.mjs`，脚本实际执行语义由 JVM 端定义。 |
+| 设置 | `views/settings/components/config/` 对应主配置、BTN、IP 数据库、性能、日志、WebUI 和推送；`profile/` 对应规则、记录和监控；`info/` 展示运行信息，`labs/` 管理实验与 AutoSTUN。分别核对 `service/settings.ts`、`logger.ts`、`labs.ts`、`autostun.ts` 和后端配置、诊断接口。 |
+| 公共组件及资源 | `components/` 放置表单、告警、暂停与自动刷新、Plus、Markdown 等共享 UI；`utils/` 放置时间、重试及格式化；`assets/` 和 `webui/public/` 分别保存构建引用和直接部署的资源。改变通用组件时检查使用它的页面及三套语言。 |
+
+### 打包、夹具和仓库工具
+
+| 子模块 | 入口与维护检查点 |
+| --- | --- |
+| 容器 | `Dockerfile` 从源码分阶段构建 WebUI 和 JVM，`Dockerfile-Release` 消费已经构建的 JAR 与 libraries。`docker-compose.yml` 使用镜像占位符和 `/app/data` 持久目录。检查 JVM 参数、端口、挂载和停止行为。 |
+| Debian 与 FreeBSD | `pkg/deb/` 含 Debian 包元数据、维护脚本、配置和 systemd 单元；`pkg/pkg/` 含 FreeBSD 清单、文件列表和 rc.d 服务。分别由 `build_deb.yml`、`build_pkg.yml` 组装，检查安装路径、权限和升级保留文件。 |
+| 便携包与图形安装器 | `pkg/portable/` 保存 GUI、托盘及控制台启动脚本，`build_portable.yml` 组装发布物。`install4j/` 管理安装器项目、脚本、VM 参数及安装器语言，`build_installers.yml` 管理 CI 发布。核对有无自带 Java 的版本，以及入口所需的平台文件。 |
+| Synology SPK | `pkg/synopkg/` 和 `build_spk.yml` 定义 DSM 包、安装向导、服务生命周期及随包部署的 compose 定义。检查 DSM 权限、持久化路径与安装、升级、卸载流程。 |
+| 平台二进制资源 | `platform-natives/` 按 OS 和架构分目录，`cpp-src/` 保存 Windows JNI 源码及手工构建说明。更改原生资源时核对加载位置、目标架构及其实际打包工作流。 |
+| 验证夹具 | `test/fakeqb.py` 提供模拟下载器，`test/test-db/` 提供配置和旧 SQLite 数据。CI 的 `test/test-db.sh` 会移动 JAR 和夹具并替换数据库类型占位符，复现时在可丢弃的工作副本中运行。脚本名称、变量和数据库矩阵以 `build_gradle.yml` 为准。`src/test/resources/testdata/scripts/` 含 Aviator 输入夹具。 |
+| CI 与贡献工具 | `.github/workflows/` 将 WebUI 构建、JVM 测试和分发拆为可复用工作流；PR 与发布入口分别查 `jvm-ci-pr.yml`、`webui.yml`、`jvm-ci.yml` 和 `jvm-release.yml`。贡献分工见 `.github/CODEOWNERS` 及 PR 模板。OpenSpec 配置在 `openspec/`，命令模板在 `.claude/`、`.github/prompts/` 和 `.github/skills/`。遇到历史 Maven、Java 21 或旧 lint 说明时，用当前脚本和工作流核对。 |

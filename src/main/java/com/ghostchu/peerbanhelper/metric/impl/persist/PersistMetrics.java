@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -31,6 +33,8 @@ public final class PersistMetrics implements BasicMetrics {
     private final TorrentService torrentDao;
     private final HistoryService historyDao;
     private final IPDBManager ipdbManager;
+    private final ExecutorService asyncWriteIOExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
 
 
     public PersistMetrics(HistoryService historyDao, TorrentService torrentDao, InMemoryMetrics inMemory, IPDBManager ipdbManager) {
@@ -107,32 +111,36 @@ public final class PersistMetrics implements BasicMetrics {
                 metadata.getTorrent().getSize(),
                 metadata.getTorrent().isPrivateTorrent()
         ));
-        IPGeoData geoIpData = null;
+        IPGeoData geoIpData;
         var resp = ipdbManager.queryIPDB(metadata.getPeer().getAddress().getAddress().toInetAddress());
         if (resp != null) {
             geoIpData = resp.geoData().get();
+        } else {
+            geoIpData = null;
         }
-        historyDao.save(new HistoryEntity(
-                null,
-                metadata.getBanAt(),
-                metadata.getUnbanAt(),
-                address.toInetAddress(),
-                metadata.getPeer().getAddress().getPort(),
-                metadata.getPeer().getId(),
-                metadata.getPeer().getClientName(),
-                metadata.getPeer().getUploaded(),
-                metadata.getPeer().getDownloaded(),
-                metadata.getPeer().getProgress(),
-                metadata.getTorrent().getProgress(),
-                torrentEntity.getId(),
-                metadata.getContext(),
-                metadata.getRule(),
-                metadata.getDescription(),
-                metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags(),
-                metadata.getDownloader().id(),
-                metadata.getStructuredData() == null ? null : metadata.getStructuredData(),
-                geoIpData
-        ));
+        asyncWriteIOExecutor.submit(()->{
+            historyDao.save(new HistoryEntity(
+                    null,
+                    metadata.getBanAt(),
+                    metadata.getUnbanAt(),
+                    address.toInetAddress(),
+                    metadata.getPeer().getAddress().getPort(),
+                    metadata.getPeer().getId(),
+                    metadata.getPeer().getClientName(),
+                    metadata.getPeer().getUploaded(),
+                    metadata.getPeer().getDownloaded(),
+                    metadata.getPeer().getProgress(),
+                    metadata.getTorrent().getProgress(),
+                    torrentEntity.getId(),
+                    metadata.getContext(),
+                    metadata.getRule(),
+                    metadata.getDescription(),
+                    metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags(),
+                    metadata.getDownloader().id(),
+                    metadata.getStructuredData() == null ? null : metadata.getStructuredData(),
+                    geoIpData
+            ));
+        });
     }
 
     @Override

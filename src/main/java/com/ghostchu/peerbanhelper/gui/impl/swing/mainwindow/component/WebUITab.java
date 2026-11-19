@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed.S
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.google.common.eventbus.Subscribe;
-import lombok.SneakyThrows;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,11 +15,13 @@ import java.awt.*;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 public class WebUITab implements WindowTab {
+    private final SwingMainWindow parent;
     private final JPanel webuiPanel;
     private SwtBrowserCanvas webBrowser;
     private PBHGuiBridge bridge;
 
     public WebUITab(SwingMainWindow parent) {
+        this.parent = parent;
         this.webuiPanel = new JPanel(new BorderLayout());
         parent.getTabbedPane().addTab(tlUI(Lang.GUI_TABBED_WEBUI), webuiPanel);
         Main.getEventBus().register(this);
@@ -28,48 +29,38 @@ public class WebUITab implements WindowTab {
 
     @Subscribe
     public void onLAFReload(PBHLookAndFeelNeedReloadEvent event) {
-        unregisterBrowser();
-        ensureBrowser();
+        runOnEdt(() -> {
+            unregisterBrowser();
+            ensureBrowser();
+        });
     }
-
 
     @Override
     public void onWindowShow() {
-        ensureBrowser();
+        runOnEdt(this::ensureBrowser);
     }
 
     @Override
     public void onWindowHide() {
-        unregisterBrowser();
+        runOnEdt(this::unregisterBrowser);
     }
 
-    @SneakyThrows
-    public void ensureBrowser() {
-        if (webBrowser == null || !webBrowser.isValid()) {
+    private void ensureBrowser() {
+        if (parent.isVisible() && (webBrowser == null || webBrowser.isTerminated())) {
             unregisterBrowser();
-            if (SwingUtilities.isEventDispatchThread()) {
-                createBrowser();
-            } else {
-                SwingUtilities.invokeAndWait(this::createBrowser);
-            }
+            webBrowser = new SwtBrowserCanvas(parent.getSwingGUI().isDarkMode(), getBrowserUrl());
+            webuiPanel.add(webBrowser, BorderLayout.CENTER);
+            webuiPanel.revalidate();
+            webuiPanel.repaint();
         }
     }
 
-    @SneakyThrows
-    private void createBrowser() {
-        this.webBrowser = new SwtBrowserCanvas();
-        webuiPanel.add(webBrowser, BorderLayout.CENTER);
-        webBrowser.initBrowser();
-        if (bridge != null) {
-            navigateToIndex();
-        }
-    }
-
-    @SneakyThrows
     private void unregisterBrowser() {
         if (webBrowser != null) {
-            webuiPanel.removeAll();
+            webuiPanel.remove(webBrowser);
             webBrowser = null;
+            webuiPanel.revalidate();
+            webuiPanel.repaint();
         }
     }
 
@@ -80,13 +71,28 @@ public class WebUITab implements WindowTab {
 
     @Override
     public void onStarted(PBHGuiBridge bridge) {
-        this.bridge = bridge;
-        navigateToIndex();
+        runOnEdt(() -> {
+            this.bridge = bridge;
+            if (webBrowser != null) {
+                webBrowser.setUrl(getBrowserUrl());
+            }
+        });
     }
 
-    private void navigateToIndex() {
-        if (webBrowser != null) {
-            bridge.getWebUiUrl().ifPresent(uri -> webBrowser.setUrl(uri + "&silentLogin=" + SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI));
+    private String getBrowserUrl() {
+        if (bridge != null) {
+            return bridge.getWebUiUrl()
+                    .map(uri -> uri + "&silentLogin=" + SharedObject.SILENT_LOGIN_TOKEN_FOR_GUI)
+                    .orElseGet(Main::getPbhServerAddress);
+        }
+        return Main.getPbhServerAddress();
+    }
+
+    private void runOnEdt(Runnable action) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            action.run();
+        } else {
+            SwingUtilities.invokeLater(action);
         }
     }
 }

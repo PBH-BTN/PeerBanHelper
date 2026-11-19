@@ -145,13 +145,13 @@
 import { WebhookContentType, WebhookMethod, type WebhookConfig } from '@/api/model/push'
 import { formInjectionKey, type FormContext } from '@arco-design/web-vue/es/form/context'
 import type { FieldRule } from '@arco-design/web-vue'
-import { VueMonacoEditor, loader } from '@guolao/vue-monaco-editor'
-import * as monaco from 'monaco-editor'
+import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
+import '@/utils/monaco'
+import type * as monaco from 'monaco-editor/editor'
+import 'monaco-editor/languages/features/json/register'
 import { useDarkStore } from '@/stores/dark'
 import { computed, inject, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-loader.config({ monaco })
 
 const { t } = useI18n()
 const model = defineModel<WebhookConfig>({ required: true })

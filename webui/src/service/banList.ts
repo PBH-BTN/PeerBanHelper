@@ -1,6 +1,6 @@
 import { type BanList, type UnbanResult } from '@/api/model/banlist'
-import { useEndpointStore } from '@/stores/endpoint'
 import { type CommonResponse, type CommonResponseWithPage } from '@/api/model/common'
+import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 
@@ -12,7 +12,7 @@ export async function getBanList(
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/bans'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/bans'), location.href)
   url.searchParams.set('limit', String(limit))
   if (lastBanTime) {
     url.searchParams.set('lastBanTime', String(lastBanTime))
@@ -41,7 +41,7 @@ export async function getBanListPaginated(params: {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/bans'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/bans'), location.href)
   url.searchParams.set('page', String(params.page))
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
@@ -61,7 +61,7 @@ export async function getBanListPaginated(params: {
 export async function unbanIP(ip: string): Promise<CommonResponse<UnbanResult>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, 'api/bans'), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/bans'), location.href)
   return fetch(url, {
     headers: getCommonHeader(),
     method: 'DELETE',

@@ -117,8 +117,8 @@ public class Main {
     private static Platform platform;
     private static String userAgent;
     private static String serverFingerprint;
-    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 20;
-    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.1";
+    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 21;
+    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "3.1";
     private static long bootSince;
     @Getter
     private static JavalinWebContainer webContainer;
@@ -641,7 +641,7 @@ public class Main {
 
             command.add("-cp");
             command.add(classpath);
-            command.add(Main.class.getName());
+            command.add(MainJumpLoader.class.getName());
 
             // Add original startup arguments
             if (startupArgs != null) {

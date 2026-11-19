@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.swtembed;
 
-import com.ghostchu.peerbanhelper.Main;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
@@ -10,177 +9,140 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import java.awt.*;
-import java.awt.event.ComponentAdapter;
+import java.awt.Canvas;
+import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
-import java.util.concurrent.CountDownLatch;
 
 @Slf4j
 public final class SwtBrowserCanvas extends Canvas {
-    private final Thread swtEventLoop;
-    private Display display;
-    private Shell shell;
-    private Browser browser;
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);
-    private double dpiScaleFactor = 1.0;
-    private boolean browserInitialized = false;
+    private static final int UPDATE_INTERVAL_MILLIS = 50;
 
-    public SwtBrowserCanvas() {
+    private final boolean darkMode;
+    private volatile boolean removed;
+    private volatile boolean terminated;
+    private volatile String url;
+    private volatile Dimension canvasSize = new Dimension();
 
-        // 在 JVM 启动时设置 Hi-DPI 支持
-        this.setupHiDPISupport();
-        this.swtEventLoop = this.createEventLoop();
-        this.swtEventLoop.start();
-
-        // 添加组件监听器，确保浏览器尺寸始终正确
-        this.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                // 延迟执行，确保布局完成后再调整尺寸
-                EventQueue.invokeLater(() -> {
-                    if (browserInitialized && display != null && !display.isDisposed()) {
-                        display.asyncExec(() -> updateBrowserSize());
-                    }
-                });
-            }
-        });
-    }
-
-    private void setupHiDPISupport() {
-        // SWT Hi-DPI 支持
+    public SwtBrowserCanvas(boolean darkMode, String initialUrl) {
+        this.darkMode = darkMode;
+        this.url = initialUrl;
         System.setProperty("swt.autoScale", "exact");
         System.setProperty("swt.autoScale.method", "nearest");
-        // Edge 浏览器，别用 IE
         System.setProperty("org.eclipse.swt.browser.DefaultType", "edge");
     }
 
-    public void initBrowser() throws Exception {
-        countDownLatch.await();
-        display.syncExec(() -> {
-            display.setData("org.eclipse.swt.internal.win32.Edge.useDarkPreferedColorScheme", Main.getGuiManager().isDarkMode());
-            // 计算 DPI 缩放比例
-            calculateDPIScaleFactor();
-            this.shell = SWT_AWT.new_Shell(display, this);
-            try {
-                this.browser = new Browser(this.shell, SWT.NONE);
-                this.browser.setVisible(true);
-                this.browser.setUrl(Main.getPbhServerAddress());
-                this.browserInitialized = true;
-                // 应用正确的大小
-                updateBrowserSize();
-            } catch (SWTError e) {
-                this.browserInitialized = false;
-                log.debug("Cannot init SWT Browser", e);
-                Sentry.captureException(e);
-            }
-        });
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        Thread.ofPlatform().daemon().name("SwtBrowserEventLoop").start(this::runEventLoop);
     }
 
-    public void setUrl(String url) {
-        if (browser != null && !browser.isDisposed()) {
-            display.asyncExec(() -> browser.setUrl(url));
-        }
-    }
-
-    private void calculateDPIScaleFactor() {
-        int dpi = display.getDPI().x;
-        int standardDPI = 96; // Windows 标准 DPI
-        this.dpiScaleFactor = (double) dpi / standardDPI;
-    }
-
-    private void updateBrowserSize() {
-        if (browser != null && !browser.isDisposed() && browserInitialized) {
-            // 获取 Canvas 的实际大小并应用 DPI 缩放
-            Dimension canvasSize = this.getSize();
-            if (canvasSize.width > 0 && canvasSize.height > 0) {
-                int scaledWidth = (int) (canvasSize.width / dpiScaleFactor);
-                int scaledHeight = (int) (canvasSize.height / dpiScaleFactor);
-
-                browser.setSize(scaledWidth, scaledHeight);
-                shell.setSize(scaledWidth, scaledHeight);
-
-                // 强制重新布局
-                shell.layout(true, true);
-            }
-        }
+    @Override
+    public void removeNotify() {
+        removed = true;
+        super.removeNotify();
     }
 
     @Override
     public void setBounds(int x, int y, int width, int height) {
         super.setBounds(x, y, width, height);
-        // 当 Canvas 大小改变时，同步更新 Browser 大小
-        if (browserInitialized && display != null && !display.isDisposed()) {
-            display.asyncExec(this::updateBrowserSize);
-        }
+        canvasSize = new Dimension(width, height);
     }
 
     @Override
-    public void setSize(Dimension d) {
-        super.setSize(d);
-        // 重写 setSize 方法，确保任何尺寸变化都会触发浏览器尺寸更新
-        if (browserInitialized && display != null && !display.isDisposed()) {
-            display.asyncExec(this::updateBrowserSize);
+    protected void processComponentEvent(ComponentEvent event) {
+        // SWT_AWT.new_Shell installs a resize listener that calls Display.syncExec on the EDT.
+        // setBounds publishes the size for the SWT thread to apply instead.
+        if (event.getID() != ComponentEvent.COMPONENT_RESIZED) {
+            super.processComponentEvent(event);
         }
     }
 
-    @Override
-    public void setSize(int width, int height) {
-        super.setSize(width, height);
-        // 重写 setSize 方法，确保任何尺寸变化都会触发浏览器尺寸更新
-        if (browserInitialized && display != null && !display.isDisposed()) {
-            display.asyncExec(this::updateBrowserSize);
-        }
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    private Thread createEventLoop() {
-        var thread = new Thread() {
-            @Override
-            public void run() {
-                display = new Display();
+    public boolean isTerminated() {
+        return terminated;
+    }
 
-                countDownLatch.countDown();
-                while (!isInterrupted()) {
-                    if (!display.readAndDispatch()) {
-                        display.sleep();
+    private void runEventLoop() {
+        Display display = null;
+        try {
+            if (removed) {
+                return;
+            }
+            display = new Display();
+            if (removed) {
+                return;
+            }
+            display.setData("org.eclipse.swt.internal.win32.Edge.useDarkPreferedColorScheme", darkMode);
+            double dpiScaleFactor = display.getDPI().x / 96.0;
+            Shell shell = SWT_AWT.new_Shell(display, this);
+            if (removed) {
+                return;
+            }
+            Browser browser = new Browser(shell, SWT.NONE);
+            if (removed) {
+                return;
+            }
+            browser.setVisible(true);
+
+            // The timer wakes the SWT loop to read Swing state without any SWT calls on the EDT.
+            Display browserDisplay = display;
+            Runnable update = new Runnable() {
+                private String appliedUrl;
+                private Dimension appliedSize;
+
+                @Override
+                public void run() {
+                    if (removed || shell.isDisposed() || browser.isDisposed()) {
+                        return;
                     }
+                    Dimension size = canvasSize;
+                    if (!size.equals(appliedSize)) {
+                        updateBrowserSize(shell, browser, size, dpiScaleFactor);
+                        appliedSize = size;
+                    }
+                    String targetUrl = url;
+                    if (targetUrl != null && !targetUrl.equals(appliedUrl)) {
+                        browser.setUrl(targetUrl);
+                        appliedUrl = targetUrl;
+                    }
+                    browserDisplay.timerExec(UPDATE_INTERVAL_MILLIS, this);
+                }
+            };
+            update.run();
+
+            while (!removed && !shell.isDisposed() && !browser.isDisposed()) {
+                if (!display.readAndDispatch()) {
+                    display.sleep();
                 }
             }
-        };
-        thread.setDaemon(true);
-        thread.setName("SwtBrowserEventLoop");
-        return thread;
-    }
-
-    @Override
-    public void removeNotify() {
-        // 组件被移除时清理资源
-        if (display != null && !display.isDisposed()) {
-            display.asyncExec(() -> {
-                if (browser != null && !browser.isDisposed()) {
-                    browser.dispose();
+        } catch (RuntimeException | SWTError | LinkageError e) {
+            if (!removed) {
+                log.warn("Unable to run embedded SWT browser", e);
+                Sentry.captureException(e);
+            }
+        } finally {
+            // Display owns the Shell and Browser and disposes both on the SWT thread.
+            try {
+                if (display != null && !display.isDisposed()) {
+                    display.dispose();
                 }
-                if (shell != null && !shell.isDisposed()) {
-                    shell.dispose();
-                }
-            });
-        }
-        swtEventLoop.interrupt();
-        super.removeNotify();
-    }
-
-    @Override
-    public boolean isValid() {
-        if (display != null && !display.isDisposed()) {
-            if (shell != null && !shell.isDisposed()) {
-                return browser != null && !browser.isDisposed();
+            } finally {
+                terminated = true;
             }
         }
-        return false;
     }
 
-    public void refresh() {
-        if (browser != null && !browser.isDisposed()) {
-            display.asyncExec(browser::refresh);
+    private void updateBrowserSize(Shell shell, Browser browser, Dimension size, double dpiScaleFactor) {
+        if (size.width > 0 && size.height > 0) {
+            int width = (int) (size.width / dpiScaleFactor);
+            int height = (int) (size.height / dpiScaleFactor);
+            browser.setSize(width, height);
+            shell.setSize(width, height);
+            shell.layout(true, true);
         }
     }
 }

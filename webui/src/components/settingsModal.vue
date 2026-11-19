@@ -2,9 +2,6 @@
   <a-modal
     v-model:visible="showModal"
     :modal-style="{ 'max-width': '80vw' }"
-    :closable="!forceModal"
-    :mask-closable="!forceModal"
-    :hide-cancel="forceModal"
     :ok-loading="loading"
     @before-ok="handleOk"
     @cancel="handleCancel"
@@ -62,7 +59,6 @@ const endPointStore = useEndpointStore()
 const autoUpdateState = useAutoUpdate()
 const showModal = ref(false)
 const loading = computed(() => endPointStore.loading)
-const forceModal = computed(() => endPointStore.status === 'fail')
 
 const form = ref({
   endpoint: endPointStore.endpointSaved,
@@ -74,6 +70,7 @@ const { t } = useI18n()
 function initForm() {
   form.value.endpoint = endPointStore.endpointSaved
   form.value.interval = autoUpdateState.interval
+  form.value.accessToken = endPointStore.accessToken
 }
 
 defineExpose({
@@ -88,6 +85,10 @@ const handleOk = () => {
   endPointStore.setAccessToken(form.value.accessToken)
   return endPointStore.setEndpoint(form.value.endpoint)
 }
+const handleCancel = () => {
+  showModal.value = false
+  initForm()
+}
 
 watch(
   () => endPointStore.error,
@@ -96,27 +97,15 @@ watch(
       handleCancel()
     } else if (GetManifestError.is(error)) {
       if (!error.isManual) Message.error({ content: t(error.message), resetOnHover: true })
-      if (!showModal.value && error.isApiWrong) {
-        showModal.value = true
-        initForm()
-      }
     } else if (error) {
       Message.error({
         content: `${t('settings.endpoint.error')},error:${error}`,
         resetOnHover: true
       })
-      if (!showModal.value) {
-        showModal.value = true
-        initForm()
-      }
     }
   },
   { immediate: true }
 )
-const handleCancel = () => {
-  showModal.value = false
-  initForm()
-}
 
 const formLayout = useResponsiveState(
   ref({

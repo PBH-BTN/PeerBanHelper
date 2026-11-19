@@ -7,7 +7,7 @@ import { getCommonHeader } from './utils'
 export async function GetPushChannelList(): Promise<CommonResponse<PushConfig[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/push`), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, `/api/push`), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -17,7 +17,7 @@ export async function GetPushChannelList(): Promise<CommonResponse<PushConfig[]>
 export async function CreatePushChannel(channel: PushConfig): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/push`), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, `/api/push`), location.href)
   return fetch(url, {
     method: 'PUT',
     headers: getCommonHeader(),
@@ -35,7 +35,7 @@ export async function UpdatePushChannel(
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/push/${encodeURIComponent(target)}`),
+    urlJoin(endpointStore.endpoint, `/api/push/${encodeURIComponent(target)}`),
     location.href
   )
   return fetch(url, {
@@ -51,7 +51,7 @@ export async function UpdatePushChannel(
 export async function TestPushChannel(channel: PushConfig): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/push/test`), location.href)
+  const url = new URL(urlJoin(endpointStore.endpoint, `/api/push/test`), location.href)
   return fetch(url, {
     method: 'POST',
     headers: getCommonHeader(),
@@ -66,7 +66,7 @@ export async function DeletePushChannel(name: string): Promise<CommonResponseWit
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/push/${encodeURIComponent(name)}`),
+    urlJoin(endpointStore.endpoint, `/api/push/${encodeURIComponent(name)}`),
     location.href
   )
   return fetch(url, {

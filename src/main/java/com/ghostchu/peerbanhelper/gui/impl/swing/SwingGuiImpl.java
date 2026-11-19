@@ -46,6 +46,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
     private SystemThemeDetector colorDetector;
+    private volatile boolean darkMode;
     private SwingMainWindow mainWindow;
     @Getter
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
@@ -149,11 +150,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         Main.getEventBus().register(this);
         if (colorDetector != null) {
             try {
-                // 这玩意儿能空指针？
+                updateTheme(false);
                 colorDetector.onAppearanceChange(appearance -> {
                     this.updateTheme(appearance == Theme.Appearance.DARK);
                 });
-                this.updateTheme(colorDetector.getAppearance().orElse(Theme.Appearance.LIGHT) == Theme.Appearance.DARK);
             } catch (Exception e) {
                 Sentry.captureException(e);
             }
@@ -163,11 +163,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public boolean isDarkMode() {
-        if (colorDetector != null) {
-            return colorDetector.getAppearance().orElse(Theme.Appearance.LIGHT) == Theme.Appearance.DARK;
-        } else {
-            return false;
-        }
+        return darkMode;
     }
 
     private void setupSwingDefaultFonts() {
@@ -188,7 +184,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
 
-    private void updateTheme(Boolean isDark) {
+    private void updateTheme(boolean isDark) {
+        darkMode = isDark;
         pbhFlatLafTheme = new StandardLafTheme();
         //macos?
         if (ExternalSwitch.parseBoolean("pbh.gui.macos-theme", true) && System.getProperty("os.name").contains("Mac")) {
