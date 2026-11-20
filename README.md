@@ -57,6 +57,14 @@ PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P �
 
 查看 [PeerBanHelper 文档](https://docs.pbh-btn.com/docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
 
+## 开发者文档
+
+[全项目开发者指南](docs/developer-guide.md)覆盖宿主、下载器、扫描与封禁、数据升级、WebUI、桌面和发行流程。
+
+参阅[插件开发者手册](docs/plugin-development.md)，了解扩展接口、生命周期、依赖注入和迁移方法。
+
+[完整规则插件示例](examples/rule-plugin/README.md)包含构建、安装和启停验证步骤。
+
 ## 常见问题
 
 在报告问题前，请先检查 [常见问题列表](https://docs.pbh-btn.com/docs/faq)

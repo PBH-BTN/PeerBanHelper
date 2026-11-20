@@ -35,12 +35,12 @@ public interface FeatureModule {
     /**
      * 功能模块启用回调
      */
-    void onEnable();
+    default void onEnable() {}
 
     /**
      * 功能模块禁用回调
      */
-    void onDisable();
+    default void onDisable() {}
 
     /**
      * 功能模块启用序列
