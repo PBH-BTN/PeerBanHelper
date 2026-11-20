@@ -12,4 +12,9 @@ public record CheckResult(
         @NotNull TranslationComponent reason,
         @NotNull StructuredData<String, Object> structuredData
 ) {
+    public static CheckResult preferred(CheckResult previous, CheckResult next) {
+        if (previous == null) return next;
+        int priority = next.action().compareTo(previous.action());
+        return priority > 0 || (priority == 0 && next.duration() >= previous.duration()) ? next : previous;
+    }
 }

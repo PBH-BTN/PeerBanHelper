@@ -3,9 +3,6 @@ package com.ghostchu.peerbanhelper.banpipeline;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,7 +13,7 @@ import java.util.function.Consumer;
 public abstract class BanOrgan<IN, OUT> {
     protected final BanOrgan<?, IN> in;
     protected final BiConsumer<BanOrgan<IN, OUT>, BanOrganCallback<IN>> gastroscopy;
-    protected final List<PipelineTask<?>> runningTasks = Collections.synchronizedList(new ArrayList<>());
+    protected final ConcurrentMap<CompletableFuture<?>, PipelineTask<?>> runningTasks = new ConcurrentHashMap<>();
     protected final BlockingQueue<OUT> outlet = new ArrayBlockingQueue<>(64);
     protected final Executor digestEnergy;
     protected final long maxDigestDuration;
@@ -83,7 +80,7 @@ public abstract class BanOrgan<IN, OUT> {
                             if (gastroscopy != null) gastroscopy.accept(this, callback);
                             return null;
                         }));
-                runningTasks.add(wrapper); // TIMING! This could let runningTasks.size() == 0 be true, that's why getStatus() must check if loopRunning.
+                addMoreDigestingPrey(wrapper);
             } catch (InterruptedException e) {
                 break;
             }
@@ -92,8 +89,9 @@ public abstract class BanOrgan<IN, OUT> {
     }
 
     public OrganLifeCycleStatus getStatus() {
+        boolean polling = loopRunning.get();
         boolean runningTaskEmpty = checkIfRunningTaskEmpty();
-        if (loopRunning.get()) { // waitForPrey() is RUNNING?
+        if (polling) { // waitForPrey() is RUNNING?
             if (runningTaskEmpty) {
                 return OrganLifeCycleStatus.WAITING_UPSTREAM; // Waiting upstream organ for more data.
             } else {
@@ -113,7 +111,9 @@ public abstract class BanOrgan<IN, OUT> {
     }
 
     public void addMoreDigestingPrey(PipelineTask<?> future) {
-        this.runningTasks.add(future); // helper method to put more tasks in running tasks.
+        var completion = java.util.Objects.requireNonNull(future.getDelegate());
+        runningTasks.put(completion, future);
+        completion.whenComplete((_, _) -> runningTasks.remove(completion));
     }
 
     /**
@@ -126,14 +126,7 @@ public abstract class BanOrgan<IN, OUT> {
      */
     public abstract void digest(IN input, Consumer<OUT> outlet, PipelineTask<?> futureContainer) throws RuntimeException;
 
-    /**
-     * Remove the completed Futures from runningTask list then returns a boolean that indicate if the runningTask list is empty
-     * !! NOTE: The Racing conditions can occur here, use getStatus() is recommended
-     *
-     * @return running tasks is empty
-     */
     public boolean checkIfRunningTaskEmpty() {
-        runningTasks.removeIf(future -> future.getDelegate() != null && future.getDelegate().isDone());
         return runningTasks.isEmpty();
     }
 

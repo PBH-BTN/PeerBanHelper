@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -47,54 +47,53 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
 
     @Override
     public void digest(FetchedPeersBatch input, Consumer<CheckResultBatch> outlet, PipelineTask<?> wrapper) throws RuntimeException {
-        for (FeatureModule m : moduleManager.getModules()) {
-            if (!(m instanceof RuleFeatureModule ruleFeatureModule)) {
-                wrapper.setComment(false, "Skipped non-rule feature module");
-                continue;
-            }
-            var downloader = input.downloader();
-            var torrent = input.torrent();
-            var peers = input.peers();
-            var prefix = "[" + ruleFeatureModule.getName() + "] (" + torrent.getId() + "): ";
-            AtomicInteger newSpawned = new AtomicInteger();
-            peers.forEach(peer -> {
-                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                    newSpawned.addAndGet(1);
-                    wrapper.setComment(false, prefix + "Checking possible BadConfig...)");
-                    var badConfigCheck = checkIfPossibleBadConfig(downloader, torrent, peer);
-                    if (badConfigCheck != null) {
-                        outlet.accept(new CheckResultBatch(downloader, torrent, peer, badConfigCheck));
-                        return;
-                    }
+        var rules = moduleManager.getModules().stream()
+                .filter(RuleFeatureModule.class::isInstance).map(RuleFeatureModule.class::cast).toList();
+        if (rules.isEmpty()) return;
+        // Bound scheduling overhead while allowing a single large torrent to use several workers.
+        final int batchSize = 32;
+        for (int start = 0; start < input.peers().size(); start += batchSize) {
+            var peers = input.peers().subList(start, Math.min(input.peers().size(), start + batchSize));
+            var batch = new PipelineTask<Void>(null, this, "Checking peers");
+            batch.setDelegate(CompletableFuture.runAsync(() -> {
+                for (Peer peer : peers) {
                     try {
-                        if (ruleFeatureModule.isThreadSafe()) {
-                            wrapper.setComment(false, prefix + "Executing: thread-safe");
-                            var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader, wrapper));
-                            wrapper.setComment(false, prefix + "Waiting: until outlet have space");
-                            outlet.accept(result);
-                        } else {
-                            try {
-                                wrapper.setComment(false, prefix + "Waiting for thread lock (non-thread-safe)");
-                                ruleFeatureModule.getThreadLock().lock();
-                                wrapper.setComment(false, prefix + "Executing: non-thread-safe");
-                                var result = new CheckResultBatch(downloader, torrent, peer, ruleFeatureModule.shouldBanPeer(torrent, peer, downloader, wrapper));
-                                wrapper.setComment(false, prefix + "Waiting: until outlet have space");
-                                outlet.accept(result);
-                            } finally {
-                                wrapper.setComment(false, prefix + "Waiting for thread unlocking...");
-                                ruleFeatureModule.getThreadLock().unlock();
-                            }
-                        }
+                        CheckResult result = checkPeer(input, peer, rules, batch);
+                        if (result != null) outlet.accept(new CheckResultBatch(input.downloader(), input.torrent(), peer, result));
                     } catch (RuntimeException e) {
-                        log.warn(tlUI(Lang.MODULE_CHECK_UNEXCEPTED_EXCEPTION, ruleFeatureModule.getName(), ruleFeatureModule.getClass().getName()), e);
+                        log.warn("Unable to check peer {}", peer.getPeerAddress(), e);
                     }
-                }, jobRunExecutor);
-                addMoreDigestingPrey(new PipelineTask<>(future, this, "Forked prey spawned, waiting for execute..."));
-            });
-            wrapper.setComment(false, "Running check module: " + ruleFeatureModule.getName() + " for torrent: " + torrent.getId() + ", spawned tasks: " + newSpawned.get());
-            log.debug("[ORGAN-DEBUG] New spawned {} peers task checkmodule futures", newSpawned.get());
+                }
+            }, jobRunExecutor));
+            addMoreDigestingPrey(batch);
         }
+    }
 
+    private CheckResult checkPeer(FetchedPeersBatch input, Peer peer, List<RuleFeatureModule> rules, PipelineTask<?> task) {
+        var ignored = checkIfPossibleBadConfig(input.downloader(), input.torrent(), peer);
+        if (ignored != null) return ignored;
+        CheckResult best = null;
+        for (var rule : rules) {
+            try {
+                task.setComment(false, rule.getName());
+                CheckResult result;
+                if (rule.isThreadSafe()) {
+                    result = rule.shouldBanPeer(input.torrent(), peer, input.downloader(), task);
+                } else {
+                    var lock = rule.getThreadLock();
+                    lock.lock();
+                    try {
+                        result = rule.shouldBanPeer(input.torrent(), peer, input.downloader(), task);
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+                best = CheckResult.preferred(best, result);
+            } catch (RuntimeException e) {
+                log.warn(tlUI(Lang.MODULE_CHECK_UNEXCEPTED_EXCEPTION, rule.getName(), rule.getClass().getName()), e);
+            }
+        }
+        return best;
     }
 
     @Nullable
