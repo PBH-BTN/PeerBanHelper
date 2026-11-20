@@ -27,6 +27,8 @@ import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -67,7 +69,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private final ModuleManagerImpl moduleManager;
     @Getter
     private long banDuration;
-    private Map<PeerAddress, List<PeerMetadata>> LIVE_PEERS = Collections.synchronizedMap(new HashMap<>());
+    private volatile Map<PeerAddress, List<PeerMetadata>> LIVE_PEERS = Collections.synchronizedMap(new HashMap<>());
     @Getter
     private boolean hideFinishLogs;
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
@@ -313,18 +315,16 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     public void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
         Map<PeerAddress, List<PeerMetadata>> livePeers = new HashMap<>();
-        peers.forEach((downloader, tasks) ->
-                tasks.forEach((torrent, peer) ->
-                        peer.forEach(p -> {
-                                    PeerAddress address = p.getPeerAddress();
-                                    List<PeerMetadata> data = livePeers.getOrDefault(address, new ArrayList<>());
-                                    PeerMetadata metadata = new PeerMetadata(
-                                            downloaderManager.getDownloadInfo(downloader),
-                                            torrent, p);
-                                    data.add(metadata);
-                                    livePeers.put(address, data);
-                                }
-                        )));
+        peers.forEach((downloader, torrents) -> {
+            var downloaderInfo = downloaderManager.getDownloadInfo(downloader);
+            torrents.forEach((torrent, connected) -> {
+                var torrentInfo = new TorrentWrapper(torrent);
+                for (Peer peer : connected) {
+                    var metadata = new PeerMetadata(downloaderInfo, torrentInfo, new PeerWrapper(peer));
+                    livePeers.computeIfAbsent(peer.getPeerAddress(), _ -> new ArrayList<>(1)).add(metadata);
+                }
+            });
+        });
         LIVE_PEERS = Map.copyOf(livePeers);
         Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
     }
