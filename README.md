@@ -19,7 +19,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 - [虚假进度检查器（提供启发式客户端检测功能）](https://docs.pbh-btn.com/docs/module/progress-cheat-blocker)
 - [自动连锁封禁](https://docs.pbh-btn.com/docs/module/auto-range-ban)
 - [多拨追猎](https://docs.pbh-btn.com/docs/module/multi-dial)
-- Peer ID/Client Name 伪装检查；通过 [AviatorScript 引擎](https://docs.pbh-btn.com/docs/module/expression-engine) 实现
+- [自定义脚本规则](docs/script-engines.md)：使用 AviatorScript、JavaScript 或 Lua 检查 Peer；支持独立沙箱。
 - [主动监测（提供本地数据分析功能）](https://docs.pbh-btn.com/docs/module/active-monitoring)
 - [网络 IP 集规则订阅](https://docs.pbh-btn.com/docs/module/ip-address-blocker-rules)
 - WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP，规则订阅管理，图表查看，Peer 列表查看）

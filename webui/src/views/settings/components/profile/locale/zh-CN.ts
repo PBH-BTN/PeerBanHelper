@@ -1,4 +1,7 @@
 export default {
+  'page.settings.tab.profile.module.expressionEngine.sandbox': '本地脚本沙箱',
+  'page.settings.tab.profile.module.expressionEngine.sandbox.tooltip':
+    '关闭后，本地脚本将在 PBH 主进程中运行。仅对可信脚本关闭此选项。BTN 脚本始终隔离运行。',
   'page.settings.tab.profile.save': '保存',
   'page.settings.tab.profile.base.title': '全局配置',
   'page.settings.tab.profile.form.checkInterval': '检查频率',
@@ -109,9 +112,9 @@ export default {
     '如果某IP已判定为多拨，无视缓存时间限制继续搜寻其同伙',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time': '追猎时间',
 
-  'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript 规则引擎',
+  'page.settings.tab.profile.module.expressionEngine.title': '脚本规则引擎',
   'page.settings.tab.profile.module.expressionEngine.tips':
-    '启用此功能可以使用 AviatorScript 语言编写复杂的规则，以实现更多的自定义功能',
+    '使用自定义脚本执行封禁规则。可选语言取决于服务器支持的引擎。',
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全局封禁时间',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '规则订阅',

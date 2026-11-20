@@ -1,4 +1,8 @@
 export default {
+  'page.rule.custom-script.notLoaded': '未載入',
+  'page.rule.custom-script.language': '腳本語言',
+  'page.rule.custom-script.filenameError': '請輸入檔名，可省略副檔名或使用所選語言的副檔名。',
+  'page.rule.custom-script.serverValidation': '儲存時，伺服器會使用對應語言的引擎檢查腳本。',
   'page.rule.custom-script.disable': '功能在設定中被停用',
   'page.rule.custom-script.description': '你可以在這裡管理自訂腳本，這些腳本將在封禁的過程中執行。',
   'page.rule.custom-script.add': '新增腳本',

@@ -5,7 +5,7 @@
         <a-typography-text>
           {{ t('page.rule.custom-script.description') }}
         </a-typography-text>
-        <a-tooltip v-if="readOnlyMode" :content="editable?.data.reason">
+        <a-tooltip v-if="readOnlyMode" :content="editable?.data?.reason">
           <a-tag color="orange">
             {{ t('page.rule.custom-script.readonlyMode') }}
           </a-tag>
@@ -20,7 +20,7 @@
             {{ t('page.rule.custom-script.add') }}
           </a-button>
         </a-tooltip>
-        <a-button v-else type="primary" @click="handleAddOne">
+        <a-button v-else type="primary" :disabled="!engines?.length" @click="handleAddOne">
           <template #icon>
             <icon-plus-circle />
           </template>
@@ -52,6 +52,17 @@
             <icon-info-circle />
           </a-tooltip>
         </a-space>
+      </template>
+      <template #name="{ record }">
+        <a-space size="mini">
+          <a-tag v-if="record.loaded === false" size="small" color="orange">
+            {{ t('page.rule.custom-script.notLoaded') }}
+          </a-tag>
+          {{ record.name }}
+        </a-space>
+      </template>
+      <template #language="{ record }">
+        {{ languageLabel(record.id) }}
       </template>
       <template #author="{ record }">
         <a-tag :color="getColor(record.author)">{{ record.author }}</a-tag>
@@ -102,7 +113,7 @@
             <a-button
               class="edit-btn"
               shape="circle"
-              :disabled="readOnlyMode"
+              :disabled="readOnlyMode || !canEditScript(record.id, record.loaded, engines)"
               type="text"
               @click="() => handleEdit(record.id)"
             >
@@ -140,10 +151,16 @@
       </template>
     </a-table>
   </a-space>
-  <DetailDrawer ref="detailDrawer" />
+  <DetailDrawer ref="detailDrawer" :engines="engines ?? []" @saved="refresh" />
 </template>
 <script setup lang="ts">
-import { CheckScriptEditable, DeleteScript, GetScriptList } from '@/service/script'
+import { canEditScript, scriptLanguages, scriptExtension } from '@/api/model/scriptLanguage'
+import {
+  CheckScriptEditable,
+  DeleteScript,
+  GetScriptEngines,
+  GetScriptList
+} from '@/service/script'
 import { useUserStore } from '@/stores/userStore'
 import { getColor } from '@/utils/color'
 import { Message, Modal } from '@arco-design/web-vue'
@@ -154,6 +171,10 @@ import { usePagination, useRequest } from 'vue-request'
 import DetailDrawer from './detailDrawer.vue'
 const { t } = useI18n()
 const userStore = useUserStore()
+const languageLabel = (id: string) => {
+  const extension = scriptExtension(id)
+  return extension ? scriptLanguages[extension].label : '—'
+}
 const columns = [
   {
     title: () => t('page.rule.custom-script.column.id'),
@@ -164,9 +185,11 @@ const columns = [
   {
     title: () => t('page.rule.custom-script.column.name'),
     dataIndex: 'name',
+    slotName: 'name',
     ellipsis: true,
     tooltip: true
   },
+  { title: () => t('page.rule.custom-script.language'), slotName: 'language' },
   {
     title: () => t('page.rule.custom-script.column.author'),
     slotName: 'author'
@@ -203,9 +226,12 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
     }
   })
 
-const { data: editable, loading: editableLoading } = useRequest(CheckScriptEditable)
+const { data: engines } = useRequest(GetScriptEngines, {
+  onError: (error) => Message.error(error.message)
+})
+const { data: editable } = useRequest(CheckScriptEditable)
 
-const readOnlyMode = computed(() => !editable.value?.data.editable && !editableLoading)
+const readOnlyMode = computed(() => editable.value?.data?.editable !== true)
 
 const detailDrawer = ref<InstanceType<typeof DetailDrawer>>()
 const handleDelete = async (id: string) => {
@@ -227,7 +253,7 @@ const handleAddOne = () => {
       hideCancel: false,
       onOk: () => {
         userStore.confirmScriptWarning()
-        detailDrawer.value?.viewDetail(undefined, true)
+        detailDrawer.value?.viewDetail(undefined)
       },
       okText: t('page.rule.custom-script.warning.confirm'),
       cancelText: t('page.rule.custom-script.warning.cancel')
@@ -235,7 +261,7 @@ const handleAddOne = () => {
     return
   }
 
-  detailDrawer.value?.viewDetail(undefined, true)
+  detailDrawer.value?.viewDetail(undefined)
 }
 const handleEdit = (id: string) => {
   if (!userStore.scriptWarningConfirm) {

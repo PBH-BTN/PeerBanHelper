@@ -1,4 +1,10 @@
 export default {
+  'page.rule.custom-script.notLoaded': 'Not loaded',
+  'page.rule.custom-script.language': 'Language',
+  'page.rule.custom-script.filenameError':
+    'Enter a filename with the selected extension or omit the extension.',
+  'page.rule.custom-script.serverValidation':
+    'The server checks this script with its language engine when you save.',
   'page.rule.custom-script.disable': 'Disabled in settings',
   'page.rule.custom-script.description':
     'You can manage custom scripts here, which will be executed during the ban process. ',

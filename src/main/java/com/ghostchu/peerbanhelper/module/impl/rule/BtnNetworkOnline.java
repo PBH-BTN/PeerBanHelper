@@ -18,16 +18,15 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.rule.*;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptSnapshot;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.eventbus.Subscribe;
-import com.googlecode.aviator.exception.TimeoutException;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +41,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -213,26 +211,14 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
-        return getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + peer.getCacheKey(), () -> {
+        var cached = getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + ":" + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
-                Map<String, Object> env = script.newEnv();
-                env.put("torrent", torrent);
-                env.put("peer", peer);
-                env.put("downloader", downloader);
-                env.put("cacheable", new AtomicBoolean(false));
-                env.put("server", getServer());
-                env.put("moduleInstance", this);
-                env.put("btnNetwork", btnNetwork);
-                env.put("banDuration", banDuration);
-                env.put("kvStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
-                Object returns = script.execute(env);
+                Object returns = script.execute(ScriptSnapshot.create(torrent, peer, downloader, banDuration));
                 result = scriptEngineManager.handleResult(script, banDuration, returns);
-            } catch (TimeoutException timeoutException) {
-                return pass();
             } catch (Exception ex) {
                 log.error(tlUI(Lang.RULE_ENGINE_ERROR, script.name()), ex);
-                return pass();
+                return null;
             }
             if (result != null && result.action() != PeerAction.NO_ACTION) {
                 return result;
@@ -240,6 +226,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                 return pass();
             }
         }, script.cacheable());
+        return cached == null ? pass() : cached;
     }
 
     private @NotNull CheckResult checkShouldBanLegacy(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
