@@ -109,14 +109,13 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body().string()));
                 }
 
-                String responseBody = response.body().string();
-                JsonObject object = JsonParser.parseString(responseBody).getAsJsonObject();
+                JsonObject object = JsonParser.parseReader(response.body().charStream()).getAsJsonObject();
                 JsonObject peers = object.getAsJsonObject("peers");
 
                 List<Peer> peersList = new ArrayList<>();
                 for (String s : peers.keySet()) {
                     JsonObject singlePeerObject = peers.getAsJsonObject(s);
-                    QBittorrentEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentEEPeer.class);
+                    QBittorrentEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject, QBittorrentEEPeer.class);
                     if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
