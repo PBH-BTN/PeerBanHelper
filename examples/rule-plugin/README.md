@@ -1,5 +1,7 @@
 # PeerBanHelper 规则插件示例
 
+扩展接口、配置、热升级和旧插件迁移见[插件开发者手册](../../docs/plugin-development.md)。
+
 这个插件匹配客户端名称恰好为 `PeerBanHelper-Demo/1.0` 的 Peer，返回 60 秒封禁。对其他客户端和缺失名称的 Peer 返回放行检查结果（`NO_ACTION`），后续规则仍可正常判断。
 
 ## 构建和安装

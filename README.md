@@ -59,6 +59,8 @@ PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P �
 
 ## Java 插件开发
 
+参阅[插件开发者手册](docs/plugin-development.md)，了解扩展接口、生命周期、依赖注入和迁移方法。
+
 [完整规则插件示例](examples/rule-plugin/README.md)包含构建、安装和启停验证步骤。
 
 ## 常见问题
