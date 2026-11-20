@@ -1,5 +1,7 @@
 # PeerBanHelper JVM 插件开发手册
 
+插件还可以使用宿主的下载器、NAT、任务、事件、翻译和诊断服务。注册前请查阅[动态注册与扩展入口](dynamic-registration.md)，确认哪些资源需要在 `onDisable()` 中自行释放。
+
 需要修改宿主模块、下载器、WebUI 或发行包时，请参阅[全项目开发者指南](developer-guide.md)。
 
 本手册适用于包含插件生命周期重构的 PBH 构建。插件在 PBH 的 JVM 内运行，可以直接使用目标发行版的 Java 类型。下面以一个可以独立编译的规则插件为例，从创建工程一直走到部署、升级和卸载。[完整示例工程](../examples/rule-plugin/)
