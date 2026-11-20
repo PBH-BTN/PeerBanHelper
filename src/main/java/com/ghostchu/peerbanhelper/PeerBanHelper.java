@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
+import com.ghostchu.peerbanhelper.configuration.pf4j.PBHSpringPluginManager;
 import com.ghostchu.peerbanhelper.databasent.DatabaseDriver;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.event.program.PBHServerStartedEvent;
@@ -58,6 +59,8 @@ public class PeerBanHelper implements Reloadable {
     @Autowired
     private ModuleManager moduleManager;
     @Autowired
+    private PBHSpringPluginManager pluginManager;
+    @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
     private AlertManager alertManager;
@@ -98,6 +101,10 @@ public class PeerBanHelper implements Reloadable {
         postCompatibilityCheck();
         Main.getReloadManager().register(this);
         registerModules();
+        synchronized (pluginManager) {
+            pluginManager.loadPlugins();
+            pluginManager.startPlugins();
+        }
         sendSnapshotAlert();
         downloaderServer.load();
         downloaderServer.loadBanListToMemory();
@@ -190,6 +197,10 @@ public class PeerBanHelper implements Reloadable {
     public void shutdown() {
         // place some clean code here
         downloaderServer.close();
+        synchronized (pluginManager) {
+            pluginManager.stopPlugins();
+            pluginManager.unloadPlugins();
+        }
         moduleManager.unregisterAll();
         CommonUtil.getScheduler().shutdown();
         if (btnNetwork != null) {
@@ -272,7 +283,7 @@ public class PeerBanHelper implements Reloadable {
         moduleClasses.add(SessionAnalyseServiceModule.class);
         moduleClasses.add(PeerRecordingServiceModule.class);
         moduleClasses.add(AntiVampire.class);
-        //moduleClasses.add(PBHPluginController.class);
+        moduleClasses.add(PBHPluginController.class);
         moduleClasses.add(PBHBtnController.class);
         moduleClasses.forEach(moduleClass -> moduleManager.register(moduleClass)); // 不要并行加载，会破坏依赖关系
     }

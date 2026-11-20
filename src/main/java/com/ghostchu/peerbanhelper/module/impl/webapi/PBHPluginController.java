@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.configuration.pf4j.PBHPlugin;
-import com.ghostchu.peerbanhelper.configuration.pf4j.menu.PBHPluginMenu;
+import com.ghostchu.peerbanhelper.configuration.pf4j.PBHSpringPluginManager;
+import com.ghostchu.peerbanhelper.configuration.pf4j.PluginDisplay;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
@@ -19,7 +19,8 @@ import org.pf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 public class PBHPluginController extends AbstractFeatureModule {
     @Autowired
-    private PluginManager pluginManager;
+    private PBHSpringPluginManager pluginManager;
     @Autowired
     private JavalinWebContainer javalinWebContainer;
 
@@ -58,75 +59,46 @@ public class PBHPluginController extends AbstractFeatureModule {
     private void operatePlugins(@NotNull Context context) {
         OperatePluginDTO dto = context.bodyAsClass(OperatePluginDTO.class);
         List<PluginOperateResultDTO> result = new ArrayList<>();
-        switch (dto.getAction()) {
-            case "start" -> dto.getIdentifiers().forEach(id -> {
+        synchronized (pluginManager) {
+            for (var id : dto.getIdentifiers()) {
                 try {
-                    var value = pluginManager.startPlugin(id);
-                    result.add(new PluginOperateResultDTO(id, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
+                    Object value = switch (dto.getAction()) {
+                        case "start" -> pluginManager.startPlugin(id);
+                        case "stop" -> pluginManager.stopPlugin(id);
+                        case "enable" -> pluginManager.enablePlugin(id);
+                        case "disable" -> pluginManager.disablePlugin(id);
+                        case "load" -> pluginManager.loadPlugin(installedPath(id));
+                        case "unload" -> pluginManager.unloadPlugin(id);
+                        case "delete" -> pluginManager.deletePlugin(id);
+                        default -> throw new IllegalArgumentException("Unknown plugin operation: " + dto.getAction());
+                    };
+                    var wrapper = pluginManager.getPlugin(id);
+                    var failure = wrapper == null ? null : wrapper.getFailedException();
+                    result.add(new PluginOperateResultDTO(id, value, failure == null
+                            ? tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)
+                            : MiscUtil.throwableToString(failure)));
                 } catch (Exception e) {
                     result.add(new PluginOperateResultDTO(id, null, MiscUtil.throwableToString(e)));
                 }
-            });
-            case "stop" -> dto.getIdentifiers().forEach(id -> {
-                try {
-                    var value = pluginManager.stopPlugin(id);
-                    result.add(new PluginOperateResultDTO(id, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
-                } catch (Exception e) {
-                    result.add(new PluginOperateResultDTO(id, null, MiscUtil.throwableToString(e)));
-                }
-            });
-            case "enable" -> dto.getIdentifiers().forEach(id -> {
-                try {
-                    var value = pluginManager.enablePlugin(id);
-                    result.add(new PluginOperateResultDTO(id, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
-                } catch (Exception e) {
-                    result.add(new PluginOperateResultDTO(id, null, MiscUtil.throwableToString(e)));
-                }
-            });
-            case "disable" -> dto.getIdentifiers().forEach(id -> {
-                try {
-                    var value = pluginManager.disablePlugin(id);
-                    result.add(new PluginOperateResultDTO(id, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
-                } catch (Exception e) {
-                    result.add(new PluginOperateResultDTO(id, null, MiscUtil.throwableToString(e)));
-                }
-            });
-            case "load" -> dto.getIdentifiers().forEach(path -> {
-                try {
-                    var pathObj = Paths.get(path);
-                    if (!pathObj.normalize().startsWith(Main.getPluginDirectory().toPath().normalize())) {
-                        result.add(new PluginOperateResultDTO(path, null, tl(locale(context), Lang.WEBAPI_PLUGIN_LOAD_FROM_UNSAFE_LOCATION)));
-                        return;
-                    }
-                    var value = pluginManager.loadPlugin(pathObj);
-                    result.add(new PluginOperateResultDTO(path, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
-                } catch (Exception e) {
-                    result.add(new PluginOperateResultDTO(path, null, MiscUtil.throwableToString(e)));
-                }
-            });
-            case "unload" -> dto.getIdentifiers().forEach(id -> {
-                try {
-                    var value = pluginManager.unloadPlugin(id);
-                    result.add(new PluginOperateResultDTO(id, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
-                } catch (Exception e) {
-                    result.add(new PluginOperateResultDTO(id, null, MiscUtil.throwableToString(e)));
-                }
-            });
-            case "delete" -> dto.getIdentifiers().forEach(id -> {
-                try {
-                    var value = pluginManager.deletePlugin(id);
-                    result.add(new PluginOperateResultDTO(id, value, tl(locale(context), Lang.WEBAPI_PLUGIN_OPERATION_COMPLETED)));
-                } catch (Exception e) {
-                    result.add(new PluginOperateResultDTO(id, null, MiscUtil.throwableToString(e)));
-                }
-            });
-            default -> throw new IllegalArgumentException("OperatePluginDTO not supported.");
+            }
         }
         context.json(new StdResp(true, null, result));
     }
 
+    private Path installedPath(String name) throws IOException {
+        var root = Main.getPluginDirectory().toPath().toRealPath();
+        var path = root.resolve(name).toRealPath();
+        if (!root.equals(path.getParent())) {
+            throw new IllegalArgumentException("Expected an installed plugin in " + root);
+        }
+        return path;
+    }
+
     private void listPlugins(@NotNull Context context) {
-        context.json(new StdResp(true, null, pluginManager.getPlugins().stream().map(pluginWrapper -> new PluginDTO(locale(context), pluginWrapper)).toList()));
+        synchronized (pluginManager) {
+            context.json(new StdResp(true, null, pluginManager.getPlugins().stream()
+                    .map(plugin -> new PluginDTO(locale(context), plugin, pluginManager.getDisplay(plugin.getPluginId()))).toList()));
+        }
     }
 
     @Override
@@ -170,7 +142,7 @@ public class PBHPluginController extends AbstractFeatureModule {
         private List<PBHPluginMenuDTO> menus = new ArrayList<>();
         private String errorMessage;
 
-        public PluginDTO(String locale, PluginWrapper plugin) {
+        public PluginDTO(String locale, PluginWrapper plugin, PluginDisplay display) {
             this.id = plugin.getPluginId();
             this.displayName = plugin.getPluginId();
             this.state = plugin.getPluginState();
@@ -190,14 +162,10 @@ public class PBHPluginController extends AbstractFeatureModule {
             for (PluginDependency dependency : descriptor.getDependencies()) {
                 this.dependencies.add(new PluginDependencyDTO(dependency));
             }
-            Plugin pluginInstance = plugin.getPlugin();
-            if (pluginInstance instanceof PBHPlugin pplug) {
-                this.displayName = tl(locale, pplug.getPluginDisplayName());
-                var desc = pplug.getPluginDescription();
-                if (desc != null) {
-                    this.description = tl(locale, pplug.getPluginDescription());
-                }
-                this.menus.addAll(pplug.getPluginMenu().stream().map(menu -> new PBHPluginMenuDTO(locale, menu)).toList());
+            if (display != null) {
+                if (display.name() != null) this.displayName = tl(locale, display.name());
+                if (display.description() != null) this.description = tl(locale, display.description());
+                this.menus = display.menus().stream().map(menu -> new PBHPluginMenuDTO(locale, menu)).toList();
             }
         }
     }
@@ -210,11 +178,11 @@ public class PBHPluginController extends AbstractFeatureModule {
         private boolean disabled;
         private String relativeEndpoint;
 
-        public PBHPluginMenuDTO(String locale, PBHPluginMenu menu) {
-            this.id = menu.getMenuId();
-            this.displayName = tl(locale, menu.getDisplayName());
-            this.relativeEndpoint = menu.getRelativeEndpoint();
-            this.disabled = menu.isDisabled();
+        public PBHPluginMenuDTO(String locale, PluginDisplay.Menu menu) {
+            this.id = menu.id();
+            this.displayName = tl(locale, menu.name());
+            this.relativeEndpoint = menu.endpoint();
+            this.disabled = menu.disabled();
         }
     }
 

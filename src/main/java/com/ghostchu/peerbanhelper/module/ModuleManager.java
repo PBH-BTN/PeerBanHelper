@@ -17,7 +17,14 @@ public interface ModuleManager {
 
     @NotNull List<FeatureModule> getModules();
 
-    void loadPlugin();
+    default <T extends FeatureModule> List<ModuleInvocation<T>> getInvocations(Class<T> type) {
+        return getModules().stream().filter(type::isInstance).map(type::cast)
+                .map(module -> new ModuleInvocation<>(module, module.getName(), null)).toList();
+    }
+
+    /** Kept for old binaries. Plugin discovery is part of the host startup sequence. */
+    @Deprecated
+    default void loadPlugin() {}
 
     /**
      * 重新加载所有模块的启用状态

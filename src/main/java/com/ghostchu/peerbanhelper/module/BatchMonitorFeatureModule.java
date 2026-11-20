@@ -5,10 +5,11 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
+import org.pf4j.ExtensionPoint;
 
 import java.util.List;
 
-public interface BatchMonitorFeatureModule extends FeatureModule {
+public interface BatchMonitorFeatureModule extends FeatureModule, ExtensionPoint {
     /**
      * 在某个下载器的某个种子的全部 Peers 全部获取完成后调用
      * 注意：不保证此方法一定调用，特别是某个下载器出现阻塞超时时，可能指定种子会被全部跳过

@@ -19,3 +19,6 @@ pluginManagement {
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
+
+include(":rule-plugin-demo")
+project(":rule-plugin-demo").projectDir = file("examples/rule-plugin")

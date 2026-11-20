@@ -47,18 +47,14 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
 
     @Override
     public void digest(FetchedPeersBatch input, Consumer<CheckResultBatch> outlet, PipelineTask<?> wrapper) throws RuntimeException {
-        for (FeatureModule m : moduleManager.getModules()) {
-            if (!(m instanceof RuleFeatureModule ruleFeatureModule)) {
-                wrapper.setComment(false, "Skipped non-rule feature module");
-                continue;
-            }
+        for (var invocation : moduleManager.getInvocations(RuleFeatureModule.class)) {
             var downloader = input.downloader();
             var torrent = input.torrent();
             var peers = input.peers();
-            var prefix = "[" + ruleFeatureModule.getName() + "] (" + torrent.getId() + "): ";
+            var prefix = "[" + invocation.name() + "] (" + torrent.getId() + "): ";
             AtomicInteger newSpawned = new AtomicInteger();
             peers.forEach(peer -> {
-                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> invocation.invoke(ruleFeatureModule -> {
                     newSpawned.addAndGet(1);
                     wrapper.setComment(false, prefix + "Checking possible BadConfig...)");
                     var badConfigCheck = checkIfPossibleBadConfig(downloader, torrent, peer);
@@ -88,10 +84,10 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
                     } catch (RuntimeException e) {
                         log.warn(tlUI(Lang.MODULE_CHECK_UNEXCEPTED_EXCEPTION, ruleFeatureModule.getName(), ruleFeatureModule.getClass().getName()), e);
                     }
-                }, jobRunExecutor);
+                }), jobRunExecutor);
                 addMoreDigestingPrey(new PipelineTask<>(future, this, "Forked prey spawned, waiting for execute..."));
             });
-            wrapper.setComment(false, "Running check module: " + ruleFeatureModule.getName() + " for torrent: " + torrent.getId() + ", spawned tasks: " + newSpawned.get());
+            wrapper.setComment(false, "Running check module: " + invocation.name() + " for torrent: " + torrent.getId() + ", spawned tasks: " + newSpawned.get());
             log.debug("[ORGAN-DEBUG] New spawned {} peers task checkmodule futures", newSpawned.get());
         }
 

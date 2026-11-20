@@ -27,9 +27,9 @@ public class RunMonitorModuleOrgan extends BanOrgan<FetchedPeersBatch, FetchedPe
     @Override
     public void digest(FetchedPeersBatch input, Consumer<FetchedPeersBatch> outlet, PipelineTask<?> wrapper) throws RuntimeException {
         wrapper.setComment(false, "Parallel notifying batch monitor modules for torrent: " + input.torrent().getId());
-        moduleManager.getModules().stream().filter(m -> m instanceof BatchMonitorFeatureModule)
-                .parallel()
-                .forEach(m -> ((BatchMonitorFeatureModule) m).onPeersRetrieved(input.downloader(), input.torrent(), input.peers(), wrapper));
+        moduleManager.getInvocations(BatchMonitorFeatureModule.class).parallelStream()
+                .forEach(invocation -> invocation.invoke(m ->
+                        m.onPeersRetrieved(input.downloader(), input.torrent(), input.peers(), wrapper)));
         outlet.accept(input);
     }
 }
