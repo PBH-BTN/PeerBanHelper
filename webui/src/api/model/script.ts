@@ -15,6 +15,7 @@ export interface Script {
    * 脚本名称
    */
   name?: string
+  loaded?: boolean
   /**
    * 是否线程安全
    */

@@ -4,6 +4,7 @@ import type {
   CommonResponseWithPage
 } from '@/api/model/common'
 import type { EditableResult, Script } from '@/api/model/script'
+import { readScriptEngines } from '@/api/model/scriptLanguage'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -15,6 +16,18 @@ export class InsecureNetworkError extends Error {
   static is(err: unknown): err is InsecureNetworkError {
     return (err as Error)?.name === InsecureNetworkError.name
   }
+}
+
+export async function GetScriptEngines() {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, '/api/expression-engine/engines'),
+    location.href
+  )
+  const response = await fetch(url, { headers: getCommonHeader() })
+  endpointStore.assertResponseLogin(response)
+  return readScriptEngines(response)
 }
 
 export async function GetScriptList(params: {
@@ -42,7 +55,7 @@ export async function GetScriptContent(id: string): Promise<CommonResponse<strin
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/expression-engine/${id}`),
+    urlJoin(endpointStore.endpoint, `/api/expression-engine/${encodeURIComponent(id)}`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
@@ -68,7 +81,7 @@ export async function DeleteScript(id: string): Promise<CommonResponseWithoutDat
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/expression-engine/${id}`),
+    urlJoin(endpointStore.endpoint, `/api/expression-engine/${encodeURIComponent(id)}`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader(), method: 'DELETE' }).then((res) => {
@@ -84,7 +97,7 @@ export async function UpsertScript(
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/expression-engine/${name}`),
+    urlJoin(endpointStore.endpoint, `/api/expression-engine/${encodeURIComponent(name)}`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader(), method: 'PUT', body: content }).then((res) => {

@@ -8,6 +8,14 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
+      v-if="typeof model.sandbox === 'boolean'"
+      :label="t('page.settings.tab.profile.module.expressionEngine.sandbox')"
+      :tooltip="t('page.settings.tab.profile.module.expressionEngine.sandbox.tooltip')"
+      field="model.sandbox"
+    >
+      <a-switch v-model="model.sandbox" />
+    </a-form-item>
+    <a-form-item
       :label="t('page.settings.tab.profile.module.expressionEngine.useGlobalBanTime')"
       field="model.ban_duration"
     >

@@ -17,7 +17,7 @@ PeerBanHelper consists of the following core modules:
 - [Fake Progress Checker (Progress Cheat Blocker)](https://docs.pbh-btn.com/docs/module/progress-cheat-blocker)
 - [Automatic Chain Banning](https://docs.pbh-btn.com/docs/module/auto-range-ban)
 - [Multi-Dial Tracking](https://docs.pbh-btn.com/docs/module/multi-dial)
-- Peer ID/Client Name Spoofing Detection via [AviatorScript Engine](https://docs.pbh-btn.com/docs/module/expression-engine)
+- Custom Peer rules in AviatorScript, JavaScript and Lua, with an isolated sandbox. See the [rule and deployment guide (Chinese)](docs/script-engines.md).
 - [Active Monitoring (Local Data Analysis)](https://docs.pbh-btn.com/docs/module/active-monitoring)
 - [IP Set Rules Subscription](https://docs.pbh-btn.com/docs/module/ip-address-blocker-rules)
 - WebUI (Current Features: Active Banlist, Ban History, Top 50 Most Banned IPs, Rule Subscription Management, Charts, Peer List)

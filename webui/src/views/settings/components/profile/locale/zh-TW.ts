@@ -1,4 +1,7 @@
 export default {
+  'page.settings.tab.profile.module.expressionEngine.sandbox': '本機腳本沙箱',
+  'page.settings.tab.profile.module.expressionEngine.sandbox.tooltip':
+    '關閉後，本機腳本會在 PBH 主程序中執行。請僅對可信任的腳本關閉此選項。BTN 腳本一律隔離執行。',
   'page.settings.tab.profile.save': '儲存',
   'page.settings.tab.profile.base.title': '全域配置',
   'page.settings.tab.profile.form.checkInterval': '檢查頻率',
@@ -109,9 +112,9 @@ export default {
     '如果某IP已判定為多撥，無視快取時間限制繼續搜尋其同夥',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time': '追獵時間',
 
-  'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript 規則引擎',
+  'page.settings.tab.profile.module.expressionEngine.title': '腳本規則引擎',
   'page.settings.tab.profile.module.expressionEngine.tips':
-    '啟用此功能可以使用 AviatorScript 語言編寫複雜的規則，以實現更多的自訂功能',
+    '使用自訂腳本執行封鎖規則。可選語言取決於伺服器支援的引擎。',
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全域封禁時間',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '規則訂閱',

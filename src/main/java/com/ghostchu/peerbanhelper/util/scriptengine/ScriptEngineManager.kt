@@ -1,57 +1,62 @@
 package com.ghostchu.peerbanhelper.util.scriptengine
 
+import com.ghostchu.peerbanhelper.Main
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule
 import com.ghostchu.peerbanhelper.module.CheckResult
 import com.ghostchu.peerbanhelper.module.PeerAction
 import com.ghostchu.peerbanhelper.text.Lang
 import com.ghostchu.peerbanhelper.text.TextManager
 import com.ghostchu.peerbanhelper.text.TranslationComponent
+import com.ghostchu.peerbanhelper.util.scriptengine.sandbox.SandboxPool
+import com.ghostchu.peerbanhelper.util.scriptengine.sandbox.SandboxProtocol.Init
+import com.ghostchu.peerbanhelper.util.scriptengine.sandbox.SandboxScript
 import com.ghostchu.peerbanhelper.wrapper.StructuredData
+import jakarta.annotation.PreDestroy
+import java.io.File
+import java.io.IOException
+import java.util.Locale
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.io.File
-import java.util.*
 
 @Component
 class ScriptEngineManager(
-    avScriptEngine: AVScriptEngine
+    engines: List<ScriptEngine>
 ) {
-    private val engineMap: MutableMap<String, ScriptEngine> = HashMap()
-
-    init {
-        // 注册引擎
-        engineMap[".av"] = avScriptEngine
-    }
+    private val engineMap = engines.associateBy { it.getFileExtension() }
 
     val supportedExtensions: List<String>
-        get() = engineMap.keys.toList()
+        get() = engineMap.keys.sorted()
 
-    fun getEngineByExtension(extension: String): ScriptEngine? {
-        return engineMap[extension.lowercase(Locale.getDefault())]
-    }
+    fun getEngineByFileName(fileName: String): ScriptEngine? =
+        engineMap["." + fileName.substringAfterLast('.', "").lowercase(Locale.ROOT)]
 
-    fun getEngineByFileName(fileName: String): ScriptEngine? {
-        for (entry in engineMap.entries) {
-            if (fileName.endsWith(entry.key)) {
-                return entry.value
+    fun compileLocal(file: File, source: String, sandbox: Boolean): CompiledScript? =
+        compile(file, file.name, source, sandbox)
+
+    fun compileBtn(name: String, source: String): CompiledScript? = compile(null, name, source, true)
+
+    private fun compile(file: File?, name: String, source: String, sandbox: Boolean): CompiledScript? {
+        val engine = if (file == null && '.' !in name) engineMap[".av"] else getEngineByFileName(name)
+        requireNotNull(engine) { "Unsupported script extension: $name" }
+        Main.getPlatform()?.malwareScanner?.use { scanner ->
+            if (scanner.isMalicious(source)) {
+                log.error("Malware scanner rejected script: {}", name)
+                return null
             }
         }
-        return engineMap[".av"]
+        if (!sandbox) return engine.compileScript(file, name, source)
+        val init = Init(engine.getFileExtension(), name, source, if (file == null) "btn" else "local")
+        return SandboxScript(file, init, SandboxPool.prepare(init))
     }
 
-    fun compileScript(file: File?, fallbackName: String?, scriptContent: String?): CompiledScript? {
-        val fileName: String = file?.name ?: fallbackName ?: return null
-        val engine = getEngineByFileName(fileName)
-        if (engine == null) {
-            log.warn("No script engine found for file: {}", fileName)
-            return null
-        }
-        return engine.compileScript(file, fallbackName, scriptContent)
-    }
-
-    fun validateScriptSyntax(fileName: String, scriptContent: String): Boolean {
+    @Throws(IOException::class)
+    fun validateScriptSyntax(fileName: String, source: String, sandbox: Boolean): Boolean {
         val engine = getEngineByFileName(fileName) ?: return false
-        return engine.validateScriptSyntax(fileName, scriptContent)
+        if (sandbox) {
+            SandboxPool.prepare(Init(engine.getFileExtension(), fileName, source, "local"))
+            return true
+        }
+        return engine.validateScriptSyntax(fileName, source)
     }
 
     /**
@@ -140,6 +145,9 @@ class ScriptEngineManager(
         log.error(TextManager.tlUI(Lang.RULE_ENGINE_INVALID_RETURNS, script.name()))
         return null
     }
+
+    @PreDestroy
+    fun close() = SandboxPool.closeAll()
 
     companion object {
         private val log = LoggerFactory.getLogger(ScriptEngineManager::class.java)

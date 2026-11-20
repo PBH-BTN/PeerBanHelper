@@ -109,6 +109,7 @@ export interface MultiDialingBlocker {
 }
 
 export interface ExpressionEngine {
+  sandbox?: boolean
   enabled: boolean
   ban_duration: BanDuration
 }

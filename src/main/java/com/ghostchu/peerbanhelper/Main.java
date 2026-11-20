@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
 import com.ghostchu.peerbanhelper.event.program.PBHShutdownEvent;
-import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
@@ -16,20 +15,12 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.platform.Platform;
 import com.ghostchu.peerbanhelper.platform.impl.win32.WindowsPlatform;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.*;
-import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
-import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.google.common.eventbus.EventBus;
-import com.googlecode.aviator.AviatorEvaluator;
-import com.googlecode.aviator.EvalMode;
-import com.googlecode.aviator.Options;
-import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
 import cordelia.client.TransmissionIOException;
 import io.javalin.util.JavalinBindException;
@@ -53,7 +44,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.math.MathContext;
 import java.net.*;
 import java.nio.file.Files;
 import java.text.Normalizer;
@@ -153,7 +143,6 @@ public class Main {
             Thread.ofPlatform().name("Bootstrap").start(() -> {
                 try {
                     guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
-                    setupScriptEngine();
                     log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
                     applicationContext = new AnnotationConfigApplicationContext();
                     applicationContext.register(AppConfig.class);
@@ -564,58 +553,6 @@ public class Main {
         char[] chars = name.toCharArray();
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
-    }
-
-    private static void setupScriptEngine() {
-        AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
-        // ASM 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.EVAL_MODE, EvalMode.ASM);
-        // EVAL 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.OPTIMIZE_LEVEL, AviatorEvaluator.EVAL);
-        // 降低浮点计算精度
-        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL32);
-        // 启用变量语法糖
-        AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
-//        // 表达式允许序列化和反序列化
-//        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
-        // 启用反射方法查找
-        AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
-        // 注册反射调用
-        registerFunctions(IPAddressUtil.class);
-        registerFunctions(HTTPUtil.class);
-        registerFunctions(JsonUtil.class);
-        registerFunctions(Lang.class);
-        registerFunctions(StrUtil.class);
-        registerFunctions(PeerBanHelper.class);
-        registerFunctions(InfoHashUtil.class);
-        registerFunctions(CommonUtil.class);
-        registerFunctions(ByteUtil.class);
-        registerFunctions(MiscUtil.class);
-        registerFunctions(MsgUtil.class);
-        registerFunctions(SharedObject.class);
-        registerFunctions(UrlEncoderDecoder.class);
-        registerFunctions(URLUtil.class);
-        registerFunctions(WebUtil.class);
-        registerFunctions(RSAUtils.class);
-        registerFunctions(Pageable.class);
-        registerFunctions(TextManager.class);
-        registerFunctions(ExchangeMap.class);
-        registerFunctions(Main.class);
-    }
-
-    private static void registerFunctions(Class<?> clazz) {
-        try {
-            AviatorEvaluator.addInstanceFunctions(StrUtil.uncapitalize(clazz.getSimpleName()), clazz);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
-            Sentry.captureException(e);
-        }
-        try {
-            AviatorEvaluator.addStaticFunctions(StrUtil.capitalize(clazz.getSimpleName()), clazz);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
-            Sentry.captureException(e);
-        }
     }
 
     // 重启应用程序

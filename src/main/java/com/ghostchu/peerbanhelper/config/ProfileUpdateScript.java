@@ -25,6 +25,11 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 43)
+    public void enableLocalScriptSandbox() {
+        if (!conf.contains("module.expression-engine.sandbox")) conf.set("module.expression-engine.sandbox", true);
+    }
+
     @UpdateScript(version = 42)
     public void addGopeedBtRules() {
         List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");

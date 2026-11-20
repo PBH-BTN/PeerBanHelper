@@ -1,11 +1,17 @@
-package com.ghostchu.peerbanhelper.util.scriptengine;
+package com.ghostchu.peerbanhelper.util.scriptengine.aviator;
 
+import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.googlecode.aviator.Expression;
 
 import java.io.File;
 
 public record AVCompiledScript(File file, String name, String author, boolean cacheable, boolean threadSafe,
                                String version, String script, Expression expression) implements CompiledScript {
+
+    @Override
+    public boolean usesHostEnvironment() {
+        return true;
+    }
 
     @Override
     public Object execute(java.util.Map<String, Object> env) {

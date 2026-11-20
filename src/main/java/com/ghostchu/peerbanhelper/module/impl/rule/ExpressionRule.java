@@ -21,17 +21,16 @@ import com.ghostchu.peerbanhelper.util.query.PBHPage;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngineManager;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptSnapshot;
+import com.ghostchu.peerbanhelper.util.scriptengine.sandbox.SandboxProtocol;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.googlecode.aviator.exception.ExpressionSyntaxErrorException;
-import com.googlecode.aviator.exception.TimeoutException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.sentry.Sentry;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -59,11 +58,12 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public final class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
     private final static String VERSION = "2";
-    private final long maxScriptExecuteTime = 1500;
+    private final ReentrantReadWriteLock policyLock = new ReentrantReadWriteLock();
+    private volatile boolean sandbox = true;
     private final JavalinWebContainer javalinWebContainer;
     private final ScriptEngineManager scriptEngineManager;
     private final BackgroundTaskManager backgroundTaskManager;
-    private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
+    private volatile List<CompiledScript> scripts = List.of();
     private long banDuration;
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
@@ -86,6 +86,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         }
         javalinWebContainer.routes()
                 .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
+                .get("/api/" + getConfigName() + "/engines", ctx -> ctx.json(new StdResp(true, null, scriptEngineManager.getSupportedExtensions())), Role.USER_READ)
                 .get("/api/" + getConfigName() + "/editable", this::editable, Role.USER_READ)
                 .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
                 .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
@@ -154,7 +155,22 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             }
         }
         var scriptContent = new String(content, StandardCharsets.UTF_8);
-        if (!scriptEngineManager.validateScriptSyntax(scriptId, scriptContent)) {
+        boolean valid;
+        var lock = policyLock.readLock();
+        lock.lock();
+        try {
+            valid = content.length <= SandboxProtocol.MAX_FRAME && scriptEngineManager.validateScriptSyntax(scriptId, scriptContent, sandbox);
+        } catch (IllegalArgumentException invalidScript) {
+            valid = false;
+        } catch (IOException unavailable) {
+            log.warn("Unable to validate script {}", scriptId, unavailable);
+            context.status(HttpStatus.SERVICE_UNAVAILABLE);
+            context.json(new StdResp(false, tl(locale(context), Lang.RULE_ENGINE_SANDBOX_UNAVAILABLE), null));
+            return;
+        } finally {
+            lock.unlock();
+        }
+        if (!valid) {
             context.status(HttpStatus.BAD_REQUEST);
             context.json(new StdResp(false, tl(locale(context), Lang.RULE_ENGINE_BAD_EXPRESSION), null));
             return;
@@ -184,15 +200,12 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private File getIfAllowedScriptId(String scriptId) {
         if (scriptId.isBlank())
             throw new IllegalArgumentException("ScriptId cannot be null or blank");
-        // 检查是否为支持的脚本类型
-        boolean supported = scriptEngineManager.getSupportedExtensions().stream()
-                .anyMatch(scriptId::endsWith);
-        if (!supported) {
+        if (scriptId.contains("/") || scriptId.contains("\\") || scriptEngineManager.getEngineByFileName(scriptId) == null) {
             return null;
         }
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
         File readFile = new File(scriptDir, scriptId);
-        if (insideDirectory(scriptDir, readFile)) {
+        if (insideDirectory(scriptDir, readFile) && !scriptId.contains(":") && !Files.isSymbolicLink(readFile.toPath())) {
             return readFile;
         }
         return null;
@@ -219,15 +232,14 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private void listScripts(Context context) {
         Pageable pageable = new Pageable(context);
         List<ExpressionMetadataDto> list = new ArrayList<>();
-        for (var script : scripts) {
-            list.add(new ExpressionMetadataDto(
-                    script.file().getName(),
-                    script.name(),
-                    script.author(),
-                    script.cacheable(),
-                    script.threadSafe(),
-                    script.version()
-            ));
+        Map<File, CompiledScript> loaded = new HashMap<>();
+        scripts.forEach(script -> loaded.put(script.file(), script));
+        for (File file : scriptFiles()) {
+            var script = loaded.get(file);
+            list.add(script == null
+                    ? new ExpressionMetadataDto(file.getName(), file.getName(), "—", false, false, "—", false)
+                    : new ExpressionMetadataDto(file.getName(), script.name(), script.author(), script.cacheable(),
+                    script.threadSafe(), script.version(), true));
         }
         var r = list.stream().skip(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).toList();
         context.json(new StdResp(true, null, new PBHPage<>(pageable.getPage(), pageable.getSize(), list.size(), r)));
@@ -254,54 +266,50 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         return "expression-engine";
     }
 
-    @SneakyThrows
+
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
-        AtomicReference<CheckResult> checkResult = new AtomicReference<>(pass());
-        Map<CompiledScript, CompletableFuture<?>> map = new HashMap<>();
-        for (CompiledScript compiledScript : scripts) {
-            var f = CompletableFuture.runAsync(() -> {
-                CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader);
-                if (expressionRun.action() == PeerAction.SKIP) {
-                    checkResult.set(expressionRun); // 提前退出
-                    return;
+        var lock = policyLock.readLock();
+        lock.lock();
+        try {
+            var futures = scripts.stream().map(script -> CompletableFuture.supplyAsync(
+                    () -> runExpression(script, torrent, peer, downloader), parallelService)).toList();
+            CheckResult result = pass();
+            for (var future : futures) {
+                var decision = future.join();
+                if (decision.action() == PeerAction.SKIP || (decision.action() == PeerAction.BAN && result.action() != PeerAction.SKIP)) {
+                    result = decision;
                 }
-                if (expressionRun.action() == PeerAction.BAN) {
-                    if (checkResult.get().action() != PeerAction.SKIP) {
-                        checkResult.set(expressionRun);
-                    }
-                }
-            }, parallelService);
-            map.put(compiledScript, f);
+            }
+            return result;
+        } finally {
+            lock.unlock();
         }
-        for (var entry : map.entrySet()) {
-            task.setComment(false, "Waiting for script complete: " + entry.getKey().name());
-            entry.getValue().join();
-        }
-        return checkResult.get();
     }
 
-    public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
-        return getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + peer.getCacheKey(), () -> {
+    private CheckResult runExpression(CompiledScript script, Torrent torrent, Peer peer, Downloader downloader) {
+        var cached = getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + ":" + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
-                Map<String, Object> env = script.newEnv();
-                env.put("torrent", torrent);
-                env.put("peer", peer);
-                env.put("downloader", downloader);
-                env.put("cacheable", new AtomicBoolean(false));
-                env.put("server", getServer());
-                env.put("moduleInstance", this);
-                env.put("banDuration", banDuration);
-                env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
+                Map<String, Object> env;
+                if (!script.usesHostEnvironment()) {
+                    env = ScriptSnapshot.create(torrent, peer, downloader, banDuration);
+                } else {
+                    env = script.newEnv();
+                    env.put("torrent", torrent);
+                    env.put("peer", peer);
+                    env.put("downloader", downloader);
+                    env.put("cacheable", new AtomicBoolean(false));
+                    env.put("server", getServer());
+                    env.put("moduleInstance", this);
+                    env.put("banDuration", banDuration);
+                    env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
+                }
                 Object returns = script.execute(env);
                 result = scriptEngineManager.handleResult(script, banDuration, returns);
-            } catch (TimeoutException timeoutException) {
-                return pass();
             } catch (Exception ex) {
                 log.error(tlUI(Lang.RULE_ENGINE_ERROR, script.name()), ex);
-                //Sentry.captureException(ex);
-                return pass();
+                return null;
             }
             if (result != null && result.action() != PeerAction.NO_ACTION) {
                 return result;
@@ -309,6 +317,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 return pass();
             }
         }, script.cacheable());
+        return cached == null ? pass() : cached;
     }
 
     @Override
@@ -322,9 +331,21 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         return Reloadable.super.reloadModule();
     }
 
-    private void reloadConfig() throws IOException {
-        scripts.clear();
-        this.banDuration = getConfig().getLong("ban-duration", 0);
+    private synchronized void reloadConfig() throws IOException {
+        var lock = policyLock.writeLock();
+        lock.lock();
+        try {
+            scripts = List.of();
+            getCache().invalidateAll();
+            sandbox = getConfig().getBoolean("sandbox", true);
+            banDuration = getConfig().getLong("ban-duration", 0);
+        } finally {
+            lock.unlock();
+        }
+        loadScripts();
+    }
+
+    private void loadScripts() throws IOException {
         initScripts();
 
         backgroundTaskManager.addTaskAsync(new FunctionalBackgroundTask(
@@ -333,54 +354,38 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                     log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
                     long start = System.currentTimeMillis();
 
-                    File scriptDir = new File(Main.getDataDirectory(), "scripts");
-                    File[] scriptFiles = scriptDir.listFiles();
-                    if (scriptFiles == null || scriptFiles.length == 0) {
-                        getCache().invalidateAll();
-                        log.info(tlUI(Lang.RULE_ENGINE_COMPILED, 0, System.currentTimeMillis() - start));
-                        return;
-                    }
-
-                    // Filter supported scripts first
-                    var supportedScripts = java.util.Arrays.stream(scriptFiles)
-                            .filter(f -> !f.isHidden())
-                            .filter(f -> scriptEngineManager.getSupportedExtensions().stream()
-                                    .anyMatch(ext -> f.getName().endsWith(ext)))
-                            .toList();
+                    var supportedScripts = scriptFiles();
 
                     task.setMax(supportedScripts.size());
                     task.setCurrent(0);
                     task.setBarType(BackgroundTaskProgressBarType.DETERMINATE);
                     callback.accept(task);
 
-                    var completed = new java.util.concurrent.atomic.AtomicInteger(0);
-
-                    try (var executor = Executors.newWorkStealingPool()) {
-                        for (File script : supportedScripts) {
-                            executor.submit(() -> {
-                                try {
-                                    String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
-                                    var compiledScript = scriptEngineManager.compileScript(script, script.getName(), scriptContent);
-                                    if (compiledScript != null) {
-                                        this.scripts.add(compiledScript);
-                                    }
-                                } catch (ExpressionSyntaxErrorException err) {
-                                    log.error(tlUI(Lang.RULE_ENGINE_BAD_EXPRESSION), err);
-                                    Sentry.captureException(err);
-                                } catch (Exception e) {
-                                    log.error("Unable to load script file", e);
-                                    Sentry.captureException(e);
-                                } finally {
-                                    task.setCurrent(completed.incrementAndGet());
-                                    callback.accept(task);
-                                }
-                            });
+                    List<CompiledScript> loaded = new ArrayList<>();
+                    int completed = 0;
+                    for (File file : supportedScripts) {
+                        try {
+                            if (file.length() > SandboxProtocol.MAX_FRAME) throw new IOException("Script source too large");
+                            var compiled = scriptEngineManager.compileLocal(file, Files.readString(file.toPath()), sandbox);
+                            if (compiled != null) loaded.add(compiled);
+                        } catch (Exception ex) {
+                            log.warn("Unable to load script {}", file.getName(), ex);
+                        } finally {
+                            task.setCurrent(++completed);
+                            callback.accept(task);
                         }
                     }
-                    getCache().invalidateAll();
+                    scripts = List.copyOf(loaded);
                     log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
                 }
         )).join();
+    }
+
+    private List<File> scriptFiles() {
+        var files = new File(Main.getDataDirectory(), "scripts").listFiles();
+        if (files == null) return List.of();
+        return Arrays.stream(files).filter(file -> file.isFile() && !file.isHidden())
+                .filter(file -> getIfAllowedScriptId(file.getName()) != null).sorted().toList();
     }
 
     private void initScripts() throws IOException {
@@ -407,6 +412,6 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     }
 
     record ExpressionMetadataDto(String id, String name, String author, boolean cacheable, boolean threadSafe,
-                                 String version) {
+                                 String version, boolean loaded) {
     }
 }
