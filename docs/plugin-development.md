@@ -1,5 +1,7 @@
 # PeerBanHelper JVM 插件开发手册
 
+需要修改宿主模块、下载器、WebUI 或发行包时，请参阅[全项目开发者指南](developer-guide.md)。
+
 本手册适用于包含插件生命周期重构的 PBH 构建。插件在 PBH 的 JVM 内运行，可以直接使用目标发行版的 Java 类型。下面以一个可以独立编译的规则插件为例，从创建工程一直走到部署、升级和卸载。[完整示例工程](../examples/rule-plugin/)
 
 ## 1. 从可运行的工程开始
@@ -105,6 +107,92 @@ module:
 **热升级顺序**为停止、卸载、替换 JAR、按文件名加载、按 ID 启动。若有下游插件，记录并核对它们的状态。确认列表中的版本和状态，再请求 `GET /api/general/checkModuleAvailable?module=demo-client-rule` 核对模块；最后用已知输入检查实际行为。回滚时按同一顺序装回保存的上一版 JAR。[可复制的 HTTP 命令](../examples/rule-plugin/README.md)
 
 ## 6. 验证与排障
+
+### 实践：把固定规则改为可配置规则
+
+复制 demo 后，保留 `getName()` 和四参数检查入口，把 `getConfigName()` 改为 `acme-client-rule`，使用第 4 节的 YAML。删除示例的 `DEMO_CLIENT` 常量，在规则类内加入以下字段与方法：
+
+```java
+private volatile String clientName;
+
+@Override
+public boolean isConfigurable() {
+    return true;
+}
+
+@Override
+public void onEnable() {
+    String configured = getConfig().getString("client-name", "").trim();
+    if (configured.isEmpty()) {
+        throw new IllegalArgumentException("acme-client-rule requires client-name");
+    }
+    clientName = configured;
+}
+```
+
+在 `shouldBanPeer` 开头用 `String target = clientName;` 取得本次检查使用的配置，将原方法中的所有 `DEMO_CLIENT` 引用替换为 `target`。先启动一个配置段缺失的实例，此时插件可以启动，但模块不可用。然后添加配置段并重启，用命中名称、不同名称、空名称各检查一次。最后将名称改成另一值并重启，确认旧名称放行、新名称命中。这个实现只在模块启用时读取参数；若要在模块持续启用时响应配置编辑，还需设计独立的重载入口。
+
+### 实践：观察一批 Peer 而不产生封禁
+
+在 demo 的 `src/main/java/example/pbh/` 下添加 `PeerBatchMonitor.java`。同一描述符可以携带多个扩展。下面的监控模块用于观察一次回调对应哪个下载器、哪个种子以及多少条 Peer 记录：
+
+```java
+package example.pbh;
+
+import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.BatchMonitorFeatureModule;
+import org.pf4j.Extension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.List;
+
+@Extension
+public final class PeerBatchMonitor extends AbstractFeatureModule implements BatchMonitorFeatureModule {
+    private static final Logger LOG = LoggerFactory.getLogger(PeerBatchMonitor.class);
+
+    @Override
+    public String getName() { return "Demo peer batch monitor"; }
+
+    @Override
+    public String getConfigName() { return "demo-peer-batch-monitor"; }
+
+    @Override
+    public void onPeersRetrieved(Downloader downloader, Torrent torrent,
+                                 List<? extends Peer> peers, PipelineTask<?> task) {
+        LOG.debug("Downloader {} torrent {} observed {} peers",
+                downloader.getId(), torrent.getId(), peers.size());
+    }
+}
+```
+
+重新构建并检查索引里同时出现规则类和监控类。在测试实例为该 logger 开启 DEBUG，让下载器返回一个带 Peer 的任务，再观察日志。相同 Peer 连续两轮出现会计入两次观察；若业务需要唯一 Peer 数，应自行定义标识、去重范围和过期策略。停用整个插件后，两种扩展都应从可用模块中消失。
+
+### 用管理接口逐步验收
+
+在 PowerShell 中可以保留每一步的响应，避免只检查 HTTP 状态码。以下命令作用于当前测试实例中已加载的 demo，令牌从环境变量读取：
+
+```powershell
+$base = 'http://127.0.0.1:19898'
+$headers = @{ Authorization = "Bearer $env:PBH_TOKEN" }
+$id = 'demo-client-rule'
+$plugins = Invoke-RestMethod "$base/api/plugins" -Headers $headers
+$plugins.data | Where-Object id -eq $id | Select-Object id, version, state, errorMessage
+
+foreach ($action in 'stop', 'start') {
+    $body = @{ action = $action; identifiers = @($id) } | ConvertTo-Json
+    $result = Invoke-RestMethod "$base/api/plugins/operate" -Method Post -Headers $headers -ContentType 'application/json' -Body $body
+    $result.data | Select-Object pluginId, value, message
+    (Invoke-RestMethod "$base/api/general/checkModuleAvailable?module=demo-client-rule" -Headers $headers).data
+}
+```
+
+对于原始 demo，预期第一次模块检查为 `false`，第二次为 `true`。如果采用上面的可配置规则，请将查询参数改为模块键 `acme-client-rule`，同时保持操作请求中的插件 ID 与描述符一致。测试升级时，在 `unload` 成功后替换磁盘文件，用新文件名执行 `load`，再按 ID 执行 `start`；最后读取列表中的版本，避免误测旧 JAR。
+
+### 自动化验证与常见故障
 
 在仓库根目录运行 `./gradlew test --tests '*PluginLifecycleTest'`。该测试加载实际打包的 demo，并覆盖首批 Peer 检查、启动失败回滚、依赖故障隔离、在途调用和重启后旧回调失效。开发自己的插件时，应另外覆盖业务条件的命中、未命中、空值，以及目标宿主版本。[集成测试源码](../src/test/java/com/ghostchu/peerbanhelper/configuration/pf4j/PluginLifecycleTest.java)
 
