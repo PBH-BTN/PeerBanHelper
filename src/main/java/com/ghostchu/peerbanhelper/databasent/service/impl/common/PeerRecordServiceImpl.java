@@ -75,10 +75,10 @@ public class PeerRecordServiceImpl extends AbstractCommonService<PeerRecordMappe
         baseMapper.upsert(new PeerRecordEntity(
                 null,
                 inet,
-                peer.toPeerAddress().getPort(),
+                peer.getAddress().getPort(),
                 torrentEntity.getId(),
                 downloader,
-                peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
+                peer.getId() != null && peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
                 peer.getClientName(),
                 peer.getUploaded(),
                 peer.getUploaded(),
