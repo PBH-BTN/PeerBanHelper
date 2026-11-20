@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ghostchu.peerbanhelper.BanList;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -8,6 +9,8 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PCBAddressService;
 import com.ghostchu.peerbanhelper.databasent.service.PCBRangeService;
+import com.ghostchu.peerbanhelper.databasent.service.PeerBatchLookup.Endpoint;
+import com.ghostchu.peerbanhelper.databasent.service.PeerBatchLookup;
 import com.ghostchu.peerbanhelper.databasent.table.PCBAddressEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PCBRangeEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -42,10 +45,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -203,23 +210,52 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
 
+    private String prefixOf(IPAddress address) {
+        return address.toPrefixBlock(address.isIPv4() ? ipv4PrefixLength : ipv6PrefixLength).toString();
+    }
+
+    @Override
+    public Function<Peer, CheckResult> preparePeerBatch(Torrent torrent, List<? extends Peer> peers, Downloader downloader, PipelineTask<?> task) {
+        String id = downloader.getId();
+        String torrentId = torrent.getId();
+        var ranges = new PeerBatchLookup<>(prefixCache,
+                () -> peers.stream().filter(peer -> !isHandShaking(peer))
+                        .map(peer -> new CacheKeyPrefix(id, torrentId, prefixOf(peer.getPeerAddress().getAddress()))).toList(),
+                keys -> {
+                    var found = new HashMap<CacheKeyPrefix, PCBRangeEntity>();
+                    var rows = pcbRangeDao.list(new LambdaQueryWrapper<PCBRangeEntity>().eq(PCBRangeEntity::getTorrentId, torrentId)
+                            .eq(PCBRangeEntity::getDownloader, id).in(PCBRangeEntity::getRange, keys.stream().map(CacheKeyPrefix::peerAddressPrefix).toList()));
+                    for (var row : rows) found.put(new CacheKeyPrefix(id, torrentId, row.getRange()), row);
+                    return found;
+                });
+        var addresses = new PeerBatchLookup<>(addrCache,
+                () -> peers.stream().filter(peer -> !isHandShaking(peer)).map(peer -> new CacheKeyAddr(id, torrentId, Endpoint.of(peer))).toList(),
+                keys -> {
+                    var found = new HashMap<CacheKeyAddr, PCBAddressEntity>();
+                    var query = new LambdaQueryWrapper<PCBAddressEntity>().eq(PCBAddressEntity::getTorrentId, torrentId)
+                            .eq(PCBAddressEntity::getDownloader, id);
+                    var rows = pcbAddressDao.list(PeerBatchLookup.matching(query, keys.stream().map(CacheKeyAddr::endpoint).toList(),
+                            PCBAddressEntity::getIp, PCBAddressEntity::getPort));
+                    for (var row : rows) found.put(new CacheKeyAddr(id, torrentId, new Endpoint(row.getIp(), row.getPort())), row);
+                    return found;
+                });
+        return peer -> checkPeer(torrent, peer, downloader, task, ranges, addresses);
+    }
+
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
-        if (isHandShaking(peer)) {
-            return handshaking();
-        }
-        // 处理 IPV6
-        IPAddress peerPrefix;
+        return checkPeer(torrent, peer, downloader, task, null, null);
+    }
+
+    private CheckResult checkPeer(Torrent torrent, Peer peer, Downloader downloader, PipelineTask<?> task,
+                                  PeerBatchLookup<CacheKeyPrefix, PCBRangeEntity> ranges,
+                                  PeerBatchLookup<CacheKeyAddr, PCBAddressEntity> addresses) {
+        if (isHandShaking(peer)) return handshaking();
         IPAddress peerIp = peer.getPeerAddress().getAddress();
-        if (peerIp.isIPv4()) {
-            peerPrefix = peerIp.toPrefixBlock(ipv4PrefixLength);
-        } else {
-            peerPrefix = peerIp.toPrefixBlock(ipv6PrefixLength);
-        }
-        String peerPrefixString = peerPrefix.toString();
-        var prefix = String.format("%s,%s,%s,%s,%s", downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
-        task.setComment(true, "Loading data from DB for: " + prefix);
-        var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(), peer.getPeerAddress().getPort());
+        String peerPrefixString = prefixOf(peerIp);
+        task.setComment(false, "Loading peer progress history");
+        var pair = loadFromDatabase(downloader.getId(), torrent.getId(), peerPrefixString, peerIp.toInetAddress(),
+                peer.getPeerAddress().getPort(), ranges, addresses);
         task.setComment(false, "Executing and determining whether to ban the peer based on loaded data and current report.");
         PCBRangeEntity rangeEntity = pair.getLeft();
         PCBAddressEntity addressEntity = pair.getRight();
@@ -260,7 +296,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     .add("fastPcbTestPercentage", fastPcbTestPercentage);
             // 快速 PCB 测试
             {
-                task.setComment(false, "Run fastPcbTest for " + prefix);
+                task.setComment(false, "Run fastPcbTest");
                 CheckResult result = fastPcbTest(addressEntity, rangeEntity, computedUploaded, torrentSize, structuredData, downloader);
                 if (result != null) return result;
             }
@@ -272,7 +308,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             // 过量下载检查
             // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
             {
-                task.setComment(false, "Run excessiveClientTest for " + prefix);
+                task.setComment(false, "Run excessiveClientTest");
                 CheckResult result = excessiveClient(computedUploaded, torrentSize, structuredData, rangeEntity, addressEntity, completedSize, computedCompletedSize);
                 if (result != null) return result;
             }
@@ -283,12 +319,12 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             // 计算进度差异
             // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
             {
-                task.setComment(false, "Run differenceTest for " + prefix);
+                task.setComment(false, "Run differenceTest");
                 CheckResult result = differenceTest(rangeEntity, addressEntity, clientReportedProgress, computedProgress, structuredData, torrentSize, peer);
                 if (result != null) return result;
             }
             {
-                task.setComment(false, "Run progressRewindTest for " + prefix);
+                task.setComment(false, "Run progressRewindTest");
                 CheckResult result = progressRewind(peer, structuredData, rangeEntity, addressEntity, clientReportedProgress, computedProgress, torrentSize);
                 if (result != null) return result;
             }
@@ -465,12 +501,14 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     @NotNull
-    private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp, int port) {
+    private Pair<PCBRangeEntity, PCBAddressEntity> loadFromDatabase(String downloader, String torrentId, String peerAddressPrefix, InetAddress peerAddressIp, int port,
+                    PeerBatchLookup<CacheKeyPrefix, PCBRangeEntity> ranges, PeerBatchLookup<CacheKeyAddr, PCBAddressEntity> addresses) {
         CacheKeyPrefix cacheKeyPrefix = new CacheKeyPrefix(downloader, torrentId, peerAddressPrefix);
-        CacheKeyAddr cacheKeyAddr = new CacheKeyAddr(downloader, torrentId, peerAddressIp);
+        CacheKeyAddr cacheKeyAddr = new CacheKeyAddr(downloader, torrentId, new Endpoint(peerAddressIp, port));
         try {
-            PCBRangeEntity prefixEntity = prefixCache.get(cacheKeyPrefix, () -> {
-                PCBRangeEntity rangeEntity = pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
+            PCBRangeEntity prefixEntity = prefixCache.getPendingOrLoad(cacheKeyPrefix, () -> {
+                Supplier<PCBRangeEntity> single = () -> pcbRangeDao.fetchFromDatabase(torrentId, peerAddressPrefix, downloader);
+                PCBRangeEntity rangeEntity = ranges == null ? single.get() : ranges.load(cacheKeyPrefix, single);
                 if (rangeEntity == null) {
                     log.debug("Creating new PCBRangeEntity for torrentId={}, peerAddressPrefix={}, downloader={}", torrentId, peerAddressPrefix, downloader);
                     rangeEntity = new PCBRangeEntity(null, peerAddressPrefix, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
@@ -479,8 +517,9 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 }
                 return rangeEntity;
             });
-            PCBAddressEntity addrEntity = addrCache.get(cacheKeyAddr, () -> {
-                PCBAddressEntity pcbAddressEntity = pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
+            PCBAddressEntity addrEntity = addrCache.getPendingOrLoad(cacheKeyAddr, () -> {
+                Supplier<PCBAddressEntity> single = () -> pcbAddressDao.fetchFromDatabase(torrentId, peerAddressIp, port, downloader);
+                PCBAddressEntity pcbAddressEntity = addresses == null ? single.get() : addresses.load(cacheKeyAddr, single);
                 if (pcbAddressEntity == null) {
                     log.debug("Creating new PCBAddressEntity for torrentId={}, peerAddressIp={}, port={}, downloader={}", torrentId, peerAddressIp, port, downloader);
                     pcbAddressEntity = new PCBAddressEntity(null, peerAddressIp, port, torrentId, 0, 0, 0, 0, 0, OffsetDateTime.now(), OffsetDateTime.now(), downloader, TimeUtil.zeroOffsetDateTime, TimeUtil.zeroOffsetDateTime, 0);
@@ -497,44 +536,25 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private synchronized void batchFlushBackDatabasePrefix(Stream<Pair<CacheKeyPrefix, PCBRangeEntity>> stream) {
+        var dirty = stream.map(Pair::getRight).filter(PCBRangeEntity::isDirty).toList();
         try {
-            transactionTemplate.execute((a) -> {
-                stream.map(Pair::getRight).forEach(entity -> {
-                    if (entity.isDirty()) {
-                        pcbRangeDao.upsert(entity);
-                    }
-                });
-                return null;
-            });
-        } catch (Exception e) {
-            log.warn("Unable to flush PCBRangeEntity cache back to database, retry in single...", e);
-            stream.map(Pair::getRight).forEach(entity -> {
-                if (entity.isDirty()) {
-                    pcbRangeDao.upsert(entity);
-                }
-            });
+            transactionTemplate.executeWithoutResult(_ -> dirty.forEach(pcbRangeDao::upsert));
+        } catch (RuntimeException e) {
+            // An individual upsert clears the flag before the enclosing transaction commits.
+            dirty.forEach(entity -> entity.setDirty(true));
+            throw e;
         }
     }
 
     private synchronized void batchFlushBackDatabaseAddr(Stream<Pair<CacheKeyAddr, PCBAddressEntity>> stream) {
+        var dirty = stream.map(Pair::getRight).filter(PCBAddressEntity::isDirty).toList();
         try {
-            transactionTemplate.execute((a) -> {
-                stream.map(Pair::getRight).forEach(entity -> {
-                    if (entity.isDirty()) {
-                        pcbAddressDao.upsert(entity);
-                    }
-                });
-                return null;
-            });
-        } catch (Exception e) {
-            log.warn("Unable to flush PCBAddressEntity cache back to database, retry in single...", e);
-            stream.map(Pair::getRight).forEach(entity -> {
-                if (entity.isDirty()) {
-                    pcbAddressDao.upsert(entity);
-                }
-            });
+            transactionTemplate.executeWithoutResult(_ -> dirty.forEach(pcbAddressDao::upsert));
+        } catch (RuntimeException e) {
+            // An individual upsert clears the flag before the enclosing transaction commits.
+            dirty.forEach(entity -> entity.setDirty(true));
+            throw e;
         }
-
     }
 
 //    @NotNull
@@ -552,7 +572,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     record CacheKeyPrefix(String downloader, String torrentId, String peerAddressPrefix) {
     }
 
-    record CacheKeyAddr(String downloader, String torrentId, InetAddress peerAddressIp) {
+    record CacheKeyAddr(String downloader, String torrentId, Endpoint endpoint) {
     }
 }
 

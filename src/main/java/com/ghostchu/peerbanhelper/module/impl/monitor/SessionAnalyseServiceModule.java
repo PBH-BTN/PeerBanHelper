@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
-import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsEntity;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -15,7 +14,6 @@ import com.ghostchu.peerbanhelper.module.BatchMonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
-import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
 import com.ghostchu.peerbanhelper.util.backgroundtask.FunctionalBackgroundTask;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -25,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -39,6 +38,8 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
     private PeerConnectionMetricsTrackService connectionMetricsTrackDao;
     @Autowired
     private PeerConnectionMetricsService connectionMetricDao;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
     private long cleanupInterval;
     private long dataRetentionTime;
     private long dataFlushInterval;
@@ -81,18 +82,35 @@ public class SessionAnalyseServiceModule extends AbstractFeatureModule implement
         Main.getReloadManager().register(this);
     }
 
-    private void flushData() {
-        long deleted = 0;
+    private synchronized void flushData() {
         connectionMetricsTrackDao.flushAll();
-        OffsetDateTime startOfToday = TimeUtil.getStartOfToday(System.currentTimeMillis());
-        List<PeerConnectionMetricsTrackEntity> listNotInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().ne(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
-        List<PeerConnectionMetricsEntity> aggNotInTheDayList = connectionMetricDao.aggregating(listNotInTheDay);
-        connectionMetricDao.saveAggregating(aggNotInTheDayList, true);
-        deleted += connectionMetricsTrackDao.deleteEntries(listNotInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
-        List<PeerConnectionMetricsTrackEntity> listInTheDay = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().eq(PeerConnectionMetricsTrackEntity::getTimeframeAt, startOfToday));
-        List<PeerConnectionMetricsEntity> aggInTheDayList = connectionMetricDao.aggregating(listInTheDay);
-        connectionMetricDao.saveAggregating(aggInTheDayList, false);
-        deleted += connectionMetricsTrackDao.deleteEntries(listInTheDay); // do not use batchDelete: workaround for [BUG] [SQLITE_TOOBIG] String or BLOB exceeds size limit (statement too long) #1518
+        var last = connectionMetricsTrackDao.getOne(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>()
+                .select(PeerConnectionMetricsTrackEntity::getId).orderByDesc(PeerConnectionMetricsTrackEntity::getId).last("LIMIT 1"));
+        if (last == null) return;
+
+        long after = 0;
+        while (after < last.getId()) {
+            final long cursor = after;
+            Long next = transactionTemplate.execute(_ -> {
+                var page = connectionMetricsTrackDao.list(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>()
+                        .select(PeerConnectionMetricsTrackEntity::getId, PeerConnectionMetricsTrackEntity::getTimeframeAt,
+                                PeerConnectionMetricsTrackEntity::getDownloader, PeerConnectionMetricsTrackEntity::getLastFlags)
+                        .gt(PeerConnectionMetricsTrackEntity::getId, cursor).le(PeerConnectionMetricsTrackEntity::getId, last.getId())
+                        .orderByAsc(PeerConnectionMetricsTrackEntity::getId).last("LIMIT 1024"));
+                if (page.isEmpty()) return null;
+                long end = page.getLast().getId();
+                int deleted = connectionMetricsTrackDao.getBaseMapper().delete(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>()
+                        .gt(PeerConnectionMetricsTrackEntity::getId, cursor).le(PeerConnectionMetricsTrackEntity::getId, end));
+                if (deleted != page.size()) {
+                    throw new IllegalStateException("Session observations changed during aggregation");
+                }
+                // Each consumed observation contributes once, including a previous day's final page.
+                connectionMetricDao.saveAggregating(connectionMetricDao.aggregating(page), false);
+                return end;
+            });
+            if (next == null) break;
+            after = next;
+        }
     }
 
     private void cleanup() {

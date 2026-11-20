@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.WatchDog;
@@ -18,6 +19,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -71,10 +73,14 @@ public class DigestionSession implements AutoCloseable {
     public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> runBanWave(WatchDog banWaveWatchDog) {
         banWaveWatchDog.setLastOperation("Initializing runBanWave", false);
         organs.clear();
+        // Stage constructors register their polling loop before subclass fields are initialized.
+        // Start the workers only after the complete pipeline is ready to accept peers.
+        List<Runnable> stageLoops = new ArrayList<>();
+        Executor registerLoop = stageLoops::add;
         // 下载器提供器
         DownloaderProviderOrgan downloaderProviderOrgan = new DownloaderProviderOrgan(
                 downloaderManager,
-                scheduleEnergy,
+                registerLoop,
                 digestEnergyCompute,
                 null,
                 null,
@@ -83,7 +89,7 @@ public class DigestionSession implements AutoCloseable {
         organs.add(downloaderProviderOrgan);
         // 下载器会话登录器
         DownloaderLoginOrgan downloaderLoginOrgan = new DownloaderLoginOrgan(
-                scheduleEnergy,
+                registerLoop,
                 digestEnergyIO,
                 downloaderProviderOrgan,
                 null,
@@ -92,7 +98,7 @@ public class DigestionSession implements AutoCloseable {
         organs.add(downloaderLoginOrgan);
         // 种子数据获取器
         TorrentsFetchOrgan torrentsFetchOrgan = new TorrentsFetchOrgan(
-                scheduleEnergy,
+                registerLoop,
                 digestEnergyIO,
                 downloaderLoginOrgan,
                 null,
@@ -101,7 +107,7 @@ public class DigestionSession implements AutoCloseable {
         organs.add(torrentsFetchOrgan);
         // Peers 获取器
         PeersFetchOrgan peersFetchOrgan = new PeersFetchOrgan(
-                scheduleEnergy,
+                registerLoop,
                 digestEnergyIO,
                 torrentsFetchOrgan,
                 null,
@@ -110,7 +116,7 @@ public class DigestionSession implements AutoCloseable {
         organs.add(peersFetchOrgan);
         // 内存快照更新器
         UpdateSnapshotOrgan updateSnapshotOrgan = new UpdateSnapshotOrgan(
-                scheduleEnergy,
+                registerLoop,
                 digestEnergyCompute,
                 peersFetchOrgan,
                 null,
@@ -120,7 +126,7 @@ public class DigestionSession implements AutoCloseable {
         organs.add(updateSnapshotOrgan);
         // 观察者回调器
         RunMonitorModuleOrgan runMonitorModuleOrgan = new RunMonitorModuleOrgan(
-                scheduleEnergy,
+                registerLoop,
                 digestEnergyCompute,
                 updateSnapshotOrgan,
                 null,
@@ -130,7 +136,7 @@ public class DigestionSession implements AutoCloseable {
         organs.add(runMonitorModuleOrgan);
         // 规则和反吸血模块执行器
         RunCheckModuleOrgan runCheckModuleOrgan = new RunCheckModuleOrgan(
-                scheduleEnergy,
+                registerLoop,
                 digestEnergyCompute,
                 runMonitorModuleOrgan,
                 null,
@@ -141,6 +147,7 @@ public class DigestionSession implements AutoCloseable {
         );
         organs.add(runCheckModuleOrgan);
         // 等待数据并完成数据转换操作
+        stageLoops.forEach(scheduleEnergy::execute);
         banWaveWatchDog.feed();
         var returns = convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan, banWaveWatchDog));
         // 调用 Tail Organ 的 endSession 方法，其调用会随着链式递归调用到 Head Organ 的 endSession 方法，完成会话结束通知
@@ -183,7 +190,7 @@ public class DigestionSession implements AutoCloseable {
                                 joiner.add("Upstream In: null");
                             }
                             joiner.add("Running Tasks: " + organ.runningTasks.size());
-                            organ.runningTasks.forEach(future -> joiner.add("  - " + Objects.requireNonNullElse(future, "null")));
+                            organ.runningTasks.values().forEach(future -> joiner.add("  - " + Objects.requireNonNullElse(future, "null")));
                             joiner.add("Outlet Waiting Retrieve: " + organ.outlet.size());
                             organ.outlet.forEach(item -> joiner.add("  - " + Objects.requireNonNullElse(item, "null")));
                         }
@@ -193,22 +200,9 @@ public class DigestionSession implements AutoCloseable {
                     }
                     continue;
                 }
-                var torrentMap = handled.getOrDefault(lastRetrieve.downloader(), Collections.synchronizedMap(new HashMap<>()));
-                var peersMap = torrentMap.getOrDefault(lastRetrieve.torrent(), Collections.synchronizedMap(new HashMap<>()));
-                var lastPeer = peersMap.getOrDefault(lastRetrieve.peer(), lastRetrieve.checkResult());
-                // 现在检查状态，SKIP > BAN > NO_ACTION
-                if (lastPeer.action().ordinal() > lastRetrieve.checkResult().action().ordinal()) { // 如果状态等级更高，则忽略避免覆写
-                    continue;
-                }
-                if (lastPeer.action().ordinal() == lastRetrieve.checkResult().action().ordinal() &&
-                        lastPeer.duration() > lastRetrieve.checkResult().duration()) { // 如果状态等级相同，则避免 banDuration 变短
-                    continue;
-                }
-                // 其他情况允许覆盖
-                // 检查结束
-                peersMap.put(lastRetrieve.peer(), lastRetrieve.checkResult());
-                torrentMap.put(lastRetrieve.torrent(), peersMap);
-                handled.put(lastRetrieve.downloader(), torrentMap);
+                var torrentMap = handled.computeIfAbsent(lastRetrieve.downloader(), _ -> new HashMap<>());
+                var peersMap = torrentMap.computeIfAbsent(lastRetrieve.torrent(), _ -> new HashMap<>());
+                peersMap.merge(lastRetrieve.peer(), lastRetrieve.checkResult(), CheckResult::preferred);
             } while (lastOrgan.getStatus() != OrganLifeCycleStatus.DONE);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -250,9 +244,9 @@ public class DigestionSession implements AutoCloseable {
                     var peer = l4.getKey();
                     peers++;
                     var checkResult = l4.getValue();
-                    banDetailSection.add(new DownloaderServerImpl.BanDetail(
-                            torrent, peer, checkResult, checkResult.duration()
-                    ));
+                    if (checkResult.action() == PeerAction.BAN || checkResult.action() == PeerAction.BAN_FOR_DISCONNECT) {
+                        banDetailSection.add(new DownloaderServerImpl.BanDetail(torrent, peer, checkResult, checkResult.duration()));
+                    }
                     l4It.remove();
                 }
                 l3It.remove();

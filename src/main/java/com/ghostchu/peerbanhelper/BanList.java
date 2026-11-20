@@ -119,6 +119,33 @@ public class BanList {
         return ipAddresses;
     }
 
+    /** Find the first non-disconnect ban in this subnet using the live trie under its read lock. */
+    @Nullable
+    public IPAddress findRangeBanSource(IPAddress peer, int prefixLength) {
+        var subnet = peer.toPrefixBlock(prefixLength);
+        lock.readLock().lock();
+        try {
+            var subtree = delegate.elementsContainedBy(subnet);
+            if (subtree != null) {
+                var nodes = subtree.nodeIterator(true);
+                while (nodes.hasNext()) {
+                    var node = nodes.next();
+                    if (!node.getValue().isBanForDisconnect()) return node.getKey();
+                }
+            }
+            // A caller may have normalized a mapped IPv6 peer after the original membership check.
+            var ancestor = delegate.longestPrefixMatchNode(peer);
+            while (ancestor != null) {
+                if (ancestor.isAdded() && !ancestor.getValue().isBanForDisconnect()
+                        && ancestor.getKey().toPrefixBlock(prefixLength).contains(peer)) return ancestor.getKey();
+                ancestor = ancestor.getParent();
+            }
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
     public boolean contains(@NotNull PeerAddress address) {
         try {
             lock.readLock().lock();

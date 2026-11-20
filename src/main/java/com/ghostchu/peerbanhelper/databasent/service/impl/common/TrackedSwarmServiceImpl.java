@@ -6,20 +6,24 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.TrackedSwarmMapper;
+import com.ghostchu.peerbanhelper.databasent.service.PeerBatchLookup.Endpoint;
+import com.ghostchu.peerbanhelper.databasent.service.PeerBatchLookup;
 import com.ghostchu.peerbanhelper.databasent.service.TrackedSwarmService;
 import com.ghostchu.peerbanhelper.databasent.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.net.InetAddress;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
@@ -50,23 +54,41 @@ public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmM
 
     @Override
     public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull Peer peer) throws ExecutionException {
-        CacheKey cacheKey = new CacheKey(
-                peer.getPeerAddress().getAddress().toCompressedString(),
-                peer.getPeerAddress().getPort(),
-                torrent.getHash(),
-                downloader.getId()
-        );
-        TrackedSwarmEntity cachedEntity = cache.get(cacheKey, () -> {
+        syncBatch(downloader, torrent, List.of(peer));
+    }
 
-            TrackedSwarmEntity lastData = baseMapper.selectOne(new LambdaQueryWrapper<TrackedSwarmEntity>()
-                    .eq(TrackedSwarmEntity::getIp, InetAddress.getByName(cacheKey.ip))
-                    .eq(TrackedSwarmEntity::getPort, cacheKey.port)
-                    .eq(TrackedSwarmEntity::getInfoHash, cacheKey.infoHash)
-                    .eq(TrackedSwarmEntity::getDownloader, cacheKey.downloader)
-                    .orderByDesc(TrackedSwarmEntity::getId)
-                    .last("LIMIT 1")
-            );
+    @Override
+    public void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers) throws ExecutionException {
+        for (var batch : Lists.partition(peers, PeerBatchLookup.BATCH_SIZE)) {
+            syncBatch(downloader, torrent, batch.stream().filter(peer -> !peer.isHandshaking()).toList());
+        }
+    }
 
+    private void syncBatch(Downloader downloader, Torrent torrent, List<? extends Peer> peers) throws ExecutionException {
+        var hash = torrent.getHash();
+        var id = downloader.getId();
+        var lookup = new PeerBatchLookup<>(cache,
+                () -> peers.stream().map(peer -> new CacheKey(Endpoint.of(peer), hash, id)).toList(),
+                keys -> {
+                    var query = new LambdaQueryWrapper<TrackedSwarmEntity>().eq(TrackedSwarmEntity::getInfoHash, hash)
+                            .eq(TrackedSwarmEntity::getDownloader, id).orderByDesc(TrackedSwarmEntity::getId);
+                    var found = new HashMap<CacheKey, TrackedSwarmEntity>();
+                    for (var row : baseMapper.selectList(PeerBatchLookup.matching(query,
+                            keys.stream().map(CacheKey::endpoint).toList(), TrackedSwarmEntity::getIp, TrackedSwarmEntity::getPort))) {
+                        found.putIfAbsent(new CacheKey(new Endpoint(row.getIp(), row.getPort()), hash, id), row);
+                    }
+                    return found;
+                });
+        for (var peer : peers) syncPeer(downloader, torrent, peer, lookup);
+    }
+
+    private void syncPeer(Downloader downloader, Torrent torrent, Peer peer, PeerBatchLookup<CacheKey, TrackedSwarmEntity> lookup) throws ExecutionException {
+        var cacheKey = new CacheKey(Endpoint.of(peer), torrent.getHash(), downloader.getId());
+        TrackedSwarmEntity cachedEntity = cache.getPendingOrLoad(cacheKey, () -> {
+            var lastData = lookup.load(cacheKey, () -> baseMapper.selectOne(new LambdaQueryWrapper<TrackedSwarmEntity>()
+                    .eq(TrackedSwarmEntity::getIp, cacheKey.endpoint.address()).eq(TrackedSwarmEntity::getPort, cacheKey.endpoint.port())
+                    .eq(TrackedSwarmEntity::getInfoHash, cacheKey.infoHash).eq(TrackedSwarmEntity::getDownloader, cacheKey.downloader)
+                    .orderByDesc(TrackedSwarmEntity::getId).last("LIMIT 1")));
             if (lastData != null) {
                 lastData.setLastTimeSeen(OffsetDateTime.now());
                 return lastData;
@@ -144,6 +166,6 @@ public class TrackedSwarmServiceImpl extends AbstractCommonService<TrackedSwarmM
         baseMapper.resetTable();
     }
 
-    record CacheKey(String ip, int port, String infoHash, String downloader) {
+    record CacheKey(Endpoint endpoint, String infoHash, String downloader) {
     }
 }

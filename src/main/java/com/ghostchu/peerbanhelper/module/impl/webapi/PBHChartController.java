@@ -1,7 +1,11 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
+import com.ghostchu.peerbanhelper.configuration.DatabaseDriverConfig;
+import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.dto.TrafficDataComputed;
 import com.ghostchu.peerbanhelper.databasent.service.HistoryService;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsService;
@@ -31,15 +35,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -58,6 +65,8 @@ public final class PBHChartController extends AbstractFeatureModule {
     private IPDBManager iPDBManager;
     @Autowired
     private PeerConnectionMetricsService peerConnectionMetricDao;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public boolean isConfigurable() {
@@ -193,43 +202,53 @@ public final class PBHChartController extends AbstractFeatureModule {
     private void handlePeerTrends(Context ctx) {
         var downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-        Map<OffsetDateTime, AtomicInteger> connectedPeerTrends = new ConcurrentHashMap<>();
-        Map<OffsetDateTime, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
+        boolean indexedEpochMillis = DatabaseDriverConfig.databaseDriver.getType() == DatabaseType.SQLITE;
+        var trends = transactionTemplate.execute(_ -> Map.of(
+                "connectedPeersTrend", dailyTrend(peerRecordService.getBaseMapper(), PeerRecordEntity::getLastTimeSeen,
+                        PeerRecordEntity::getDownloader, downloader, timeQueryModel.startAt(), timeQueryModel.endAt(), indexedEpochMillis),
+                "bannedPeersTrend", dailyTrend(historyService.getBaseMapper(), HistoryEntity::getBanAt,
+                        HistoryEntity::getDownloader, downloader, timeQueryModel.startAt(), timeQueryModel.endAt(), indexedEpochMillis)));
+        ctx.json(new StdResp(true, null, trends));
+    }
 
-        var queryConnected = Wrappers.<PeerRecordEntity>lambdaQuery()
-                .select(PeerRecordEntity::getId, PeerRecordEntity::getLastTimeSeen)
-                .ge(PeerRecordEntity::getLastTimeSeen, timeQueryModel.startAt())
-                .le(PeerRecordEntity::getLastTimeSeen, timeQueryModel.endAt());
-        var queryBanned = Wrappers.<HistoryEntity>lambdaQuery()
-                .select(HistoryEntity::getId, HistoryEntity::getBanAt)
-                .ge(HistoryEntity::getBanAt, timeQueryModel.startAt())
-                .le(HistoryEntity::getBanAt, timeQueryModel.endAt());
-
-        if (downloader != null && !downloader.isBlank()) {
-            queryConnected.eq(PeerRecordEntity::getDownloader, downloader);
-            queryBanned.eq(HistoryEntity::getDownloader, downloader);
+    static <T> List<SimpleOffsetDateTimeIntKVDTO> dailyTrend(BaseMapper<T> mapper, SFunction<T, OffsetDateTime> timestamp,
+                                                              SFunction<T, String> source, String downloader,
+                                                              OffsetDateTime start, OffsetDateTime end, boolean indexedEpochMillis) {
+        Map<OffsetDateTime, Integer> totals = new TreeMap<>();
+        Supplier<LambdaQueryWrapper<T>> scope = () -> new LambdaQueryWrapper<T>()
+                .eq(downloader != null && !downloader.isBlank(), source, downloader).le(timestamp, end);
+        if (indexedEpochMillis) {
+            // SQLite stores epoch milliseconds and the type handler reads them in the JVM's zone.
+            // Both timestamp columns are indexed. Seek directly to each populated day.
+            var zone = ZoneId.systemDefault();
+            var cursor = start;
+            while (!cursor.isAfter(end)) {
+                var first = mapper.selectOne(scope.get().select(timestamp).ge(timestamp, cursor).orderByAsc(timestamp).last("LIMIT 1"));
+                if (first == null) break;
+                var instant = timestamp.apply(first);
+                var boundary = nextTrendBoundary(instant, zone);
+                long count = mapper.selectCount(scope.get().ge(timestamp, cursor).lt(timestamp, boundary));
+                totals.merge(TimeUtil.getStartOfToday(instant), (int) count, Integer::sum);
+                cursor = boundary;
+            }
+        } else {
+            // Keep the offset delivered by the database driver when forming day keys.
+            mapper.selectList(scope.get().select(timestamp).ge(timestamp, start), row -> {
+                var day = TimeUtil.getStartOfToday(timestamp.apply(row.getResultObject()));
+                totals.merge(day, 1, Integer::sum);
+            });
         }
+        return totals.entrySet().stream().map(entry -> new SimpleOffsetDateTimeIntKVDTO(entry.getKey(), entry.getValue())).toList();
+    }
 
-        peerRecordService.list(queryConnected).forEach(entity -> {
-            var startOfDay = TimeUtil.getStartOfToday(entity.getLastTimeSeen());
-            connectedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
-        });
-
-        historyService.list(queryBanned).forEach(entity -> {
-            var startOfDay = TimeUtil.getStartOfToday(entity.getBanAt());
-            bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
-        });
-
-        ctx.json(new StdResp(true, null, Map.of(
-                "connectedPeersTrend", connectedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleOffsetDateTimeIntKVDTO(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparing(SimpleOffsetDateTimeIntKVDTO::key))
-                        .toList(),
-                "bannedPeersTrend", bannedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleOffsetDateTimeIntKVDTO(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparing(SimpleOffsetDateTimeIntKVDTO::key))
-                        .toList()
-        )));
+    static OffsetDateTime nextTrendBoundary(OffsetDateTime first, ZoneId zone) {
+        var boundary = first.toLocalDate().plusDays(1).atStartOfDay(zone).toOffsetDateTime();
+        // TimeUtil includes the observation's offset in the day key on DST transition days.
+        var transition = zone.getRules().nextTransition(first.toInstant());
+        if (transition != null && transition.getInstant().isBefore(boundary.toInstant())) {
+            return transition.getInstant().atZone(zone).toOffsetDateTime();
+        }
+        return boundary;
     }
 
     private void handleGeoIP(Context ctx) {

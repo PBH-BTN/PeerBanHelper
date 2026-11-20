@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.mapper.java.PeerConnectionMetricsTrackMapper;
+import com.ghostchu.peerbanhelper.databasent.service.PeerBatchLookup.Endpoint;
+import com.ghostchu.peerbanhelper.databasent.service.PeerBatchLookup;
 import com.ghostchu.peerbanhelper.databasent.service.PeerConnectionMetricsTrackService;
 import com.ghostchu.peerbanhelper.databasent.service.TorrentService;
 import com.ghostchu.peerbanhelper.databasent.table.PeerConnectionMetricsTrackEntity;
@@ -13,13 +15,14 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.util.Pair;
 import com.ghostchu.peerbanhelper.util.TimeUtil;
 import com.ghostchu.peerbanhelper.util.iocache.PBHCache;
+import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.net.InetAddress;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
@@ -75,23 +78,31 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
                 torrent.getSize(),
                 torrent.isPrivate()
         ));
+        var day = TimeUtil.getStartOfToday(System.currentTimeMillis());
+        for (var batch : Lists.partition(peers, PeerBatchLookup.BATCH_SIZE)) {
+            syncBatch(downloader.getId(), torrentEntity.getId(), day, batch);
+        }
+    }
+
+    private void syncBatch(String downloader, long torrentId, OffsetDateTime day, List<? extends Peer> peers) throws ExecutionException {
+        var lookup = new PeerBatchLookup<>(cache,
+                () -> peers.stream().filter(peer -> !peer.isHandshaking()).map(peer -> new CacheKey(day, downloader, torrentId, Endpoint.of(peer))).toList(),
+                keys -> {
+                    var query = scope(day, downloader, torrentId);
+                    var found = new HashMap<CacheKey, PeerConnectionMetricsTrackEntity>();
+                    for (var row : baseMapper.selectList(PeerBatchLookup.matching(query, keys.stream().map(CacheKey::endpoint).toList(),
+                            PeerConnectionMetricsTrackEntity::getAddress, PeerConnectionMetricsTrackEntity::getPort))) {
+                        found.put(new CacheKey(day, downloader, torrentId, new Endpoint(row.getAddress(), row.getPort())), row);
+                    }
+                    return found;
+                });
         for (Peer peer : peers) {
             if (peer.isHandshaking()) continue;
-            CacheKey cacheKey = new CacheKey(
-                    TimeUtil.getStartOfToday(System.currentTimeMillis()),
-                    downloader.getId(),
-                    torrentEntity.getId(),
-                    peer.getPeerAddress().getAddress().toCompressedString(),
-                    peer.getPeerAddress().getPort()
-            );
-            PeerConnectionMetricsTrackEntity trackEntity = cache.get(cacheKey, () -> {
-                PeerConnectionMetricsTrackEntity entity = baseMapper.selectOne(new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>()
-                        .eq(PeerConnectionMetricsTrackEntity::getTimeframeAt, cacheKey.timeframeAt())
-                        .eq(PeerConnectionMetricsTrackEntity::getDownloader, cacheKey.downloader())
-                        .eq(PeerConnectionMetricsTrackEntity::getTorrentId, cacheKey.torrentId())
-                        .eq(PeerConnectionMetricsTrackEntity::getAddress, InetAddress.getByName(cacheKey.address()))
-                        .eq(PeerConnectionMetricsTrackEntity::getPort, cacheKey.port())
-                );
+            var cacheKey = new CacheKey(day, downloader, torrentId, Endpoint.of(peer));
+            PeerConnectionMetricsTrackEntity trackEntity = cache.getPendingOrLoad(cacheKey, () -> {
+                var entity = lookup.load(cacheKey, () -> baseMapper.selectOne(scope(day, downloader, torrentId)
+                        .eq(PeerConnectionMetricsTrackEntity::getAddress, cacheKey.endpoint.address())
+                        .eq(PeerConnectionMetricsTrackEntity::getPort, cacheKey.endpoint.port())));
                 if (entity == null) {
                     entity = new PeerConnectionMetricsTrackEntity();
                     entity.setTimeframeAt(cacheKey.timeframeAt());
@@ -101,14 +112,19 @@ public class PeerConnectionMetricsTrackServiceImpl extends AbstractCommonService
             trackEntity.setPeerId(peer.getPeerId());
             trackEntity.setClientName(peer.getClientName());
             trackEntity.setLastFlags(peer.getFlags() == null ? null : peer.getFlags().getLtStdString());
-            trackEntity.setDownloader(downloader.getId());
-            trackEntity.setTorrentId(torrentEntity.getId());
+            trackEntity.setDownloader(downloader);
+            trackEntity.setTorrentId(torrentId);
             trackEntity.setAddress(peer.getPeerAddress().getAddress().toInetAddress());
             trackEntity.setPort(peer.getPeerAddress().getPort());
             //baseMapper.insertOrUpdate(trackEntity);
         }
     }
 
-    public record CacheKey(OffsetDateTime timeframeAt, String downloader, long torrentId, String address, int port) {
+    private LambdaQueryWrapper<PeerConnectionMetricsTrackEntity> scope(OffsetDateTime day, String downloader, long torrentId) {
+        return new LambdaQueryWrapper<PeerConnectionMetricsTrackEntity>().eq(PeerConnectionMetricsTrackEntity::getTimeframeAt, day)
+                .eq(PeerConnectionMetricsTrackEntity::getDownloader, downloader).eq(PeerConnectionMetricsTrackEntity::getTorrentId, torrentId);
+    }
+
+    public record CacheKey(OffsetDateTime timeframeAt, String downloader, long torrentId, Endpoint endpoint) {
     }
 }

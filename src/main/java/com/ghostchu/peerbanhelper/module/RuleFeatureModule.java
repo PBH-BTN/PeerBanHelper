@@ -6,6 +6,9 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.function.Function;
+
 public interface RuleFeatureModule extends FeatureModule {
     /**
      * 检查一个特定的 Torrent 和 Peer 是否应该封禁
@@ -16,6 +19,11 @@ public interface RuleFeatureModule extends FeatureModule {
      */
     @NotNull
     CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task);
+
+    default Function<Peer, CheckResult> preparePeerBatch(Torrent torrent, List<? extends Peer> peers,
+                                                          Downloader downloader, PipelineTask<?> task) {
+        return peer -> shouldBanPeer(torrent, peer, downloader, task);
+    }
 
     /**
      * 指示模块的内部处理逻辑是否是线程安全的，如果线程不安全，PeerBanHelper 将在同步块中执行不安全的模块
