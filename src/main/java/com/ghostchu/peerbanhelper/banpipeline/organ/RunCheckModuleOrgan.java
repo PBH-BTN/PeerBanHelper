@@ -18,10 +18,12 @@ import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -56,34 +58,51 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
             var peers = input.peers().subList(start, Math.min(input.peers().size(), start + batchSize));
             var batch = new PipelineTask<Void>(null, this, "Checking peers");
             batch.setDelegate(CompletableFuture.runAsync(() -> {
-                for (Peer peer : peers) {
+                var eligible = new ArrayList<Peer>(peers.size());
+                for (var peer : peers) {
                     try {
-                        CheckResult result = checkPeer(input, peer, rules, batch);
-                        if (result != null) outlet.accept(new CheckResultBatch(input.downloader(), input.torrent(), peer, result));
+                        var ignored = checkIfPossibleBadConfig(input.downloader(), input.torrent(), peer);
+                        if (ignored == null) eligible.add(peer);
+                        else outlet.accept(new CheckResultBatch(input.downloader(), input.torrent(), peer, ignored));
                     } catch (RuntimeException e) {
-                        log.warn("Unable to check peer {}", peer.getPeerAddress(), e);
+                        log.warn("Unable to check ignored addresses for peer {}", peer.getPeerAddress(), e);
                     }
+                }
+                if (eligible.isEmpty()) return;
+                var checks = new ArrayList<BoundRule>(rules.size());
+                for (var rule : rules) {
+                    try {
+                        checks.add(new BoundRule(rule, rule.preparePeerBatch(input.torrent(), eligible, input.downloader(), batch)));
+                    } catch (RuntimeException e) {
+                        log.warn("Unable to prepare rule {}, checking peers individually", rule.getName(), e);
+                        checks.add(new BoundRule(rule, peer -> rule.shouldBanPeer(input.torrent(), peer, input.downloader(), batch)));
+                    }
+                }
+                for (Peer peer : eligible) {
+                    CheckResult result = checkPeer(peer, checks, batch);
+                    if (result != null) outlet.accept(new CheckResultBatch(input.downloader(), input.torrent(), peer, result));
                 }
             }, jobRunExecutor));
             addMoreDigestingPrey(batch);
         }
     }
 
-    private CheckResult checkPeer(FetchedPeersBatch input, Peer peer, List<RuleFeatureModule> rules, PipelineTask<?> task) {
-        var ignored = checkIfPossibleBadConfig(input.downloader(), input.torrent(), peer);
-        if (ignored != null) return ignored;
+    private record BoundRule(RuleFeatureModule rule, Function<Peer, CheckResult> check) {}
+
+    private CheckResult checkPeer(Peer peer, List<BoundRule> checks, PipelineTask<?> task) {
         CheckResult best = null;
-        for (var rule : rules) {
+        for (var bound : checks) {
+            var rule = bound.rule();
             try {
                 task.setComment(false, rule.getName());
                 CheckResult result;
                 if (rule.isThreadSafe()) {
-                    result = rule.shouldBanPeer(input.torrent(), peer, input.downloader(), task);
+                    result = bound.check().apply(peer);
                 } else {
                     var lock = rule.getThreadLock();
                     lock.lock();
                     try {
-                        result = rule.shouldBanPeer(input.torrent(), peer, input.downloader(), task);
+                        result = bound.check().apply(peer);
                     } finally {
                         lock.unlock();
                     }

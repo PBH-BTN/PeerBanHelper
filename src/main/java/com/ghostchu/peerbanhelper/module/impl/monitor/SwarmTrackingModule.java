@@ -110,11 +110,8 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     @Override
     public void onPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers, @NotNull PipelineTask<?> task) {
         try {
-            for (Peer peer : peers) {
-                if (peer.isHandshaking()) continue;
-                task.setComment(true, "Sync Peers data with DB, flush to disk if needed.");
-                trackedSwarmDao.syncPeers(downloader, torrent, peer);
-            }
+            task.setComment(true, "Sync peers with the tracked swarm");
+            trackedSwarmDao.syncPeers(downloader, torrent, peers);
         } catch (ExecutionException e) {
             Sentry.captureException(e);
             log.error("Unable update tracked peers in SQLite temporary table", e);
