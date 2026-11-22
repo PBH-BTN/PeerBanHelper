@@ -60,7 +60,7 @@ enum Command {
     /// Configure on first launch and then run the native service.
     Run {
         /// PeerBanHelper data directory.
-        #[arg(long, default_value = "data")]
+        #[arg(long, env = "PBH_DATADIR", default_value_os_t = config::default_data_dir())]
         data_dir: PathBuf,
         /// Built Vue application directory.
         #[arg(long, default_value = "webui/dist")]
@@ -79,7 +79,7 @@ enum Command {
     /// Scan configured downloaders and evaluate supported rules.
     Scan {
         /// PeerBanHelper data directory containing config/config.yml and config/profile.yml.
-        #[arg(long, default_value = "data")]
+        #[arg(long, env = "PBH_DATADIR", default_value_os_t = config::default_data_dir())]
         data_dir: PathBuf,
         /// Run a single wave and exit.
         #[arg(long)]
@@ -94,7 +94,7 @@ enum Command {
     /// Run the WebUI HTTP preview with metadata and authentication.
     Serve {
         /// PeerBanHelper data directory containing config/config.yml.
-        #[arg(long, default_value = "data")]
+        #[arg(long, env = "PBH_DATADIR", default_value_os_t = config::default_data_dir())]
         data_dir: PathBuf,
         /// Built Vue application directory.
         #[arg(long, default_value = "webui/dist")]
@@ -173,7 +173,9 @@ async fn run_command(command: Command) -> Result<()> {
             run_service(data_dir, webui_dir, tray).await
         }
         Command::CompareDecisions => compare_decisions(io::stdin().lock(), io::stdout().lock()),
-        Command::InitConfig { data_dir } => web::create_defaults(&data_dir).map(|_| ()),
+        Command::InitConfig { data_dir } => {
+            web::create_defaults(&data_dir.join("config")).map(|_| ())
+        }
         Command::Scan {
             data_dir,
             once,
@@ -188,8 +190,8 @@ async fn run_command(command: Command) -> Result<()> {
 }
 
 fn tray_labels(data_dir: &Path) -> pbh_desktop::TrayLabels {
-    let yaml = config::read_yaml::<serde_yaml_ng::Value>(&data_dir.join("config/config.yml"))
-        .unwrap_or_default();
+    let config_path = config::config_dir(data_dir).join("config.yml");
+    let yaml = config::read_yaml::<serde_yaml_ng::Value>(&config_path).unwrap_or_default();
     let language =
         ban_api::BanLanguage::from_locale(yaml["language"].as_str().unwrap_or("default"));
     let message = |key| language.render(&serde_json::json!({"key": key}));

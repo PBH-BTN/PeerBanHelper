@@ -193,7 +193,7 @@ async fn configuration(
     if !matches!(config.as_str(), "config" | "profile") {
         return StatusCode::NOT_FOUND.into_response();
     }
-    let path = state.data_dir.join("config").join(format!("{config}.yml"));
+    let path = crate::config::config_dir(&state.data_dir).join(format!("{config}.yml"));
     let Ok(Ok(mut document)) =
         tokio::task::spawn_blocking(move || crate::config::read_yaml::<Value>(&path)).await
     else {
@@ -276,13 +276,14 @@ async fn save_configuration(
     if !matches!(config.as_str(), "config" | "profile") {
         return StatusCode::NOT_FOUND.into_response();
     }
-    let path = state.data_dir.join("config").join(format!("{config}.yml"));
+    let path = crate::config::config_dir(&state.data_dir).join(format!("{config}.yml"));
     let edited = tokio::task::spawn_blocking(move || {
         pbh_web::config_file::edit(&path, |document| -> Result<()> {
             merge_yaml(document, patch, &mut Vec::new())?;
             let merged = Yaml::Mapping(document.clone());
             if config == "config" {
-                let main: MainConfig = serde_yaml_ng::from_value(merged)?;
+                let mut main: MainConfig = serde_yaml_ng::from_value(merged)?;
+                main.server.apply_environment()?;
                 validate_main(&main)?;
             } else {
                 let profile: Profile = serde_yaml_ng::from_value(merged)?;
@@ -323,8 +324,9 @@ async fn reload(State(state): State<General>, headers: HeaderMap) -> Response {
 async fn reload_response(state: &General, headers: &HeaderMap, status: StatusCode) -> Response {
     let data_dir = state.data_dir.clone();
     let configuration = tokio::task::spawn_blocking(move || -> Result<MainConfig> {
-        let main = read_yaml(&data_dir.join("config/config.yml"))?;
-        let profile: Profile = read_yaml(&data_dir.join("config/profile.yml"))?;
+        let config = crate::config::config_dir(&data_dir);
+        let main = crate::config::read_main(&config.join("config.yml"))?;
+        let profile: Profile = read_yaml(&config.join("profile.yml"))?;
         validate_main(&main)?;
         profile.policies(true)?;
         Ok(main)

@@ -8,3 +8,4 @@
 - `/api/general/stacktrace` 返回当前 Rust 执行线程的调用栈，保留文本和 JSON 两种响应形式。JVM 专属 HPROF 只显示在 Vue 连接旧 Java 服务时，对应原生内存分析尚缺。
 - `reachability.rs` 定期通过同一出站代理尝试全局与中国连通性检查。初始值未知，测试用 `PBH_DISABLE_NETWORK_PROBES=true` 禁止请求公网。两个回环响应证实 `2xx` 与 `503` 判定。
 - `journal_file` 在 `data/logs/latest.log` 追加日志，沿用 Java 的按日或 20 MiB 滚动格式和保留近七天、至少五份备份的行为。`PBH_LOGSDIR` 控制落盘目录。原生覆盖文件锁与 gzip 归档，首次运行的回环测试核对进程日志与持久日志的监听地址。
+- 同一原生服务可用既有环境变量 `PBH_DATADIR`、`PBH_CONFIGDIR`、`PBH_SERVERADDRESS`、`PBH_PORT` 与 `PBH_APITOKEN`。Windows 进程夹具验证分离的配置与数据路径、监听覆盖、鉴权覆盖、封禁落库及跨重载。磁盘保留原始 YAML 监听设置，不写入环境令牌。`PBH_USEPLATFORMCONFIGLOCATION` 提供可选用户目录，显式 `--data-dir` 优先。

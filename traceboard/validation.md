@@ -4,7 +4,7 @@
 
 | 验收 | 结果 |
 | --- | --- |
-| Rust 全量测试 | Debian WSL 原生工作区 193 项通过，另有 4 项专用环境测试。运行 `cargo test --workspace --locked --no-fail-fast`。Windows 的 WebView2 忽略项已独立通过。 |
+| Rust 全量测试 | Debian WSL 原生工作区 193 项通过，另有 4 项专用环境测试。运行 `cargo test --workspace --locked --no-fail-fast`。Windows 已执行 189 项并全部通过，系统以错误 5 拒绝启动 BiglyBT `web_api` 测试二进制，独立重试相同。该套件在 Linux 通过，Windows 的 WebView2 忽略项另行通过。 |
 | Vue 生产构建 | `pnpm run build` 通过 TypeScript 和 Vite，保留既有大包提示。|
 | Java 行为对照 | Java 基线 6 项通过。规则归并 10 条、qBittorrent 首轮与封禁到期 1 条，Swarm HTTP 7 条、实验室 23 条及 BTN 状态 5 组均有对照证据。 |
 | 下载器 | 七种配置通过回环协议或进程测试。另用真实 BiglyBT 和 Aria2Next 验证隔离配置及封禁。 |

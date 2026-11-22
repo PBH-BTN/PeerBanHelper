@@ -87,6 +87,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python -B test/rust-parity/check_settings_reload.py $binary
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_native_startup.py $binary webui/dist --legacy-env
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python -B test/rust-parity/check_downloader_api.py $binary webui/dist
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python -B test/rust-parity/check_autostun_config.py $binary

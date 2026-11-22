@@ -30,7 +30,7 @@ struct Downloaders {
 
 impl Downloaders {
     fn config_path(&self) -> PathBuf {
-        self.data_dir.join("config/config.yml")
+        crate::config::config_dir(&self.data_dir).join("config.yml")
     }
 
     async fn edit_config(

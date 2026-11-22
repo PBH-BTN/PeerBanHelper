@@ -19,7 +19,7 @@ use tokio::net::TcpListener;
 use tokio::sync::{Mutex, RwLock, mpsc, watch};
 
 use crate::background_tasks::{self, BackgroundTasks};
-use crate::config::{MainConfig, ServerConfig, read_yaml};
+use crate::config::{MainConfig, ServerConfig, config_dir, read_main, read_yaml};
 use crate::dashboard::{self, Dashboard};
 use crate::downloader::Client;
 use crate::general_api;
@@ -96,12 +96,14 @@ pub(crate) fn configured_server(path: &Path) -> Result<ServerConfig> {
         #[serde(default)]
         server: ServerConfig,
     }
-    Ok(read_yaml::<Configured>(path)?.server)
+    let mut server = read_yaml::<Configured>(path)?.server;
+    server.apply_environment()?;
+    Ok(server)
 }
 
 pub(crate) async fn run(data_dir: &Path, webui_dir: PathBuf) -> Result<()> {
-    let config_path = create_defaults(data_dir)?;
-    let config: MainConfig = read_yaml(&config_path)?;
+    let config_path = create_defaults(&config_dir(data_dir))?;
+    let config = read_main(&config_path)?;
     let bound = BoundServer::bind(&config.server).await?;
     let listener = bound.listener()?;
     let router = prepare(
@@ -127,14 +129,14 @@ pub(crate) async fn wait_for_setup(
     webui_dir: PathBuf,
     tray: Option<&pbh_desktop::Tray>,
 ) -> Result<Option<BoundServer>> {
-    let config_path = create_defaults(data_dir)?;
+    let config_path = create_defaults(&config_dir(data_dir))?;
     let server = configured_server(&config_path)?;
     let bound = BoundServer::bind(&server).await?;
     if !server.token.trim().is_empty() {
         return Ok(Some(bound));
     }
     let listener = bound.listener()?;
-    let config: MainConfig = read_yaml(&config_path)?;
+    let config = read_main(&config_path)?;
     let router = prepare(
         &bound,
         &config,
@@ -162,17 +164,14 @@ pub(crate) async fn wait_for_setup(
 async fn wait_for_token(config_path: PathBuf) {
     loop {
         tokio::time::sleep(Duration::from_millis(250)).await;
-        if read_yaml::<MainConfig>(&config_path)
-            .is_ok_and(|config| !config.server.token.trim().is_empty())
-        {
+        if configured_server(&config_path).is_ok_and(|server| !server.token.trim().is_empty()) {
             return;
         }
     }
 }
 
-pub(crate) fn create_defaults(data_dir: &Path) -> Result<PathBuf> {
-    let config_dir = data_dir.join("config");
-    fs::create_dir_all(&config_dir)?;
+pub(crate) fn create_defaults(config_dir: &Path) -> Result<PathBuf> {
+    fs::create_dir_all(config_dir)?;
     let config_path = config_dir.join("config.yml");
     create_config(&config_path, config_template().as_bytes())?;
     create_config(
@@ -228,6 +227,7 @@ pub(crate) fn prepare(
     tray: Option<&pbh_desktop::Tray>,
 ) -> Result<Router> {
     let local = bound.socket.local_addr()?;
+    let config_dir = config_dir(data_dir);
     if let Some(tray) = tray {
         tray.set_web_ui(Some(pbh_desktop::WebUi::from_listener(local, None)));
     }
@@ -238,12 +238,8 @@ pub(crate) fn prepare(
         .as_ref()
         .map(|scan| scan.btn_status.clone())
         .unwrap_or_default();
-    let plus = plus_api::PlusRuntime::open(
-        data_dir,
-        &data_dir.join("config/config.yml"),
-        demo_mode,
-        &proxy,
-    )?;
+    let plus =
+        plus_api::PlusRuntime::open(data_dir, &config_dir.join("config.yml"), demo_mode, &proxy)?;
     let modules = scan.as_ref().map_or_else(
         || Modules::new(None).manifest(),
         |scan| scan.modules.manifest(),
@@ -296,18 +292,14 @@ pub(crate) fn prepare(
                 plus_api::require_basic,
             ));
         let history = history_api::router(scan.clone());
-        let push = push_api::router(
-            data_dir.join("config/config.yml"),
-            scan.demo_mode,
-            proxy.clone(),
-        );
+        let push = push_api::router(config_dir.join("config.yml"), scan.demo_mode, proxy.clone());
         let tracker = tracker_api::router(scan.clients.clone());
         let subscriptions = scan
             .subscriptions
             .clone()
             .map_or_else(Router::new, |runtime| {
                 subscription_api::router(
-                    data_dir.join("config/profile.yml"),
+                    config_dir.join("profile.yml"),
                     runtime,
                     scan.database.clone(),
                     scan.demo_mode,
@@ -319,7 +311,7 @@ pub(crate) fn prepare(
             scan.downloader_info.clone(),
             scan.demo_mode,
             scan.geoip.clone(),
-            data_dir.join("config/config.yml"),
+            config_dir.join("config.yml"),
         );
         let journal = journal::router(scan.closing_http.clone());
         (

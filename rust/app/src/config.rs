@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::fs;
 use std::io::{ErrorKind, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use pbh_core::AddressPolicy;
@@ -180,6 +180,23 @@ pub(crate) struct ServerConfig {
     pub(crate) token: String,
     pub(crate) prefix: String,
     pub(crate) allow_cors: bool,
+}
+
+impl ServerConfig {
+    pub(crate) fn apply_environment(&mut self) -> Result<()> {
+        if let Ok(address) = std::env::var("PBH_SERVERADDRESS") {
+            self.address = address;
+        }
+        if let Ok(port) = std::env::var("PBH_PORT") {
+            self.http = port.parse().context("PBH_PORT must be a valid port")?;
+        }
+        if let Ok(token) = std::env::var("PBH_APITOKEN")
+            && !token.trim().is_empty()
+        {
+            self.token = token;
+        }
+        Ok(())
+    }
 }
 
 impl Default for ServerConfig {
@@ -667,8 +684,41 @@ pub(crate) fn read_yaml<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T
     })
 }
 
+pub(crate) fn default_data_dir() -> PathBuf {
+    if std::env::var("PBH_USEPLATFORMCONFIGLOCATION")
+        .is_ok_and(|value| value.eq_ignore_ascii_case("true"))
+    {
+        let platform_dir = if cfg!(windows) {
+            std::env::var_os("LOCALAPPDATA").map(PathBuf::from)
+        } else {
+            let folder = if cfg!(target_os = "macos") {
+                "Library/Application Support"
+            } else {
+                ".config"
+            };
+            std::env::var_os("HOME").map(|home| PathBuf::from(home).join(folder))
+        };
+        if let Some(platform_dir) = platform_dir {
+            return platform_dir.join("PeerBanHelper");
+        }
+    }
+    PathBuf::from("data")
+}
+
+pub(crate) fn config_dir(data_dir: &Path) -> PathBuf {
+    std::env::var_os("PBH_CONFIGDIR")
+        .filter(|value| !value.is_empty())
+        .map_or_else(|| data_dir.join("config"), PathBuf::from)
+}
+
+pub(crate) fn read_main(path: &Path) -> Result<MainConfig> {
+    let mut main: MainConfig = read_yaml(path)?;
+    main.server.apply_environment()?;
+    Ok(main)
+}
+
 pub(crate) fn upgrade_installed_configs(data_dir: &Path) -> Result<()> {
-    let config = data_dir.join("config");
+    let config = config_dir(data_dir);
     upgrade_file(
         &config.join("config.yml"),
         config_migrations::MAIN_VERSION,

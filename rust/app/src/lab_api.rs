@@ -140,7 +140,7 @@ fn group(installation_id: Option<&str>) -> u8 {
 }
 
 fn config_path(data_dir: &FilePath) -> PathBuf {
-    data_dir.join("config").join("laboratory.yml")
+    crate::config::config_dir(data_dir).join("laboratory.yml")
 }
 
 fn enabled(config: &Mapping) -> bool {

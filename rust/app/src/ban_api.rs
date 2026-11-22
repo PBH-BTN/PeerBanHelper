@@ -321,6 +321,7 @@ impl BanLanguage {
         if locale.trim().is_empty() || locale.eq_ignore_ascii_case("default") {
             let system = std::env::var("PBH_USERLOCALE")
                 .ok()
+                .or_else(|| std::env::var("PBH_USER_LOCALE").ok())
                 .or_else(sys_locale::get_locale);
             return system
                 .as_deref()

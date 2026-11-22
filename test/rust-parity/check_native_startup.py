@@ -10,7 +10,7 @@ import threading
 import time
 from pathlib import Path
 from http.server import ThreadingHTTPServer
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from uuid import uuid4
 
@@ -38,13 +38,7 @@ def verify(command, stop, check_file_log):
                     env={**os.environ, "PBH_DISABLE_NETWORK_PROBES": "true"},
                 )
                 try:
-                    def listening_address():
-                        for line in (data / "startup.log").read_text(encoding="utf-8").splitlines():
-                            if "listening on 127.0.0.1:" in line:
-                                return f"http://{line.rsplit(' ', 1)[1]}"
-                        return None
-
-                    endpoint = wait_for(process, log, listening_address)
+                    endpoint = wait_for(process, log, lambda: listening_address(data / "startup.log"))
                     wait_for(process, log, lambda: request(endpoint, "/"))
                     assert not (data / "persist").exists()
                     first_run = request(endpoint, "/api/oobe/init", body={
@@ -90,6 +84,81 @@ def request(endpoint, path, token=None, body=None):
         return response.status, response.read()
 
 
+def listening_address(log_path):
+    for line in log_path.read_text(encoding="utf-8").splitlines():
+        if "listening on 127.0.0.1:" in line:
+            return f"http://{line.rsplit(' ', 1)[1]}"
+    return None
+
+
+def verify_legacy_environment(binary, webui):
+    downloader = DownloaderState()
+    with (
+        ThreadingHTTPServer(("127.0.0.1", 0), downloader.handler()) as server,
+        tempfile.TemporaryDirectory(prefix="pbh-legacy-environment-") as directory,
+    ):
+        data = Path(directory) / "runtime"
+        data.mkdir()
+        configure(data, server.server_port)
+        config = data.parent / "legacy config"
+        (data / "config").rename(config)
+        main_config = config / "config.yml"
+        contents = main_config.read_text(encoding="utf-8")
+        main_config.write_text(
+            contents.replace("http: 0", "http: 1").replace("address: 127.0.0.1", "address: 192.0.2.7"),
+            encoding="utf-8",
+        )
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        startup = data / "startup.log"
+        token = "native-environment-test"
+        environment = {
+            **os.environ,
+            "PBH_DISABLE_NETWORK_PROBES": "true",
+            "PBH_LOG_LEVEL": "INFO",
+            "PBH_DATADIR": str(data),
+            "PBH_CONFIGDIR": str(config),
+            "PBH_APITOKEN": token,
+            "PBH_PORT": "0",
+            "PBH_SERVERADDRESS": "127.0.0.1",
+        }
+        try:
+            with startup.open("w+b") as log:
+                process = subprocess.Popen(
+                    [str(binary), "run", "--webui-dir", str(webui)],
+                    stdout=log, stderr=subprocess.STDOUT,
+                    env=environment,
+                )
+                try:
+                    endpoint = wait_for(process, log, lambda: listening_address(startup))
+                    wait_for(process, log, lambda: request(endpoint, "/api/downloaders", token=token))
+                    wait_for(process, log, lambda: history(data))
+                    try:
+                        request(endpoint, "/api/downloaders", token="test")
+                    except HTTPError as denied:
+                        assert denied.code == 403, denied.code
+                    else:
+                        raise AssertionError("the YAML token was accepted while the environment token was set")
+                    status, body = request(endpoint, "/api/general/reload", token=token, body={})
+                    assert status == 200 and json.loads(body)["success"], body
+                    wait_for(
+                        process,
+                        log,
+                        lambda: startup.read_text(encoding="utf-8").count("listening on 127.0.0.1:") >= 2,
+                    )
+                    wait_for(process, log, lambda: request(endpoint, "/api/downloaders", token=token))
+                    assert not (data / "config").exists()
+                    assert "address: 192.0.2.7" in main_config.read_text(encoding="utf-8")
+                    assert token not in main_config.read_text(encoding="utf-8")
+                finally:
+                    if process.poll() is None:
+                        process.terminate()
+                    process.wait(timeout=10)
+        finally:
+            server.shutdown()
+            worker.join()
+
+
 def wait_for(process, log, callback):
     deadline = time.monotonic() + 15
     while process.poll() is None and time.monotonic() < deadline:
@@ -97,7 +166,7 @@ def wait_for(process, log, callback):
             outcome = callback()
             if outcome:
                 return outcome
-        except URLError:
+        except (URLError, ConnectionResetError, TimeoutError):
             pass
         time.sleep(0.05)
     log.seek(0)
@@ -110,8 +179,11 @@ if __name__ == "__main__":
     parser.add_argument("webui", type=Path, nargs="?")
     parser.add_argument("--docker-image")
     parser.add_argument("--check-file-log", action="store_true")
+    parser.add_argument("--legacy-env", action="store_true")
     args = parser.parse_args()
     if args.docker_image:
+        if args.legacy_env:
+            parser.error("--legacy-env requires a local binary and WebUI")
         name = f"pbh-native-smoke-{uuid4().hex[:12]}"
         subprocess.run([
             "docker", "run", "--rm", "--entrypoint", "/bin/sh", args.docker_image,
@@ -129,6 +201,11 @@ if __name__ == "__main__":
             parser.error("supply binary and webui paths, or --docker-image")
         binary = args.binary.resolve(strict=True)
         webui = args.webui.resolve(strict=True)
+
+        if args.legacy_env:
+            verify_legacy_environment(binary, webui)
+            print("Native legacy data, configuration, listener and token environment passed.")
+            raise SystemExit(0)
 
         def command(data):
             return [str(binary), "run", "--data-dir", str(data), "--webui-dir", str(webui)]

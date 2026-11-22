@@ -11,7 +11,7 @@ linux-webview = ["pbh-desktop/linux-webview"]
 anyhow = "1"
 axum = "0.8"
 base64 = "0.22"
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", features = ["derive", "env"] }
 dns-lookup = "4"
 flate2 = "1"
 form_urlencoded = "1"

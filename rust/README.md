@@ -4,6 +4,8 @@ Build from the repository root using the pinned Rust toolchain and `cargo build 
 
 `sh build.sh` builds both parts in release mode. Use the root `Dockerfile` to build from source or provide a prebuilt Linux binary and front end to `Dockerfile-Release`. See the [packaging guide](packaging/README.md) for operating system dependencies and [SQLite cutover](../traceboard/sqlite-cutover.md) for back-up and rollback.
 
+An explicit `--data-dir` takes precedence over `PBH_DATADIR`. When neither is supplied, `PBH_USEPLATFORMCONFIGLOCATION=true` opts into the operating system's user configuration path. `PBH_CONFIGDIR` and `PBH_LOGSDIR` select separate configuration and log directories. `PBH_SERVERADDRESS`, `PBH_PORT` and `PBH_APITOKEN` override the runtime listener and token without changing their persisted YAML values.
+
 ## Code layout
 
 - `app` owns startup, configuration upgrades, scheduling, downloader management, rule evaluation, monitoring and the API composition. `scan.rs` owns the writer lock and transaction boundaries between a completed wave, database state, and downloader synchronization.

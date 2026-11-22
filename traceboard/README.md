@@ -15,7 +15,7 @@
 | BiglyBT 协议 2 | downloader | 已通过协议及回环真客户端测试，按既有决定保留新版协议 | [biglybt.md](biglybt.md) |
 | BitComet | downloader | 已通过协议和应用测试 | [bitcomet.md](bitcomet.md) |
 | 下载器静态 IP 映射策略 | downloader / root | 共用策略接入七种配置并通过定向验证 | [address-remapping.md](address-remapping.md) |
-| BTN 协商、IP 查询、规则与上报 | parity / root | 回环已验证新旧上报、重试、允许列表解封和多网卡心跳，继续核对任务事件 | [btn.md](btn.md) |
+| BTN 协商、IP 查询、规则与上报 | parity / root | 回环已验证新旧上报、重试、允许列表解封、多网卡心跳和请求级任务事件 | [btn.md](btn.md) |
 | GeoIP | parity / root | 原生查询、镜像回退和三类下载任务通过回环，真实镜像待验 | [geoip.md](geoip.md) |
 | AutoSTUN 和 UPnP | downloader / root | 协议、转发、配置切换及关停已在回环验证，真实路由器待验 | [autostun.md](autostun.md) |
 | SQLite、PostgreSQL、MySQL/MariaDB | storage / root | 已运行 SQLite、PostgreSQL 17、MariaDB 11.8 和独立 MySQL 8.4 存储验证 | [storage.md](storage.md) |

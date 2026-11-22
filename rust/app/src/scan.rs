@@ -160,7 +160,7 @@ pub(crate) async fn run(
 ) -> Result<()> {
     let (pause, _) = watch::channel(false);
     let (manual_bans, manual_commands) = mpsc::channel(32);
-    let config_path = data_dir.join("config/config.yml");
+    let config_path = crate::config::config_dir(data_dir).join("config.yml");
     if listener.is_none() && webui_dir.is_some() {
         listener = Some(web::BoundServer::bind(&web::configured_server(&config_path)?).await?);
     }
@@ -181,7 +181,7 @@ pub(crate) async fn run(
     } else {
         None
     };
-    let boot: MainConfig = read_yaml(&config_path)?;
+    let boot = crate::config::read_main(&config_path)?;
     if listener.is_none()
         && apply
         && boot
@@ -236,7 +236,8 @@ async fn run_epoch(
         ref webui_dir,
         ref listener,
     } = *options;
-    let mut config: MainConfig = read_yaml(&data_dir.join("config/config.yml"))?;
+    let config_dir = crate::config::config_dir(data_dir);
+    let mut config = crate::config::read_main(&config_dir.join("config.yml"))?;
     config.database.clone_from(&boot.database);
     config.server.address.clone_from(&boot.server.address);
     config.server.http = boot.server.http;
@@ -244,7 +245,7 @@ async fn run_epoch(
         &mut control.eco_qos,
         apply && !once && config.performance.windows_ecoqos_api,
     );
-    let profile: Profile = read_yaml(&data_dir.join("config/profile.yml"))?;
+    let profile: Profile = read_yaml(&config_dir.join("profile.yml"))?;
     let policies = profile.policies(apply)?;
     let address_policy = config.address_policy()?;
     let proxy = config.proxy_policy()?;
@@ -440,7 +441,7 @@ async fn run_epoch(
     let mut traffic_monitor = None;
     if let (Some(policy), Some(state)) = (&policies.traffic, &state) {
         let notifications = Notifications {
-            config_path: data_dir.join("config/config.yml"),
+            config_path: config_dir.join("config.yml"),
             language: BanLanguage::from_locale(config.language.as_deref().unwrap_or_default()),
             proxy: proxy.clone(),
         };
