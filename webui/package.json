@@ -26,7 +26,6 @@
     "@octokit/request-error": "^7.1.2",
     "@sentry/vue": "^11.8.0",
     "@vueuse/core": "^15",
-    "antlr4": "^4.13.2",
     "compare-versions": "^6.1.1",
     "copy-to-clipboard": "^4.0.2",
     "dayjs": "^1.11.23",

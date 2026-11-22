@@ -85,12 +85,6 @@
                 <multiDialingBlocker v-model="form.module.multi_dialing_blocker" />
               </a-collapse-item>
               <a-collapse-item
-                key="8"
-                :header="t('page.settings.tab.profile.module.expressionEngine.title')"
-              >
-                <expressionEngine v-model="form.module.expression_engine" />
-              </a-collapse-item>
-              <a-collapse-item
                 key="9"
                 :header="t('page.settings.tab.profile.module.ruleSubscribe.title')"
               >
@@ -161,7 +155,6 @@ import antiVampire from './components/antiVampire.vue'
 import autoRangeBan from './components/autoRangeBan.vue'
 import btn from './components/btn.vue'
 import clientNameBlackList from './components/clientNameBlackList.vue'
-import expressionEngine from './components/expressionEngine.vue'
 import formArray from './components/formArray.vue'
 import idleConnectionDosProtection from './components/idleConnectionDosProtection.vue'
 import ipAddressBlocker from './components/ipAddressBlocker.vue'
@@ -187,7 +180,6 @@ const form = reactive({
     auto_range_ban: {},
     btn: {},
     multi_dialing_blocker: {},
-    expression_engine: {},
     ip_address_blocker_rules: {},
     active_monitoring: {
       traffic_monitoring: {}

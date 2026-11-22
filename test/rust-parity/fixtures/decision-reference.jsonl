@@ -1,0 +1,10 @@
+{"id":"empty","value":null}
+{"id":"skip-override","value":{"action":"SKIP","duration":0,"reason":"skip"}}
+{"id":"ban-override-disconnect","value":{"action":"BAN","duration":1,"reason":"ban"}}
+{"id":"disconnect-override-no-action","value":{"action":"BAN_FOR_DISCONNECT","duration":0,"reason":"disconnect"}}
+{"id":"same-action-longer-previous","value":{"action":"BAN","duration":100,"reason":"long"}}
+{"id":"same-action-longer-latest","value":{"action":"BAN","duration":100,"reason":"long"}}
+{"id":"same-action-same-duration-latest","value":{"action":"BAN","duration":100,"reason":"last"}}
+{"id":"signed-duration-bounds","value":{"action":"BAN","duration":9223372036854775807,"reason":"maximum"}}
+{"id":"skip-retained","value":{"action":"SKIP","duration":0,"reason":"already skipped"}}
+{"id":"no-action-retains-reason","value":{"action":"NO_ACTION","duration":0,"reason":"规则未命中"}}

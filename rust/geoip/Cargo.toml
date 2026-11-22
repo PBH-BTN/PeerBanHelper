@@ -1,0 +1,22 @@
+[package]
+name = "pbh-geoip"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+csv = "1"
+lzma-rust2 = { version = "0.25", default-features = false, features = ["std", "xz"] }
+maxminddb = "0.30"
+pbh-network = { path = "../network" }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+serde.workspace = true
+sha2 = "0.10"
+tempfile = "3"
+thiserror.workspace = true
+
+[dev-dependencies]
+axum = "0.8"
+lzma-rust2 = { version = "0.25", default-features = false, features = ["encoder"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "net", "rt"] }

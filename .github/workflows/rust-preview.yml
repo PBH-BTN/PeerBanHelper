@@ -1,0 +1,274 @@
+name: Rust migration preview
+
+on:
+  push:
+  release:
+    types: [published]
+  pull_request:
+    paths:
+      - '.github/workflows/rust-preview.yml'
+      - 'Cargo.*'
+      - 'Dockerfile*'
+      - 'rust-toolchain.toml'
+      - 'rust/**'
+      - 'src/main/resources/**'
+      - 'test/rust-parity/**'
+      - 'test/test-db/**'
+      - 'webui/**'
+  workflow_dispatch:
+    inputs:
+      spk_image:
+        description: Native container image reference for the optional DSM package
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  PBH_DISABLE_NETWORK_PROBES: 'true'
+
+jobs:
+  webui:
+    uses: ./.github/workflows/build_fe.yml
+
+  native:
+    needs: webui
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: webui-dist
+          path: webui/dist
+      - name: Show the pinned toolchain
+        run: rustup show
+      - name: Check Rust format
+        run: cargo fmt --all -- --check
+      - name: Check Rust lints
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Run native Rust tests
+        run: cargo test --workspace --locked
+      - name: Build the native preview
+        run: cargo build -p peerbanhelper --locked
+      - name: Compare decisions and qBittorrent behavior
+        shell: pwsh
+        run: |
+          $binary = if ($IsWindows) { './target/debug/peerbanhelper.exe' } else { './target/debug/peerbanhelper' }
+          python -B test/rust-parity/judge.py self-test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/judge.py judge --corpus test/rust-parity/fixtures/decision-input.jsonl --reference test/rust-parity/fixtures/decision-reference.jsonl -- $binary compare-decisions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/capture_qbittorrent.py --rust $binary | Set-Content -Encoding utf8NoBOM target/ip-ban-expiry.jsonl
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/judge.py compare --corpus test/rust-parity/fixtures/ip-ban-expiry-input.jsonl --reference test/rust-parity/fixtures/ip-ban-expiry-java.jsonl --candidate target/ip-ban-expiry.jsonl
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_scan_recovery.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_transmission_scan.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_deluge_scan.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_bitcomet_scan.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_btn_reporting.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_btn_reporting.py $binary --legacy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_traffic.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_push.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_subscriptions.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_settings_reload.py $binary
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_downloader_api.py $binary webui/dist
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B test/rust-parity/check_autostun_config.py $binary
+
+  container:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the native runtime image
+        run: docker build --build-arg GIT_HASH="$GITHUB_SHA" -t pbh-rust-preview .
+      - name: Check setup, ban persistence and SIGTERM
+        run: python3 -B test/rust-parity/check_native_startup.py --docker-image pbh-rust-preview --check-file-log
+      - name: Build Debian package and check installation
+        run: |
+          set -eu
+          stage=$(mktemp -d)
+          container=$(docker create pbh-rust-preview)
+          trap 'docker rm "$container" >/dev/null' EXIT
+          docker cp "$container:/app/peerbanhelper" "$stage/peerbanhelper"
+          docker cp "$container:/app/webui/dist" "$stage/dist"
+          sh rust/packaging/debian/build.sh "$stage/peerbanhelper" "$stage/dist" target/debian
+          package=$(realpath target/debian/*.deb)
+          docker run --rm --network none --entrypoint /bin/sh -v "$package:/tmp/preview.deb:ro" pbh-rust-preview -ec '
+            dpkg -i /tmp/preview.deb
+            test -L /var/lib/peerbanhelper/config
+            /usr/lib/peerbanhelper/peerbanhelper --version
+            ! grep -Ei "aviator|(^|[^a-z])h2([^a-z]|$)" /etc/peerbanhelper/config.yml /etc/peerbanhelper/profile.yml
+            dpkg -r peerbanhelper
+            test -f /etc/peerbanhelper/config.yml
+          '
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-debian-preview-${{ runner.arch }}
+          if-no-files-found: error
+          path: target/debian/*.deb
+
+  freebsd:
+    needs: webui
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: webui-dist
+          path: webui/dist
+      - uses: vmactions/freebsd-vm@v1
+        with:
+          release: '15.1'
+          usesh: true
+          prepare: pkg install -y devel/rustup-init pkgconf python3
+          run: |
+            rustup-init --profile minimal --default-toolchain none -y
+            export PATH="$HOME/.cargo/bin:$PATH"
+            cargo build -p peerbanhelper --release --locked
+            python3 -B test/rust-parity/check_native_startup.py target/release/peerbanhelper webui/dist
+            sh rust/packaging/freebsd/build.sh target/release/peerbanhelper webui/dist target/freebsd
+            pkg info -F target/freebsd/*.pkg
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-freebsd-preview
+          if-no-files-found: error
+          path: target/freebsd/*.pkg
+
+  synology:
+    if: github.event_name == 'workflow_dispatch' && inputs.spk_image != ''
+    uses: ./.github/workflows/build_spk.yml
+    with:
+      image: ${{ inputs.spk_image }}
+
+  portable:
+    needs: [native, webui]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-latest, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: webui-dist
+          path: webui/dist
+      - name: Build release binary
+        run: cargo build -p peerbanhelper --release --locked
+      - name: Stage portable preview
+        shell: pwsh
+        run: |
+          $binary = if ($IsWindows) { './target/release/peerbanhelper.exe' } else { './target/release/peerbanhelper' }
+          ./rust/packaging/package.ps1 -Binary $binary -WebUi ./webui/dist -Output ./target/portable/PeerBanHelper
+          $packagedBinary = Join-Path './target/portable/PeerBanHelper' (Split-Path -Leaf $binary)
+          python -B test/rust-parity/check_native_startup.py $packagedBinary ./target/portable/PeerBanHelper/webui/dist --check-file-log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          tar -czf ./target/PeerBanHelper-preview.tar.gz -C ./target/portable PeerBanHelper
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-preview-${{ matrix.os }}-${{ runner.arch }}
+          if-no-files-found: error
+          path: target/PeerBanHelper-preview.tar.gz
+
+  windows_installer:
+    needs: portable
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            arch: X64
+          - os: windows-11-arm
+            arch: ARM64
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-preview-${{ matrix.os }}-${{ matrix.arch }}
+          path: target/windows-portable
+      - name: Build the Windows installer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends nsis
+          tar -xzf target/windows-portable/PeerBanHelper-preview.tar.gz -C target/windows-portable
+          portable=target/windows-portable/PeerBanHelper
+          sh rust/packaging/windows/build.sh "$portable/peerbanhelper.exe" "$portable/webui/dist" target/windows-installer
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-windows-installer-preview-${{ matrix.arch }}
+          if-no-files-found: error
+          path: target/windows-installer/*.exe
+
+  windows_install_test:
+    needs: windows_installer
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            arch: X64
+          - os: windows-11-arm
+            arch: ARM64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-windows-installer-preview-${{ matrix.arch }}
+          path: target/windows-installer
+      - name: Verify installation and removal under the runner's user account
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem target/windows-installer -Filter '*.exe'
+          ./test/rust-parity/check_windows_installer.ps1 -Installer $installer.FullName
+
+  linux_desktop:
+    needs: webui
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: webui-dist
+          path: webui/dist
+      - name: Install WebKitGTK and test-session dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgtk-3-dev libwebkit2gtk-4.1-dev dbus-x11 x11-utils xvfb xauth
+      - name: Build and test the native Linux desktop
+        run: |
+          cargo build -p peerbanhelper --release --locked --features linux-webview
+          xvfb-run -a dbus-run-session -- cargo test -p pbh-desktop --locked --features linux-webview embedded_window_action_loads_local_web_ui_without_token -- --ignored
+          PBH_LINUX_TRAY_BINARY="$PWD/target/release/peerbanhelper" xvfb-run -a dbus-run-session -- cargo test -p pbh-desktop --locked --features linux-webview native_service_keeps_tray_through_oobe_and_shuts_down_on_exit -- --ignored
+      - name: Stage the Linux desktop preview
+        shell: pwsh
+        run: |
+          ./rust/packaging/package.ps1 -Binary ./target/release/peerbanhelper -WebUi ./webui/dist -Output ./target/desktop/PeerBanHelper
+          tar -czf ./target/PeerBanHelper-desktop.tar.gz -C ./target/desktop PeerBanHelper
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-desktop-preview-linux-X64
+          if-no-files-found: error
+          path: target/PeerBanHelper-desktop.tar.gz

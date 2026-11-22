@@ -1,0 +1,20 @@
+[package]
+name = "pbh-traversal"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+crc32fast = "1"
+futures-util = "0.3"
+getrandom = "0.4"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+roxmltree = "0.21"
+serde.workspace = true
+socket2 = { version = "0.6", features = ["all"] }
+thiserror.workspace = true
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt", "time"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+
+[dev-dependencies]
+axum = "0.8"

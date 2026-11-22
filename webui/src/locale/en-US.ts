@@ -1,7 +1,6 @@
 import serviceLocale from '@/service/locale/en-US'
 import banListPageLocale from '@/views/banlist/locale/en-US'
 import chartsLocale from '@/views/charts/locale/en-US'
-import scriptLocale from '@/views/custom-script/locale/en-US'
 import dashboardPageLocale from '@/views/dashboard/locale/en-US'
 import dataLocale from '@/views/data-view/locale/en-US'
 import loginLocale from '@/views/login/locale/en-US'
@@ -55,7 +54,6 @@ export default {
   'router.metrics.charts': 'Charts',
   'router.rule_management': 'Rule',
   'router.config': 'Preferences',
-  'router.script': 'Custom Script',
 
   'router.moduleNotEnable': '{moduleName} is not enabled',
   'router.moduleNotEnable.tips': 'Please enable the feature in the configuration file',
@@ -83,6 +81,5 @@ export default {
   ...configLocale,
   ...alertLocale,
   ...copierLocale,
-  ...scriptLocale,
   ...routerLocale
 }

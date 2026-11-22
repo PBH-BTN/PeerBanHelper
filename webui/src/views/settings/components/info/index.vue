@@ -213,7 +213,11 @@
             </a-tag>
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.version.compileTime')">
-            {{ d(dayjs.unix(data?.data.peerbanhelper.compile_time ?? 0).toDate(), 'long') }}
+            {{
+              data?.data.peerbanhelper.compile_time
+                ? d(dayjs.unix(data.data.peerbanhelper.compile_time).toDate(), 'long')
+                : 'N/A'
+            }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.version.uptime')">
             {{ dayjs.duration({ seconds: data?.data.peerbanhelper.uptime }).humanize() }}
@@ -353,26 +357,49 @@
           :title="t('page.settings.tab.info.runtime')"
           :align="{ label: 'right' }"
         >
-          <a-descriptions-item :label="t('page.settings.tab.info.runtime.version')">
+          <a-descriptions-item
+            v-if="data?.data.native"
+            :label="t('page.settings.tab.info.runtime.nativeVersion')"
+          >
+            <a-space>
+              {{ data.data.native.runtime }} {{ data.data.native.version }}
+              <a-tag :color="data.data.native.bitness === 64 ? 'arcoblue' : 'orange'">
+                {{ data.data.native.bitness }}-Bit
+              </a-tag>
+            </a-space>
+          </a-descriptions-item>
+          <a-descriptions-item
+            v-if="data?.data.jvm"
+            :label="t('page.settings.tab.info.runtime.version')"
+          >
             <a-space
-              >{{ data?.data.jvm.version
-              }}<a-tag :color="data?.data.jvm.bitness === 64 ? 'arcoblue' : 'orange'">
-                {{ data?.data.jvm.bitness }}-Bit
+              >{{ data?.data.jvm?.version
+              }}<a-tag :color="data?.data.jvm?.bitness === 64 ? 'arcoblue' : 'orange'">
+                {{ data?.data.jvm?.bitness }}-Bit
               </a-tag></a-space
             >
           </a-descriptions-item>
-          <a-descriptions-item :label="t('page.settings.tab.info.runtime.vendor')">
-            {{ data?.data.jvm.vendor }}
+          <a-descriptions-item
+            v-if="data?.data.jvm"
+            :label="t('page.settings.tab.info.runtime.vendor')"
+          >
+            {{ data?.data.jvm?.vendor }}
           </a-descriptions-item>
-          <a-descriptions-item :label="t('page.settings.tab.info.runtime.runtime')">
-            {{ data?.data.jvm.runtime }}
+          <a-descriptions-item
+            v-if="data?.data.jvm"
+            :label="t('page.settings.tab.info.runtime.runtime')"
+          >
+            {{ data?.data.jvm?.runtime }}
           </a-descriptions-item>
-          <a-descriptions-item :label="t('page.settings.tab.info.runtime.heapMemory')">
+          <a-descriptions-item
+            v-if="data?.data.jvm"
+            :label="t('page.settings.tab.info.runtime.heapMemory')"
+          >
             <multiClick :required="5" :time-limit="3000" @multi-click="downloadHeap">
               <a-space style="display: flex; align-items: center; color: var(--color-text-1)">
                 <a-tooltip
                   :content="
-                    `${Math.round((1 - (data?.data.jvm.memory.heap.free ?? 0) / (data?.data.jvm.memory.heap.max ?? 1)) * 100)}% ` +
+                    `${Math.round((1 - (data?.data.jvm?.memory.heap.free ?? 0) / (data?.data.jvm?.memory.heap.max ?? 1)) * 100)}% ` +
                     t('page.settings.tab.info.system.memory.used')
                   "
                 >
@@ -383,7 +410,7 @@
                     :percent="heapMemoryStatus"
                   />
                 </a-tooltip>
-                {{ formatFileSize(data?.data.jvm.memory.heap.free ?? 0) }} &nbsp;
+                {{ formatFileSize(data?.data.jvm?.memory.heap.free ?? 0) }} &nbsp;
                 {{ t('page.settings.tab.info.system.memory.available') }}
               </a-space>
             </multiClick>
@@ -541,7 +568,8 @@ const memoryStatus = computed(
 const heapMemoryStatus = computed(
   () =>
     1 -
-    (data.value?.data.jvm.memory.heap.free ?? 0) / ((data.value?.data.jvm.memory.heap.max ?? 1) + 1)
+    (data.value?.data.jvm?.memory.heap.free ?? 0) /
+      ((data.value?.data.jvm?.memory.heap.max ?? 1) + 1)
 ) //+1保证永远不可能100%
 const memoryProgressBarColor = computed(() => {
   if (memoryStatus.value > 0.85) return 'danger'
@@ -619,6 +647,8 @@ const networkAccess = (runningInfo: RunningInfo | undefined) => {
   if (runningInfo === undefined) return 'N/A'
   const network = runningInfo.system.network
   const internetAccess = network.internet_access
+  if (typeof internetAccess?.accessToChinaNetwork !== 'boolean') return 'N/A'
+  if (typeof internetAccess.accessToGlobalNetwork !== 'boolean') return 'N/A'
   let i18nString = '???'
 
   if (!internetAccess.accessToChinaNetwork && !internetAccess.accessToGlobalNetwork) {

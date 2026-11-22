@@ -1,0 +1,21 @@
+[package]
+name = "pbh-network"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+fancy-regex = "0.20"
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "socks"] }
+serde.workspace = true
+thiserror.workspace = true
+tokio = { version = "1", features = ["net", "rt", "sync", "time"] }
+
+[target.'cfg(any(target_os = "windows", target_os = "linux", target_os = "macos", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
+listeners = "0.6.1"
+
+[dev-dependencies]
+serde_json.workspace = true
+serde_yaml_ng = "0.10"
+tokio = { version = "1", features = ["io-util", "macros"] }

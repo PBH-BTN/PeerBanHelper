@@ -1,7 +1,6 @@
 import serviceLocale from '@/service/locale/zh-TW'
 import banListPageLocale from '@/views/banlist/locale/zh-TW'
 import chartsLocale from '@/views/charts/locale/zh-TW'
-import scriptLocale from '@/views/custom-script/locale/zh-TW'
 import dashboardPageLocale from '@/views/dashboard/locale/zh-TW'
 import dataLocale from '@/views/data-view/locale/zh-TW'
 import loginLocale from '@/views/login/locale/zh-TW'
@@ -56,7 +55,6 @@ export default {
   'router.metrics.charts': '圖表',
   'router.rule_management': '規則管理',
   'router.config': '設定',
-  'router.script': '自訂腳本',
 
   'router.moduleNotEnable': '{moduleName}功能未啟用',
   'router.moduleNotEnable.tips': '請在設定檔中開啟相關功能',
@@ -84,6 +82,5 @@ export default {
   ...configLocale,
   ...alertLocale,
   ...copierLocale,
-  ...scriptLocale,
   ...routerLocale
 }

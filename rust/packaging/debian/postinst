@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = configure ]; then
+    if ! getent passwd peerbanhelper >/dev/null; then
+        adduser --quiet --system --group --home /var/lib/peerbanhelper peerbanhelper
+    fi
+    install -d -o peerbanhelper -g peerbanhelper -m 0750 /var/lib/peerbanhelper
+    chown peerbanhelper:peerbanhelper /etc/peerbanhelper
+    if [ ! -e /var/lib/peerbanhelper/config ] && [ ! -L /var/lib/peerbanhelper/config ]; then
+        ln -s /etc/peerbanhelper /var/lib/peerbanhelper/config
+    fi
+    deb-systemd-helper enable peerbanhelper.service >/dev/null || true
+    if [ -d /run/systemd/system ]; then
+        systemctl daemon-reload
+        deb-systemd-invoke restart peerbanhelper.service >/dev/null || true
+    fi
+fi

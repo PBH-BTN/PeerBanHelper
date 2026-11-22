@@ -3,13 +3,7 @@ import { useEndpointStore } from '@/stores/endpoint'
 import BanList from '@/views/banlist/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
-import {
-  IconCloud,
-  IconCodeSquare,
-  IconLocation,
-  IconStorage,
-  IconWifi
-} from '@arco-design/web-vue/es/icon'
+import { IconCloud, IconLocation, IconStorage, IconWifi } from '@arco-design/web-vue/es/icon'
 import { computed, h, type Component } from 'vue'
 import {
   createRouter,
@@ -117,16 +111,6 @@ export const routerOptions: RouteRecordRaw[] = [
           disabled: checkModuleEnable('ip-address-blocker-rules')
         },
         component: SubscribeManagement
-      },
-      {
-        path: '/script',
-        name: 'rule_management_script',
-        meta: {
-          label: 'router.script',
-          icon: () => h(IconCodeSquare),
-          needLogin: true
-        },
-        component: () => import('@/views/custom-script/index.vue')
       },
       {
         path: '/ruleIp',

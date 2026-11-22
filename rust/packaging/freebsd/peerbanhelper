@@ -1,0 +1,37 @@
+#!/bin/sh
+# PROVIDE: peerbanhelper
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name=peerbanhelper
+rcvar=peerbanhelper_enable
+load_rc_config "$name"
+
+: "${peerbanhelper_enable:=NO}"
+: "${peerbanhelper_user:=root}"
+: "${peerbanhelper_dir:=/usr/local/var/db/peerbanhelper}"
+: "${peerbanhelper_command:=/usr/local/lib/peerbanhelper/peerbanhelper}"
+: "${peerbanhelper_webui:=/usr/local/lib/peerbanhelper/webui/dist}"
+
+pidfile="/var/run/${name}.pid"
+procname=$peerbanhelper_command
+command=$peerbanhelper_command
+start_cmd=peerbanhelper_start
+
+peerbanhelper_start()
+{
+    if [ -n "$(check_pidfile "$pidfile" "$procname")" ]; then
+        echo "$name is already running."
+        return 0
+    fi
+    if [ ! -d "$peerbanhelper_dir" ]; then
+        install -d -o "$peerbanhelper_user" -m 0750 "$peerbanhelper_dir" || return 1
+    fi
+    export PBH_RELEASE=freebsd
+    /usr/sbin/daemon -f -p "$pidfile" -u "$peerbanhelper_user" "$peerbanhelper_command" run \
+        --data-dir "$peerbanhelper_dir" --webui-dir "$peerbanhelper_webui"
+}
+
+run_rc_command "$1"

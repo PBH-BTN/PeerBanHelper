@@ -119,11 +119,6 @@ export default {
     'If a specific IP flagged multi-dialing, ignore the caching span and keep searching other IPs in same subnet',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time': 'Keep hunting time',
 
-  'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript rule engine',
-  'page.settings.tab.profile.module.expressionEngine.tips':
-    'Enable this feature can use AviatorScript language to write complex rules to achieve more custom functions',
-  'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': 'Use global ban duration',
-
   'page.settings.tab.profile.module.ruleSubscribe.title': 'Rule subscribe',
   'page.settings.tab.profile.module.ruleSubscribe.enable.tips':
     'Enable this feature to subscribe to remote rules',

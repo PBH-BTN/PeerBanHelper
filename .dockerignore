@@ -1,0 +1,10 @@
+.git
+.gradle
+build
+data
+target/*
+!target/release
+target/release/*
+!target/release/peerbanhelper
+webui/node_modules
+webui/.pnpm-store

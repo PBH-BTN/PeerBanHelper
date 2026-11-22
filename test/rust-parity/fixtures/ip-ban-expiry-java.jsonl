@@ -1,0 +1,1 @@
+{"id":"ip-ban-expiry","value":{"requests":[{"request":"setPreferences","banned_IPs":[]},{"request":"banPeers","peers":["192.0.2.113:51413"]},{"request":"setPreferences","banned_IPs":[]}],"history":[{"ip":"192.0.2.113","port":51413,"duration_ms":1400}]}}

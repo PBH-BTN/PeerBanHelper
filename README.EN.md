@@ -1,6 +1,8 @@
 # PeerBanHelper
 [简体中文](./README.md)
 
+See the [native runtime guide](rust/README.md) for this branch's build and installation commands and the [migration traceboard](traceboard/README.md) for validation.
+
 Automatically ban unwelcome, leeching, and abnormal BT clients with support for custom rules.
 
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
@@ -17,7 +19,6 @@ PeerBanHelper consists of the following core modules:
 - [Fake Progress Checker (Progress Cheat Blocker)](https://docs.pbh-btn.com/docs/module/progress-cheat-blocker)
 - [Automatic Chain Banning](https://docs.pbh-btn.com/docs/module/auto-range-ban)
 - [Multi-Dial Tracking](https://docs.pbh-btn.com/docs/module/multi-dial)
-- Peer ID/Client Name Spoofing Detection via [AviatorScript Engine](https://docs.pbh-btn.com/docs/module/expression-engine)
 - [Active Monitoring (Local Data Analysis)](https://docs.pbh-btn.com/docs/module/active-monitoring)
 - [IP Set Rules Subscription](https://docs.pbh-btn.com/docs/module/ip-address-blocker-rules)
 - WebUI (Current Features: Active Banlist, Ban History, Top 50 Most Banned IPs, Rule Subscription Management, Charts, Peer List)

@@ -14,7 +14,7 @@ interface JVMMemoryInfo {
   free: number
 }
 export type RunningInfo = {
-  jvm: {
+  jvm?: {
     version: string
     vendor: string
     runtime: string
@@ -23,6 +23,11 @@ export type RunningInfo = {
       heap: JVMMemoryInfo
       non_heap: JVMMemoryInfo
     }
+  }
+  native?: {
+    version: string
+    runtime: string
+    bitness: 32 | 64
   }
   system: {
     os: OSType
@@ -36,9 +41,9 @@ export type RunningInfo = {
     load: number
     network: {
       internet_access: {
-        accessToChinaNetwork: boolean
-        accessToGlobalNetwork: boolean
-      }
+        accessToChinaNetwork: boolean | null
+        accessToGlobalNetwork: boolean | null
+      } | null
       nat_type: string
       use_proxy: boolean
       reverse_proxy: boolean
@@ -48,7 +53,7 @@ export type RunningInfo = {
   peerbanhelper: {
     version: string
     commit_id: string
-    compile_time: number
+    compile_time: number | null
     release: string
     uptime: number
   }

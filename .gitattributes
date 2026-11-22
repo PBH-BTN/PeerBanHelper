@@ -1,1 +1,6 @@
 *.bat text eol=crlf
+/build.sh text eol=lf
+/rust/packaging/**/*.sh text eol=lf
+/rust/packaging/debian/postinst text eol=lf
+/rust/packaging/debian/prerm text eol=lf
+/rust/packaging/freebsd/peerbanhelper text eol=lf

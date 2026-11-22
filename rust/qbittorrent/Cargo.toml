@@ -1,0 +1,21 @@
+[package]
+name = "pbh-qbittorrent"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+futures-util = "0.3"
+indexmap = { version = "2", features = ["serde"] }
+pbh-core = { path = "../core" }
+pbh-network = { path = "../network" }
+reqwest = { version = "0.12", default-features = false, features = ["cookies", "json", "rustls-tls"] }
+semver = "1"
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { version = "1", features = ["sync"] }
+
+[dev-dependencies]
+axum = { version = "0.8", default-features = false, features = ["form", "http1", "json", "query", "tokio"] }
+tokio = { version = "1", features = ["macros", "net", "rt"] }

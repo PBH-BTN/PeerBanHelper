@@ -1,0 +1,31 @@
+[workspace]
+resolver = "3"
+members = [
+    "rust/app",
+    "rust/aria2next",
+    "rust/biglybt",
+    "rust/bitcomet",
+    "rust/btn",
+    "rust/core",
+    "rust/deluge",
+    "rust/desktop",
+    "rust/geoip",
+    "rust/network",
+    "rust/plus",
+    "rust/qbittorrent",
+    "rust/storage",
+    "rust/transmission",
+    "rust/traversal",
+    "rust/web",
+]
+
+[workspace.package]
+version = "9.6.0"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[workspace.dependencies]
+ipnet = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+thiserror = "2"

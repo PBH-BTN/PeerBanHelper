@@ -76,11 +76,6 @@ export default {
   'page.settings.tab.config.btn.enableSubmit.modal.content2':
     '您的 Torrent 列表（包括：Torrent 種子摘要的二次不可逆雜湊和 Torrent 大小），連接到您的 Torrent 的所有 Peers （包括：IP位址、埠號、PeerID、UserAgent（ClientName），Peer協議，Peer總下載量，Peer總上傳量，Peer瞬時上傳速度，Peer瞬時下載速度，Peer下載進度，以及您的下載器名稱）',
   'page.settings.tab.config.btn.enableSubmit.modal.content3': '確定要開啟提交嗎？',
-  'page.settings.tab.config.btn.allowScript': '允許 BTN 伺服器下髮腳本',
-  'page.settings.tab.config.btn.allowScript.warning':
-    '警告：這意味著遠端伺服器可以在你的裝置上執行任意程式碼，請謹慎開啟',
-  'page.settings.tab.config.btn.allowScript.tips':
-    '打開此選項後將允許 PeerBanHelper 接收並執行來自 BTN 伺服器的動態腳本，這有助於提高反吸血精確度和反吸血效果。',
 
   'page.settings.tab.config.ipDatabase.title': 'IP 資料庫',
   'page.settings.tab.config.ipDatabase.autoUpdate': '啟用自動更新',

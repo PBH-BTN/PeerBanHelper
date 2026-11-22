@@ -41,6 +41,7 @@ export default {
 
   'page.settings.tab.info.runtime': '執行階段資訊',
   'page.settings.tab.info.runtime.version': 'JVM 版本',
+  'page.settings.tab.info.runtime.nativeVersion': '原生執行階段版本',
   'page.settings.tab.info.runtime.vendor': '提供商',
   'page.settings.tab.info.runtime.runtime': '執行階段',
   'page.settings.tab.info.runtime.heapMemory': '堆記憶體資訊',

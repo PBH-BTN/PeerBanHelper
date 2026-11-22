@@ -1,0 +1,22 @@
+[package]
+name = "pbh-storage"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+crc32fast = "1"
+mysql_async = { version = "0.37", default-features = false, features = ["minimal-rust", "native-tls-tls"] }
+native-tls = "0.2"
+pbh-core = { path = "../core" }
+postgres-native-tls = "0.5"
+rusqlite = { version = "0.43", features = ["bundled", "functions"] }
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { version = "1", features = ["rt"] }
+tokio-postgres = "0.7"
+url = "2"
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["macros"] }

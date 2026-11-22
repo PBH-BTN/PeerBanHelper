@@ -1,0 +1,5 @@
+.git
+.gradle
+data
+target
+webui/node_modules

@@ -6,10 +6,9 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI (push)
+name: Java reference build
 
 on:
-  push:
   workflow_dispatch:
 jobs:
   Build_Executable:
@@ -135,7 +134,7 @@ jobs:
       uses: docker/build-push-action@v7.4.0
       with:
         context: .
-        file: ./Dockerfile
+        file: ./test/rust-parity/reference/Dockerfile
         push: true
         platforms: |
           linux/amd64
@@ -172,7 +171,7 @@ jobs:
       uses: docker/build-push-action@v7.4.0
       with:
         context: .
-        file: ./Dockerfile
+        file: ./test/rust-parity/reference/Dockerfile
         push: false
         build-args: |
           GIT_HASH=${{ github.sha }}

@@ -1,0 +1,18 @@
+[package]
+name = "pbh-deluge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+pbh-core = { path = "../core" }
+pbh-network = { path = "../network" }
+reqwest = { version = "0.12", default-features = false, features = ["cookies", "json", "rustls-tls"] }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { version = "1", features = ["sync"] }
+
+[dev-dependencies]
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "tokio"] }
+tokio = { version = "1", features = ["macros", "net", "rt"] }

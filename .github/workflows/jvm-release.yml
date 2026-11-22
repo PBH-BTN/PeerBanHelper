@@ -1,10 +1,7 @@
-name: Release
+name: Java reference release build
 
 on:
   workflow_dispatch:
-  release:
-    types:
-      - published
 
 jobs:
   Build_Executable:
@@ -344,7 +341,7 @@ jobs:
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
         with:
           context: .
-          file: ./Dockerfile
+          file: ./test/rust-parity/reference/Dockerfile
           push: true
           platforms: |
             linux/amd64
@@ -380,7 +377,7 @@ jobs:
         uses: docker/build-push-action@v7.4.0
         with:
           context: .
-          file: ./Dockerfile-Release
+          file: ./test/rust-parity/reference/Dockerfile-Release
           push: true
           provenance: false
           sbom: false

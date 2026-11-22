@@ -1,0 +1,18 @@
+[Unit]
+Description=PeerBanHelper Service
+After=network.target
+
+[Service]
+User=peerbanhelper
+Group=peerbanhelper
+WorkingDirectory=/usr/lib/peerbanhelper
+StateDirectory=peerbanhelper
+LogsDirectory=peerbanhelper
+Environment=PBH_RELEASE=debian
+Environment=PBH_LOGSDIR=/var/log/peerbanhelper
+ExecStart=/usr/lib/peerbanhelper/peerbanhelper run --data-dir /var/lib/peerbanhelper --webui-dir /usr/lib/peerbanhelper/webui/dist
+TimeoutStopSec=30
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

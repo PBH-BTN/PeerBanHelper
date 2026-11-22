@@ -1,0 +1,28 @@
+[package]
+name = "pbh-web"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+axum = "0.8"
+pbh-aria2next = { path = "../aria2next" }
+pbh-biglybt = { path = "../biglybt" }
+pbh-bitcomet = { path = "../bitcomet" }
+pbh-deluge = { path = "../deluge" }
+pbh-network = { path = "../network" }
+pbh-qbittorrent = { path = "../qbittorrent" }
+pbh-storage = { path = "../storage" }
+pbh-transmission = { path = "../transmission" }
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml_ng = "0.10"
+subtle = "2"
+tempfile = "3"
+tokio = { version = "1", features = ["net", "rt", "sync", "time"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["cors", "fs"] }
+tower-sessions = "0.15"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt"] }

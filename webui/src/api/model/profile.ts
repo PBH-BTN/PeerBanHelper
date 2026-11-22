@@ -16,7 +16,6 @@ export interface Module {
   auto_range_ban: AutoRangeBan
   btn: Btn
   multi_dialing_blocker: MultiDialingBlocker
-  expression_engine: ExpressionEngine
   ip_address_blocker_rules: IpAddressBlockerRules
   active_monitoring: ActiveMonitoring
   idle_connection_dos_protection: IdleConnectionDosProtection
@@ -106,11 +105,6 @@ export interface MultiDialingBlocker {
   cache_lifespan: number
   keep_hunting: boolean
   keep_hunting_time: number
-}
-
-export interface ExpressionEngine {
-  enabled: boolean
-  ban_duration: BanDuration
 }
 
 export interface IpAddressBlockerRules {

@@ -1,14 +1,10 @@
 #!/bin/sh
-echo "Setup webui files.."
-current_wd=$(pwd)
-static_dir="$(dirname $0)/src/main/resources/static"
+set -eu
 
-rm -rf ${static_dir} || echo ""
-cd ${current_wd}/webui
-pnpm install
-pnpm run build
-cd ${current_wd}
-cp -r webui/dist ${static_dir}
-
-echo "Prepare to build jar.."
-./gradlew clean build --no-daemon
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+(
+    cd webui
+    pnpm install --frozen-lockfile
+    pnpm run build
+)
+cargo build -p peerbanhelper --release --locked

@@ -44,7 +44,6 @@ export interface Btn {
   app_id: string
   app_secret: string
   config_url: string
-  allow_script_execute: boolean
 }
 
 export interface BanlistInvoker {
@@ -109,11 +108,11 @@ export interface Performance {
   windows_ecoqos_api: boolean
 }
 
-export type DatabaseType = 'sqlite' | 'h2' | 'mysql' | 'postgresql'
+export type DatabaseType = 'sqlite' | 'mysql' | 'postgresql'
 export type DatabaseConfig = EmbedDatabaseConfig | ExternalDatabaseConfig
 
 export interface EmbedDatabaseConfig {
-  type: 'sqlite' | 'h2'
+  type: 'sqlite'
 }
 
 export interface ExternalDatabaseConfig {

@@ -20,7 +20,6 @@
         <a-radio-group v-model="config.database.type">
           <a-space>
             <a-radio value="sqlite">SQLite</a-radio>
-            <a-radio value="h2">H2</a-radio>
             <a-radio value="mysql">MySQL</a-radio>
             <a-radio value="postgresql">PostgreSQL</a-radio></a-space
           >

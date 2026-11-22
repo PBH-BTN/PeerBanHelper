@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - id: java_info
-        uses: YunaBraska/java-info-action@main
       - name: Install dependencies
         run: sudo apt-get install cifs-utils python3 python3-pip
       - name: Copy files
@@ -54,7 +52,7 @@ jobs:
       - name: Process version for SPK
         id: process_version
         run: |
-          RAW_VERSION="${{ steps.java_info.outputs.x_version }}"
+          RAW_VERSION=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["workspace"]["package"]["version"])')
           # Remove any non-numeric suffix (like -alpha1, -beta2, etc.) and replace with build number
           # Extract base version (e.g., 9.2.3 from 9.2.3-alpha1)
           BASE_VERSION=$(echo "$RAW_VERSION" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
@@ -65,9 +63,14 @@ jobs:
           echo "Raw version: $RAW_VERSION"
           echo "SPK version: $SPK_VERSION"
       - name: Run build script
-        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} SPK_VERSION=${{ env.SPK_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
+        run: |
+          if [[ ! "$IMAGE" =~ ^[a-zA-Z0-9._/:@-]+$ ]]; then
+            echo 'An OCI image reference is required.' >&2
+            exit 1
+          fi
+          sudo env PBH_VERSION="$PBH_VERSION" SPK_VERSION="$SPK_VERSION" IMAGE="$IMAGE" bash pkg/synopkg/build-script.sh
         env:
-          PBH_VERSION: ${{ steps.java_info.outputs.x_version }}
+          PBH_VERSION: ${{ steps.process_version.outputs.raw_version }}
           SPK_VERSION: ${{ steps.process_version.outputs.spk_version }}
           IMAGE: ${{ inputs.image }}
       - name: Upload build artifacts

@@ -109,11 +109,6 @@ export default {
     '如果某IP已判定为多拨，无视缓存时间限制继续搜寻其同伙',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time': '追猎时间',
 
-  'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript 规则引擎',
-  'page.settings.tab.profile.module.expressionEngine.tips':
-    '启用此功能可以使用 AviatorScript 语言编写复杂的规则，以实现更多的自定义功能',
-  'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全局封禁时间',
-
   'page.settings.tab.profile.module.ruleSubscribe.title': '规则订阅',
   'page.settings.tab.profile.module.ruleSubscribe.enable.tips': '启用此功能可以订阅远程规则',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全局封禁时间',

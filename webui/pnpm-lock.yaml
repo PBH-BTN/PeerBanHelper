@@ -37,9 +37,6 @@ importers:
       '@vueuse/core':
         specifier: ^15
         version: 15.0.0(vue@3.5.45(typescript@6.0.3))
-      antlr4:
-        specifier: ^4.13.2
-        version: 4.13.2
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -1067,10 +1064,6 @@ packages:
   ansis@4.3.1:
     resolution: {integrity: sha512-BJ8/l4R5LRE7hW9WdSuGYrLSHi2ynxeFpDFbH0K/CgNeY/tyhk+vO6TYxXC5r5CpUhNVX310xzPsN/H9lCdfOA==}
     engines: {node: '>=14'}
-
-  antlr4@4.13.2:
-    resolution: {integrity: sha512-QiVbZhyy4xAZ17UPEuG3YTOt8ZaoeOR1CvEAqrEsDBsOqINslaB147i9xqljZqoyf5S+EUlGStaj+t22LT9MOg==}
-    engines: {node: '>=16'}
 
   argparse@3.0.3:
     resolution: {integrity: sha512-Sn98ftV3KfsO8xfLPHG6oT8y+b0yvbrLgZjgPDXsharNY15tTAjqIsIju4S32nl6/iEUNNE4v+yL2Zhm8ooP3w==}
@@ -3394,8 +3387,6 @@ snapshots:
   ansi-styles@7.0.0: {}
 
   ansis@4.3.1: {}
-
-  antlr4@4.13.2: {}
 
   argparse@3.0.3: {}
 

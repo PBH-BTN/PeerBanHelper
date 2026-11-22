@@ -41,6 +41,7 @@ export default {
 
   'page.settings.tab.info.runtime': 'Runtime Info',
   'page.settings.tab.info.runtime.version': 'JVM Version',
+  'page.settings.tab.info.runtime.nativeVersion': 'Native Runtime Version',
   'page.settings.tab.info.runtime.vendor': 'Vendor',
   'page.settings.tab.info.runtime.runtime': 'Runtime',
   'page.settings.tab.info.runtime.heapMemory': 'Heap Memory Info',
