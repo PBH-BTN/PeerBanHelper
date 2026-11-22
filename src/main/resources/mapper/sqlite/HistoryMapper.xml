@@ -13,15 +13,20 @@
         <result column="percent" property="percent"/>
     </resultMap>
 
+    <sql id="ipPrefixFilter">
+        <if test="filter != null and filter != ''">
+            <bind name="ipPattern" value="filter + &quot;%&quot;"/>
+            WHERE ip LIKE #{ipPattern}
+        </if>
+    </sql>
+
     <!-- 封禁IP查询（带过滤） -->
     <select id="getBannedIpsWithFilter" resultMap="PeerBanCountMap">
         SELECT
         ip AS peerIp,
         COUNT(*) AS count
         FROM history
-        <if test="filter != null and filter != ''">
-            WHERE ip LIKE #{filter} || '%'
-        </if>
+        <include refid="ipPrefixFilter"/>
         GROUP BY ip
         ORDER BY count DESC
     </select>
@@ -39,9 +44,7 @@
     <select id="countDistinctIpWithFilter" resultType="long">
         SELECT COUNT(DISTINCT ip)
         FROM history
-        <if test="filter != null and filter != ''">
-            WHERE ip LIKE #{filter} || '%'
-        </if>
+        <include refid="ipPrefixFilter"/>
     </select>
 
     <!-- 字段聚合统计 -->
