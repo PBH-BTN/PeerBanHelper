@@ -90,19 +90,20 @@
         ORDER BY count DESC;
     </select>
 
-    <!-- 字段计数统计 -->
+    <!-- Compute the total over grouped counts so each qualifying history row is read once. -->
     <select id="countField" resultMap="UniversalFieldNumResultMap">
-        WITH data_source AS (
+        WITH field_counts AS (
             SELECT
             <choose>
                 <when test="substringLength != null">
-                    SUBSTRING(${field}, 1, #{substringLength})
+                    SUBSTRING(CAST(${field} AS TEXT), 1, #{substringLength})
                 </when>
                 <otherwise>
                     ${field}
                 </otherwise>
             </choose>
-            AS field_data
+            AS data,
+            COUNT(*) AS count
             FROM history h
             <if test="field == 't.name'">
                 JOIN torrents t ON h.torrent_id = t.id
@@ -112,19 +113,20 @@
                     AND h.downloader = #{downloader}
                 </if>
                 AND ${field} IS NOT NULL
-                AND ${field} != ''
+                AND CAST(${field} AS TEXT) != ''
             </where>
+            GROUP BY data
+        ),
+        distribution AS (
+            SELECT data,
+                   count,
+                   CAST(count AS DECIMAL(20, 10)) / SUM(count) OVER () AS percent
+            FROM field_counts
+            WHERE data IS NOT NULL AND CAST(data AS TEXT) != ''
         )
-        SELECT
-            field_data AS data,
-            COUNT(*) AS count,
-            CAST(COUNT(*) AS DECIMAL(20, 10)) / (SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != '') AS percent
-        FROM data_source
-        WHERE field_data IS NOT NULL AND field_data != ''
-        GROUP BY field_data
-        HAVING CAST(COUNT(*) AS DECIMAL(20, 10))
-            / NULLIF((SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != ''), 0)
-            &gt; #{percentFilter}
+        SELECT data, count, percent
+        FROM distribution
+        WHERE percent &gt; #{percentFilter}
         ORDER BY count DESC
     </select>
 

@@ -90,36 +90,40 @@
         ORDER BY count DESC;
     </select>
 
-    <!-- 字段计数统计 -->
-    <select id="countField" resultMap="UniversalFieldNumResultMap">
-        WITH data_source AS (
-            SELECT
-            <choose>
-                <when test="substringLength != null">
-                    SUBSTRING(${field}, 1, #{substringLength})
-                </when>
-                <otherwise>
-                    ${field}
-                </otherwise>
-            </choose>
-            AS field_data
-            FROM history h
-            <if test="field == 't.name'">
-                JOIN torrents t ON h.torrent_id = t.id
-            </if>
-            <where>
-                <if test="downloader != null and downloader != ''">
-                    AND h.downloader = #{downloader}
-                </if>
-                AND ${field} IS NOT NULL
-                AND ${field} != ''
-            </where>
-        )
+    <sql id="countFieldSource">
         SELECT
-            field_data AS data,
-            COUNT(*) AS count,
-            CAST(COUNT(*) AS DECIMAL(20, 10)) / (SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != '') AS percent
-        FROM data_source
+        <choose>
+            <when test="substringLength != null">
+                SUBSTRING(${field}, 1, #{substringLength})
+            </when>
+            <otherwise>
+                ${field}
+            </otherwise>
+        </choose>
+        AS field_data
+        FROM history h
+        <if test="field == 't.name'">
+            JOIN torrents t ON h.torrent_id = t.id
+        </if>
+        <where>
+            <if test="downloader != null and downloader != ''">
+                AND h.downloader = #{downloader}
+            </if>
+            AND ${field} IS NOT NULL
+            AND ${field} != ''
+        </where>
+    </sql>
+
+    <!-- MySQL 5.7 can compute the denominator with a scalar aggregate. -->
+    <select id="countField" resultMap="UniversalFieldNumResultMap">
+        SELECT field_data AS data,
+               COUNT(*) AS count,
+               CAST(COUNT(*) AS DECIMAL(20, 10)) / (
+                   SELECT COUNT(*)
+                   FROM (<include refid="countFieldSource"/>) totals
+                   WHERE field_data IS NOT NULL AND field_data != ''
+               ) AS percent
+        FROM (<include refid="countFieldSource"/>) fields
         WHERE field_data IS NOT NULL AND field_data != ''
         GROUP BY field_data
         HAVING percent &gt; #{percentFilter}
