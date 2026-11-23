@@ -142,14 +142,19 @@ jobs:
         with:
           release: '15.1'
           usesh: true
-          prepare: pkg install -y devel/rustup-init pkgconf python3
+          prepare: |
+            pkg install -y devel/rustup-init pkgconf python3
+            python_version=$(python3 -c 'import sys; print(f"{sys.version_info.major}{sys.version_info.minor}")')
+            pkg install -y "py${python_version}-sqlite3"
           run: |
             rustup-init --profile minimal --default-toolchain none -y
             export PATH="$HOME/.cargo/bin:$PATH"
             cargo build -p peerbanhelper --release --locked
-            python3 -B test/rust-parity/check_native_startup.py target/release/peerbanhelper webui/dist
             sh rust/packaging/freebsd/build.sh target/release/peerbanhelper webui/dist target/freebsd
             pkg info -F target/freebsd/*.pkg
+            pkg add target/freebsd/*.pkg
+            python3 -B test/rust-parity/check_native_startup.py /usr/local/lib/peerbanhelper/peerbanhelper /usr/local/lib/peerbanhelper/webui/dist --check-file-log
+            pkg delete -y peerbanhelper
       - uses: actions/upload-artifact@v7
         with:
           name: native-freebsd-preview

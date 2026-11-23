@@ -8,10 +8,11 @@
 | Vue 生产构建 | `pnpm run build` 通过 TypeScript 和 Vite，保留既有大包提示。|
 | Java 行为对照 | Java 基线 6 项通过。规则归并 10 条、qBittorrent 首轮与封禁到期 1 条，Swarm HTTP 7 条、实验室 23 条及 BTN 状态 5 组均有对照证据。 |
 | 下载器 | 七种配置通过回环协议或进程测试。另用真实 BiglyBT 和 Aria2Next 验证隔离配置及封禁。 |
-| 存储与切换 | SQLite、PostgreSQL 17、MariaDB 11.8、独立 MySQL 8.4 实测。已有库和 ORMLite 升级后的库两次完成独占写入、双向封禁历史与完整列表重放。|
+| 存储与切换 | SQLite、PostgreSQL 17、MariaDB 11.8、独立 MySQL 8.4 实测。最新 MySQL 存储与图表用例在一次性 MySQL 8.4 容器上再通过。已有库和 ORMLite 升级后的库两次完成独占写入、双向封禁历史与完整列表重放。|
 | Windows 桌面与包 | 托盘首次运行、扫描、正常退出和图标清除通过。WebView2 加载本机页面通过。NSIS amd64 安装、已安装进程和带注册清理的卸载通过。ARM64 桌面 crate 通过严格 Clippy，整应用交叉检查受当前主机缺少 ARM64 C 工具链阻挡。 |
 | Linux 桌面与包 | SNI 托盘、首次配置和扫描通过隔离 D-Bus 会话，带 WebKitGTK 的实际进程也通过 Xvfb 窗口打开和正常退出。容器与 Debian 包通过隔离安装，日志轮转通过原生用例。|
-| 运行基线 | 原生 OOBE、保持套接字和会话、重载保留封禁、BTN 新旧上报、日志流、推送与订阅有本地进程测试。17 条原生 CI 脚本通过 Bash 或 PowerShell 语法检查。 |
+| FreeBSD 15.1p7 amd64 | 官方镜像客户机中原生发布构建、`pkg add`、已安装服务首次设置和封禁落库、rc.d 启停及保留数据卸载通过。 |
+| 运行基线 | 原生 OOBE、保持套接字和会话、重载保留封禁、BTN 新旧上报、日志流、推送与订阅有本地进程测试。18 条原生 CI 脚本通过 Bash 或 PowerShell 语法检查。 |
 
 ## 仍需验证或存在差异
 

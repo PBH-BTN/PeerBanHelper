@@ -35,7 +35,7 @@
 | 核心规则、运行入口和当前封禁页面 | root | 封禁读写、下发失败恢复已验证，继续扩围 | [integration.md](integration.md) |
 | 原生便携包和桌面入口 | root / downloader | Windows 安装、托盘和 WebView2 已验，Linux SNI 已验，macOS 两架构桌面编译已验 | [native-startup.md](native-startup.md)、[desktop.md](desktop.md) |
 | 原生 Linux 容器和 Debian 包 | root | Docker 首次设置、封禁落库和 SIGTERM 已验，Debian 包隔离安装移除已验 | [native-startup.md](native-startup.md) |
-| FreeBSD 原生包 | root / storage | 已启动校验通过的 FreeBSD 15.1 VM，包与服务在独立客户机验收 | [freebsd.md](freebsd.md) |
+| FreeBSD 原生包 | root / storage | FreeBSD 15.1p7 amd64 原生构建、装包、首次配置与扫描、rc.d 和保留数据卸载均通过 | [freebsd.md](freebsd.md) |
 | 单独发布与剩余兼容差异 | root | 源码和预编译构建入口已转原生，外部发布和实机矩阵待验 | [validation.md](validation.md) |
 
 SQLite 单写入方验证和回退演练已有实测证据。外部连接、不同平台的桌面和生产发布仍按 [验证矩阵](validation.md) 追踪。
