@@ -184,6 +184,9 @@ async fn visible_x11_window(title: &str) -> bool {
 #[ignore = "requires dbus-run-session and PBH_LINUX_TRAY_BINARY"]
 async fn native_service_keeps_tray_through_oobe_and_shuts_down_on_exit() {
     const OPEN_WEB_UI: &str = "WebUI";
+    const OPEN_DATA_DIRECTORY: &str = "Open data file storage location...";
+    #[cfg(feature = "linux-webview")]
+    const COPY_WEB_UI_TOKEN: &str = "Copy WebUI Token...";
     const QUIT: &str = "Quit";
     let binary = std::env::var_os("PBH_LINUX_TRAY_BINARY").expect("set PBH_LINUX_TRAY_BINARY");
     let workspace = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
@@ -210,6 +213,9 @@ async fn native_service_keeps_tray_through_oobe_and_shuts_down_on_exit() {
     } else {
         (webui_dir, None)
     };
+    #[cfg(feature = "linux-webview")]
+    let test_clipboard =
+        render_probe.is_some() && std::env::var_os("PBH_LINUX_TRAY_TEST_XCLIP").is_some();
     let config = data.path().join("config");
     fs::create_dir(&config).unwrap();
     let probe = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
@@ -298,12 +304,24 @@ server.serve_forever()
     })
     .await
     .unwrap();
+    assert!(entries[OPEN_DATA_DIRECTORY].1);
+    #[cfg(feature = "linux-webview")]
+    if render_probe.is_some() {
+        assert!(!entries[COPY_WEB_UI_TOKEN].1);
+    }
+    #[cfg(feature = "linux-webview")]
+    if test_clipboard {
+        assert!(!read_x11_clipboard().await.status.success());
+    }
     let first_manifest = request(address, "GET", "/api/metadata/manifest", None, "")
         .await
         .unwrap();
     assert!(first_manifest.starts_with("HTTP/1.1 200"));
     click(&menu, entries[OPEN_WEB_UI].0).await;
-    assert_opened_url(&opened, address).await;
+    assert_opened_target(&opened, &format!("http://{address}/\n")).await;
+    fs::remove_file(&opened).unwrap();
+    click(&menu, entries[OPEN_DATA_DIRECTORY].0).await;
+    assert_opened_target(&opened, &format!("{}\n", data.path().display())).await;
 
     let token = "fixture-linux-tray-token";
     let setup = format!(
@@ -331,7 +349,7 @@ server.serve_forever()
     let updated = menu_entries(&menu).await;
     fs::remove_file(&opened).unwrap();
     click(&menu, updated[OPEN_WEB_UI].0).await;
-    assert_opened_url(&opened, address).await;
+    assert_opened_target(&opened, &format!("http://{address}/\n")).await;
 
     #[cfg(feature = "linux-webview")]
     if let Some(probe) = render_probe {
@@ -352,8 +370,27 @@ server.serve_forever()
         })
         .await
         .unwrap();
+        let entries = menu_entries(&menu).await;
+        assert!(entries[COPY_WEB_UI_TOKEN].1);
+        if test_clipboard {
+            assert!(!read_x11_clipboard().await.status.success());
+            click(&menu, entries[COPY_WEB_UI_TOKEN].0).await;
+            tokio::time::timeout(TEST_TIMEOUT, async {
+                loop {
+                    let contents = read_x11_clipboard().await;
+                    if contents.status.success() {
+                        assert_eq!(contents.stdout, token.as_bytes());
+                        break;
+                    }
+                    tokio::time::sleep(Duration::from_millis(25)).await;
+                }
+            })
+            .await
+            .unwrap();
+        }
     } else {
-        assert!(!menu_entries(&menu).await.contains_key("Open Window"));
+        assert!(!updated.contains_key("Open Window"));
+        assert!(!updated.contains_key(COPY_WEB_UI_TOKEN));
     }
 
     let updated = menu_entries(&menu).await;
@@ -377,8 +414,16 @@ server.serve_forever()
     downloader.kill().await.unwrap();
 }
 
-async fn assert_opened_url(opened: &Path, address: SocketAddr) {
-    let expected = format!("http://{address}/\n");
+#[cfg(feature = "linux-webview")]
+async fn read_x11_clipboard() -> std::process::Output {
+    Command::new("xclip")
+        .args(["-selection", "clipboard", "-out"])
+        .output()
+        .await
+        .unwrap()
+}
+
+async fn assert_opened_target(opened: &Path, expected: &str) {
     let destination = tokio::time::timeout(TEST_TIMEOUT, async {
         loop {
             if let Ok(url) = fs::read_to_string(opened)

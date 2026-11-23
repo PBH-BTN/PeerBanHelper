@@ -199,6 +199,8 @@ fn tray_labels(data_dir: &Path) -> pbh_desktop::TrayLabels {
         title: "PeerBanHelper".to_owned(),
         open_window: message("GUI_MENU_SHOW_WINDOW"),
         open_web_ui: message("GUI_MENU_WEBUI"),
+        open_data_directory: message("GUI_MENU_OPEN_DATA_DIRECTORY"),
+        copy_web_ui_token: message("GUI_COPY_WEBUI_TOKEN"),
         exit: message("GUI_MENU_QUIT"),
         ban_statistics: message("GUI_MENU_STATS_BANNED"),
         downloader_statistics: message("GUI_MENU_STATS_DOWNLOADER"),

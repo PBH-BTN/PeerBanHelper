@@ -1,6 +1,7 @@
 use std::io;
 use std::mem::size_of;
-use std::path::PathBuf;
+use std::os::windows::ffi::OsStrExt;
+use std::path::{Path, PathBuf};
 use std::ptr::{null, null_mut};
 use std::sync::{Arc, RwLock, mpsc};
 use std::thread::{self, JoinHandle};
@@ -20,12 +21,16 @@ use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
 use crate::{DesktopError, MenuState, TrayLabels, WebUi};
 
+mod clipboard;
+
 const NOTIFICATION: u32 = WM_APP + 1;
 const KEY_SELECT: u32 = NIN_SELECT | NINF_KEY;
 const ICON_ID: u32 = 1;
 const OPEN: u16 = 1;
 const EXIT: u16 = 2;
 const OPEN_WINDOW: u16 = 3;
+const OPEN_DATA_DIRECTORY: u16 = 4;
+const COPY_WEB_UI_TOKEN: u16 = 5;
 const ICON_LEN: usize = include_bytes!("../../../src/main/resources/assets/icon.png").len();
 #[repr(align(4))]
 struct IconResource([u8; ICON_LEN]);
@@ -34,6 +39,14 @@ static ICON: IconResource = IconResource(*include_bytes!(
 ));
 
 type Browser = Box<dyn Fn(&WebUi) + Send>;
+type DirectoryOpener = Box<dyn Fn(&Path) + Send>;
+type ClipboardWriter = Box<dyn Fn(HWND, &str) + Send>;
+
+struct DesktopActions {
+    open_web_ui: Browser,
+    open_data_directory: DirectoryOpener,
+    copy_web_ui_token: ClipboardWriter,
+}
 
 pub(super) struct PlatformTray {
     window: usize,
@@ -47,15 +60,29 @@ impl PlatformTray {
         exit: watch::Sender<bool>,
         profile: PathBuf,
     ) -> Result<Self, DesktopError> {
-        Self::start_with_browser(labels, menu, exit, profile, Box::new(open_default_browser))
+        Self::start_with_actions(
+            labels,
+            menu,
+            exit,
+            profile,
+            DesktopActions {
+                open_web_ui: Box::new(open_default_browser),
+                open_data_directory: Box::new(open_data_directory),
+                copy_web_ui_token: Box::new(|owner, token| {
+                    if let Err(error) = clipboard::set_text(owner, token) {
+                        eprintln!("Unable to copy the PeerBanHelper WebUI token: {error}");
+                    }
+                }),
+            },
+        )
     }
 
-    fn start_with_browser(
+    fn start_with_actions(
         labels: TrayLabels,
         menu: Arc<RwLock<MenuState>>,
         exit: watch::Sender<bool>,
         profile: PathBuf,
-        open: Browser,
+        actions: DesktopActions,
     ) -> Result<Self, DesktopError> {
         let (ready, startup) = mpsc::sync_channel(1);
         let worker = thread::Builder::new()
@@ -68,7 +95,7 @@ impl PlatformTray {
                         return;
                     }
                 };
-                let window = match NativeWindow::create(labels, menu, exit, profile, open) {
+                let window = match NativeWindow::create(labels, menu, exit, profile, actions) {
                     Ok(window) => window,
                     Err(error) => {
                         let _ = ready.send(Err(error));
@@ -210,7 +237,7 @@ struct WindowState {
     labels: TrayLabels,
     menu: Arc<RwLock<MenuState>>,
     exit: watch::Sender<bool>,
-    open: Browser,
+    actions: DesktopActions,
     icon: Icon,
     taskbar_created: u32,
     profile: PathBuf,
@@ -230,7 +257,7 @@ impl WindowState {
         match command {
             OPEN => {
                 if let Some(web_ui) = self.snapshot().web_ui {
-                    (self.open)(&web_ui);
+                    (self.actions.open_web_ui)(&web_ui);
                 }
             }
             EXIT => {
@@ -239,6 +266,16 @@ impl WindowState {
             OPEN_WINDOW => {
                 if let Some(web_ui) = self.snapshot().web_ui {
                     self.show_window(owner, web_ui);
+                }
+            }
+            OPEN_DATA_DIRECTORY => {
+                if let Some(directory) = self.snapshot().data_directory {
+                    (self.actions.open_data_directory)(&directory);
+                }
+            }
+            COPY_WEB_UI_TOKEN => {
+                if let Some(token) = self.snapshot().web_ui_token {
+                    (self.actions.copy_web_ui_token)(owner, &token);
                 }
             }
             _ => {}
@@ -251,8 +288,7 @@ impl WindowState {
         let Ok(mut window) = self.web_window.try_borrow_mut() else {
             return;
         };
-        let mut address = web_ui.0.clone();
-        address.set_query(None);
+        let address = web_ui.0;
         let result = match window.as_mut() {
             Some(window) => window.show(&address),
             None => web_window::Window::new(&self.labels.title, &address, self.profile.clone())
@@ -270,7 +306,7 @@ impl WindowState {
             }
         } else if let Err(error) = result {
             eprintln!("Unable to open the PeerBanHelper window: {error}");
-            (self.open)(&WebUi(address));
+            (self.actions.open_web_ui)(&WebUi(address));
         }
     }
 
@@ -323,13 +359,27 @@ impl WindowState {
             menu.append(0, &downloaders, MF_GRAYED);
             menu.separator();
         }
-        let options = if snapshot.web_ui.is_some() {
-            MF_STRING
-        } else {
-            MF_GRAYED
-        };
-        menu.append(OPEN_WINDOW, &self.labels.open_window, options);
-        menu.append(OPEN, &self.labels.open_web_ui, options);
+        let enabled = |available| if available { MF_STRING } else { MF_GRAYED };
+        menu.append(
+            OPEN_WINDOW,
+            &self.labels.open_window,
+            enabled(snapshot.web_ui.is_some()),
+        );
+        menu.append(
+            OPEN,
+            &self.labels.open_web_ui,
+            enabled(snapshot.web_ui.is_some()),
+        );
+        menu.append(
+            OPEN_DATA_DIRECTORY,
+            &self.labels.open_data_directory,
+            enabled(snapshot.data_directory.is_some()),
+        );
+        menu.append(
+            COPY_WEB_UI_TOKEN,
+            &self.labels.copy_web_ui_token,
+            enabled(snapshot.web_ui_token.is_some()),
+        );
         menu.separator();
         menu.append(EXIT, &self.labels.exit, MF_STRING);
         let (x, y) = menu_position(parameters);
@@ -364,14 +414,14 @@ impl NativeWindow {
         menu: Arc<RwLock<MenuState>>,
         exit: watch::Sender<bool>,
         profile: PathBuf,
-        open: Browser,
+        actions: DesktopActions,
     ) -> Result<Self, DesktopError> {
         let class = WindowClass::register()?;
         let state = Box::new(WindowState {
             labels,
             menu,
             exit,
-            open,
+            actions,
             profile,
             icon: Icon::load()?,
             // SAFETY: the name is a valid null-terminated wide string.
@@ -556,20 +606,28 @@ fn label_counts(template: &str, first: u64, second: u64) -> String {
 }
 
 fn open_default_browser(web_ui: &WebUi) {
-    let url = wide(web_ui.as_url());
-    // SAFETY: the shell receives a validated HTTP URL and no command-line parameters.
+    open_shell_target(&wide(web_ui.as_url()), "WebUI");
+}
+
+fn open_data_directory(directory: &Path) {
+    let directory: Vec<_> = directory.as_os_str().encode_wide().chain([0]).collect();
+    open_shell_target(&directory, "data directory");
+}
+
+fn open_shell_target(target: &[u16], description: &str) {
+    // SAFETY: the shell receives a terminated URL or directory and no command-line parameters.
     let result = unsafe {
         ShellExecuteW(
             null_mut(),
             windows_sys::w!("open"),
-            url.as_ptr(),
+            target.as_ptr(),
             null(),
             null(),
             SW_SHOWNORMAL,
         )
     } as isize;
     if result <= 32 {
-        eprintln!("Unable to open the PeerBanHelper WebUI (Windows shell code {result}).");
+        eprintln!("Unable to open the PeerBanHelper {description} (Windows shell code {result}).");
     }
 }
 
@@ -598,20 +656,30 @@ mod tests {
         }
         let (request_exit, exit) = watch::channel(false);
         let (opened, open) = mpsc::channel();
+        let (opened_directory, directory_opened) = mpsc::channel();
+        let (copied_token, token_copied) = mpsc::channel();
         let menu = Arc::new(RwLock::new(MenuState::default()));
         let labels = TrayLabels {
             title: "PeerBanHelper tray test".into(),
             ..TrayLabels::default()
         };
         let temporary = tempfile::tempdir().unwrap();
-        let platform = PlatformTray::start_with_browser(
+        let platform = PlatformTray::start_with_actions(
             labels,
             menu.clone(),
             request_exit,
             temporary.path().join("profile"),
-            Box::new(move |web_ui| {
-                let _ = opened.send(web_ui.as_url().to_owned());
-            }),
+            DesktopActions {
+                open_web_ui: Box::new(move |web_ui| {
+                    let _ = opened.send(web_ui.as_url().to_owned());
+                }),
+                open_data_directory: Box::new(move |directory| {
+                    let _ = opened_directory.send(directory.to_path_buf());
+                }),
+                copy_web_ui_token: Box::new(move |_, token| {
+                    let _ = copied_token.send(token.to_owned());
+                }),
+            },
         )
         .expect("register the fixture tray icon with Explorer");
         let window = platform.window as HWND;
@@ -648,28 +716,58 @@ mod tests {
         .unwrap();
 
         let select = ((ICON_ID << 16) | KEY_SELECT) as LPARAM;
+        let activate = |command| {
+            // SAFETY: the message only targets this fixture's own tray window.
+            assert_ne!(
+                unsafe { PostMessageW(window, WM_COMMAND, usize::from(command), 0) },
+                0
+            );
+        };
         // SAFETY: both messages target the fixture's own tray window.
         assert_ne!(unsafe { PostMessageW(window, NOTIFICATION, 0, select) }, 0);
+        activate(COPY_WEB_UI_TOKEN);
         assert!(matches!(
             open.recv_timeout(Duration::from_millis(100)),
             Err(mpsc::RecvTimeoutError::Timeout)
         ));
-        tray.set_web_ui(Some(WebUi::from_listener(
-            "127.0.0.1:9898".parse().unwrap(),
-            Some("a+b"),
-        )));
+        assert!(token_copied.try_recv().is_err());
+        let web_ui = WebUi::from_listener("127.0.0.1:9898".parse().unwrap(), Some("a+b"));
+        let directory = temporary.path().join("PeerBanHelper data");
+        tray.set_web_ui_context(web_ui.clone(), &directory, "fixture-token-一");
         assert_ne!(unsafe { PostMessageW(window, NOTIFICATION, 0, select) }, 0);
         assert_eq!(
             open.recv_timeout(Duration::from_secs(2)).unwrap(),
-            "http://127.0.0.1:9898/?token=a%2Bb"
+            "http://127.0.0.1:9898/"
         );
-        assert_ne!(
-            unsafe { PostMessageW(window, WM_COMMAND, usize::from(EXIT), 0) },
-            0
+        assert!(token_copied.try_recv().is_err());
+        activate(OPEN_DATA_DIRECTORY);
+        assert_eq!(
+            directory_opened
+                .recv_timeout(Duration::from_secs(2))
+                .unwrap(),
+            directory
         );
+        assert!(token_copied.try_recv().is_err());
+        activate(COPY_WEB_UI_TOKEN);
+        assert_eq!(
+            token_copied.recv_timeout(Duration::from_secs(2)).unwrap(),
+            "fixture-token-一"
+        );
+        tray.set_web_ui_context(web_ui, &directory, "fixture-token-二");
+        activate(COPY_WEB_UI_TOKEN);
+        assert_eq!(
+            token_copied.recv_timeout(Duration::from_secs(2)).unwrap(),
+            "fixture-token-二"
+        );
+        tray.set_web_ui(None);
+        activate(OPEN_DATA_DIRECTORY);
+        activate(COPY_WEB_UI_TOKEN);
+        activate(EXIT);
         tokio::time::timeout(Duration::from_secs(2), tray.exit_requested())
             .await
             .unwrap();
+        assert!(directory_opened.try_recv().is_err());
+        assert!(token_copied.try_recv().is_err());
 
         drop(tray);
         assert_eq!(unsafe { IsWindow(window) }, 0);

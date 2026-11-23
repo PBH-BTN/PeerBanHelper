@@ -5,6 +5,7 @@
 ## 行为依据
 
 - `Main#initGUI` 及 `gui/PBHGuiManager` 管理桌面和控制台选择。`SwingMainWindow` 支持收起至托盘。`TrayMenu` 提供显示窗口、打开 WebUI、退出和封禁、下载器统计。`PBHGuiBridge#getWebUiUrl` 使用当前监听端口和 UTF-8 URL 编码的 token。
+- `WindowMenuBar#generateProgramMenu` 打开 `Main#getDataDirectory`。`generateWebUIMenu` 读取 `PBHGuiBridge#getWebUiToken`，只有点击复制项才写入剪贴板，并弹出包含令牌的确认对话框。Rust 托盘复用 `GUI_MENU_OPEN_DATA_DIRECTORY` 与 `GUI_COPY_WEBUI_TOKEN` 的已有翻译。
 - Windows 通知区通过 `Shell_NotifyIconW` 注册、接收激活和退出时移除。在 `TaskbarCreated` 后重新注册。菜单和浏览器操作复用系统的 `TrackPopupMenuEx`、`ShellExecuteW`。[Windows 通知区](https://learn.microsoft.com/en-us/windows/win32/shell/taskbar) · [Windows Shell 打开操作](https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shellexecutew)
 
 ## 实施
@@ -16,6 +17,7 @@
 - macOS 的 `run_macos_tray` 在主线程运行 AppKit 应用与 `NSStatusItem`。后台线程执行 Rust 服务。原生菜单在打开时读取现有托盘统计和 WebUI 端口。点击图标打开菜单，WebUI 项通过 `NSWorkspace` 打开剔除查询串的 URL，退出项使用已有应用关停通道。服务返回后由主线程的 GCD 队列停止事件循环并移除状态项。 [Apple AppKit 应用事件循环](https://developer.apple.com/documentation/appkit/nsapplication) · [Apple 菜单接口](https://developer.apple.com/documentation/appkit/menus-cursors-and-the-dock)
 - macOS “显示窗口”由 Java `TrayMenu` 的本地化条目 `GUI_MENU_SHOW_WINDOW` 接入。它在现有 AppKit 主线程中按需创建一个可缩放的 `NSWindow` 和 `WKWebView`，打开应用当前 WebUI 端口和普通登录页面，加载 URL 时剔除查询参数。关闭窗口保留当前 WebKit 会话，服务与菜单栏图标继续运行，重新选择时复用窗口。监听地址变化后重新打开会导航到新地址。同级 WebUI 菜单项继续用系统浏览器。嵌入式页面中用户点击要求新开窗口的 HTTP(S) 链接也交给系统浏览器。 [Apple WKWebView](https://developer.apple.com/documentation/webkit/wkwebview) · [Apple NSWindow](https://developer.apple.com/documentation/appkit/nswindow)
 - Linux 可用 `cargo build --locked -p peerbanhelper --features linux-webview` 构建带嵌入式窗口的桌面二进制。该功能启用 GTK 3 和 WebKitGTK 4.1，默认 Linux 二进制继续提供 SNI 托盘和无界面服务。图形构建的 `run --tray` 在进程主线程运行 GTK/WebKit 事件循环，服务在工作线程运行。GTK 初始化成功后才出现“显示窗口”。窗口按需创建并在同一个 WebView 内加载现有 WebUI，URL 剔除查询参数，浏览器动作仍可用。关闭窗口时保留会话，Quit 在服务关停后销毁窗口。 [Debian WebKitGTK 4.1 软件包](https://packages.debian.org/source/stable/webkit2gtk) · [GTK 3 Rust 线程约定](https://gtk-rs.org/gtk3-rs/stable/latest/docs/gtk/)
+- 应用在 `web::prepare` 同时更新桌面监听地址、数据目录和当前配置的令牌。首次设置前复制项禁用，重新加载配置后采用当前令牌，清理监听状态时也清理相应动作。数据目录由 Win32 Shell、AppKit Workspace 或 Linux `xdg-open`/`gio open` 打开。Windows Unicode Clipboard、macOS NSPasteboard 和启用 GTK 的 Linux CLIPBOARD 仅处理明确的复制菜单操作。GTK 请求可用的桌面剪贴板管理器保存数据。令牌不通过浏览器地址传递，Rust 的操作不弹出 Java 中显示明文令牌的确认对话框。 [Win32 剪贴板](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclipboarddata) · [AppKit NSPasteboard](https://developer.apple.com/documentation/appkit/nspasteboard) · [GTK Clipboard](https://gtk-rs.org/gtk3-rs/stable/latest/docs/gtk/struct.Clipboard.html)
 
 ## 验证
 
@@ -26,11 +28,12 @@
 - Debian WSL2 上 `cargo +1.96.0 check --locked -p pbh-desktop --all-targets` 对 `aarch64-apple-darwin` 和 `x86_64-apple-darwin` 均通过，覆盖 `objc2` 类型、AppKit 导出、后台服务句柄与测试编译。两个目标的严格 Clippy 也通过。
 - 加入 WKWebView 后重新在两个 Darwin 目标运行 `cargo +1.96.0 clippy --locked -p pbh-desktop --all-targets --target <darwin-target> -- -D warnings`，均通过。原生 macOS 上加载回环 HTTP、首次设置与登录、新开链接、关闭和重开窗口仍待验证。打包为 `.app` 时需验证 App Transport Security 对回环 HTTP 的处理。 [Apple ATS 文档](https://developer.apple.com/documentation/security/preventing-insecure-network-connections)
 - Linux 可选嵌入式构建及严格 Clippy 通过。验证环境为 Debian Bookworm 容器、GTK 3.24.38、WebKitGTK 2.50.6、Xvfb 和 `dbus-run-session`，容器仅使用回环，WebKit 沙箱设置维持默认值。`cargo build --locked --offline -p peerbanhelper --features linux-webview` 后，用 `PBH_LINUX_TRAY_BINARY=<二进制> dbus-run-session -- xvfb-run -a cargo test --locked --offline -p pbh-desktop --features linux-webview native_service_keeps_tray_through_oobe_and_shuts_down_on_exit -- --ignored` 验证实际应用完成 OOBE、扫描一个种子与一个 Peer、打开现有浏览器动作，并且能从 DBusMenu 打开图形窗口。X11 查询确认窗口可见，内嵌页面的脚本回环请求确认 WebUI 地址没有查询串。Quit 返回退出码 0，注销托盘并销毁窗口。首轮将 GTK 置于工作线程时退出会触发 `SIGABRT`，迁至进程主线程后验证通过。无 DISPLAY 复测时保留浏览器动作和 Quit，菜单省略“显示窗口”。默认 Linux 应用依赖树未引入 WebKitGTK。
+- 数据目录与复制动作通过验证。Windows `cargo +1.96.0 test --locked --offline -p pbh-desktop` 使用实际 Win32 托盘命令测试两个动作，注入目录和剪贴板替身。测试验证启动前不复制、打开 WebUI 与目录时不复制、显式操作复制当前令牌、令牌更换后复制新值、清理监听状态后两个动作失效。Linux 在上面的隔离 Xvfb 命令中添加 `PBH_LINUX_TRAY_TEST_XCLIP=1`，由 `xclip` 读取隔离会话的系统剪贴板，确认首次设置后只有显式点击才会写入令牌。目录操作交给 `xdg-open` 夹具验证绝对路径。无图形会话的二进制保留目录和浏览器动作并隐藏复制项。严格 Clippy 通过 Linux 默认与 `linux-webview`、Windows x64/ARM64 和 macOS Intel/Apple Silicon。真实 macOS 剪贴板与 Linux 桌面管理器在退出后保留内容的效果仍待验证。
 
 ## 桌面动作对照
 
 - `SwingMainWindow` 和 `WebUITab` 提供主窗口、隐藏到托盘与 SWT 浏览器。Java 隐藏时回收浏览器，并通过 URL 参数静默登录。macOS Rust 复用同一个 WebKit 会话并采用普通 WebUI 认证。
-- 原生 `LogsTab`、`WindowMenuBar` 打开数据目录、复制 WebUI 令牌、GitHub 和关于/鸣谢，以及 `SwingGuiImpl` 的通知、对话框和 `SwingTaskbarControl` 进度仍待桌面移植。WebUI 日志和帮助可由应用现有入口使用。
+- 原生 `LogsTab`、`WindowMenuBar` 的 GitHub 和关于/鸣谢，以及 `SwingGuiImpl` 的通知、对话框和 `SwingTaskbarControl` 进度仍待桌面移植。WebUI 日志和帮助可由应用现有入口使用。
 
 ## 尚待验收
 

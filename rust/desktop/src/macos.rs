@@ -1,10 +1,14 @@
 //! The AppKit status item and its application loop stay on the process main thread.
 
 use std::cell::RefCell;
+use std::ffi::CString;
 use std::io;
+use std::os::unix::ffi::OsStrExt;
+use std::ptr::NonNull;
 use std::sync::{Arc, RwLock};
 use std::thread;
 
+use crate::{DesktopError, MenuState, Tray, TrayLabels};
 use dispatch2::DispatchQueue;
 use objc2::rc::{Retained, autoreleasepool};
 use objc2::runtime::{ProtocolObject, Sel};
@@ -13,14 +17,11 @@ use objc2::{
 };
 use objc2_app_kit::{
     NSApplication, NSApplicationActivationPolicy, NSEvent, NSEventModifierFlags, NSEventType,
-    NSImage, NSMenu, NSMenuDelegate, NSMenuItem, NSStatusBar, NSStatusItem,
-    NSVariableStatusItemLength, NSWorkspace,
+    NSImage, NSMenu, NSMenuDelegate, NSMenuItem, NSPasteboard, NSPasteboardTypeString, NSStatusBar,
+    NSStatusItem, NSVariableStatusItemLength, NSWorkspace,
 };
 use objc2_foundation::{NSData, NSObject, NSObjectProtocol, NSPoint, NSSize, NSString, NSURL};
 use tokio::sync::watch;
-use url::Url;
-
-use crate::{DesktopError, MenuState, Tray, TrayLabels, WebUi};
 
 mod window;
 use window::EmbeddedWindow;
@@ -31,6 +32,8 @@ const DOWNLOADER_STATISTIC: isize = 1;
 const STATISTIC_SEPARATOR: isize = 2;
 const OPEN_WINDOW: isize = 3;
 const OPEN_WEB_UI: isize = 4;
+const OPEN_DATA_DIRECTORY: isize = 5;
+const COPY_WEB_UI_TOKEN: isize = 6;
 
 /// Runs an accessory AppKit application on the main thread and the PBH service on a worker.
 /// The service owns the portable tray handle and handles Exit through its normal shutdown signal.
@@ -155,6 +158,20 @@ impl NativeTray {
             sel!(openWebUi:),
             marker,
         );
+        add_action(
+            &menu,
+            &target,
+            &target.ivars().labels.open_data_directory,
+            sel!(openDataDirectory:),
+            marker,
+        );
+        add_action(
+            &menu,
+            &target,
+            &target.ivars().labels.copy_web_ui_token,
+            sel!(copyWebUiToken:),
+            marker,
+        );
         menu.addItem(&NSMenuItem::separatorItem(marker));
         add_action(
             &menu,
@@ -186,7 +203,7 @@ fn add_action(
     let item = NSMenuItem::new(marker);
     item.setTitle(&NSString::from_str(label));
     item.setEnabled(true);
-    // SAFETY: the native tray retains the target. Both selectors use the menu-item action signature.
+    // SAFETY: the native tray retains the target. The selectors use the menu-item action signature.
     unsafe {
         item.setTarget(Some(target));
         item.setAction(Some(selector));
@@ -220,7 +237,7 @@ define_class!(
     impl MenuTarget {
         #[unsafe(method(openWindow:))]
         fn open_window(&self, _sender: &NSMenuItem) {
-            let Some(destination) = self.snapshot().web_ui.map(web_ui_destination) else { return };
+            let Some(destination) = self.snapshot().web_ui.map(|web_ui| web_ui.0) else { return };
             let actions = self.ivars();
             let marker = self.mtm();
             actions.window.borrow_mut()
@@ -230,10 +247,38 @@ define_class!(
 
         #[unsafe(method(openWebUi:))]
         fn open_web_ui(&self, _sender: &NSMenuItem) {
-            if let Some(url) = self.snapshot().web_ui.map(web_ui_destination)
-                && let Some(url) = NSURL::URLWithString(&NSString::from_str(url.as_str()))
+            if let Some(url) = self.snapshot().web_ui
+                && let Some(url) = NSURL::URLWithString(&NSString::from_str(url.as_url()))
             {
                 NSWorkspace::sharedWorkspace().openURL(&url);
+            }
+        }
+
+        #[unsafe(method(openDataDirectory:))]
+        fn open_data_directory(&self, _sender: &NSMenuItem) {
+            let Some(directory) = self.snapshot().data_directory else { return };
+            let Ok(path) = CString::new(directory.as_os_str().as_bytes()) else { return };
+            // SAFETY: path supplies a NUL-terminated sequence of native filesystem bytes.
+            let url = unsafe {
+                NSURL::fileURLWithFileSystemRepresentation_isDirectory_relativeToURL(
+                    NonNull::from(path.as_c_str()).cast(),
+                    true,
+                    None,
+                )
+            };
+            if !NSWorkspace::sharedWorkspace().openURL(&url) {
+                eprintln!("Unable to open the PeerBanHelper data directory.");
+            }
+        }
+
+        #[unsafe(method(copyWebUiToken:))]
+        fn copy_web_ui_token(&self, _sender: &NSMenuItem) {
+            let Some(token) = self.snapshot().web_ui_token else { return };
+            let clipboard = NSPasteboard::generalPasteboard();
+            clipboard.clearContents();
+            // SAFETY: this constant is an AppKit string type for pasteboard data.
+            if !clipboard.setString_forType(&NSString::from_str(&token), unsafe { NSPasteboardTypeString }) {
+                eprintln!("Unable to copy the PeerBanHelper WebUI token.");
             }
         }
 
@@ -291,18 +336,17 @@ impl MenuTarget {
                 ));
             }
         }
-        for index in [OPEN_WINDOW, OPEN_WEB_UI] {
+        for (index, enabled) in [
+            (OPEN_WINDOW, snapshot.web_ui.is_some()),
+            (OPEN_WEB_UI, snapshot.web_ui.is_some()),
+            (OPEN_DATA_DIRECTORY, snapshot.data_directory.is_some()),
+            (COPY_WEB_UI_TOKEN, snapshot.web_ui_token.is_some()),
+        ] {
             if let Some(item) = menu.itemAtIndex(index) {
-                item.setEnabled(snapshot.web_ui.is_some());
+                item.setEnabled(enabled);
             }
         }
     }
-}
-
-fn web_ui_destination(web_ui: WebUi) -> Url {
-    let mut url = web_ui.0;
-    url.set_query(None);
-    url
 }
 
 fn desktop_error(operation: &'static str) -> DesktopError {
@@ -327,11 +371,5 @@ mod tests {
             .join()
             .unwrap();
         assert!(matches!(off_main_thread, Err(DesktopError::Native { .. })));
-    }
-
-    #[test]
-    fn opening_web_ui_omits_the_access_token() {
-        let web_ui = WebUi::from_listener("[::]:9898".parse().unwrap(), Some("secret fixture"));
-        assert_eq!(web_ui_destination(web_ui).as_str(), "http://[::1]:9898/");
     }
 }

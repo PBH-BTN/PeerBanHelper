@@ -1,5 +1,6 @@
 //! StatusNotifierItem and DBusMenu support for a Linux desktop session.
 
+use std::ffi::OsString;
 use std::io::{self, Cursor};
 use std::process::Stdio;
 use std::sync::{Arc, RwLock, mpsc};
@@ -170,11 +171,7 @@ impl Item {
     }
 
     fn web_ui_destination(&self) -> Option<Url> {
-        self.snapshot().web_ui.map(|web_ui| {
-            let mut url = web_ui.0;
-            url.set_query(None);
-            url
-        })
+        self.snapshot().web_ui.map(|web_ui| web_ui.0)
     }
 
     fn open_web_ui(&self) {
@@ -187,6 +184,19 @@ impl Item {
     fn open_window(&self) {
         if let (Some(window), Some(url)) = (&self.window, self.web_ui_destination()) {
             window.show(url);
+        }
+    }
+
+    fn open_data_directory(&self) {
+        if let Some(directory) = self.snapshot().data_directory {
+            open_desktop_target(directory.into_os_string());
+        }
+    }
+
+    #[cfg(feature = "linux-webview")]
+    fn copy_web_ui_token(&self) {
+        if let (Some(window), Some(token)) = (&self.window, self.snapshot().web_ui_token) {
+            window.copy_to_clipboard(token);
         }
     }
 }
@@ -260,6 +270,27 @@ impl ksni::Tray for Item {
                 ..Default::default()
             }
             .into(),
+            StandardItem {
+                label: self.labels.open_data_directory.clone(),
+                enabled: state.data_directory.is_some(),
+                activate: Box::new(|tray: &mut Self| tray.open_data_directory()),
+                ..Default::default()
+            }
+            .into(),
+        ]);
+        #[cfg(feature = "linux-webview")]
+        if self.window.is_some() {
+            items.push(
+                StandardItem {
+                    label: self.labels.copy_web_ui_token.clone(),
+                    enabled: state.web_ui_token.is_some(),
+                    activate: Box::new(|tray: &mut Self| tray.copy_web_ui_token()),
+                    ..Default::default()
+                }
+                .into(),
+            );
+        }
+        items.extend([
             MenuItem::Separator,
             StandardItem {
                 label: self.labels.exit.clone(),
@@ -304,9 +335,13 @@ fn decode_icon() -> Option<Icon> {
 }
 
 fn open_default_browser(url: Url) {
+    open_desktop_target(url.as_str().into());
+}
+
+fn open_desktop_target(target: OsString) {
     tokio::spawn(async move {
         let launch = Command::new("xdg-open")
-            .arg(url.as_str())
+            .arg(&target)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
@@ -314,7 +349,8 @@ fn open_default_browser(url: Url) {
             .await;
         if !launch.is_ok_and(|status| status.success()) {
             let _ = Command::new("gio")
-                .args(["open", url.as_str()])
+                .arg("open")
+                .arg(target)
                 .stdin(Stdio::null())
                 .stdout(Stdio::null())
                 .stderr(Stdio::null())

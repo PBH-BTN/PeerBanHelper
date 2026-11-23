@@ -229,7 +229,11 @@ pub(crate) fn prepare(
     let local = bound.socket.local_addr()?;
     let config_dir = config_dir(data_dir);
     if let Some(tray) = tray {
-        tray.set_web_ui(Some(pbh_desktop::WebUi::from_listener(local, None)));
+        tray.set_web_ui_context(
+            pbh_desktop::WebUi::from_listener(local, None),
+            &std::path::absolute(data_dir)?,
+            &config.server.token,
+        );
     }
     let demo_mode =
         std::env::var("PBH_DEMOMODE").is_ok_and(|value| value.eq_ignore_ascii_case("true"));

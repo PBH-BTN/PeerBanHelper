@@ -88,6 +88,15 @@ impl WindowAction {
             true
         });
     }
+
+    pub(super) fn copy_to_clipboard(&self, token: Arc<str>) {
+        // Attach the operation to the GTK loop. The caller handles D-Bus menu events on a worker.
+        MainContext::default().spawn(async move {
+            let clipboard = gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD);
+            clipboard.set_text(&token);
+            clipboard.store();
+        });
+    }
 }
 
 struct StopOnDrop(watch::Sender<WindowCommand>);

@@ -3,6 +3,7 @@
 use std::future::pending;
 use std::io;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 
 use thiserror::Error;
@@ -53,6 +54,11 @@ impl WebUi {
     pub fn as_url(&self) -> &str {
         self.0.as_str()
     }
+
+    fn without_query(mut self) -> Self {
+        self.0.set_query(None);
+        self
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -60,6 +66,8 @@ pub struct TrayLabels {
     pub title: String,
     pub open_window: String,
     pub open_web_ui: String,
+    pub open_data_directory: String,
+    pub copy_web_ui_token: String,
     pub exit: String,
     pub ban_statistics: String,
     pub downloader_statistics: String,
@@ -71,6 +79,8 @@ impl Default for TrayLabels {
             title: "PeerBanHelper".into(),
             open_window: "Open Window".into(),
             open_web_ui: "Open WebUI".into(),
+            open_data_directory: "Open data file storage location...".into(),
+            copy_web_ui_token: "Copy WebUI Token...".into(),
             exit: "Exit".into(),
             ban_statistics: "Banned peers: {} ({} IPs)".into(),
             downloader_statistics: "Downloaders: {} / {}".into(),
@@ -113,6 +123,8 @@ pub enum DesktopError {
 #[derive(Clone, Default)]
 struct MenuState {
     web_ui: Option<WebUi>,
+    data_directory: Option<PathBuf>,
+    web_ui_token: Option<Arc<str>>,
     status: Option<TrayStatus>,
 }
 
@@ -175,12 +187,35 @@ impl Tray {
         })
     }
 
-    /// `None` disables opening the WebUI while the listener is unavailable.
+    /// `None` clears all listener actions while the listener is unavailable.
     pub fn set_web_ui(&self, web_ui: Option<WebUi>) {
-        self.state
-            .write()
-            .unwrap_or_else(|error| error.into_inner())
-            .web_ui = web_ui;
+        {
+            let mut state = self
+                .state
+                .write()
+                .unwrap_or_else(|error| error.into_inner());
+            state.web_ui = web_ui.map(WebUi::without_query);
+            if state.web_ui.is_none() {
+                state.data_directory = None;
+                state.web_ui_token = None;
+            }
+        }
+        #[cfg(target_os = "linux")]
+        self._platform.refresh();
+    }
+
+    /// Updates the native actions when the WebUI listener and configuration become active.
+    pub fn set_web_ui_context(&self, web_ui: WebUi, data_directory: &Path, token: &str) {
+        {
+            let mut state = self
+                .state
+                .write()
+                .unwrap_or_else(|error| error.into_inner());
+            state.web_ui = Some(web_ui.without_query());
+            state.data_directory = Some(data_directory.to_owned());
+            state.web_ui_token =
+                (!token.trim().is_empty() && !token.contains('\0')).then(|| Arc::from(token));
+        }
         #[cfg(target_os = "linux")]
         self._platform.refresh();
     }
@@ -215,8 +250,8 @@ mod tests {
             target.as_url(),
             "http://127.0.0.1:9898/?token=a%26+b%3D%E4%B8%AD%E6%96%87"
         );
-        let target = WebUi::from_listener("[::]:9898".parse().unwrap(), None);
-        assert_eq!(target.as_url(), "http://[::1]:9898/");
+        let target = WebUi::from_listener("[::]:9898".parse().unwrap(), Some("fixture"));
+        assert_eq!(target.without_query().as_url(), "http://[::1]:9898/");
     }
 
     #[cfg(not(any(windows, target_os = "linux", target_os = "macos")))]
