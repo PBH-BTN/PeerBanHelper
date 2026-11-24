@@ -13,15 +13,20 @@
         <result column="percent" property="percent"/>
     </resultMap>
 
+    <sql id="ipPrefixFilter">
+        <if test="filter != null and filter != ''">
+            <bind name="ipPattern" value="filter + &quot;%&quot;"/>
+            WHERE ip LIKE #{ipPattern}
+        </if>
+    </sql>
+
     <!-- 封禁IP查询（带过滤） -->
     <select id="getBannedIpsWithFilter" resultMap="PeerBanCountMap">
         SELECT
         ip AS peerIp,
         COUNT(*) AS count
         FROM history
-        <if test="filter != null and filter != ''">
-            WHERE ip LIKE #{filter} || '%'
-        </if>
+        <include refid="ipPrefixFilter"/>
         GROUP BY ip
         ORDER BY count DESC
     </select>
@@ -39,9 +44,7 @@
     <select id="countDistinctIpWithFilter" resultType="long">
         SELECT COUNT(DISTINCT ip)
         FROM history
-        <if test="filter != null and filter != ''">
-            WHERE ip LIKE #{filter} || '%'
-        </if>
+        <include refid="ipPrefixFilter"/>
     </select>
 
     <!-- 字段聚合统计 -->
@@ -90,9 +93,9 @@
         ORDER BY count DESC
     </select>
 
-    <!-- 字段计数统计 -->
+    <!-- Compute the total over grouped counts so each qualifying history row is read once. -->
     <select id="countField" resultMap="UniversalFieldNumResultMap">
-        WITH data_source AS (
+        WITH field_counts AS (
             SELECT
             <choose>
                 <when test="substringLength != null">
@@ -102,7 +105,8 @@
                     ${field}
                 </otherwise>
             </choose>
-            AS field_data
+            AS data,
+            COUNT(*) AS count
             FROM history h
             <if test="field == 't.name'">
                 JOIN torrents t ON h.torrent_id = t.id
@@ -114,15 +118,18 @@
                 AND ${field} IS NOT NULL
                 AND ${field} != ''
             </where>
+            GROUP BY data
+        ),
+        distribution AS (
+            SELECT data,
+                   count,
+                   CAST(count AS REAL) / SUM(count) OVER () AS percent
+            FROM field_counts
+            WHERE data IS NOT NULL AND data != ''
         )
-        SELECT
-            field_data AS data,
-            COUNT(*) AS count,
-            CAST(COUNT(*) AS REAL) / (SELECT COUNT(*) FROM data_source WHERE field_data IS NOT NULL AND field_data != '') AS percent
-        FROM data_source
-        WHERE field_data IS NOT NULL AND field_data != ''
-        GROUP BY field_data
-        HAVING percent &gt; #{percentFilter}
+        SELECT data, count, percent
+        FROM distribution
+        WHERE percent &gt; #{percentFilter}
         ORDER BY count DESC
     </select>
 
