@@ -1,7 +1,6 @@
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import type { GlobalConfig, mainfest } from '@/api/model/manifest'
 import { useEndpointStore } from '@/stores/endpoint'
-import { Octokit } from '@octokit/core'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 export class GetManifestError extends Error {
@@ -18,19 +17,6 @@ export class GetManifestError extends Error {
   static is(err: unknown): err is GetManifestError {
     return (err as Error)?.name === GetManifestError.name
   }
-}
-
-export function getLatestVersion(token = useEndpointStore().accessToken) {
-  const octokit = new Octokit({ auth: token })
-  return octokit
-    .request('GET /repos/{owner}/{repo}/releases/latest', {
-      owner: 'PBH-BTN',
-      repo: 'PeerBanHelper',
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    })
-    .then((res) => res.data)
 }
 
 export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mainfest> {

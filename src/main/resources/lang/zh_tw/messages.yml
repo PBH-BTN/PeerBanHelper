@@ -576,3 +576,5 @@ DIGESTION_SYSTEM_WATCH_EARLY_WARNING: "[WatchDog] 封禁執行緒即將達到設
 DOWNLOADER_JSONRPC_REQUEST_FAILED: "[錯誤] 在下載器 {} ({}) 上執行 JsonRPC 請求時發生錯誤：{} - {}: {}"
 
 DOWNLOADER_ARIA2NEXT_INCORRECT_PRODUCT: "[錯誤] 目前連接到的 Aria2 RPC 伺服器不是 Aria2Next。PeerBanHelper 僅支援 Aria2Next 分支，官方版本和其他 Aria2 分支因技術限制不受支援。"
+SOFTWARE_UPDATE_CHECK: "檢查 PeerBanHelper 更新"
+SOFTWARE_UPDATE_PREPARE: "準備 PeerBanHelper 更新"

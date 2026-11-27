@@ -8,6 +8,9 @@
     </a-tab-pane>
     <a-tab-pane :key="1">
       <template #title> <icon-settings />&nbsp; {{ t('page.settings.tab.config') }} </template>
+      <a-button class="update-settings" @click="endpoint.emitter.emit('open-update-settings')">
+        {{ t('updates.title') }}
+      </a-button>
       <ConfigForm />
     </a-tab-pane>
     <a-tab-pane :key="2">
@@ -24,6 +27,7 @@
 </template>
 <script setup lang="ts">
 import IconFont from '@/components/iconFont'
+import { useEndpointStore } from '@/stores/endpoint'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import ConfigForm from './components/config/index.vue'
@@ -32,6 +36,7 @@ import Labs from './components/labs/index.vue'
 import ProfileForm from './components/profile/index.vue'
 
 const { t } = useI18n()
+const endpoint = useEndpointStore()
 
 const { query } = useRoute()
 const defaultActiveKey = query.tab
@@ -43,3 +48,9 @@ const defaultActiveKey = query.tab
     }[query.tab as string] ?? 0)
   : 0
 </script>
+
+<style scoped>
+.update-settings {
+  margin-bottom: 16px;
+}
+</style>

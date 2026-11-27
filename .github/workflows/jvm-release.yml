@@ -78,6 +78,8 @@ jobs:
           merge-multiple: true
           skip-decompress: true
           path: build/media
+      - name: Include release metadata
+        run: jq '.release | {tag_name, html_url, body}' "$GITHUB_EVENT_PATH" > build/media/release.json
       - uses: shallwefootball/s3-upload-action@master
         with:
           aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
@@ -164,6 +166,10 @@ jobs:
           merge-multiple: true
           skip-decompress: true
           path: "${{ steps.set_version.outputs.version }}"
+      - uses: actions/download-artifact@v8
+        with:
+          name: installer-dist
+          path: "${{ steps.set_version.outputs.version }}"
       - name: Install torrenttools
         run: |
           echo "2d15f8ab3cee5ebb392e3fb219b186cc99efc7224b08b39d298c54e894401a19 torrenttools" > torrenttools.sha256
@@ -199,7 +205,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DIST: ${{ steps.set_version.outputs.version }}
         with:
-          asset_paths: '["${{ env.DIST }}/PeerBanHelper*", "${{ env.DIST }}/peerbanhelper*", "peerbanhelper.torrent"]'
+          asset_paths: '["${{ env.DIST }}/PeerBanHelper*", "${{ env.DIST }}/peerbanhelper*", "${{ env.DIST }}/updates.xml", "${{ env.DIST }}/sha256sums", "peerbanhelper.torrent"]'
 
   Publish_Changelog:
     name: Publish Changelog to Forum
@@ -349,6 +355,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
+        id: docker-hub
         uses: docker/build-push-action@v7.4.0
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
         with:
@@ -385,6 +392,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Aliyun ACR
+        id: docker-acr
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
         uses: docker/build-push-action@v7.4.0
         with:
@@ -400,3 +408,25 @@ jobs:
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
           cache-from: type=gha
           cache-to: type=gha,mode=min
+      - name: Publish immutable image references
+        if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          HUB_DIGEST: ${{ steps.docker-hub.outputs.digest }}
+          ACR_DIGEST: ${{ steps.docker-acr.outputs.digest }}
+        run: |
+          mkdir -p docker-update-metadata
+          jq -n --arg version "$RELEASE_TAG" --arg hub "$HUB_DIGEST" --arg mirror "$ACR_DIGEST" \
+            '{version: $version, hub: $hub, mirror: $mirror}' > docker-update-metadata/docker-update.json
+          gh release upload "$RELEASE_TAG" docker-update-metadata/docker-update.json --clobber
+      - name: Mirror immutable image references
+        if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.S3_SECRET_KEY }}
+          aws_bucket: ${{ secrets.S3_BUCKET }}
+          endpoint: ${{ secrets.S3_ENDPOINT }}
+          source_dir: 'docker-update-metadata'
+          destination_dir: 'updates/docker/${{ github.event.release.tag_name }}'

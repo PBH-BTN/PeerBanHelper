@@ -4,16 +4,7 @@
       <a-descriptions :column="{ xs: 1, md: 3, lg: 4 }">
         <a-descriptions-item label="Backend Version">
           <a-space>
-            <a
-              v-if="hasNewVersion"
-              :href="latestVersion?.url"
-              :title="t('footer.newVersionTips', { version: latestVersion?.tagName })"
-            >
-              <a-badge dot :count="1" :offset="[8, -1]">
-                {{ serverVersion?.version }}
-              </a-badge>
-            </a>
-            <div v-else>{{ serverVersion?.version }}</div>
+            <div>{{ serverVersion?.version }}</div>
             <div v-if="serverVersion?.commit">
               (<a-link
                 :href="`https://github.com/Ghost-chu/PeerBanHelper/commit/${serverVersion?.commit}`"
@@ -21,6 +12,9 @@
               >)
             </div>
           </a-space>
+        </a-descriptions-item>
+        <a-descriptions-item v-if="endpointStore.status === 'pass'">
+          <ChangelogViewer />
         </a-descriptions-item>
         <a-descriptions-item label="WebUI Version">
           <a-space>
@@ -45,90 +39,18 @@
     </a-col>
   </a-row>
   <PlusModal ref="plusInfo" />
-  <ChangelogViewer ref="changeLogViewer" />
 </template>
 
 <script setup lang="ts">
 import { useEndpointStore } from '@/stores/endpoint'
-import { Button, Notification } from '@arco-design/web-vue'
-import { IconHistory } from '@arco-design/web-vue/es/icon'
-import { RequestError } from '@octokit/request-error'
-import { compare } from 'compare-versions'
-import { computed, h, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { computed, ref } from 'vue'
 import ChangelogViewer from './changelogViewer.vue'
 import PlusModal from './plus/plusModalContainer.vue'
 
-const { t } = useI18n()
 const version = __APP_VERSION__
 const hash = __APP_HASH__
 const endpointStore = useEndpointStore()
 const serverVersion = computed(() => endpointStore.serverManifest?.version)
-const latestVersion = computed(() => endpointStore.latestVersion)
-const hasNewVersion = computed(() => {
-  return compare(
-    endpointStore.latestVersion?.tagName ?? '1.0',
-    endpointStore.serverManifest?.version.version ?? '1.0',
-    '>'
-  )
-})
-const changeLogViewer = ref<typeof ChangelogViewer>()
-watch(hasNewVersion, () => {
-  if (hasNewVersion.value) {
-    Notification.info({
-      title: t('footer.newVersion'),
-      content: t('footer.newVersion.body', { version: latestVersion.value?.tagName }),
-      footer: () =>
-        h(
-          Button,
-          {
-            onClick: () => changeLogViewer.value?.showModal(),
-            type: 'primary'
-          },
-          {
-            default: () => t('footer.newVersion.updateNow'),
-            icon: () => h(IconHistory)
-          }
-        ),
-      duration: 5000,
-      closable: true
-    })
-  }
-})
-
-watch(
-  () => endpointStore.checkUpgradeError,
-  (error) => {
-    if (error instanceof RequestError) {
-      if (error?.message.includes('limit')) {
-        console.log(t('settings.accessToken.error'))
-        console.log(t('settings.accessToken.error.limit'))
-
-        // Notification.error({
-        //   title: t('settings.accessToken.error'),
-        //   content: t('settings.accessToken.error.limit'),
-        //   footer: () =>
-        //     h(
-        //       Button,
-        //       {
-        //         type: 'primary',
-        //         onClick: () => endpointStore.emitter.emit('open-settings-modal')
-        //       },
-        //       () => t('settings.open')
-        //     )
-        // })
-      }
-    } else {
-      Notification.error({
-        title: t('settings.accessToken.error'),
-        content: error?.message ?? ''
-      })
-      console.log(t('settings.accessToken.error'))
-      console.log(error?.message ?? '')
-    }
-  }
-)
-
 const plusInfo = ref<InstanceType<typeof PlusModal>>()
 endpointStore.emitter.on('open-plus-modal', () => {
   plusInfo.value?.showModal()
