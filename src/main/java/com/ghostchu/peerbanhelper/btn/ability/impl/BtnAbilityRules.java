@@ -60,6 +60,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
             if (cache != null) {
                 BtnRuleset btnRuleset = JsonUtil.getGson().fromJson(cache, BtnRuleset.class);
                 this.btnRule = new BtnRulesetParsed(scriptEngineManager, btnRuleset, scriptExecute);
+                btnNetwork.notifyBanlistUpdated();
             }
         } catch (Throwable ignored) {
         }
@@ -130,6 +131,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                         BtnRuleset btr = JsonUtil.getGson().fromJson(responseBody, BtnRuleset.class);
                         this.btnRule = new BtnRulesetParsed(scriptEngineManager, btr, scriptExecute);
                         Main.getEventBus().post(new BtnRuleUpdateEvent());
+                        btnNetwork.notifyBanlistUpdated();
                         metadataDao.set("btn.ability.rules.cache", JsonUtil.getGson().toJson(btr));
                         log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
                         setLastStatus(true, new TranslationComponent(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));

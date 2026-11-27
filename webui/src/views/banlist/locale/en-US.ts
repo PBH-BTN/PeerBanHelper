@@ -1,6 +1,11 @@
 export default {
   'page.banlist.banlist': 'Ban List',
   'page.banlist.banlist.description': 'Following is the ban list (sorted by time descending)',
+  'page.banlist.prefilled.title': 'Prefilled Ban List',
+  'page.banlist.prefilled.collapsed': 'Collapsed by default',
+  'page.banlist.prefilled.description':
+    'Entries are merged from rule subscriptions, BTN, and other ban list providers, separately from the runtime dynamic ban list.',
+  'page.banlist.prefilled.tag': 'Prefilled',
   'page.banlist.banlist.searchPlaceHolder': 'Search...',
   'page.banlist.banlist.listItem.reserveDNSLookup': 'Reverse DNS Lookup',
   'page.banlist.banlist.listItem.banTime': 'Ban Time',

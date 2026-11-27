@@ -1,4 +1,4 @@
-config-version: 48
+config-version: 49
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -67,6 +67,12 @@ persist:
   # Regular maintenance will improve performance and release unused space; too frequent maintenance may cause flash wear on embedded devices
   # This operation only check and execute when PeerBanHelper starting
   vacuum-interval-days: 60
+# 封禁列表预处理
+# Ban list preprocessing
+banlist-prefill:
+  # 启用后，从所有封禁规则提供者收集 IP 地址并合并到独立的预填充封禁列表
+  # When enabled, collect IP addresses from all ban list rule providers and merge them into a separate prefilled ban list
+  enabled: false
 # BitTorrent Threat Network 威胁防护网络（测试版）
 # BitTorrent Threat Network (BETA)
 btn:

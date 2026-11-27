@@ -9,6 +9,7 @@ export interface Config {
   btn: Btn
   banlist_invoker: BanlistInvoker
   banlist_remapping: BanlistRemapping
+  banlist_prefill: BanlistPrefill
   ip_database: IpDatabase
   proxy: Proxy
   privacy: Privacy
@@ -76,6 +77,10 @@ export interface BanlistRemappingIpv4 {
 export interface BanlistRemappingIpv6 {
   enabled: boolean
   remap_range: number
+}
+
+export interface BanlistPrefill {
+  enabled: boolean
 }
 
 export interface IpDatabase {

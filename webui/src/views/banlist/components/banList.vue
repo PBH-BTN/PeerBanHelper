@@ -1,9 +1,10 @@
 <template>
   <a-space direction="vertical" fill>
     <a-space class="list-header" wrap>
-      <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
+      <a-typography-text>{{ description }}</a-typography-text>
       <a-space class="list-header-right-group" wrap>
         <a-popconfirm
+          v-if="source === 'primary'"
           type="warning"
           :content="t('page.banlist.banlist.listItem.unbanallConfirm')"
           @before-ok="handleUnban('*')"
@@ -25,7 +26,7 @@
     <a-list :data="list">
       <template #item="{ item }">
         <a-list-item>
-          <banListItem :item="item" @unban="refresh()" />
+          <banListItem :item="item" :source="source" @unban="refresh()" />
         </a-list-item>
       </template>
       <template #scroll-loading>
@@ -51,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { getBanListPaginated, unbanIP } from '@/service/banList'
+import { getBanListPaginated, unbanIP, type BanListSource } from '@/service/banList'
 import { useFirstPageOnlyAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
@@ -63,6 +64,20 @@ import banListItem from './banListItem.vue'
 const endpointState = useEndpointStore()
 const searchString = ref('')
 const { t } = useI18n()
+const props = withDefaults(
+  defineProps<{
+    source?: BanListSource
+  }>(),
+  {
+    source: 'primary'
+  }
+)
+const source = computed(() => props.source)
+const description = computed(() =>
+  source.value === 'prefilled'
+    ? t('page.banlist.prefilled.description')
+    : t('page.banlist.banlist.description')
+)
 
 const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
   usePagination(
@@ -72,7 +87,8 @@ const { total, data, current, pageSize, loading, changeCurrent, changePageSize, 
         {
           page: 1,
           pageSize: 10,
-          search: ''
+          search: '',
+          source: props.source
         }
       ],
       pagination: {
@@ -109,13 +125,13 @@ watch(
   }
 )
 
-run({ page: 1, pageSize: 10, search: '' })
+run({ page: 1, pageSize: 10, search: '', source: props.source })
 
 const list = computed(() => data.value?.data.results ?? [])
 const debouncedSearch = useDebounceFn((v: string) => {
   searchString.value = v
   changeCurrent(1)
-  run({ page: 1, pageSize: pageSize.value, search: v })
+  run({ page: 1, pageSize: pageSize.value, search: v, source: props.source })
 }, 300)
 
 const handleSearch = (v: string) => {
