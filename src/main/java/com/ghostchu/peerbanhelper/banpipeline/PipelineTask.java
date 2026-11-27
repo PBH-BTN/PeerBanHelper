@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.banpipeline;
 
+import com.ghostchu.peerbanhelper.module.PeerCheckContext;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 @EqualsAndHashCode
-public class PipelineTask<T> {
+public class PipelineTask<T> implements PeerCheckContext {
     private final BanOrgan<?, ?> organ;
     @Getter
     @Nullable
@@ -26,6 +27,7 @@ public class PipelineTask<T> {
         this.comment = comment;
     }
 
+    @Override
     public void setComment(boolean io, @Nullable String comment) {
         this.io = io;
         this.comment = comment;

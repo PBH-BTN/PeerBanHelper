@@ -25,6 +25,18 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 43)
+    public void banListSchedulerIntervals(YamlConfiguration bundled) {
+        conf.set(
+                "banlist-commit-interval",
+                bundled.getLong("banlist-commit-interval", 5_000L)
+        );
+        conf.set(
+                "banlist-apply-grace-period",
+                bundled.getLong("banlist-apply-grace-period", 60_000L)
+        );
+    }
+
     @UpdateScript(version = 42)
     public void addGopeedBtRules() {
         List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");

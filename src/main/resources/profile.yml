@@ -1,7 +1,13 @@
-config-version: 42
+config-version: 43
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
+# BanList commit interval (Timeunit: ms)
+# BanList 提交间隔（单位：毫秒）
+banlist-commit-interval: 5000
+# Grace period before reporting a ban that has not reached all downloaders (Timeunit: ms)
+# 下载器尚未完成封禁时的宽限期（单位：毫秒）
+banlist-apply-grace-period: 60000
 # 封禁持续时间（单位：毫秒）
 # Ban duration (Global) (Timeunit: ms)
 ban-duration: 1209600000

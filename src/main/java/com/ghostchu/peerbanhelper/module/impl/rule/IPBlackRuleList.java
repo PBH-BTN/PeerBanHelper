@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.databasent.service.RuleSubLogService;
@@ -13,6 +12,7 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.PeerAction;
+import com.ghostchu.peerbanhelper.module.PeerCheckContext;
 import com.ghostchu.peerbanhelper.module.impl.rule.dto.DataUpdateResultDTO;
 import com.ghostchu.peerbanhelper.module.impl.rule.dto.IPBanResultDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -125,7 +125,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PeerCheckContext task) {
         if (isHandShaking(peer)) {
             return handshaking();
         }

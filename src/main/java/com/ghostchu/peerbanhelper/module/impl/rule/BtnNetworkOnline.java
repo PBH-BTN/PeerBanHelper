@@ -1,8 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
-import com.ghostchu.peerbanhelper.BanList;
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.banpipeline.PipelineTask;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
@@ -16,6 +15,7 @@ import com.ghostchu.peerbanhelper.event.btn.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
+import com.ghostchu.peerbanhelper.module.PeerCheckContext;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.SharedObject;
@@ -60,7 +60,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
 
     private final ExecutorService parallelService = Executors.newWorkStealingPool();
     @Autowired
-    private BanList banList;
+    private DownloaderServer downloaderServer;
 
     @Override
     public @NotNull String getName() {
@@ -114,7 +114,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PeerCheckContext task) {
         if (btnNetwork == null) {
             return BTN_MANAGER_NOT_INITIALIZED;
         }
@@ -140,7 +140,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return checkShouldBanLegacy(torrent, peer, downloader, task);
     }
 
-    private @NotNull CheckResult checkShouldBanModern(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PipelineTask<?> task) {
+    private @NotNull CheckResult checkShouldBanModern(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull PeerCheckContext task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityIPDenyList.class);
         if (abilityObject == null) {
             return pass();
@@ -158,7 +158,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return pass();
     }
 
-    private @NotNull CheckResult checkShouldSkip(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
+    private @NotNull CheckResult checkShouldSkip(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PeerCheckContext task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityIPAllowList.class);
         if (abilityObject == null) {
             return pass();
@@ -177,7 +177,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return pass();
     }
 
-    private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor, PipelineTask<?> task) {
+    private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor, PeerCheckContext task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
@@ -212,7 +212,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return finalResult;
     }
 
-    public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
+    public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PeerCheckContext task) {
         return getCache().readCacheButWritePassOnly(this, script.scriptHashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
@@ -242,7 +242,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }, script.cacheable());
     }
 
-    private @NotNull CheckResult checkShouldBanLegacy(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PipelineTask<?> task) {
+    private @NotNull CheckResult checkShouldBanLegacy(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, PeerCheckContext task) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
@@ -437,13 +437,13 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         if (allowListAbilityModule == null) return;
         BtnAbilityIPAllowList allowList = (BtnAbilityIPAllowList) allowListAbilityModule;
         List<IPAddress> pendingUnban = new ArrayList<>();
-        banList.forEach((ipAddress, _) -> {
+        downloaderServer.getBanList().forEach((ipAddress, _) -> {
             var result = allowList.getIpMatcher().match(ipAddress.toCompressedString());
             if (result.result() == MatchResultEnum.TRUE) {
                 pendingUnban.add(ipAddress);
             }
         });
-        pendingUnban.forEach(ip -> banList.remove(ip));
+        pendingUnban.forEach(downloaderServer::scheduleUnBanPeer);
     }
 
 }

@@ -75,6 +75,8 @@ DOWNLOAD_PROGRESS_DETERMINED: "下载进度：已下载 {}/{} 字节，进度：
 DOWNLOAD_PROGRESS: "下载进度：已下载 {} 字节"
 DOWNLOAD_COMPLETED: "下载进度：已完成！共传输 {} 字节的数据"
 BAN_WAVE_CHECK_COMPLETED: "已检查 {} 个下载器的 {} 个活跃 Torrent 与 {} 个 Peers。共封禁 {} 个 Peers，并解除 {} 个过期的封禁 ({}ms)"
+PEER_POLLING_COMPLETED: "已完成 {} 个下载器的 Peer 轮询，共检查 {} 个活跃 Torrent 与 {} 个 Peers，已排队 {} 个封禁操作 ({}ms)"
+BANLIST_COMMIT_COMPLETED: "已向 {} 个下载器提交封禁列表，新增 {} 个封禁并移除 {} 个封禁 ({}ms)"
 WATCH_DOG_HUNGRY: "[警告] WatchDog Service {} 未在指定时间 {} 内得到重置，最后状态 {}，正在转储进程线程信息，请发送给 PeerBanHelper 开发者以协助修复此问题"
 WATCH_DOG_CALLBACK_BLOCKED: "[错误] WatchDog Service 回调线程无响应，已强制离开回调"
 BAN_WAVE_WATCH_DOG_TITLE: "PeerBanHelper 正尝试从异常中恢复"

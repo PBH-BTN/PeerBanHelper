@@ -2,13 +2,13 @@ package com.ghostchu.peerbanhelper.banpipeline;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.DownloaderServerImpl;
-import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.banpipeline.data.CheckResultBatch;
 import com.ghostchu.peerbanhelper.banpipeline.organ.*;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderRequestLock;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
- * Peers 处理会话，每次处理 BanWave 将打开一个新的会话，用于安全且正确的处理 Peers 获取、检查、封禁流程
+ * Peers 处理会话，每次轮询将打开一个新的会话，用于安全且正确的处理 Peers 获取与检查流程
  */
 @Slf4j
 public class DigestionSession implements AutoCloseable {
@@ -44,32 +44,35 @@ public class DigestionSession implements AutoCloseable {
     private final DownloaderManager downloaderManager;
     private final DownloaderServer downloaderServer;
     private final ModuleManager moduleManager;
+    private final DownloaderRequestLock downloaderRequestLock;
     /*
     管道处理节点
      */
     private final List<BanOrgan<?, ?>> organs = new ArrayList<>();
-    private final AlertManager alertManager;
+    private final PeerCheckService peerCheckService;
 
     public DigestionSession(DownloaderManager downloaderManager, DownloaderServer downloaderServer, ModuleManager moduleManager,
-                            AlertManager alertManager,
+                            PeerCheckService peerCheckService,
+                            DownloaderRequestLock downloaderRequestLock,
                             ExecutorService scheduleEnergy, ExecutorService digestEnergyCompute, ExecutorService digestEnergyIO) {
         this.downloaderManager = downloaderManager;
         this.downloaderServer = downloaderServer;
         this.moduleManager = moduleManager;
-        this.alertManager = alertManager;
+        this.peerCheckService = peerCheckService;
+        this.downloaderRequestLock = downloaderRequestLock;
         this.scheduleEnergy = scheduleEnergy;
         this.digestEnergyCompute = digestEnergyCompute;
         this.digestEnergyIO = digestEnergyIO;
     }
 
     /**
-     * 执行 BanWave 流程
+     * 执行一次 Peer 轮询流程
      *
-     * @param banWaveWatchDog 监控 BanWave 的 WatchDog
-     * @return BanWave 处理结果，包括封禁详情和处理统计信息
+     * @param pollingWatchDog 监控轮询任务的 WatchDog
+     * @return 处理结果，包括待封禁详情和处理统计信息
      */
-    public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> runBanWave(WatchDog banWaveWatchDog) {
-        banWaveWatchDog.setLastOperation("Initializing runBanWave", false);
+    public Pair<Map<Downloader, List<DownloaderServerImpl.BanDetail>>, ProcessingStatistics> runPollingCycle(WatchDog pollingWatchDog) {
+        pollingWatchDog.setLastOperation("Initializing peer polling cycle", false);
         organs.clear();
         // 下载器提供器
         DownloaderProviderOrgan downloaderProviderOrgan = new DownloaderProviderOrgan(
@@ -86,6 +89,7 @@ public class DigestionSession implements AutoCloseable {
                 scheduleEnergy,
                 digestEnergyIO,
                 downloaderProviderOrgan,
+                downloaderRequestLock,
                 null,
                 60, TimeUnit.SECONDS
         );
@@ -135,14 +139,12 @@ public class DigestionSession implements AutoCloseable {
                 runMonitorModuleOrgan,
                 null,
                 60, TimeUnit.SECONDS,
-                moduleManager,
-                alertManager,
-                (DownloaderServerImpl) downloaderServer
+                peerCheckService
         );
         organs.add(runCheckModuleOrgan);
         // 等待数据并完成数据转换操作
-        banWaveWatchDog.feed();
-        var returns = convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan, banWaveWatchDog));
+        pollingWatchDog.feed();
+        var returns = convertBanDetails(extractFromLastOrgan(runCheckModuleOrgan, pollingWatchDog));
         // 调用 Tail Organ 的 endSession 方法，其调用会随着链式递归调用到 Head Organ 的 endSession 方法，完成会话结束通知
         runCheckModuleOrgan.endSession();
         return returns;
@@ -155,7 +157,7 @@ public class DigestionSession implements AutoCloseable {
      * @param lastOrgan 最后输出的 Organ
      * @return 中间产物
      */
-    private Map<Downloader, Map<Torrent, Map<Peer, CheckResult>>> extractFromLastOrgan(BanOrgan<?, CheckResultBatch> lastOrgan, WatchDog banWaveWatchDog) {
+    private Map<Downloader, Map<Torrent, Map<Peer, CheckResult>>> extractFromLastOrgan(BanOrgan<?, CheckResultBatch> lastOrgan, WatchDog pollingWatchDog) {
         boolean warningTriggered = false;
         Map<Downloader, Map<Torrent, Map<Peer, CheckResult>>> handled = new HashMap<>();
         try {
@@ -164,7 +166,7 @@ public class DigestionSession implements AutoCloseable {
                 lastRetrieve = lastOrgan.outlet.poll(10, TimeUnit.MILLISECONDS);
                 if (lastRetrieve == null) {
                     // 这里插入 WatchDog，如果即将触发 WatchDog 则打印等待日志
-                    if (banWaveWatchDog.getRemainingMsUntilTriggered() < 1000 && !warningTriggered) {
+                    if (pollingWatchDog.getRemainingMsUntilTriggered() < 1000 && !warningTriggered) {
                         StringJoiner joiner = new StringJoiner("\n");
                         for (BanOrgan<?, ?> organ : organs) {
                             joiner.add("--------------");

@@ -2,6 +2,8 @@ export default {
   'page.settings.tab.profile.save': 'Save',
   'page.settings.tab.profile.base.title': 'Global Config',
   'page.settings.tab.profile.form.checkInterval': 'Check Interval',
+  'page.settings.tab.profile.form.banlistCommitInterval': 'BanList Commit Interval',
+  'page.settings.tab.profile.form.banlistApplyGracePeriod': 'BanList Apply Grace Period',
   'page.settings.tab.profile.unit.ms': 'ms',
   'page.settings.tab.profile.unit.s': 'seconds',
   'page.settings.tab.profile.unit.bytes': 'bytes',
