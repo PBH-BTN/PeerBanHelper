@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public final class MetadataCallbackBean {
+    private int protocol;
     private String pluginVersion;
     private String applicationVersion;
     private String applicationName;
