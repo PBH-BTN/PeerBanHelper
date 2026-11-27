@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.databasent.driver.sqlite;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.databasent.DatabaseType;
 import com.ghostchu.peerbanhelper.databasent.driver.AbstractDatabaseDriver;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -103,7 +104,7 @@ public class SQLiteDatabaseDriver extends AbstractDatabaseDriver {
                     stmt.execute("VACUUM");
 
                     // Update maintenance timestamp
-                    java.nio.file.Files.writeString(maintenanceFile.toPath(),
+                    AtomicFileWriter.writeString(maintenanceFile.toPath(),
                             String.valueOf(System.currentTimeMillis()));
 
                     log.info("SQLite database VACUUM completed successfully");

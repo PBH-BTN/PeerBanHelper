@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -163,7 +164,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     public void saveConfig() throws IOException {
         if (!isConfigurable()) return;
         Main.getProfileConfig().set("module." + getConfigName(), getConfig());
-        Main.getProfileConfig().save(new File(Main.getConfigDirectory(), "profile.yml"));
+        AtomicFileWriter.saveYaml(Main.getProfileConfig(), new File(Main.getConfigDirectory(), "profile.yml"));
     }
 
     public String locale(Context ctx) {

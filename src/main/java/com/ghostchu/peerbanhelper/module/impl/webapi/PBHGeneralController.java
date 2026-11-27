@@ -387,7 +387,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         yamlConfiguration.load(configFile);
         Map<String, Object> newData = GSON.fromJson(context.body(), new TypeToken<Map<String, Object>>() {}.getType());
         mergeYaml(yamlConfiguration, newData, "_", "-");
-        yamlConfiguration.save(configFile);
+        AtomicFileWriter.saveYaml(yamlConfiguration, configFile);
         //moduleMatchCache.invalidateAll();
         context.status(HttpStatus.CREATED);
         //context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));

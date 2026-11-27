@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.AtomicFileWriter;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.WebUtil;
@@ -44,7 +45,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -159,7 +159,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             context.json(new StdResp(false, tl(locale(context), Lang.RULE_ENGINE_BAD_EXPRESSION), null));
             return;
         }
-        Files.write(readFile.toPath(), content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+        AtomicFileWriter.write(readFile.toPath(), content);
         context.json(new StdResp(true, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_SAVED), null));
         reloadConfig();
     }
@@ -387,11 +387,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
         scriptDir.mkdirs();
         File versionFile = new File(scriptDir, "version");
-        if (!versionFile.exists()) {
-            versionFile.createNewFile();
-        }
-        var version = Files.readString(versionFile.toPath(), StandardCharsets.UTF_8);
-        if (VERSION.equals(version)) {
+        if (versionFile.exists() && VERSION.equals(Files.readString(versionFile.toPath(), StandardCharsets.UTF_8))) {
             return;
         }
         PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
@@ -400,10 +396,9 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
             String content = new String(re.getContentAsByteArray(), StandardCharsets.UTF_8);
             File file = new File(scriptDir, re.getFilename());
             if (file.exists()) continue;
-            file.createNewFile();
-            Files.writeString(file.toPath(), content);
+            AtomicFileWriter.writeString(file.toPath(), content);
         }
-        Files.writeString(versionFile.toPath(), VERSION, StandardCharsets.UTF_8);
+        AtomicFileWriter.writeString(versionFile.toPath(), VERSION);
     }
 
     record ExpressionMetadataDto(String id, String name, String author, boolean cacheable, boolean threadSafe,
