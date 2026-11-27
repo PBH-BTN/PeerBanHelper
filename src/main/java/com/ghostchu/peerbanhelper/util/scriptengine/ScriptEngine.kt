@@ -33,5 +33,5 @@ interface ScriptEngine {
     /**
      * 获取支持的脚本文件扩展名
      */
-    fun getFileExtension(): String?
+    fun getFileExtension(): String
 }

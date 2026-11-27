@@ -6,6 +6,8 @@ import java.io.File
  * 编译后的脚本通用接口
  */
 interface CompiledScript {
+    fun usesHostEnvironment(): Boolean = false
+
     /**
      * 获取脚本文件
      */

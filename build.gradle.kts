@@ -51,6 +51,7 @@ val sqliteVersion = "3.54.1.0"
 val springVersion = "7.1.0"
 val flywayVersion = "13.13.0"
 val oshiVersion = "7.8.0"
+val graalJsVersion = "25.0.5"
 // val jettyVersion = "12.1.12"
 
 configurations.all {
@@ -107,6 +108,9 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:5.3.0")
     // Expression engine
     implementation("com.googlecode.aviator:aviator:5.4.4")
+    implementation("org.graalvm.polyglot:polyglot:$graalJsVersion")
+    runtimeOnly("org.graalvm.polyglot:js-community:$graalJsVersion")
+    implementation("org.luaj:luaj-jse:3.0.1")
 
     // Email
     implementation("org.eclipse.angus:angus-mail:2.0.5")

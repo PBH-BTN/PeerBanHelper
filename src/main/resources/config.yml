@@ -98,9 +98,9 @@ btn:
   # The BTN instance URL, you need find a BTN instance
   # By default, PBH-BTN official BTN instance will be used
   config-url: "https://sparkle.ghostchu.com/ping/config"
-  # 是否允许 PeerBanHelper 接收来自 BTN 服务器的 Aviator 脚本
+  # 是否允许 PeerBanHelper 接收 BTN 脚本规则。远程脚本仅在沙箱内执行。
   # 请仅在受信任的 BTN 服务器上启用此功能，运行来自未知来源的脚本可能会导致设备遭到攻击
-  # Allow PeerBanHelper to receive Aviator script from BTN server
+  # Allow scripts from BTN. Remote rules always require the sandbox.
   # Enable this option only on trusted BTN server, running script from unknown source may cause your device under attack
   allow-script-execute: false
 # GeoIP/ASN 数据库 (Powered by Maxmind & GeoCN)

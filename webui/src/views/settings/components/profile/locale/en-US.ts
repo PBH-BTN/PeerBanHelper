@@ -1,4 +1,7 @@
 export default {
+  'page.settings.tab.profile.module.expressionEngine.sandbox': 'Local script sandbox',
+  'page.settings.tab.profile.module.expressionEngine.sandbox.tooltip':
+    'Turning this off runs local scripts in the PBH main process. Only use this mode for trusted scripts. BTN scripts always run in isolation.',
   'page.settings.tab.profile.save': 'Save',
   'page.settings.tab.profile.base.title': 'Global Config',
   'page.settings.tab.profile.form.checkInterval': 'Check Interval',
@@ -119,9 +122,9 @@ export default {
     'If a specific IP flagged multi-dialing, ignore the caching span and keep searching other IPs in same subnet',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time': 'Keep hunting time',
 
-  'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript rule engine',
+  'page.settings.tab.profile.module.expressionEngine.title': 'Script rule engine',
   'page.settings.tab.profile.module.expressionEngine.tips':
-    'Enable this feature can use AviatorScript language to write complex rules to achieve more custom functions',
+    'Run custom scripts as ban rules. Available languages depend on the server.',
   'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': 'Use global ban duration',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': 'Rule subscribe',

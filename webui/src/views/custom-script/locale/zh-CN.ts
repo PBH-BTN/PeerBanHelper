@@ -1,4 +1,8 @@
 export default {
+  'page.rule.custom-script.notLoaded': '未加载',
+  'page.rule.custom-script.language': '脚本语言',
+  'page.rule.custom-script.filenameError': '请输入文件名，可省略扩展名或使用所选语言的扩展名。',
+  'page.rule.custom-script.serverValidation': '保存时，服务器会使用对应语言的引擎检查脚本。',
   'page.rule.custom-script.disable': '功能在设置中被禁用',
   'page.rule.custom-script.description':
     '你可以在这里管理自定义脚本，这些脚本将在封禁的过程中执行。',

@@ -11,7 +11,7 @@
         foldingStrategy: 'indentation',
         autoIndent: 'brackets'
       }"
-      :default-language="AV"
+      :language="extension ? scriptLanguages[extension].monaco : 'plaintext'"
       @mount="handleMount"
       @change="setMarkers"
     >
@@ -34,6 +34,9 @@ import {
   VueMonacoEditor,
   type VueMonacoEditorEmitsOptions
 } from '@guolao/vue-monaco-editor'
+import { scriptLanguages, type ScriptExtension } from '@/api/model/scriptLanguage'
+import 'monaco-editor/languages/definitions/javascript/register'
+import 'monaco-editor/languages/definitions/lua/register'
 import { shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GrammarParser from './aviatorscript/grammar/GrammarParser'
@@ -42,7 +45,8 @@ import getSuggestion from './aviatorscript/suggestions'
 
 const { t } = useI18n()
 
-const { viewOnly = false } = defineProps<{
+const { viewOnly = false, extension } = defineProps<{
+  extension?: ScriptExtension
   viewOnly?: boolean
 }>()
 const model = defineModel<string | undefined>({ required: true })
@@ -58,9 +62,10 @@ let hasCachedValidation = false
 let lastValidationResult = true
 
 const setMarkers = (value: string | undefined) => {
+  if (extension !== '.av') return true
   const editorModel = editorRef.value?.getModel()
   const monaco = monacoRef.value
-  if (!editorModel || !monaco) return true
+  if (!editorModel || !monaco) return false
   if (hasCachedValidation && value === lastValidatedValue) return lastValidationResult
 
   if (!value) {
@@ -100,18 +105,20 @@ const validate = () => setMarkers(model.value)
 const handleMount: onMountF = (editor, monaco) => {
   editorRef.value = editor
   monacoRef.value = monaco
-  monaco.languages.register({ id: AV })
-  monaco.languages.setMonarchTokensProvider(AV, monarch)
-  monaco.languages.registerCompletionItemProvider(AV, {
-    provideCompletionItems: () =>
-      ({
-        suggestions: getSuggestion(monaco)
-      }) as ReturnType<
-        Parameters<
-          typeof monaco.languages.registerCompletionItemProvider
-        >[1]['provideCompletionItems']
-      >
-  })
+  if (!monaco.languages.getLanguages().some(({ id }: { id: string }) => id === AV)) {
+    monaco.languages.register({ id: AV })
+    monaco.languages.setMonarchTokensProvider(AV, monarch)
+    monaco.languages.registerCompletionItemProvider(AV, {
+      provideCompletionItems: () =>
+        ({
+          suggestions: getSuggestion(monaco)
+        }) as ReturnType<
+          Parameters<
+            typeof monaco.languages.registerCompletionItemProvider
+          >[1]['provideCompletionItems']
+        >
+    })
+  }
   editor.updateOptions({ readOnly: viewOnly })
   setMarkers(editor.getValue())
 }

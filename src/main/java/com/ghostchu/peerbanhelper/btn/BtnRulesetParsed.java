@@ -46,7 +46,7 @@ public final class BtnRulesetParsed {
         long startAt = System.currentTimeMillis();
         scriptRules.forEach((name, content) -> {
             try {
-                var script = scriptEngineManager.compileScript(null, name, content);
+                var script = scriptEngineManager.compileBtn(name, content);
                 if (script != null) {
                     scripts.put(name, script);
                 }
