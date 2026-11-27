@@ -9,9 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.Queue;
+import java.util.LinkedHashMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -22,7 +21,9 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
     private final Cache<@NotNull K, @NotNull V> delegate;
     private final @Nullable Consumer<Stream<Pair<@NotNull K, @NotNull V>>> removeCallback;
     private final AtomicBoolean receiveNotification = new AtomicBoolean(true);
-    private final Queue<Pair<@NotNull K, @NotNull V>> pendingRemovals = new ConcurrentLinkedQueue<>();
+    private final Map<K, V> pendingRemovals = new LinkedHashMap<>();
+    private long flushGeneration;
+    private final int pendingLimit;
     private final ScheduledFuture<?> cleanupTask;
     private final ScheduledFuture<?> callbackTask;
 
@@ -30,6 +31,7 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
                     boolean weakKey, boolean weakValue, boolean softValue,
                     @Nullable Consumer<Stream<Pair<@NotNull K, @NotNull V>>> onRemove) {
         this.removeCallback = onRemove;
+        pendingLimit = maxCapacity == null ? Integer.MAX_VALUE : Math.max(1, maxCapacity);
         var builder = CacheBuilder.newBuilder();
         if (maxCapacity != null) {
             builder.maximumSize(maxCapacity);
@@ -52,33 +54,50 @@ public class PBHCache<K, V> implements RemovalListener<K, V>, AutoCloseable, Cac
         builder.removalListener(this);
         this.delegate = builder.build();
         this.cleanupTask = CommonUtil.getScheduler().scheduleAtFixedRate(delegate::cleanUp, 5, 5, TimeUnit.MINUTES);
-        this.callbackTask = CommonUtil.getScheduler().scheduleAtFixedRate(this::flushPendingRemovals, 1, 1, TimeUnit.SECONDS);
+        this.callbackTask = CommonUtil.getScheduler().scheduleAtFixedRate(this::scheduledFlush, 1, 1, TimeUnit.SECONDS);
     }
 
     @Override
-    public void onRemoval(@SuppressWarnings("NullableProblems") @NotNull RemovalNotification<K, V> notification) {
+    public synchronized void onRemoval(@SuppressWarnings("NullableProblems") @NotNull RemovalNotification<K, V> notification) {
         if (!receiveNotification.get()) return;
         var key = notification.getKey();
         var value = notification.getValue();
         if (key == null) return;
         if (value == null) return;
         if (removeCallback == null) return;
-        pendingRemovals.add(Pair.of(key, value));
+        pendingRemovals.put(key, value);
     }
 
-    private void flushPendingRemovals() {
-        if (removeCallback == null) return;
-        var batched = new ArrayList<Pair<@NotNull K, @NotNull V>>();
-        Pair<@NotNull K, @NotNull V> pair;
-        while ((pair = pendingRemovals.poll()) != null) {
-            batched.add(pair);
-        }
-        if (batched.isEmpty()) return;
+    private void scheduledFlush() {
         try {
-            removeCallback.accept(batched.stream());
-        } catch (Exception e) {
-            log.error("Failed to process batched cache removal callback", e);
+            flushPendingRemovals();
+        } catch (RuntimeException e) {
+            log.error("Failed to persist evicted entries, will retry", e);
         }
+    }
+
+    private synchronized void flushPendingRemovals() {
+        if (removeCallback == null || pendingRemovals.isEmpty()) return;
+        removeCallback.accept(pendingRemovals.entrySet().stream().map(entry -> Pair.of(entry.getKey(), entry.getValue())));
+        pendingRemovals.clear();
+        flushGeneration++;
+    }
+
+    public synchronized long getFlushGeneration() {
+        return flushGeneration;
+    }
+
+    // Write-back clients hold absolute state. Recover an evicted value until its transaction commits.
+    public V getPendingOrLoad(K key, Callable<? extends V> loader) throws ExecutionException {
+        return delegate.get(key, () -> {
+            synchronized (this) {
+                V pending = pendingRemovals.remove(key);
+                if (pending != null) return pending;
+                // Apply backpressure on misses while the database is unable to accept evictions.
+                if (pendingRemovals.size() >= pendingLimit) flushPendingRemovals();
+                return loader.call();
+            }
+        });
     }
 
     @Override

@@ -227,7 +227,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                     if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
                                         try {
                                             fileToIPList(ruleFile, ipAddresses);
-                                            ipBanMatchers.add(new IPMatcher(ruleId, name, List.of(ipAddresses)));
+                                            ipBanMatchers.add(new IPMatcher.Subscription(ruleId, name, List.of(ipAddresses)));
                                             log.warn(tlUI(Lang.IP_BAN_RULE_USE_CACHE, name));
                                             result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_USE_CACHE, name), null));
                                         } catch (IOException ex) {
@@ -272,7 +272,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                         log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name));
                                         result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATE_SUCCESS, name), null));
                                     }, () -> {
-                                        ipBanMatchers.add(new IPMatcher(ruleId, name, List.of(ipAddresses)));
+                                        ipBanMatchers.add(new IPMatcher.Subscription(ruleId, name, List.of(ipAddresses)));
                                         log.info(tlUI(Lang.IP_BAN_RULE_LOAD_SUCCESS, name));
                                         result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_LOAD_SUCCESS, name), null));
                                     });

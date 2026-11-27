@@ -9,12 +9,19 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface TrackedSwarmService extends IService<TrackedSwarmEntity> {
     @NotNull Page<TrackedSwarmEntity> getPendingSubmitTrackedPeers(@NotNull Pageable pageable, long idAfterThan);
 
     void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull Peer peer) throws ExecutionException;
+
+    default void syncPeers(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<? extends Peer> peers) throws ExecutionException {
+        for (var peer : peers) {
+            if (!peer.isHandshaking()) syncPeers(downloader, torrent, peer);
+        }
+    }
 
     void flushAll();
 

@@ -73,6 +73,7 @@ public final class PeerConnectionMetricsEntity implements Serializable {
         this.remoteAcceptTransferToClient += appender.remoteAcceptTransferToClient;
         this.localRefuseTransferToPeer += appender.localRefuseTransferToPeer;
         this.localAcceptTransferToPeer += appender.localAcceptTransferToPeer;
+        this.localNotInterested += appender.localNotInterested;
         this.questionStatus += appender.questionStatus;
         this.optimisticUnchoke += appender.optimisticUnchoke;
         this.fromDHT += appender.fromDHT;

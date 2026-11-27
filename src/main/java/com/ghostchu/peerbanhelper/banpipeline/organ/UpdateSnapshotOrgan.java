@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class UpdateSnapshotOrgan extends BanOrgan<FetchedPeersBatch, FetchedPeersBatch> {
 
     private final DownloaderServerImpl downloaderServer;
-    private final Map<Downloader, Map<Torrent, List<Peer>>> snapshot = Collections.synchronizedMap(new HashMap<>());
+    private Map<Downloader, Map<Torrent, List<Peer>>> snapshot = new HashMap<>();
 
     public UpdateSnapshotOrgan(Executor schedEnergy, Executor digestEnergy, @Nullable BanOrgan<?, FetchedPeersBatch> in, @Nullable BiConsumer<BanOrgan<FetchedPeersBatch, FetchedPeersBatch>, BanOrganCallback<FetchedPeersBatch>> gastroscopy, long maxDigestDuration, TimeUnit digestTimeUnit,
                                DownloaderServerImpl downloaderServer) {
@@ -30,11 +30,11 @@ public class UpdateSnapshotOrgan extends BanOrgan<FetchedPeersBatch, FetchedPeer
     @Override
     public void digest(FetchedPeersBatch input, Consumer<FetchedPeersBatch> outlet, PipelineTask<?> wrapper) throws RuntimeException {
         wrapper.setComment(false, "Filling collections with fresh data.");
-        var downloader = snapshot.getOrDefault(input.downloader(), Collections.synchronizedMap(new HashMap<>()));
-        var torrent = downloader.getOrDefault(input.torrent(), Collections.synchronizedList(new ArrayList<>()));
-        torrent.addAll(input.peers());
-        downloader.put(input.torrent(), torrent);
-        snapshot.put(input.downloader(), downloader);
+        synchronized (this) {
+            if (snapshot == null) return;
+            snapshot.computeIfAbsent(input.downloader(), _ -> new HashMap<>())
+                    .computeIfAbsent(input.torrent(), _ -> new ArrayList<>()).addAll(input.peers());
+        }
         outlet.accept(input);
     }
 
@@ -42,7 +42,11 @@ public class UpdateSnapshotOrgan extends BanOrgan<FetchedPeersBatch, FetchedPeer
     @Override
     public void endSession() {
         super.endSession();
-        downloaderServer.updateLivePeers(snapshot);
-        snapshot.clear();
+        Map<Downloader, Map<Torrent, List<Peer>>> completed;
+        synchronized (this) {
+            completed = snapshot;
+            snapshot = null;
+        }
+        if (completed != null) downloaderServer.updateLivePeers(completed);
     }
 }

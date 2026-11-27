@@ -27,8 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Component
@@ -107,37 +105,14 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
-        AtomicReference<CheckResult> reference = new AtomicReference<>(null);
-        IPAddress finalPeerAddress = peerAddress;
-        task.setComment(false, "Iterating banList for related ban entries.");
-        banList.forEach((bannedAddr, bannedMeta) -> {
-            if (reference.get() != null) {
-                return;
-            }
-            if (bannedMeta.isBanForDisconnect()) {
-                return;
-            }
-            if (finalPeerAddress.isIPv4() != bannedAddr.isIPv4()) {
-                return;
-            }
-            String addressType = "UNKNOWN";
-            IPAddress bannedCidr = bannedAddr;
-            if (bannedAddr.isIPv4()) {
-                addressType = "IPv4/" + ipv4Prefix;
-                bannedCidr = bannedAddr.toPrefixBlock(ipv4Prefix);
-            }
-            if (bannedAddr.isIPv6()) {
-                addressType = "IPv6/" + ipv6Prefix;
-                bannedCidr = bannedAddr.toPrefixBlock(ipv6Prefix);
-            }
-            if (bannedCidr.contains(finalPeerAddress)) {
-                reference.set(new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, finalPeerAddress.toString(),
-                        bannedAddr.toString(), bannedCidr.toString(), addressType),
-                        StructuredData.create().add("relatedBannedAddress", bannedAddr.toCompressedString())));
-            }
-        });
-        var result = reference.get();
-        return Objects.requireNonNullElseGet(result, this::pass);
+        int prefix = peerAddress.isIPv4() ? ipv4Prefix : ipv6Prefix;
+        var source = banList.findRangeBanSource(peerAddress, prefix);
+        if (source == null) return pass();
+        String addressType = (peerAddress.isIPv4() ? "IPv4/" : "IPv6/") + prefix;
+        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType),
+                new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), source.toString(),
+                        source.toPrefixBlock(prefix).toString(), addressType),
+                StructuredData.create().add("relatedBannedAddress", source.toCompressedString()));
     }
 
 
