@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.banpipeline.organ;
 
 import com.ghostchu.peerbanhelper.DownloaderServerImpl;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrgan;
 import com.ghostchu.peerbanhelper.banpipeline.BanOrganCallback;
@@ -103,7 +104,7 @@ public class RunCheckModuleOrgan extends BanOrgan<FetchedPeersBatch, CheckResult
         if (node != null) {
             if (isPeerHavePossibleBadNatConfig(peer)) {
                 if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getId())) {
-                    alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getId(),
+                    alertManager.publishAlert(BuiltinNotifications.DOWNLOADER_NETWORK.id(), AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getId(),
                             new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
                             new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getId(), peer.getPeerAddress().getAddress().toCompressedString()));
                 }

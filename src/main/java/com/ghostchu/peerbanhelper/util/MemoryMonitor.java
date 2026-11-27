@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -69,7 +70,7 @@ public final class MemoryMonitor {
                                         }
                                         lastMBLog = mbAvailable;
                                     }
-                                    alertManager.publishAlert(true,
+                                    alertManager.publishAlert(BuiltinNotifications.LOW_MEMORY.id(),
                                             AlertLevel.FATAL,
                                             "outofmemory",
                                             new TranslationComponent(Lang.PROGRAM_OUT_OF_MEMORY_TITLE),

@@ -110,6 +110,40 @@ export default {
   'page.settings.tab.config.performance.useEcoQOS.tips':
     'Enable {link} on Windows Platform for power saving, the program performance will reduce and cronjobs may delay',
 
+  'page.settings.tab.config.push.routing.channels': 'Push channels',
+  'page.settings.tab.config.push.routing.title': 'Notification categories',
+  'page.settings.tab.config.push.routing.description':
+    'Choose delivery channels for each category. Turn off the default rule and clear the selection to stop delivery. Existing alerts still appear in WebUI alert history.',
+  'page.settings.tab.config.push.routing.default': 'Use default rule',
+  'page.settings.tab.config.push.routing.none': 'No delivery',
+  'page.settings.tab.config.push.routing.save': 'Save',
+  'page.settings.tab.config.push.routing.saved': 'Notification rule saved',
+  'page.settings.tab.config.push.routing.retry': 'Retry',
+  'page.settings.tab.config.push.routing.loadFailed': 'Could not load notification settings',
+  'page.settings.tab.config.push.routing.saveFailed': 'Could not save notification rule',
+  'page.settings.tab.config.push.routing.desktop': 'Desktop notification',
+  'page.settings.tab.config.push.routing.unavailable': 'Unavailable channel ({id})',
+  'page.settings.tab.config.push.routing.group.btn': 'BTN',
+  'page.settings.tab.config.push.routing.group.downloader': 'Downloaders',
+  'page.settings.tab.config.push.routing.group.monitor': 'Monitoring',
+  'page.settings.tab.config.push.routing.group.system': 'System',
+  'page.settings.tab.config.push.routing.group.web': 'WebUI',
+  'page.settings.tab.config.push.routing.category.btn.allowlist-unban': 'Allowlist unban',
+  'page.settings.tab.config.push.routing.category.downloader.connection':
+    'Repeated downloader connection failure',
+  'page.settings.tab.config.push.routing.category.downloader.network': 'Docker/NAT network issue',
+  'page.settings.tab.config.push.routing.category.downloader.transmission-blocklist':
+    'Transmission blocklist update failure',
+  'page.settings.tab.config.push.routing.category.monitor.traffic-limit': 'Traffic limit exceeded',
+  'page.settings.tab.config.push.routing.category.system.bitness':
+    'Incompatible runtime architecture',
+  'page.settings.tab.config.push.routing.category.system.crash-recovery': 'Crash recovery',
+  'page.settings.tab.config.push.routing.category.system.java-compatibility':
+    'Incompatible Java runtime',
+  'page.settings.tab.config.push.routing.category.system.low-memory': 'Low memory',
+  'page.settings.tab.config.push.routing.category.system.snapshot': 'Snapshot build notice',
+  'page.settings.tab.config.push.routing.category.system.watchdog': 'Ban task watchdog timeout',
+  'page.settings.tab.config.push.routing.category.web.login': 'Successful sign-in',
   'page.settings.tab.config.push.title': 'Message Push',
   'page.settings.tab.config.push.description':
     'By configuring message push, you can receive message push from PBH',

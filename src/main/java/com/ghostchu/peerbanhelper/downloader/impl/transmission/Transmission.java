@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.BuiltinNotifications;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
@@ -204,7 +205,7 @@ public final class Transmission extends AbstractDownloader {
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
             log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP));
-            alertManager.publishAlert(true, AlertLevel.WARN,
+            alertManager.publishAlert(BuiltinNotifications.TRANSMISSION_BLOCKLIST.id(), AlertLevel.WARN,
                     "downloader-" + getEndpoint() + "-transmission-blocklist-update-error",
                     new TranslationComponent(Lang.ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_TITLE, getName()),
                     new TranslationComponent(Lang.ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION, getName(), blocklistUrl)
