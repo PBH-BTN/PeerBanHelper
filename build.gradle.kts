@@ -198,8 +198,20 @@ dependencies {
 
 }
 
+val demoPluginJar = configurations.create("demoPluginJar") {
+    isCanBeConsumed = false
+    isTransitive = false
+}
+dependencies {
+    add(demoPluginJar.name, project(path = ":rule-plugin-demo", configuration = "runtimeElements"))
+}
+
 tasks.test {
     useJUnitPlatform()
+    inputs.files(demoPluginJar)
+    doFirst {
+        systemProperty("pbh.test.demoJar", demoPluginJar.singleFile.absolutePath)
+    }
 }
 
 application {

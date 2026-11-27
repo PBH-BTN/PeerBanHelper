@@ -41,10 +41,15 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Autowired
     private PeerBanHelper server;
     @Getter
-    private boolean register;
+    private volatile boolean register;
     @Autowired
     JavalinWebContainer javalinWebContainer;
     private final List<ScheduledFuture<?>> scheduledTasks = new ArrayList<>();
+    private PluginModuleScope pluginScope;
+
+    void bindPluginScope(PluginModuleScope pluginScope) {
+        this.pluginScope = pluginScope;
+    }
 
     @Override
     public boolean shouldModuleEnabled() {
@@ -74,7 +79,9 @@ public abstract class AbstractFeatureModule implements FeatureModule {
      *
      * @return 是否支持使用配置文件进行配置
      */
-    public abstract boolean isConfigurable();
+    public boolean isConfigurable() {
+        return false;
+    }
 
     @Override
     public ConfigurationSection getConfig() {
@@ -92,12 +99,16 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public void disable() {
         if (register) {
-            onDisable();
-            cancelAllScheduledTasks();
             try {
-                Main.getEventBus().unregister(this);
-            } catch (IllegalArgumentException ignored) {
-                // unregister 时可能会抛出未注册异常，忽略即可
+                onDisable();
+            } finally {
+                register = false;
+                cancelAllScheduledTasks();
+                try {
+                    Main.getEventBus().unregister(this);
+                } catch (IllegalArgumentException ignored) {
+                    // Some modules do not register an event listener.
+                }
             }
             log.info(tlUI(Lang.MODULE_UNREGISTER, getName()));
         }
@@ -114,7 +125,9 @@ public abstract class AbstractFeatureModule implements FeatureModule {
      * @return ScheduledFuture 对象
      */
     protected ScheduledFuture<?> registerScheduledTask(Runnable task, long initialDelay, long period, TimeUnit unit) {
-        ScheduledFuture<?> future = CommonUtil.getScheduler().scheduleWithFixedDelay(task, initialDelay, period, unit);
+        var scope = pluginScope;
+        Runnable callback = scope == null ? task : () -> scope.invoke(task);
+        ScheduledFuture<?> future = CommonUtil.getScheduler().scheduleWithFixedDelay(callback, initialDelay, period, unit);
         synchronized (scheduledTasks) {
             scheduledTasks.add(future);
         }
@@ -154,8 +167,18 @@ public abstract class AbstractFeatureModule implements FeatureModule {
 
     @Override
     public void enable() {
+        if (register) return;
         register = true;
-        onEnable();
+        try {
+            onEnable();
+        } catch (RuntimeException | Error failure) {
+            try {
+                disable();
+            } catch (RuntimeException | Error cleanup) {
+                if (cleanup != failure) failure.addSuppressed(cleanup);
+            }
+            throw failure;
+        }
         log.info(tlUI(Lang.MODULE_REGISTER, getName()));
     }
 

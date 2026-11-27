@@ -6,17 +6,21 @@ import com.ghostchu.peerbanhelper.event.module.ModuleUnregisterEvent;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.pf4j.PluginClassLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
 public final class ModuleManagerImpl implements ModuleManager {
     private final List<FeatureModule> modules = new ArrayList<>();
+    private final Map<ClassLoader, PluginModuleScope> pluginScopes = new IdentityHashMap<>();
     @Autowired
     private ApplicationContext context;
 
@@ -27,7 +31,6 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public void register(@NotNull Class<? extends FeatureModule> moduleClass) {
-        // Main.registerBean(moduleClass, null);
         try {
             FeatureModule module = context.getBean(moduleClass);
             attemptRegister(module);
@@ -44,16 +47,21 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public void register(@NotNull FeatureModule module, String beanName) {
-        //  Main.registerBean(module.getClass(), beanName);
         attemptRegister(module);
     }
 
     private void attemptRegister(FeatureModule module) {
         synchronized (modules) {
-            // 添加到模块列表（不管是否启用）
-            if (!modules.contains(module)) {
-                this.modules.add(module);
+            var loader = module.getClass().getClassLoader();
+            if (loader instanceof PluginClassLoader) {
+                var scope = pluginScopes.get(loader);
+                if (scope == null || scope.isClosing()) {
+                    throw new IllegalStateException("Plugin is not accepting modules: " + module.getClass().getName());
+                }
+                if (module instanceof AbstractFeatureModule feature) feature.bindPluginScope(scope);
             }
+            if (modules.contains(module)) return;
+            modules.add(module);
 
             // 如果配置启用，则真正启用模块
             if (module.shouldModuleEnabled()) {
@@ -77,15 +85,15 @@ public final class ModuleManagerImpl implements ModuleManager {
     @Override
     public boolean unregister(@NotNull FeatureModule module) {
         synchronized (modules) {
-            var moduleUnregisterEvent = new ModuleUnregisterEvent(module);
-            Main.getEventBus().post(moduleUnregisterEvent);
+            if (!modules.remove(module)) return false;
+            Main.getEventBus().post(new ModuleUnregisterEvent(module));
             try {
                 module.disable();
             } catch (Exception e) {
                 log.warn("Unable to unregister module {}", module.getName(), e);
                 Sentry.captureException(e);
             }
-            return this.modules.remove(module);
+            return true;
         }
     }
 
@@ -103,108 +111,86 @@ public final class ModuleManagerImpl implements ModuleManager {
                     moduleList.add(featureModule);
                 }
             }
-            moduleList.forEach(unregisteringModule -> {
-                var moduleUnregisterEvent = new ModuleUnregisterEvent(unregisteringModule);
-                Main.getEventBus().post(moduleUnregisterEvent);
-                unregister(unregisteringModule);
-            });
+            moduleList.forEach(this::unregister);
         }
     }
 
-    /**
-     * 解注册所有的功能模块
-     */
     @Override
     public void unregisterAll() {
-        List.copyOf(this.modules).forEach(unregisteringModule -> {
-            var moduleUnregisterEvent = new ModuleUnregisterEvent(unregisteringModule);
-            Main.getEventBus().post(moduleUnregisterEvent);
-            unregister(unregisteringModule);
-        });
+        synchronized (modules) {
+            List.copyOf(modules).forEach(this::unregister);
+        }
     }
 
-    /**
-     * 获取注册的所有功能模块
-     *
-     * @return 功能模块列表（不可修改）
-     */
+    public PluginModuleScope openPluginScope(ClassLoader loader) {
+        synchronized (modules) {
+            var scope = new PluginModuleScope();
+            if (pluginScopes.putIfAbsent(loader, scope) != null) {
+                throw new IllegalStateException("Plugin module scope is already open");
+            }
+            return scope;
+        }
+    }
+
+    public void removePluginModules(ClassLoader loader) {
+        synchronized (modules) {
+            var owned = modules.stream().filter(m -> m.getClass().getClassLoader() == loader).toList();
+            pluginScopes.remove(loader);
+            modules.removeAll(owned);
+            IllegalStateException failure = null;
+            for (var module : owned.reversed()) {
+                try {
+                    Main.getEventBus().post(new ModuleUnregisterEvent(module));
+                    module.disable();
+                } catch (Exception | LinkageError | AssertionError e) {
+                    if (failure == null) failure = new IllegalStateException("Plugin module cleanup failed", e);
+                    else failure.addSuppressed(e);
+                }
+            }
+            if (failure != null) throw failure;
+        }
+    }
+
+    private boolean isAvailable(FeatureModule module) {
+        var scope = pluginScopes.get(module.getClass().getClassLoader());
+        return (scope == null || scope.isActive()) && module.getModuleStatus().getType() == ModuleStatusType.ENABLED;
+    }
+
     @Override
     public @NotNull List<FeatureModule> getModules() {
-        // 只返回实际已启用的模块
         synchronized (modules) {
-            return modules.stream()
-                    .filter(module -> module.getModuleStatus().getType() == ModuleStatusType.ENABLED)
+            return modules.stream().filter(this::isAvailable).toList();
+        }
+    }
+
+    @Override
+    public <T extends FeatureModule> List<ModuleInvocation<T>> getInvocations(Class<T> type) {
+        synchronized (modules) {
+            return modules.stream().filter(type::isInstance).map(type::cast).filter(this::isAvailable)
+                    .map(m -> new ModuleInvocation<>(m, m.getName(), pluginScopes.get(m.getClass().getClassLoader())))
                     .toList();
         }
     }
 
-    /**
-     * 重新加载所有模块的启用状态
-     * 根据配置文件的 enabled 字段，自动启用或禁用模块
-     */
     @Override
     public void reloadModuleStates() {
-        log.info("Reloading module states based on configuration...");
-
-        // 直接遍历所有已知的模块
-        List<FeatureModule> modulesCopy;
         synchronized (modules) {
-            modulesCopy = new ArrayList<>(modules);
-        }
-
-        for (FeatureModule module : modulesCopy) {
-            boolean shouldBeEnabled = module.shouldModuleEnabled();
-            try {
-                if (shouldBeEnabled) {
-                    // 模块应该启用但当前未启用，启用它
-                    log.info("Enabling module {} due to configuration change", module.getName());
-                    var moduleRegisterEvent = new ModuleRegisterEvent(module);
-                    Main.getEventBus().post(moduleRegisterEvent);
-                    if (moduleRegisterEvent.isCancelled()) {
-                        log.debug("Module {} registration cancelled: {}", module.getName(), moduleRegisterEvent.getCancelReason());
-                        continue;
+            for (FeatureModule module : List.copyOf(modules)) {
+                var scope = pluginScopes.get(module.getClass().getClassLoader());
+                if (scope != null && !scope.isActive()) continue;
+                try {
+                    if (module.shouldModuleEnabled()) {
+                        var event = new ModuleRegisterEvent(module);
+                        Main.getEventBus().post(event);
+                        if (!event.isCancelled()) module.enable();
+                    } else {
+                        Main.getEventBus().post(new ModuleUnregisterEvent(module));
+                        module.disable();
                     }
-                    module.enable();
-                } else {
-                    // 模块不应该启用但当前已启用，禁用它
-                    log.info("Disabling module {} due to configuration change", module.getName());
-                    var moduleUnregisterEvent = new ModuleUnregisterEvent(module);
-                    Main.getEventBus().post(moduleUnregisterEvent);
-                    module.disable();
+                } catch (Throwable e) {
+                    log.error("Unable to reload module {}", module.getName(), e);
                 }
-            } catch (Throwable e) {
-                log.error("Unable to reload module {} due to configuration change", module.getName(), e);
             }
         }
-
-        log.info("Module states reloaded successfully");
-    }
-
-    /**
-     * 从插件目录加载 JVM 插件
-     */
-    @Override
-    public void loadPlugin() {
-//        if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
-//            log.info(Lang.SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE);
-//            return;
-//        }
-//        try {
-//            // list file in the plugin folder
-//            var plugins = new File("data/plugins").listFiles();
-//            if (plugins != null) {
-//                for (File plugin : plugins) {
-//                    if (plugin.getName().endsWith(".jar")) {
-//                        var loader = new URLClassLoader(new URL[]{plugin.toURI().toURL()});
-//                        var clazz = loader.loadClass(PLUGIN_CLASS_NAME);
-//                        var instance = clazz.getDeclaredConstructor().newInstance();
-//                        clazz.getMethod("register").invoke(instance);
-//                        dynamicModules.put(clazz, instance);
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error(Lang.ERR_CANNOT_LOAD_PLUGIN, e);
-//        }
     }
 }

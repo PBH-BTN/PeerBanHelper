@@ -5,8 +5,9 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
+import org.pf4j.ExtensionPoint;
 
-public interface RuleFeatureModule extends FeatureModule {
+public interface RuleFeatureModule extends FeatureModule, ExtensionPoint {
     /**
      * 检查一个特定的 Torrent 和 Peer 是否应该封禁
      *

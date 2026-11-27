@@ -1,7 +1,8 @@
 package com.ghostchu.peerbanhelper.configuration.pf4j;
 
+import com.ghostchu.peerbanhelper.BuildMeta;
 import com.ghostchu.peerbanhelper.Main;
-import org.pf4j.PluginManager;
+import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 public class Pf4jConfiguration {
 
     @Bean
-    public PluginManager pluginManager() {
-        return new PBHSpringPluginManager(Main.getPluginDirectory().toPath());
+    public PBHSpringPluginManager pluginManager(BuildMeta build, ModuleManagerImpl modules) {
+        return new PBHSpringPluginManager(Main.getPluginDirectory().toPath(), build.getVersion(), modules);
     }
 
 }
